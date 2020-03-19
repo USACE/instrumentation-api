@@ -54,7 +54,7 @@ package:
     - ./bin/**
 
 functions:
-  hhd_root:
+  cwbi-geotech-instrumentation-apiFn:
     handler: bin/root
     environment:
       DB_USER: instrumentation_user
