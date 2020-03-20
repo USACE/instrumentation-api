@@ -4,13 +4,25 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
+	"strings"
 
 	"github.com/apex/gateway"
 	"github.com/labstack/echo"
 
 	"api/root/handlers"
 )
+
+func lambdaContext() bool {
+
+	value, exists := os.LookupEnv("LAMBDA")
+	if !exists || strings.ToUpper(value) != "TRUE" {
+		return true
+	}
+
+	return false
+}
 
 func dbConnStr() string {
 
@@ -78,6 +90,10 @@ func main() {
 	// Time Series
 
 	// Using gateway instead of net/http
-	log.Fatal(gateway.ListenAndServe(":3000", e))
+	if lambdaContext() {
+		log.Fatal(gateway.ListenAndServe(":3000", e))
+	} else {
+		log.Fatal(http.ListenAndServe(":3000", e))
+	}
 
 }

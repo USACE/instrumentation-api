@@ -57,6 +57,7 @@ functions:
   cwbi-geotech-instrumentation-apiFn:
     handler: bin/root
     environment:
+      LAMBDA: "TRUE"
       DB_USER: instrumentation_user
       DB_PASS: none
       DB_NAME: postgres
