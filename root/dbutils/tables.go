@@ -8,7 +8,7 @@ import (
 func createTableInstrumentType(db *sql.DB) {
 	sql := `
 	CREATE TABLE IF NOT EXISTS public.instrument_type (
-		id UUID PRIMARY KEY NOT NULL,
+		id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
 		name VARCHAR(120) UNIQUE NOT NULL
 	);
 	`
@@ -21,7 +21,7 @@ func createTableInstrumentType(db *sql.DB) {
 func createTableUnit(db *sql.DB) {
 	sql := `
 	CREATE TABLE IF NOT EXISTS public.unit (
-		id UUID PRIMARY KEY NOT NULL,
+		id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
 		name VARCHAR(120) UNIQUE NOT NULL
 	);
 	`
@@ -34,7 +34,7 @@ func createTableUnit(db *sql.DB) {
 func createTableParameter(db *sql.DB) {
 	sql := `
 	CREATE TABLE IF NOT EXISTS public.parameter (
-		id UUID PRIMARY KEY NOT NULL,
+		id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
 		name VARCHAR(120) UNIQUE NOT NULL
 	);
 	`
@@ -47,8 +47,9 @@ func createTableParameter(db *sql.DB) {
 func createTableInstrumentGroup(db *sql.DB) {
 	sql := `
 	CREATE TABLE IF NOT EXISTS public.instrument_group (
-		id UUID PRIMARY KEY NOT NULL,
-		name VARCHAR(120) UNIQUE NOT NULL
+		id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+		name VARCHAR(120) UNIQUE NOT NULL,
+		description VARCHAR(360)
 	);
 	`
 	_, err := db.Exec(sql)
@@ -60,12 +61,11 @@ func createTableInstrumentGroup(db *sql.DB) {
 func createTableInstrument(db *sql.DB) {
 	sql := `
 	CREATE TABLE IF NOT EXISTS public.instrument (
-		id UUID PRIMARY KEY NOT NULL,
+		id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
 		name VARCHAR(120) UNIQUE NOT NULL,
 		height REAL,
 		geometry geometry,
-		instrument_type_id UUID REFERENCES instrument_type (id),
-		instrument_group_id UUID REFERENCES instrument_group (id)
+		instrument_type_id UUID REFERENCES instrument_type (id)
 	);
 	`
 	_, err := db.Exec(sql)
@@ -79,6 +79,7 @@ func createTableInstrumentGroupInstruments(db *sql.DB) {
 	CREATE TABLE IF NOT EXISTS public.instrument_group_instruments (
 		instrument_id UUID NOT NULL REFERENCES instrument (id),
 		instrument_group_id UUID NOT NULL REFERENCES instrument_group (id)
+		UNIQUE (instrument_id, instrument_group_id)
 	);
 	`
 	_, err := db.Exec(sql)
@@ -90,7 +91,7 @@ func createTableInstrumentGroupInstruments(db *sql.DB) {
 func createTableTimeseries(db *sql.DB) {
 	sql := `
 	CREATE TABLE IF NOT EXISTS public.timeseries (
-		id UUID PRIMARY KEY NOT NULL,
+		id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
 		name VARCHAR(240) UNIQUE NOT NULL,
 		instrument_id UUID REFERENCES instrument (id),
 		parameter_id UUID NOT NULL REFERENCES parameter (id),
@@ -106,7 +107,7 @@ func createTableTimeseries(db *sql.DB) {
 func createTableTimeseriesMeasurement(db *sql.DB) {
 	sql := `
 	CREATE TABLE IF NOT EXISTS public.timeseries_measurement (
-		id UUID PRIMARY KEY NOT NULL,
+		id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
 		time TIMESTAMPTZ NOT NULL,
 		value REAL NOT NULL,
 		timeseries_id UUID NOT NULL REFERENCES unit (id)
