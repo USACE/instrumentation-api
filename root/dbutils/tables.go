@@ -78,7 +78,7 @@ func createTableInstrumentGroupInstruments(db *sql.DB) {
 	sql := `
 	CREATE TABLE IF NOT EXISTS public.instrument_group_instruments (
 		instrument_id UUID NOT NULL REFERENCES instrument (id),
-		instrument_group_id UUID NOT NULL REFERENCES instrument_group (id)
+		instrument_group_id UUID NOT NULL REFERENCES instrument_group (id),
 		UNIQUE (instrument_id, instrument_group_id)
 	);
 	`

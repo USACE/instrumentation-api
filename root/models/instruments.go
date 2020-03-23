@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"log"
 
 	_ "github.com/lib/pq"
 )
@@ -59,6 +60,20 @@ func GetInstrumentGroups(db *sql.DB) []InstrumentGroup {
 			panic(err)
 		}
 		result = append(result, n)
+	}
+	return result
+}
+
+// GetInstrumentGroup returns a single instrument group
+func GetInstrumentGroup(db *sql.DB, ID string) InstrumentGroup {
+	sql := "SELECT id, name, description FROM instrument_group WHERE id = ?"
+
+	var result InstrumentGroup
+	err := db.QueryRow(sql, 1).Scan(
+		&result.ID, &result.Name, &result.Description,
+	)
+	if err != nil {
+		log.Fatalf("Fail to query and scan row with ID %s", ID)
 	}
 	return result
 }

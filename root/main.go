@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 
+	"api/root/dbutils"
 	"api/root/handlers"
 
 	"github.com/apex/gateway"
@@ -54,7 +55,7 @@ func initDB(connStr string) *sql.DB {
 		log.Panicf("database is nil")
 	}
 
-	// dbutils.CreateTables(db)
+	dbutils.CreateTables(db)
 
 	return db
 }
@@ -86,6 +87,7 @@ func main() {
 	// Routes
 	// Instruments
 	e.GET("instrument_groups", handlers.GetInstrumentGroups(db))
+	e.GET("instrument_groups/:id", handlers.GetInstrumentGroup(db))
 	e.GET("/instruments", handlers.GetInstruments(db))
 	e.GET("/timeseries", handlers.GetTimeseries)
 	// Time Series
