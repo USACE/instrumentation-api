@@ -12,9 +12,11 @@ type Instrument struct {
 	Name string `json:"name"`
 }
 
+// InstrumentGroup holds information for entity instrument_group
 type InstrumentGroup struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
 }
 
 // GetInstruments returns an array of instruments from the database
@@ -41,7 +43,7 @@ func GetInstruments(db *sql.DB) []Instrument {
 
 // GetInstrumentGroups returns a list of instrument groups
 func GetInstrumentGroups(db *sql.DB) []InstrumentGroup {
-	sql := "SELECT id, name FROM instrument_groups"
+	sql := "SELECT id, name, description FROM instrument_group"
 	rows, err := db.Query(sql)
 
 	if err != nil {
@@ -52,7 +54,7 @@ func GetInstrumentGroups(db *sql.DB) []InstrumentGroup {
 	result := make([]InstrumentGroup, 0)
 	for rows.Next() {
 		n := InstrumentGroup{}
-		err := rows.Scan(&n.ID, &n.Name)
+		err := rows.Scan(&n.ID, &n.Name, &n.Description)
 		if err != nil {
 			panic(err)
 		}

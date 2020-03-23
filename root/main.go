@@ -8,7 +8,6 @@ import (
 	"os"
 	"strings"
 
-	"api/root/dbutils"
 	"api/root/handlers"
 
 	"github.com/apex/gateway"
@@ -55,7 +54,7 @@ func initDB(connStr string) *sql.DB {
 		log.Panicf("database is nil")
 	}
 
-	dbutils.CreateTables(db)
+	// dbutils.CreateTables(db)
 
 	return db
 }
