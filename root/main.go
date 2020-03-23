@@ -8,19 +8,20 @@ import (
 	"os"
 	"strings"
 
+	"api/root/dbutils"
+	"api/root/handlers"
+
 	"github.com/apex/gateway"
 	"github.com/labstack/echo"
-
-	"api/root/handlers"
 )
 
 func lambdaContext() bool {
 
 	value, exists := os.LookupEnv("LAMBDA")
-	if !exists || strings.ToUpper(value) != "TRUE" {
+
+	if exists && strings.ToUpper(value) == "TRUE" {
 		return true
 	}
-
 	return false
 }
 
@@ -32,10 +33,11 @@ func dbConnStr() string {
 	dbpass := os.Getenv("DB_PASS")
 	dbname := os.Getenv("DB_NAME")
 	dbhost := os.Getenv("DB_HOST")
+	sslmode := os.Getenv("DB_SSLMODE")
 
 	return fmt.Sprintf(
-		"user=%s password=%s dbname=%s host=%s",
-		dbuser, dbpass, dbname, dbhost,
+		"user=%s password=%s dbname=%s host=%s sslmode=%s",
+		dbuser, dbpass, dbname, dbhost, sslmode,
 	)
 }
 
@@ -53,8 +55,7 @@ func initDB(connStr string) *sql.DB {
 		log.Panicf("database is nil")
 	}
 
-	log.Fatal(db)
-	log.Fatal(err)
+	dbutils.CreateTables(db)
 
 	return db
 }
@@ -84,16 +85,20 @@ func main() {
 	e := echo.New()
 
 	// Routes
-	e.GET("/", handlers.GetRoot)
 	// Instruments
+	e.GET("instrument_groups", handlers.GetInstrumentGroups(db))
 	e.GET("/instruments", handlers.GetInstruments(db))
+	e.GET("/timeseries", handlers.GetTimeseries)
 	// Time Series
 
-	// Using gateway instead of net/http
+	log.Printf(
+		"starting server; Running On AWS LAMBDA: %t",
+		lambdaContext(),
+	)
+
 	if lambdaContext() {
 		log.Fatal(gateway.ListenAndServe(":3000", e))
 	} else {
 		log.Fatal(http.ListenAndServe(":3000", e))
 	}
-
 }

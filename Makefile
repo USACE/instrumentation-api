@@ -11,3 +11,6 @@ deploy: clean build
 
 local: build
 	sls offline --useDocker --printOutput start
+
+package: clean build
+	serverless package
