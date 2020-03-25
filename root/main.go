@@ -13,6 +13,7 @@ import (
 
 	"github.com/apex/gateway"
 	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 )
 
 func lambdaContext() bool {
@@ -83,14 +84,20 @@ func main() {
 	db := initDB(dbConnStr())
 
 	e := echo.New()
+	e.Pre(middleware.AddTrailingSlash())
 
 	// Routes
+	// Instrument Groups
+	e.GET("instrument_groups/", handlers.GetInstrumentGroups(db))
+	e.GET("instrument_groups/:id/", handlers.GetInstrumentGroup(db))
+	e.GET("instrument_groups/:id/instruments/", handlers.GetInstrumentGroupInstruments(db))
 	// Instruments
-	e.GET("instrument_groups", handlers.GetInstrumentGroups(db))
-	e.GET("instrument_groups/:id", handlers.GetInstrumentGroup(db))
-	e.GET("/instruments", handlers.GetInstruments(db))
-	e.GET("/timeseries", handlers.GetTimeseries)
+	e.GET("instruments/", handlers.GetInstruments(db))
+	e.GET("instruments/:id/", handlers.GetInstrument(db))
+	e.GET("timeseries/", handlers.GetTimeseries)
 	// Time Series
+	// Domains
+	e.GET("domains/", handlers.GetDomains(db))
 
 	log.Printf(
 		"starting server; Running On AWS LAMBDA: %t",

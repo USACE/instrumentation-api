@@ -16,20 +16,28 @@ func GetInstruments(db *sql.DB) echo.HandlerFunc {
 	}
 }
 
-// GetInstrumentGroups returns instrument groups
-func GetInstrumentGroups(db *sql.DB) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		return c.JSON(http.StatusOK, models.GetInstrumentGroups(db))
-	}
-}
-
-// GetInstrumentGroup returns single instrument group
-func GetInstrumentGroup(db *sql.DB) echo.HandlerFunc {
+// GetInstrument returns a single instrument
+func GetInstrument(db *sql.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id, err := uuid.Parse(c.Param("id"))
 		if err != nil {
 			return c.String(http.StatusNotFound, "Malformed ID")
 		}
-		return c.JSON(http.StatusOK, models.GetInstrumentGroup(db, id.String()))
+		return c.JSON(http.StatusOK, models.GetInstrument(db, id.String()))
 	}
 }
+
+// // CreateInstrument creates
+// func CreateInstrument(db *sql.DB) echo.HandlerFunc {
+
+// }
+
+// // UpdateInstrument modifys an existing instrument
+// func UpdateInstrument(db *sql.DB) echo.HandlerFunc {
+
+// }
+
+// // DeleteInstrument deletes an existing instrument by ID
+// func DeleteInstrument(db *sql.DB) echo.HandlerFunc {
+
+// }

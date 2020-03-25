@@ -5,24 +5,30 @@ import (
 	"log"
 
 	_ "github.com/lib/pq"
+	geojson "github.com/paulmach/go.geojson"
 )
 
 // Instrument is an instrument data structure
 type Instrument struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-}
-
-// InstrumentGroup holds information for entity instrument_group
-type InstrumentGroup struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	ID       string           `json:"id"`
+	Name     string           `json:"name"`
+	Type     string           `json:"type"`
+	Height   string           `json:"height"`
+	Geometry geojson.Geometry `json:"geometry"`
 }
 
 // GetInstruments returns an array of instruments from the database
 func GetInstruments(db *sql.DB) []Instrument {
-	sql := "SELECT id, name FROM instrument"
+	sql := `SELECT instrument.id, 
+	        	   instrument.NAME,
+	        	   instrument_type.NAME              AS instrument_type, 
+	               instrument.height, 
+	               ST_AsGeoJSON(instrument.geometry) AS geometry 
+            FROM   instrument
+	               INNER JOIN instrument_type
+	               		   ON instrument_type.id = instrument.instrument_type_id
+			`
+
 	rows, err := db.Query(sql)
 
 	if err != nil {
@@ -33,47 +39,38 @@ func GetInstruments(db *sql.DB) []Instrument {
 	result := make([]Instrument, 0)
 	for rows.Next() {
 		n := Instrument{}
-		err := rows.Scan(&n.ID, &n.Name)
+		var geometry *geojson.Geometry
+		err := rows.Scan(&n.ID, &n.Name, &n.Type, &n.Height, &geometry)
 		if err != nil {
 			panic(err)
 		}
+		n.Geometry = *geometry
+
 		result = append(result, n)
 	}
 	return result
 }
 
-// GetInstrumentGroups returns a list of instrument groups
-func GetInstrumentGroups(db *sql.DB) []InstrumentGroup {
-	sql := "SELECT id, name, description FROM instrument_group"
-	rows, err := db.Query(sql)
-
-	if err != nil {
-		panic(err)
-	}
-
-	defer rows.Close()
-	result := make([]InstrumentGroup, 0)
-	for rows.Next() {
-		n := InstrumentGroup{}
-		err := rows.Scan(&n.ID, &n.Name, &n.Description)
-		if err != nil {
-			panic(err)
-		}
-		result = append(result, n)
-	}
-	return result
-}
-
-// GetInstrumentGroup returns a single instrument group
-func GetInstrumentGroup(db *sql.DB, ID string) InstrumentGroup {
-	sql := "SELECT id, name, description FROM instrument_group WHERE id = ?"
-
-	var result InstrumentGroup
-	err := db.QueryRow(sql, 1).Scan(
-		&result.ID, &result.Name, &result.Description,
+// GetInstrument returns a single instrument
+func GetInstrument(db *sql.DB, ID string) Instrument {
+	sql := `SELECT instrument.id, 
+	        	   instrument.NAME,
+	        	   instrument_type.NAME              AS instrument_type, 
+	               instrument.height, 
+	               ST_AsGeoJSON(instrument.geometry) AS geometry 
+            FROM   instrument
+	               INNER JOIN instrument_type
+							  ON instrument_type.id = instrument.instrument_type_id
+			WHERE instrument.id = $1
+			`
+	var result Instrument
+	var geom *geojson.Geometry
+	err := db.QueryRow(sql, ID).Scan(
+		&result.ID, &result.Name, &result.Type, &result.Height, &geom,
 	)
+	result.Geometry = *geom
 	if err != nil {
-		log.Fatalf("Fail to query and scan row with ID %s", ID)
+		log.Printf("Fail to query and scan row with ID %s; %s", ID, err)
 	}
 	return result
 }

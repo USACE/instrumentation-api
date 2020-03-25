@@ -1,0 +1,206 @@
+openapi: "3.0.0"
+info:
+  version: 0.1.0
+  title: US Army Corps of Engineers Instrumentation
+  license:
+    name: MIT
+servers:
+  - url: https://ci7914nmcb.execute-api.us-east-1.amazonaws.com/development/
+paths:
+  /instruments:
+    get:
+      summary: List Instruments
+      operationId: GetInstruments
+      tags:
+        - instruments
+      responses:
+        '200':
+          description: Array of instruments
+          headers:
+            x-next:
+              description: A link to the next page of responses
+              schema:
+                type: string
+          content:
+            application/json:    
+              schema:
+                $ref: "#/components/schemas/instruments"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    post:
+      summary: Create Instrument
+      operationId: CreateInstrument
+      tags:
+        - instruments
+      responses:
+        '201':
+          description: Null response
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /instrument/{id}:
+    get:
+      summary: Get Instrument
+      operationId: GetInstrument
+      tags:
+        - instruments
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the instrument to retrieve
+          schema:
+            type: string
+            format: uuid
+
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/instrument"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /instrument_groups:
+    get:
+      summary: List Instrument Groups
+      operationId: GetInstrumentGroups
+      tags:
+        - instrument_groups
+      responses:
+        '200':
+          description: A list of instrument groups
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/instrument_groups"
+  /instrument_groups/{id}:
+    get:
+      summary: Get Instrument Group
+      operationId: GetInstrumentGroup
+      tags:
+        - instrument_groups
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the instrument group to retrieve
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Instrument Group
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/instrument_group'
+
+  /instrument_groups/{id}/instruments:
+    get:
+      summary: List Instrument Group Instruments
+      operationId: ListInstrumentGroupInstruments
+      tags:
+        - instrument_groups
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the instrument group to retrieve
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Expected response to a valid request
+  /domains:
+    get:
+      summary: List Domains
+      operationId: ListDomains
+      tags:
+        - other
+      responses:
+        '200':
+          description: Expected response to a valid request
+
+components:
+  schemas:
+    instrument:
+      type: object
+      required:
+        - id
+        - name
+        - type
+        - height
+        - geometry
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        type:
+          type: string
+        height:
+          type: number
+          format: float
+        geometry:
+          type: object
+          description: GeoJSON PointGeometry
+          required:
+            - type
+            - coordinates
+          properties:
+            type:
+              type: string
+            coordinates:
+              type: array
+              items:
+                type: number
+              minItems: 2
+              maxItems: 2
+    instrument_group:
+      type: object
+      required:
+        - id
+        - name
+        - description
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+    instruments:
+      type: array
+      items:
+        $ref: "#/components/schemas/instrument"
+    instrument_groups:
+      type: array
+      items:
+        $ref: "#/components/schemas/instrument_group"
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
