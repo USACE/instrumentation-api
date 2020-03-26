@@ -16,6 +16,4 @@ package: clean build
 	serverless package
 
 docs:
-	docker run -it --rm -p 80:80 \
-	-v $(pwd)/swagger.yaml:/usr/share/nginx/html/swagger.yaml \
-	-e SPEC_URL=swagger.yaml redocly/redoc:latest
+	redoc-cli serve -p 4000 apidoc.yaml
