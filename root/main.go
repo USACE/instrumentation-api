@@ -85,6 +85,7 @@ func main() {
 
 	e := echo.New()
 	e.Pre(middleware.AddTrailingSlash())
+	e.Use(middleware.CORS())
 
 	// Routes
 	// Instrument Groups
@@ -105,8 +106,8 @@ func main() {
 	)
 
 	if lambdaContext() {
-		log.Fatal(gateway.ListenAndServe(":3000", e))
+		log.Fatal(gateway.ListenAndServe(":3030", e))
 	} else {
-		log.Fatal(http.ListenAndServe(":3000", e))
+		log.Fatal(http.ListenAndServe(":3030", e))
 	}
 }
