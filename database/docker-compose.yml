@@ -1,0 +1,21 @@
+version: "3"
+# Create a standin database for local development for testing
+volumes:
+  hhd_postgres_data: {}
+
+services:
+  postgres:
+    image: mdillon/postgis
+    volumes:
+      - hhd_postgres_data:/var/lib/postgresql/data
+    environment:
+        - POSTGRES_PASSWORD=postgres
+    ports:
+        - "5432:5432"
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+        - PGADMIN_DEFAULT_EMAIL=postgres@postgres.com
+        - PGADMIN_DEFAULT_PASSWORD=postgres
+    ports:
+        - "8080:80"

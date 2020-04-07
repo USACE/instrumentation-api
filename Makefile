@@ -10,7 +10,7 @@ deploy: clean build
 	sls deploy --verbose
 
 local: build
-	sls offline --useDocker --printOutput start
+	sls offline --useDocker --printOutput --httpPort 3030 start
 
 package: clean build
 	serverless package

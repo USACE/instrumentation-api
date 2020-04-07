@@ -23,3 +23,5 @@ vendor
 
 # Node Modules
 node_modules/**
+
+__debug*
