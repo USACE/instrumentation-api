@@ -7,12 +7,15 @@ import (
 	"os"
 	"strings"
 
+	"api/root/appconfig"
 	"api/root/handlers"
 
 	"github.com/apex/gateway"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
+
+	_ "github.com/lib/pq"
 )
 
 func lambdaContext() bool {
@@ -82,6 +85,7 @@ func main() {
 
 	e := echo.New()
 	e.Use(middleware.CORS())
+	e.Use(middleware.JWTWithConfig(appconfig.JWTConfig))
 
 	// Routes
 	// Instrument Groups
