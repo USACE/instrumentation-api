@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
@@ -11,6 +10,7 @@ import (
 	"api/root/handlers"
 
 	"github.com/apex/gateway"
+	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 )
@@ -36,15 +36,15 @@ func dbConnStr() string {
 	sslmode := os.Getenv("DB_SSLMODE")
 
 	return fmt.Sprintf(
-		"user=%s password=%s dbname=%s host=%s sslmode=%s",
+		"user=%s password=%s dbname=%s host=%s sslmode=%s binary_parameters=yes",
 		dbuser, dbpass, dbname, dbhost, sslmode,
 	)
 }
 
-func initDB(connStr string) *sql.DB {
+func initDB(connStr string) *sqlx.DB {
 
 	log.Printf("Getting database connection")
-	db, err := sql.Open("postgres", connStr)
+	db, err := sqlx.Open("postgres", connStr)
 
 	if err != nil {
 		log.Fatal("Could not connect to database")
@@ -81,21 +81,23 @@ func main() {
 	db := initDB(dbConnStr())
 
 	e := echo.New()
-	e.Pre(middleware.AddTrailingSlash())
 	e.Use(middleware.CORS())
 
 	// Routes
 	// Instrument Groups
-	e.GET("instrument_groups/", handlers.GetInstrumentGroups(db))
-	e.GET("instrument_groups/:id/", handlers.GetInstrumentGroup(db))
-	e.GET("instrument_groups/:id/instruments/", handlers.GetInstrumentGroupInstruments(db))
+	e.GET("instrument_groups", handlers.ListInstrumentGroups(db))
+	e.GET("instrument_groups/:id", handlers.GetInstrumentGroup(db))
+	e.GET("instrument_groups/:id/instruments", handlers.ListInstrumentGroupInstruments(db))
 	// Instruments
-	e.GET("instruments/", handlers.GetInstruments(db))
-	e.GET("instruments/:id/", handlers.GetInstrument(db))
-	e.GET("timeseries/", handlers.GetTimeseries)
+	e.GET("instruments", handlers.ListInstruments(db))
+	e.POST("instruments", handlers.CreateInstrument(db))
+	e.GET("instruments/:id", handlers.GetInstrument(db))
+	e.PUT("instruments/:id", handlers.UpdateInstrument(db))
+	e.DELETE("instruments/:id", handlers.DeleteInstrument(db))
 	// Time Series
+	e.GET("timeseries", handlers.GetTimeseries)
 	// Domains
-	e.GET("domains/", handlers.GetDomains(db))
+	e.GET("domains", handlers.GetDomains(db))
 
 	log.Printf(
 		"starting server; Running On AWS LAMBDA: %t",

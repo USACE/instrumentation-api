@@ -1,11 +1,9 @@
 package dbutils
 
-import (
-	"database/sql"
-)
+import "github.com/jmoiron/sqlx"
 
 // Domains
-func createTableInstrumentType(db *sql.DB) {
+func createTableInstrumentType(db *sqlx.DB) {
 	sql := `
 	CREATE TABLE IF NOT EXISTS public.instrument_type (
 		id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
@@ -18,7 +16,7 @@ func createTableInstrumentType(db *sql.DB) {
 	}
 }
 
-func createTableUnit(db *sql.DB) {
+func createTableUnit(db *sqlx.DB) {
 	sql := `
 	CREATE TABLE IF NOT EXISTS public.unit (
 		id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
@@ -31,7 +29,7 @@ func createTableUnit(db *sql.DB) {
 	}
 }
 
-func createTableParameter(db *sql.DB) {
+func createTableParameter(db *sqlx.DB) {
 	sql := `
 	CREATE TABLE IF NOT EXISTS public.parameter (
 		id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
@@ -44,7 +42,7 @@ func createTableParameter(db *sql.DB) {
 	}
 }
 
-func createTableInstrumentGroup(db *sql.DB) {
+func createTableInstrumentGroup(db *sqlx.DB) {
 	sql := `
 	CREATE TABLE IF NOT EXISTS public.instrument_group (
 		id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
@@ -58,7 +56,7 @@ func createTableInstrumentGroup(db *sql.DB) {
 	}
 }
 
-func createTableInstrument(db *sql.DB) {
+func createTableInstrument(db *sqlx.DB) {
 	sql := `
 	CREATE TABLE IF NOT EXISTS public.instrument (
 		id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
@@ -74,7 +72,7 @@ func createTableInstrument(db *sql.DB) {
 	}
 }
 
-func createTableInstrumentGroupInstruments(db *sql.DB) {
+func createTableInstrumentGroupInstruments(db *sqlx.DB) {
 	sql := `
 	CREATE TABLE IF NOT EXISTS public.instrument_group_instruments (
 		instrument_id UUID NOT NULL REFERENCES instrument (id),
@@ -88,7 +86,7 @@ func createTableInstrumentGroupInstruments(db *sql.DB) {
 	}
 }
 
-func createTableTimeseries(db *sql.DB) {
+func createTableTimeseries(db *sqlx.DB) {
 	sql := `
 	CREATE TABLE IF NOT EXISTS public.timeseries (
 		id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
@@ -104,7 +102,7 @@ func createTableTimeseries(db *sql.DB) {
 	}
 }
 
-func createTableTimeseriesMeasurement(db *sql.DB) {
+func createTableTimeseriesMeasurement(db *sqlx.DB) {
 	sql := `
 	CREATE TABLE IF NOT EXISTS public.timeseries_measurement (
 		id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
@@ -120,7 +118,7 @@ func createTableTimeseriesMeasurement(db *sql.DB) {
 }
 
 // CreateTables creates database tables and views if they do not exist
-func CreateTables(db *sql.DB) {
+func CreateTables(db *sqlx.DB) {
 	// Domain Tables
 	createTableInstrumentType(db)
 	createTableUnit(db)
