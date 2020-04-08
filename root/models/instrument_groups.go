@@ -1,22 +1,26 @@
 package models
 
 import (
-	"database/sql"
 	"log"
 
+	"github.com/google/uuid"
+	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
-	geojson "github.com/paulmach/go.geojson"
+
+	"github.com/paulmach/orb"
+	"github.com/paulmach/orb/encoding/wkb"
+	"github.com/paulmach/orb/geojson"
 )
 
 // InstrumentGroup holds information for entity instrument_group
 type InstrumentGroup struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	ID          uuid.UUID `json:"id"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
 }
 
-// GetInstrumentGroups returns a list of instrument groups
-func GetInstrumentGroups(db *sql.DB) []InstrumentGroup {
+// ListInstrumentGroups returns a list of instrument groups
+func ListInstrumentGroups(db *sqlx.DB) []InstrumentGroup {
 	sql := "SELECT id, name, description FROM instrument_group"
 	rows, err := db.Query(sql)
 
@@ -38,7 +42,7 @@ func GetInstrumentGroups(db *sql.DB) []InstrumentGroup {
 }
 
 // GetInstrumentGroup returns a single instrument group
-func GetInstrumentGroup(db *sql.DB, ID string) InstrumentGroup {
+func GetInstrumentGroup(db *sqlx.DB, ID uuid.UUID) InstrumentGroup {
 	sql := "SELECT id, name, description FROM instrument_group WHERE id = $1"
 
 	var result InstrumentGroup
@@ -51,19 +55,19 @@ func GetInstrumentGroup(db *sql.DB, ID string) InstrumentGroup {
 	return result
 }
 
-// GetInstrumentGroupInstruments returns a list of instrument group instruments for a given instrument
-func GetInstrumentGroupInstruments(db *sql.DB, ID string) []Instrument {
+// ListInstrumentGroupInstruments returns a list of instrument group instruments for a given instrument
+func ListInstrumentGroupInstruments(db *sqlx.DB, ID uuid.UUID) []Instrument {
 
-	sql := `SELECT A.instrument_id, 
+	sql := `SELECT A.instrument_id,
 	        	   instrument.NAME,
-	        	   instrument_type.NAME              AS instrument_type, 
-	               instrument.height, 
-	               ST_AsGeoJSON(instrument.geometry)::json AS geometry 
+	        	   instrument_type.NAME              AS instrument_type,
+	               instrument.height,
+	               ST_AsBinary(instrument.geometry) AS geometry
             FROM   instrument_group_instruments A
 	               INNER JOIN instrument instrument
-	               		   ON instrument.id = A.instrument_id 
+	               		   ON instrument.id = A.instrument_id
 	               INNER JOIN instrument_type
-	               		   ON instrument_type.id = instrument.instrument_type_id 
+	               		   ON instrument_type.id = instrument.instrument_type_id
 			WHERE  instrument_group_id = $1
 			`
 
@@ -76,13 +80,13 @@ func GetInstrumentGroupInstruments(db *sql.DB, ID string) []Instrument {
 	defer rows.Close()
 	result := make([]Instrument, 0)
 	for rows.Next() {
-		n := Instrument{}
-		var geometry *geojson.Geometry
-		err := rows.Scan(&n.ID, &n.Name, &n.Type, &n.Height, &geometry)
+		var p orb.Point
+		var n Instrument
+		err := rows.Scan(&n.ID, &n.Name, &n.Type, &n.Height, wkb.Scanner(&p))
+		n.Geometry = *geojson.NewGeometry(p)
 		if err != nil {
 			panic(err)
 		}
-		n.Geometry = *geometry
 
 		result = append(result, n)
 	}

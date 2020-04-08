@@ -2,42 +2,77 @@ package handlers
 
 import (
 	"api/root/models"
-	"database/sql"
 	"net/http"
 
 	"github.com/google/uuid"
+	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo"
 )
 
-// GetInstruments returns instruments
-func GetInstruments(db *sql.DB) echo.HandlerFunc {
+// ListInstruments returns instruments
+func ListInstruments(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return c.JSON(http.StatusOK, models.GetInstruments(db))
+		return c.JSON(http.StatusOK, models.ListInstruments(db))
 	}
 }
 
 // GetInstrument returns a single instrument
-func GetInstrument(db *sql.DB) echo.HandlerFunc {
+func GetInstrument(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id, err := uuid.Parse(c.Param("id"))
 		if err != nil {
 			return c.String(http.StatusNotFound, "Malformed ID")
 		}
-		return c.JSON(http.StatusOK, models.GetInstrument(db, id.String()))
+		return c.JSON(http.StatusOK, models.GetInstrument(db, id))
 	}
 }
 
-// // CreateInstrument creates
-// func CreateInstrument(db *sql.DB) echo.HandlerFunc {
+// CreateInstrument creates a single instrument
+func CreateInstrument(db *sqlx.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		id := uuid.Must(uuid.NewRandom())
 
+		i := &models.Instrument{ID: id}
+		if err := c.Bind(i); err != nil {
+			return c.String(http.StatusBadRequest, err.Error())
+		}
+
+		if err := models.CreateInstrument(db, i); err != nil {
+			return c.String(http.StatusForbidden, err.Error())
+		}
+
+		return c.JSON(http.StatusCreated, i.ID)
+	}
+}
+
+// UpdateInstrument modifys an existing instrument
+// func UpdateInstrument(db *sqlx.DB) echo.HandlerFunc {
+// 	return func(c echo.Context) error {
+// 		i := &models.Instrument{}
+// 		if err := c.Bind(i); err != nil {
+// 			return c.String(http.StatusBadRequest, err.Error())
+// 		}
+
+// 		if err := models.UpdateInstrument(db, i); err != nil {
+// 			return c.String(http.StatusBadRequest, err.Error())
+// 		}
+
+// 		return c.JSON(http.StatusOK, i.ID)
+// 	}
 // }
 
-// // UpdateInstrument modifys an existing instrument
-// func UpdateInstrument(db *sql.DB) echo.HandlerFunc {
+// DeleteInstrument deletes an existing instrument by ID
+func DeleteInstrument(db *sqlx.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		id, err := uuid.Parse(c.Param("id"))
+		if err != nil {
+			return c.String(http.StatusBadRequest, "Malformed ID")
+		}
 
-// }
+		if err := models.DeleteInstrument(db, id); err != nil {
+			return c.String(http.StatusBadRequest, "Bad Request")
+		}
 
-// // DeleteInstrument deletes an existing instrument by ID
-// func DeleteInstrument(db *sql.DB) echo.HandlerFunc {
-
-// }
+		return c.JSON(http.StatusOK, map[string]interface{}{"deleted": id})
+	}
+}

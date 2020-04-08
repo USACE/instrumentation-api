@@ -9,7 +9,7 @@
       "type": "go",
       "request": "launch",
       "mode": "auto",
-      "program": "./root/main.go",
+      "program": "${workspaceFolder}/root/main.go",
       "env": {"DB_USER":"postgres",
         "DB_PASS":"postgres",
         "DB_NAME":"postgres",
