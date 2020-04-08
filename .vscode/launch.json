@@ -10,12 +10,15 @@
       "request": "launch",
       "mode": "auto",
       "program": "${workspaceFolder}/root/main.go",
-      "env": {"DB_USER":"postgres",
+      "env": {
+        "JWT_DISABLED": "TRUE",
+        "DB_USER":"postgres",
         "DB_PASS":"postgres",
         "DB_NAME":"postgres",
         "DB_HOST":"localhost",
         "DB_SSLMODE":"disable",
-        "LAMBDA":"FALSE"},
+        "LAMBDA":"FALSE"
+      },
       "args": []
     }
   ]
