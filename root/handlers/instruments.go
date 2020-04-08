@@ -46,20 +46,34 @@ func CreateInstrument(db *sqlx.DB) echo.HandlerFunc {
 }
 
 // UpdateInstrument modifys an existing instrument
-// func UpdateInstrument(db *sqlx.DB) echo.HandlerFunc {
-// 	return func(c echo.Context) error {
-// 		i := &models.Instrument{}
-// 		if err := c.Bind(i); err != nil {
-// 			return c.String(http.StatusBadRequest, err.Error())
-// 		}
+func UpdateInstrument(db *sqlx.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
 
-// 		if err := models.UpdateInstrument(db, i); err != nil {
-// 			return c.String(http.StatusBadRequest, err.Error())
-// 		}
+		// id from url params
+		id, err := uuid.Parse(c.Param("id"))
+		if err != nil {
+			return c.String(http.StatusBadRequest, "Malformed ID")
+		}
+		// id from request
+		i := &models.Instrument{ID: id}
+		if err := c.Bind(i); err != nil {
+			return c.String(http.StatusBadRequest, err.Error())
+		}
+		// check :id in url params matches id in request body
+		if id != i.ID {
+			return c.String(
+				http.StatusBadRequest,
+				"url parameter id does not match object id in body",
+			)
+		}
+		// update
+		if err := models.UpdateInstrument(db, i); err != nil {
+			return c.String(http.StatusBadRequest, err.Error())
+		}
 
-// 		return c.JSON(http.StatusOK, i.ID)
-// 	}
-// }
+		return c.JSON(http.StatusOK, i.ID)
+	}
+}
 
 // DeleteInstrument deletes an existing instrument by ID
 func DeleteInstrument(db *sqlx.DB) echo.HandlerFunc {

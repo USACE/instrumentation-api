@@ -92,9 +92,20 @@ func CreateInstrument(db *sqlx.DB, i *Instrument) error {
 }
 
 // UpdateInstrument updates a single instrument
-// func UpdateInstrument(db *sqlx.DB, i *Instrument) error {
+func UpdateInstrument(db *sqlx.DB, i *Instrument) error {
 
-// }
+	_, err := db.Exec(
+		`UPDATE instrument SET name = $1, height = $2, instrument_type_id = $3, geometry = $4 WHERE id = $5`,
+		i.Name, i.Height, i.Type, wkb.Value(i.Geometry.Geometry()), i.ID,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}
 
 // DeleteInstrument deletes a single instrument
 func DeleteInstrument(db *sqlx.DB, id uuid.UUID) error {
