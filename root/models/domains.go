@@ -1,9 +1,9 @@
 package models
 
 import (
-	"database/sql"
 	"log"
 
+	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
 
@@ -14,7 +14,7 @@ type Domain struct {
 }
 
 // GetDomains returns a UNION of all domain tables in the database
-func GetDomains(db *sql.DB) []Domain {
+func GetDomains(db *sqlx.DB) []Domain {
 	sql := `SELECT id, 
 	               'instrument_type' AS group, 
 	               name              AS value 

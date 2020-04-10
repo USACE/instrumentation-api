@@ -5,13 +5,14 @@ go 1.13
 require (
 	github.com/apex/gateway v1.1.1
 	github.com/aws/aws-lambda-go v1.15.0 // indirect
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/google/uuid v1.1.1
+	github.com/jmoiron/sqlx v1.2.0
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/labstack/gommon v0.3.0 // indirect
 	github.com/lib/pq v1.3.0
 	github.com/mattn/go-colorable v0.1.6 // indirect
-	github.com/paulmach/go.geojson v1.4.0
+	github.com/paulmach/orb v0.1.6
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/tj/assert v0.0.0-20190920132354-ee03d75cd160 // indirect
 	github.com/valyala/fasttemplate v1.1.0 // indirect

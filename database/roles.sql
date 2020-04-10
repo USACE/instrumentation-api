@@ -21,7 +21,14 @@ TO instrumentation_reader;
 -- Role instrumentation_writer
 -- Tables specific to instrumentation app
 CREATE ROLE instrumentation_writer;
--- GRANT INSERT,UPDATE,DELETE ON xxx TO instrumentation_writer;
+GRANT INSERT,UPDATE,DELETE ON 
+    instrument,
+    instrument_group,
+    instrument_group_instruments,
+    instrument_type,
+    timeseries,
+    timeseries_measurement
+TO instrumentation_writer;
 
 -- Role postgis_reader
 CREATE ROLE postgis_reader;
