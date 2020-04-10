@@ -9,8 +9,8 @@ import (
 type TimeseriesMeasurement struct {
 	ID       	string      `json:"id"`
 	Time     	string      `json:"time"`
-	Value  		string		`json:"value`
-	Timeseries 	string		`json:"timeseries`
+	Value  		string		`json:"value"`
+	Timeseries 	string		`json:"timeseries"`
 }
 
 // GetTimeseriesMeasurements returns all time series measurements from the database
