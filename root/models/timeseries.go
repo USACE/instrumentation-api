@@ -1,7 +1,7 @@
 package models
 
 import (
-	"database/sql"
+	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
 
@@ -15,7 +15,7 @@ type Timeseries struct {
 }
 
 // GetInstruments returns an array of instruments from the database
-func GetTimeseries(db *sql.DB) []Timeseries {
+func GetTimeseries(db *sqlx.DB) []Timeseries {
 	sql := `SELECT  timeseries.id, 
 				    timeseries.NAME,
 				    instrument.Name as instrument,

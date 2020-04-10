@@ -7,7 +7,6 @@ import (
 	"os"
 	"strings"
 
-	"api/root/appconfig"
 	"api/root/handlers"
 
 	"github.com/apex/gateway"
@@ -85,7 +84,6 @@ func main() {
 
 	e := echo.New()
 	e.Use(middleware.CORS())
-	e.Use(middleware.JWTWithConfig(appconfig.JWTConfig))
 
 	// Routes
 	// Instrument Groups
@@ -95,10 +93,9 @@ func main() {
 	// Instruments
 	e.GET("instruments/", handlers.ListInstruments(db))
 	e.GET("instruments/:id/", handlers.GetInstrument(db))
+	// Timeseries
 	e.GET("timeseries/", handlers.GetTimeseries(db))
-	e.GET("timeseries_measurement/", handlers.GetTimeseriesMeasurements(db))
-	// Time Series
-	e.GET("timeseries", handlers.GetTimeseries)
+	e.GET("timeseries_measurements/", handlers.GetTimeseriesMeasurements(db))
 	// Domains
 	e.GET("domains", handlers.GetDomains(db))
 

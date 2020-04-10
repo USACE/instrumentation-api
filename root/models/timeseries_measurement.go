@@ -1,7 +1,7 @@
 package models
 
 import (
-	"database/sql"
+	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
 
@@ -14,7 +14,7 @@ type TimeseriesMeasurement struct {
 }
 
 // GetTimeseriesMeasurements returns all time series measurements from the database
-func GetTimeseriesMeasurements(db *sql.DB) []TimeseriesMeasurement {
+func GetTimeseriesMeasurements(db *sqlx.DB) []TimeseriesMeasurement {
 	sql := `SELECT  timeseries_measurement.id, 
 				    timeseries_measurement.time,
 				    timeseries_measurement.value,
