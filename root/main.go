@@ -92,7 +92,8 @@ func main() {
 	// Instruments
 	e.GET("instruments/", handlers.GetInstruments(db))
 	e.GET("instruments/:id/", handlers.GetInstrument(db))
-	e.GET("timeseries/", handlers.GetTimeseries)
+	e.GET("timeseries/", handlers.GetTimeseries(db))
+	e.GET("timeseries_measurement/", handlers.GetTimeseriesMeasurements(db))
 	// Time Series
 	// Domains
 	e.GET("domains/", handlers.GetDomains(db))

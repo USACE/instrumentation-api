@@ -9,13 +9,15 @@
       "type": "go",
       "request": "launch",
       "mode": "auto",
-      "program": "./root/main.go",
-      "env": {"DB_USER":"postgres",
-        "DB_PASS":"postgres",
-        "DB_NAME":"postgres",
-        "DB_HOST":"localhost",
-        "DB_SSLMODE":"disable",
-        "LAMBDA":"FALSE"},
+      "program": "${workspaceFolder}/root/main.go",
+      "env": {
+        "DB_USER": "postgres",
+        "DB_PASS": "postgres",
+        "DB_NAME": "postgres",
+        "DB_HOST": "localhost",
+        "DB_SSLMODE": "disable",
+        "LAMBDA": "FALSE"
+      },
       "args": []
     }
   ]

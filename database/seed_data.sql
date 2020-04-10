@@ -105,3 +105,27 @@ INSERT INTO instrument_group_instruments (instrument_id, instrument_group_id) VA
     ('3629cbf6-1256-49ed-aebe-df2f661872a7', '5be75d58-2d16-4605-9652-72211e80b742'),
     ('9048e7c1-eba2-4888-9048-db63e71e85ef', '5be75d58-2d16-4605-9652-72211e80b742');
 
+
+-- Units
+INSERT INTO unit (id, name) VALUES
+('7b924ec2-c488-401d-a503-ca734b1ab804', 'pound-inch'),
+('e0f8ecb4-02da-46f6-b10b-37b0bf09b43c', 'feet'),
+('cbba941e-14cb-4d17-bc7f-b7156626a64a', 'unit');
+-- Parameter
+INSERT INTO parameter (id, name) VALUES
+('068b59b0-aafb-4c98-ae4b-ed0365a6fbac', 'parameterexample');
+-- Time Series
+INSERT INTO timeseries (id, name, instrument_id, parameter_id, unit_id) VALUES
+('cbba941e-14cb-4d17-bc7f-b7156626a64a', 'LAKEOKEE', '9048e7c1-eba2-4888-9048-db63e71e85ef', '{068b59b0-aafb-4c98-ae4b-ed0365a6fbac}' , '{e0f8ecb4-02da-46f6-b10b-37b0bf09b43c}');
+-- Time Series Measurement
+INSERT INTO timeseries_measurement (id, time, value, timeseries_id) VALUES
+('1a5f08ea-de55-466a-b758-a9e2d8f15e31', '1/1/2020', '13.16', 'cbba941e-14cb-4d17-bc7f-b7156626a64a'),
+('acfb521e-26e4-44f4-afc8-89e0e5cd1fb6', '1/2/2020', '13.16', 'cbba941e-14cb-4d17-bc7f-b7156626a64a'),
+('56ca1fad-40a8-4e28-9135-b74897f85ce7', '1/3/2020', '13.17', 'cbba941e-14cb-4d17-bc7f-b7156626a64a'),
+('41657ca9-ae5c-4870-b026-6fb7da36251c', '1/4/2020', '13.17', 'cbba941e-14cb-4d17-bc7f-b7156626a64a'),
+('d92f2b07-aea1-437e-9cef-17e640bb1b1f', '1/5/2020', '13.13', 'cbba941e-14cb-4d17-bc7f-b7156626a64a'),
+('861f3af7-c588-4ee9-91c6-e2499804d690', '1/6/2020', '13.12', 'cbba941e-14cb-4d17-bc7f-b7156626a64a'),
+('0eda3e40-9e52-422b-b325-7ec285427259', '1/7/2020', '13.1', 'cbba941e-14cb-4d17-bc7f-b7156626a64a'),
+('e1539122-da8a-4094-97a3-46bdd576f6bf', '1/8/2020', '13.08', 'cbba941e-14cb-4d17-bc7f-b7156626a64a'),
+('9d316c28-ffde-4a61-8955-b27015944b49', '1/9/2020', '13.07', 'cbba941e-14cb-4d17-bc7f-b7156626a64a'),
+('ba4c2963-71fc-4023-adc6-1a053b33e461', '1/10/2020', '13.05', 'cbba941e-14cb-4d17-bc7f-b7156626a64a');
