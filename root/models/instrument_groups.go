@@ -15,13 +15,14 @@ import (
 // InstrumentGroup holds information for entity instrument_group
 type InstrumentGroup struct {
 	ID          uuid.UUID `json:"id"`
+	Slug        string    `json:"slug"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
 }
 
 // ListInstrumentGroups returns a list of instrument groups
 func ListInstrumentGroups(db *sqlx.DB) []InstrumentGroup {
-	sql := "SELECT id, name, description FROM instrument_group"
+	sql := "SELECT id, slug, name, description FROM instrument_group"
 	rows, err := db.Query(sql)
 
 	if err != nil {
@@ -31,34 +32,35 @@ func ListInstrumentGroups(db *sqlx.DB) []InstrumentGroup {
 	defer rows.Close()
 	result := make([]InstrumentGroup, 0)
 	for rows.Next() {
-		n := InstrumentGroup{}
-		err := rows.Scan(&n.ID, &n.Name, &n.Description)
+		g := InstrumentGroup{}
+		err := rows.Scan(&g.ID, &g.Slug, &g.Name, &g.Description)
 		if err != nil {
 			panic(err)
 		}
-		result = append(result, n)
+		result = append(result, g)
 	}
 	return result
 }
 
 // GetInstrumentGroup returns a single instrument group
 func GetInstrumentGroup(db *sqlx.DB, ID uuid.UUID) InstrumentGroup {
-	sql := "SELECT id, name, description FROM instrument_group WHERE id = $1"
+	sql := "SELECT id, slug, name, description FROM instrument_group WHERE id = $1"
 
-	var result InstrumentGroup
+	var g InstrumentGroup
 	err := db.QueryRow(sql, ID).Scan(
-		&result.ID, &result.Name, &result.Description,
+		&g.ID, &g.Slug, &g.Name, &g.Description,
 	)
 	if err != nil {
 		log.Printf("Fail to query and scan row with ID %s; %s", ID, err)
 	}
-	return result
+	return g
 }
 
 // ListInstrumentGroupInstruments returns a list of instrument group instruments for a given instrument
 func ListInstrumentGroupInstruments(db *sqlx.DB, ID uuid.UUID) []Instrument {
 
 	sql := `SELECT A.instrument_id,
+	               instrument.slug,
 	        	   instrument.NAME,
 	        	   instrument_type.NAME              AS instrument_type,
 	               instrument.height,
@@ -82,7 +84,7 @@ func ListInstrumentGroupInstruments(db *sqlx.DB, ID uuid.UUID) []Instrument {
 	for rows.Next() {
 		var p orb.Point
 		var n Instrument
-		err := rows.Scan(&n.ID, &n.Name, &n.Type, &n.Height, wkb.Scanner(&p))
+		err := rows.Scan(&n.ID, &n.Slug, &n.Name, &n.Type, &n.Height, wkb.Scanner(&p))
 		n.Geometry = *geojson.NewGeometry(p)
 		if err != nil {
 			panic(err)

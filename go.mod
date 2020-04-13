@@ -7,6 +7,7 @@ require (
 	github.com/aws/aws-lambda-go v1.15.0 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/google/uuid v1.1.1
+	github.com/gosimple/slug v1.9.0
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/labstack/gommon v0.3.0 // indirect

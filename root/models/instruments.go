@@ -1,6 +1,7 @@
 package models
 
 import (
+	"api/root/dbutils"
 	"log"
 
 	"github.com/google/uuid"
@@ -15,6 +16,7 @@ import (
 // Instrument is an instrument data structure
 type Instrument struct {
 	ID       uuid.UUID        `json:"id"`
+	Slug     string           `json:"slug"`
 	Name     string           `json:"name"`
 	Type     string           `json:"type"`
 	Height   string           `json:"height"`
@@ -23,7 +25,8 @@ type Instrument struct {
 
 // ListInstruments returns an array of instruments from the database
 func ListInstruments(db *sqlx.DB) []Instrument {
-	sql := `SELECT instrument.id, 
+	sql := `SELECT instrument.id,
+	               instrument.slug,
 	        	   instrument.NAME,
 	        	   instrument_type.NAME              AS instrument_type, 
 	               instrument.height, 
@@ -43,15 +46,15 @@ func ListInstruments(db *sqlx.DB) []Instrument {
 	result := make([]Instrument, 0)
 	for rows.Next() {
 		var p orb.Point
-		var n Instrument
-		err := rows.Scan(&n.ID, &n.Name, &n.Type, &n.Height, wkb.Scanner(&p))
-		n.Geometry = *geojson.NewGeometry(p)
+		var i Instrument
+		err := rows.Scan(&i.ID, &i.Slug, &i.Name, &i.Type, &i.Height, wkb.Scanner(&p))
+		i.Geometry = *geojson.NewGeometry(p)
 
 		if err != nil {
 			panic(err)
 		}
 
-		result = append(result, n)
+		result = append(result, i)
 	}
 	return result
 }
@@ -59,6 +62,7 @@ func ListInstruments(db *sqlx.DB) []Instrument {
 // GetInstrument returns a single instrument
 func GetInstrument(db *sqlx.DB, id uuid.UUID) Instrument {
 	sql := `SELECT instrument.id,
+	               instrument.slug,
 	        	   instrument.NAME,
 	        	   instrument_type.NAME              AS instrument_type,
 	               instrument.height,
@@ -68,22 +72,29 @@ func GetInstrument(db *sqlx.DB, id uuid.UUID) Instrument {
 							  ON instrument_type.id = instrument.instrument_type_id
 			WHERE instrument.id = $1
 			`
-	var result Instrument
+
+	var i Instrument
 	var p orb.Point
-	err := db.QueryRow(sql, id).Scan(&result.ID, &result.Name, &result.Type, &result.Height, wkb.Scanner(&p))
-	result.Geometry = *geojson.NewGeometry(p)
+	err := db.QueryRow(sql, id).Scan(&i.ID, &i.Slug, &i.Name, &i.Type, &i.Height, wkb.Scanner(&p))
 	if err != nil {
 		log.Printf("Fail to query and scan row with ID %s; %s", id, err)
 	}
-	return result
+	i.Geometry = *geojson.NewGeometry(p)
+
+	return i
 }
 
 // CreateInstrument creates a single instrument
 func CreateInstrument(db *sqlx.DB, i *Instrument) error {
 
+	// unique slug
+	slug, err := dbutils.NextUniqueSlug(db, i.Name, "instrument", "slug")
+	if err != nil {
+		return err
+	}
 	if _, err := db.Exec(
-		`INSERT INTO instrument (id, name, height, instrument_type_id, geometry) VALUES ($1, $2, $3, $4, $5)`,
-		i.ID, i.Name, i.Height, i.Type, wkb.Value(i.Geometry.Geometry()),
+		`INSERT INTO instrument (id, slug, name, height, instrument_type_id, geometry) VALUES ($1, $2, $3, $4, $5, $6)`,
+		i.ID, slug, i.Name, i.Height, i.Type, wkb.Value(i.Geometry.Geometry()),
 	); err != nil {
 		return err
 	}
@@ -95,7 +106,7 @@ func CreateInstrument(db *sqlx.DB, i *Instrument) error {
 func UpdateInstrument(db *sqlx.DB, i *Instrument) error {
 
 	_, err := db.Exec(
-		`UPDATE instrument SET name = $1, height = $2, instrument_type_id = $3, geometry = $4 WHERE id = $5`,
+		`UPDATE instrument SET name = $1, height = $2, instrument_type_id = $3, geometry = ST_GeomFromWKB($4) WHERE id = $5`,
 		i.Name, i.Height, i.Type, wkb.Value(i.Geometry.Geometry()), i.ID,
 	)
 
