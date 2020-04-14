@@ -56,16 +56,29 @@ func main() {
 	// Routes
 	// Instrument Groups
 	e.GET("instrument_groups", handlers.ListInstrumentGroups(db))
+	e.POST("instrument_groups", handlers.CreateInstrumentGroup(db))
 	e.GET("instrument_groups/:id", handlers.GetInstrumentGroup(db))
+	e.DELETE("instrument_groups/:id", handlers.DeleteInstrumentGroup(db))
+	// Instrument Group Instruments
 	e.GET("instrument_groups/:id/instruments", handlers.ListInstrumentGroupInstruments(db))
+	// Add instrument to group
+	e.POST("instrument_groups/:id/instruments", handlers.CreateInstrumentGroupInstruments(db))
+	// Remove instrument from group
+	e.DELETE("instrument_groups/:id/instruments/:instrument_id", handlers.DeleteInstrumentGroupInstruments(db))
 	// Instruments
 	e.GET("instruments", handlers.ListInstruments(db))
 	e.POST("instruments", handlers.CreateInstrument(db))
 	e.GET("instruments/:id", handlers.GetInstrument(db))
+	// e.GET("instruments/:id/timeseries", handlers.GetInstrument(db))
+
 	e.PUT("instruments/:id", handlers.UpdateInstrument(db))
 	e.DELETE("instruments/:id", handlers.DeleteInstrument(db))
+
 	// Time Series
 	e.GET("timeseries", handlers.GetTimeseries(db))
+	e.GET("timeseries/:id", handlers.GetTimeseries(db))
+	// e.GET("timeseries/:id/measurements", handlers.GetTimeseriesMeasurements(db))
+	// ^ Query Parameters
 	e.GET("timeseries_measurements", handlers.GetTimeseriesMeasurements(db))
 	// Domains
 	e.GET("domains", handlers.GetDomains(db))

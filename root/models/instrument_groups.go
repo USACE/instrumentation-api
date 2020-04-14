@@ -1,6 +1,8 @@
 package models
 
 import (
+	"api/root/dbutils"
+	"database/sql"
 	"log"
 
 	"github.com/google/uuid"
@@ -56,6 +58,50 @@ func GetInstrumentGroup(db *sqlx.DB, ID uuid.UUID) InstrumentGroup {
 	return g
 }
 
+// CreateInstrumentGroup creates a single instrument group
+func CreateInstrumentGroup(db *sqlx.DB, g *InstrumentGroup) (uuid.UUID, error) {
+
+	// UUID
+	id := uuid.Must(uuid.NewRandom())
+	// unique slug
+	slug, err := dbutils.NextUniqueSlug(db, g.Name, "instrument_group", "slug")
+	if err != nil {
+		return uuid.UUID{}, err
+	}
+	_, err = db.Exec(
+		`INSERT INTO instrument_group (id, slug, name, description) VALUES ($1, $2, $3, $4)`,
+		id, slug, g.Name, g.Description,
+	)
+
+	return id, err
+}
+
+// DeleteInstrumentGroup deletes an instrument group and any associations in instrument_group_instruments
+func DeleteInstrumentGroup(db *sqlx.DB, id uuid.UUID) error {
+
+	tx, err := db.Begin()
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	// delete instrument_group_instruments first to avoid foreign key constraint
+	if _, err = tx.Exec(
+		`DELETE FROM instrument_group_instruments WHERE instrument_group_id = $1`,
+		id,
+	); err != nil {
+		tx.Rollback()
+		return err
+	}
+	if _, err = tx.Exec(`DELETE FROM instrument_group WHERE id = $1`, id); err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err = tx.Commit(); err != nil {
+		return err
+	}
+	return nil
+}
+
 // ListInstrumentGroupInstruments returns a list of instrument group instruments for a given instrument
 func ListInstrumentGroupInstruments(db *sqlx.DB, ID uuid.UUID) []Instrument {
 
@@ -93,4 +139,24 @@ func ListInstrumentGroupInstruments(db *sqlx.DB, ID uuid.UUID) []Instrument {
 		result = append(result, n)
 	}
 	return result
+}
+
+// CreateInstrumentGroupInstruments adds an instrument to an instrument group
+func CreateInstrumentGroupInstruments(db *sqlx.DB, instrumentGroupID uuid.UUID, instrumentID uuid.UUID) (sql.Result, error) {
+	result, err := db.Exec(
+		`INSERT INTO instrument_group_instruments (instrument_group_id, instrument_id) VALUES ($1, $2)`,
+		instrumentGroupID,
+		instrumentID,
+	)
+	return result, err
+}
+
+// DeleteInstrumentGroupInstruments adds an instrument to an instrument group
+func DeleteInstrumentGroupInstruments(db *sqlx.DB, instrumentGroupID uuid.UUID, instrumentID uuid.UUID) (sql.Result, error) {
+	result, err := db.Exec(
+		`DELETE FROM instrument_group_instruments WHERE instrument_group_id = $1 and instrument_id = $2`,
+		instrumentGroupID,
+		instrumentID,
+	)
+	return result, err
 }

@@ -57,7 +57,7 @@ func UpdateInstrument(db *sqlx.DB) echo.HandlerFunc {
 		// id from request
 		i := &models.Instrument{ID: id}
 		if err := c.Bind(i); err != nil {
-			return c.String(http.StatusBadRequest, err.Error())
+			return c.JSON(http.StatusBadRequest, err)
 		}
 		// check :id in url params matches id in request body
 		if id != i.ID {
