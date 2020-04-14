@@ -60,12 +60,10 @@ func main() {
 	e.GET("instrument_groups/:id/instruments", handlers.ListInstrumentGroupInstruments(db))
 	// Instruments
 	e.GET("instruments", handlers.ListInstruments(db))
-	e.POST("instruments", handlers.CreateInstrument(db))
 	e.GET("instruments/:id", handlers.GetInstrument(db))
-	e.PUT("instruments/:id", handlers.UpdateInstrument(db))
-	e.DELETE("instruments/:id", handlers.DeleteInstrument(db))
-	// Time Series
-	e.GET("timeseries", handlers.GetTimeseries)
+	// Timeseries
+	e.GET("timeseries", handlers.GetTimeseries(db))
+	e.GET("timeseries_measurements", handlers.GetTimeseriesMeasurements(db))
 	// Domains
 	e.GET("domains", handlers.GetDomains(db))
 
