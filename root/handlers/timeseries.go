@@ -1,12 +1,23 @@
 package handlers
 
 import (
+	"api/root/models"
 	"net/http"
 
+	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo"
 )
 
 // GetTimeseries returns timeseries endpoints
-func GetTimeseries(c echo.Context) error {
-	return c.String(http.StatusOK, "HHD API Timeseries Endpoint")
+func GetTimeseries(db *sqlx.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		return c.JSON(http.StatusOK, models.GetTimeseries(db))
+	}
+}
+
+// GetTimeseriesMeasurements returns timeseries measurements data
+func GetTimeseriesMeasurements(db *sqlx.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		return c.JSON(http.StatusOK, models.GetTimeseriesMeasurements(db))
+	}
 }

@@ -16,7 +16,7 @@ func ListInstrumentGroups(db *sqlx.DB) echo.HandlerFunc {
 	}
 }
 
-// // GetInstrumentGroup returns single instrument group
+// GetInstrumentGroup returns single instrument group
 func GetInstrumentGroup(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id, err := uuid.Parse(c.Param("id"))
@@ -27,7 +27,7 @@ func GetInstrumentGroup(db *sqlx.DB) echo.HandlerFunc {
 	}
 }
 
-// // ListInstrumentGroupInstruments returns a list of instruments for a provided instrument group
+// ListInstrumentGroupInstruments returns a list of instruments for a provided instrument group
 func ListInstrumentGroupInstruments(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id, err := uuid.Parse(c.Param("id"))
