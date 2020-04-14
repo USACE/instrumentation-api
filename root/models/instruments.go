@@ -20,7 +20,7 @@ type Instrument struct {
 	Name     string           `json:"name"`
 	TypeID   string           `json:"type_id"`
 	Type     string           `json:"type"`
-	Height   string           `json:"height"`
+	Height   float32          `json:"height"`
 	Geometry geojson.Geometry `json:"geometry"`
 }
 
