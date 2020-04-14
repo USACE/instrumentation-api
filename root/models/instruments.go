@@ -18,6 +18,7 @@ type Instrument struct {
 	ID       uuid.UUID        `json:"id"`
 	Slug     string           `json:"slug"`
 	Name     string           `json:"name"`
+	TypeID   string           `json:"type_id"`
 	Type     string           `json:"type"`
 	Height   string           `json:"height"`
 	Geometry geojson.Geometry `json:"geometry"`
@@ -26,8 +27,9 @@ type Instrument struct {
 // ListInstruments returns an array of instruments from the database
 func ListInstruments(db *sqlx.DB) []Instrument {
 	sql := `SELECT instrument.id,
-	               instrument.slug,
-	        	   instrument.NAME,
+				   instrument.slug,
+				   instrument.NAME,
+				   instrument.INSTRUMENT_TYPE_ID,
 	        	   instrument_type.NAME              AS instrument_type, 
 	               instrument.height, 
 	               ST_AsBinary(instrument.geometry) AS geometry 
@@ -47,7 +49,7 @@ func ListInstruments(db *sqlx.DB) []Instrument {
 	for rows.Next() {
 		var p orb.Point
 		var i Instrument
-		err := rows.Scan(&i.ID, &i.Slug, &i.Name, &i.Type, &i.Height, wkb.Scanner(&p))
+		err := rows.Scan(&i.ID, &i.Slug, &i.Name, &i.TypeID, &i.Type, &i.Height, wkb.Scanner(&p))
 		i.Geometry = *geojson.NewGeometry(p)
 
 		if err != nil {
@@ -64,6 +66,7 @@ func GetInstrument(db *sqlx.DB, id uuid.UUID) Instrument {
 	sql := `SELECT instrument.id,
 	               instrument.slug,
 	        	   instrument.NAME,
+				   instrument.INSTRUMENT_TYPE_ID,
 	        	   instrument_type.NAME              AS instrument_type,
 	               instrument.height,
 	               ST_AsBinary(instrument.geometry) AS geometry
@@ -75,7 +78,7 @@ func GetInstrument(db *sqlx.DB, id uuid.UUID) Instrument {
 
 	var i Instrument
 	var p orb.Point
-	err := db.QueryRow(sql, id).Scan(&i.ID, &i.Slug, &i.Name, &i.Type, &i.Height, wkb.Scanner(&p))
+	err := db.QueryRow(sql, id).Scan(&i.ID, &i.Slug, &i.Name, &i.TypeID, &i.Type, &i.Height, wkb.Scanner(&p))
 	if err != nil {
 		log.Printf("Fail to query and scan row with ID %s; %s", id, err)
 	}
@@ -94,7 +97,7 @@ func CreateInstrument(db *sqlx.DB, i *Instrument) error {
 	}
 	if _, err := db.Exec(
 		`INSERT INTO instrument (id, slug, name, height, instrument_type_id, geometry) VALUES ($1, $2, $3, $4, $5, $6)`,
-		i.ID, slug, i.Name, i.Height, i.Type, wkb.Value(i.Geometry.Geometry()),
+		i.ID, slug, i.Name, i.Height, i.TypeID, wkb.Value(i.Geometry.Geometry()),
 	); err != nil {
 		return err
 	}
@@ -107,7 +110,7 @@ func UpdateInstrument(db *sqlx.DB, i *Instrument) error {
 
 	_, err := db.Exec(
 		`UPDATE instrument SET name = $1, height = $2, instrument_type_id = $3, geometry = ST_GeomFromWKB($4) WHERE id = $5`,
-		i.Name, i.Height, i.Type, wkb.Value(i.Geometry.Geometry()), i.ID,
+		i.Name, i.Height, i.TypeID, wkb.Value(i.Geometry.Geometry()), i.ID,
 	)
 
 	if err != nil {
