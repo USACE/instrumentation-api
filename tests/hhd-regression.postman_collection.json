@@ -1,0 +1,596 @@
+{
+	"info": {
+		"_postman_id": "cf9a7b9c-f0d1-464c-afa0-1ea23f7dd1f5",
+		"name": "hhd-regression",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "GetDomains",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "37005e12-f505-44a1-b2b9-05a2d6a6b1ee",
+						"exec": [
+							"// status code is 200",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"",
+							"// validate JSON schema",
+							"var schema = {",
+							"    \"type\": \"array\",",
+							"    \"items\": {",
+							"        \"type\": \"object\",",
+							"        \"properties\": {",
+							"            \"id\": { \"type\": \"string\"},",
+							"            \"group\": { \"type\": \"string\"},",
+							"            \"value\": { \"type\": \"string\"},",
+							"        },",
+							"        \"required\": [\"id\",\"group\",\"value\"],",
+							"        \"additionalProperties\": false",
+							"    }",
+							"}",
+							"",
+							"",
+							"pm.test(\"Schema validation\", function () {",
+							"    pm.response.to.have.jsonSchema(schema)",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/domains",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"domains"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ListInstruments",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "37005e12-f505-44a1-b2b9-05a2d6a6b1ee",
+						"exec": [
+							"// status code is 200",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"",
+							"// validate JSON schema",
+							"var schema = {",
+							"    \"type\": \"array\",",
+							"    \"items\": {",
+							"        \"type\": \"object\",",
+							"        \"properties\": {",
+							"            \"id\": { \"type\": \"string\"},",
+							"            \"slug\": { \"type\": \"string\"},",
+							"            \"name\": { \"type\": \"string\"},",
+							"            \"type_id\": { \"type\": \"string\"},",
+							"            \"type\": { \"type\": \"string\"},",
+							"            \"height\": { \"type\": \"number\"},",
+							"            \"geometry\": {",
+							"                \"type\": \"object\",",
+							"                \"properties\": {",
+							"                    \"type\": {",
+							"                        \"type\": \"string\",",
+							"                        \"pattern\": \"Point\"",
+							"                    },",
+							"                    \"coordinates\": {",
+							"                        \"type\": \"array\",",
+							"                        \"minItems\": 2,",
+							"                        \"maxItems\": 2,",
+							"                        \"items\": {\"type\": \"number\"},",
+							"                    }",
+							"                },",
+							"                \"required\": [\"type\",\"coordinates\"]",
+							"            },",
+							"            \"creator\": {\"type\": \"number\"},",
+							"            \"create_date\": {\"type\": \"string\", \"format\": \"date-time\"},",
+							"            \"updater\": {\"type\": \"number\"},",
+							"            \"update_date\": {\"type\": \"string\", \"format\": \"date-time\"},",
+							"        },",
+							"        \"required\": [\"id\",\"slug\",\"name\",\"type_id\",\"type\",\"height\",\"geometry\",\"creator\",\"create_date\",\"updater\",\"update_date\"],",
+							"        \"additionalProperties\": false",
+							"    }",
+							"}",
+							"",
+							"",
+							"pm.test(\"Schema validation\", function () {",
+							"    pm.response.to.have.jsonSchema(schema)",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/instruments",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"instruments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetInstrument",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "37005e12-f505-44a1-b2b9-05a2d6a6b1ee",
+						"exec": [
+							"// status code is 200",
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"",
+							"// validate JSON schema",
+							"var schema = {",
+							"    \"type\": \"object\",",
+							"    \"properties\": {",
+							"        \"id\": { \"type\": \"string\"},",
+							"        \"slug\": { \"type\": \"string\"},",
+							"        \"name\": { \"type\": \"string\"},",
+							"        \"type_id\": { \"type\": \"string\"},",
+							"        \"type\": { \"type\": \"string\"},",
+							"        \"height\": { \"type\": \"number\"},",
+							"        \"geometry\": {",
+							"            \"type\": \"object\",",
+							"            \"properties\": {",
+							"                \"type\": {",
+							"                    \"type\": \"string\",",
+							"                    \"pattern\": \"Point\"",
+							"                },",
+							"                \"coordinates\": {",
+							"                    \"type\": \"array\",",
+							"                    \"minItems\": 2,",
+							"                    \"maxItems\": 2,",
+							"                    \"items\": {\"type\": \"number\"},",
+							"                }",
+							"            },",
+							"            \"required\": [\"type\",\"coordinates\"]",
+							"        },",
+							"        \"creator\": {\"type\": \"number\"},",
+							"        \"create_date\": {\"type\": \"string\", \"format\": \"date-time\"},",
+							"        \"updater\": {\"type\": \"number\"},",
+							"        \"update_date\": {\"type\": \"string\", \"format\": \"date-time\"},",
+							"    },",
+							"    \"required\": [\"id\",\"slug\",\"name\",\"type_id\",\"type\",\"height\",\"creator\",\"create_date\",\"updater\",\"update_date\"],",
+							"    \"additionalProperties\": true",
+							"}",
+							"",
+							"",
+							"pm.test(\"Schema validation\", function () {",
+							"    pm.response.to.have.jsonSchema(schema)",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Test Instrument 1\",\n    \"type_id\": \"0fd1f9ba-2731-4ff9-96dd-3c03215ab06f\",\n    \"height\": 35.0,\n    \"geometry\": {\"type\":\"Point\",\"coordinates\": [125.6, 10.1]},\n    \"creator\": 1111111111,\n    \"create_date\": \"2020-04-16T15:41:22.013Z\",\n    \"updater\": 1111111111,\n    \"update_date\": \"2020-04-16T15:41:22.013Z\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/instruments",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"instruments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CreateInstrument",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "37005e12-f505-44a1-b2b9-05a2d6a6b1ee",
+						"exec": [
+							"// status code is 200",
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"",
+							"// validate JSON schema",
+							"var schema = {",
+							"    \"type\": \"object\",",
+							"    \"properties\": {",
+							"        \"id\": { \"type\": \"string\"},",
+							"        \"slug\": { \"type\": \"string\"},",
+							"        \"name\": { \"type\": \"string\"},",
+							"        \"type_id\": { \"type\": \"string\"},",
+							"        \"type\": { \"type\": \"string\"},",
+							"        \"height\": { \"type\": \"number\"},",
+							"        \"geometry\": {",
+							"            \"type\": \"object\",",
+							"            \"properties\": {",
+							"                \"type\": {",
+							"                    \"type\": \"string\",",
+							"                    \"pattern\": \"Point\"",
+							"                },",
+							"                \"coordinates\": {",
+							"                    \"type\": \"array\",",
+							"                    \"minItems\": 2,",
+							"                    \"maxItems\": 2,",
+							"                    \"items\": {\"type\": \"number\"},",
+							"                }",
+							"            },",
+							"            \"required\": [\"type\",\"coordinates\"]",
+							"        },",
+							"        \"creator\": {\"type\": \"number\"},",
+							"        \"create_date\": {\"type\": \"string\", \"format\": \"date-time\"},",
+							"        \"updater\": {\"type\": \"number\"},",
+							"        \"update_date\": {\"type\": \"string\", \"format\": \"date-time\"},",
+							"    },",
+							"    \"required\": [\"id\",\"slug\",\"name\",\"type_id\",\"type\",\"height\",\"creator\",\"create_date\",\"updater\",\"update_date\"],",
+							"    \"additionalProperties\": true",
+							"}",
+							"",
+							"",
+							"pm.test(\"Schema validation\", function () {",
+							"    pm.response.to.have.jsonSchema(schema)",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Test Instrument 1\",\n    \"type_id\": \"0fd1f9ba-2731-4ff9-96dd-3c03215ab06f\",\n    \"height\": 35.0,\n    \"geometry\": {\"type\":\"Point\",\"coordinates\": [125.6, 10.1]},\n    \"creator\": 1111111111,\n    \"create_date\": \"2020-04-16T15:41:22.013Z\",\n    \"updater\": 1111111111,\n    \"update_date\": \"2020-04-16T15:41:22.013Z\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/instruments",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"instruments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ListInstrumentGroups",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "37005e12-f505-44a1-b2b9-05a2d6a6b1ee",
+						"exec": [
+							"// status code is 200",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"",
+							"// validate JSON schema",
+							"var schema = {",
+							"    \"type\": \"array\",",
+							"    \"items\": {",
+							"        \"type\": \"object\",",
+							"        \"properties\": {",
+							"            \"id\": { \"type\": \"string\"},",
+							"            \"slug\": { \"type\": \"string\"},",
+							"            \"name\": { \"type\": \"string\"},",
+							"            \"type_id\": { \"type\": \"string\"},",
+							"            \"type\": { \"type\": \"string\"},",
+							"            \"height\": { \"type\": \"number\"},",
+							"            \"geometry\": {",
+							"                \"type\": \"object\",",
+							"                \"properties\": {",
+							"                    \"type\": {",
+							"                        \"type\": \"string\",",
+							"                        \"pattern\": \"Point\"",
+							"                    },",
+							"                    \"coordinates\": {",
+							"                        \"type\": \"array\",",
+							"                        \"minItems\": 2,",
+							"                        \"maxItems\": 2,",
+							"                        \"items\": {\"type\": \"number\"},",
+							"                    }",
+							"                },",
+							"                \"required\": [\"type\",\"coordinates\"]",
+							"            },",
+							"            \"creator\": {\"type\": \"string\"},",
+							"            \"create_date\": {\"type\": \"string\", \"format\": \"date-time\"},",
+							"            \"updater\": {\"type\": \"string\"},",
+							"            \"update_date\": {\"type\": \"string\", \"format\": \"date-time\"},",
+							"        },",
+							"        \"required\": [\"id\",\"slug\",\"name\",\"type_id\",\"type\",\"height\",\"geometry\",\"creator\",\"create_date\",\"updater\",\"update_date\"],",
+							"        \"additionalProperties\": false",
+							"    }",
+							"}",
+							"",
+							"",
+							"pm.test(\"Schema validation\", function () {",
+							"    pm.response.to.have.jsonSchema(schema)",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/instrument_groups",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"instrument_groups"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetInstrumentGroup",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "78983d2a-fdcd-471a-a31f-101f5327e591",
+						"exec": [
+							"// status code is 200",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"",
+							"// validate JSON schema",
+							"var schema = {",
+							"    \"type\": \"object\",",
+							"    \"properties\": {",
+							"        \"id\": { \"type\": \"string\"},",
+							"        \"slug\": { \"type\": \"string\"},",
+							"        \"name\": { \"type\": \"string\"},",
+							"        \"description\": {\"type\": \"string\"},",
+							"        \"creator\": {\"type\": \"number\"},",
+							"        \"create_date\": {\"type\": \"string\", \"format\": \"date-time\"},",
+							"        \"updater\": {\"type\": \"number\"},",
+							"        \"update_date\": {\"type\": \"string\", \"format\": \"date-time\"},",
+							"    },",
+							"    \"required\": [\"id\",\"slug\",\"name\",\"description\",\"creator\",\"create_date\",\"updater\",\"update_date\"],",
+							"    \"additionalProperties\": false",
+							"}",
+							"",
+							"",
+							"pm.test(\"Schema validation\", function () {",
+							"    pm.response.to.have.jsonSchema(schema)",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/instrument_groups/0beff703-07a6-4220-aa1d-dec8746bd4ca",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"instrument_groups",
+						"0beff703-07a6-4220-aa1d-dec8746bd4ca"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CreateInstrumentGroup",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "37005e12-f505-44a1-b2b9-05a2d6a6b1ee",
+						"exec": [
+							"// status code is 200",
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"",
+							"// validate JSON schema",
+							"var schema = {",
+							"    \"type\": \"object\",",
+							"    \"properties\": {",
+							"        \"id\": { \"type\": \"string\"},",
+							"        \"slug\": { \"type\": \"string\"},",
+							"        \"name\": { \"type\": \"string\"},",
+							"        \"description\": {\"type\": \"string\"},",
+							"        \"creator\": {\"type\": \"number\"},",
+							"        \"create_date\": {\"type\": \"string\", \"format\": \"date-time\"},",
+							"        \"updater\": {\"type\": \"number\"},",
+							"        \"update_date\": {\"type\": \"string\", \"format\": \"date-time\"},",
+							"    },",
+							"    \"required\": [\"id\",\"slug\",\"name\",\"description\",\"creator\",\"create_date\",\"updater\",\"update_date\"],",
+							"    \"additionalProperties\": false",
+							"}",
+							"",
+							"",
+							"pm.test(\"Schema validation\", function () {",
+							"    pm.response.to.have.jsonSchema(schema)",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Test Instrument Group 1\",\n    \"type_id\": \"0fd1f9ba-2731-4ff9-96dd-3c03215ab06f\",\n    \"height\": 35.0,\n    \"geometry\": {\"type\":\"Point\",\"coordinates\": [125.6, 10.1]},\n    \"creator\": 1111111111,\n    \"create_date\": \"2020-04-16T15:41:22.013Z\",\n    \"updater\": 1111111111,\n    \"update_date\": \"2020-04-16T15:41:22.013Z\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/instrument_groups",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"instrument_groups"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add Instrument to InstrumentGroup",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "37005e12-f505-44a1-b2b9-05a2d6a6b1ee",
+						"exec": [
+							"// status code is 200",
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"id\": \"0445a37c-4524-4eae-bdc1-6a39538df0ac\"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/instrument_groups/4a98919a-32e4-4e77-b2e2-09f728dbabac/instruments",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"instrument_groups",
+						"4a98919a-32e4-4e77-b2e2-09f728dbabac",
+						"instruments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Remove Instrument from InstrumentGroup",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "37005e12-f505-44a1-b2b9-05a2d6a6b1ee",
+						"exec": [
+							"// status code is 200",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"id\": \"0445a37c-4524-4eae-bdc1-6a39538df0ac\"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/instrument_groups/4a98919a-32e4-4e77-b2e2-09f728dbabac/instruments/0445a37c-4524-4eae-bdc1-6a39538df0ac",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"instrument_groups",
+						"4a98919a-32e4-4e77-b2e2-09f728dbabac",
+						"instruments",
+						"0445a37c-4524-4eae-bdc1-6a39538df0ac"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}
