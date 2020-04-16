@@ -6,5 +6,5 @@ ALTER TABLE instrument_group ADD slug VARCHAR(240) UNIQUE;
 -- drop unique constraint on instrument name
 ALTER TABLE instrument DROP CONSTRAINT instrument_name_key;
 -- drop unique constraint on 
-ALTER TABLE instrument_name DROP CONSTRAINT instrument_group_name_key;
+ALTER TABLE instrument_group DROP CONSTRAINT instrument_group_name_key;
 

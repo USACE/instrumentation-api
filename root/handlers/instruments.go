@@ -21,7 +21,7 @@ func GetInstrument(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id, err := uuid.Parse(c.Param("id"))
 		if err != nil {
-			return c.String(http.StatusNotFound, "Malformed ID")
+			return c.String(http.StatusBadRequest, "Malformed ID")
 		}
 		return c.JSON(http.StatusOK, models.GetInstrument(db, id))
 	}
@@ -34,14 +34,14 @@ func CreateInstrument(db *sqlx.DB) echo.HandlerFunc {
 
 		i := &models.Instrument{ID: id}
 		if err := c.Bind(i); err != nil {
-			return c.String(http.StatusBadRequest, err.Error())
+			return c.JSON(http.StatusBadRequest, err)
 		}
 
 		if err := models.CreateInstrument(db, i); err != nil {
-			return c.String(http.StatusForbidden, err.Error())
+			return c.JSON(http.StatusForbidden, err)
 		}
-
-		return c.JSON(http.StatusCreated, i.ID)
+		// Send instrument
+		return c.JSON(http.StatusCreated, i)
 	}
 }
 
@@ -57,7 +57,7 @@ func UpdateInstrument(db *sqlx.DB) echo.HandlerFunc {
 		// id from request
 		i := &models.Instrument{ID: id}
 		if err := c.Bind(i); err != nil {
-			return c.String(http.StatusBadRequest, err.Error())
+			return c.JSON(http.StatusBadRequest, err)
 		}
 		// check :id in url params matches id in request body
 		if id != i.ID {
@@ -70,8 +70,8 @@ func UpdateInstrument(db *sqlx.DB) echo.HandlerFunc {
 		if err := models.UpdateInstrument(db, i); err != nil {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
-
-		return c.JSON(http.StatusOK, i.ID)
+		// return whole instrument
+		return c.JSON(http.StatusOK, i)
 	}
 }
 
@@ -84,9 +84,9 @@ func DeleteInstrument(db *sqlx.DB) echo.HandlerFunc {
 		}
 
 		if err := models.DeleteInstrument(db, id); err != nil {
-			return c.String(http.StatusBadRequest, "Bad Request")
+			return c.NoContent(http.StatusBadRequest)
 		}
 
-		return c.JSON(http.StatusOK, map[string]interface{}{"deleted": id})
+		return c.NoContent(http.StatusOK)
 	}
 }

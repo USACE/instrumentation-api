@@ -19,16 +19,26 @@ CREATE TABLE IF NOT EXISTS public.parameter (
 -- instrument_group
 CREATE TABLE IF NOT EXISTS public.instrument_group (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
-    name VARCHAR(120) UNIQUE NOT NULL,
-    description VARCHAR(360)
+    slug VARCHAR(240) UNIQUE NOT NULL,
+    name VARCHAR(120) NOT NULL,
+    description VARCHAR(360),
+    creator BIGINT NOT NULL DEFAULT 1111111111,
+    create_date TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updater BIGINT NOT NULL DEFAULT 1111111111,
+    update_date TIMESTAMPTZ NOT NULL DEFAULT now()
 	);
 
 -- instrument
 CREATE TABLE IF NOT EXISTS public.instrument (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
-    name VARCHAR(120) UNIQUE NOT NULL,
+    slug VARCHAR(240) UNIQUE NOT NULL,
+    name VARCHAR(120) NOT NULL,
     height REAL,
     geometry geometry,
+    creator BIGINT NOT NULL DEFAULT 1111111111,
+    create_date TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updater BIGINT NOT NULL DEFAULT 1111111111,
+    update_date TIMESTAMPTZ NOT NULL DEFAULT now(),
     instrument_type_id UUID REFERENCES instrument_type (id)
 );
 
