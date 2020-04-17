@@ -134,7 +134,7 @@ func UpdateInstrument(db *sqlx.DB, i *Instrument) error {
 		`UPDATE instrument
 		SET name = $1, height = $2, instrument_type_id = $3, geometry = ST_GeomFromWKB($4), creator = $5, create_date = $6, updater = $7, update_date = $8
 		WHERE id = $9`,
-		i.Name, i.Height, i.TypeID, i.Creator, i.CreateDate, i.Updater, i.UpdateDate, wkb.Value(i.Geometry.Geometry()), i.ID,
+		i.Name, i.Height, i.TypeID, wkb.Value(i.Geometry.Geometry()), i.Creator, i.CreateDate, i.Updater, i.UpdateDate, i.ID,
 	); err != nil {
 		return err
 	}
