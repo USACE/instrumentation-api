@@ -4,12 +4,6 @@ An Application Programming Interface (API) to manage instrumentation data, built
 
 # How to Develop
 
-## After Cloning the Repository
-
-1. Install serverless command line tools with `npm install -g serverless`. Note: This is a "global" `-g` install.
-
-2. Install node packages associated with this project. From the top directory of this repository, type `npm install`.
-
 ## Running a Database for Local Development
 
 1. Install Docker and Docker Compose
@@ -55,9 +49,7 @@ An Application Programming Interface (API) to manage instrumentation data, built
 
 ## Running the GO API for Local Development
 
-### Without AWS Lambda environment simulated (use this most of the time)
-
-Either of these options starts the API at `localhost:3030`
+Either of these options starts the API at `localhost:3030`. The API uses JSON Web tokens (JWT) for authorization by default.  To disable JWT for testing or development, you can set the environment variable `JWT_DISABLED=TRUE`.
 
 **With Visual Studio Code Debugger**
 
@@ -73,20 +65,14 @@ Set the following environment variables and type `go run root/main.go` from the 
     * DB_HOST=localhost
     * DB_SSLMODE=disable
     * LAMBDA=FALSE
+    * JWT_DISABLED=FALSE
 
 Note: make sure environment variable `LAMBDA` is either **not set** or is set to `LAMBDA=FALSE`.
-
-### With AWS Lambda environment simulation
-
-1. Set environment variable `LAMBDA=TRUE`. Note: `True` is case insensitive, so True, tRue or true all work.
-
-2. From the top level of this repository, type `make local`. This starts the API at  `localhost:3030/development/`.  This runs the API in a docker container that simulates the AWS Lambda environment and request payload from the AWS API Gateway.
 
 ## Running API Docs Locally
 
 From the top level of this repository, type `make docs`. This starts a container that serves content based on "apidoc.yml" in this repository.
 Open a browser and navigate to `https://localhost:4000` to view the content.
-
 
 # How To Deploy
 
