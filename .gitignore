@@ -1,6 +1,3 @@
-# Serverless directories
-.serverless
-
 # golang output binary directory
 bin
 
@@ -20,8 +17,5 @@ vendor
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
-
-# Node Modules
-node_modules/**
 
 __debug*
