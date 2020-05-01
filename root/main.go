@@ -57,6 +57,7 @@ func main() {
 	// Instrument Groups
 	e.GET("instrumentation/instrument_groups", handlers.ListInstrumentGroups(db))
 	e.POST("instrumentation/instrument_groups", handlers.CreateInstrumentGroup(db))
+	e.POST("instrumentation/instrument_groups2", handlers.CreateInstrumentGroupBulk(db))
 	e.GET("instrumentation/instrument_groups/:id", handlers.GetInstrumentGroup(db))
 	e.DELETE("instrumentation/instrument_groups/:id", handlers.DeleteInstrumentGroup(db))
 	// Instrument Group Instruments
@@ -68,6 +69,7 @@ func main() {
 	// Instruments
 	e.GET("instrumentation/instruments", handlers.ListInstruments(db))
 	e.POST("instrumentation/instruments", handlers.CreateInstrument(db))
+	e.POST("instrumentation/instruments2", handlers.CreateInstrumentBulk(db))
 	e.GET("instrumentation/instruments/:id", handlers.GetInstrument(db))
 	// e.GET("instrumentation/instruments/:id/timeseries", handlers.GetInstrument(db))
 

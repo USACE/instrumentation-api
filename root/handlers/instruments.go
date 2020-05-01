@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"api/root/dbutils"
 	"api/root/models"
 	"net/http"
 
@@ -30,18 +31,60 @@ func GetInstrument(db *sqlx.DB) echo.HandlerFunc {
 // CreateInstrument creates a single instrument
 func CreateInstrument(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		id := uuid.Must(uuid.NewRandom())
 
-		i := &models.Instrument{ID: id}
+		i := &models.Instrument{}
 		if err := c.Bind(i); err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
+
+		// Ensure a new UUID
+		i.ID = uuid.Must(uuid.NewRandom())
+		// Assign Slug
+		s, err := dbutils.NextUniqueSlug(i.Name, models.ListInstrumentSlugs(db))
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, err)
+		}
+		i.Slug = s
 
 		if err := models.CreateInstrument(db, i); err != nil {
 			return c.JSON(http.StatusForbidden, err)
 		}
 		// Send instrument
 		return c.JSON(http.StatusCreated, i)
+	}
+}
+
+// CreateInstrumentBulk accepts an array of instruments for bulk upload to the database
+func CreateInstrumentBulk(db *sqlx.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+
+		instruments := []models.Instrument{}
+		if err := c.Bind(&instruments); err != nil {
+			return c.JSON(http.StatusBadRequest, err)
+		}
+
+		// slugs already taken in the database
+		slugs := models.ListInstrumentSlugs(db)
+
+		for idx := range instruments {
+			// Assign UUID
+			instruments[idx].ID = uuid.Must(uuid.NewRandom())
+			// Assign Slug
+			s, err := dbutils.NextUniqueSlug(instruments[idx].Name, slugs)
+			if err != nil {
+				return c.JSON(http.StatusBadRequest, err)
+			}
+			instruments[idx].Slug = s
+			// Add slug to array of slugs originally fetched from the database
+			// to catch duplicate names/slugs from the same bulk upload
+			slugs = append(slugs, s)
+		}
+
+		if err := models.CreateInstrumentBulk(db, instruments); err != nil {
+			return c.JSON(http.StatusBadRequest, err)
+		}
+		// Send instrument
+		return c.JSON(http.StatusCreated, instruments)
 	}
 }
 
