@@ -3,10 +3,8 @@ package dbutils
 import (
 	"errors"
 	"fmt"
-	"log"
 
 	"github.com/gosimple/slug"
-	"github.com/jmoiron/sqlx"
 )
 
 // Slugify removes spaces and converts to lower case
@@ -15,38 +13,30 @@ func Slugify(str string) string {
 	return slug
 }
 
-func slugIsUnique(DB *sqlx.DB, slug string, table string, column string) bool {
+// NextUniqueSlug returns the next unique slug available based on
+func NextUniqueSlug(str string, usedSlugs []string) (string, error) {
 
-	sql := fmt.Sprintf("SELECT COUNT(%s) FROM %s WHERE %s = $1", column, table, column)
-
-	log.Printf(sql)
-	log.Printf(column)
-
-	var count int
-	err := DB.Get(&count, sql, slug)
-	if err != nil {
-		log.Printf(err.Error())
-	}
-	log.Printf("Slugs with this name: %s; %d", slug, count)
-	if count != 0 {
+	slugIsTaken := func(str string, arr []string) bool {
+		for _, i := range arr {
+			if str == i {
+				return true
+			}
+		}
 		return false
 	}
-	return true
-}
-
-// NextUniqueSlug returns the next unique slug available based on
-func NextUniqueSlug(DB *sqlx.DB, str string, table string, column string) (string, error) {
 
 	slugBasename := Slugify(str)
-	// if slug is unique without appending an integer
-	if slugIsUnique(DB, slugBasename, table, column) {
+	// if slug is unique without appending an integer, return it
+	if !(slugIsTaken(slugBasename, usedSlugs)) {
 		return slugBasename, nil
 	}
-	// max 10 iterations trying to get unique slug
+	// max 100 iterations trying to get unique slug
+	// if we reach the end of 100 iterations, it means there are more than 100 things with the same
+	// name in the database table
 	i := 1
-	for i < 10 {
+	for i < 100 {
 		slug := fmt.Sprintf("%s-%d", slugBasename, i)
-		if slugIsUnique(DB, slug, table, column) {
+		if !(slugIsTaken(slug, usedSlugs)) {
 			return slug, nil
 		}
 		i++

@@ -1,13 +1,13 @@
 package models
 
 import (
-	"api/root/dbutils"
 	"log"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	_ "github.com/lib/pq"
+
+	"github.com/lib/pq"
 
 	"github.com/paulmach/orb"
 	"github.com/paulmach/orb/encoding/wkb"
@@ -26,8 +26,31 @@ type InstrumentGroup struct {
 	UpdateDate  time.Time `json:"update_date" db:"update_date"`
 }
 
+// ListInstrumentGroupSlugs lists used instrument group slugs in the database
+func ListInstrumentGroupSlugs(db *sqlx.DB) []string {
+
+	rows, err := db.Query(`SELECT slug from instrument_group`)
+
+	if err != nil {
+		log.Panic(err)
+	}
+
+	defer rows.Close()
+	result := make([]string, 0)
+	for rows.Next() {
+		var slug string
+		err := rows.Scan(&slug)
+		if err != nil {
+			log.Panic(err)
+		}
+		result = append(result, slug)
+	}
+	return result
+}
+
 // ListInstrumentGroups returns a list of instrument groups
 func ListInstrumentGroups(db *sqlx.DB) []InstrumentGroup {
+
 	sql := "SELECT id, slug, name, description, creator, create_date, updater, update_date FROM instrument_group"
 	rows, err := db.Queryx(sql)
 
@@ -64,22 +87,59 @@ func GetInstrumentGroup(db *sqlx.DB, ID uuid.UUID) InstrumentGroup {
 // CreateInstrumentGroup creates a single instrument group
 func CreateInstrumentGroup(db *sqlx.DB, g *InstrumentGroup) error {
 
-	// UUID
-	g.ID = uuid.Must(uuid.NewRandom())
-
-	// unique slug
-	slug, err := dbutils.NextUniqueSlug(db, g.Name, "instrument_group", "slug")
-	if err != nil {
-		return err
-	}
-	g.Slug = slug
-	_, err = db.NamedExec(
+	_, err := db.NamedExec(
 		`INSERT INTO instrument_group (id, slug, name, description, creator, create_date, updater, update_date)
 		VALUES (:id, :slug, :name, :description, :creator, :create_date, :updater, :update_date)`,
 		g,
 	)
 
 	return err
+}
+
+// CreateInstrumentGroupBulk creates many instruments from an array of instruments
+func CreateInstrumentGroupBulk(db *sqlx.DB, groups []InstrumentGroup) error {
+
+	txn, err := db.Begin()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	stmt, err := txn.Prepare(pq.CopyIn(
+		"instrument_group",
+		"id", "slug", "name", "description", "creator", "create_date", "updater", "update_date",
+	))
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, g := range groups {
+
+		_, err := stmt.Exec(
+			g.ID, g.Slug, g.Name, g.Description, g.Creator, g.CreateDate, g.Updater, g.UpdateDate,
+		)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	_, err = stmt.Exec()
+	if err != nil {
+		return err
+	}
+
+	err = stmt.Close()
+	if err != nil {
+		return err
+	}
+
+	err = txn.Commit()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // DeleteInstrumentGroup deletes an instrument group and any associations in instrument_group_instruments

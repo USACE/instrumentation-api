@@ -1,16 +1,16 @@
 package models
 
 import (
-	"api/root/dbutils"
 	"log"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	_ "github.com/lib/pq"
+	"github.com/lib/pq"
 
 	"github.com/paulmach/orb"
 	"github.com/paulmach/orb/encoding/wkb"
+	"github.com/paulmach/orb/encoding/wkt"
 	"github.com/paulmach/orb/geojson"
 )
 
@@ -27,6 +27,28 @@ type Instrument struct {
 	CreateDate time.Time        `json:"create_date"`
 	Updater    int              `json:"updater"`
 	UpdateDate time.Time        `json:"update_date"`
+}
+
+// ListInstrumentSlugs lists used instrument slugs in the database
+func ListInstrumentSlugs(db *sqlx.DB) []string {
+
+	rows, err := db.Query(`SELECT slug from instrument`)
+
+	if err != nil {
+		log.Panic(err)
+	}
+
+	defer rows.Close()
+	result := make([]string, 0)
+	for rows.Next() {
+		var slug string
+		err := rows.Scan(&slug)
+		if err != nil {
+			log.Panic(err)
+		}
+		result = append(result, slug)
+	}
+	return result
 }
 
 // ListInstruments returns an array of instruments from the database
@@ -105,15 +127,56 @@ func GetInstrument(db *sqlx.DB, id uuid.UUID) Instrument {
 	return i
 }
 
-// CreateInstrument creates a single instrument
-func CreateInstrument(db *sqlx.DB, i *Instrument) error {
+// CreateInstrumentBulk creates many instruments from an array of instruments
+func CreateInstrumentBulk(db *sqlx.DB, instruments []Instrument) error {
 
-	// unique slug
-	slug, err := dbutils.NextUniqueSlug(db, i.Name, "instrument", "slug")
+	txn, err := db.Begin()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	stmt, err := txn.Prepare(pq.CopyIn(
+		"instrument",
+		"id", "slug", "name", "height", "instrument_type_id",
+		"geometry", "creator", "create_date", "updater", "update_date",
+	))
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, i := range instruments {
+
+		_, err = stmt.Exec(
+			i.ID, i.Slug, i.Name, i.Height, i.TypeID,
+			wkt.MarshalString(i.Geometry.Geometry()), i.Creator, i.CreateDate, i.Updater, i.UpdateDate,
+		)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	_, err = stmt.Exec()
 	if err != nil {
 		return err
 	}
-	i.Slug = slug
+
+	err = stmt.Close()
+	if err != nil {
+		return err
+	}
+
+	err = txn.Commit()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// CreateInstrument creates a single instrument
+func CreateInstrument(db *sqlx.DB, i *Instrument) error {
 
 	if _, err := db.Exec(
 		`INSERT INTO instrument (id, slug, name, height, instrument_type_id, geometry, creator, create_date, updater, update_date)
