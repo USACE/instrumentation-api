@@ -54,12 +54,22 @@ func main() {
 	e.Use(middleware.JWTWithConfig(appconfig.JWTConfig))
 
 	// Routes
+	// Projects
+	e.GET("instrumentation/projects", handlers.ListProjects(db))
+	e.POST("instrumentation/projects", handlers.CreateProjectBulk(db))
+	e.GET("instrumentation/projects/:id", handlers.GetProject(db))
+	e.PUT("instrumentation/projects/:id", handlers.UpdateProject(db))
+	e.DELETE("instrumentation/projects/:id", handlers.DeleteFlagProject(db))
+	// Projects - Project Instruments
+	// ADD ROUTES FOR PROJECT INSTRUMENTS HERE
+	// Projects - Project Instrument Groups
+	// ADD ROUTES FOR PROJECT INSTRUMENT GROUPS HERE
+
 	// Instrument Groups
 	e.GET("instrumentation/instrument_groups", handlers.ListInstrumentGroups(db))
-	e.POST("instrumentation/instrument_groups", handlers.CreateInstrumentGroup(db))
-	e.POST("instrumentation/instrument_groups2", handlers.CreateInstrumentGroupBulk(db))
+	e.POST("instrumentation/instrument_groups", handlers.CreateInstrumentGroupBulk(db))
 	e.GET("instrumentation/instrument_groups/:id", handlers.GetInstrumentGroup(db))
-	e.DELETE("instrumentation/instrument_groups/:id", handlers.DeleteInstrumentGroup(db))
+	e.DELETE("instrumentation/instrument_groups/:id", handlers.DeleteFlagInstrumentGroup(db))
 	// Instrument Group Instruments
 	e.GET("instrumentation/instrument_groups/:id/instruments", handlers.ListInstrumentGroupInstruments(db))
 	// Add instrument to group
@@ -68,13 +78,12 @@ func main() {
 	e.DELETE("instrumentation/instrument_groups/:id/instruments/:instrument_id", handlers.DeleteInstrumentGroupInstruments(db))
 	// Instruments
 	e.GET("instrumentation/instruments", handlers.ListInstruments(db))
-	e.POST("instrumentation/instruments", handlers.CreateInstrument(db))
-	e.POST("instrumentation/instruments2", handlers.CreateInstrumentBulk(db))
+	e.POST("instrumentation/instruments", handlers.CreateInstrumentBulk(db))
 	e.GET("instrumentation/instruments/:id", handlers.GetInstrument(db))
 	// e.GET("instrumentation/instruments/:id/timeseries", handlers.GetInstrument(db))
 
 	e.PUT("instrumentation/instruments/:id", handlers.UpdateInstrument(db))
-	e.DELETE("instrumentation/instruments/:id", handlers.DeleteInstrument(db))
+	e.DELETE("instrumentation/instruments/:id", handlers.DeleteFlagInstrument(db))
 
 	// Time Series
 	e.GET("instrumentation/timeseries", handlers.GetTimeseries(db))

@@ -24,33 +24,12 @@ func GetInstrument(db *sqlx.DB) echo.HandlerFunc {
 		if err != nil {
 			return c.String(http.StatusBadRequest, "Malformed ID")
 		}
-		return c.JSON(http.StatusOK, models.GetInstrument(db, id))
-	}
-}
-
-// CreateInstrument creates a single instrument
-func CreateInstrument(db *sqlx.DB) echo.HandlerFunc {
-	return func(c echo.Context) error {
-
-		i := &models.Instrument{}
-		if err := c.Bind(i); err != nil {
-			return c.JSON(http.StatusBadRequest, err)
-		}
-
-		// Ensure a new UUID
-		i.ID = uuid.Must(uuid.NewRandom())
-		// Assign Slug
-		s, err := dbutils.NextUniqueSlug(i.Name, models.ListInstrumentSlugs(db))
+		n, err := models.GetInstrument(db, id)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return c.JSON(http.StatusInternalServerError, err)
 		}
-		i.Slug = s
 
-		if err := models.CreateInstrument(db, i); err != nil {
-			return c.JSON(http.StatusForbidden, err)
-		}
-		// Send instrument
-		return c.JSON(http.StatusCreated, i)
+		return c.JSON(http.StatusOK, n)
 	}
 }
 
@@ -64,20 +43,23 @@ func CreateInstrumentBulk(db *sqlx.DB) echo.HandlerFunc {
 		}
 
 		// slugs already taken in the database
-		slugs := models.ListInstrumentSlugs(db)
+		slugsTaken, err := models.ListInstrumentSlugs(db)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, err)
+		}
 
 		for idx := range instruments {
 			// Assign UUID
 			instruments[idx].ID = uuid.Must(uuid.NewRandom())
 			// Assign Slug
-			s, err := dbutils.NextUniqueSlug(instruments[idx].Name, slugs)
+			s, err := dbutils.NextUniqueSlug(instruments[idx].Name, slugsTaken)
 			if err != nil {
 				return c.JSON(http.StatusBadRequest, err)
 			}
 			instruments[idx].Slug = s
 			// Add slug to array of slugs originally fetched from the database
 			// to catch duplicate names/slugs from the same bulk upload
-			slugs = append(slugs, s)
+			slugsTaken = append(slugsTaken, s)
 		}
 
 		if err := models.CreateInstrumentBulk(db, instruments); err != nil {
@@ -110,23 +92,24 @@ func UpdateInstrument(db *sqlx.DB) echo.HandlerFunc {
 			)
 		}
 		// update
-		if err := models.UpdateInstrument(db, i); err != nil {
-			return c.String(http.StatusBadRequest, err.Error())
+		iUpdated, err := models.UpdateInstrument(db, i)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, err)
 		}
-		// return whole instrument
-		return c.JSON(http.StatusOK, i)
+		// return updated instrument
+		return c.JSON(http.StatusOK, iUpdated)
 	}
 }
 
-// DeleteInstrument deletes an existing instrument by ID
-func DeleteInstrument(db *sqlx.DB) echo.HandlerFunc {
+// DeleteFlagInstrument changes deleted flag true for an instrument
+func DeleteFlagInstrument(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id, err := uuid.Parse(c.Param("id"))
 		if err != nil {
 			return c.String(http.StatusBadRequest, "Malformed ID")
 		}
 
-		if err := models.DeleteInstrument(db, id); err != nil {
+		if err := models.DeleteFlagInstrument(db, id); err != nil {
 			return c.NoContent(http.StatusBadRequest)
 		}
 

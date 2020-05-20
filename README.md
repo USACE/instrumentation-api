@@ -41,11 +41,9 @@ An Application Programming Interface (API) to manage instrumentation data, built
 
    The .sql in the files should be run in this order to initialize the database:
 
-   1. postgis_init.sql
+   1. tables.sql
 
-   2. tables.sql
-
-   3. seed_data.sql
+   1. seed_data.sql
 
 ## Running the GO API for Local Development
 
@@ -80,13 +78,11 @@ Open a browser and navigate to `https://localhost:4000` to view the content.
 
 Database should be initialized with the following SQL files in the order listed:
 
-1. pre_postgis_init_rds.sql (install PostGIS extensions)
+1. rds_init.sql (install PostGIS extensions)
 
-2. postgis_init.sql (install other extensions)
+1. tables.sql (create tables for application)
 
-3. tables.sql (create tables for application)
-
-3. roles.sql (database roles, grants, etc.)
+1. roles.sql (database roles, grants, etc.)
 
    Note: Change 'password' in roles.sql to a real password for the `instrumentation_user` account.
 
