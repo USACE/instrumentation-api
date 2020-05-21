@@ -17,6 +17,8 @@ import (
 // Instrument is an instrument data structure
 type Instrument struct {
 	ID         uuid.UUID        `json:"id"`
+	Active     bool             `json:"active"`
+	Deleted    bool             `json:"-"`
 	Slug       string           `json:"slug"`
 	Name       string           `json:"name"`
 	TypeID     string           `json:"type_id"`
@@ -27,33 +29,25 @@ type Instrument struct {
 	CreateDate time.Time        `json:"create_date"`
 	Updater    int              `json:"updater"`
 	UpdateDate time.Time        `json:"update_date"`
+	ProjectID  *string          `json:"project_id" db:"project_id"`
 }
 
 // ListInstrumentSlugs lists used instrument slugs in the database
-func ListInstrumentSlugs(db *sqlx.DB) []string {
+func ListInstrumentSlugs(db *sqlx.DB) ([]string, error) {
 
-	rows, err := db.Query(`SELECT slug from instrument`)
-
-	if err != nil {
-		log.Panic(err)
+	ss := make([]string, 0)
+	if err := db.Select(&ss, "SELECT slug FROM instrument"); err != nil {
+		return make([]string, 0), err
 	}
 
-	defer rows.Close()
-	result := make([]string, 0)
-	for rows.Next() {
-		var slug string
-		err := rows.Scan(&slug)
-		if err != nil {
-			log.Panic(err)
-		}
-		result = append(result, slug)
-	}
-	return result
+	return ss, nil
+
 }
 
 // ListInstruments returns an array of instruments from the database
 func ListInstruments(db *sqlx.DB) []Instrument {
 	sql := `SELECT instrument.id,
+				   instrument.active,
 				   instrument.slug,
 				   instrument.NAME,
 				   instrument.INSTRUMENT_TYPE_ID,
@@ -63,10 +57,12 @@ func ListInstruments(db *sqlx.DB) []Instrument {
 				   instrument.creator,
 				   instrument.create_date,
 				   instrument.updater,
-				   instrument.update_date
-            FROM   instrument
+				   instrument.update_date,
+				   instrument.project_id
+			FROM   instrument
 	               INNER JOIN instrument_type
-	               		   ON instrument_type.id = instrument.instrument_type_id
+							  ON instrument_type.id = instrument.instrument_type_id
+		   WHERE NOT instrument.deleted
 			`
 
 	rows, err := db.Query(sql)
@@ -81,8 +77,8 @@ func ListInstruments(db *sqlx.DB) []Instrument {
 		var p orb.Point
 		var i Instrument
 		err := rows.Scan(
-			&i.ID, &i.Slug, &i.Name, &i.TypeID, &i.Type, &i.Height, wkb.Scanner(&p),
-			&i.Creator, &i.CreateDate, &i.Updater, &i.UpdateDate,
+			&i.ID, &i.Active, &i.Slug, &i.Name, &i.TypeID, &i.Type, &i.Height, wkb.Scanner(&p),
+			&i.Creator, &i.CreateDate, &i.Updater, &i.UpdateDate, &i.ProjectID,
 		)
 		i.Geometry = *geojson.NewGeometry(p)
 
@@ -96,8 +92,9 @@ func ListInstruments(db *sqlx.DB) []Instrument {
 }
 
 // GetInstrument returns a single instrument
-func GetInstrument(db *sqlx.DB, id uuid.UUID) Instrument {
+func GetInstrument(db *sqlx.DB, id uuid.UUID) (*Instrument, error) {
 	sql := `SELECT instrument.id,
+	               instrument.active,
 	               instrument.slug,
 	        	   instrument.NAME,
 				   instrument.INSTRUMENT_TYPE_ID,
@@ -107,7 +104,8 @@ func GetInstrument(db *sqlx.DB, id uuid.UUID) Instrument {
 				   instrument.creator,
 				   instrument.create_date,
 				   instrument.updater,
-				   instrument.update_date
+				   instrument.update_date,
+				   instrument.project_id
             FROM   instrument
 	               INNER JOIN instrument_type
 							  ON instrument_type.id = instrument.instrument_type_id
@@ -116,15 +114,15 @@ func GetInstrument(db *sqlx.DB, id uuid.UUID) Instrument {
 
 	var i Instrument
 	var p orb.Point
-	err := db.QueryRow(sql, id).Scan(&i.ID, &i.Slug, &i.Name, &i.TypeID, &i.Type, &i.Height, wkb.Scanner(&p),
-		&i.Creator, &i.CreateDate, &i.Updater, &i.UpdateDate,
+	err := db.QueryRow(sql, id).Scan(&i.ID, &i.Active, &i.Slug, &i.Name, &i.TypeID, &i.Type, &i.Height, wkb.Scanner(&p),
+		&i.Creator, &i.CreateDate, &i.Updater, &i.UpdateDate, &i.ProjectID,
 	)
 	if err != nil {
-		log.Printf("Fail to query and scan row with ID %s; %s", id, err)
+		return nil, err
 	}
 	i.Geometry = *geojson.NewGeometry(p)
 
-	return i
+	return &i, nil
 }
 
 // CreateInstrumentBulk creates many instruments from an array of instruments
@@ -137,8 +135,8 @@ func CreateInstrumentBulk(db *sqlx.DB, instruments []Instrument) error {
 
 	stmt, err := txn.Prepare(pq.CopyIn(
 		"instrument",
-		"id", "slug", "name", "height", "instrument_type_id",
-		"geometry", "creator", "create_date", "updater", "update_date",
+		"id", "active", "slug", "name", "height", "instrument_type_id",
+		"geometry", "creator", "create_date", "updater", "update_date", "project_id",
 	))
 
 	if err != nil {
@@ -148,8 +146,8 @@ func CreateInstrumentBulk(db *sqlx.DB, instruments []Instrument) error {
 	for _, i := range instruments {
 
 		_, err = stmt.Exec(
-			i.ID, i.Slug, i.Name, i.Height, i.TypeID,
-			wkt.MarshalString(i.Geometry.Geometry()), i.Creator, i.CreateDate, i.Updater, i.UpdateDate,
+			i.ID, i.Active, i.Slug, i.Name, i.Height, i.TypeID,
+			wkt.MarshalString(i.Geometry.Geometry()), i.Creator, i.CreateDate, i.Updater, i.UpdateDate, i.ProjectID,
 		)
 
 		if err != nil {
@@ -175,40 +173,34 @@ func CreateInstrumentBulk(db *sqlx.DB, instruments []Instrument) error {
 	return nil
 }
 
-// CreateInstrument creates a single instrument
-func CreateInstrument(db *sqlx.DB, i *Instrument) error {
-
-	if _, err := db.Exec(
-		`INSERT INTO instrument (id, slug, name, height, instrument_type_id, geometry, creator, create_date, updater, update_date)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
-		i.ID, i.Slug, i.Name, i.Height, i.TypeID, wkb.Value(i.Geometry.Geometry()),
-		i.Creator, i.CreateDate, i.Updater, i.UpdateDate,
-	); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 // UpdateInstrument updates a single instrument
-func UpdateInstrument(db *sqlx.DB, i *Instrument) error {
+func UpdateInstrument(db *sqlx.DB, i *Instrument) (*Instrument, error) {
 
-	if _, err := db.Exec(
+	var iUpdated Instrument
+	if err := db.QueryRowx(
 		`UPDATE instrument
-		SET name = $1, height = $2, instrument_type_id = $3, geometry = ST_GeomFromWKB($4), creator = $5, create_date = $6, updater = $7, update_date = $8
-		WHERE id = $9`,
-		i.Name, i.Height, i.TypeID, wkb.Value(i.Geometry.Geometry()), i.Creator, i.CreateDate, i.Updater, i.UpdateDate, i.ID,
-	); err != nil {
-		return err
+		 SET    name = $2,
+			    active = $3,
+			    height = $4,
+			    instrument_type_id = $5,
+			    geometry = ST_GeomFromWKB($6),
+			    updater = $7,
+				update_date = $8,
+				project_id = $9
+		 WHERE id = $1
+		 RETURNING *
+		`, i.ID, i.Name, i.Active, i.Height, i.TypeID, wkb.Value(i.Geometry.Geometry()), i.Updater, i.UpdateDate, i.ProjectID,
+	).StructScan(&iUpdated); err != nil {
+		return nil, err
 	}
 
-	return nil
+	return &iUpdated, nil
 }
 
-// DeleteInstrument deletes a single instrument
-func DeleteInstrument(db *sqlx.DB, id uuid.UUID) error {
+// DeleteFlagInstrument changes delete flag to true
+func DeleteFlagInstrument(db *sqlx.DB, id uuid.UUID) error {
 
-	if _, err := db.Exec(`DELETE FROM instrument WHERE id = $1`, id); err != nil {
+	if _, err := db.Exec(`UPDATE instrument SET deleted = true WHERE id = $1`, id); err != nil {
 		return err
 	}
 

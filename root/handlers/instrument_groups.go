@@ -13,7 +13,11 @@ import (
 // ListInstrumentGroups returns instrument groups
 func ListInstrumentGroups(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return c.JSON(http.StatusOK, models.ListInstrumentGroups(db))
+		groups, err := models.ListInstrumentGroups(db)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+		return c.JSON(http.StatusOK, groups)
 	}
 }
 
@@ -24,34 +28,11 @@ func GetInstrumentGroup(db *sqlx.DB) echo.HandlerFunc {
 		if err != nil {
 			return c.String(http.StatusBadRequest, "Malformed ID")
 		}
-		return c.JSON(http.StatusOK, models.GetInstrumentGroup(db, id))
-	}
-}
-
-// CreateInstrumentGroup creates a single instrument group
-func CreateInstrumentGroup(db *sqlx.DB) echo.HandlerFunc {
-	return func(c echo.Context) error {
-
-		g := &models.InstrumentGroup{}
-		if err := c.Bind(g); err != nil {
-			return c.JSON(http.StatusBadRequest, err)
-		}
-
-		// Ensure a new UUID
-		g.ID = uuid.Must(uuid.NewRandom())
-		// Assign Slug
-		s, err := dbutils.NextUniqueSlug(g.Name, models.ListInstrumentGroupSlugs(db))
+		g, err := models.GetInstrumentGroup(db, id)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return c.JSON(http.StatusInternalServerError, err)
 		}
-		g.Slug = s
-
-		err = models.CreateInstrumentGroup(db, g)
-		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
-		}
-		// Send back group
-		return c.JSON(http.StatusCreated, g)
+		return c.JSON(http.StatusOK, g)
 	}
 }
 
@@ -65,20 +46,23 @@ func CreateInstrumentGroupBulk(db *sqlx.DB) echo.HandlerFunc {
 		}
 
 		// slugs already taken in the database
-		slugs := models.ListInstrumentGroupSlugs(db)
+		slugsTaken, err := models.ListInstrumentGroupSlugs(db)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
 
 		for idx := range groups {
 			// Assign UUID
 			groups[idx].ID = uuid.Must(uuid.NewRandom())
 			// Assign Slug
-			s, err := dbutils.NextUniqueSlug(groups[idx].Name, slugs)
+			s, err := dbutils.NextUniqueSlug(groups[idx].Name, slugsTaken)
 			if err != nil {
 				return c.JSON(http.StatusBadRequest, err)
 			}
 			groups[idx].Slug = s
 			// Add slug to array of slugs originally fetched from the database
 			// to catch duplicate names/slugs from the same bulk upload
-			slugs = append(slugs, s)
+			slugsTaken = append(slugsTaken, s)
 		}
 
 		if err := models.CreateInstrumentGroupBulk(db, groups); err != nil {
@@ -89,14 +73,14 @@ func CreateInstrumentGroupBulk(db *sqlx.DB) echo.HandlerFunc {
 	}
 }
 
-// DeleteInstrumentGroup deletes an instrument group and any instrument_group_instruments associations
-func DeleteInstrumentGroup(db *sqlx.DB) echo.HandlerFunc {
+// DeleteFlagInstrumentGroup sets the instrument group deleted flag true
+func DeleteFlagInstrumentGroup(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id, err := uuid.Parse(c.Param("id"))
 		if err != nil {
 			return c.JSON(http.StatusNotFound, err)
 		}
-		if err = models.DeleteInstrumentGroup(db, id); err != nil {
+		if err := models.DeleteFlagInstrumentGroup(db, id); err != nil {
 			return c.JSON(http.StatusInternalServerError, err)
 		}
 		return c.NoContent(http.StatusOK)

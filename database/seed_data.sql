@@ -1,3 +1,6 @@
+-- Project
+INSERT INTO project (id, slug, name) VALUES
+    ('88d63e1f-c491-4a8f-ba09-d9402ab1bdf3', 'herbert-hoover-dike', 'Herbert Hoover Dike');
 
 -- Instrument Type
 INSERT INTO instrument_type (id, name) VALUES
@@ -58,7 +61,6 @@ INSERT INTO instrument (id, slug, name, height, geometry, instrument_type_id) VA
     ('ba42dd69-bbe0-411d-9a20-12fa5ec0ebf3', 'pz-r3-d-c1', 'PZ-R3-D-C1', 14.07,ST_GeomFromText('POINT(-80.79336 26.69843)',4326),'{1bb4bf7c-f5f8-44eb-9805-43b07ffadbef}'),
     ('3629cbf6-1256-49ed-aebe-df2f661872a7', 'pz-r3-d-c2', 'PZ-R3-D-C2', 14.10,ST_GeomFromText('POINT(-80.79338 26.69843)',4326),'{1bb4bf7c-f5f8-44eb-9805-43b07ffadbef}'),
     ('9048e7c1-eba2-4888-9048-db63e71e85ef', 'r3-1-tw', 'R3-1-TW', 1.40,ST_GeomFromText('POINT(-80.79336 26.69835)',4326),'{0fd1f9ba-2731-4ff9-96dd-3c03215ab06f}');
-
 
 -- Instrument Group Instruments
 INSERT INTO instrument_group_instruments (instrument_id, instrument_group_id) VALUES
