@@ -546,6 +546,54 @@
 					"response": []
 				},
 				{
+					"name": "ListInstrumentGroupInstruments",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "ebbed786-afa0-446d-bbeb-6d282bff656e",
+								"exec": [
+									"// validate JSON schema",
+									"var schema = {",
+									"    \"type\": \"array\",",
+									"    \"items\": JSON.parse(pm.globals.get('INSTRUMENTGROUP_OBJ_SCHEMA'))",
+									"}",
+									"",
+									"pm.globals.set(\"INSTRUMENTGROUP_ARRAY_SCHEMA\", JSON.stringify(schema));",
+									"",
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// schema validation",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(schema)",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/instrumentation/instrument_groups/460c0de9-bd88-4141-a7ca-d7d69b0627a5/instruments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"instrument_groups",
+								"460c0de9-bd88-4141-a7ca-d7d69b0627a5",
+								"instruments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Add Instrument to InstrumentGroup",
 					"event": [
 						{
