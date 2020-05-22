@@ -61,14 +61,15 @@ func main() {
 	e.PUT("instrumentation/projects/:id", handlers.UpdateProject(db))
 	e.DELETE("instrumentation/projects/:id", handlers.DeleteFlagProject(db))
 	// Projects - Project Instruments
-	// ADD ROUTES FOR PROJECT INSTRUMENTS HERE
+	e.GET("instrumentation/projects/:id/instruments", handlers.ListProjectInstruments(db))
 	// Projects - Project Instrument Groups
-	// ADD ROUTES FOR PROJECT INSTRUMENT GROUPS HERE
+	e.GET("instrumentation/projects/:id/instrument_groups", handlers.ListProjectInstrumentGroups(db))
 
 	// Instrument Groups
 	e.GET("instrumentation/instrument_groups", handlers.ListInstrumentGroups(db))
 	e.POST("instrumentation/instrument_groups", handlers.CreateInstrumentGroupBulk(db))
 	e.GET("instrumentation/instrument_groups/:id", handlers.GetInstrumentGroup(db))
+	e.PUT("instrumentation/instrument_groups/:id", handlers.UpdateInstrumentGroup(db))
 	e.DELETE("instrumentation/instrument_groups/:id", handlers.DeleteFlagInstrumentGroup(db))
 	// Instrument Group Instruments
 	e.GET("instrumentation/instrument_groups/:id/instruments", handlers.ListInstrumentGroupInstruments(db))

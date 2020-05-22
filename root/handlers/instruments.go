@@ -13,7 +13,11 @@ import (
 // ListInstruments returns instruments
 func ListInstruments(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return c.JSON(http.StatusOK, models.ListInstruments(db))
+		nn, err := models.ListInstruments(db)
+		if err != nil {
+			return c.NoContent(http.StatusBadRequest)
+		}
+		return c.JSON(http.StatusOK, nn)
 	}
 }
 
@@ -37,8 +41,8 @@ func GetInstrument(db *sqlx.DB) echo.HandlerFunc {
 func CreateInstrumentBulk(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 
-		instruments := []models.Instrument{}
-		if err := c.Bind(&instruments); err != nil {
+		ic := models.InstrumentCollection{}
+		if err := c.Bind(&ic); err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 
@@ -48,29 +52,29 @@ func CreateInstrumentBulk(db *sqlx.DB) echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 
-		for idx := range instruments {
+		for idx := range ic.Items {
 			// Assign UUID
-			instruments[idx].ID = uuid.Must(uuid.NewRandom())
+			ic.Items[idx].ID = uuid.Must(uuid.NewRandom())
 			// Assign Slug
-			s, err := dbutils.NextUniqueSlug(instruments[idx].Name, slugsTaken)
+			s, err := dbutils.NextUniqueSlug(ic.Items[idx].Name, slugsTaken)
 			if err != nil {
 				return c.JSON(http.StatusBadRequest, err)
 			}
-			instruments[idx].Slug = s
+			ic.Items[idx].Slug = s
 			// Add slug to array of slugs originally fetched from the database
 			// to catch duplicate names/slugs from the same bulk upload
 			slugsTaken = append(slugsTaken, s)
 		}
 
-		if err := models.CreateInstrumentBulk(db, instruments); err != nil {
+		if err := models.CreateInstrumentBulk(db, ic.Items); err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 		// Send instrument
-		return c.JSON(http.StatusCreated, instruments)
+		return c.JSON(http.StatusCreated, ic.Items)
 	}
 }
 
-// UpdateInstrument modifys an existing instrument
+// UpdateInstrument modifies an existing instrument
 func UpdateInstrument(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 

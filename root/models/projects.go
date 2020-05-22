@@ -1,7 +1,7 @@
 package models
 
 import (
-	"log"
+	"encoding/json"
 	"time"
 
 	"github.com/google/uuid"
@@ -22,6 +22,31 @@ type Project struct {
 	UpdateDate time.Time `json:"update_date" db:"update_date"`
 }
 
+// ProjectCollection helps unpack unspecified JSON into an array of products
+type ProjectCollection struct {
+	Projects []Project
+}
+
+// UnmarshalJSON implements UnmarshalJSON interface
+func (c *ProjectCollection) UnmarshalJSON(b []byte) error {
+
+	switch JSONType(b) {
+	case "ARRAY":
+		if err := json.Unmarshal(b, &c.Projects); err != nil {
+			return err
+		}
+	case "OBJECT":
+		var p Project
+		if err := json.Unmarshal(b, &p); err != nil {
+			return err
+		}
+		c.Projects = []Project{p}
+	default:
+		c.Projects = make([]Project, 0)
+	}
+	return nil
+}
+
 // ListProjectSlugs returns a list of used slugs for projects
 func ListProjectSlugs(db *sqlx.DB) ([]string, error) {
 	ss := make([]string, 0)
@@ -35,10 +60,35 @@ func ListProjectSlugs(db *sqlx.DB) ([]string, error) {
 func ListProjects(db *sqlx.DB) ([]Project, error) {
 	pp := make([]Project, 0)
 	if err := db.Select(&pp, "SELECT * FROM project WHERE NOT deleted"); err != nil {
-		log.Printf(err.Error())
 		return make([]Project, 0), err
 	}
 	return pp, nil
+}
+
+// ListProjectInstruments returns a slice of instruments for a project
+func ListProjectInstruments(db *sqlx.DB, id uuid.UUID) ([]Instrument, error) {
+
+	rows, err := db.Queryx(
+		listInstrumentsSQL()+" WHERE NOT instrument.deleted AND project_id = $1",
+		id,
+	)
+	if err != nil {
+		return make([]Instrument, 0), err
+	}
+	return InstrumentsFactory(rows)
+}
+
+// ListProjectInstrumentGroups returns a list of instrument groups for a project
+func ListProjectInstrumentGroups(db *sqlx.DB, id uuid.UUID) ([]InstrumentGroup, error) {
+	gg := make([]InstrumentGroup, 0)
+	if err := db.Select(
+		&gg,
+		listInstrumentGroupsSQL()+"WHERE NOT deleted AND project_id = $1",
+		id,
+	); err != nil {
+		return make([]InstrumentGroup, 0), err
+	}
+	return gg, nil
 }
 
 // GetProject returns a pointer to a project

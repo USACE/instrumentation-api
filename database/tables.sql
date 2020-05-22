@@ -56,6 +56,8 @@ CREATE TABLE IF NOT EXISTS public.instrument (
     name VARCHAR(120) NOT NULL,
     height REAL,
     geometry geometry,
+    station int,
+    station_offset int,
     creator BIGINT NOT NULL DEFAULT 1111111111,
     create_date TIMESTAMPTZ NOT NULL DEFAULT now(),
     updater BIGINT NOT NULL DEFAULT 1111111111,

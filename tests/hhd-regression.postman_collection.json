@@ -6,891 +6,1082 @@
 	},
 	"item": [
 		{
-			"name": "GetDomains",
-			"event": [
+			"name": "Instruments",
+			"item": [
 				{
-					"listen": "test",
-					"script": {
-						"id": "37005e12-f505-44a1-b2b9-05a2d6a6b1ee",
-						"exec": [
-							"// status code is 200",
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});",
-							"",
-							"",
-							"// validate JSON schema",
-							"var schema = {",
-							"    \"type\": \"array\",",
-							"    \"items\": {",
-							"        \"type\": \"object\",",
-							"        \"properties\": {",
-							"            \"id\": { \"type\": \"string\"},",
-							"            \"group\": { \"type\": \"string\"},",
-							"            \"value\": { \"type\": \"string\"},",
-							"        },",
-							"        \"required\": [\"id\",\"group\",\"value\"],",
-							"        \"additionalProperties\": false",
-							"    }",
-							"}",
-							"",
-							"",
-							"pm.test(\"Schema validation\", function () {",
-							"    pm.response.to.have.jsonSchema(schema)",
-							"});",
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{base_url}}/domains",
-					"host": [
-						"{{base_url}}"
-					],
-					"path": [
-						"domains"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "ListInstruments",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"id": "37005e12-f505-44a1-b2b9-05a2d6a6b1ee",
-						"exec": [
-							"// status code is 200",
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});",
-							"",
-							"",
-							"// validate JSON schema",
-							"var schema = {",
-							"    \"type\": \"array\",",
-							"    \"items\": {",
-							"        \"type\": \"object\",",
-							"        \"properties\": {",
-							"            \"id\": { \"type\": \"string\"},",
-							"            \"slug\": { \"type\": \"string\"},",
-							"            \"name\": { \"type\": \"string\"},",
-							"            \"type_id\": { \"type\": \"string\"},",
-							"            \"type\": { \"type\": \"string\"},",
-							"            \"height\": { \"type\": \"number\"},",
-							"            \"geometry\": {",
-							"                \"type\": \"object\",",
-							"                \"properties\": {",
-							"                    \"type\": {",
-							"                        \"type\": \"string\",",
-							"                        \"pattern\": \"Point\"",
-							"                    },",
-							"                    \"coordinates\": {",
-							"                        \"type\": \"array\",",
-							"                        \"minItems\": 2,",
-							"                        \"maxItems\": 2,",
-							"                        \"items\": {\"type\": \"number\"},",
-							"                    }",
-							"                },",
-							"                \"required\": [\"type\",\"coordinates\"]",
-							"            },",
-							"            \"creator\": {\"type\": \"number\"},",
-							"            \"create_date\": {\"type\": \"string\", \"format\": \"date-time\"},",
-							"            \"updater\": {\"type\": \"number\"},",
-							"            \"update_date\": {\"type\": \"string\", \"format\": \"date-time\"},",
-							"            \"active\": {\"type\": \"boolean\"},",
-							"            \"project_id\": {\"type\": [\"string\", \"null\"] }",
-							"        },",
-							"        \"required\": [\"id\",\"slug\",\"name\",\"type_id\",\"type\",\"height\",\"geometry\",\"creator\",\"create_date\",\"updater\",\"update_date\", \"active\", \"project_id\"],",
-							"        \"additionalProperties\": false",
-							"    }",
-							"}",
-							"",
-							"",
-							"pm.test(\"Schema validation\", function () {",
-							"    pm.response.to.have.jsonSchema(schema)",
-							"});",
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{base_url}}/instrumentation/instruments",
-					"host": [
-						"{{base_url}}"
-					],
-					"path": [
-						"instrumentation",
-						"instruments"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "GetInstrument",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"id": "0eaa5c25-7e98-415a-b3cf-c9e8f1ff81c0",
-						"exec": [
-							"// status code is 200",
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});",
-							"",
-							"",
-							"// validate JSON schema",
-							"var schema = {",
-							"    \"type\": \"object\",",
-							"    \"properties\": {",
-							"        \"id\": { \"type\": \"string\" },",
-							"        \"slug\": { \"type\": \"string\" },",
-							"        \"name\": { \"type\": \"string\" },",
-							"        \"type_id\": { \"type\": \"string\" },",
-							"        \"type\": { \"type\": \"string\" },",
-							"        \"height\": { \"type\": \"number\" },",
-							"        \"geometry\": {",
-							"            \"type\": \"object\",",
-							"            \"properties\": {",
-							"                \"type\": {",
-							"                    \"type\": \"string\",",
-							"                    \"pattern\": \"Point\"",
-							"                },",
-							"                \"coordinates\": {",
-							"                    \"type\": \"array\",",
-							"                    \"minItems\": 2,",
-							"                    \"maxItems\": 2,",
-							"                    \"items\": { \"type\": \"number\" },",
-							"                }",
-							"            },",
-							"            \"required\": [\"type\", \"coordinates\"]",
-							"        },",
-							"        \"creator\": { \"type\": \"number\" },",
-							"        \"create_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
-							"        \"updater\": { \"type\": \"number\" },",
-							"        \"update_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
-							"        \"active\": {\"type\": \"boolean\"},",
-							"        \"project_id\": {\"type\": [\"string\", \"null\"] }",
-							"    },",
-							"    \"required\": [\"id\", \"slug\", \"name\", \"type_id\", \"type\", \"height\", \"geometry\", \"creator\", \"create_date\", \"updater\", \"update_date\", \"active\", \"project_id\"],",
-							"    \"additionalProperties\": false",
-							"}",
-							"",
-							"",
-							"pm.test(\"Schema validation\", function () {",
-							"    pm.response.to.have.jsonSchema(schema)",
-							"});",
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"name\": \"Test Instrument 1\",\n    \"type_id\": \"0fd1f9ba-2731-4ff9-96dd-3c03215ab06f\",\n    \"height\": 35.0,\n    \"geometry\": {\"type\":\"Point\",\"coordinates\": [125.6, 10.1]},\n    \"creator\": 1111111111,\n    \"create_date\": \"2020-04-16T15:41:22.013Z\",\n    \"updater\": 1111111111,\n    \"update_date\": \"2020-04-16T15:41:22.013Z\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
+					"name": "GetInstrument",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "0eaa5c25-7e98-415a-b3cf-c9e8f1ff81c0",
+								"exec": [
+									"// validate JSON schema",
+									"var schema = {",
+									"    \"type\": \"object\",",
+									"    \"properties\": {",
+									"        \"id\": { \"type\": \"string\" },",
+									"        \"slug\": { \"type\": \"string\" },",
+									"        \"name\": { \"type\": \"string\" },",
+									"        \"type_id\": { \"type\": \"string\" },",
+									"        \"type\": { \"type\": \"string\" },",
+									"        \"height\": { \"type\": \"number\" },",
+									"        \"geometry\": {",
+									"            \"type\": \"object\",",
+									"            \"properties\": {",
+									"                \"type\": {",
+									"                    \"type\": \"string\",",
+									"                    \"pattern\": \"Point\"",
+									"                },",
+									"                \"coordinates\": {",
+									"                    \"type\": \"array\",",
+									"                    \"minItems\": 2,",
+									"                    \"maxItems\": 2,",
+									"                    \"items\": { \"type\": \"number\" },",
+									"                }",
+									"            },",
+									"            \"required\": [\"type\", \"coordinates\"]",
+									"        },",
+									"        \"station\": { \"type\": [\"number\", \"null\"] },",
+									"        \"station_offset\": { \"type\": [\"number\", \"null\"] },",
+									"        \"creator\": { \"type\": \"number\" },",
+									"        \"create_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
+									"        \"updater\": { \"type\": \"number\" },",
+									"        \"update_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
+									"        \"active\": { \"type\": \"boolean\" },",
+									"        \"project_id\": { \"type\": [\"string\", \"null\"] }",
+									"    },",
+									"    \"required\": [\"id\", \"slug\", \"name\", \"type_id\", \"type\", \"height\", \"geometry\", \"creator\", \"create_date\", \"updater\", \"update_date\", \"active\", \"project_id\", ",
+									"    \"station\", \"station_offset\"],",
+									"    \"additionalProperties\": false",
+									"}",
+									"",
+									"pm.globals.set('INSTRUMENT_OBJ_SCHEMA', JSON.stringify(schema));",
+									"",
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// validate schema",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(schema)",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
 						}
-					}
-				},
-				"url": {
-					"raw": "{{base_url}}/instrumentation/instruments/9048e7c1-eba2-4888-9048-db63e71e85ef",
-					"host": [
-						"{{base_url}}"
 					],
-					"path": [
-						"instrumentation",
-						"instruments",
-						"9048e7c1-eba2-4888-9048-db63e71e85ef"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "CreateInstrumentBulk",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"id": "eb17c39e-6651-4bbd-858d-f368b20bc070",
-						"exec": [
-							"// status code is 200",
-							"pm.test(\"Status code is 201\", function () {",
-							"    pm.response.to.have.status(201);",
-							"});",
-							"",
-							"",
-							"// validate JSON schema",
-							"var schema = {",
-							"    \"type\": \"array\",",
-							"    \"items\": {",
-							"        \"type\": \"object\",",
-							"        \"properties\": {",
-							"            \"id\": { \"type\": \"string\" },",
-							"            \"slug\": { \"type\": \"string\" },",
-							"            \"name\": { \"type\": \"string\" },",
-							"            \"type_id\": { \"type\": \"string\" },",
-							"            \"type\": { \"type\": \"string\" },",
-							"            \"height\": { \"type\": \"number\" },",
-							"            \"geometry\": {",
-							"                \"type\": \"object\",",
-							"                \"properties\": {",
-							"                    \"type\": {",
-							"                        \"type\": \"string\",",
-							"                        \"pattern\": \"Point\"",
-							"                    },",
-							"                    \"coordinates\": {",
-							"                        \"type\": \"array\",",
-							"                        \"minItems\": 2,",
-							"                        \"maxItems\": 2,",
-							"                        \"items\": { \"type\": \"number\" },",
-							"                    }",
-							"                },",
-							"                \"required\": [\"type\", \"coordinates\"]",
-							"            },",
-							"            \"creator\": { \"type\": \"number\" },",
-							"            \"create_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
-							"            \"updater\": { \"type\": \"number\" },",
-							"            \"update_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
-							"            \"active\": {\"type\": \"boolean\"},",
-							"            \"project_id\": {\"type\": [\"string\", \"null\"] }",
-							"        },",
-							"        \"required\": [\"id\", \"slug\", \"name\", \"type_id\", \"type\", \"height\", \"geometry\", \"creator\", \"create_date\", \"updater\", \"update_date\", \"active\", \"project_id\"],",
-							"        \"additionalProperties\": false",
-							"    }",
-							"}",
-							"",
-							"",
-							"pm.test(\"Schema validation\", function () {",
-							"    pm.response.to.have.jsonSchema(schema)",
-							"});",
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "[{\n    \"name\": \"Test Instrument 5001\",\n    \"type_id\": \"0fd1f9ba-2731-4ff9-96dd-3c03215ab06f\",\n    \"height\": 35.0,\n    \"geometry\": {\"type\":\"Point\",\"coordinates\": [125.6, 10.1]},\n    \"creator\": 1111111111,\n    \"create_date\": \"2020-04-16T15:41:22.013Z\",\n    \"updater\": 1111111111,\n    \"update_date\": \"2020-04-16T15:41:22.013Z\"\n},\n{\n    \"name\": \"Test Instrument 5002\",\n    \"type_id\": \"0fd1f9ba-2731-4ff9-96dd-3c03215ab06f\",\n    \"height\": 35.0,\n    \"geometry\": {\"type\":\"Point\",\"coordinates\": [125.6, 10.1]},\n    \"creator\": 1111111111,\n    \"create_date\": \"2020-04-16T15:41:22.013Z\",\n    \"updater\": 1111111111,\n    \"update_date\": \"2020-04-16T15:41:22.013Z\"\n},\n{\n    \"name\": \"Test Instrument 5003\",\n    \"type_id\": \"0fd1f9ba-2731-4ff9-96dd-3c03215ab06f\",\n    \"height\": 35.0,\n    \"geometry\": {\"type\":\"Point\",\"coordinates\": [125.6, 10.1]},\n    \"creator\": 1111111111,\n    \"create_date\": \"2020-04-16T15:41:22.013Z\",\n    \"updater\": 1111111111,\n    \"update_date\": \"2020-04-16T15:41:22.013Z\"\n}]",
-					"options": {
-						"raw": {
-							"language": "json"
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test Instrument 1\",\n    \"type_id\": \"0fd1f9ba-2731-4ff9-96dd-3c03215ab06f\",\n    \"height\": 35.0,\n    \"geometry\": {\"type\":\"Point\",\"coordinates\": [125.6, 10.1]},\n    \"creator\": 1111111111,\n    \"create_date\": \"2020-04-16T15:41:22.013Z\",\n    \"updater\": 1111111111,\n    \"update_date\": \"2020-04-16T15:41:22.013Z\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/instrumentation/instruments/9048e7c1-eba2-4888-9048-db63e71e85ef",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"instruments",
+								"9048e7c1-eba2-4888-9048-db63e71e85ef"
+							]
 						}
-					}
+					},
+					"response": []
 				},
-				"url": {
-					"raw": "{{base_url}}/instrumentation/instruments",
-					"host": [
-						"{{base_url}}"
-					],
-					"path": [
-						"instrumentation",
-						"instruments"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "ListInstrumentGroups",
-			"event": [
 				{
-					"listen": "test",
-					"script": {
-						"id": "ae4845bd-e94b-4d48-946a-7994977f4a9d",
-						"exec": [
-							"// status code is 200",
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});",
-							"",
-							"",
-							"// validate JSON schema",
-							"var schema = {",
-							"    \"type\": \"array\",",
-							"    \"items\": {",
-							"        \"type\": \"object\",",
-							"        \"properties\": {",
-							"            \"id\": { \"type\": \"string\" },",
-							"            \"slug\": { \"type\": \"string\" },",
-							"            \"name\": { \"type\": \"string\" },",
-							"            \"description\": { \"type\": \"string\" },",
-							"            \"creator\": { \"type\": \"number\" },",
-							"            \"create_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
-							"            \"updater\": { \"type\": \"number\" },",
-							"            \"update_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
-							"            \"project_id\": {\"type\": [\"string\", \"null\"] }",
-							"",
-							"        },",
-							"        \"required\": [\"id\", \"slug\", \"name\", \"description\", \"creator\", \"create_date\", \"updater\", \"update_date\", \"project_id\"],",
-							"        \"additionalProperties\": false",
-							"    }",
-							"}",
-							"",
-							"",
-							"pm.test(\"Schema validation\", function () {",
-							"    pm.response.to.have.jsonSchema(schema)",
-							"});",
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{base_url}}/instrumentation/instrument_groups",
-					"host": [
-						"{{base_url}}"
-					],
-					"path": [
-						"instrumentation",
-						"instrument_groups"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "GetInstrumentGroup",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"id": "78983d2a-fdcd-471a-a31f-101f5327e591",
-						"exec": [
-							"// status code is 200",
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});",
-							"",
-							"",
-							"// validate JSON schema",
-							"var schema = {",
-							"    \"type\": \"object\",",
-							"    \"properties\": {",
-							"        \"id\": { \"type\": \"string\" },",
-							"        \"slug\": { \"type\": \"string\" },",
-							"        \"name\": { \"type\": \"string\" },",
-							"        \"description\": { \"type\": \"string\" },",
-							"        \"creator\": { \"type\": \"number\" },",
-							"        \"create_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
-							"        \"updater\": { \"type\": \"number\" },",
-							"        \"update_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
-							"        \"project_id\": {\"type\": [\"string\", \"null\"] }",
-							"    },",
-							"    \"required\": [\"id\", \"slug\", \"name\", \"description\", \"creator\", \"create_date\", \"updater\", \"update_date\", \"project_id\"],",
-							"    \"additionalProperties\": false",
-							"}",
-							"",
-							"",
-							"pm.test(\"Schema validation\", function () {",
-							"    pm.response.to.have.jsonSchema(schema)",
-							"});",
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{base_url}}/instrumentation/instrument_groups/0beff703-07a6-4220-aa1d-dec8746bd4ca",
-					"host": [
-						"{{base_url}}"
-					],
-					"path": [
-						"instrumentation",
-						"instrument_groups",
-						"0beff703-07a6-4220-aa1d-dec8746bd4ca"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "CreateInstrumentGroupBulk",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"id": "b6ed3336-57ec-4018-b62d-7bf4eaf9f06f",
-						"exec": [
-							"// status code is 200",
-							"pm.test(\"Status code is 201\", function () {",
-							"    pm.response.to.have.status(201);",
-							"});",
-							"",
-							"",
-							"// validate JSON schema",
-							"var schema = {",
-							"    \"type\": \"array\",",
-							"    \"items\": {",
-							"        \"type\": \"object\",",
-							"        \"properties\": {",
-							"            \"id\": { \"type\": \"string\" },",
-							"            \"slug\": { \"type\": \"string\" },",
-							"            \"name\": { \"type\": \"string\" },",
-							"            \"description\": { \"type\": \"string\" },",
-							"            \"creator\": { \"type\": \"number\" },",
-							"            \"create_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
-							"            \"updater\": { \"type\": \"number\" },",
-							"            \"update_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
-							"            \"project_id\": {\"type\": [\"string\", \"null\"] }",
-							"        },",
-							"        \"required\": [\"id\", \"slug\", \"name\", \"description\", \"creator\", \"create_date\", \"updater\", \"update_date\", \"project_id\"],",
-							"        \"additionalProperties\": false",
-							"    }",
-							"}",
-							"",
-							"",
-							"pm.test(\"Schema validation\", function () {",
-							"    pm.response.to.have.jsonSchema(schema)",
-							"});",
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "[{\n    \"name\": \"Test Instrument Group 5000\",\n    \"type_id\": \"0fd1f9ba-2731-4ff9-96dd-3c03215ab06f\",\n    \"height\": 35.0,\n    \"geometry\": {\"type\":\"Point\",\"coordinates\": [125.6, 10.1]},\n    \"creator\": 1111111111,\n    \"create_date\": \"2020-04-16T15:41:22.013Z\",\n    \"updater\": 1111111111,\n    \"update_date\": \"2020-04-16T15:41:22.013Z\"\n},\n{\n    \"name\": \"Test Instrument Group 5001\",\n    \"type_id\": \"0fd1f9ba-2731-4ff9-96dd-3c03215ab06f\",\n    \"height\": 35.0,\n    \"geometry\": {\"type\":\"Point\",\"coordinates\": [125.6, 10.1]},\n    \"creator\": 1111111111,\n    \"create_date\": \"2020-04-16T15:41:22.013Z\",\n    \"updater\": 1111111111,\n    \"update_date\": \"2020-04-16T15:41:22.013Z\"\n},\n{\n    \"name\": \"Test Instrument Group 5002\",\n    \"type_id\": \"0fd1f9ba-2731-4ff9-96dd-3c03215ab06f\",\n    \"height\": 35.0,\n    \"geometry\": {\"type\":\"Point\",\"coordinates\": [125.6, 10.1]},\n    \"creator\": 1111111111,\n    \"create_date\": \"2020-04-16T15:41:22.013Z\",\n    \"updater\": 1111111111,\n    \"update_date\": \"2020-04-16T15:41:22.013Z\"\n}]",
-					"options": {
-						"raw": {
-							"language": "json"
+					"name": "ListInstruments",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "37005e12-f505-44a1-b2b9-05a2d6a6b1ee",
+								"exec": [
+									"// schema validator",
+									"var schema = {",
+									"    \"type\": \"array\",",
+									"    \"items\": JSON.parse(pm.globals.get('INSTRUMENT_OBJ_SCHEMA'))",
+									"}",
+									"",
+									"pm.globals.set('INSTRUMENT_ARRAY_SCHEMA', JSON.stringify(schema));",
+									"",
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// schema validation",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(schema)",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
 						}
-					}
-				},
-				"url": {
-					"raw": "{{base_url}}/instrumentation/instrument_groups",
-					"host": [
-						"{{base_url}}"
 					],
-					"path": [
-						"instrumentation",
-						"instrument_groups"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Remove Instrument from InstrumentGroup",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"id": "37005e12-f505-44a1-b2b9-05a2d6a6b1ee",
-						"exec": [
-							"// status code is 200",
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "DELETE",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "",
-					"options": {
-						"raw": {
-							"language": "json"
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/instrumentation/instruments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"instruments"
+							]
 						}
-					}
+					},
+					"response": []
 				},
-				"url": {
-					"raw": "{{base_url}}/instrumentation/instrument_groups/0beff703-07a6-4220-aa1d-dec8746bd4ca/instruments",
-					"host": [
-						"{{base_url}}"
-					],
-					"path": [
-						"instrumentation",
-						"instrument_groups",
-						"0beff703-07a6-4220-aa1d-dec8746bd4ca",
-						"instruments"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Add Instrument to InstrumentGroup",
-			"event": [
 				{
-					"listen": "test",
-					"script": {
-						"id": "37005e12-f505-44a1-b2b9-05a2d6a6b1ee",
-						"exec": [
-							"// status code is 200",
-							"pm.test(\"Status code is 201\", function () {",
-							"    pm.response.to.have.status(201);",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\"id\": \"9a30d375-0800-4297-891e-699fa8878899\"}",
-					"options": {
-						"raw": {
-							"language": "json"
+					"name": "CreateInstrumentBulk_Array",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "eb17c39e-6651-4bbd-858d-f368b20bc070",
+								"exec": [
+									"// status code is 200",
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"// validate JSON schema",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(",
+									"        JSON.parse(pm.globals.get('INSTRUMENT_ARRAY_SCHEMA')))",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
 						}
-					}
-				},
-				"url": {
-					"raw": "{{base_url}}/instrumentation/instrument_groups/0beff703-07a6-4220-aa1d-dec8746bd4ca/instruments",
-					"host": [
-						"{{base_url}}"
 					],
-					"path": [
-						"instrumentation",
-						"instrument_groups",
-						"0beff703-07a6-4220-aa1d-dec8746bd4ca",
-						"instruments"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "ListProjects",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"id": "3419fa60-a5d8-4b2c-86f1-23862fb912cb",
-						"exec": [
-							"// status code is 200",
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});",
-							"",
-							"",
-							"// validate JSON schema",
-							"var schema = {",
-							"    \"type\": \"array\",",
-							"    \"items\": {",
-							"        \"type\": \"object\",",
-							"        \"properties\": {",
-							"            \"id\": { \"type\": \"string\" },",
-							"            \"federal_id\": { \"type\": [\"string\", \"null\"]},",
-							"            \"slug\": { \"type\": \"string\" },",
-							"            \"name\": { \"type\": \"string\" },",
-							"            \"creator\": { \"type\": \"number\" },",
-							"            \"create_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
-							"            \"updater\": { \"type\": \"number\" },",
-							"            \"update_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
-							"        },",
-							"        \"required\": [\"id\", \"federal_id\", \"slug\", \"name\", \"creator\", \"create_date\", \"updater\", \"update_date\"],",
-							"        \"additionalProperties\": false",
-							"    }",
-							"}",
-							"",
-							"",
-							"pm.test(\"Schema validation\", function () {",
-							"    pm.response.to.have.jsonSchema(schema)",
-							"});",
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{base_url}}/instrumentation/projects",
-					"host": [
-						"{{base_url}}"
-					],
-					"path": [
-						"instrumentation",
-						"projects"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "GetProject",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"id": "0ad942ad-08e3-4f79-a19c-903f904bf751",
-						"exec": [
-							"// status code is 200",
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});",
-							"",
-							"",
-							"// validate JSON schema",
-							"var schema = {",
-							"    \"type\": \"object\",",
-							"    \"properties\": {",
-							"            \"id\": { \"type\": \"string\" },",
-							"            \"federal_id\": { \"type\": [\"string\", \"null\"]},",
-							"            \"slug\": { \"type\": \"string\" },",
-							"            \"name\": { \"type\": \"string\" },",
-							"            \"creator\": { \"type\": \"number\" },",
-							"            \"create_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
-							"            \"updater\": { \"type\": \"number\" },",
-							"            \"update_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
-							"        },",
-							"    \"required\": [\"id\", \"federal_id\", \"slug\", \"name\", \"creator\", \"create_date\", \"updater\", \"update_date\"],",
-							"    \"additionalProperties\": false",
-							"}",
-							"",
-							"",
-							"pm.test(\"Schema validation\", function () {",
-							"    pm.response.to.have.jsonSchema(schema)",
-							"});",
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{base_url}}/instrumentation/projects/88d63e1f-c491-4a8f-ba09-d9402ab1bdf3",
-					"host": [
-						"{{base_url}}"
-					],
-					"path": [
-						"instrumentation",
-						"projects",
-						"88d63e1f-c491-4a8f-ba09-d9402ab1bdf3"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "CreateProjectBulk",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"id": "e6b3c52d-4596-4720-a3be-b437e65ef47d",
-						"exec": [
-							"// status code is 200",
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});",
-							"",
-							"",
-							"// validate JSON schema",
-							"var schema = {",
-							"    \"type\": \"object\",",
-							"    \"properties\": {",
-							"            \"id\": { \"type\": \"string\" },",
-							"            \"federal_id\": { \"type\": [\"string\", \"null\"]},",
-							"            \"slug\": { \"type\": \"string\" },",
-							"            \"name\": { \"type\": \"string\" },",
-							"            \"creator\": { \"type\": \"number\" },",
-							"            \"create_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
-							"            \"updater\": { \"type\": \"number\" },",
-							"            \"update_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
-							"        },",
-							"        \"required\": [\"id\", \"federal_id\", \"slug\", \"name\", \"creator\", \"create_date\", \"updater\", \"update_date\"],",
-							"        \"additionalProperties\": false",
-							"    }",
-							"}",
-							"",
-							"",
-							"pm.test(\"Schema validation\", function () {",
-							"    pm.response.to.have.jsonSchema(schema)",
-							"});",
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "[{\n    \"name\": \"Test Project 7\",\n    \"federal_id\": null,\n    \"creator\": 1111111111,\n    \"create_date\": \"2020-04-16T15:41:22.013Z\",\n    \"updater\": 1111111111,\n    \"update_date\": \"2020-04-16T15:41:22.013Z\"\n},\n{\n    \"name\": \"Test Project 8\",\n    \"federal_id\": null,\n    \"creator\": 1111111111,\n    \"create_date\": \"2020-04-16T15:41:22.013Z\",\n    \"updater\": 1111111111,\n    \"update_date\": \"2020-04-16T15:41:22.013Z\"\n},\n{\n    \"name\": \"Test Project 9\",\n    \"federal_id\": null,\n    \"creator\": 1111111111,\n    \"create_date\": \"2020-04-16T15:41:22.013Z\",\n    \"updater\": 1111111111,\n    \"update_date\": \"2020-04-16T15:41:22.013Z\"\n}\n]",
-					"options": {
-						"raw": {
-							"language": "json"
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[{\n    \"name\": \"Test Instrument 100\",\n    \"type_id\": \"0fd1f9ba-2731-4ff9-96dd-3c03215ab06f\",\n    \"height\": 35.0,\n    \"geometry\": {\"type\":\"Point\",\"coordinates\": [125.6, 10.1]},\n    \"creator\": 1111111111,\n    \"create_date\": \"2020-04-16T15:41:22.013Z\",\n    \"updater\": 1111111111,\n    \"update_date\": \"2020-04-16T15:41:22.013Z\"\n},\n{\n    \"name\": \"Test Instrument 101\",\n    \"type_id\": \"0fd1f9ba-2731-4ff9-96dd-3c03215ab06f\",\n    \"height\": 35.0,\n    \"geometry\": {\"type\":\"Point\",\"coordinates\": [125.6, 10.1]},\n    \"creator\": 1111111111,\n    \"create_date\": \"2020-04-16T15:41:22.013Z\",\n    \"updater\": 1111111111,\n    \"update_date\": \"2020-04-16T15:41:22.013Z\"\n},\n{\n    \"name\": \"Test Instrument 102\",\n    \"type_id\": \"0fd1f9ba-2731-4ff9-96dd-3c03215ab06f\",\n    \"height\": 35.0,\n    \"geometry\": {\"type\":\"Point\",\"coordinates\": [125.6, 10.1]},\n    \"creator\": 1111111111,\n    \"create_date\": \"2020-04-16T15:41:22.013Z\",\n    \"updater\": 1111111111,\n    \"update_date\": \"2020-04-16T15:41:22.013Z\"\n}]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/instrumentation/instruments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"instruments"
+							]
 						}
-					}
+					},
+					"response": []
 				},
-				"url": {
-					"raw": "{{base_url}}/instrumentation/projects",
-					"host": [
-						"{{base_url}}"
-					],
-					"path": [
-						"instrumentation",
-						"projects"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "UpdateProject",
-			"event": [
 				{
-					"listen": "test",
-					"script": {
-						"id": "eac2d8ce-d941-43c4-ba6e-8839065fd208",
-						"exec": [
-							"// status code is 200",
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});",
-							"",
-							"",
-							"// validate JSON schema",
-							"var schema = {",
-							"    \"type\": \"object\",",
-							"    \"properties\": {",
-							"        \"id\": { \"type\": \"string\" },",
-							"        \"federal_id\": { \"type\": [\"string\", \"null\"] },",
-							"        \"slug\": { \"type\": \"string\" },",
-							"        \"name\": { \"type\": \"string\" },",
-							"        \"creator\": { \"type\": \"number\" },",
-							"        \"create_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
-							"        \"updater\": { \"type\": \"number\" },",
-							"        \"update_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
-							"    },",
-							"    \"required\": [\"id\", \"federal_id\", \"slug\", \"name\", \"creator\", \"create_date\", \"updater\", \"update_date\"],",
-							"    \"additionalProperties\": false",
-							"}",
-							"",
-							"",
-							"pm.test(\"Schema validation\", function () {",
-							"    pm.response.to.have.jsonSchema(schema)",
-							"});",
-							""
-						],
-						"type": "text/javascript"
-					}
+					"name": "CreateInstrumentBulk_Object",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "eb8cede3-91d8-44bf-9fd1-25e065fecfbc",
+								"exec": [
+									"// status code is 200",
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"// validate JSON schema",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(",
+									"        JSON.parse(pm.globals.get('INSTRUMENT_ARRAY_SCHEMA')))",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test Instrument 5000\",\n    \"type_id\": \"0fd1f9ba-2731-4ff9-96dd-3c03215ab06f\",\n    \"height\": 35.0,\n    \"geometry\": {\"type\":\"Point\",\"coordinates\": [125.6, 10.1]},\n    \"creator\": 1111111111,\n    \"create_date\": \"2020-04-16T15:41:22.013Z\",\n    \"updater\": 1111111111,\n    \"update_date\": \"2020-04-16T15:41:22.013Z\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/instrumentation/instruments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"instruments"
+							]
+						}
+					},
+					"response": []
 				}
 			],
-			"request": {
-				"method": "PUT",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"id\": \"88d63e1f-c491-4a8f-ba09-d9402ab1bdf3\",\n    \"federal_id\": null,\n    \"slug\": \"herbert-hoover-dike\",\n    \"name\": \"Herbert Hoover Dike Test Update Name\",\n    \"creator\": 1111111111,\n    \"create_date\": \"2020-05-20T15:26:37.248682Z\",\n    \"updater\": 1111111111,\n    \"update_date\": \"2020-05-20T15:26:37.248682Z\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{base_url}}/instrumentation/projects/88d63e1f-c491-4a8f-ba09-d9402ab1bdf3",
-					"host": [
-						"{{base_url}}"
-					],
-					"path": [
-						"instrumentation",
-						"projects",
-						"88d63e1f-c491-4a8f-ba09-d9402ab1bdf3"
-					]
-				}
-			},
-			"response": []
+			"protocolProfileBehavior": {}
 		},
 		{
-			"name": "DeleteProject",
-			"event": [
+			"name": "Instrument Groups",
+			"item": [
 				{
-					"listen": "test",
-					"script": {
-						"id": "5de0f429-e740-4805-aee4-e302c33cfa49",
-						"exec": [
-							"// status code is 200",
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});"
-						],
-						"type": "text/javascript"
-					}
+					"name": "GetInstrumentGroup",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "78983d2a-fdcd-471a-a31f-101f5327e591",
+								"exec": [
+									"// validate JSON schema",
+									"var schema = {",
+									"    \"type\": \"object\",",
+									"    \"properties\": {",
+									"        \"id\": { \"type\": \"string\" },",
+									"        \"slug\": { \"type\": \"string\" },",
+									"        \"name\": { \"type\": \"string\" },",
+									"        \"description\": { \"type\": \"string\" },",
+									"        \"creator\": { \"type\": \"number\" },",
+									"        \"create_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
+									"        \"updater\": { \"type\": \"number\" },",
+									"        \"update_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
+									"        \"project_id\": { \"type\": [\"string\", \"null\"] }",
+									"    },",
+									"    \"required\": [\"id\", \"slug\", \"name\", \"description\", \"creator\", \"create_date\", \"updater\", \"update_date\", \"project_id\"],",
+									"    \"additionalProperties\": false",
+									"}",
+									"",
+									"pm.globals.set('INSTRUMENTGROUP_OBJ_SCHEMA', JSON.stringify(schema))",
+									"",
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// schema validation",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(schema)",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/instrumentation/instrument_groups/0beff703-07a6-4220-aa1d-dec8746bd4ca",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"instrument_groups",
+								"0beff703-07a6-4220-aa1d-dec8746bd4ca"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ListInstrumentGroups",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "ae4845bd-e94b-4d48-946a-7994977f4a9d",
+								"exec": [
+									"// validate JSON schema",
+									"var schema = {",
+									"    \"type\": \"array\",",
+									"    \"items\": JSON.parse(pm.globals.get('INSTRUMENTGROUP_OBJ_SCHEMA'))",
+									"}",
+									"",
+									"pm.globals.set(\"INSTRUMENTGROUP_ARRAY_SCHEMA\", JSON.stringify(schema));",
+									"",
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// schema validation",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(schema)",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/instrumentation/instrument_groups",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"instrument_groups"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CreateInstrumentGroupBulk_Array",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "b6ed3336-57ec-4018-b62d-7bf4eaf9f06f",
+								"exec": [
+									"// status code is 200",
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"// schema validation",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(",
+									"        JSON.parse(pm.globals.get('INSTRUMENTGROUP_ARRAY_SCHEMA'))",
+									"    )",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[{\n    \"name\": \"Test Instrument Group 100\",\n    \"type_id\": \"0fd1f9ba-2731-4ff9-96dd-3c03215ab06f\",\n    \"height\": 35.0,\n    \"geometry\": {\"type\":\"Point\",\"coordinates\": [125.6, 10.1]},\n    \"creator\": 1111111111,\n    \"create_date\": \"2020-04-16T15:41:22.013Z\",\n    \"updater\": 1111111111,\n    \"update_date\": \"2020-04-16T15:41:22.013Z\"\n},\n{\n    \"name\": \"Test Instrument Group 101\",\n    \"type_id\": \"0fd1f9ba-2731-4ff9-96dd-3c03215ab06f\",\n    \"height\": 35.0,\n    \"geometry\": {\"type\":\"Point\",\"coordinates\": [125.6, 10.1]},\n    \"creator\": 1111111111,\n    \"create_date\": \"2020-04-16T15:41:22.013Z\",\n    \"updater\": 1111111111,\n    \"update_date\": \"2020-04-16T15:41:22.013Z\"\n},\n{\n    \"name\": \"Test Instrument Group 102\",\n    \"type_id\": \"0fd1f9ba-2731-4ff9-96dd-3c03215ab06f\",\n    \"height\": 35.0,\n    \"geometry\": {\"type\":\"Point\",\"coordinates\": [125.6, 10.1]},\n    \"creator\": 1111111111,\n    \"create_date\": \"2020-04-16T15:41:22.013Z\",\n    \"updater\": 1111111111,\n    \"update_date\": \"2020-04-16T15:41:22.013Z\"\n}]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/instrumentation/instrument_groups",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"instrument_groups"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CreateInstrumentGroupBulk_Object",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "cb8982e9-4b3f-420d-8c74-5c372f60e25a",
+								"exec": [
+									"// status code is 200",
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"// schema validation",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(",
+									"        JSON.parse(pm.globals.get('INSTRUMENTGROUP_ARRAY_SCHEMA'))",
+									"    )",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test Instrument Group 100\",\n    \"type_id\": \"0fd1f9ba-2731-4ff9-96dd-3c03215ab06f\",\n    \"height\": 35.0,\n    \"geometry\": {\"type\":\"Point\",\"coordinates\": [125.6, 10.1]},\n    \"creator\": 1111111111,\n    \"create_date\": \"2020-04-16T15:41:22.013Z\",\n    \"updater\": 1111111111,\n    \"update_date\": \"2020-04-16T15:41:22.013Z\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/instrumentation/instrument_groups",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"instrument_groups"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateInstrumentGroup",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "7105a8ba-1477-4149-9c02-11ef98c3526c",
+								"exec": [
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// schema validation",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(",
+									"        JSON.parse(pm.globals.get('INSTRUMENTGROUP_OBJ_SCHEMA'))",
+									"    )",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"97cadd04-74a5-482c-bdee-f7e7fa217e66\",\n    \"slug\": \"r3-4\",\n    \"name\": \"R3-4\",\n    \"description\": \"Updated Name 3.5 Miles East of Gate at S-354\",\n    \"creator\": 1111111111,\n    \"create_date\": \"2020-05-20T15:26:37.248682Z\",\n    \"updater\": 1111111111,\n    \"update_date\": \"2020-05-20T15:26:37.248682Z\",\n    \"project_id\": null\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/instrumentation/instrument_groups/97cadd04-74a5-482c-bdee-f7e7fa217e66",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"instrument_groups",
+								"97cadd04-74a5-482c-bdee-f7e7fa217e66"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteInstrumentGroup",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "45389e06-935f-4b62-9b51-ba0bd26302d0",
+								"exec": [
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/instrumentation/instrument_groups/1362a4e4-0dc7-4bc2-a279-868787e16012",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"instrument_groups",
+								"1362a4e4-0dc7-4bc2-a279-868787e16012"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Instrument to InstrumentGroup",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "37005e12-f505-44a1-b2b9-05a2d6a6b1ee",
+								"exec": [
+									"// status code is 200",
+									"pm.test(\"Status code is 200 or 201\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201])",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"id\": \"9a30d375-0800-4297-891e-699fa8878899\"}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/instrumentation/instrument_groups/0beff703-07a6-4220-aa1d-dec8746bd4ca/instruments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"instrument_groups",
+								"0beff703-07a6-4220-aa1d-dec8746bd4ca",
+								"instruments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Remove Instrument from InstrumentGroup",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "37005e12-f505-44a1-b2b9-05a2d6a6b1ee",
+								"exec": [
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/instrumentation/instrument_groups/0beff703-07a6-4220-aa1d-dec8746bd4ca/instruments/9a30d375-0800-4297-891e-699fa8878899",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"instrument_groups",
+								"0beff703-07a6-4220-aa1d-dec8746bd4ca",
+								"instruments",
+								"9a30d375-0800-4297-891e-699fa8878899"
+							]
+						}
+					},
+					"response": []
 				}
 			],
-			"request": {
-				"method": "DELETE",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "",
-					"options": {
-						"raw": {
-							"language": "json"
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Projects",
+			"item": [
+				{
+					"name": "GetProject",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "0ad942ad-08e3-4f79-a19c-903f904bf751",
+								"exec": [
+									"// validate JSON schema",
+									"var schema = {",
+									"    \"type\": \"object\",",
+									"    \"properties\": {",
+									"        \"id\": { \"type\": \"string\" },",
+									"        \"federal_id\": { \"type\": [\"string\", \"null\"] },",
+									"        \"slug\": { \"type\": \"string\" },",
+									"        \"name\": { \"type\": \"string\" },",
+									"        \"creator\": { \"type\": \"number\" },",
+									"        \"create_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
+									"        \"updater\": { \"type\": \"number\" },",
+									"        \"update_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
+									"    },",
+									"    \"required\": [\"id\", \"federal_id\", \"slug\", \"name\", \"creator\", \"create_date\", \"updater\", \"update_date\"],",
+									"    \"additionalProperties\": false",
+									"}",
+									"",
+									"pm.globals.set('PROJECT_OBJ_SCHEMA', JSON.stringify(schema));",
+									"",
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// schema validation",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(schema)",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
 						}
-					}
-				},
-				"url": {
-					"raw": "{{base_url}}/instrumentation/projects/88d63e1f-c491-4a8f-ba09-d9402ab1bdf3",
-					"host": [
-						"{{base_url}}"
 					],
-					"path": [
-						"instrumentation",
-						"projects",
-						"88d63e1f-c491-4a8f-ba09-d9402ab1bdf3"
-					]
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/instrumentation/projects/88d63e1f-c491-4a8f-ba09-d9402ab1bdf3",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"projects",
+								"88d63e1f-c491-4a8f-ba09-d9402ab1bdf3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ListProjects",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "3419fa60-a5d8-4b2c-86f1-23862fb912cb",
+								"exec": [
+									"// validate JSON schema",
+									"var schema = {",
+									"    \"type\": \"array\",",
+									"    \"items\": JSON.parse(pm.globals.get('PROJECT_OBJ_SCHEMA'))",
+									"}",
+									"",
+									"pm.globals.set('PROJECT_ARRAY_SCHEMA', JSON.stringify(schema))",
+									"",
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// schema validation",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(schema)",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/instrumentation/projects",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"projects"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CreateProjectBulk_Array",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "e6b3c52d-4596-4720-a3be-b437e65ef47d",
+								"exec": [
+									"// status code is 200",
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"// schema validation",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(",
+									"        JSON.parse(pm.globals.get('PROJECT_ARRAY_SCHEMA'))",
+									"    )",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[{\n    \"name\": \"Test Project 100000\",\n    \"federal_id\": null,\n    \"creator\": 1111111111,\n    \"create_date\": \"2020-04-16T15:41:22.013Z\",\n    \"updater\": 1111111111,\n    \"update_date\": \"2020-04-16T15:41:22.013Z\"\n},\n{\n    \"name\": \"Test Project 100001\",\n    \"federal_id\": null,\n    \"creator\": 1111111111,\n    \"create_date\": \"2020-04-16T15:41:22.013Z\",\n    \"updater\": 1111111111,\n    \"update_date\": \"2020-04-16T15:41:22.013Z\"\n},\n{\n    \"name\": \"Test Project 100002\",\n    \"federal_id\": null,\n    \"creator\": 1111111111,\n    \"create_date\": \"2020-04-16T15:41:22.013Z\",\n    \"updater\": 1111111111,\n    \"update_date\": \"2020-04-16T15:41:22.013Z\"\n}\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/instrumentation/projects",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"projects"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CreateProjectBulk_Object",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "ae4fea4a-c024-4b8d-a69f-43f562009e57",
+								"exec": [
+									"// status code is 200",
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"// schema validation",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(",
+									"        JSON.parse(pm.globals.get('PROJECT_ARRAY_SCHEMA'))",
+									"    )",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test Project 500000\",\n    \"federal_id\": null,\n    \"creator\": 1111111111,\n    \"create_date\": \"2020-04-16T15:41:22.013Z\",\n    \"updater\": 1111111111,\n    \"update_date\": \"2020-04-16T15:41:22.013Z\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/instrumentation/projects",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"projects"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateProject",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "eac2d8ce-d941-43c4-ba6e-8839065fd208",
+								"exec": [
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// schema validation",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(",
+									"        JSON.parse(pm.globals.get('PROJECT_OBJ_SCHEMA'))",
+									"    )",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"88d63e1f-c491-4a8f-ba09-d9402ab1bdf3\",\n    \"federal_id\": null,\n    \"slug\": \"herbert-hoover-dike\",\n    \"name\": \"Herbert Hoover Dike Test Update Name\",\n    \"creator\": 1111111111,\n    \"create_date\": \"2020-05-20T15:26:37.248682Z\",\n    \"updater\": 1111111111,\n    \"update_date\": \"2020-05-20T15:26:37.248682Z\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/instrumentation/projects/88d63e1f-c491-4a8f-ba09-d9402ab1bdf3",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"projects",
+								"88d63e1f-c491-4a8f-ba09-d9402ab1bdf3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteProject",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "5de0f429-e740-4805-aee4-e302c33cfa49",
+								"exec": [
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/instrumentation/projects/88d63e1f-c491-4a8f-ba09-d9402ab1bdf3",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"projects",
+								"88d63e1f-c491-4a8f-ba09-d9402ab1bdf3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ListProjectInstrumentGroups",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "e753b31e-c524-4a5f-b4d6-cc5c56447788",
+								"exec": [
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// schema validation",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(",
+									"        JSON.parse(pm.globals.get('INSTRUMENTGROUP_ARRAY_SCHEMA'))",
+									"    )",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/instrumentation/projects/88d63e1f-c491-4a8f-ba09-d9402ab1bdf3/instrument_groups",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"projects",
+								"88d63e1f-c491-4a8f-ba09-d9402ab1bdf3",
+								"instrument_groups"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ListProjectInstruments",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "c9d659cc-7b2a-4bb3-91b6-044a111d4e12",
+								"exec": [
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// schema validation",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(",
+									"        JSON.parse(pm.globals.get('INSTRUMENT_ARRAY_SCHEMA'))",
+									"    )",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/instrumentation/projects/88d63e1f-c491-4a8f-ba09-d9402ab1bdf3/instruments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"projects",
+								"88d63e1f-c491-4a8f-ba09-d9402ab1bdf3",
+								"instruments"
+							]
+						}
+					},
+					"response": []
 				}
-			},
-			"response": []
+			],
+			"description": "Project Endpoint Tests",
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Misc",
+			"item": [
+				{
+					"name": "GetDomains",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "37005e12-f505-44a1-b2b9-05a2d6a6b1ee",
+								"exec": [
+									"// validate JSON schema",
+									"var schema = {",
+									"    \"type\": \"array\",",
+									"    \"items\": {",
+									"        \"type\": \"object\",",
+									"        \"properties\": {",
+									"            \"id\": { \"type\": \"string\" },",
+									"            \"group\": { \"type\": \"string\" },",
+									"            \"value\": { \"type\": \"string\" },",
+									"        },",
+									"        \"required\": [\"id\", \"group\", \"value\"],",
+									"        \"additionalProperties\": false",
+									"    }",
+									"}",
+									"pm.globals.set('DOMAIN_ARRAY_SCHEMA', schema);",
+									"",
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// schema validation",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(schema)",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/instrumentation/domains",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"domains"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
 		}
 	],
 	"protocolProfileBehavior": {}
