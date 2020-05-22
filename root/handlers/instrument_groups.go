@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo"
+	"github.com/lib/pq"
 )
 
 // ListInstrumentGroups returns instrument groups
@@ -40,8 +41,8 @@ func GetInstrumentGroup(db *sqlx.DB) echo.HandlerFunc {
 func CreateInstrumentGroupBulk(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 
-		groups := []models.InstrumentGroup{}
-		if err := c.Bind(&groups); err != nil {
+		gc := models.InstrumentGroupCollection{}
+		if err := c.Bind(&gc); err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 
@@ -51,25 +52,56 @@ func CreateInstrumentGroupBulk(db *sqlx.DB) echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, err)
 		}
 
-		for idx := range groups {
+		for idx := range gc.Items {
 			// Assign UUID
-			groups[idx].ID = uuid.Must(uuid.NewRandom())
+			gc.Items[idx].ID = uuid.Must(uuid.NewRandom())
 			// Assign Slug
-			s, err := dbutils.NextUniqueSlug(groups[idx].Name, slugsTaken)
+			s, err := dbutils.NextUniqueSlug(gc.Items[idx].Name, slugsTaken)
 			if err != nil {
 				return c.JSON(http.StatusBadRequest, err)
 			}
-			groups[idx].Slug = s
+			gc.Items[idx].Slug = s
 			// Add slug to array of slugs originally fetched from the database
 			// to catch duplicate names/slugs from the same bulk upload
 			slugsTaken = append(slugsTaken, s)
 		}
 
-		if err := models.CreateInstrumentGroupBulk(db, groups); err != nil {
+		if err := models.CreateInstrumentGroupBulk(db, gc.Items); err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 		// Send instrumentgroup
-		return c.JSON(http.StatusCreated, groups)
+		return c.JSON(http.StatusCreated, gc.Items)
+	}
+}
+
+// UpdateInstrumentGroup modifies an existing instrument_group
+func UpdateInstrumentGroup(db *sqlx.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+
+		// id from url params
+		id, err := uuid.Parse(c.Param("id"))
+		if err != nil {
+			return c.String(http.StatusBadRequest, "Malformed ID")
+		}
+		// id from request
+		g := models.InstrumentGroup{ID: id}
+		if err := c.Bind(&g); err != nil {
+			return c.JSON(http.StatusBadRequest, err)
+		}
+		// check :id in url params matches id in request body
+		if id != g.ID {
+			return c.String(
+				http.StatusBadRequest,
+				"url parameter id does not match object id in body",
+			)
+		}
+		// update
+		gUpdated, err := models.UpdateInstrumentGroup(db, &g)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, err)
+		}
+		// return updated instrument
+		return c.JSON(http.StatusOK, gUpdated)
 	}
 }
 
@@ -94,7 +126,11 @@ func ListInstrumentGroupInstruments(db *sqlx.DB) echo.HandlerFunc {
 		if err != nil {
 			return c.String(http.StatusBadRequest, "Malformed ID")
 		}
-		return c.JSON(http.StatusOK, models.ListInstrumentGroupInstruments(db, id))
+		nn, err := models.ListInstrumentGroupInstruments(db, id)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+		return c.JSON(http.StatusOK, nn)
 	}
 }
 
@@ -114,13 +150,17 @@ func CreateInstrumentGroupInstruments(db *sqlx.DB) echo.HandlerFunc {
 		}
 
 		if err := models.CreateInstrumentGroupInstruments(db, instrumentGroupID, i.ID); err != nil {
-			return c.JSON(http.StatusConflict, map[string]interface{}{
-				"error":               "instrument already a member of this instrument group",
-				"instrument_id":       i.ID,
-				"instrument_group_id": instrumentGroupID,
-			})
+			if err, ok := err.(*pq.Error); ok {
+				switch err.Code {
+				case "23505":
+					// Instrument is already a member of instrument_group
+					return c.NoContent(http.StatusOK)
+				default:
+					return c.JSON(http.StatusInternalServerError, err)
+				}
+			}
+			return c.JSON(http.StatusInternalServerError, err)
 		}
-
 		return c.NoContent(http.StatusCreated)
 	}
 }

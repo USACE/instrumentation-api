@@ -21,6 +21,36 @@ func ListProjects(db *sqlx.DB) echo.HandlerFunc {
 	}
 }
 
+// ListProjectInstruments returns instruments associated with a project
+func ListProjectInstruments(db *sqlx.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		id, err := uuid.Parse(c.Param("id"))
+		if err != nil {
+			return c.String(http.StatusBadRequest, "Malformed ID")
+		}
+		nn, err := models.ListProjectInstruments(db, id)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+		return c.JSON(http.StatusOK, nn)
+	}
+}
+
+// ListProjectInstrumentGroups returns instrument groups associated with a project
+func ListProjectInstrumentGroups(db *sqlx.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		id, err := uuid.Parse(c.Param("id"))
+		if err != nil {
+			return c.String(http.StatusBadRequest, "Malformed ID")
+		}
+		gg, err := models.ListProjectInstrumentGroups(db, id)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+		return c.JSON(http.StatusOK, gg)
+	}
+}
+
 // GetProject returns single project
 func GetProject(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
@@ -40,8 +70,8 @@ func GetProject(db *sqlx.DB) echo.HandlerFunc {
 func CreateProjectBulk(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 
-		projects := []models.Project{}
-		if err := c.Bind(&projects); err != nil {
+		pc := models.ProjectCollection{}
+		if err := c.Bind(&pc); err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 
@@ -51,25 +81,25 @@ func CreateProjectBulk(db *sqlx.DB) echo.HandlerFunc {
 			return err
 		}
 
-		for idx := range projects {
+		for idx := range pc.Projects {
 			// Assign UUID
-			projects[idx].ID = uuid.Must(uuid.NewRandom())
+			pc.Projects[idx].ID = uuid.Must(uuid.NewRandom())
 			// Assign Slug
-			s, err := dbutils.NextUniqueSlug(projects[idx].Name, slugsTaken)
+			s, err := dbutils.NextUniqueSlug(pc.Projects[idx].Name, slugsTaken)
 			if err != nil {
 				return c.JSON(http.StatusBadRequest, err)
 			}
-			projects[idx].Slug = s
+			pc.Projects[idx].Slug = s
 			// Add slug to array of slugs originally fetched from the database
 			// to catch duplicate names/slugs from the same bulk upload
 			slugsTaken = append(slugsTaken, s)
 		}
 
-		if err := models.CreateProjectBulk(db, projects); err != nil {
+		if err := models.CreateProjectBulk(db, pc.Projects); err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 		// Send Project
-		return c.JSON(http.StatusCreated, projects)
+		return c.JSON(http.StatusCreated, pc.Projects)
 	}
 }
 

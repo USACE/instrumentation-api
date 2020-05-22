@@ -1,6 +1,7 @@
 package models
 
 import (
+	"encoding/json"
 	"log"
 	"time"
 
@@ -8,10 +9,6 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	"github.com/lib/pq"
-
-	"github.com/paulmach/orb"
-	"github.com/paulmach/orb/encoding/wkb"
-	"github.com/paulmach/orb/geojson"
 )
 
 // InstrumentGroup holds information for entity instrument_group
@@ -26,6 +23,32 @@ type InstrumentGroup struct {
 	Updater     int        `json:"updater"`
 	UpdateDate  time.Time  `json:"update_date" db:"update_date"`
 	ProjectID   *uuid.UUID `json:"project_id" db:"project_id"`
+}
+
+// InstrumentGroupCollection is a collection of Instrument items
+type InstrumentGroupCollection struct {
+	Items []InstrumentGroup
+}
+
+// UnmarshalJSON implements UnmarshalJSON interface
+// Allows unpacking object or array of objects into array of objects
+func (c *InstrumentGroupCollection) UnmarshalJSON(b []byte) error {
+
+	switch JSONType(b) {
+	case "ARRAY":
+		if err := json.Unmarshal(b, &c.Items); err != nil {
+			return err
+		}
+	case "OBJECT":
+		var g InstrumentGroup
+		if err := json.Unmarshal(b, &g); err != nil {
+			return err
+		}
+		c.Items = []InstrumentGroup{g}
+	default:
+		c.Items = make([]InstrumentGroup, 0)
+	}
+	return nil
 }
 
 // ListInstrumentGroupSlugs lists used instrument group slugs in the database
@@ -43,27 +66,23 @@ func ListInstrumentGroups(db *sqlx.DB) ([]InstrumentGroup, error) {
 
 	gg := make([]InstrumentGroup, 0)
 	if err := db.Select(
-		&gg,
-		`SELECT id, slug, name, description, creator, create_date, updater, update_date, project_id
-		 FROM   instrument_group
-		 WHERE NOT deleted
-		`,
+		&gg, listInstrumentGroupsSQL()+" WHERE NOT deleted",
 	); err != nil {
 		return make([]InstrumentGroup, 0), err
 	}
-
 	return gg, nil
 }
 
 // GetInstrumentGroup returns a single instrument group
 func GetInstrumentGroup(db *sqlx.DB, ID uuid.UUID) (*InstrumentGroup, error) {
-	sql := "SELECT id, slug, name, description, creator, create_date, updater, update_date, project_id FROM instrument_group WHERE id = $1"
 
 	var g InstrumentGroup
-	if err := db.QueryRowx(sql, ID).StructScan(&g); err != nil {
+	if err := db.QueryRowx(
+		listInstrumentGroupsSQL()+" WHERE id = $1",
+		ID,
+	).StructScan(&g); err != nil {
 		return nil, err
 	}
-
 	return &g, nil
 }
 
@@ -113,6 +132,28 @@ func CreateInstrumentGroupBulk(db *sqlx.DB, groups []InstrumentGroup) error {
 	return nil
 }
 
+// UpdateInstrumentGroup updates an instrument group
+func UpdateInstrumentGroup(db *sqlx.DB, g *InstrumentGroup) (*InstrumentGroup, error) {
+
+	var gUpdated InstrumentGroup
+	if err := db.QueryRowx(
+		`UPDATE instrument_group
+		 SET    name = $2,
+			    deleted = $3,
+			    description = $4,
+			    updater = $5,
+				update_date = $6,
+				project_id = $7
+		 WHERE id = $1
+		 RETURNING *
+		`, g.ID, g.Name, g.Deleted, g.Description, g.Updater, g.UpdateDate, g.ProjectID,
+	).StructScan(&gUpdated); err != nil {
+		return nil, err
+	}
+
+	return &gUpdated, nil
+}
+
 // DeleteFlagInstrumentGroup sets the deleted field to true
 func DeleteFlagInstrumentGroup(db *sqlx.DB, ID uuid.UUID) error {
 	if _, err := db.Exec(`UPDATE instrument_group SET deleted = true WHERE id = $1`, ID); err != nil {
@@ -122,7 +163,7 @@ func DeleteFlagInstrumentGroup(db *sqlx.DB, ID uuid.UUID) error {
 }
 
 // ListInstrumentGroupInstruments returns a list of instrument group instruments for a given instrument
-func ListInstrumentGroupInstruments(db *sqlx.DB, ID uuid.UUID) []Instrument {
+func ListInstrumentGroupInstruments(db *sqlx.DB, ID uuid.UUID) ([]Instrument, error) {
 
 	sql := `SELECT A.instrument_id,
 	               instrument.active,
@@ -145,29 +186,11 @@ func ListInstrumentGroupInstruments(db *sqlx.DB, ID uuid.UUID) []Instrument {
 			WHERE  instrument_group_id = $1
 			`
 
-	rows, err := db.Query(sql, ID)
-
+	rows, err := db.Queryx(sql, ID)
 	if err != nil {
-		panic(err)
+		return make([]Instrument, 0), err
 	}
-
-	defer rows.Close()
-	result := make([]Instrument, 0)
-	for rows.Next() {
-		var p orb.Point
-		var n Instrument
-		err := rows.Scan(
-			&n.ID, &n.Active, &n.Slug, &n.Name, &n.TypeID, &n.Type, &n.Height, wkb.Scanner(&p),
-			&n.Creator, &n.CreateDate, &n.Updater, &n.UpdateDate, &n.ProjectID,
-		)
-		n.Geometry = *geojson.NewGeometry(p)
-		if err != nil {
-			panic(err)
-		}
-
-		result = append(result, n)
-	}
-	return result
+	return InstrumentsFactory(rows)
 }
 
 // CreateInstrumentGroupInstruments adds an instrument to an instrument group
@@ -195,4 +218,18 @@ func DeleteInstrumentGroupInstruments(db *sqlx.DB, instrumentGroupID uuid.UUID, 
 	}
 
 	return nil
+}
+
+func listInstrumentGroupsSQL() string {
+	return `SELECT id,
+				   slug,
+				   name,
+				   description,
+				   creator,
+				   create_date,
+				   updater,
+				   update_date,
+				   project_id
+	        FROM   instrument_group
+   `
 }
