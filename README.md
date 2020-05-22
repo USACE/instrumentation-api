@@ -1,4 +1,4 @@
-# Instrumentation API
+# Instrumentation API  ![Build API and Lambda Package](https://github.com/rsgis-dev/instrumentation-api/workflows/Build%20API%20and%20Lambda%20Package/badge.svg)
 
 An Application Programming Interface (API) to manage instrumentation data, built with Golang and Deployed on AWS Lambda.
 
