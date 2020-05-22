@@ -8,6 +8,7 @@ CREATE USER instrumentation_user WITH ENCRYPTED PASSWORD 'password';
 -- Tables specific to instrumentation app
 CREATE ROLE instrumentation_reader;
 GRANT SELECT ON
+    project,
     instrument,
     instrument_group,
     instrument_group_instruments,
@@ -21,7 +22,8 @@ TO instrumentation_reader;
 -- Role instrumentation_writer
 -- Tables specific to instrumentation app
 CREATE ROLE instrumentation_writer;
-GRANT INSERT,UPDATE,DELETE ON 
+GRANT INSERT,UPDATE,DELETE ON
+    project,
     instrument,
     instrument_group,
     instrument_group_instruments,
