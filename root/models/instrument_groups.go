@@ -173,6 +173,8 @@ func ListInstrumentGroupInstruments(db *sqlx.DB, ID uuid.UUID) ([]Instrument, er
 	        	   instrument_type.NAME              AS instrument_type,
 	               instrument.height,
 				   ST_AsBinary(instrument.geometry) AS geometry,
+				   instrument.station,
+				   instrument.station_offset,
 				   instrument.creator,
 				   instrument.create_date,
 				   instrument.updater,
