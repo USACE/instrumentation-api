@@ -1,6 +1,19 @@
 -- extensions
 CREATE extension IF NOT EXISTS "uuid-ossp";
 
+
+-- drop tables if they already exist
+drop table public.timeseries_measurement cascade;
+drop table public.timeseries cascade;
+drop table public.instrument_group_instruments cascade;
+drop table public.instrument cascade;
+drop table public.instrument_group cascade;
+drop table public.parameter cascade;
+drop table public.unit cascade;
+drop table public.instrument_type cascade;
+drop table public.project cascade;
+
+
 -- project
 CREATE TABLE IF NOT EXISTS public.project (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),

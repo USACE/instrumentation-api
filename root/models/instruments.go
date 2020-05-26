@@ -22,17 +22,17 @@ type Instrument struct {
 	Deleted       bool             `json:"-"`
 	Slug          string           `json:"slug"`
 	Name          string           `json:"name"`
-	TypeID        string           `json:"type_id"`
-	Type          string           `json:"type"`
+	TypeID        uuid.UUID        `json:"type_id" db:"instrument_type_id"`
+	Type          string           `json:"type" db:"instrument_type"`
 	Height        float32          `json:"height"`
 	Geometry      geojson.Geometry `json:"geometry,omitempty"`
 	Station       *int             `json:"station"`
-	StationOffset *int             `json:"station_offset" db:"station_offset"`
+	StationOffset *int             `json:"offset" db:"station_offset"`
 	Creator       int              `json:"creator"`
 	CreateDate    time.Time        `json:"create_date" db:"create_date"`
 	Updater       int              `json:"updater"`
 	UpdateDate    time.Time        `json:"update_date" db:"update_date"`
-	ProjectID     *string          `json:"project_id" db:"project_id"`
+	ProjectID     *uuid.UUID       `json:"project_id" db:"project_id"`
 }
 
 // InstrumentCollection is a collection of Instrument items
@@ -145,7 +145,7 @@ func CreateInstrumentBulk(db *sqlx.DB, instruments []Instrument) error {
 // UpdateInstrument updates a single instrument
 func UpdateInstrument(db *sqlx.DB, i *Instrument) (*Instrument, error) {
 
-	var iUpdated Instrument
+	var updatedID struct{ ID uuid.UUID }
 	if err := db.QueryRowx(
 		`UPDATE instrument
 		 SET    name = $2,
@@ -159,13 +159,13 @@ func UpdateInstrument(db *sqlx.DB, i *Instrument) (*Instrument, error) {
 				station = $10,
 				station_offset = $11
 		 WHERE id = $1
-		 RETURNING *
+		 RETURNING id
 		`, i.ID, i.Name, i.Active, i.Height, i.TypeID, wkb.Value(i.Geometry.Geometry()), i.Updater, i.UpdateDate, i.ProjectID, i.Station, i.StationOffset,
-	).StructScan(&iUpdated); err != nil {
+	).StructScan(&updatedID); err != nil {
 		return nil, err
 	}
-
-	return &iUpdated, nil
+	// Get Updated Row
+	return GetInstrument(db, updatedID.ID)
 }
 
 // DeleteFlagInstrument changes delete flag to true
