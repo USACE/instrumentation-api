@@ -22,17 +22,17 @@ type Instrument struct {
 	Deleted       bool             `json:"-"`
 	Slug          string           `json:"slug"`
 	Name          string           `json:"name"`
-	TypeID        string           `json:"type_id"`
-	Type          string           `json:"type"`
+	TypeID        uuid.UUID        `json:"type_id" db:"instrument_type_id"`
+	Type          string           `json:"type" db:"instrument_type"`
 	Height        float32          `json:"height"`
 	Geometry      geojson.Geometry `json:"geometry,omitempty"`
 	Station       *int             `json:"station"`
-	StationOffset *int             `json:"station_offset" db:"station_offset"`
+	StationOffset *int             `json:"offset" db:"station_offset"`
 	Creator       int              `json:"creator"`
 	CreateDate    time.Time        `json:"create_date" db:"create_date"`
 	Updater       int              `json:"updater"`
 	UpdateDate    time.Time        `json:"update_date" db:"update_date"`
-	ProjectID     *string          `json:"project_id" db:"project_id"`
+	ProjectID     *uuid.UUID       `json:"project_id" db:"project_id"`
 }
 
 // InstrumentCollection is a collection of Instrument items

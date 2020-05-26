@@ -165,12 +165,12 @@ func DeleteFlagInstrumentGroup(db *sqlx.DB, ID uuid.UUID) error {
 // ListInstrumentGroupInstruments returns a list of instrument group instruments for a given instrument
 func ListInstrumentGroupInstruments(db *sqlx.DB, ID uuid.UUID) ([]Instrument, error) {
 
-	sql := `SELECT A.instrument_id,
+	sql := `SELECT A.instrument_id as id,
 	               instrument.active,
-	               instrument.slug,
+								 instrument.slug,
 				   instrument.NAME,
-				   instrument.INSTRUMENT_TYPE_ID,
-	        	   instrument_type.NAME              AS instrument_type,
+				   instrument.INSTRUMENT_TYPE_ID as type_id,
+	        	   instrument_type.NAME              AS type,
 	               instrument.height,
 				   ST_AsBinary(instrument.geometry) AS geometry,
 				   instrument.station,
@@ -185,7 +185,7 @@ func ListInstrumentGroupInstruments(db *sqlx.DB, ID uuid.UUID) ([]Instrument, er
 	               		   ON instrument.id = A.instrument_id
 	               INNER JOIN instrument_type
 	               		   ON instrument_type.id = instrument.instrument_type_id
-			WHERE  instrument_group_id = $1
+			WHERE  instrument_group_id = $1 and deleted = false
 			`
 
 	rows, err := db.Queryx(sql, ID)
