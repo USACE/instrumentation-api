@@ -145,7 +145,7 @@ func CreateInstrumentBulk(db *sqlx.DB, instruments []Instrument) error {
 // UpdateInstrument updates a single instrument
 func UpdateInstrument(db *sqlx.DB, i *Instrument) (*Instrument, error) {
 
-	var iUpdated Instrument
+	var updatedID struct{ ID uuid.UUID }
 	if err := db.QueryRowx(
 		`UPDATE instrument
 		 SET    name = $2,
@@ -159,13 +159,13 @@ func UpdateInstrument(db *sqlx.DB, i *Instrument) (*Instrument, error) {
 				station = $10,
 				station_offset = $11
 		 WHERE id = $1
-		 RETURNING *
+		 RETURNING id
 		`, i.ID, i.Name, i.Active, i.Height, i.TypeID, wkb.Value(i.Geometry.Geometry()), i.Updater, i.UpdateDate, i.ProjectID, i.Station, i.StationOffset,
-	).StructScan(&iUpdated); err != nil {
+	).StructScan(&updatedID); err != nil {
 		return nil, err
 	}
-
-	return &iUpdated, nil
+	// Get Updated Row
+	return GetInstrument(db, updatedID.ID)
 }
 
 // DeleteFlagInstrument changes delete flag to true
