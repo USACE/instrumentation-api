@@ -15,7 +15,7 @@ func ListInstruments(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		nn, err := models.ListInstruments(db)
 		if err != nil {
-			return c.NoContent(http.StatusBadRequest)
+			return c.JSON(http.StatusBadRequest, err)
 		}
 		return c.JSON(http.StatusOK, nn)
 	}
@@ -28,7 +28,7 @@ func GetInstrument(db *sqlx.DB) echo.HandlerFunc {
 		if err != nil {
 			return c.String(http.StatusBadRequest, "Malformed ID")
 		}
-		n, err := models.GetInstrument(db, id)
+		n, err := models.GetInstrument(db, &id)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err)
 		}
@@ -98,7 +98,7 @@ func UpdateInstrument(db *sqlx.DB) echo.HandlerFunc {
 		// update
 		iUpdated, err := models.UpdateInstrument(db, i)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return c.String(http.StatusBadRequest, err.Error())
 		}
 		// return updated instrument
 		return c.JSON(http.StatusOK, iUpdated)

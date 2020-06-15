@@ -2,13 +2,13 @@ package models
 
 import (
 	"encoding/json"
-	"log"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	"github.com/lib/pq"
 
+	// pq library
+	_ "github.com/lib/pq"
 	"github.com/paulmach/orb"
 	"github.com/paulmach/orb/encoding/wkb"
 	"github.com/paulmach/orb/encoding/wkt"
@@ -17,22 +17,27 @@ import (
 
 // Instrument is an instrument data structure
 type Instrument struct {
-	ID            uuid.UUID        `json:"id"`
-	Active        bool             `json:"active"`
-	Deleted       bool             `json:"-"`
-	Slug          string           `json:"slug"`
-	Name          string           `json:"name"`
-	TypeID        uuid.UUID        `json:"type_id" db:"instrument_type_id"`
-	Type          string           `json:"type" db:"instrument_type"`
-	Height        float32          `json:"height"`
-	Geometry      geojson.Geometry `json:"geometry,omitempty"`
-	Station       *int             `json:"station"`
-	StationOffset *int             `json:"offset" db:"station_offset"`
-	Creator       int              `json:"creator"`
-	CreateDate    time.Time        `json:"create_date" db:"create_date"`
-	Updater       int              `json:"updater"`
-	UpdateDate    time.Time        `json:"update_date" db:"update_date"`
-	ProjectID     *uuid.UUID       `json:"project_id" db:"project_id"`
+	ID                uuid.UUID        `json:"id"`
+	StatusID          uuid.UUID        `json:"status_id" db:"status_id"`
+	Status            string           `json:"status"`
+	StatusTime        time.Time        `json:"status_time" db:"status_time"`
+	Deleted           bool             `json:"-"`
+	Slug              string           `json:"slug"`
+	Name              string           `json:"name"`
+	TypeID            uuid.UUID        `json:"type_id" db:"type_id"`
+	Type              string           `json:"type"`
+	Geometry          geojson.Geometry `json:"geometry,omitempty"`
+	Station           *int             `json:"station"`
+	StationOffset     *int             `json:"offset" db:"station_offset"`
+	Creator           int              `json:"creator"`
+	CreateDate        time.Time        `json:"create_date" db:"create_date"`
+	Updater           int              `json:"updater"`
+	UpdateDate        time.Time        `json:"update_date" db:"update_date"`
+	ProjectID         *uuid.UUID       `json:"project_id" db:"project_id"`
+	ZReference        float32          `json:"zreference"`
+	ZReferenceDatumID uuid.UUID        `json:"zreference_datum_id" db:"zreference_datum_id"`
+	ZReferenceDatum   string           `json:"zreference_datum"`
+	ZReferenceTime    time.Time        `json:"zreference_time"`
 }
 
 // InstrumentCollection is a collection of Instrument items
@@ -73,7 +78,7 @@ func ListInstrumentSlugs(db *sqlx.DB) ([]string, error) {
 // ListInstruments returns an array of instruments from the database
 func ListInstruments(db *sqlx.DB) ([]Instrument, error) {
 
-	rows, err := db.Queryx(listInstrumentsSQL() + " WHERE NOT instrument.deleted")
+	rows, err := db.Queryx(listInstrumentsSQL() + " WHERE NOT I.deleted")
 	if err != nil {
 		return make([]Instrument, 0), err
 	}
@@ -81,9 +86,9 @@ func ListInstruments(db *sqlx.DB) ([]Instrument, error) {
 }
 
 // GetInstrument returns a single instrument
-func GetInstrument(db *sqlx.DB, id uuid.UUID) (*Instrument, error) {
+func GetInstrument(db *sqlx.DB, id *uuid.UUID) (*Instrument, error) {
 
-	rows, err := db.Queryx(listInstrumentsSQL()+" WHERE instrument.id = $1", id)
+	rows, err := db.Queryx(listInstrumentsSQL()+" WHERE I.id = $1", id)
 	if err != nil {
 		return nil, err
 	}
@@ -99,43 +104,57 @@ func CreateInstrumentBulk(db *sqlx.DB, instruments []Instrument) error {
 
 	txn, err := db.Begin()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
-	stmt, err := txn.Prepare(pq.CopyIn(
-		"instrument",
-		"id", "active", "slug", "name", "height", "instrument_type_id",
-		"geometry", "station", "station_offset", "creator", "create_date", "updater", "update_date", "project_id",
-	))
-
+	// Instrument
+	stmt1, err := txn.Prepare(
+		`INSERT INTO instrument
+			(id, slug, name, type_id, geometry, station, station_offset, creator, create_date, updater, update_date, project_id)
+		 VALUES
+		 	($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+	)
 	if err != nil {
-		log.Fatal(err)
+		return err
+	}
+
+	// Instrument Status
+	stmt2, err := txn.Prepare(createInstrumentStatusSQL())
+	if err != nil {
+		return err
+	}
+
+	// Instrument ZReference
+	stmt3, err := txn.Prepare(createInstrumentZReferenceSQL())
+	if err != nil {
+		return err
 	}
 
 	for _, i := range instruments {
-
-		_, err = stmt.Exec(
-			i.ID, i.Active, i.Slug, i.Name, i.Height, i.TypeID, wkt.MarshalString(i.Geometry.Geometry()),
+		// Load Instrument
+		if _, err := stmt1.Exec(
+			i.ID, i.Slug, i.Name, i.TypeID, wkt.MarshalString(i.Geometry.Geometry()),
 			i.Station, i.StationOffset, i.Creator, i.CreateDate, i.Updater, i.UpdateDate, i.ProjectID,
-		)
-
-		if err != nil {
+		); err != nil {
+			return err
+		}
+		if _, err := stmt2.Exec(i.ID, i.StatusID, i.StatusTime); err != nil {
+			return err
+		}
+		if _, err := stmt3.Exec(i.ID, i.ZReferenceTime, i.ZReference, i.ZReferenceDatumID); err != nil {
 			return err
 		}
 	}
-
-	_, err = stmt.Exec()
-	if err != nil {
+	if err := stmt1.Close(); err != nil {
 		return err
 	}
-
-	err = stmt.Close()
-	if err != nil {
+	if err := stmt2.Close(); err != nil {
 		return err
 	}
-
-	err = txn.Commit()
-	if err != nil {
+	if err := stmt3.Close(); err != nil {
+		return err
+	}
+	if err := txn.Commit(); err != nil {
 		return err
 	}
 
@@ -145,27 +164,64 @@ func CreateInstrumentBulk(db *sqlx.DB, instruments []Instrument) error {
 // UpdateInstrument updates a single instrument
 func UpdateInstrument(db *sqlx.DB, i *Instrument) (*Instrument, error) {
 
-	var updatedID struct{ ID uuid.UUID }
-	if err := db.QueryRowx(
-		`UPDATE instrument
-		 SET    name = $2,
-			    active = $3,
-			    height = $4,
-			    instrument_type_id = $5,
-			    geometry = ST_GeomFromWKB($6),
-			    updater = $7,
-				update_date = $8,
-				project_id = $9,
-				station = $10,
-				station_offset = $11
-		 WHERE id = $1
-		 RETURNING id
-		`, i.ID, i.Name, i.Active, i.Height, i.TypeID, wkb.Value(i.Geometry.Geometry()), i.Updater, i.UpdateDate, i.ProjectID, i.Station, i.StationOffset,
-	).StructScan(&updatedID); err != nil {
+	txn, err := db.Begin()
+	if err != nil {
 		return nil, err
 	}
+
+	// Instrument
+	stmt1, err := txn.Prepare(
+		`UPDATE instrument
+		 SET    name = $2,
+			    type_id = $3,
+			    geometry = ST_GeomFromWKB($4),
+			    updater = $5,
+				update_date = $6,
+				project_id = $7,
+				station = $8,
+				station_offset = $9
+		 WHERE id = $1
+		 RETURNING id`,
+	)
+	// Update Instrument
+	var updatedID uuid.UUID
+	if err := stmt1.QueryRow(
+		i.ID, i.Name, i.TypeID, wkb.Value(i.Geometry.Geometry()),
+		i.Updater, i.UpdateDate, i.ProjectID, i.Station, i.StationOffset,
+	).Scan(&updatedID); err != nil {
+		return nil, err
+	}
+	if err := stmt1.Close(); err != nil {
+		return nil, err
+	}
+
+	// Instrument Status
+	stmt2, err := txn.Prepare(createInstrumentStatusSQL())
+	if err != nil {
+		return nil, err
+	}
+	if _, err := stmt2.Exec(i.ID, i.StatusID, i.StatusTime); err != nil {
+		return nil, err
+	}
+	if err := stmt2.Close(); err != nil {
+		return nil, err
+	}
+
+	// Instrument ZReference
+	stmt3, err := txn.Prepare(createInstrumentZReferenceSQL())
+	if _, err := stmt3.Exec(i.ID, i.ZReferenceTime, i.ZReference, i.ZReferenceDatumID); err != nil {
+		return nil, err
+	}
+	if err := stmt3.Close(); err != nil {
+		return nil, err
+	}
+
+	if err := txn.Commit(); err != nil {
+		return nil, err
+	}
+
 	// Get Updated Row
-	return GetInstrument(db, updatedID.ID)
+	return GetInstrument(db, &updatedID)
 }
 
 // DeleteFlagInstrument changes delete flag to true
@@ -187,8 +243,8 @@ func InstrumentsFactory(rows *sqlx.Rows) ([]Instrument, error) {
 		var i Instrument
 		var p orb.Point
 		err := rows.Scan(
-			&i.ID, &i.Active, &i.Slug, &i.Name, &i.TypeID, &i.Type, &i.Height, wkb.Scanner(&p), &i.Station, &i.StationOffset,
-			&i.Creator, &i.CreateDate, &i.Updater, &i.UpdateDate, &i.ProjectID,
+			&i.ID, &i.Deleted, &i.StatusID, &i.Status, &i.StatusTime, &i.Slug, &i.Name, &i.TypeID, &i.Type, wkb.Scanner(&p), &i.Station, &i.StationOffset,
+			&i.Creator, &i.CreateDate, &i.Updater, &i.UpdateDate, &i.ProjectID, &i.ZReferenceTime, &i.ZReference, &i.ZReferenceDatumID, &i.ZReferenceDatum,
 		)
 		if err != nil {
 			return make([]Instrument, 0), err
@@ -201,25 +257,55 @@ func InstrumentsFactory(rows *sqlx.Rows) ([]Instrument, error) {
 	return ii, nil
 }
 
-// ListInstrumentsSQL is the base SQL to retrieve all instruments
+// ListInstrumentsSQL is the base SQL to retrieve all instrumentsJSON
 func listInstrumentsSQL() string {
-	return `SELECT instrument.id,
-	               instrument.active,
-	               instrument.slug,
-	               instrument.NAME,
-	               instrument.INSTRUMENT_TYPE_ID,
-	               instrument_type.NAME              AS instrument_type, 
-	               instrument.height, 
-				   ST_AsBinary(instrument.geometry) AS geometry,
-				   instrument.station,
-				   instrument.station_offset,
-	               instrument.creator,
-	               instrument.create_date,
-	               instrument.updater,
-	               instrument.update_date,
-	               instrument.project_id
-			FROM   instrument
-			INNER JOIN instrument_type
-			   ON instrument_type.id = instrument.instrument_type_id
+	return `SELECT I.id,
+			       I.deleted,
+				   S.status_id,
+				   S.status,
+				   S.status_time,
+	               I.slug,
+	               I.name,
+	               I.type_id,
+	               T.name                  AS type, 
+				   ST_AsBinary(I.geometry) AS geometry,
+				   I.station,
+				   I.station_offset,
+	               I.creator,
+	               I.create_date,
+	               I.updater,
+	               I.update_date,
+				   I.project_id,
+				   Z.zreference_time,
+				   Z.zreference,
+				   Z.zreference_datum_id,
+				   Z.zreference_datum
+			FROM   instrument I
+			INNER JOIN instrument_type T
+			   ON T.id = I.type_id
+			INNER JOIN (
+				SELECT
+                	DISTINCT ON (instrument_id) instrument_id, 
+					a.time                 AS status_time,
+					a.status_id            AS status_id,
+					d.name                 AS status
+				FROM instrument_status a
+				INNER JOIN status d ON d.id = a.status_id
+				WHERE a.time <= now()
+				ORDER BY instrument_id, a.time DESC
+			) S ON S.instrument_id = I.id
+			INNER JOIN (
+				SELECT
+					DISTINCT ON (instrument_id) instrument_id,
+					b.time                  AS zreference_time,
+					b.zreference            AS zreference,
+					b.zreference_datum_id   AS zreference_datum_id,
+					d.name                  AS zreference_datum
+				FROM instrument_zreference b
+				INNER JOIN zreference_datum d
+					ON d.id = b.zreference_datum_id
+				WHERE b.time <= now()
+				ORDER BY instrument_id, b.time DESC
+			) Z ON Z.instrument_id = I.id
 			`
 }

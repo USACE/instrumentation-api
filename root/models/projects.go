@@ -69,7 +69,7 @@ func ListProjects(db *sqlx.DB) ([]Project, error) {
 func ListProjectInstruments(db *sqlx.DB, id uuid.UUID) ([]Instrument, error) {
 
 	rows, err := db.Queryx(
-		listInstrumentsSQL()+" WHERE NOT instrument.deleted AND project_id = $1",
+		listInstrumentsSQL()+" WHERE NOT I.deleted AND I.project_id = $1",
 		id,
 	)
 	if err != nil {

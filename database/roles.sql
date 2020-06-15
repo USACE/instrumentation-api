@@ -12,7 +12,9 @@ GRANT SELECT ON
     instrument,
     instrument_group,
     instrument_group_instruments,
+    instrument_status,
     instrument_type,
+    status,
     parameter,
     timeseries,
     timeseries_measurement,
@@ -27,7 +29,9 @@ GRANT INSERT,UPDATE,DELETE ON
     instrument,
     instrument_group,
     instrument_group_instruments,
+    instrument_status,
     instrument_type,
+    status,
     timeseries,
     timeseries_measurement
 TO instrumentation_writer;

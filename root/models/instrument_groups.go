@@ -2,7 +2,7 @@ package models
 
 import (
 	"encoding/json"
-	"log"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -91,7 +91,7 @@ func CreateInstrumentGroupBulk(db *sqlx.DB, groups []InstrumentGroup) error {
 
 	txn, err := db.Begin()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	stmt, err := txn.Prepare(pq.CopyIn(
@@ -100,7 +100,7 @@ func CreateInstrumentGroupBulk(db *sqlx.DB, groups []InstrumentGroup) error {
 	))
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	for _, g := range groups {
@@ -165,28 +165,13 @@ func DeleteFlagInstrumentGroup(db *sqlx.DB, ID uuid.UUID) error {
 // ListInstrumentGroupInstruments returns a list of instrument group instruments for a given instrument
 func ListInstrumentGroupInstruments(db *sqlx.DB, ID uuid.UUID) ([]Instrument, error) {
 
-	sql := `SELECT A.instrument_id as id,
-	               instrument.active,
-								 instrument.slug,
-				   instrument.NAME,
-				   instrument.INSTRUMENT_TYPE_ID as type_id,
-	        	   instrument_type.NAME              AS type,
-	               instrument.height,
-				   ST_AsBinary(instrument.geometry) AS geometry,
-				   instrument.station,
-				   instrument.station_offset,
-				   instrument.creator,
-				   instrument.create_date,
-				   instrument.updater,
-				   instrument.update_date,
-				   instrument.project_id
-            FROM   instrument_group_instruments A
-	               INNER JOIN instrument instrument
-	               		   ON instrument.id = A.instrument_id
-	               INNER JOIN instrument_type
-	               		   ON instrument_type.id = instrument.instrument_type_id
-			WHERE  instrument_group_id = $1 and deleted = false
-			`
+	sql := fmt.Sprintf(
+		`SELECT B.*
+         FROM   instrument_group_instruments A
+		 INNER JOIN (%s) B ON A.instrument_id = B.id
+		 WHERE A.instrument_group_id = $1 and B.deleted = false`,
+		listInstrumentsSQL(),
+	)
 
 	rows, err := db.Queryx(sql, ID)
 	if err != nil {
