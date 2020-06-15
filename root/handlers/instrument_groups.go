@@ -25,7 +25,7 @@ func ListInstrumentGroups(db *sqlx.DB) echo.HandlerFunc {
 // GetInstrumentGroup returns single instrument group
 func GetInstrumentGroup(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		id, err := uuid.Parse(c.Param("id"))
+		id, err := uuid.Parse(c.Param("instrument_group_id"))
 		if err != nil {
 			return c.String(http.StatusBadRequest, "Malformed ID")
 		}
@@ -79,7 +79,7 @@ func UpdateInstrumentGroup(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 
 		// id from url params
-		id, err := uuid.Parse(c.Param("id"))
+		id, err := uuid.Parse(c.Param("instrument_group_id"))
 		if err != nil {
 			return c.String(http.StatusBadRequest, "Malformed ID")
 		}
@@ -108,7 +108,7 @@ func UpdateInstrumentGroup(db *sqlx.DB) echo.HandlerFunc {
 // DeleteFlagInstrumentGroup sets the instrument group deleted flag true
 func DeleteFlagInstrumentGroup(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		id, err := uuid.Parse(c.Param("id"))
+		id, err := uuid.Parse(c.Param("instrument_group_id"))
 		if err != nil {
 			return c.JSON(http.StatusNotFound, err)
 		}
@@ -122,7 +122,7 @@ func DeleteFlagInstrumentGroup(db *sqlx.DB) echo.HandlerFunc {
 // ListInstrumentGroupInstruments returns a list of instruments for a provided instrument group
 func ListInstrumentGroupInstruments(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		id, err := uuid.Parse(c.Param("id"))
+		id, err := uuid.Parse(c.Param("instrument_group_id"))
 		if err != nil {
 			return c.String(http.StatusBadRequest, "Malformed ID")
 		}
@@ -138,7 +138,7 @@ func ListInstrumentGroupInstruments(db *sqlx.DB) echo.HandlerFunc {
 func CreateInstrumentGroupInstruments(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		// instrument_group_id
-		instrumentGroupID, err := uuid.Parse(c.Param("id"))
+		instrumentGroupID, err := uuid.Parse(c.Param("instrument_group_id"))
 
 		if err != nil || instrumentGroupID == uuid.Nil {
 			return c.NoContent(http.StatusBadRequest)
@@ -169,7 +169,7 @@ func CreateInstrumentGroupInstruments(db *sqlx.DB) echo.HandlerFunc {
 func DeleteInstrumentGroupInstruments(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		// instrument_group_id
-		instrumentGroupID, err := uuid.Parse(c.Param("id"))
+		instrumentGroupID, err := uuid.Parse(c.Param("instrument_group_id"))
 		if err != nil {
 			return c.String(http.StatusBadRequest, "Malformed ID")
 		}

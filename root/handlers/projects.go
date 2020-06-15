@@ -24,7 +24,7 @@ func ListProjects(db *sqlx.DB) echo.HandlerFunc {
 // ListProjectInstruments returns instruments associated with a project
 func ListProjectInstruments(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		id, err := uuid.Parse(c.Param("id"))
+		id, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
 			return c.String(http.StatusBadRequest, "Malformed ID")
 		}
@@ -39,7 +39,7 @@ func ListProjectInstruments(db *sqlx.DB) echo.HandlerFunc {
 // ListProjectInstrumentGroups returns instrument groups associated with a project
 func ListProjectInstrumentGroups(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		id, err := uuid.Parse(c.Param("id"))
+		id, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
 			return c.String(http.StatusBadRequest, "Malformed ID")
 		}
@@ -54,7 +54,7 @@ func ListProjectInstrumentGroups(db *sqlx.DB) echo.HandlerFunc {
 // GetProject returns single project
 func GetProject(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		id, err := uuid.Parse(c.Param("id"))
+		id, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
 			return c.String(http.StatusBadRequest, "Malformed ID")
 		}
@@ -107,7 +107,7 @@ func CreateProjectBulk(db *sqlx.DB) echo.HandlerFunc {
 func UpdateProject(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		// id from url params
-		id, err := uuid.Parse(c.Param("id"))
+		id, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
 			return c.String(http.StatusBadRequest, "Malformed ID")
 		}
@@ -138,7 +138,7 @@ func UpdateProject(db *sqlx.DB) echo.HandlerFunc {
 // DeleteFlagProject sets the instrument group deleted flag true
 func DeleteFlagProject(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		id, err := uuid.Parse(c.Param("id"))
+		id, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
 			return c.JSON(http.StatusNotFound, err)
 		}

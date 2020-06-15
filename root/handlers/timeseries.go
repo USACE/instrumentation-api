@@ -51,6 +51,21 @@ func ListInstrumentTimeseries(db *sqlx.DB) echo.HandlerFunc {
 	}
 }
 
+// ListInstrumentGroupTimeseries lists timeseries for instruments in an instrument group
+func ListInstrumentGroupTimeseries(db *sqlx.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		gID, err := uuid.Parse(c.Param("instrument_group_id"))
+		if err != nil {
+			return c.String(http.StatusBadRequest, "Malformed ID")
+		}
+		tt, err := models.ListInstrumentGroupTimeseries(db, &gID)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, err.Error())
+		}
+		return c.JSON(http.StatusOK, tt)
+	}
+}
+
 // CreateTimeseries accepts a timeseries object or array of timeseries objects
 // Can handle objects with or without TimeseriesMeasurements
 func CreateTimeseries(db *sqlx.DB) echo.HandlerFunc {

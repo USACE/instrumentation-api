@@ -2128,6 +2128,54 @@
 					"response": []
 				},
 				{
+					"name": "ListInstrumentGroupTimeseries",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "1e28abec-e44c-4eea-9080-50251911a813",
+								"exec": [
+									"// validate JSON schema",
+									"var schema = {",
+									"    \"type\": \"array\",",
+									"    \"items\": JSON.parse(pm.globals.get('TIMESERIES_OBJ_SCHEMA'))",
+									"}",
+									"",
+									"pm.globals.set('TIMESERIES_ARRAY_SCHEMA', JSON.stringify(schema))",
+									"",
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// schema validation",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(schema)",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/instrumentation/instrument_groups/d0916e8a-39a6-4f2f-bd31-879881f8b40c/timeseries",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"instrument_groups",
+								"d0916e8a-39a6-4f2f-bd31-879881f8b40c",
+								"timeseries"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "ListTimeseriesMeasurements",
 					"event": [
 						{

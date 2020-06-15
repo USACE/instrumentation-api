@@ -24,7 +24,7 @@ func ListInstruments(db *sqlx.DB) echo.HandlerFunc {
 // GetInstrument returns a single instrument
 func GetInstrument(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		id, err := uuid.Parse(c.Param("id"))
+		id, err := uuid.Parse(c.Param("instrument_id"))
 		if err != nil {
 			return c.String(http.StatusBadRequest, "Malformed ID")
 		}
@@ -79,7 +79,7 @@ func UpdateInstrument(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 
 		// id from url params
-		id, err := uuid.Parse(c.Param("id"))
+		id, err := uuid.Parse(c.Param("instrument_id"))
 		if err != nil {
 			return c.String(http.StatusBadRequest, "Malformed ID")
 		}
@@ -108,7 +108,7 @@ func UpdateInstrument(db *sqlx.DB) echo.HandlerFunc {
 // DeleteFlagInstrument changes deleted flag true for an instrument
 func DeleteFlagInstrument(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		id, err := uuid.Parse(c.Param("id"))
+		id, err := uuid.Parse(c.Param("instrument_id"))
 		if err != nil {
 			return c.String(http.StatusBadRequest, "Malformed ID")
 		}

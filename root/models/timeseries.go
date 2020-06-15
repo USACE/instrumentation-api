@@ -76,6 +76,25 @@ func ListInstrumentTimeseries(db *sqlx.DB, instrumentID *uuid.UUID) ([]Timeserie
 	return tt, nil
 }
 
+// ListInstrumentGroupTimeseries returns an array of timeseries for instruments that belong to an instrument_group
+func ListInstrumentGroupTimeseries(db *sqlx.DB, instrumentGroupID *uuid.UUID) ([]Timeseries, error) {
+
+	var tt []Timeseries
+	if err := db.Select(
+		&tt,
+		`SELECT *
+		 FROM   timeseries
+		 WHERE  instrument_id IN (
+			SELECT instrument_id
+			FROM   instrument_group_instruments
+			WHERE  instrument_group_id = $1
+		)`, instrumentGroupID,
+	); err != nil {
+		return make([]Timeseries, 0), err
+	}
+	return tt, nil
+}
+
 // GetTimeseries returns a single timeseries without measurements
 func GetTimeseries(db *sqlx.DB, id *uuid.UUID) (*Timeseries, error) {
 
