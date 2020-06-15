@@ -39,6 +39,9 @@ func parsePublicKey(key string) *rsa.PublicKey {
 }
 
 func skipper(c echo.Context) bool {
+	if c.Request().Method == "GET" {
+		return true
+	}
 	value, exists := os.LookupEnv("JWT_DISABLED")
 	if exists && strings.ToUpper(value) == "TRUE" {
 		return true
