@@ -21,6 +21,17 @@ func ListInstruments(db *sqlx.DB) echo.HandlerFunc {
 	}
 }
 
+// GetInstrumentCount returns the total number of non deleted instruments in the system
+func GetInstrumentCount(db *sqlx.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		count, err := models.GetInstrumentCount(db)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+		return c.JSON(http.StatusOK, map[string]interface{}{"instrument_count": count})
+	}
+}
+
 // GetInstrument returns a single instrument
 func GetInstrument(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
@@ -113,7 +124,7 @@ func DeleteFlagInstrument(db *sqlx.DB) echo.HandlerFunc {
 			return c.String(http.StatusBadRequest, "Malformed ID")
 		}
 
-		if err := models.DeleteFlagInstrument(db, id); err != nil {
+		if err := models.DeleteFlagInstrument(db, &id); err != nil {
 			return c.NoContent(http.StatusBadRequest)
 		}
 

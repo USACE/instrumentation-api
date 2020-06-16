@@ -38,7 +38,7 @@ func parsePublicKey(key string) *rsa.PublicKey {
 
 }
 
-func skipper(c echo.Context) bool {
+func skipJWT(c echo.Context) bool {
 	if c.Request().Method == "GET" {
 		return true
 	}
@@ -52,7 +52,7 @@ func skipper(c echo.Context) bool {
 // JWTConfig is JWT authentication configuration for this app
 var JWTConfig = middleware.JWTConfig{
 	// Skipper defines a function to skip middleware.
-	Skipper: skipper,
+	Skipper: skipJWT,
 	// Signing key to validate token.
 	// Required.
 	SigningKey: parsePublicKey(jwtVerifyKey),

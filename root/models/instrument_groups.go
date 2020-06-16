@@ -103,10 +103,11 @@ func CreateInstrumentGroupBulk(db *sqlx.DB, groups []InstrumentGroup) error {
 		return err
 	}
 
+	t := time.Now()
 	for _, g := range groups {
 
 		_, err := stmt.Exec(
-			g.ID, g.Slug, g.Name, g.Description, g.Creator, g.CreateDate, g.Updater, g.UpdateDate, g.ProjectID,
+			g.ID, g.Slug, g.Name, g.Description, g.Creator, t, g.Updater, t, g.ProjectID,
 		)
 
 		if err != nil {
@@ -146,7 +147,7 @@ func UpdateInstrumentGroup(db *sqlx.DB, g *InstrumentGroup) (*InstrumentGroup, e
 				project_id = $7
 		 WHERE id = $1
 		 RETURNING *
-		`, g.ID, g.Name, g.Deleted, g.Description, g.Updater, g.UpdateDate, g.ProjectID,
+		`, g.ID, g.Name, g.Deleted, g.Description, g.Updater, time.Now(), g.ProjectID,
 	).StructScan(&gUpdated); err != nil {
 		return nil, err
 	}

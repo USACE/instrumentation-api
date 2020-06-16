@@ -99,9 +99,10 @@ func CreateInstrumentNote(db *sqlx.DB, notes []InstrumentNote) error {
 		return err
 	}
 
+	t := time.Now()
 	for _, n := range notes {
 		if _, err = stmt.Exec(
-			n.ID, n.InstrumentID, n.Title, n.Body, n.Time, n.Creator, n.CreateDate, n.Updater, n.UpdateDate,
+			n.ID, n.InstrumentID, n.Title, n.Body, n.Time, n.Creator, t, n.Updater, t,
 		); err != nil {
 			return err
 		}
@@ -135,7 +136,7 @@ func UpdateInstrumentNote(db *sqlx.DB, n *InstrumentNote) (*InstrumentNote, erro
 				update_date = $6
 		 WHERE id = $1
 		 RETURNING id, instrument_id, title, body, time, creator, create_date, updater, update_date
-		`, n.ID, n.Title, n.Body, n.Time, n.Updater, n.UpdateDate,
+		`, n.ID, n.Title, n.Body, n.Time, n.Updater, time.Now(),
 	).StructScan(&nUpdated); err != nil {
 		return nil, err
 	}
