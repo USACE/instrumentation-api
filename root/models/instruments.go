@@ -85,15 +85,6 @@ func ListInstruments(db *sqlx.DB) ([]Instrument, error) {
 	return InstrumentsFactory(rows)
 }
 
-// GetInstrumentCount returns the number of instruments in the database
-func GetInstrumentCount(db *sqlx.DB) (int, error) {
-	var count int
-	if err := db.Get(&count, "SELECT COUNT(id) FROM instrument WHERE NOT deleted"); err != nil {
-		return 0, err
-	}
-	return count, nil
-}
-
 // GetInstrument returns a single instrument
 func GetInstrument(db *sqlx.DB, id *uuid.UUID) (*Instrument, error) {
 
@@ -139,12 +130,11 @@ func CreateInstrumentBulk(db *sqlx.DB, instruments []Instrument) error {
 		return err
 	}
 
-	t := time.Now()
 	for _, i := range instruments {
 		// Load Instrument
 		if _, err := stmt1.Exec(
 			i.ID, i.Slug, i.Name, i.TypeID, wkt.MarshalString(i.Geometry.Geometry()),
-			i.Station, i.StationOffset, i.Creator, t, i.Updater, t, i.ProjectID,
+			i.Station, i.StationOffset, i.Creator, i.CreateDate, i.Updater, i.UpdateDate, i.ProjectID,
 		); err != nil {
 			return err
 		}
@@ -197,7 +187,7 @@ func UpdateInstrument(db *sqlx.DB, i *Instrument) (*Instrument, error) {
 	var updatedID uuid.UUID
 	if err := stmt1.QueryRow(
 		i.ID, i.Name, i.TypeID, wkb.Value(i.Geometry.Geometry()),
-		i.Updater, time.Now(), i.ProjectID, i.Station, i.StationOffset,
+		i.Updater, i.UpdateDate, i.ProjectID, i.Station, i.StationOffset,
 	).Scan(&updatedID); err != nil {
 		return nil, err
 	}
@@ -235,7 +225,7 @@ func UpdateInstrument(db *sqlx.DB, i *Instrument) (*Instrument, error) {
 }
 
 // DeleteFlagInstrument changes delete flag to true
-func DeleteFlagInstrument(db *sqlx.DB, id *uuid.UUID) error {
+func DeleteFlagInstrument(db *sqlx.DB, id uuid.UUID) error {
 
 	if _, err := db.Exec(`UPDATE instrument SET deleted = true WHERE id = $1`, id); err != nil {
 		return err

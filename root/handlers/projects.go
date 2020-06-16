@@ -51,17 +51,6 @@ func ListProjectInstrumentGroups(db *sqlx.DB) echo.HandlerFunc {
 	}
 }
 
-// GetProjectCount returns the total number of non deleted projects in the system
-func GetProjectCount(db *sqlx.DB) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		count, err := models.GetProjectCount(db)
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
-		}
-		return c.JSON(http.StatusOK, map[string]interface{}{"project_count": count})
-	}
-}
-
 // GetProject returns single project
 func GetProject(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
