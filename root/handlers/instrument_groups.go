@@ -66,7 +66,13 @@ func CreateInstrumentGroupBulk(db *sqlx.DB) echo.HandlerFunc {
 			slugsTaken = append(slugsTaken, s)
 		}
 
-		if err := models.CreateInstrumentGroupBulk(db, gc.Items); err != nil {
+		// Get action information from context
+		a, err := models.NewAction(c)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+
+		if err := models.CreateInstrumentGroupBulk(db, a, gc.Items); err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 		// Send instrumentgroup
@@ -95,8 +101,15 @@ func UpdateInstrumentGroup(db *sqlx.DB) echo.HandlerFunc {
 				"url parameter id does not match object id in body",
 			)
 		}
+
+		// Get action information from context
+		a, err := models.NewAction(c)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+
 		// update
-		gUpdated, err := models.UpdateInstrumentGroup(db, &g)
+		gUpdated, err := models.UpdateInstrumentGroup(db, a, &g)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}

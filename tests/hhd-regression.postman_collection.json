@@ -107,6 +107,67 @@
 					"response": []
 				},
 				{
+					"name": "GetInstrumentCount",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "a65011f3-7827-4c52-a59d-e241a3089d7b",
+								"exec": [
+									"// validate JSON schema",
+									"var schema = {",
+									"    \"type\": \"object\",",
+									"    \"properties\": {",
+									"        \"instrument_count\": { \"type\": \"number\" }",
+									"    },",
+									"    \"required\": [\"instrument_count\"],",
+									"    \"additionalProperties\": false",
+									"}",
+									"",
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// validate schema",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(schema)",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/instrumentation/instruments/count",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"instruments",
+								"count"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "PutInstrument",
 					"event": [
 						{
@@ -135,7 +196,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"id\": \"a7540f69-c41e-43b3-b655-6e44097edb7e\",\n    \"status_id\": \"94578354-ffdf-4119-9663-6bd4323e58f5\",\n    \"status\": \"destroyed\",\n    \"status_time\": \"2001-01-01T00:00:00Z\",\n    \"slug\": \"demo-piezometer-1\",\n    \"name\": \"Demo Piezometer 1 Updated Name\",\n    \"type_id\": \"1bb4bf7c-f5f8-44eb-9805-43b07ffadbef\",\n    \"type\": \"Piezometer\",\n    \"geometry\": {\n        \"type\": \"Point\",\n        \"coordinates\": [\n            -80.8,\n            26.7\n        ]\n    },\n    \"station\": null,\n    \"offset\": null,\n    \"creator\": 0,\n    \"create_date\": \"2020-06-10T02:36:23.600686Z\",\n    \"updater\": 0,\n    \"update_date\": \"2020-06-12T02:36:23.600686Z\",\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\",\n    \"zreference\": 44.5,\n    \"zreference_datum_id\": \"72113f9a-982d-44e5-8fc1-8e595dafd344\",\n    \"zreference_datum\": \"North American Vertical Datum of 1988 (NAVD 88)\",\n    \"zreference_time\": \"2006-06-01T00:00:00Z\"\n}",
+							"raw": "{\n    \"id\": \"a7540f69-c41e-43b3-b655-6e44097edb7e\",\n    \"status_id\": \"94578354-ffdf-4119-9663-6bd4323e58f5\",\n    \"status\": \"destroyed\",\n    \"status_time\": \"2001-01-01T00:00:00Z\",\n    \"slug\": \"demo-piezometer-1\",\n    \"name\": \"Demo Piezometer 1 Updated Name\",\n    \"type_id\": \"1bb4bf7c-f5f8-44eb-9805-43b07ffadbef\",\n    \"type\": \"Piezometer\",\n    \"geometry\": {\n        \"type\": \"Point\",\n        \"coordinates\": [\n            -80.8,\n            26.7\n        ]\n    },\n    \"station\": null,\n    \"offset\": null,\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\",\n    \"zreference\": 44.5,\n    \"zreference_datum_id\": \"72113f9a-982d-44e5-8fc1-8e595dafd344\",\n    \"zreference_datum\": \"North American Vertical Datum of 1988 (NAVD 88)\",\n    \"zreference_time\": \"2006-06-01T00:00:00Z\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -230,7 +291,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "[{\n    \"status_id\": \"94578354-ffdf-4119-9663-6bd4323e58f5\",\n    \"status\": \"destroyed\",\n    \"status_time\": \"2001-01-01T00:00:00Z\",\n    \"slug\": \"demo-piezometer-2\",\n    \"name\": \"Demo Piezometer 2\",\n    \"type_id\": \"1bb4bf7c-f5f8-44eb-9805-43b07ffadbef\",\n    \"type\": \"Piezometer\",\n    \"geometry\": {\n        \"type\": \"Point\",\n        \"coordinates\": [\n            -80.8,\n            26.7\n        ]\n    },\n    \"station\": null,\n    \"offset\": null,\n    \"creator\": 0,\n    \"create_date\": \"2020-06-10T02:36:23.600686Z\",\n    \"updater\": 0,\n    \"update_date\": \"2020-06-12T02:36:23.600686Z\",\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\",\n    \"zreference\": 44.5,\n    \"zreference_datum_id\": \"72113f9a-982d-44e5-8fc1-8e595dafd344\",\n    \"zreference_datum\": \"North American Vertical Datum of 1988 (NAVD 88)\",\n    \"zreference_time\": \"2006-06-01T00:00:00Z\"\n},\n{\n    \"status_id\": \"94578354-ffdf-4119-9663-6bd4323e58f5\",\n    \"status\": \"destroyed\",\n    \"status_time\": \"2001-01-01T00:00:00Z\",\n    \"slug\": \"demo-piezometer-3\",\n    \"name\": \"Demo Piezometer 3\",\n    \"type_id\": \"1bb4bf7c-f5f8-44eb-9805-43b07ffadbef\",\n    \"type\": \"Piezometer\",\n    \"geometry\": {\n        \"type\": \"Point\",\n        \"coordinates\": [\n            -80.8,\n            26.7\n        ]\n    },\n    \"station\": null,\n    \"offset\": null,\n    \"creator\": 0,\n    \"create_date\": \"2020-06-10T02:36:23.600686Z\",\n    \"updater\": 0,\n    \"update_date\": \"2020-06-12T02:36:23.600686Z\",\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\",\n    \"zreference\": 44.5,\n    \"zreference_datum_id\": \"72113f9a-982d-44e5-8fc1-8e595dafd344\",\n    \"zreference_datum\": \"North American Vertical Datum of 1988 (NAVD 88)\",\n    \"zreference_time\": \"2006-06-01T00:00:00Z\"\n},\n{\n    \"status_id\": \"94578354-ffdf-4119-9663-6bd4323e58f5\",\n    \"status\": \"destroyed\",\n    \"status_time\": \"2001-01-01T00:00:00Z\",\n    \"slug\": \"demo-piezometer-4\",\n    \"name\": \"Demo Piezometer 4\",\n    \"type_id\": \"1bb4bf7c-f5f8-44eb-9805-43b07ffadbef\",\n    \"type\": \"Piezometer\",\n    \"geometry\": {\n        \"type\": \"Point\",\n        \"coordinates\": [\n            -80.8,\n            26.7\n        ]\n    },\n    \"station\": null,\n    \"offset\": null,\n    \"creator\": 0,\n    \"create_date\": \"2020-06-10T02:36:23.600686Z\",\n    \"updater\": 0,\n    \"update_date\": \"2020-06-12T02:36:23.600686Z\",\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\",\n    \"zreference\": 44.5,\n    \"zreference_datum_id\": \"72113f9a-982d-44e5-8fc1-8e595dafd344\",\n    \"zreference_datum\": \"North American Vertical Datum of 1988 (NAVD 88)\",\n    \"zreference_time\": \"2006-06-01T00:00:00Z\"\n}\n]",
+							"raw": "[{\n    \"status_id\": \"94578354-ffdf-4119-9663-6bd4323e58f5\",\n    \"status\": \"destroyed\",\n    \"status_time\": \"2001-01-01T00:00:00Z\",\n    \"slug\": \"demo-piezometer-2\",\n    \"name\": \"Demo Piezometer 2\",\n    \"type_id\": \"1bb4bf7c-f5f8-44eb-9805-43b07ffadbef\",\n    \"type\": \"Piezometer\",\n    \"geometry\": {\n        \"type\": \"Point\",\n        \"coordinates\": [\n            -80.8,\n            26.7\n        ]\n    },\n    \"station\": null,\n    \"offset\": null,\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\",\n    \"zreference\": 44.5,\n    \"zreference_datum_id\": \"72113f9a-982d-44e5-8fc1-8e595dafd344\",\n    \"zreference_datum\": \"North American Vertical Datum of 1988 (NAVD 88)\",\n    \"zreference_time\": \"2006-06-01T00:00:00Z\"\n},\n{\n    \"status_id\": \"94578354-ffdf-4119-9663-6bd4323e58f5\",\n    \"status\": \"destroyed\",\n    \"status_time\": \"2001-01-01T00:00:00Z\",\n    \"slug\": \"demo-piezometer-3\",\n    \"name\": \"Demo Piezometer 3\",\n    \"type_id\": \"1bb4bf7c-f5f8-44eb-9805-43b07ffadbef\",\n    \"type\": \"Piezometer\",\n    \"geometry\": {\n        \"type\": \"Point\",\n        \"coordinates\": [\n            -80.8,\n            26.7\n        ]\n    },\n    \"station\": null,\n    \"offset\": null,\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\",\n    \"zreference\": 44.5,\n    \"zreference_datum_id\": \"72113f9a-982d-44e5-8fc1-8e595dafd344\",\n    \"zreference_datum\": \"North American Vertical Datum of 1988 (NAVD 88)\",\n    \"zreference_time\": \"2006-06-01T00:00:00Z\"\n},\n{\n    \"status_id\": \"94578354-ffdf-4119-9663-6bd4323e58f5\",\n    \"status\": \"destroyed\",\n    \"status_time\": \"2001-01-01T00:00:00Z\",\n    \"slug\": \"demo-piezometer-4\",\n    \"name\": \"Demo Piezometer 4\",\n    \"type_id\": \"1bb4bf7c-f5f8-44eb-9805-43b07ffadbef\",\n    \"type\": \"Piezometer\",\n    \"geometry\": {\n        \"type\": \"Point\",\n        \"coordinates\": [\n            -80.8,\n            26.7\n        ]\n    },\n    \"station\": null,\n    \"offset\": null,\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\",\n    \"zreference\": 44.5,\n    \"zreference_datum_id\": \"72113f9a-982d-44e5-8fc1-8e595dafd344\",\n    \"zreference_datum\": \"North American Vertical Datum of 1988 (NAVD 88)\",\n    \"zreference_time\": \"2006-06-01T00:00:00Z\"\n}\n]",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -278,7 +339,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"status_id\": \"94578354-ffdf-4119-9663-6bd4323e58f5\",\n    \"status\": \"destroyed\",\n    \"status_time\": \"2001-01-01T00:00:00Z\",\n    \"slug\": \"demo-piezometer-5\",\n    \"name\": \"Demo Piezometer 5\",\n    \"type_id\": \"1bb4bf7c-f5f8-44eb-9805-43b07ffadbef\",\n    \"type\": \"Piezometer\",\n    \"geometry\": {\n        \"type\": \"Point\",\n        \"coordinates\": [\n            -80.8,\n            26.7\n        ]\n    },\n    \"station\": null,\n    \"offset\": null,\n    \"creator\": 0,\n    \"create_date\": \"2020-06-10T02:36:23.600686Z\",\n    \"updater\": 0,\n    \"update_date\": \"2020-06-12T02:36:23.600686Z\",\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\",\n    \"zreference\": 44.5,\n    \"zreference_datum_id\": \"72113f9a-982d-44e5-8fc1-8e595dafd344\",\n    \"zreference_datum\": \"North American Vertical Datum of 1988 (NAVD 88)\",\n    \"zreference_time\": \"2006-06-01T00:00:00Z\"\n},",
+							"raw": "{\n    \"status_id\": \"94578354-ffdf-4119-9663-6bd4323e58f5\",\n    \"status\": \"destroyed\",\n    \"status_time\": \"2001-01-01T00:00:00Z\",\n    \"slug\": \"demo-piezometer-5\",\n    \"name\": \"Demo Piezometer 5\",\n    \"type_id\": \"1bb4bf7c-f5f8-44eb-9805-43b07ffadbef\",\n    \"type\": \"Piezometer\",\n    \"geometry\": {\n        \"type\": \"Point\",\n        \"coordinates\": [\n            -80.8,\n            26.7\n        ]\n    },\n    \"station\": null,\n    \"offset\": null,\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\",\n    \"zreference\": 44.5,\n    \"zreference_datum_id\": \"72113f9a-982d-44e5-8fc1-8e595dafd344\",\n    \"zreference_datum\": \"North American Vertical Datum of 1988 (NAVD 88)\",\n    \"zreference_time\": \"2006-06-01T00:00:00Z\"\n},",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1044,7 +1105,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"id\": \"90a3f8de-de65-48a7-8286-024c13162958\",\n    \"instrument_id\": \"a7540f69-c41e-43b3-b655-6e44097edb7e\",\n    \"title\": \"Instrument Test Note 1\",\n    \"body\": \"Updated instrument note body text.  This is example updated text.\",\n    \"time\": \"2020-06-09T01:49:48.505713Z\",\n    \"creator\": 0,\n    \"create_date\": \"2020-06-09T01:49:48.505713Z\",\n    \"updater\": 0,\n    \"update_date\": \"2020-06-09T01:49:48.505713Z\"\n}",
+							"raw": "{\n    \"id\": \"90a3f8de-de65-48a7-8286-024c13162958\",\n    \"instrument_id\": \"a7540f69-c41e-43b3-b655-6e44097edb7e\",\n    \"title\": \"Instrument Test Note 1\",\n    \"body\": \"Updated instrument note body text.  This is example updated text.\",\n    \"time\": \"2020-06-09T01:49:48.505713Z\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1095,7 +1156,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "[\n    {\n        \"instrument_id\": \"a7540f69-c41e-43b3-b655-6e44097edb7e\",\n        \"title\": \"Instrument Test Note 101\",\n        \"body\": \"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut\\n labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris\\n nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse\\n cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui\\n officia deserunt mollit anim id est laborum.\\n\",\n        \"time\": \"2020-06-09T01:49:48.505713Z\",\n        \"creator\": 0,\n        \"create_date\": \"2020-06-09T01:49:48.505713Z\",\n        \"updater\": 0,\n        \"update_date\": \"2020-06-09T01:49:48.505713Z\"\n    },\n        {\n        \"instrument_id\": \"a7540f69-c41e-43b3-b655-6e44097edb7e\",\n        \"title\": \"Instrument Test Note 102\",\n        \"body\": \"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut\\n labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris\\n nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse\\n cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui\\n officia deserunt mollit anim id est laborum.\\n\",\n        \"time\": \"2020-06-09T01:49:48.505713Z\",\n        \"creator\": 0,\n        \"create_date\": \"2020-06-09T01:49:48.505713Z\",\n        \"updater\": 0,\n        \"update_date\": \"2020-06-09T01:49:48.505713Z\"\n    },\n        {\n        \"instrument_id\": \"a7540f69-c41e-43b3-b655-6e44097edb7e\",\n        \"title\": \"Instrument Test Note 103\",\n        \"body\": \"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut\\n labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris\\n nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse\\n cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui\\n officia deserunt mollit anim id est laborum.\\n\",\n        \"time\": \"2020-06-09T01:49:48.505713Z\",\n        \"creator\": 0,\n        \"create_date\": \"2020-06-09T01:49:48.505713Z\",\n        \"updater\": 0,\n        \"update_date\": \"2020-06-09T01:49:48.505713Z\"\n    }\n]",
+							"raw": "[\n    {\n        \"instrument_id\": \"a7540f69-c41e-43b3-b655-6e44097edb7e\",\n        \"title\": \"Instrument Test Note 101\",\n        \"body\": \"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut\\n labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris\\n nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse\\n cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui\\n officia deserunt mollit anim id est laborum.\\n\",\n        \"time\": \"2020-06-09T01:49:48.505713Z\"\n    },\n        {\n        \"instrument_id\": \"a7540f69-c41e-43b3-b655-6e44097edb7e\",\n        \"title\": \"Instrument Test Note 102\",\n        \"body\": \"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut\\n labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris\\n nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse\\n cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui\\n officia deserunt mollit anim id est laborum.\\n\",\n        \"time\": \"2020-06-09T01:49:48.505713Z\"\n    },\n        {\n        \"instrument_id\": \"a7540f69-c41e-43b3-b655-6e44097edb7e\",\n        \"title\": \"Instrument Test Note 103\",\n        \"body\": \"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut\\n labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris\\n nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse\\n cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui\\n officia deserunt mollit anim id est laborum.\\n\",\n        \"time\": \"2020-06-09T01:49:48.505713Z\"\n    }\n]",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1117,7 +1178,7 @@
 					"response": []
 				},
 				{
-					"name": "CreateInstrumentBulk_Object",
+					"name": "CreateInstrumentNote_Object",
 					"event": [
 						{
 							"listen": "test",
@@ -1144,7 +1205,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n        \"instrument_id\": \"a7540f69-c41e-43b3-b655-6e44097edb7e\",\n        \"title\": \"Instrument Note from Object Upload\",\n        \"body\": \"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut\\n labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris\\n nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse\\n cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui\\n officia deserunt mollit anim id est laborum.\\n\",\n        \"time\": \"2020-06-09T01:49:48.505713Z\",\n        \"creator\": 0,\n        \"create_date\": \"2020-06-09T01:49:48.505713Z\",\n        \"updater\": 0,\n        \"update_date\": \"2020-06-09T01:49:48.505713Z\"\n    }",
+							"raw": "{\n        \"instrument_id\": \"a7540f69-c41e-43b3-b655-6e44097edb7e\",\n        \"title\": \"Instrument Note from Object Upload\",\n        \"body\": \"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut\\n labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris\\n nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse\\n cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui\\n officia deserunt mollit anim id est laborum.\\n\",\n        \"time\": \"2020-06-09T01:49:48.505713Z\"\n    }",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1340,7 +1401,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "[{\n    \"name\": \"Test Instrument Group 100\",\n    \"creator\": 1111111111,\n    \"create_date\": \"2020-04-16T15:41:22.013Z\",\n    \"updater\": 1111111111,\n    \"update_date\": \"2020-04-16T15:41:22.013Z\"\n},\n{\n    \"name\": \"Test Instrument Group 101\",\n    \"creator\": 1111111111,\n    \"create_date\": \"2020-04-16T15:41:22.013Z\",\n    \"updater\": 1111111111,\n    \"update_date\": \"2020-04-16T15:41:22.013Z\"\n},\n{\n    \"name\": \"Test Instrument Group 102\",\n    \"creator\": 1111111111,\n    \"create_date\": \"2020-04-16T15:41:22.013Z\",\n    \"updater\": 1111111111,\n    \"update_date\": \"2020-04-16T15:41:22.013Z\"\n}]",
+							"raw": "[{\n    \"name\": \"Test Instrument Group 100\",\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\"\n},\n{\n    \"name\": \"Test Instrument Group 101\",\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\"\n},\n{\n    \"name\": \"Test Instrument Group 102\",\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\"\n}]",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1389,7 +1450,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"Test Instrument Group 500\",\n    \"description\": \"This is a sample instrument group created by integration tests\",\n    \"creator\": 1111111111,\n    \"create_date\": \"2020-04-16T15:41:22.013Z\",\n    \"updater\": 1111111111,\n    \"update_date\": \"2020-04-16T15:41:22.013Z\"\n}",
+							"raw": "{\n    \"name\": \"Test Instrument Group 500\",\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\",\n    \"description\": \"This is a sample instrument group created by integration tests\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1438,7 +1499,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"id\": \"d0916e8a-39a6-4f2f-bd31-879881f8b40c\",\n    \"name\": \"Updated Name for Instrument Group 1\",\n    \"description\": \"A sample instrument group created by integration tests\",\n    \"creator\": 1111111111,\n    \"create_date\": \"2020-05-20T15:26:37.248682Z\",\n    \"updater\": 1111111111,\n    \"update_date\": \"2020-05-20T15:26:37.248682Z\",\n    \"project_id\": null\n}",
+							"raw": "{\n    \"id\": \"d0916e8a-39a6-4f2f-bd31-879881f8b40c\",\n    \"name\": \"Updated Name for Instrument Group 1\",\n    \"description\": \"A sample instrument group created by integration tests\",\n    \"project_id\": null\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1658,8 +1719,10 @@
 									"        \"create_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
 									"        \"updater\": { \"type\": \"number\" },",
 									"        \"update_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
+									"        \"instrument_count\": {\"type\": \"number\"},",
+									"        \"instrument_group_count\": {\"type\": \"number\"},",
 									"    },",
-									"    \"required\": [\"id\", \"federal_id\", \"slug\", \"name\", \"creator\", \"create_date\", \"updater\", \"update_date\"],",
+									"    \"required\": [\"id\", \"federal_id\", \"slug\", \"name\", \"creator\", \"create_date\", \"updater\", \"update_date\", \"instrument_count\", \"instrument_group_count\"],",
 									"    \"additionalProperties\": false",
 									"}",
 									"",
@@ -1691,6 +1754,55 @@
 								"instrumentation",
 								"projects",
 								"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetProjectCount",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "3e658043-89f1-4f22-884a-df8fd1b5acfa",
+								"exec": [
+									"// validate JSON schema",
+									"var schema = {",
+									"    \"type\": \"object\",",
+									"    \"properties\": {",
+									"        \"project_count\": { \"type\": \"number\" }",
+									"    },",
+									"    \"required\": [\"project_count\"],",
+									"    \"additionalProperties\": false",
+									"}",
+									"",
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// schema validation",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(schema)",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/instrumentation/projects/count",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"projects",
+								"count"
 							]
 						}
 					},
@@ -1771,7 +1883,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "[{\n    \"name\": \"Test Project 100000\",\n    \"federal_id\": null,\n    \"creator\": 1111111111,\n    \"create_date\": \"2020-04-16T15:41:22.013Z\",\n    \"updater\": 1111111111,\n    \"update_date\": \"2020-04-16T15:41:22.013Z\"\n},\n{\n    \"name\": \"Test Project 100001\",\n    \"federal_id\": null,\n    \"creator\": 1111111111,\n    \"create_date\": \"2020-04-16T15:41:22.013Z\",\n    \"updater\": 1111111111,\n    \"update_date\": \"2020-04-16T15:41:22.013Z\"\n},\n{\n    \"name\": \"Test Project 100002\",\n    \"federal_id\": null,\n    \"creator\": 1111111111,\n    \"create_date\": \"2020-04-16T15:41:22.013Z\",\n    \"updater\": 1111111111,\n    \"update_date\": \"2020-04-16T15:41:22.013Z\"\n}\n]",
+							"raw": "[{\n    \"name\": \"Test Project 100000\",\n    \"federal_id\": null\n},\n{\n    \"name\": \"Test Project 100001\",\n    \"federal_id\": null\n},\n{\n    \"name\": \"Test Project 100002\",\n    \"federal_id\": null\n}\n]",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1820,7 +1932,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"Test Project 500000\",\n    \"federal_id\": null,\n    \"creator\": 1111111111,\n    \"create_date\": \"2020-04-16T15:41:22.013Z\",\n    \"updater\": 1111111111,\n    \"update_date\": \"2020-04-16T15:41:22.013Z\"\n}",
+							"raw": "{\n    \"name\": \"Test Project 500000\",\n    \"federal_id\": null\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1869,7 +1981,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\",\n    \"federal_id\": null,\n    \"name\": \"Blue Water Reservoir\",\n    \"creator\": 1111111111,\n    \"create_date\": \"2020-05-20T15:26:37.248682Z\",\n    \"updater\": 1111111111,\n    \"update_date\": \"2020-05-20T15:26:37.248682Z\"\n}",
+							"raw": "{\n    \"id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\",\n    \"federal_id\": null,\n    \"name\": \"Blue Water Reservoir\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2610,9 +2722,92 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "GetHome",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "191deb14-751c-4c46-8f10-57e4e933033a",
+								"exec": [
+									"// validate JSON schema",
+									"var schema = {",
+									"    \"type\": \"object\",",
+									"    \"properties\": {",
+									"        \"instrument_count\": { \"type\": \"number\" },",
+									"        \"instrument_group_count\": { \"type\": \"number\" },",
+									"        \"project_count\": { \"type\": \"number\" },",
+									"        \"new_instruments_7d\": { \"type\": \"number\" },",
+									"        \"new_measurements_2h\": { \"type\": \"number\" }",
+									"    },",
+									"    \"required\": [\"instrument_count\", \"instrument_group_count\", \"project_count\", \"new_instruments_7d\", \"new_measurements_2h\"],",
+									"    \"additionalProperties\": false",
+									"}",
+									"",
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// schema validation",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(schema)",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/instrumentation/home",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"home"
+							]
+						}
+					},
+					"response": []
 				}
 			],
 			"protocolProfileBehavior": {}
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{jwt}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "3fe06d2e-5992-4d03-9494-238fc6318131",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "ec62e315-47eb-4d0d-a09d-c9350ee4ff13",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
 		}
 	],
 	"protocolProfileBehavior": {}

@@ -61,7 +61,14 @@ func CreateInstrumentNote(db *sqlx.DB) echo.HandlerFunc {
 			// Assign UUID
 			nc.Items[idx].ID = uuid.Must(uuid.NewRandom())
 		}
-		if err := models.CreateInstrumentNote(db, nc.Items); err != nil {
+
+		// Get action information from context
+		a, err := models.NewAction(c)
+
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+		if err := models.CreateInstrumentNote(db, a, nc.Items); err != nil {
 			return c.JSON(http.StatusInternalServerError, err)
 		}
 		return c.JSON(http.StatusCreated, nc.Items)
@@ -86,8 +93,15 @@ func UpdateInstrumentNote(db *sqlx.DB) echo.HandlerFunc {
 				"url note_id does not match object id in body",
 			)
 		}
+
+		// Get action information from context
+		a, err := models.NewAction(c)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+
 		// update
-		nUpdated, err := models.UpdateInstrumentNote(db, &n)
+		nUpdated, err := models.UpdateInstrumentNote(db, a, &n)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}

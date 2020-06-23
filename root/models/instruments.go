@@ -29,15 +29,12 @@ type Instrument struct {
 	Geometry          geojson.Geometry `json:"geometry,omitempty"`
 	Station           *int             `json:"station"`
 	StationOffset     *int             `json:"offset" db:"station_offset"`
-	Creator           int              `json:"creator"`
-	CreateDate        time.Time        `json:"create_date" db:"create_date"`
-	Updater           int              `json:"updater"`
-	UpdateDate        time.Time        `json:"update_date" db:"update_date"`
 	ProjectID         *uuid.UUID       `json:"project_id" db:"project_id"`
 	ZReference        float32          `json:"zreference"`
 	ZReferenceDatumID uuid.UUID        `json:"zreference_datum_id" db:"zreference_datum_id"`
 	ZReferenceDatum   string           `json:"zreference_datum"`
 	ZReferenceTime    time.Time        `json:"zreference_time"`
+	AuditInfo
 }
 
 // InstrumentCollection is a collection of Instrument items
@@ -99,8 +96,17 @@ func GetInstrument(db *sqlx.DB, id *uuid.UUID) (*Instrument, error) {
 	return &ii[0], nil
 }
 
+// GetInstrumentCount returns the number of instruments in the database
+func GetInstrumentCount(db *sqlx.DB) (int, error) {
+	var count int
+	if err := db.Get(&count, "SELECT COUNT(id) FROM instrument WHERE NOT deleted"); err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
 // CreateInstrumentBulk creates many instruments from an array of instruments
-func CreateInstrumentBulk(db *sqlx.DB, instruments []Instrument) error {
+func CreateInstrumentBulk(db *sqlx.DB, a *Action, instruments []Instrument) error {
 
 	txn, err := db.Begin()
 	if err != nil {
@@ -134,7 +140,7 @@ func CreateInstrumentBulk(db *sqlx.DB, instruments []Instrument) error {
 		// Load Instrument
 		if _, err := stmt1.Exec(
 			i.ID, i.Slug, i.Name, i.TypeID, wkt.MarshalString(i.Geometry.Geometry()),
-			i.Station, i.StationOffset, i.Creator, i.CreateDate, i.Updater, i.UpdateDate, i.ProjectID,
+			i.Station, i.StationOffset, a.Actor, a.Time, a.Actor, a.Time, i.ProjectID,
 		); err != nil {
 			return err
 		}
@@ -162,7 +168,7 @@ func CreateInstrumentBulk(db *sqlx.DB, instruments []Instrument) error {
 }
 
 // UpdateInstrument updates a single instrument
-func UpdateInstrument(db *sqlx.DB, i *Instrument) (*Instrument, error) {
+func UpdateInstrument(db *sqlx.DB, a *Action, i *Instrument) (*Instrument, error) {
 
 	txn, err := db.Begin()
 	if err != nil {
@@ -187,7 +193,7 @@ func UpdateInstrument(db *sqlx.DB, i *Instrument) (*Instrument, error) {
 	var updatedID uuid.UUID
 	if err := stmt1.QueryRow(
 		i.ID, i.Name, i.TypeID, wkb.Value(i.Geometry.Geometry()),
-		i.Updater, i.UpdateDate, i.ProjectID, i.Station, i.StationOffset,
+		a.Actor, a.Time, i.ProjectID, i.Station, i.StationOffset,
 	).Scan(&updatedID); err != nil {
 		return nil, err
 	}
@@ -225,7 +231,7 @@ func UpdateInstrument(db *sqlx.DB, i *Instrument) (*Instrument, error) {
 }
 
 // DeleteFlagInstrument changes delete flag to true
-func DeleteFlagInstrument(db *sqlx.DB, id uuid.UUID) error {
+func DeleteFlagInstrument(db *sqlx.DB, id *uuid.UUID) error {
 
 	if _, err := db.Exec(`UPDATE instrument SET deleted = true WHERE id = $1`, id); err != nil {
 		return err

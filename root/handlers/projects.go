@@ -51,6 +51,17 @@ func ListProjectInstrumentGroups(db *sqlx.DB) echo.HandlerFunc {
 	}
 }
 
+// GetProjectCount returns the total number of non deleted projects in the system
+func GetProjectCount(db *sqlx.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		count, err := models.GetProjectCount(db)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+		return c.JSON(http.StatusOK, map[string]interface{}{"project_count": count})
+	}
+}
+
 // GetProject returns single project
 func GetProject(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
@@ -95,7 +106,13 @@ func CreateProjectBulk(db *sqlx.DB) echo.HandlerFunc {
 			slugsTaken = append(slugsTaken, s)
 		}
 
-		if err := models.CreateProjectBulk(db, pc.Projects); err != nil {
+		// Get action information from context
+		a, err := models.NewAction(c)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+
+		if err := models.CreateProjectBulk(db, a, pc.Projects); err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 		// Send Project
@@ -125,8 +142,15 @@ func UpdateProject(db *sqlx.DB) echo.HandlerFunc {
 				},
 			)
 		}
+
+		// Get action information from context
+		a, err := models.NewAction(c)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+
 		// update
-		pUpdated, err := models.UpdateProject(db, p)
+		pUpdated, err := models.UpdateProject(db, a, p)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}

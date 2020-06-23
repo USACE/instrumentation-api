@@ -16,10 +16,7 @@ type InstrumentNote struct {
 	Title        string    `json:"title"`
 	Body         string    `json:"body"`
 	Time         time.Time `json:"time"`
-	Creator      int       `json:"creator"`
-	CreateDate   time.Time `json:"create_date" db:"create_date"`
-	Updater      int       `json:"updater"`
-	UpdateDate   time.Time `json:"update_date" db:"update_date"`
+	AuditInfo
 }
 
 // InstrumentNoteCollection is a collection of Instrument Notes
@@ -83,7 +80,7 @@ func GetInstrumentNote(db *sqlx.DB, id *uuid.UUID) (*InstrumentNote, error) {
 }
 
 // CreateInstrumentNote creates many instrument notes from an array of instrument notes
-func CreateInstrumentNote(db *sqlx.DB, notes []InstrumentNote) error {
+func CreateInstrumentNote(db *sqlx.DB, a *Action, notes []InstrumentNote) error {
 
 	txn, err := db.Begin()
 	if err != nil {
@@ -101,7 +98,7 @@ func CreateInstrumentNote(db *sqlx.DB, notes []InstrumentNote) error {
 
 	for _, n := range notes {
 		if _, err = stmt.Exec(
-			n.ID, n.InstrumentID, n.Title, n.Body, n.Time, n.Creator, n.CreateDate, n.Updater, n.UpdateDate,
+			n.ID, n.InstrumentID, n.Title, n.Body, n.Time, a.Actor, a.Time, a.Actor, a.Time,
 		); err != nil {
 			return err
 		}
@@ -123,7 +120,7 @@ func CreateInstrumentNote(db *sqlx.DB, notes []InstrumentNote) error {
 }
 
 // UpdateInstrumentNote updates a single instrument note
-func UpdateInstrumentNote(db *sqlx.DB, n *InstrumentNote) (*InstrumentNote, error) {
+func UpdateInstrumentNote(db *sqlx.DB, a *Action, n *InstrumentNote) (*InstrumentNote, error) {
 
 	var nUpdated InstrumentNote
 	if err := db.QueryRowx(
@@ -135,7 +132,7 @@ func UpdateInstrumentNote(db *sqlx.DB, n *InstrumentNote) (*InstrumentNote, erro
 				update_date = $6
 		 WHERE id = $1
 		 RETURNING id, instrument_id, title, body, time, creator, create_date, updater, update_date
-		`, n.ID, n.Title, n.Body, n.Time, n.Updater, n.UpdateDate,
+		`, n.ID, n.Title, n.Body, n.Time, a.Actor, a.Time,
 	).StructScan(&nUpdated); err != nil {
 		return nil, err
 	}

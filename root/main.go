@@ -51,12 +51,20 @@ func main() {
 
 	e := echo.New()
 	e.Use(middleware.CORS())
-	e.Use(middleware.JWTWithConfig(appconfig.JWTConfig))
+
+	// JWT Middleware handles JWT Auth
+	// SetCreatorUpaterFields sets context values from JWT claims for
+	// creator, create_date, updater, update_date
+	e.Use(
+		middleware.JWTWithConfig(appconfig.JWTConfig),
+		appconfig.IsLoggedIn,
+	)
 
 	// Public Routes
 	// NOTE: ALL GET REQUESTS ARE ALLOWED WITHOUT AUTHENTICATION USING JWTConfig Skipper. See appconfig/jwt.go
 	e.GET("instrumentation/projects", handlers.ListProjects(db))
 	e.GET("instrumentation/projects/:project_id", handlers.GetProject(db))
+	e.GET("instrumentation/projects/count", handlers.GetProjectCount(db))
 	e.GET("instrumentation/projects/:project_id/instruments", handlers.ListProjectInstruments(db))
 	e.GET("instrumentation/projects/:project_id/instrument_groups", handlers.ListProjectInstrumentGroups(db))
 	e.GET("instrumentation/instrument_groups", handlers.ListInstrumentGroups(db))
@@ -64,6 +72,7 @@ func main() {
 	e.GET("instrumentation/instrument_groups/:instrument_group_id/instruments", handlers.ListInstrumentGroupInstruments(db))
 	e.GET("instrumentation/instrument_groups/:instrument_group_id/timeseries", handlers.ListInstrumentGroupTimeseries(db))
 	e.GET("instrumentation/instruments", handlers.ListInstruments(db))
+	e.GET("instrumentation/instruments/count", handlers.GetInstrumentCount(db))
 	e.GET("instrumentation/instruments/:instrument_id", handlers.GetInstrument(db))
 	e.GET("instrumentation/instruments/notes", handlers.ListInstrumentNotes(db))
 	e.GET("instrumentation/instruments/notes/:note_id", handlers.GetInstrumentNote(db))
@@ -80,6 +89,7 @@ func main() {
 	e.GET("instrumentation/instruments/:instrument_id/timeseries/:timeseries_id/measurements", handlers.ListTimeseriesMeasurements(db))
 	e.GET("instrumentation/instruments/:instrument_id/timeseries/:timeseries_id", handlers.GetTimeseries(db))
 	e.GET("instrumentation/domains", handlers.GetDomains(db))
+	e.GET("instrumentation/home", handlers.GetHome(db))
 
 	// Authenticated Routes (Need CAC Login)
 	// Projects

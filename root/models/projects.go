@@ -2,7 +2,6 @@ package models
 
 import (
 	"encoding/json"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -11,15 +10,14 @@ import (
 
 // Project is a project data structure
 type Project struct {
-	ID         uuid.UUID `json:"id"`
-	Deleted    bool      `json:"-"`
-	FederalID  *string   `json:"federal_id" db:"federal_id"`
-	Slug       string    `json:"slug"`
-	Name       string    `json:"name"`
-	Creator    int       `json:"creator"`
-	CreateDate time.Time `json:"create_date" db:"create_date"`
-	Updater    int       `json:"updater"`
-	UpdateDate time.Time `json:"update_date" db:"update_date"`
+	ID                   uuid.UUID `json:"id"`
+	Deleted              bool      `json:"-"`
+	FederalID            *string   `json:"federal_id" db:"federal_id"`
+	Slug                 string    `json:"slug"`
+	Name                 string    `json:"name"`
+	InstrumentCount      int       `json:"instrument_count" db:"instrument_count"`
+	InstrumentGroupCount int       `json:"instrument_group_count" db:"instrument_group_count"`
+	AuditInfo
 }
 
 // ProjectCollection helps unpack unspecified JSON into an array of products
@@ -59,7 +57,7 @@ func ListProjectSlugs(db *sqlx.DB) ([]string, error) {
 // ListProjects returns a slice of projects
 func ListProjects(db *sqlx.DB) ([]Project, error) {
 	pp := make([]Project, 0)
-	if err := db.Select(&pp, "SELECT * FROM project WHERE NOT deleted"); err != nil {
+	if err := db.Select(&pp, listProjectsSQL()+" WHERE NOT p.deleted"); err != nil {
 		return make([]Project, 0), err
 	}
 	return pp, nil
@@ -83,7 +81,7 @@ func ListProjectInstrumentGroups(db *sqlx.DB, id uuid.UUID) ([]InstrumentGroup, 
 	gg := make([]InstrumentGroup, 0)
 	if err := db.Select(
 		&gg,
-		listInstrumentGroupsSQL()+"WHERE NOT deleted AND project_id = $1",
+		listInstrumentGroupsSQL()+" WHERE NOT deleted AND project_id = $1",
 		id,
 	); err != nil {
 		return make([]InstrumentGroup, 0), err
@@ -91,10 +89,19 @@ func ListProjectInstrumentGroups(db *sqlx.DB, id uuid.UUID) ([]InstrumentGroup, 
 	return gg, nil
 }
 
+// GetProjectCount returns the number of projects in the database that are not deleted
+func GetProjectCount(db *sqlx.DB) (int, error) {
+	var count int
+	if err := db.Get(&count, "SELECT COUNT(id) FROM project WHERE NOT deleted"); err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
 // GetProject returns a pointer to a project
 func GetProject(db *sqlx.DB, id uuid.UUID) (*Project, error) {
 	var p Project
-	if err := db.Get(&p, "SELECT * FROM project WHERE id = $1", id); err != nil {
+	if err := db.Get(&p, listProjectsSQL()+" WHERE p.id = $1", id); err != nil {
 		return nil, err
 	}
 	return &p, nil
@@ -103,14 +110,14 @@ func GetProject(db *sqlx.DB, id uuid.UUID) (*Project, error) {
 // GetProjectByFederalID returns a pointer to a project, looked-up by FederalID
 func GetProjectByFederalID(db *sqlx.DB, federalID string) (*Project, error) {
 	var p Project
-	if err := db.Get(&p, "SELECT * FROM project WHERE federal_id = $1", federalID); err != nil {
+	if err := db.Get(&p, listProjectsSQL()+" WHERE federal_id = $1", federalID); err != nil {
 		return nil, err
 	}
 	return &p, nil
 }
 
 // CreateProjectBulk creates one or more projects from an array of projects
-func CreateProjectBulk(db *sqlx.DB, projects []Project) error {
+func CreateProjectBulk(db *sqlx.DB, a *Action, projects []Project) error {
 
 	txn, err := db.Begin()
 	if err != nil {
@@ -128,7 +135,7 @@ func CreateProjectBulk(db *sqlx.DB, projects []Project) error {
 			return err
 		}
 
-		if _, err = stmt.Exec(i.ID, i.FederalID, i.Slug, i.Name, i.Creator, i.CreateDate, i.Updater, i.UpdateDate); err != nil {
+		if _, err = stmt.Exec(i.ID, i.FederalID, i.Slug, i.Name, a.Actor, a.Time, a.Actor, a.Time); err != nil {
 			return err
 		}
 	}
@@ -149,12 +156,12 @@ func CreateProjectBulk(db *sqlx.DB, projects []Project) error {
 }
 
 // UpdateProject updates a project
-func UpdateProject(db *sqlx.DB, p *Project) (*Project, error) {
+func UpdateProject(db *sqlx.DB, a *Action, p *Project) (*Project, error) {
 
 	var pUpdated Project
 	if err := db.QueryRowx(
 		"UPDATE project SET federal_id=$2, name=$3, updater=$4, update_date=$5 WHERE id=$1 RETURNING *",
-		p.ID, p.FederalID, p.Name, p.Updater, p.UpdateDate,
+		p.ID, p.FederalID, p.Name, a.Actor, a.Time,
 	).StructScan(&pUpdated); err != nil {
 		return nil, err
 	}
@@ -168,4 +175,27 @@ func DeleteFlagProject(db *sqlx.DB, id uuid.UUID) error {
 		return err
 	}
 	return nil
+}
+
+// ListProjectsSQL is the standard SQL for listing all projects
+func listProjectsSQL() string {
+	return `SELECT p.*,
+	               COALESCE(i.count, 0) AS instrument_count,
+	               COALESCE(g.count, 0) AS instrument_group_count
+            FROM   project p
+            LEFT JOIN (
+                SELECT project_id,
+               	       COUNT(instrument) as count
+				FROM   instrument
+				WHERE NOT instrument.deleted
+                GROUP BY project_id
+            ) i ON i.project_id = p.id
+            LEFT JOIN (
+                SELECT project_id,
+            		   COUNT(instrument_group) as count
+				FROM   instrument_group
+				WHERE NOT instrument_group.deleted
+                GROUP BY project_id
+            ) g ON g.project_id = p.id
+	`
 }
