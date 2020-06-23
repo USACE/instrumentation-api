@@ -1,50 +1,57 @@
 package models
 
 import (
-	"log"
-
 	"github.com/jmoiron/sqlx"
+	// pq library
 	_ "github.com/lib/pq"
 )
 
+// Domain is a struct for returning all database domain values
 type Domain struct {
-	ID    string `json:"id"`
-	Group string `json:"group"`
-	Value string `json:"value"`
+	ID          string  `json:"id"`
+	Group       string  `json:"group"`
+	Value       string  `json:"value"`
+	Description *string `json:"description"`
 }
 
 // GetDomains returns a UNION of all domain tables in the database
-func GetDomains(db *sqlx.DB) []Domain {
+func GetDomains(db *sqlx.DB) ([]Domain, error) {
+
+	dd := make([]Domain, 0)
+
 	sql := `SELECT id, 
 	               'instrument_type' AS group, 
-	               name              AS value 
+				   name              AS value,
+				   null              AS description
             FROM   instrument_type 
             UNION 
             SELECT id, 
             	   'parameter' AS group, 
-            	   name        AS value 
+				   name        AS value,
+				   null        AS description
+
             FROM   parameter 
             UNION 
             SELECT id, 
             	   'unit' AS group, 
-            	   name   AS value 
-            FROM   unit 
+				   name   AS value,
+				   null   AS description
+			FROM   unit
+			UNION
+			SELECT id,
+				   'status' AS group,
+				   name                AS value,
+				   description
+			FROM   status
+			UNION
+			SELECT id,
+				   'zreference_datum' AS group,
+				   name               AS value,
+				   null               AS description
+			FROM zreference_datum
 	`
-	rows, err := db.Query(sql)
-
-	if err != nil {
-		panic(err)
+	if err := db.Select(&dd, sql); err != nil {
+		return make([]Domain, 0), err
 	}
-
-	defer rows.Close()
-	result := make([]Domain, 0)
-	for rows.Next() {
-		d := Domain{}
-		err := rows.Scan(&d.ID, &d.Group, &d.Value)
-		if err != nil {
-			log.Panic(err)
-		}
-		result = append(result, d)
-	}
-	return result
+	return dd, nil
 }

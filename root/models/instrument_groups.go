@@ -2,8 +2,7 @@ package models
 
 import (
 	"encoding/json"
-	"log"
-	"time"
+	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -18,11 +17,8 @@ type InstrumentGroup struct {
 	Slug        string     `json:"slug"`
 	Name        string     `json:"name"`
 	Description string     `json:"description"`
-	Creator     int        `json:"creator"`
-	CreateDate  time.Time  `json:"create_date" db:"create_date"`
-	Updater     int        `json:"updater"`
-	UpdateDate  time.Time  `json:"update_date" db:"update_date"`
 	ProjectID   *uuid.UUID `json:"project_id" db:"project_id"`
+	AuditInfo
 }
 
 // InstrumentGroupCollection is a collection of Instrument items
@@ -87,11 +83,11 @@ func GetInstrumentGroup(db *sqlx.DB, ID uuid.UUID) (*InstrumentGroup, error) {
 }
 
 // CreateInstrumentGroupBulk creates many instruments from an array of instruments
-func CreateInstrumentGroupBulk(db *sqlx.DB, groups []InstrumentGroup) error {
+func CreateInstrumentGroupBulk(db *sqlx.DB, a *Action, groups []InstrumentGroup) error {
 
 	txn, err := db.Begin()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	stmt, err := txn.Prepare(pq.CopyIn(
@@ -100,13 +96,13 @@ func CreateInstrumentGroupBulk(db *sqlx.DB, groups []InstrumentGroup) error {
 	))
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	for _, g := range groups {
 
 		_, err := stmt.Exec(
-			g.ID, g.Slug, g.Name, g.Description, g.Creator, g.CreateDate, g.Updater, g.UpdateDate, g.ProjectID,
+			g.ID, g.Slug, g.Name, g.Description, a.Actor, a.Time, a.Actor, a.Time, g.ProjectID,
 		)
 
 		if err != nil {
@@ -133,7 +129,7 @@ func CreateInstrumentGroupBulk(db *sqlx.DB, groups []InstrumentGroup) error {
 }
 
 // UpdateInstrumentGroup updates an instrument group
-func UpdateInstrumentGroup(db *sqlx.DB, g *InstrumentGroup) (*InstrumentGroup, error) {
+func UpdateInstrumentGroup(db *sqlx.DB, a *Action, g *InstrumentGroup) (*InstrumentGroup, error) {
 
 	var gUpdated InstrumentGroup
 	if err := db.QueryRowx(
@@ -146,7 +142,7 @@ func UpdateInstrumentGroup(db *sqlx.DB, g *InstrumentGroup) (*InstrumentGroup, e
 				project_id = $7
 		 WHERE id = $1
 		 RETURNING *
-		`, g.ID, g.Name, g.Deleted, g.Description, g.Updater, g.UpdateDate, g.ProjectID,
+		`, g.ID, g.Name, g.Deleted, g.Description, a.Actor, a.Time, g.ProjectID,
 	).StructScan(&gUpdated); err != nil {
 		return nil, err
 	}
@@ -165,28 +161,13 @@ func DeleteFlagInstrumentGroup(db *sqlx.DB, ID uuid.UUID) error {
 // ListInstrumentGroupInstruments returns a list of instrument group instruments for a given instrument
 func ListInstrumentGroupInstruments(db *sqlx.DB, ID uuid.UUID) ([]Instrument, error) {
 
-	sql := `SELECT A.instrument_id as id,
-	               instrument.active,
-								 instrument.slug,
-				   instrument.NAME,
-				   instrument.INSTRUMENT_TYPE_ID as type_id,
-	        	   instrument_type.NAME              AS type,
-	               instrument.height,
-				   ST_AsBinary(instrument.geometry) AS geometry,
-				   instrument.station,
-				   instrument.station_offset,
-				   instrument.creator,
-				   instrument.create_date,
-				   instrument.updater,
-				   instrument.update_date,
-				   instrument.project_id
-            FROM   instrument_group_instruments A
-	               INNER JOIN instrument instrument
-	               		   ON instrument.id = A.instrument_id
-	               INNER JOIN instrument_type
-	               		   ON instrument_type.id = instrument.instrument_type_id
-			WHERE  instrument_group_id = $1 and deleted = false
-			`
+	sql := fmt.Sprintf(
+		`SELECT B.*
+         FROM   instrument_group_instruments A
+		 INNER JOIN (%s) B ON A.instrument_id = B.id
+		 WHERE A.instrument_group_id = $1 and B.deleted = false`,
+		listInstrumentsSQL(),
+	)
 
 	rows, err := db.Queryx(sql, ID)
 	if err != nil {

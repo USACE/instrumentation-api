@@ -15,20 +15,31 @@ func ListInstruments(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		nn, err := models.ListInstruments(db)
 		if err != nil {
-			return c.NoContent(http.StatusBadRequest)
+			return c.JSON(http.StatusBadRequest, err)
 		}
 		return c.JSON(http.StatusOK, nn)
+	}
+}
+
+// GetInstrumentCount returns the total number of non deleted instruments in the system
+func GetInstrumentCount(db *sqlx.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		count, err := models.GetInstrumentCount(db)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+		return c.JSON(http.StatusOK, map[string]interface{}{"instrument_count": count})
 	}
 }
 
 // GetInstrument returns a single instrument
 func GetInstrument(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		id, err := uuid.Parse(c.Param("id"))
+		id, err := uuid.Parse(c.Param("instrument_id"))
 		if err != nil {
 			return c.String(http.StatusBadRequest, "Malformed ID")
 		}
-		n, err := models.GetInstrument(db, id)
+		n, err := models.GetInstrument(db, &id)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err)
 		}
@@ -66,7 +77,13 @@ func CreateInstrumentBulk(db *sqlx.DB) echo.HandlerFunc {
 			slugsTaken = append(slugsTaken, s)
 		}
 
-		if err := models.CreateInstrumentBulk(db, ic.Items); err != nil {
+		// Get action information from context
+		a, err := models.NewAction(c)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+
+		if err := models.CreateInstrumentBulk(db, a, ic.Items); err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 		// Send instrument
@@ -79,7 +96,7 @@ func UpdateInstrument(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 
 		// id from url params
-		id, err := uuid.Parse(c.Param("id"))
+		id, err := uuid.Parse(c.Param("instrument_id"))
 		if err != nil {
 			return c.String(http.StatusBadRequest, "Malformed ID")
 		}
@@ -95,10 +112,17 @@ func UpdateInstrument(db *sqlx.DB) echo.HandlerFunc {
 				"url parameter id does not match object id in body",
 			)
 		}
-		// update
-		iUpdated, err := models.UpdateInstrument(db, i)
+
+		// Get action information from context
+		a, err := models.NewAction(c)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+
+		// update
+		iUpdated, err := models.UpdateInstrument(db, a, i)
+		if err != nil {
+			return c.String(http.StatusBadRequest, err.Error())
 		}
 		// return updated instrument
 		return c.JSON(http.StatusOK, iUpdated)
@@ -108,12 +132,12 @@ func UpdateInstrument(db *sqlx.DB) echo.HandlerFunc {
 // DeleteFlagInstrument changes deleted flag true for an instrument
 func DeleteFlagInstrument(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		id, err := uuid.Parse(c.Param("id"))
+		id, err := uuid.Parse(c.Param("instrument_id"))
 		if err != nil {
 			return c.String(http.StatusBadRequest, "Malformed ID")
 		}
 
-		if err := models.DeleteFlagInstrument(db, id); err != nil {
+		if err := models.DeleteFlagInstrument(db, &id); err != nil {
 			return c.NoContent(http.StatusBadRequest)
 		}
 

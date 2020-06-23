@@ -12,6 +12,10 @@ import (
 // GetDomains returns all database domains in a single endpoint
 func GetDomains(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return c.JSON(http.StatusOK, models.GetDomains(db))
+		dd, err := models.GetDomains(db)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, err)
+		}
+		return c.JSON(http.StatusOK, dd)
 	}
 }

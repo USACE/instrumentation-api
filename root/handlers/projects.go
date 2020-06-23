@@ -24,7 +24,7 @@ func ListProjects(db *sqlx.DB) echo.HandlerFunc {
 // ListProjectInstruments returns instruments associated with a project
 func ListProjectInstruments(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		id, err := uuid.Parse(c.Param("id"))
+		id, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
 			return c.String(http.StatusBadRequest, "Malformed ID")
 		}
@@ -39,7 +39,7 @@ func ListProjectInstruments(db *sqlx.DB) echo.HandlerFunc {
 // ListProjectInstrumentGroups returns instrument groups associated with a project
 func ListProjectInstrumentGroups(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		id, err := uuid.Parse(c.Param("id"))
+		id, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
 			return c.String(http.StatusBadRequest, "Malformed ID")
 		}
@@ -51,10 +51,21 @@ func ListProjectInstrumentGroups(db *sqlx.DB) echo.HandlerFunc {
 	}
 }
 
+// GetProjectCount returns the total number of non deleted projects in the system
+func GetProjectCount(db *sqlx.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		count, err := models.GetProjectCount(db)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+		return c.JSON(http.StatusOK, map[string]interface{}{"project_count": count})
+	}
+}
+
 // GetProject returns single project
 func GetProject(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		id, err := uuid.Parse(c.Param("id"))
+		id, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
 			return c.String(http.StatusBadRequest, "Malformed ID")
 		}
@@ -95,7 +106,13 @@ func CreateProjectBulk(db *sqlx.DB) echo.HandlerFunc {
 			slugsTaken = append(slugsTaken, s)
 		}
 
-		if err := models.CreateProjectBulk(db, pc.Projects); err != nil {
+		// Get action information from context
+		a, err := models.NewAction(c)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+
+		if err := models.CreateProjectBulk(db, a, pc.Projects); err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 		// Send Project
@@ -107,7 +124,7 @@ func CreateProjectBulk(db *sqlx.DB) echo.HandlerFunc {
 func UpdateProject(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		// id from url params
-		id, err := uuid.Parse(c.Param("id"))
+		id, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
 			return c.String(http.StatusBadRequest, "Malformed ID")
 		}
@@ -125,8 +142,15 @@ func UpdateProject(db *sqlx.DB) echo.HandlerFunc {
 				},
 			)
 		}
+
+		// Get action information from context
+		a, err := models.NewAction(c)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+
 		// update
-		pUpdated, err := models.UpdateProject(db, p)
+		pUpdated, err := models.UpdateProject(db, a, p)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
@@ -138,7 +162,7 @@ func UpdateProject(db *sqlx.DB) echo.HandlerFunc {
 // DeleteFlagProject sets the instrument group deleted flag true
 func DeleteFlagProject(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		id, err := uuid.Parse(c.Param("id"))
+		id, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
 			return c.JSON(http.StatusNotFound, err)
 		}

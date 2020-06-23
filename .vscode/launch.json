@@ -11,7 +11,7 @@
       "mode": "auto",
       "program": "${workspaceFolder}/root/main.go",
       "env": {
-        "JWT_DISABLED": "TRUE",
+        "JWT_DISABLED": "FALSE",
         "DB_USER": "postgres",
         "DB_PASS": "postgres",
         "DB_NAME": "postgres",

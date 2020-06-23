@@ -8,28 +8,40 @@ CREATE USER instrumentation_user WITH ENCRYPTED PASSWORD 'password';
 -- Tables specific to instrumentation app
 CREATE ROLE instrumentation_reader;
 GRANT SELECT ON
-    project,
     instrument,
     instrument_group,
     instrument_group_instruments,
+    instrument_note,
+    instrument_status,
     instrument_type,
+    instrument_zreference,
     parameter,
+    project,
+    status,
     timeseries,
     timeseries_measurement,
-    unit
+    unit,
+    zreference_datum
 TO instrumentation_reader;
 
 -- Role instrumentation_writer
 -- Tables specific to instrumentation app
 CREATE ROLE instrumentation_writer;
 GRANT INSERT,UPDATE,DELETE ON
-    project,
     instrument,
     instrument_group,
     instrument_group_instruments,
+    instrument_note,
+    instrument_status,
     instrument_type,
+    instrument_zreference,
+    parameter,
+    project,
+    status,
     timeseries,
-    timeseries_measurement
+    timeseries_measurement,
+    unit,
+    zreference_datum
 TO instrumentation_writer;
 
 -- Role postgis_reader
