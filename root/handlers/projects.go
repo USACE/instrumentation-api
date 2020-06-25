@@ -36,6 +36,21 @@ func ListProjectInstruments(db *sqlx.DB) echo.HandlerFunc {
 	}
 }
 
+// ListProjectInstrumentNames returns names of all instruments associated with a project
+func ListProjectInstrumentNames(db *sqlx.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		id, err := uuid.Parse(c.Param("project_id"))
+		if err != nil {
+			return c.String(http.StatusBadRequest, "Malformed ID")
+		}
+		names, err := models.ListProjectInstrumentNames(db, &id)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+		return c.JSON(http.StatusOK, names)
+	}
+}
+
 // ListProjectInstrumentGroups returns instrument groups associated with a project
 func ListProjectInstrumentGroups(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
