@@ -2776,6 +2776,152 @@
 				}
 			],
 			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "explorer",
+			"item": [
+				{
+					"name": "PostExplorer Query By InstrumetID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "c6f77875-e3f9-4f55-8669-285be9cb9c88",
+								"exec": [
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[\"9e8f2ca4-4037-45a4-aaca-d9e598877439\", \"a7540f69-c41e-43b3-b655-6e44097edb7e\"]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/instrumentation/explorer",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"explorer"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PostExplorer Query By ParameterID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "19c50451-9dcf-44f4-ae09-130f4065d404",
+								"exec": [
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/instrumentation/explorer?parameter_id=068b59b0-aafb-4c98-ae4b-ed0365a6fbac",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"explorer"
+							],
+							"query": [
+								{
+									"key": "parameter_id",
+									"value": "068b59b0-aafb-4c98-ae4b-ed0365a6fbac"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PostExplorer Query By InstrumetID, ParameterID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "88229436-0dec-40f8-87eb-ea5fba13e42e",
+								"exec": [
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[\"9e8f2ca4-4037-45a4-aaca-d9e598877439\", \"a7540f69-c41e-43b3-b655-6e44097edb7e\"]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/instrumentation/explorer?parameter_id=068b59b0-aafb-4c98-ae4b-ed0365a6fbac",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"explorer"
+							],
+							"query": [
+								{
+									"key": "parameter_id",
+									"value": "068b59b0-aafb-4c98-ae4b-ed0365a6fbac"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Tests for explorer endpoints",
+			"protocolProfileBehavior": {}
 		}
 	],
 	"auth": {

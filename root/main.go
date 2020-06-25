@@ -90,6 +90,7 @@ func main() {
 	e.GET("instrumentation/instruments/:instrument_id/timeseries/:timeseries_id", handlers.GetTimeseries(db))
 	e.GET("instrumentation/domains", handlers.GetDomains(db))
 	e.GET("instrumentation/home", handlers.GetHome(db))
+	e.POST("instrumentation/explorer", handlers.PostExplorer(db))
 
 	// Authenticated Routes (Need CAC Login)
 	// Projects

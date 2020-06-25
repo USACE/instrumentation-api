@@ -2,6 +2,8 @@ package models
 
 import (
 	"encoding/json"
+	"fmt"
+	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -18,6 +20,7 @@ import (
 // Instrument is an instrument data structure
 type Instrument struct {
 	ID                uuid.UUID        `json:"id"`
+	Groups            []uuid.UUID      `json:"groups"`
 	StatusID          uuid.UUID        `json:"status_id" db:"status_id"`
 	Status            string           `json:"status"`
 	StatusTime        time.Time        `json:"status_time" db:"status_time"`
@@ -79,7 +82,7 @@ func ListInstruments(db *sqlx.DB) ([]Instrument, error) {
 	if err != nil {
 		return make([]Instrument, 0), err
 	}
-	return InstrumentsFactory(rows)
+	return InstrumentsFactory(db, rows)
 }
 
 // GetInstrument returns a single instrument
@@ -89,10 +92,11 @@ func GetInstrument(db *sqlx.DB, id *uuid.UUID) (*Instrument, error) {
 	if err != nil {
 		return nil, err
 	}
-	ii, err := InstrumentsFactory(rows)
+	ii, err := InstrumentsFactory(db, rows)
 	if err != nil {
 		return nil, err
 	}
+
 	return &ii[0], nil
 }
 
@@ -241,26 +245,109 @@ func DeleteFlagInstrument(db *sqlx.DB, id *uuid.UUID) error {
 }
 
 // InstrumentsFactory returns a slice of instruments from a string of SQL
-func InstrumentsFactory(rows *sqlx.Rows) ([]Instrument, error) {
+func InstrumentsFactory(db *sqlx.DB, rows *sqlx.Rows) ([]Instrument, error) {
 
 	defer rows.Close()
-	ii := make([]Instrument, 0)
+	_IDs := make([]uuid.UUID, 0) // Instrument IDs (used to get groups)
+	ii := make([]Instrument, 0)  // Instruments
 	for rows.Next() {
+		var _ID uuid.UUID // InstrumentID
 		var i Instrument
 		var p orb.Point
 		err := rows.Scan(
-			&i.ID, &i.Deleted, &i.StatusID, &i.Status, &i.StatusTime, &i.Slug, &i.Name, &i.TypeID, &i.Type, wkb.Scanner(&p), &i.Station, &i.StationOffset,
+			&_ID, &i.Deleted, &i.StatusID, &i.Status, &i.StatusTime, &i.Slug, &i.Name, &i.TypeID, &i.Type, wkb.Scanner(&p), &i.Station, &i.StationOffset,
 			&i.Creator, &i.CreateDate, &i.Updater, &i.UpdateDate, &i.ProjectID, &i.ZReferenceTime, &i.ZReference, &i.ZReferenceDatumID, &i.ZReferenceDatum,
 		)
 		if err != nil {
 			return make([]Instrument, 0), err
 		}
+		// Add _ID to list of IDs; Used to fetch instrument_group_instruments
+		_IDs = append(_IDs, _ID)
+		// Set Instrument ID Field
+		i.ID = _ID
 		// Set Geometry field
 		i.Geometry = *geojson.NewGeometry(p)
 		// Add
 		ii = append(ii, i)
 	}
+
+	// Add groups
+	groupMap, err := instrumentGroupMap(db, _IDs)
+	if err != nil {
+		log.Print(err.Error())
+		return make([]Instrument, 0), err
+	}
+
+	// Assign Array of Group IDs to Each Instrument
+	for idx := range ii {
+		groups := groupMap[ii[idx].ID]
+		if groups == nil {
+			// Instrument is not member of any groups
+			ii[idx].Groups = make([]uuid.UUID, 0)
+			continue
+		}
+		ii[idx].Groups = groups
+	}
+
 	return ii, nil
+}
+
+// instrumentGroupMap takes a list of instrument IDs and returns a map of
+// <instrument_id>: [<group_id>, <group_id>, <group_id>] for all instrumentIDs passed in
+// this allows nesting instrument groups inside the instrument struct using only 2 database hits.
+// (avoids nested SQL queries or numerous database queries.
+func instrumentGroupMap(db *sqlx.DB, instrumentIDs []uuid.UUID) (map[uuid.UUID][]uuid.UUID, error) {
+	sql := func(inClause string) string {
+		return fmt.Sprintf(
+			`SELECT a.instrument_id,
+					a.instrument_group_id
+			FROM instrument_group_instruments a
+			INNER JOIN instrument i ON i.id = a.instrument_id
+			INNER JOIN instrument_group g ON g.id = a.instrument_group_id
+			WHERE NOT (i.deleted OR g.deleted)
+			%s
+			ORDER BY a.instrument_id
+			`,
+			inClause,
+		)
+	}
+
+	var gg []struct {
+		InstrumentID uuid.UUID `db:"instrument_id"`
+		GroupID      uuid.UUID `db:"instrument_group_id"`
+	}
+	switch {
+	// Fetch a subset of the instrument_group_instruments table
+	case len(instrumentIDs) > 0:
+		s := sql("AND a.instrument_id IN (?)")
+		query, args, err := sqlx.In(s, instrumentIDs)
+		if err != nil {
+			return nil, err
+		}
+		err = db.Select(&gg, db.Rebind(query), args...)
+		if err != nil {
+			return nil, err
+		}
+	// Fetch entire instrument_group_instruments table (Listing all instruments)
+	default:
+		if err := db.Select(&gg, sql("")); err != nil {
+			return nil, err
+		}
+	}
+
+	// Sort Instrument Group IDs into Arrays by InstrumentID
+	var _ID uuid.UUID                    // Working Instrument ID
+	m := make(map[uuid.UUID][]uuid.UUID) // Instrument: GroupIDs Map
+	for idx := range gg {
+		if gg[idx].InstrumentID != _ID {
+			// Started on a new instrument; Create empty array in map
+			m[gg[idx].InstrumentID] = make([]uuid.UUID, 0)
+		}
+		// Add instrument_group_id to map
+		m[gg[idx].InstrumentID] = append(m[gg[idx].InstrumentID], gg[idx].GroupID)
+	}
+
+	return m, nil
 }
 
 // ListInstrumentsSQL is the base SQL to retrieve all instrumentsJSON

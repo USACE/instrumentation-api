@@ -116,7 +116,7 @@ func CreateProjectBulk(db *sqlx.DB) echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 		// Send Project
-		return c.JSON(http.StatusCreated, pc.Projects)
+		return c.NoContent(http.StatusCreated)
 	}
 }
 

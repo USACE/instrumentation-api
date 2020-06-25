@@ -15,7 +15,7 @@ func ListInstruments(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		nn, err := models.ListInstruments(db)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return c.String(http.StatusBadRequest, err.Error())
 		}
 		return c.JSON(http.StatusOK, nn)
 	}
@@ -86,8 +86,9 @@ func CreateInstrumentBulk(db *sqlx.DB) echo.HandlerFunc {
 		if err := models.CreateInstrumentBulk(db, a, ic.Items); err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
+
 		// Send instrument
-		return c.JSON(http.StatusCreated, ic.Items)
+		return c.NoContent(http.StatusCreated)
 	}
 }
 

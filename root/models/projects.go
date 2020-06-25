@@ -73,7 +73,7 @@ func ListProjectInstruments(db *sqlx.DB, id uuid.UUID) ([]Instrument, error) {
 	if err != nil {
 		return make([]Instrument, 0), err
 	}
-	return InstrumentsFactory(rows)
+	return InstrumentsFactory(db, rows)
 }
 
 // ListProjectInstrumentGroups returns a list of instrument groups for a project
