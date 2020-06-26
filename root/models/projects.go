@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -73,7 +74,20 @@ func ListProjectInstruments(db *sqlx.DB, id uuid.UUID) ([]Instrument, error) {
 	if err != nil {
 		return make([]Instrument, 0), err
 	}
-	return InstrumentsFactory(rows)
+	return InstrumentsFactory(db, rows)
+}
+
+// ListProjectInstrumentNames returns a slice of instrument names for a project
+func ListProjectInstrumentNames(db *sqlx.DB, id *uuid.UUID) ([]string, error) {
+	var names []string
+	if err := db.Select(
+		&names,
+		"SELECT name FROM instrument WHERE project_id = $1",
+		id,
+	); err != nil {
+		return make([]string, 0), err
+	}
+	return names, nil
 }
 
 // ListProjectInstrumentGroups returns a list of instrument groups for a project
@@ -198,4 +212,39 @@ func listProjectsSQL() string {
                 GROUP BY project_id
             ) g ON g.project_id = p.id
 	`
+}
+
+// projectInstrumentNamesMap returns a map of key: project_id , value: map[string]bool ;  string is name of instrument Upper
+func projectInstrumentNamesMap(db *sqlx.DB, projectIDs []uuid.UUID) (map[uuid.UUID]map[string]bool, error) {
+	sql := `SELECT project_id, name
+			FROM instrument
+			WHERE project_id IN (?)
+			ORDER BY project_id
+			`
+	query, args, err := sqlx.In(sql, projectIDs)
+	if err != nil {
+		return nil, err
+	}
+	var nn []struct {
+		ProjectID      uuid.UUID `db:"project_id"`
+		InstrumentName string    `db:"name"`
+	}
+	if err := db.Select(&nn, db.Rebind(query), args...); err != nil {
+		return nil, err
+	}
+
+	// Make Map
+	m := make(map[uuid.UUID]map[string]bool)
+	var _pID uuid.UUID
+	for _, n := range nn {
+		if n.ProjectID != _pID {
+			// Starting on a new project of instrument names
+			m[n.ProjectID] = make(map[string]bool)
+			_pID = n.ProjectID // Increment ProjectID
+		}
+
+		m[n.ProjectID][strings.ToUpper(n.InstrumentName)] = true
+	}
+	return m, nil
+
 }

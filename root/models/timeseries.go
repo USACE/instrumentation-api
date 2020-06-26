@@ -1,6 +1,7 @@
 package models
 
 import (
+	ts "api/root/timeseries"
 	"encoding/json"
 
 	"github.com/google/uuid"
@@ -11,23 +12,9 @@ import (
 	_ "github.com/lib/pq"
 )
 
-// Timeseries is a timeseries data structure
-type Timeseries struct {
-	ID           uuid.UUID               `json:"id"`
-	Slug         string                  `json:"slug"`
-	Name         string                  `json:"name"`
-	InstrumentID uuid.UUID               `json:"instrument_id" db:"instrument_id"`
-	Instrument   string                  `json:"instrument,omitempty"`
-	ParameterID  uuid.UUID               `json:"parameter_id" db:"parameter_id"`
-	Parameter    string                  `json:"parameter,omitempty"`
-	UnitID       uuid.UUID               `json:"unit_id" db:"unit_id"`
-	Unit         string                  `json:"unit,omitempty"`
-	Values       []TimeseriesMeasurement `json:"values,omitempty"`
-}
-
 // TimeseriesCollection is a collection of Timeseries items
 type TimeseriesCollection struct {
-	Items []Timeseries
+	Items []ts.Timeseries
 }
 
 // UnmarshalJSON implements UnmarshalJSON interface
@@ -38,13 +25,13 @@ func (c *TimeseriesCollection) UnmarshalJSON(b []byte) error {
 			return err
 		}
 	case "OBJECT":
-		var t Timeseries
+		var t ts.Timeseries
 		if err := json.Unmarshal(b, &t); err != nil {
 			return err
 		}
-		c.Items = []Timeseries{t}
+		c.Items = []ts.Timeseries{t}
 	default:
-		c.Items = make([]Timeseries, 0)
+		c.Items = make([]ts.Timeseries, 0)
 	}
 	return nil
 }
@@ -60,28 +47,28 @@ func ListTimeseriesSlugs(db *sqlx.DB) ([]string, error) {
 }
 
 // ListTimeseries lists all timeseries
-func ListTimeseries(db *sqlx.DB) ([]Timeseries, error) {
+func ListTimeseries(db *sqlx.DB) ([]ts.Timeseries, error) {
 
-	tt := make([]Timeseries, 0)
+	tt := make([]ts.Timeseries, 0)
 	if err := db.Select(&tt, listTimeseriesSQL()); err != nil {
-		return make([]Timeseries, 0), err
+		return make([]ts.Timeseries, 0), err
 	}
 	return tt, nil
 }
 
 // ListInstrumentTimeseries returns an array of timeseries for an instrument
-func ListInstrumentTimeseries(db *sqlx.DB, instrumentID *uuid.UUID) ([]Timeseries, error) {
-	tt := make([]Timeseries, 0)
+func ListInstrumentTimeseries(db *sqlx.DB, instrumentID *uuid.UUID) ([]ts.Timeseries, error) {
+	tt := make([]ts.Timeseries, 0)
 	if err := db.Select(&tt, listTimeseriesSQL()+" WHERE I.id = $1", instrumentID); err != nil {
-		return make([]Timeseries, 0), err
+		return make([]ts.Timeseries, 0), err
 	}
 	return tt, nil
 }
 
 // ListInstrumentGroupTimeseries returns an array of timeseries for instruments that belong to an instrument_group
-func ListInstrumentGroupTimeseries(db *sqlx.DB, instrumentGroupID *uuid.UUID) ([]Timeseries, error) {
+func ListInstrumentGroupTimeseries(db *sqlx.DB, instrumentGroupID *uuid.UUID) ([]ts.Timeseries, error) {
 
-	var tt []Timeseries
+	var tt []ts.Timeseries
 	if err := db.Select(
 		&tt,
 		`SELECT *
@@ -92,15 +79,15 @@ func ListInstrumentGroupTimeseries(db *sqlx.DB, instrumentGroupID *uuid.UUID) ([
 			WHERE  instrument_group_id = $1
 		)`, instrumentGroupID,
 	); err != nil {
-		return make([]Timeseries, 0), err
+		return make([]ts.Timeseries, 0), err
 	}
 	return tt, nil
 }
 
 // GetTimeseries returns a single timeseries without measurements
-func GetTimeseries(db *sqlx.DB, id *uuid.UUID) (*Timeseries, error) {
+func GetTimeseries(db *sqlx.DB, id *uuid.UUID) (*ts.Timeseries, error) {
 
-	var t Timeseries
+	var t ts.Timeseries
 	if err := db.Get(&t, listTimeseriesSQL()+" WHERE T.id = $1", id); err != nil {
 		return nil, err
 	}
@@ -108,7 +95,7 @@ func GetTimeseries(db *sqlx.DB, id *uuid.UUID) (*Timeseries, error) {
 }
 
 // CreateTimeseries creates many timeseries from an array of timeseries
-func CreateTimeseries(db *sqlx.DB, tt []Timeseries) error {
+func CreateTimeseries(db *sqlx.DB, tt []ts.Timeseries) error {
 
 	txn, err := db.Begin()
 	if err != nil {
@@ -141,9 +128,9 @@ func CreateTimeseries(db *sqlx.DB, tt []Timeseries) error {
 }
 
 // UpdateTimeseries updates a timeseries
-func UpdateTimeseries(db *sqlx.DB, t *Timeseries) (*Timeseries, error) {
+func UpdateTimeseries(db *sqlx.DB, t *ts.Timeseries) (*ts.Timeseries, error) {
 
-	var tUpdated Timeseries
+	var tUpdated ts.Timeseries
 	if err := db.QueryRowx(
 		`UPDATE timeseries
 		 SET    name = $2,

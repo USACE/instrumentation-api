@@ -66,6 +66,7 @@ func main() {
 	e.GET("instrumentation/projects/:project_id", handlers.GetProject(db))
 	e.GET("instrumentation/projects/count", handlers.GetProjectCount(db))
 	e.GET("instrumentation/projects/:project_id/instruments", handlers.ListProjectInstruments(db))
+	e.GET("instrumentation/projects/:project_id/instruments/names", handlers.ListProjectInstrumentNames(db))
 	e.GET("instrumentation/projects/:project_id/instrument_groups", handlers.ListProjectInstrumentGroups(db))
 	e.GET("instrumentation/instrument_groups", handlers.ListInstrumentGroups(db))
 	e.GET("instrumentation/instrument_groups/:instrument_group_id", handlers.GetInstrumentGroup(db))
@@ -90,12 +91,15 @@ func main() {
 	e.GET("instrumentation/instruments/:instrument_id/timeseries/:timeseries_id", handlers.GetTimeseries(db))
 	e.GET("instrumentation/domains", handlers.GetDomains(db))
 	e.GET("instrumentation/home", handlers.GetHome(db))
+	e.POST("instrumentation/explorer", handlers.PostExplorer(db))
 
 	// Authenticated Routes (Need CAC Login)
 	// Projects
 	e.POST("instrumentation/projects", handlers.CreateProjectBulk(db))
 	e.PUT("instrumentation/projects/:project_id", handlers.UpdateProject(db))
 	e.DELETE("instrumentation/projects/:project_id", handlers.DeleteFlagProject(db))
+	// Project Instruments
+	e.POST("instrumentation/projects/:project_id/instruments", handlers.CreateInstruments(db))
 	// Instrument Groups
 	e.POST("instrumentation/instrument_groups", handlers.CreateInstrumentGroupBulk(db))
 	e.PUT("instrumentation/instrument_groups/:instrument_group_id", handlers.UpdateInstrumentGroup(db))

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"api/root/models"
+	"api/root/timeseries"
 	"net/http"
 	"time"
 
@@ -19,7 +20,7 @@ func ListTimeseriesMeasurements(db *sqlx.DB) echo.HandlerFunc {
 		}
 
 		// Time Window
-		var tw models.TimeWindow
+		var tw timeseries.TimeWindow
 		a, b := c.QueryParam("after"), c.QueryParam("before")
 		// If after or before are not provided
 		// Return last 14 days of data from current time
@@ -61,6 +62,6 @@ func CreateOrUpdateTimeseriesMeasurements(db *sqlx.DB) echo.HandlerFunc {
 		if err := models.CreateOrUpdateTimeseriesMeasurements(db, mcc.Items); err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
-		return c.JSON(http.StatusCreated, mcc.Items)
+		return c.NoContent(http.StatusCreated)
 	}
 }

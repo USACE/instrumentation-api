@@ -21,6 +21,10 @@
 									"    \"type\": \"object\",",
 									"    \"properties\": {",
 									"        \"id\": { \"type\": \"string\" },",
+									"        \"groups\": {",
+									"            \"type\": \"array\",",
+									"            \"items\": { \"type\": \"string\" },",
+									"        },",
 									"        \"slug\": { \"type\": \"string\" },",
 									"        \"name\": { \"type\": \"string\" },",
 									"        \"type_id\": { \"type\": \"string\" },",
@@ -274,13 +278,7 @@
 									"// status code is 200",
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
-									"});",
-									"// validate JSON schema",
-									"pm.test(\"Schema validation\", function () {",
-									"    pm.response.to.have.jsonSchema(",
-									"        JSON.parse(pm.globals.get('INSTRUMENT_ARRAY_SCHEMA')))",
-									"});",
-									""
+									"});"
 								],
 								"type": "text/javascript"
 							}
@@ -299,13 +297,65 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url}}/instrumentation/instruments",
+							"raw": "{{base_url}}/instrumentation/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/instruments",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"instrumentation",
+								"projects",
+								"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
 								"instruments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ValidateCreateInstrument_Array",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "16a3ad8f-ce6b-4bfa-a6ab-e482f9e0d0c1",
+								"exec": [
+									"// status code is 200",
+									"pm.test(\"Status code is 20o\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[{\n    \"status_id\": \"94578354-ffdf-4119-9663-6bd4323e58f5\",\n    \"status\": \"destroyed\",\n    \"status_time\": \"2001-01-01T00:00:00Z\",\n    \"slug\": \"demo-piezometer-2\",\n    \"name\": \"Demo Piezometer 2\",\n    \"type_id\": \"1bb4bf7c-f5f8-44eb-9805-43b07ffadbef\",\n    \"type\": \"Piezometer\",\n    \"geometry\": {\n        \"type\": \"Point\",\n        \"coordinates\": [\n            -80.8,\n            26.7\n        ]\n    },\n    \"station\": null,\n    \"offset\": null,\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\",\n    \"zreference\": 44.5,\n    \"zreference_datum_id\": \"72113f9a-982d-44e5-8fc1-8e595dafd344\",\n    \"zreference_datum\": \"North American Vertical Datum of 1988 (NAVD 88)\",\n    \"zreference_time\": \"2006-06-01T00:00:00Z\"\n},\n{\n    \"status_id\": \"94578354-ffdf-4119-9663-6bd4323e58f5\",\n    \"status\": \"destroyed\",\n    \"status_time\": \"2001-01-01T00:00:00Z\",\n    \"slug\": \"demo-piezometer-3\",\n    \"name\": \"Demo Piezometer 3\",\n    \"type_id\": \"1bb4bf7c-f5f8-44eb-9805-43b07ffadbef\",\n    \"type\": \"Piezometer\",\n    \"geometry\": {\n        \"type\": \"Point\",\n        \"coordinates\": [\n            -80.8,\n            26.7\n        ]\n    },\n    \"station\": null,\n    \"offset\": null,\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\",\n    \"zreference\": 44.5,\n    \"zreference_datum_id\": \"72113f9a-982d-44e5-8fc1-8e595dafd344\",\n    \"zreference_datum\": \"North American Vertical Datum of 1988 (NAVD 88)\",\n    \"zreference_time\": \"2006-06-01T00:00:00Z\"\n},\n{\n    \"status_id\": \"94578354-ffdf-4119-9663-6bd4323e58f5\",\n    \"status\": \"destroyed\",\n    \"status_time\": \"2001-01-01T00:00:00Z\",\n    \"slug\": \"demo-piezometer-4\",\n    \"name\": \"Demo Piezometer 4\",\n    \"type_id\": \"1bb4bf7c-f5f8-44eb-9805-43b07ffadbef\",\n    \"type\": \"Piezometer\",\n    \"geometry\": {\n        \"type\": \"Point\",\n        \"coordinates\": [\n            -80.8,\n            26.7\n        ]\n    },\n    \"station\": null,\n    \"offset\": null,\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\",\n    \"zreference\": 44.5,\n    \"zreference_datum_id\": \"72113f9a-982d-44e5-8fc1-8e595dafd344\",\n    \"zreference_datum\": \"North American Vertical Datum of 1988 (NAVD 88)\",\n    \"zreference_time\": \"2006-06-01T00:00:00Z\"\n}\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/instrumentation/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/instruments?dry_run=true",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"projects",
+								"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+								"instruments"
+							],
+							"query": [
+								{
+									"key": "dry_run",
+									"value": "true"
+								}
 							]
 						}
 					},
@@ -319,16 +369,10 @@
 							"script": {
 								"id": "eb8cede3-91d8-44bf-9fd1-25e065fecfbc",
 								"exec": [
-									"// status code is 200",
+									"// status code is 201",
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
-									"});",
-									"// validate JSON schema",
-									"pm.test(\"Schema validation\", function () {",
-									"    pm.response.to.have.jsonSchema(",
-									"        JSON.parse(pm.globals.get('INSTRUMENT_ARRAY_SCHEMA')))",
-									"});",
-									""
+									"});"
 								],
 								"type": "text/javascript"
 							}
@@ -354,6 +398,56 @@
 							"path": [
 								"instrumentation",
 								"instruments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ValidateCreateInstrument_Object",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "dfce93f5-356a-4cf1-8ff4-b6886348c1c0",
+								"exec": [
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status_id\": \"94578354-ffdf-4119-9663-6bd4323e58f5\",\n    \"status\": \"destroyed\",\n    \"status_time\": \"2001-01-01T00:00:00Z\",\n    \"slug\": \"demo-piezometer-5\",\n    \"name\": \"Demo Piezometer 5\",\n    \"type_id\": \"1bb4bf7c-f5f8-44eb-9805-43b07ffadbef\",\n    \"type\": \"Piezometer\",\n    \"geometry\": {\n        \"type\": \"Point\",\n        \"coordinates\": [\n            -80.8,\n            26.7\n        ]\n    },\n    \"station\": null,\n    \"offset\": null,\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\",\n    \"zreference\": 44.5,\n    \"zreference_datum_id\": \"72113f9a-982d-44e5-8fc1-8e595dafd344\",\n    \"zreference_datum\": \"North American Vertical Datum of 1988 (NAVD 88)\",\n    \"zreference_time\": \"2006-06-01T00:00:00Z\"\n},",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/instrumentation/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/instruments?dry_run=true",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"projects",
+								"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+								"instruments"
+							],
+							"query": [
+								{
+									"key": "dry_run",
+									"value": "true"
+								}
 							]
 						}
 					},
@@ -1140,11 +1234,6 @@
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
 									"});",
-									"// validate JSON schema",
-									"pm.test(\"Schema validation\", function () {",
-									"    pm.response.to.have.jsonSchema(",
-									"        JSON.parse(pm.globals.get('INSTRUMENT_NOTE_ARRAY_SCHEMA')))",
-									"});",
 									""
 								],
 								"type": "text/javascript"
@@ -1188,13 +1277,7 @@
 									"// status code is 201",
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
-									"});",
-									"// validate JSON schema",
-									"pm.test(\"Schema validation\", function () {",
-									"    pm.response.to.have.jsonSchema(",
-									"        JSON.parse(pm.globals.get('INSTRUMENT_NOTE_ARRAY_SCHEMA')))",
-									"});",
-									""
+									"});"
 								],
 								"type": "text/javascript"
 							}
@@ -1384,12 +1467,6 @@
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
 									"});",
-									"// schema validation",
-									"pm.test(\"Schema validation\", function () {",
-									"    pm.response.to.have.jsonSchema(",
-									"        JSON.parse(pm.globals.get('INSTRUMENTGROUP_ARRAY_SCHEMA'))",
-									"    )",
-									"});",
 									""
 								],
 								"type": "text/javascript"
@@ -1432,12 +1509,6 @@
 									"// status code is 200",
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
-									"});",
-									"// schema validation",
-									"pm.test(\"Schema validation\", function () {",
-									"    pm.response.to.have.jsonSchema(",
-									"        JSON.parse(pm.globals.get('INSTRUMENTGROUP_ARRAY_SCHEMA'))",
-									"    )",
 									"});",
 									""
 								],
@@ -1866,12 +1937,6 @@
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
 									"});",
-									"// schema validation",
-									"pm.test(\"Schema validation\", function () {",
-									"    pm.response.to.have.jsonSchema(",
-									"        JSON.parse(pm.globals.get('PROJECT_ARRAY_SCHEMA'))",
-									"    )",
-									"});",
 									""
 								],
 								"type": "text/javascript"
@@ -1914,14 +1979,7 @@
 									"// status code is 200",
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
-									"});",
-									"// schema validation",
-									"pm.test(\"Schema validation\", function () {",
-									"    pm.response.to.have.jsonSchema(",
-									"        JSON.parse(pm.globals.get('PROJECT_ARRAY_SCHEMA'))",
-									"    )",
-									"});",
-									""
+									"});"
 								],
 								"type": "text/javascript"
 							}
@@ -2115,15 +2173,62 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/instrumentation/projects/88d63e1f-c491-4a8f-ba09-d9402ab1bdf3/instruments",
+							"raw": "{{base_url}}/instrumentation/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/instruments",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"instrumentation",
 								"projects",
-								"88d63e1f-c491-4a8f-ba09-d9402ab1bdf3",
+								"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
 								"instruments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ListProjectInstrumentNames",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "4f77e31a-78d9-4dbe-a69a-05a6c84b6410",
+								"exec": [
+									"// validate JSON schema",
+									"var schema = {",
+									"    \"type\": \"array\",",
+									"    \"items\": { \"type\": \"string\" }",
+									"}",
+									"",
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// schema validation",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(schema)",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/instrumentation/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/instruments/names",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"projects",
+								"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+								"instruments",
+								"names"
 							]
 						}
 					},
@@ -2382,14 +2487,7 @@
 									"// status code is 200",
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
-									"});",
-									"// schema validation",
-									"pm.test(\"Schema validation\", function () {",
-									"    pm.response.to.have.jsonSchema(",
-									"        JSON.parse(pm.globals.get('TIMESERIES_ARRAY_SCHEMA'))",
-									"    )",
-									"});",
-									""
+									"});"
 								],
 								"type": "text/javascript"
 							}
@@ -2431,14 +2529,7 @@
 									"// status code is 200",
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
-									"});",
-									"// schema validation",
-									"pm.test(\"Schema validation\", function () {",
-									"    pm.response.to.have.jsonSchema(",
-									"        JSON.parse(pm.globals.get('TIMESERIES_ARRAY_SCHEMA'))",
-									"    )",
-									"});",
-									""
+									"});"
 								],
 								"type": "text/javascript"
 							}
@@ -2480,14 +2571,7 @@
 									"// status code is 200",
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
-									"});",
-									"// schema validation",
-									"pm.test(\"Schema validation\", function () {",
-									"    pm.response.to.have.jsonSchema(",
-									"        JSON.parse(pm.globals.get('TIMESERIES_MEASUREMENT_COLLECTION_ARRAY_SCHEMA'))",
-									"    )",
-									"});",
-									""
+									"});"
 								],
 								"type": "text/javascript"
 							}
@@ -2530,14 +2614,7 @@
 									"// status code is 200",
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
-									"});",
-									"// schema validation",
-									"pm.test(\"Schema validation\", function () {",
-									"    pm.response.to.have.jsonSchema(",
-									"        JSON.parse(pm.globals.get('TIMESERIES_MEASUREMENT_COLLECTION_ARRAY_SCHEMA'))",
-									"    )",
-									"});",
-									""
+									"});"
 								],
 								"type": "text/javascript"
 							}
@@ -2775,6 +2852,152 @@
 					"response": []
 				}
 			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "explorer",
+			"item": [
+				{
+					"name": "PostExplorer Query By InstrumetID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "c6f77875-e3f9-4f55-8669-285be9cb9c88",
+								"exec": [
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[\"9e8f2ca4-4037-45a4-aaca-d9e598877439\", \"a7540f69-c41e-43b3-b655-6e44097edb7e\"]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/instrumentation/explorer",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"explorer"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PostExplorer Query By ParameterID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "19c50451-9dcf-44f4-ae09-130f4065d404",
+								"exec": [
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/instrumentation/explorer?parameter_id=068b59b0-aafb-4c98-ae4b-ed0365a6fbac",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"explorer"
+							],
+							"query": [
+								{
+									"key": "parameter_id",
+									"value": "068b59b0-aafb-4c98-ae4b-ed0365a6fbac"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PostExplorer Query By InstrumetID, ParameterID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "88229436-0dec-40f8-87eb-ea5fba13e42e",
+								"exec": [
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[\"9e8f2ca4-4037-45a4-aaca-d9e598877439\", \"a7540f69-c41e-43b3-b655-6e44097edb7e\"]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/instrumentation/explorer?parameter_id=068b59b0-aafb-4c98-ae4b-ed0365a6fbac",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"explorer"
+							],
+							"query": [
+								{
+									"key": "parameter_id",
+									"value": "068b59b0-aafb-4c98-ae4b-ed0365a6fbac"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Tests for explorer endpoints",
 			"protocolProfileBehavior": {}
 		}
 	],

@@ -1,8 +1,8 @@
 package models
 
 import (
+	ts "api/root/timeseries"
 	"encoding/json"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -11,24 +11,10 @@ import (
 	_ "github.com/lib/pq"
 )
 
-// TimeseriesMeasurement is a time series data structure
-type TimeseriesMeasurement struct {
-	ID           string    `json:"id,omitempty"`
-	TimeseriesID uuid.UUID `json:"-" db:"timeseries_id"`
-	Time         time.Time `json:"time"`
-	Value        float32   `json:"value"`
-}
-
-// TimeseriesMeasurementCollection is a collection of timeseries measurements
-type TimeseriesMeasurementCollection struct {
-	TimeseriesID uuid.UUID               `json:"timeseries_id" db:"timeseries_id"`
-	Items        []TimeseriesMeasurement `json:"items"`
-}
-
 // TimeseriesMeasurementCollectionCollection is a collection of timeseries measurement collections
 // i.e an array of structs, each containing timeseries measurements not necessarily from the same time series
 type TimeseriesMeasurementCollectionCollection struct {
-	Items []TimeseriesMeasurementCollection
+	Items []ts.MeasurementCollection
 }
 
 // UnmarshalJSON implements UnmarshalJSON interface
@@ -39,27 +25,21 @@ func (cc *TimeseriesMeasurementCollectionCollection) UnmarshalJSON(b []byte) err
 			return err
 		}
 	case "OBJECT":
-		var mc TimeseriesMeasurementCollection
+		var mc ts.MeasurementCollection
 		if err := json.Unmarshal(b, &mc); err != nil {
 			return err
 		}
-		cc.Items = []TimeseriesMeasurementCollection{mc}
+		cc.Items = []ts.MeasurementCollection{mc}
 	default:
-		cc.Items = make([]TimeseriesMeasurementCollection, 0)
+		cc.Items = make([]ts.MeasurementCollection, 0)
 	}
 	return nil
 }
 
-// TimeWindow is a bounding box for time
-type TimeWindow struct {
-	After  time.Time `json:"after"`
-	Before time.Time `json:"before"`
-}
-
 // ListTimeseriesMeasurements returns a timeseries with slice of timeseries measurements populated
-func ListTimeseriesMeasurements(db *sqlx.DB, timeseriesID *uuid.UUID, tw *TimeWindow) (*TimeseriesMeasurementCollection, error) {
+func ListTimeseriesMeasurements(db *sqlx.DB, timeseriesID *uuid.UUID, tw *ts.TimeWindow) (*ts.MeasurementCollection, error) {
 
-	mc := TimeseriesMeasurementCollection{TimeseriesID: *timeseriesID}
+	mc := ts.MeasurementCollection{TimeseriesID: *timeseriesID}
 	// Get Timeseries Measurements
 	if err := db.Select(
 		&mc.Items,
@@ -74,7 +54,7 @@ func ListTimeseriesMeasurements(db *sqlx.DB, timeseriesID *uuid.UUID, tw *TimeWi
 
 // CreateOrUpdateTimeseriesMeasurements creates many timeseries from an array of timeseries
 // If a timeseries measurement already exists for a given timeseries_id and time, the value is updated
-func CreateOrUpdateTimeseriesMeasurements(db *sqlx.DB, mc []TimeseriesMeasurementCollection) error {
+func CreateOrUpdateTimeseriesMeasurements(db *sqlx.DB, mc []ts.MeasurementCollection) error {
 
 	txn, err := db.Begin()
 	if err != nil {

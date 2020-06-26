@@ -13,8 +13,14 @@ import (
 // based on the time of the request and the user claims in the JWT
 func IsLoggedIn(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
+		c.Set("action", c.Request().Method)
+		c.Set("action_time", time.Now())
+
 		// If Skipping JWT, skip this middleware too
 		if skipJWT(c) {
+			// Set a test user ID and role TEST
+			c.Set("actor", 0)
+			c.Set("actor_roles", "TEST")
 			return next(c)
 		}
 
@@ -30,11 +36,8 @@ func IsLoggedIn(next echo.HandlerFunc) echo.HandlerFunc {
 
 		userRoles := claims["roles"].([]interface{})
 
-		t := time.Now()
 		c.Set("actor", userID)
 		c.Set("actor_roles", userRoles)
-		c.Set("action", c.Request().Method)
-		c.Set("action_time", t)
 
 		return next(c)
 	}

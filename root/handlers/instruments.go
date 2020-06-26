@@ -15,7 +15,7 @@ func ListInstruments(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		nn, err := models.ListInstruments(db)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return c.String(http.StatusBadRequest, err.Error())
 		}
 		return c.JSON(http.StatusOK, nn)
 	}
@@ -48,7 +48,79 @@ func GetInstrument(db *sqlx.DB) echo.HandlerFunc {
 	}
 }
 
+// CreateInstruments accepts an array of instruments for bulk upload to the database
+func CreateInstruments(db *sqlx.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+
+		// Sanatized instruments with ID, projectID, and slug assigned
+		newInstruments := func(c echo.Context) ([]models.Instrument, error) {
+			ic := models.InstrumentCollection{}
+			if err := c.Bind(&ic); err != nil {
+				return make([]models.Instrument, 0), err
+			}
+
+			// Get ProjectID of Instruments
+			projectID, err := uuid.Parse(c.Param("project_id"))
+			if err != nil {
+				return make([]models.Instrument, 0), err
+			}
+
+			// slugs already taken in the database
+			slugsTaken, err := models.ListInstrumentSlugs(db)
+			if err != nil {
+				return make([]models.Instrument, 0), err
+			}
+
+			for idx := range ic.Items {
+				// Assign UUID
+				ic.Items[idx].ID = uuid.Must(uuid.NewRandom())
+				// Assign ProjectID
+				ic.Items[idx].ProjectID = &projectID
+				// Assign Slug
+				s, err := dbutils.NextUniqueSlug(ic.Items[idx].Name, slugsTaken)
+				if err != nil {
+					return make([]models.Instrument, 0), err
+				}
+				ic.Items[idx].Slug = s
+				// Add slug to array of slugs originally fetched from the database
+				// to catch duplicate names/slugs from the same bulk upload
+				slugsTaken = append(slugsTaken, s)
+			}
+
+			return ic.Items, nil
+		}
+
+		// Instruments
+		instruments, err := newInstruments(c)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, err)
+		}
+
+		// Get action information from context
+		a, err := models.NewAction(c)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+
+		// Validate POST
+		if c.QueryParam("dry_run") == "true" {
+			v, err := models.ValidateCreateInstruments(db, a, instruments)
+			if err != nil {
+				return c.JSON(http.StatusBadRequest, err)
+			}
+			return c.JSON(http.StatusOK, v)
+		}
+
+		// Actually POST
+		if err := models.CreateInstruments(db, a, instruments); err != nil {
+			return c.JSON(http.StatusBadRequest, err)
+		}
+		return c.NoContent(http.StatusCreated)
+	}
+}
+
 // CreateInstrumentBulk accepts an array of instruments for bulk upload to the database
+// Deprecated...
 func CreateInstrumentBulk(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 
@@ -86,8 +158,9 @@ func CreateInstrumentBulk(db *sqlx.DB) echo.HandlerFunc {
 		if err := models.CreateInstrumentBulk(db, a, ic.Items); err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
+
 		// Send instrument
-		return c.JSON(http.StatusCreated, ic.Items)
+		return c.NoContent(http.StatusCreated)
 	}
 }
 

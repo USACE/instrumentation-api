@@ -3,6 +3,8 @@ package handlers
 import (
 	"api/root/dbutils"
 	"api/root/models"
+	ts "api/root/timeseries"
+
 	"net/http"
 
 	"github.com/google/uuid"
@@ -98,7 +100,7 @@ func CreateTimeseries(db *sqlx.DB) echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 
-		return c.JSON(http.StatusCreated, tc.Items)
+		return c.NoContent(http.StatusCreated)
 	}
 }
 
@@ -113,7 +115,7 @@ func UpdateTimeseries(db *sqlx.DB) echo.HandlerFunc {
 			return c.String(http.StatusBadRequest, "Malformed ID")
 		}
 		// id from request
-		t := models.Timeseries{}
+		t := ts.Timeseries{}
 		if err := c.Bind(&t); err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}

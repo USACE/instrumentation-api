@@ -71,7 +71,7 @@ func CreateInstrumentNote(db *sqlx.DB) echo.HandlerFunc {
 		if err := models.CreateInstrumentNote(db, a, nc.Items); err != nil {
 			return c.JSON(http.StatusInternalServerError, err)
 		}
-		return c.JSON(http.StatusCreated, nc.Items)
+		return c.NoContent(http.StatusCreated)
 	}
 }
 
