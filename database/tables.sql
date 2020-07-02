@@ -415,6 +415,7 @@ INSERT INTO parameter (id, name) VALUES
     ('1de79e29-fb70-45c3-ae7d-4695517ced90', 'pressure'),
     ('de6112da-8489-4286-ae56-ec72aa09974d', 'temperature'),
     ('0ce77a5a-8283-47cd-9126-c440bcec4ef6', 'precipitation'),
+    ('83b5a1f7-948b-4373-a47c-d73ff622aafd', 'elevation'),
     ('430e5edb-e2b5-4f86-b19f-cda26a27e151', 'voltage');
 
 -- zreference_datum (https://www.ngs.noaa.gov/datums/vertical/)
