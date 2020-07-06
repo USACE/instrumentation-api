@@ -10,9 +10,9 @@ An Application Programming Interface (API) to manage instrumentation data, built
 
 2. Change to the /database directory in this repository and type `docker-compose up`. This brings up two services on `localhost`
 
-   1. A postgres database with postgis schema installed
+   1. A postgres database with postgis schema installed using the Docker image [mdillon/postgis](https://hub.docker.com/r/mdillon/postgis/)
 
-   2. pgadmin4 (a user interface to interact with the database)
+   2. pgadmin4 (a user interface to interact with the database) using the Docker image [dpage/pgadmin4](https://hub.docker.com/r/dpage/pgadmin4/)
 
    To modify the database using pgadmin4, open a web browser and go to `localhost:8080`.
 
@@ -22,9 +22,9 @@ An Application Programming Interface (API) to manage instrumentation data, built
 
    **General Tab**
 
-   | Field | Value     |
-   | ----- | --------- |
-   | Name  | localhost |
+   | Field | Value                               |
+   | ----- | ----------------------------------- |
+   | Name  | localhost (or other preferred name) |
 
    **Connection Tab**
 
@@ -37,13 +37,7 @@ An Application Programming Interface (API) to manage instrumentation data, built
 
 3. Initialize the database and seed it with some data
 
-   Use the Query Tool in pgadmin4 and the .sql files in the database/ directory in this repository. You can find the query tool by expanding the left menu tree to `Servers --> Databases --> postgres`. Right click `postgres --> Query Tool`. From here you can copy .sql into the Query Tool and run it by pressing `f5`. Note: to only run a portion of the SQL you've copied, you can highlight the section you want to run before hitting `f5`.
-
-   The .sql in the files should be run in this order to initialize the database:
-
-   1. tables.sql
-
-   1. seed_data.sql
+   Use the Query Tool in pgadmin4 and the .sql files in the database/ directory in this repository. You can find the query tool by expanding the left menu tree to `Servers --> Databases --> postgres`. Right click `postgres --> Query Tool`. From here, copy [tables.sql](database/tables.sql) into the Query Tool and run it by pressing `f5`. Note: to only run a portion of the SQL you've copied, you can highlight the section you want to run before hitting `f5`.
 
 ## Running the GO API for Local Development
 
@@ -65,7 +59,7 @@ Set the following environment variables and type `go run root/main.go` from the 
     * LAMBDA=FALSE
     * JWT_DISABLED=FALSE
 
-Note: make sure environment variable `LAMBDA` is either **not set** or is set to `LAMBDA=FALSE`.
+Note: When running the API locally, make sure environment variable `LAMBDA` is either **not set** or is set to `LAMBDA=FALSE`.
 
 ## Running API Docs Locally
 
@@ -85,8 +79,3 @@ Database should be initialized with the following SQL files in the order listed:
 1. roles.sql (database roles, grants, etc.)
 
    Note: Change 'password' in roles.sql to a real password for the `instrumentation_user` account.
-
-## AWS Lambda API Function
-
-## AWS API Gateway
-
