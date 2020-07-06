@@ -52,6 +52,18 @@ type InstrumentCollection struct {
 	Items []Instrument
 }
 
+// Shorten returns an instrument collection with individual objects limited to ID and Struct fields
+func (c InstrumentCollection) Shorten() IDAndSlugCollection {
+
+	ss := IDAndSlugCollection{Items: make([]IDAndSlug, 0)}
+	for _, n := range c.Items {
+		s := IDAndSlug{ID: n.ID, Slug: n.Slug}
+
+		ss.Items = append(ss.Items, s)
+	}
+	return ss
+}
+
 // UnmarshalJSON implements UnmarshalJSON interface
 func (c *InstrumentCollection) UnmarshalJSON(b []byte) error {
 
@@ -209,69 +221,6 @@ func ValidateCreateInstruments(db *sqlx.DB, a *Action, instruments []Instrument)
 		)
 	}
 	return validationResult, nil
-}
-
-// CreateInstrumentBulk creates many instruments from an array of instruments
-// Deprecated
-func CreateInstrumentBulk(db *sqlx.DB, a *Action, instruments []Instrument) error {
-
-	txn, err := db.Begin()
-	if err != nil {
-		return err
-	}
-
-	// Instrument
-	stmt1, err := txn.Prepare(
-		`INSERT INTO instrument
-			(id, slug, name, type_id, geometry, station, station_offset, creator, create_date, updater, update_date, project_id)
-		 VALUES
-		 	($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
-	)
-	if err != nil {
-		return err
-	}
-
-	// Instrument Status
-	stmt2, err := txn.Prepare(createInstrumentStatusSQL())
-	if err != nil {
-		return err
-	}
-
-	// Instrument ZReference
-	stmt3, err := txn.Prepare(createInstrumentZReferenceSQL())
-	if err != nil {
-		return err
-	}
-
-	for _, i := range instruments {
-		// Load Instrument
-		if _, err := stmt1.Exec(
-			i.ID, i.Slug, i.Name, i.TypeID, wkt.MarshalString(i.Geometry.Geometry()),
-			i.Station, i.StationOffset, a.Actor, a.Time, a.Actor, a.Time, i.ProjectID,
-		); err != nil {
-			return err
-		}
-		if _, err := stmt2.Exec(i.ID, i.StatusID, i.StatusTime); err != nil {
-			return err
-		}
-		if _, err := stmt3.Exec(i.ID, i.ZReferenceTime, i.ZReference, i.ZReferenceDatumID); err != nil {
-			return err
-		}
-	}
-	if err := stmt1.Close(); err != nil {
-		return err
-	}
-	if err := stmt2.Close(); err != nil {
-		return err
-	}
-	if err := stmt3.Close(); err != nil {
-		return err
-	}
-	if err := txn.Commit(); err != nil {
-		return err
-	}
-
-	return nil
 }
 
 // UpdateInstrument updates a single instrument

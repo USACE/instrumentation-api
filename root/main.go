@@ -108,7 +108,7 @@ func main() {
 	e.POST("instrumentation/instrument_groups/:instrument_group_id/instruments", handlers.CreateInstrumentGroupInstruments(db))
 	e.DELETE("instrumentation/instrument_groups/:instrument_group_id/instruments/:instrument_id", handlers.DeleteInstrumentGroupInstruments(db))
 	// Instruments
-	e.POST("instrumentation/instruments", handlers.CreateInstrumentBulk(db))
+	e.POST("instrumentation/instruments", handlers.CreateInstruments(db))
 	e.PUT("instrumentation/instruments/:instrument_id", handlers.UpdateInstrument(db))
 	e.DELETE("instrumentation/instruments/:instrument_id", handlers.DeleteFlagInstrument(db))
 	// Instrument Notes(GET, PUT, DELETE work with or without instrument context in URL)

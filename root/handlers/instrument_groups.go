@@ -76,7 +76,7 @@ func CreateInstrumentGroupBulk(db *sqlx.DB) echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 		// Send instrumentgroup
-		return c.NoContent(http.StatusCreated)
+		return c.JSON(http.StatusCreated, gc.Shorten().Items)
 	}
 }
 

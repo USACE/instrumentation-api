@@ -26,6 +26,18 @@ type InstrumentGroupCollection struct {
 	Items []InstrumentGroup
 }
 
+// Shorten returns an instrument collection with individual objects limited to ID and Struct fields
+func (c InstrumentGroupCollection) Shorten() IDAndSlugCollection {
+
+	ss := IDAndSlugCollection{Items: make([]IDAndSlug, 0)}
+	for _, n := range c.Items {
+		s := IDAndSlug{ID: n.ID, Slug: n.Slug}
+
+		ss.Items = append(ss.Items, s)
+	}
+	return ss
+}
+
 // UnmarshalJSON implements UnmarshalJSON interface
 // Allows unpacking object or array of objects into array of objects
 func (c *InstrumentGroupCollection) UnmarshalJSON(b []byte) error {

@@ -30,11 +30,11 @@ func NextUniqueSlug(str string, usedSlugs []string) (string, error) {
 	if !(slugIsTaken(slugBasename, usedSlugs)) {
 		return slugBasename, nil
 	}
-	// max 100 iterations trying to get unique slug
+	// max 1000 iterations trying to get unique slug
 	// if we reach the end of 100 iterations, it means there are more than 100 things with the same
 	// name in the database table
 	i := 1
-	for i < 100 {
+	for i < 1000 {
 		slug := fmt.Sprintf("%s-%d", slugBasename, i)
 		if !(slugIsTaken(slug, usedSlugs)) {
 			return slug, nil
