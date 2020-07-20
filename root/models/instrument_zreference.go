@@ -1,6 +1,7 @@
 package models
 
 import (
+	"api/root/timeseries"
 	"encoding/json"
 	"time"
 
@@ -19,6 +20,14 @@ type ZReference struct {
 	ZReference        float32   `json:"zreference"`
 	ZReferenceDatumID uuid.UUID `json:"zreference_datum_id" db:"zreference_datum_id"`
 	ZReferenceDatum   string    `json:"zreference_datum" db:"zreference_datum"`
+}
+
+// AsTimeseriesMeasurement returns a timeseries.Measurement representation of ZReference
+func (z ZReference) AsTimeseriesMeasurement() timeseries.Measurement {
+	return timeseries.Measurement{
+		Time:  z.Time,
+		Value: z.ZReference,
+	}
 }
 
 // ZReferenceCollection is a collection of ZReference items

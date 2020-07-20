@@ -413,6 +413,7 @@ INSERT INTO unit (id, unit_family_id, measure_id, name, abbreviation) VALUES
 INSERT INTO parameter (id, name) VALUES
     ('068b59b0-aafb-4c98-ae4b-ed0365a6fbac', 'length'),
     ('1de79e29-fb70-45c3-ae7d-4695517ced90', 'pressure'),
+    ('b49f214e-f69f-43da-9ce3-ad96042268d0', 'stage'),
     ('de6112da-8489-4286-ae56-ec72aa09974d', 'temperature'),
     ('0ce77a5a-8283-47cd-9126-c440bcec4ef6', 'precipitation'),
     ('83b5a1f7-948b-4373-a47c-d73ff622aafd', 'elevation'),
