@@ -27,12 +27,6 @@ type Filter struct {
 	ParameterID  []uuid.UUID
 }
 
-// TimeseriesLeanFormat is a condensed representation of timeseries data
-type TimeseriesLeanFormat struct {
-	TimeseriesID uuid.UUID               `json:"timeseries_id"`
-	Values       []map[time.Time]float32 `json:"values"`
-}
-
 // PostExplorer retrieves timeseries information for the explorer app component
 func PostExplorer(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {

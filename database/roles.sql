@@ -21,12 +21,14 @@ GRANT SELECT ON
     instrument_status,
     instrument_type,
     instrument_zreference,
+    measure,
     parameter,
     project,
     status,
     timeseries,
     timeseries_measurement,
     unit,
+    unit_family,
     zreference_datum
 TO instrumentation_reader;
 
@@ -40,12 +42,14 @@ GRANT INSERT,UPDATE,DELETE ON
     instrument_status,
     instrument_type,
     instrument_zreference,
+    measure,
     parameter,
     project,
     status,
     timeseries,
     timeseries_measurement,
     unit,
+    unit_family,
     zreference_datum
 TO instrumentation_writer;
 

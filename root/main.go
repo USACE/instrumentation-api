@@ -52,14 +52,6 @@ func main() {
 	e := echo.New()
 	e.Use(middleware.CORS())
 
-	// JWT Middleware handles JWT Auth
-	// SetCreatorUpaterFields sets context values from JWT claims for
-	// creator, create_date, updater, update_date
-	e.Use(
-		middleware.JWTWithConfig(appconfig.JWTConfig),
-		appconfig.IsLoggedIn,
-	)
-
 	// Public Routes
 	// NOTE: ALL GET REQUESTS ARE ALLOWED WITHOUT AUTHENTICATION USING JWTConfig Skipper. See appconfig/jwt.go
 	e.GET("instrumentation/projects", handlers.ListProjects(db))
@@ -92,6 +84,14 @@ func main() {
 	e.GET("instrumentation/domains", handlers.GetDomains(db))
 	e.GET("instrumentation/home", handlers.GetHome(db))
 	e.POST("instrumentation/explorer", handlers.PostExplorer(db))
+
+	// JWT Middleware handles JWT Auth
+	// SetCreatorUpaterFields sets context values from JWT claims for
+	// creator, create_date, updater, update_date
+	e.Use(
+		middleware.JWTWithConfig(appconfig.JWTConfig),
+		appconfig.IsLoggedIn,
+	)
 
 	// Authenticated Routes (Need CAC Login)
 	// Projects
@@ -135,8 +135,8 @@ func main() {
 		lambdaContext(),
 	)
 	if lambdaContext() {
-		log.Fatal(gateway.ListenAndServe(":3030", e))
+		log.Fatal(gateway.ListenAndServe("localhost:3030", e))
 	} else {
-		log.Fatal(http.ListenAndServe(":3030", e))
+		log.Fatal(http.ListenAndServe("localhost:3030", e))
 	}
 }

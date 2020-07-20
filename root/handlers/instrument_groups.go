@@ -156,8 +156,8 @@ func CreateInstrumentGroupInstruments(db *sqlx.DB) echo.HandlerFunc {
 		if err != nil || instrumentGroupID == uuid.Nil {
 			return c.NoContent(http.StatusBadRequest)
 		}
-		// instrument
-		i := new(models.Instrument)
+		// InstrumentInformation
+		i := new(models.InstrumentInformation)
 		if err := c.Bind(i); err != nil || i.ID == uuid.Nil {
 			return c.NoContent(http.StatusBadRequest)
 		}

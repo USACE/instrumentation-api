@@ -53,22 +53,22 @@ func CreateInstruments(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 
 		// Sanatized instruments with ID, projectID, and slug assigned
-		newInstrumentCollection := func(c echo.Context) (models.InstrumentCollection, error) {
-			ic := models.InstrumentCollection{}
+		newInstrumentInformationCollection := func(c echo.Context) (models.InstrumentInformationCollection, error) {
+			ic := models.InstrumentInformationCollection{}
 			if err := c.Bind(&ic); err != nil {
-				return models.InstrumentCollection{}, err
+				return models.InstrumentInformationCollection{}, err
 			}
 
 			// Get ProjectID of Instruments
 			projectID, err := uuid.Parse(c.Param("project_id"))
 			if err != nil {
-				return models.InstrumentCollection{}, err
+				return models.InstrumentInformationCollection{}, err
 			}
 
 			// slugs already taken in the database
 			slugsTaken, err := models.ListInstrumentSlugs(db)
 			if err != nil {
-				return models.InstrumentCollection{}, err
+				return models.InstrumentInformationCollection{}, err
 			}
 
 			for idx := range ic.Items {
@@ -79,7 +79,7 @@ func CreateInstruments(db *sqlx.DB) echo.HandlerFunc {
 				// Assign Slug
 				s, err := dbutils.NextUniqueSlug(ic.Items[idx].Name, slugsTaken)
 				if err != nil {
-					return models.InstrumentCollection{}, err
+					return models.InstrumentInformationCollection{}, err
 				}
 				ic.Items[idx].Slug = s
 				// Add slug to array of slugs originally fetched from the database
@@ -91,7 +91,7 @@ func CreateInstruments(db *sqlx.DB) echo.HandlerFunc {
 		}
 
 		// Instruments
-		ic, err := newInstrumentCollection(c)
+		ic, err := newInstrumentInformationCollection(c)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
@@ -130,7 +130,7 @@ func UpdateInstrument(db *sqlx.DB) echo.HandlerFunc {
 			return c.String(http.StatusBadRequest, "Malformed ID")
 		}
 		// id from request
-		i := &models.Instrument{ID: id}
+		i := &models.InstrumentInformation{ID: id}
 		if err := c.Bind(i); err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
