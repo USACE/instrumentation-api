@@ -94,7 +94,7 @@ CREATE TABLE IF NOT EXISTS public.instrument (
     update_date TIMESTAMPTZ NOT NULL DEFAULT now(),
     type_id UUID NOT NULL REFERENCES instrument_type (id),
     project_id UUID REFERENCES project (id),
-    zreference_datum_id UUID REFERENCES zreference_datum (id),
+    formula VARCHAR(360),
     CONSTRAINT project_unique_instrument_name UNIQUE(name,project_id)
 );
 
@@ -156,6 +156,32 @@ CREATE TABLE IF NOT EXISTS public.timeseries_measurement (
     timeseries_id UUID NOT NULL REFERENCES timeseries (id) ON DELETE CASCADE,
     CONSTRAINT timeseries_unique_time UNIQUE(timeseries_id,time)
 );
+
+-- constants
+CREATE TABLE IF NOT EXISTS public.constants (
+    instrument_id UUID NOT NULL REFERENCES instrument (id),
+    timeseries_id UUID NOT NULL REFERENCES timeseries (id),
+)
+
+-- alarms
+CREATE TABLE IF NOT EXISTS public.alarms (
+    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+    instrument_id UUID NOT NULL REFERENCES instrument (id),
+    formula VARCHAR(360),
+    schedule VARCHAR(20),
+    mute_notifications BOOLEAN,
+    mute_ui BOOLEAN,
+    to VARCHAR(360),
+    body VARCHAR(1200)
+)
+
+-- annotations
+CREATE TABLE IF NOT EXISTS public.annotations (
+    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+    x VARCHAR(100), -- we have to be able to store date-strings as well as numbers
+    y REAL,
+    body VARCHAR(100)
+)
 
 -- -------
 -- Domains
