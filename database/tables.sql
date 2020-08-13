@@ -8,7 +8,6 @@ drop table if exists
     public.timeseries,
     public.instrument_group_instruments,
     public.instrument_status,
-    public.instrument_zreference,
     public.instrument_note,
     public.instrument,
     public.instrument_group,
@@ -18,8 +17,7 @@ drop table if exists
     public.unit,
     public.instrument_type,
     public.project,
-    public.status,
-    public.zreference_datum
+    public.status
 	CASCADE;
 
 -- project
@@ -46,12 +44,6 @@ CREATE TABLE IF NOT EXISTS public.status (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     name VARCHAR(20) UNIQUE NOT NULL,
     description VARCHAR(480)
-);
-
--- domain zreference_datum
-CREATE TABLE IF NOT EXISTS public.zreference_datum (
-    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
-    name VARCHAR(120) UNIQUE NOT NULL
 );
 
 -- measure
@@ -111,7 +103,6 @@ CREATE TABLE IF NOT EXISTS public.instrument (
     update_date TIMESTAMPTZ NOT NULL DEFAULT now(),
     type_id UUID NOT NULL REFERENCES instrument_type (id),
     project_id UUID REFERENCES project (id),
-    zreference_datum_id UUID REFERENCES zreference_datum (id),
     CONSTRAINT project_unique_instrument_name UNIQUE(name,project_id)
 );
 
@@ -142,16 +133,6 @@ CREATE TABLE IF NOT EXISTS public.instrument_status (
     status_id UUID NOT NULL REFERENCES status (id),
     time TIMESTAMPTZ NOT NULL DEFAULT now(),
     CONSTRAINT instrument_unique_status_in_time UNIQUE (instrument_id, time)
-);
-
--- instrument_zreference
-CREATE TABLE IF NOT EXISTS public.instrument_zreference (
-    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
-    instrument_id UUID NOT NULL REFERENCES instrument (id),
-    time TIMESTAMPTZ NOT NULL DEFAULT '1776-08-02',
-    zreference REAL NOT NULL,
-    zreference_datum_id UUID NOT NULL REFERENCES zreference_datum (id),
-    CONSTRAINT instrument_unique_zreference_in_time UNIQUE(instrument_id, time)
 );
 
 -- timeseries
@@ -419,10 +400,6 @@ INSERT INTO parameter (id, name) VALUES
     ('83b5a1f7-948b-4373-a47c-d73ff622aafd', 'elevation'),
     ('430e5edb-e2b5-4f86-b19f-cda26a27e151', 'voltage');
 
--- zreference_datum (https://www.ngs.noaa.gov/datums/vertical/)
-INSERT INTO zreference_datum (id, name) VALUES
-    ('85fb892d-7d55-41f1-95f6-addea9914264', 'National Geodetic Vertical Datum of 1929 (NGVD 29)'),
-    ('72113f9a-982d-44e5-8fc1-8e595dafd344', 'North American Vertical Datum of 1988 (NAVD 88)');
 -- -------------------------------------------------
 -- basic seed data to demo the app and run API tests
 -- -------------------------------------------------
@@ -442,18 +419,6 @@ INSERT INTO instrument (project_id, id, slug, name, geometry, type_id) VALUES
 -- instrument_group_instruments
 INSERT INTO instrument_group_instruments (instrument_id, instrument_group_id) VALUES
     ('a7540f69-c41e-43b3-b655-6e44097edb7e', 'd0916e8a-39a6-4f2f-bd31-879881f8b40c');
-
--- instrument_zreference
--- Following simulates the described scenario
--- (1) Initial reference height (pz casing installed)
--- (2) PZ casing hit by mower, reducing height by 0.5 ft
--- (3) pz casing repaired/extended to be 4.0 ft higher
-INSERT INTO instrument_zreference (id, instrument_id, time, zreference, zreference_datum_id) VALUES
-    ('3f4718fb-897b-4840-8494-0f142cc11027', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '1975-01-01', 41.60, '85fb892d-7d55-41f1-95f6-addea9914264'),
-    ('d18e5577-5b28-4722-8833-5cb14430e02a', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '2000-01-01', 41.0, '72113f9a-982d-44e5-8fc1-8e595dafd344'),
-    ('99841fcc-16e7-408b-ba53-126bd2e764d1', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '2005-07-01', 40.5, '72113f9a-982d-44e5-8fc1-8e595dafd344'),
-    ('9b16d6bf-81ab-488d-a650-996280c628dc', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '2006-06-01', 44.5, '72113f9a-982d-44e5-8fc1-8e595dafd344'),
-    ('996b9650-24c7-4e43-b65c-abd767041ecd', '9e8f2ca4-4037-45a4-aaca-d9e598877439', '2020-01-01', 10.5, '72113f9a-982d-44e5-8fc1-8e595dafd344');
 
 -- instrument_status
 -- (1) Active    in 1980 (sample, project construction)

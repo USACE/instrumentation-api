@@ -1,7 +1,6 @@
 package models
 
 import (
-	"api/root/timeseries"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -18,33 +17,8 @@ import (
 	"github.com/paulmach/orb/geojson"
 )
 
-// Instrument interface
-type Instrument interface {
-	InstrumentInfo() InstrumentInformation
-}
-
-// ElevationInstrument interface
-type ElevationInstrument interface {
-	Instrument
-	Elevate(stages []timeseries.Measurement, zrefs []ZReference)
-}
-
-//
-
-// InstrumentFactory creates concrete instrument types from InstrumentInfo
-func InstrumentFactory(info InstrumentInformation) Instrument {
-	switch strings.ToUpper(info.Type) {
-	case "PIEZOMETER":
-		return NewOpenAirPiezometer(info)
-	case "STAFFGAGE":
-		return NewStaffGage(info)
-	default:
-		return info
-	}
-}
-
-// InstrumentInformation is shared metadata between all concrete instrument types
-type InstrumentInformation struct {
+// Instrument is an instrument
+type Instrument struct {
 	ID                uuid.UUID        `json:"id"`
 	Groups            []uuid.UUID      `json:"groups"`
 	StatusID          uuid.UUID        `json:"status_id" db:"status_id"`
@@ -59,97 +33,22 @@ type InstrumentInformation struct {
 	Station           *int             `json:"station"`
 	StationOffset     *int             `json:"offset" db:"station_offset"`
 	ProjectID         *uuid.UUID       `json:"project_id" db:"project_id"`
-	ZReference        float32          `json:"zreference"`
-	ZReferenceDatumID uuid.UUID        `json:"zreference_datum_id" db:"zreference_datum_id"`
-	ZReferenceDatum   string           `json:"zreference_datum"`
-	ZReferenceTime    time.Time        `json:"zreference_time"`
 	AuditInfo
 }
 
-// InstrumentInfo implements Instrument interface for InstrumentInformation, allows it to act as an instrument
-func (i InstrumentInformation) InstrumentInfo() InstrumentInformation {
-	return i
-}
-
-// OpenAirPiezometer is a concrete instrument
-type OpenAirPiezometer struct {
-	InstrumentInformation
-}
-
-// InstrumentInfo implements the instrument interface for an OpenAirPiezometer
-func (i OpenAirPiezometer) InstrumentInfo() InstrumentInformation {
-	return i.InstrumentInformation
-}
-
-// Elevate implements the ElevationInstrument interface;
-// Assumes ZReferences and Timeseries Measurements are sorted on time.Time descending
-// https://stackoverflow.com/questions/34329441/golang-struct-array-values-not-appending-in-loop
-func (i OpenAirPiezometer) Elevate(stages []timeseries.Measurement, zrefs []ZReference) ([]timeseries.Measurement, error) {
-	// Convert ZReference to timeseries.Measurements
-	zz := make([]timeseries.Measurement, 0)
-	for _, z := range zrefs {
-		zz = append(zz, z.AsTimeseriesMeasurement())
-	}
-	// Switch stages negative
-	for sIdx := range stages {
-		stages[sIdx].Value = stages[sIdx].Value * -1
-	}
-	// Call Shifter
-	elevs, err := timeseries.Shifter(stages, zz)
-	if err != nil {
-		return make([]timeseries.Measurement, 0), err
-	}
-	return elevs, nil
-}
-
-// NewOpenAirPiezometer is a constructor
-func NewOpenAirPiezometer(info InstrumentInformation) Instrument {
-	return OpenAirPiezometer{info}
-}
-
-// StaffGage is a concrete instrument
-type StaffGage struct {
-	InstrumentInformation
-}
-
-// InstrumentInfo implements the instrument interface for a StaffGage
-func (i StaffGage) InstrumentInfo() InstrumentInformation {
-	return i.InstrumentInformation
-}
-
-// NewStaffGage is a constructor
-func NewStaffGage(info InstrumentInformation) Instrument {
-	return StaffGage{info}
-}
-
-// Elevate implements the ElevationInstrument interface
-func (i StaffGage) Elevate(stages []timeseries.Measurement, zrefs []ZReference) ([]timeseries.Measurement, error) {
-	// Convert ZReference to timeseries.Measurements
-	zz := make([]timeseries.Measurement, 0)
-	for _, z := range zrefs {
-		zz = append(zz, z.AsTimeseriesMeasurement())
-	}
-	// Call Shifter
-	elevs, err := timeseries.Shifter(stages, zz)
-	if err != nil {
-		return make([]timeseries.Measurement, 0), err
-	}
-	return elevs, nil
-}
-
-// CreateInstrumentsValidationResult holds results of checking InstrumentInformationCollection POST
+// CreateInstrumentsValidationResult holds results of checking InstrumentCollection POST
 type CreateInstrumentsValidationResult struct {
 	IsValid bool     `json:"is_valid"`
 	Errors  []string `json:"errors"`
 }
 
-// InstrumentInformationCollection is a collection of InstrumentInformation items
-type InstrumentInformationCollection struct {
-	Items []InstrumentInformation
+// InstrumentCollection is a collection of Instrument items
+type InstrumentCollection struct {
+	Items []Instrument
 }
 
 // Shorten returns an instrument collection with individual objects limited to ID and Struct fields
-func (c InstrumentInformationCollection) Shorten() IDAndSlugCollection {
+func (c InstrumentCollection) Shorten() IDAndSlugCollection {
 
 	ss := IDAndSlugCollection{Items: make([]IDAndSlug, 0)}
 	for _, n := range c.Items {
@@ -161,7 +60,7 @@ func (c InstrumentInformationCollection) Shorten() IDAndSlugCollection {
 }
 
 // UnmarshalJSON implements UnmarshalJSON interface
-func (c *InstrumentInformationCollection) UnmarshalJSON(b []byte) error {
+func (c *InstrumentCollection) UnmarshalJSON(b []byte) error {
 
 	switch JSONType(b) {
 	case "ARRAY":
@@ -169,13 +68,13 @@ func (c *InstrumentInformationCollection) UnmarshalJSON(b []byte) error {
 			return err
 		}
 	case "OBJECT":
-		var n InstrumentInformation
+		var n Instrument
 		if err := json.Unmarshal(b, &n); err != nil {
 			return err
 		}
-		c.Items = []InstrumentInformation{n}
+		c.Items = []Instrument{n}
 	default:
-		c.Items = make([]InstrumentInformation, 0)
+		c.Items = make([]Instrument, 0)
 	}
 	return nil
 }
@@ -225,7 +124,7 @@ func GetInstrumentCount(db *sqlx.DB) (int, error) {
 }
 
 // CreateInstruments creates many instruments from an array of instruments
-func CreateInstruments(db *sqlx.DB, a *Action, instruments []InstrumentInformation) error {
+func CreateInstruments(db *sqlx.DB, a *Action, instruments []Instrument) error {
 
 	txn, err := db.Begin()
 	if err != nil {
@@ -249,12 +148,6 @@ func CreateInstruments(db *sqlx.DB, a *Action, instruments []InstrumentInformati
 		return err
 	}
 
-	// Instrument ZReference
-	stmt3, err := txn.Prepare(createInstrumentZReferenceSQL())
-	if err != nil {
-		return err
-	}
-
 	for _, i := range instruments {
 		// Load Instrument
 		if _, err := stmt1.Exec(
@@ -266,17 +159,11 @@ func CreateInstruments(db *sqlx.DB, a *Action, instruments []InstrumentInformati
 		if _, err := stmt2.Exec(i.ID, i.StatusID, i.StatusTime); err != nil {
 			return err
 		}
-		if _, err := stmt3.Exec(i.ID, i.ZReferenceTime, i.ZReference, i.ZReferenceDatumID); err != nil {
-			return err
-		}
 	}
 	if err := stmt1.Close(); err != nil {
 		return err
 	}
 	if err := stmt2.Close(); err != nil {
-		return err
-	}
-	if err := stmt3.Close(); err != nil {
 		return err
 	}
 	if err := txn.Commit(); err != nil {
@@ -287,7 +174,7 @@ func CreateInstruments(db *sqlx.DB, a *Action, instruments []InstrumentInformati
 }
 
 // ValidateCreateInstruments creates many instruments from an array of instruments
-func ValidateCreateInstruments(db *sqlx.DB, a *Action, instruments []InstrumentInformation) (CreateInstrumentsValidationResult, error) {
+func ValidateCreateInstruments(db *sqlx.DB, a *Action, instruments []Instrument) (CreateInstrumentsValidationResult, error) {
 
 	validationResult := CreateInstrumentsValidationResult{Errors: make([]string, 0)}
 
@@ -320,7 +207,7 @@ func ValidateCreateInstruments(db *sqlx.DB, a *Action, instruments []InstrumentI
 }
 
 // UpdateInstrument updates a single instrument
-func UpdateInstrument(db *sqlx.DB, a *Action, i *InstrumentInformation) (*Instrument, error) {
+func UpdateInstrument(db *sqlx.DB, a *Action, i *Instrument) (*Instrument, error) {
 
 	txn, err := db.Begin()
 	if err != nil {
@@ -365,15 +252,6 @@ func UpdateInstrument(db *sqlx.DB, a *Action, i *InstrumentInformation) (*Instru
 		return nil, err
 	}
 
-	// Instrument ZReference
-	stmt3, err := txn.Prepare(createInstrumentZReferenceSQL())
-	if _, err := stmt3.Exec(i.ID, i.ZReferenceTime, i.ZReference, i.ZReferenceDatumID); err != nil {
-		return nil, err
-	}
-	if err := stmt3.Close(); err != nil {
-		return nil, err
-	}
-
 	if err := txn.Commit(); err != nil {
 		return nil, err
 	}
@@ -392,21 +270,21 @@ func DeleteFlagInstrument(db *sqlx.DB, id *uuid.UUID) error {
 	return nil
 }
 
-// InstrumentInformationFactory converts database rows to InstrumentInformation objects
-func InstrumentInformationFactory(db *sqlx.DB, rows *sqlx.Rows) ([]InstrumentInformation, error) {
+// InstrumentsFactory converts database rows to Instrument objects
+func InstrumentsFactory(db *sqlx.DB, rows *sqlx.Rows) ([]Instrument, error) {
 	defer rows.Close()
 	_IDs := make([]uuid.UUID, 0)           // Instrument IDs (used to get groups)
-	ii := make([]InstrumentInformation, 0) // InstrumentInformation
+	ii := make([]Instrument, 0) // Instrument
 	for rows.Next() {
 		var _ID uuid.UUID // InstrumentID
-		var i InstrumentInformation
+		var i Instrument
 		var p orb.Point
 		err := rows.Scan(
 			&_ID, &i.Deleted, &i.StatusID, &i.Status, &i.StatusTime, &i.Slug, &i.Name, &i.TypeID, &i.Type, wkb.Scanner(&p), &i.Station, &i.StationOffset,
-			&i.Creator, &i.CreateDate, &i.Updater, &i.UpdateDate, &i.ProjectID, &i.ZReferenceTime, &i.ZReference, &i.ZReferenceDatumID, &i.ZReferenceDatum,
+			&i.Creator, &i.CreateDate, &i.Updater, &i.UpdateDate, &i.ProjectID,
 		)
 		if err != nil {
-			return make([]InstrumentInformation, 0), err
+			return make([]Instrument, 0), err
 		}
 		// Add _ID to list of IDs; Used to fetch instrument_group_instruments
 		_IDs = append(_IDs, _ID)
@@ -421,7 +299,7 @@ func InstrumentInformationFactory(db *sqlx.DB, rows *sqlx.Rows) ([]InstrumentInf
 	// Add groups
 	groupMap, err := instrumentGroupMap(db, _IDs)
 	if err != nil {
-		return make([]InstrumentInformation, 0), err
+		return make([]Instrument, 0), err
 	}
 
 	// Assign Array of Group IDs to Each Instrument
@@ -435,23 +313,6 @@ func InstrumentInformationFactory(db *sqlx.DB, rows *sqlx.Rows) ([]InstrumentInf
 		ii[idx].Groups = groups
 	}
 	return ii, nil
-}
-
-// InstrumentsFactory returns a slice of instruments from a string of SQL
-func InstrumentsFactory(db *sqlx.DB, rows *sqlx.Rows) ([]Instrument, error) {
-
-	// List InstrumentInformation and run it through the factory
-	ii, err := InstrumentInformationFactory(db, rows)
-	if err != nil {
-		return make([]Instrument, 0), err
-	}
-
-	nn := make([]Instrument, 0)
-	for _, info := range ii {
-		nn = append(nn, InstrumentFactory(info))
-	}
-
-	return nn, nil
 }
 
 // instrumentGroupMap takes a list of instrument IDs and returns a map of
@@ -530,11 +391,7 @@ func listInstrumentsSQL() string {
 	               I.create_date,
 	               I.updater,
 	               I.update_date,
-				   I.project_id,
-				   Z.zreference_time,
-				   Z.zreference,
-				   Z.zreference_datum_id,
-				   Z.zreference_datum
+				   I.project_id
 			FROM   instrument I
 			INNER JOIN instrument_type T
 			   ON T.id = I.type_id
@@ -549,18 +406,5 @@ func listInstrumentsSQL() string {
 				WHERE a.time <= now()
 				ORDER BY instrument_id, a.time DESC
 			) S ON S.instrument_id = I.id
-			INNER JOIN (
-				SELECT
-					DISTINCT ON (instrument_id) instrument_id,
-					b.time                  AS zreference_time,
-					b.zreference            AS zreference,
-					b.zreference_datum_id   AS zreference_datum_id,
-					d.name                  AS zreference_datum
-				FROM instrument_zreference b
-				INNER JOIN zreference_datum d
-					ON d.id = b.zreference_datum_id
-				WHERE b.time <= now()
-				ORDER BY instrument_id, b.time DESC
-			) Z ON Z.instrument_id = I.id
 			`
 }

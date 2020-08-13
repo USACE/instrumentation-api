@@ -87,8 +87,6 @@ func main() {
 	public.GET("instrumentation/instruments/notes/:note_id", handlers.GetInstrumentNote(db))
 	public.GET("instrumentation/instruments/:instrument_id/notes", handlers.ListInstrumentInstrumentNotes(db))
 	public.GET("instrumentation/instruments/:instrument_id/notes/:note_id", handlers.GetInstrumentNote(db))
-	public.GET("instrumentation/instruments/:instrument_id/zreference", handlers.ListInstrumentZReference(db))
-	public.GET("instrumentation/instruments/:instrument_id/zreference/:zreference_id", handlers.GetInstrumentZReference(db))
 	public.GET("instrumentation/instruments/:instrument_id/status", handlers.ListInstrumentStatus(db))
 	public.GET("instrumentation/instruments/:instrument_id/status/:status_id", handlers.GetInstrumentStatus(db))
 	public.GET("instrumentation/timeseries", handlers.ListTimeseries(db))
@@ -125,9 +123,6 @@ func main() {
 	private.DELETE("instrumentation/instruments/notes/:note_id", handlers.DeleteInstrumentNote(db))
 	private.PUT("instrumentation/instruments/:instrument_id/notes/:note_id", handlers.UpdateInstrumentNote(db))
 	private.DELETE("instrumentation/instruments/:instrument_id/notes/:note_id", handlers.DeleteInstrumentNote(db))
-	// Instrument ZReference
-	private.POST("instrumentation/instruments/:instrument_id/zreference", handlers.CreateOrUpdateInstrumentZReference(db))
-	private.DELETE("instrumentation/instruments/:instrument_id/zreference/:zreference_id", handlers.DeleteInstrumentZReference(db))
 	// Instrument Status
 	private.POST("instrumentation/instruments/:instrument_id/status", handlers.CreateOrUpdateInstrumentStatus(db))
 	private.DELETE("instrumentation/instruments/:instrument_id/status/:status_id", handlers.DeleteInstrumentStatus(db))
