@@ -74,7 +74,7 @@ func ListInstrumentGroups(db *sqlx.DB) ([]InstrumentGroup, error) {
 
 	gg := make([]InstrumentGroup, 0)
 	if err := db.Select(
-		&gg, listInstrumentGroupsSQL()+" WHERE NOT deleted",
+		&gg, listInstrumentGroupsSQL+" WHERE NOT deleted",
 	); err != nil {
 		return make([]InstrumentGroup, 0), err
 	}
@@ -86,7 +86,7 @@ func GetInstrumentGroup(db *sqlx.DB, ID uuid.UUID) (*InstrumentGroup, error) {
 
 	var g InstrumentGroup
 	if err := db.QueryRowx(
-		listInstrumentGroupsSQL()+" WHERE id = $1",
+		listInstrumentGroupsSQL+" WHERE id = $1",
 		ID,
 	).StructScan(&g); err != nil {
 		return nil, err
@@ -178,7 +178,7 @@ func ListInstrumentGroupInstruments(db *sqlx.DB, ID uuid.UUID) ([]Instrument, er
          FROM   instrument_group_instruments A
 		 INNER JOIN (%s) B ON A.instrument_id = B.id
 		 WHERE A.instrument_group_id = $1 and B.deleted = false`,
-		listInstrumentsSQL(),
+		listInstrumentsSQL,
 	)
 
 	rows, err := db.Queryx(sql, ID)
@@ -215,16 +215,14 @@ func DeleteInstrumentGroupInstruments(db *sqlx.DB, instrumentGroupID uuid.UUID, 
 	return nil
 }
 
-func listInstrumentGroupsSQL() string {
-	return `SELECT id,
-				   slug,
-				   name,
-				   description,
-				   creator,
-				   create_date,
-				   updater,
-				   update_date,
-				   project_id
-	        FROM   instrument_group
-   `
-}
+var listInstrumentGroupsSQL = `SELECT id,
+				                      slug,
+				                      name,
+				                      description,
+				                      creator,
+				                      create_date,
+				                      updater,
+				                      update_date,
+				                      project_id
+	                            FROM   instrument_group`
+

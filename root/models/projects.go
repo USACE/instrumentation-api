@@ -67,10 +67,7 @@ func ListProjects(db *sqlx.DB) ([]Project, error) {
 // ListProjectInstruments returns a slice of instruments for a project
 func ListProjectInstruments(db *sqlx.DB, id uuid.UUID) ([]Instrument, error) {
 
-	rows, err := db.Queryx(
-		listInstrumentsSQL()+" WHERE NOT I.deleted AND I.project_id = $1",
-		id,
-	)
+	rows, err := db.Queryx(listInstrumentsSQL+" WHERE project_id = $1 AND NOT deleted", id)
 	if err != nil {
 		return make([]Instrument, 0), err
 	}
@@ -95,7 +92,7 @@ func ListProjectInstrumentGroups(db *sqlx.DB, id uuid.UUID) ([]InstrumentGroup, 
 	gg := make([]InstrumentGroup, 0)
 	if err := db.Select(
 		&gg,
-		listInstrumentGroupsSQL()+" WHERE NOT deleted AND project_id = $1",
+		listInstrumentGroupsSQL+" WHERE project_id = $1 AND NOT deleted",
 		id,
 	); err != nil {
 		return make([]InstrumentGroup, 0), err

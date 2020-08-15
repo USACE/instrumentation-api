@@ -11,6 +11,7 @@ drop table if exists
     public.instrument_note,
     public.instrument,
     public.instrument_group,
+    public.instrument_constants,
     public.parameter,
     public.unit_family,
     public.measure,
@@ -153,6 +154,65 @@ CREATE TABLE IF NOT EXISTS public.timeseries_measurement (
     value REAL NOT NULL,
     timeseries_id UUID NOT NULL REFERENCES timeseries (id) ON DELETE CASCADE,
     CONSTRAINT timeseries_unique_time UNIQUE(timeseries_id,time)
+);
+
+-- instrument_constants
+CREATE TABLE IF NOT EXISTS public.instrument_constants (
+    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+    timeseries_id UUID NOT NULL REFERENCES timeseries(id) ON DELETE CASCADE,
+    instrument_id UUID NOT NULL REFERENCES instrument(id) ON DELETE CASCADE,
+    CONSTRAINT instrument_unique_timeseries UNIQUE(instrument_id, timeseries_id)
+);
+
+-- -----
+-- Views
+-- -----
+CREATE OR REPLACE VIEW v_instrument AS (
+    SELECT I.id,
+	       I.deleted,
+		   S.status_id,
+		   S.status,
+		   S.status_time,
+	       I.slug,
+	       I.name,
+	       I.type_id,
+	       T.name                  AS type, 
+		   ST_AsBinary(I.geometry) AS geometry,
+		   I.station,
+		   I.station_offset,
+	       I.creator,
+	       I.create_date,
+	       I.updater,
+	       I.update_date,
+		   I.project_id,
+		   COALESCE(C.constants, '{}') AS constants,
+		   COALESCE(G.groups, '{}')   AS groups
+	FROM   instrument I
+	INNER JOIN instrument_type T
+	ON T.id = I.type_id
+			INNER JOIN (
+				SELECT
+                	DISTINCT ON (instrument_id) instrument_id, 
+					a.time                 AS status_time,
+					a.status_id            AS status_id,
+					d.name                 AS status
+				FROM instrument_status a
+				INNER JOIN status d ON d.id = a.status_id
+				WHERE a.time <= now()
+				ORDER BY instrument_id, a.time DESC
+			) S ON S.instrument_id = I.id
+			LEFT JOIN (
+				SELECT array_agg(timeseries_id) as constants,
+				       instrument_id
+		    	FROM instrument_constants
+				GROUP BY instrument_id
+			) C on C.instrument_id = I.id
+			LEFT JOIN (
+				SELECT array_agg(instrument_group_id) as groups,
+				       instrument_id
+				FROM instrument_group_instruments
+				GROUP BY instrument_id
+			) G on G.instrument_id = I.id
 );
 
 -- -------
@@ -459,7 +519,14 @@ INSERT INTO timeseries (id, instrument_id, parameter_id, unit_id, slug, name) VA
 ('869465fc-dc1e-445e-81f4-9979b5fadda9', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '1de79e29-fb70-45c3-ae7d-4695517ced90', '6407a23f-b5f8-4214-9343-50b6231e4bfe', 'atmospheric-pressure', 'Atmospheric Pressure'),
 ('9a3864a8-8766-4bfa-bad1-0328b166f6a8', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a', 'precipitation', 'Precipitation'),
 ('7ee902a3-56d0-4acf-8956-67ac82c03a96', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce', 'height', 'Height'),
-('8f4ca3a3-5971-4597-bd6f-332d1cf5af7c', '9e8f2ca4-4037-45a4-aaca-d9e598877439', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce', 'height-1', 'Height');
+('8f4ca3a3-5971-4597-bd6f-332d1cf5af7c', '9e8f2ca4-4037-45a4-aaca-d9e598877439', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce', 'height-1', 'Height'),
+('d9697351-3a38-4194-9ac4-41541927e475', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce', 'top-of-riser', 'Top of Riser'),
+('22a734d6-dc24-451d-a462-43a32f335ae8', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce', 'tip-depth', 'Tip Depth');
+
+-- instrument_constants
+INSERT INTO instrument_constants (instrument_id, timeseries_id) VALUES
+('a7540f69-c41e-43b3-b655-6e44097edb7e', 'd9697351-3a38-4194-9ac4-41541927e475'),
+('a7540f69-c41e-43b3-b655-6e44097edb7e', '22a734d6-dc24-451d-a462-43a32f335ae8');
 
 -- Time Series Measurements
 INSERT INTO timeseries_measurement (timeseries_id, time, value) VALUES
@@ -513,4 +580,8 @@ INSERT INTO timeseries_measurement (timeseries_id, time, value) VALUES
 ('8f4ca3a3-5971-4597-bd6f-332d1cf5af7c', '3/7/2020' , 20.10),
 ('8f4ca3a3-5971-4597-bd6f-332d1cf5af7c', '3/8/2020' , 20.08),
 ('8f4ca3a3-5971-4597-bd6f-332d1cf5af7c', '3/9/2020' , 20.07),
-('8f4ca3a3-5971-4597-bd6f-332d1cf5af7c', '3/10/2020', 20.05);
+('8f4ca3a3-5971-4597-bd6f-332d1cf5af7c', '3/10/2020', 20.05),
+('d9697351-3a38-4194-9ac4-41541927e475', '3/10/2015', 40.50),
+('d9697351-3a38-4194-9ac4-41541927e475', '6/10/2020', 40.00),
+('d9697351-3a38-4194-9ac4-41541927e475', '3/10/2020', 39.50),
+('22a734d6-dc24-451d-a462-43a32f335ae8', '3/10/2015', 10.0);
