@@ -21,7 +21,12 @@
 									"    \"type\": \"object\",",
 									"    \"properties\": {",
 									"        \"id\": { \"type\": \"string\" },",
+									"        \"formula\": { \"type\": [\"string\", \"null\"] },",
 									"        \"groups\": {",
+									"            \"type\": \"array\",",
+									"            \"items\": { \"type\": \"string\" },",
+									"        },",
+									"        \"constants\": {",
 									"            \"type\": \"array\",",
 									"            \"items\": { \"type\": \"string\" },",
 									"        },",
@@ -56,7 +61,7 @@
 									"        \"update_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
 									"        \"project_id\": { \"type\": [\"string\", \"null\"] }",
 									"    },",
-									"    \"required\": [\"id\", \"slug\", \"name\", \"type_id\", \"type\", \"status_id\", \"status\", \"status_time\", \"geometry\", \"creator\", \"create_date\", \"updater\", \"update_date\", \"project_id\", \"station\", \"offset\"],",
+									"    \"required\": [\"id\", \"slug\", \"name\", \"type_id\", \"type\", \"status_id\", \"status\", \"status_time\", \"geometry\", \"creator\", \"create_date\", \"updater\", \"update_date\", \"project_id\", \"station\", \"offset\", \"constants\", \"formula\"],",
 									"    \"additionalProperties\": false",
 									"}",
 									"",
@@ -284,7 +289,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "[{\n    \"status_id\": \"94578354-ffdf-4119-9663-6bd4323e58f5\",\n    \"status\": \"destroyed\",\n    \"status_time\": \"2001-01-01T00:00:00Z\",\n    \"slug\": \"demo-piezometer-2\",\n    \"name\": \"Demo Piezometer 2\",\n    \"type_id\": \"1bb4bf7c-f5f8-44eb-9805-43b07ffadbef\",\n    \"type\": \"Piezometer\",\n    \"geometry\": {\n        \"type\": \"Point\",\n        \"coordinates\": [\n            -80.8,\n            26.7\n        ]\n    },\n    \"station\": null,\n    \"offset\": null,\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\",\n    \"zreference\": 44.5,\n    \"zreference_datum_id\": \"72113f9a-982d-44e5-8fc1-8e595dafd344\",\n    \"zreference_datum\": \"North American Vertical Datum of 1988 (NAVD 88)\",\n    \"zreference_time\": \"2006-06-01T00:00:00Z\"\n},\n{\n    \"status_id\": \"94578354-ffdf-4119-9663-6bd4323e58f5\",\n    \"status\": \"destroyed\",\n    \"status_time\": \"2001-01-01T00:00:00Z\",\n    \"slug\": \"demo-piezometer-3\",\n    \"name\": \"Demo Piezometer 3\",\n    \"type_id\": \"1bb4bf7c-f5f8-44eb-9805-43b07ffadbef\",\n    \"type\": \"Piezometer\",\n    \"geometry\": {\n        \"type\": \"Point\",\n        \"coordinates\": [\n            -80.8,\n            26.7\n        ]\n    },\n    \"station\": null,\n    \"offset\": null,\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\",\n    \"zreference\": 44.5,\n    \"zreference_datum_id\": \"72113f9a-982d-44e5-8fc1-8e595dafd344\",\n    \"zreference_datum\": \"North American Vertical Datum of 1988 (NAVD 88)\",\n    \"zreference_time\": \"2006-06-01T00:00:00Z\"\n},\n{\n    \"status_id\": \"94578354-ffdf-4119-9663-6bd4323e58f5\",\n    \"status\": \"destroyed\",\n    \"status_time\": \"2001-01-01T00:00:00Z\",\n    \"slug\": \"demo-piezometer-4\",\n    \"name\": \"Demo Piezometer 4\",\n    \"type_id\": \"1bb4bf7c-f5f8-44eb-9805-43b07ffadbef\",\n    \"type\": \"Piezometer\",\n    \"geometry\": {\n        \"type\": \"Point\",\n        \"coordinates\": [\n            -80.8,\n            26.7\n        ]\n    },\n    \"station\": null,\n    \"offset\": null,\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\",\n    \"zreference\": 44.5,\n    \"zreference_datum_id\": \"72113f9a-982d-44e5-8fc1-8e595dafd344\",\n    \"zreference_datum\": \"North American Vertical Datum of 1988 (NAVD 88)\",\n    \"zreference_time\": \"2006-06-01T00:00:00Z\"\n}\n]",
+							"raw": "[{\n    \"status_id\": \"94578354-ffdf-4119-9663-6bd4323e58f5\",\n    \"status\": \"destroyed\",\n    \"status_time\": \"2001-01-01T00:00:00Z\",\n    \"slug\": \"demo-piezometer-2\",\n    \"formula\": null,\n    \"name\": \"Demo Piezometer 2\",\n    \"type_id\": \"1bb4bf7c-f5f8-44eb-9805-43b07ffadbef\",\n    \"type\": \"Piezometer\",\n    \"geometry\": {\n        \"type\": \"Point\",\n        \"coordinates\": [\n            -80.8,\n            26.7\n        ]\n    },\n    \"station\": null,\n    \"offset\": null,\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\"\n},\n{\n    \"status_id\": \"94578354-ffdf-4119-9663-6bd4323e58f5\",\n    \"status\": \"destroyed\",\n    \"status_time\": \"2001-01-01T00:00:00Z\",\n    \"slug\": \"demo-piezometer-3\",\n    \"name\": \"Demo Piezometer 3\",\n    \"type_id\": \"1bb4bf7c-f5f8-44eb-9805-43b07ffadbef\",\n    \"type\": \"Piezometer\",\n    \"geometry\": {\n        \"type\": \"Point\",\n        \"coordinates\": [\n            -80.8,\n            26.7\n        ]\n    },\n    \"formula\": null,\n    \"station\": null,\n    \"offset\": null,\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\"\n},\n{\n    \"status_id\": \"94578354-ffdf-4119-9663-6bd4323e58f5\",\n    \"status\": \"destroyed\",\n    \"status_time\": \"2001-01-01T00:00:00Z\",\n    \"slug\": \"demo-piezometer-4\",\n    \"name\": \"Demo Piezometer 4\",\n    \"type_id\": \"1bb4bf7c-f5f8-44eb-9805-43b07ffadbef\",\n    \"type\": \"Piezometer\",\n    \"geometry\": {\n        \"type\": \"Point\",\n        \"coordinates\": [\n            -80.8,\n            26.7\n        ]\n    },\n    \"station\": null,\n    \"offset\": null,\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\"\n}\n]",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -378,7 +383,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"status_id\": \"94578354-ffdf-4119-9663-6bd4323e58f5\",\n    \"status\": \"destroyed\",\n    \"status_time\": \"2001-01-01T00:00:00Z\",\n    \"slug\": \"demo-piezometer-5\",\n    \"name\": \"Demo Piezometer 5\",\n    \"type_id\": \"1bb4bf7c-f5f8-44eb-9805-43b07ffadbef\",\n    \"type\": \"Piezometer\",\n    \"geometry\": {\n        \"type\": \"Point\",\n        \"coordinates\": [\n            -80.8,\n            26.7\n        ]\n    },\n    \"station\": null,\n    \"offset\": null,\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\",\n    \"zreference\": 44.5,\n    \"zreference_datum_id\": \"72113f9a-982d-44e5-8fc1-8e595dafd344\",\n    \"zreference_datum\": \"North American Vertical Datum of 1988 (NAVD 88)\",\n    \"zreference_time\": \"2006-06-01T00:00:00Z\"\n}",
+							"raw": "{\n    \"status_id\": \"94578354-ffdf-4119-9663-6bd4323e58f5\",\n    \"status\": \"destroyed\",\n    \"status_time\": \"2001-01-01T00:00:00Z\",\n    \"slug\": \"demo-piezometer-5\",\n    \"name\": \"Demo Piezometer 5\",\n    \"type_id\": \"1bb4bf7c-f5f8-44eb-9805-43b07ffadbef\",\n    \"type\": \"Piezometer\",\n    \"geometry\": {\n        \"type\": \"Point\",\n        \"coordinates\": [\n            -80.8,\n            26.7\n        ]\n    },\n    \"formula\": null,\n    \"station\": null,\n    \"offset\": null,\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"

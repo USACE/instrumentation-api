@@ -21,7 +21,8 @@ import (
 type Instrument struct {
 	ID                uuid.UUID        `json:"id"`
 	Groups            []uuid.UUID      `json:"groups"`
-	Constants         []uuid.UUID `json:"constants"`
+	Constants         []uuid.UUID      `json:"constants"`
+	Formula           *string          `json:"formula"`
 	StatusID          uuid.UUID        `json:"status_id" db:"status_id"`
 	Status            string           `json:"status"`
 	StatusTime        time.Time        `json:"status_time" db:"status_time"`
@@ -135,9 +136,9 @@ func CreateInstruments(db *sqlx.DB, a *Action, instruments []Instrument) error {
 	// Instrument
 	stmt1, err := txn.Prepare(
 		`INSERT INTO instrument
-			(id, slug, name, type_id, geometry, station, station_offset, creator, create_date, updater, update_date, project_id)
+			(id, slug, name, type_id, geometry, station, station_offset, creator, create_date, updater, update_date, project_id, formula)
 		 VALUES
-		 	($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+		 	($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
 	)
 	if err != nil {
 		return err
@@ -153,7 +154,7 @@ func CreateInstruments(db *sqlx.DB, a *Action, instruments []Instrument) error {
 		// Load Instrument
 		if _, err := stmt1.Exec(
 			i.ID, i.Slug, i.Name, i.TypeID, wkt.MarshalString(i.Geometry.Geometry()),
-			i.Station, i.StationOffset, a.Actor, a.Time, a.Actor, a.Time, i.ProjectID,
+			i.Station, i.StationOffset, a.Actor, a.Time, a.Actor, a.Time, i.ProjectID, i.Formula,
 		); err != nil {
 			return err
 		}
@@ -225,7 +226,8 @@ func UpdateInstrument(db *sqlx.DB, a *Action, i *Instrument) (*Instrument, error
 				update_date = $6,
 				project_id = $7,
 				station = $8,
-				station_offset = $9
+				station_offset = $9,
+				formula = $10
 		 WHERE id = $1
 		 RETURNING id`,
 	)
@@ -233,7 +235,7 @@ func UpdateInstrument(db *sqlx.DB, a *Action, i *Instrument) (*Instrument, error
 	var updatedID uuid.UUID
 	if err := stmt1.QueryRow(
 		i.ID, i.Name, i.TypeID, wkb.Value(i.Geometry.Geometry()),
-		a.Actor, a.Time, i.ProjectID, i.Station, i.StationOffset,
+		a.Actor, a.Time, i.ProjectID, i.Station, i.StationOffset, i.Formula,
 	).Scan(&updatedID); err != nil {
 		return nil, err
 	}
@@ -280,7 +282,7 @@ func InstrumentsFactory(db *sqlx.DB, rows *sqlx.Rows) ([]Instrument, error) {
 		var p orb.Point
 		err := rows.Scan(
 			&i.ID, &i.Deleted, &i.StatusID, &i.Status, &i.StatusTime, &i.Slug, &i.Name, &i.TypeID, &i.Type, wkb.Scanner(&p), &i.Station, &i.StationOffset,
-			&i.Creator, &i.CreateDate, &i.Updater, &i.UpdateDate, &i.ProjectID, pq.Array(&i.Constants), pq.Array(&i.Groups),
+			&i.Creator, &i.CreateDate, &i.Updater, &i.UpdateDate, &i.ProjectID, pq.Array(&i.Constants), pq.Array(&i.Groups), &i.Formula,
 		)
 		if err != nil {
 			return make([]Instrument, 0), err
@@ -297,6 +299,6 @@ func InstrumentsFactory(db *sqlx.DB, rows *sqlx.Rows) ([]Instrument, error) {
 // ListInstrumentsSQL is the base SQL to retrieve all instrumentsJSON
 var listInstrumentsSQL = `SELECT id, deleted, status_id, status, status_time, slug,
 	name, type_id, name AS type, geometry, station, station_offset, creator, create_date,
-	updater, update_date, project_id, constants, groups
+	updater, update_date, project_id, constants, groups, formula
 	FROM   v_instrument
 	`

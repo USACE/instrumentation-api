@@ -95,6 +95,7 @@ CREATE TABLE IF NOT EXISTS public.instrument (
     deleted BOOLEAN NOT NULL DEFAULT false,
     slug VARCHAR(240) UNIQUE NOT NULL,
     name VARCHAR(120) NOT NULL,
+    formula VARCHAR,
     geometry geometry,
     station int,
     station_offset int,
@@ -168,52 +169,52 @@ CREATE TABLE IF NOT EXISTS public.instrument_constants (
 -- Views
 -- -----
 CREATE OR REPLACE VIEW v_instrument AS (
-    SELECT I.id,
-	       I.deleted,
-		   S.status_id,
-		   S.status,
-		   S.status_time,
-	       I.slug,
-	       I.name,
-	       I.type_id,
-	       T.name                  AS type, 
-		   ST_AsBinary(I.geometry) AS geometry,
-		   I.station,
-		   I.station_offset,
-	       I.creator,
-	       I.create_date,
-	       I.updater,
-	       I.update_date,
-		   I.project_id,
-		   COALESCE(C.constants, '{}') AS constants,
-		   COALESCE(G.groups, '{}')   AS groups
-	FROM   instrument I
-	INNER JOIN instrument_type T
-	ON T.id = I.type_id
-			INNER JOIN (
-				SELECT
-                	DISTINCT ON (instrument_id) instrument_id, 
-					a.time                 AS status_time,
-					a.status_id            AS status_id,
-					d.name                 AS status
-				FROM instrument_status a
-				INNER JOIN status d ON d.id = a.status_id
-				WHERE a.time <= now()
-				ORDER BY instrument_id, a.time DESC
-			) S ON S.instrument_id = I.id
-			LEFT JOIN (
-				SELECT array_agg(timeseries_id) as constants,
-				       instrument_id
-		    	FROM instrument_constants
-				GROUP BY instrument_id
-			) C on C.instrument_id = I.id
-			LEFT JOIN (
-				SELECT array_agg(instrument_group_id) as groups,
-				       instrument_id
-				FROM instrument_group_instruments
-				GROUP BY instrument_id
-			) G on G.instrument_id = I.id
-);
+        SELECT I.id,
+            I.deleted,
+            S.status_id,
+            S.status,
+            S.status_time,
+            I.slug,
+            I.name,
+            I.type_id,
+            I.formula,
+            T.name AS type,
+            ST_AsBinary(I.geometry) AS geometry,
+            I.station,
+            I.station_offset,
+            I.creator,
+            I.create_date,
+            I.updater,
+            I.update_date,
+            I.project_id,
+            COALESCE(C.constants, '{}') AS constants,
+            COALESCE(G.groups, '{}') AS groups
+        FROM instrument I
+            INNER JOIN instrument_type T ON T.id = I.type_id
+            INNER JOIN (
+                SELECT DISTINCT ON (instrument_id) instrument_id,
+                    a.time AS status_time,
+                    a.status_id AS status_id,
+                    d.name AS status
+                FROM instrument_status a
+                    INNER JOIN status d ON d.id = a.status_id
+                WHERE a.time <= now()
+                ORDER BY instrument_id,
+                    a.time DESC
+            ) S ON S.instrument_id = I.id
+            LEFT JOIN (
+                SELECT array_agg(timeseries_id) as constants,
+                    instrument_id
+                FROM instrument_constants
+                GROUP BY instrument_id
+            ) C on C.instrument_id = I.id
+            LEFT JOIN (
+                SELECT array_agg(instrument_group_id) as groups,
+                    instrument_id
+                FROM instrument_group_instruments
+                GROUP BY instrument_id
+            ) G on G.instrument_id = I.id
+    );
 
 -- -------
 -- Domains
@@ -472,9 +473,9 @@ INSERT INTO instrument_group (project_id, id, slug, name, description) VALUES
     ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'd0916e8a-39a6-4f2f-bd31-879881f8b40c', 'sample-instrument-group', 'Sample Instrument Group 1', 'This is an example instrument group');
 
 -- instrument
-INSERT INTO instrument (project_id, id, slug, name, geometry, type_id) VALUES
-    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'a7540f69-c41e-43b3-b655-6e44097edb7e', 'demo-piezometer-1', 'Demo Piezometer 1', ST_GeomFromText('POINT(-80.8 26.7)',4326),'1bb4bf7c-f5f8-44eb-9805-43b07ffadbef'),
-    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', '9e8f2ca4-4037-45a4-aaca-d9e598877439', 'demo-staffgage-1', 'Demo Staffgage 1', ST_GeomFromText('POINT(-80.85 26.75)',4326),'0fd1f9ba-2731-4ff9-96dd-3c03215ab06f');
+INSERT INTO instrument (project_id, id, slug, name, formula, geometry, type_id) VALUES
+    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'a7540f69-c41e-43b3-b655-6e44097edb7e', 'demo-piezometer-1', 'Demo Piezometer 1', '[demo-piezometer-1.top-of-riser] - [demo-piezometer-1.distance-to-water]', ST_GeomFromText('POINT(-80.8 26.7)',4326),'1bb4bf7c-f5f8-44eb-9805-43b07ffadbef'),
+    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', '9e8f2ca4-4037-45a4-aaca-d9e598877439', 'demo-staffgage-1', 'Demo Staffgage 1', null, ST_GeomFromText('POINT(-80.85 26.75)',4326),'0fd1f9ba-2731-4ff9-96dd-3c03215ab06f');
 
 -- instrument_group_instruments
 INSERT INTO instrument_group_instruments (instrument_id, instrument_group_id) VALUES
@@ -518,8 +519,8 @@ INSERT INTO instrument_note (id, instrument_id, title, body) VALUES
 INSERT INTO timeseries (id, instrument_id, parameter_id, unit_id, slug, name) VALUES
 ('869465fc-dc1e-445e-81f4-9979b5fadda9', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '1de79e29-fb70-45c3-ae7d-4695517ced90', '6407a23f-b5f8-4214-9343-50b6231e4bfe', 'atmospheric-pressure', 'Atmospheric Pressure'),
 ('9a3864a8-8766-4bfa-bad1-0328b166f6a8', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a', 'precipitation', 'Precipitation'),
-('7ee902a3-56d0-4acf-8956-67ac82c03a96', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce', 'height', 'Height'),
-('8f4ca3a3-5971-4597-bd6f-332d1cf5af7c', '9e8f2ca4-4037-45a4-aaca-d9e598877439', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce', 'height-1', 'Height'),
+('7ee902a3-56d0-4acf-8956-67ac82c03a96', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce', 'distance-to-water', 'Distance to Water'),
+('8f4ca3a3-5971-4597-bd6f-332d1cf5af7c', '9e8f2ca4-4037-45a4-aaca-d9e598877439', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce', 'height', 'Height'),
 ('d9697351-3a38-4194-9ac4-41541927e475', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce', 'top-of-riser', 'Top of Riser'),
 ('22a734d6-dc24-451d-a462-43a32f335ae8', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce', 'tip-depth', 'Tip Depth');
 
