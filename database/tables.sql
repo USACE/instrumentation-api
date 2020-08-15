@@ -24,6 +24,7 @@ drop table if exists
 -- project
 CREATE TABLE IF NOT EXISTS public.project (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+    office_id UUID,
     deleted boolean NOT NULL DEFAULT false,
     slug VARCHAR(240) UNIQUE NOT NULL,
     federal_id VARCHAR(240),

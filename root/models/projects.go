@@ -11,13 +11,14 @@ import (
 
 // Project is a project data structure
 type Project struct {
-	ID                   uuid.UUID `json:"id"`
-	Deleted              bool      `json:"-"`
-	FederalID            *string   `json:"federal_id" db:"federal_id"`
-	Slug                 string    `json:"slug"`
-	Name                 string    `json:"name"`
-	InstrumentCount      int       `json:"instrument_count" db:"instrument_count"`
-	InstrumentGroupCount int       `json:"instrument_group_count" db:"instrument_group_count"`
+	ID                   uuid.UUID  `json:"id"`
+	OfficeID             *uuid.UUID `json:"office_id" db:"office_id"`
+	Deleted              bool       `json:"-"`
+	FederalID            *string    `json:"federal_id" db:"federal_id"`
+	Slug                 string     `json:"slug"`
+	Name                 string     `json:"name"`
+	InstrumentCount      int        `json:"instrument_count" db:"instrument_count"`
+	InstrumentGroupCount int        `json:"instrument_group_count" db:"instrument_group_count"`
 	AuditInfo
 }
 
@@ -58,7 +59,7 @@ func ListProjectSlugs(db *sqlx.DB) ([]string, error) {
 // ListProjects returns a slice of projects
 func ListProjects(db *sqlx.DB) ([]Project, error) {
 	pp := make([]Project, 0)
-	if err := db.Select(&pp, listProjectsSQL()+" WHERE NOT p.deleted"); err != nil {
+	if err := db.Select(&pp, listProjectsSQL+" WHERE NOT p.deleted"); err != nil {
 		return make([]Project, 0), err
 	}
 	return pp, nil
@@ -112,7 +113,7 @@ func GetProjectCount(db *sqlx.DB) (int, error) {
 // GetProject returns a pointer to a project
 func GetProject(db *sqlx.DB, id uuid.UUID) (*Project, error) {
 	var p Project
-	if err := db.Get(&p, listProjectsSQL()+" WHERE p.id = $1", id); err != nil {
+	if err := db.Get(&p, listProjectsSQL+" WHERE p.id = $1", id); err != nil {
 		return nil, err
 	}
 	return &p, nil
@@ -121,7 +122,7 @@ func GetProject(db *sqlx.DB, id uuid.UUID) (*Project, error) {
 // GetProjectByFederalID returns a pointer to a project, looked-up by FederalID
 func GetProjectByFederalID(db *sqlx.DB, federalID string) (*Project, error) {
 	var p Project
-	if err := db.Get(&p, listProjectsSQL()+" WHERE federal_id = $1", federalID); err != nil {
+	if err := db.Get(&p, listProjectsSQL+" WHERE federal_id = $1", federalID); err != nil {
 		return nil, err
 	}
 	return &p, nil
@@ -189,8 +190,8 @@ func DeleteFlagProject(db *sqlx.DB, id uuid.UUID) error {
 }
 
 // ListProjectsSQL is the standard SQL for listing all projects
-func listProjectsSQL() string {
-	return `SELECT p.*,
+var listProjectsSQL = 
+           `SELECT p.*,
 	               COALESCE(i.count, 0) AS instrument_count,
 	               COALESCE(g.count, 0) AS instrument_group_count
             FROM   project p
@@ -209,7 +210,6 @@ func listProjectsSQL() string {
                 GROUP BY project_id
             ) g ON g.project_id = p.id
 	`
-}
 
 // projectInstrumentNamesMap returns a map of key: project_id , value: map[string]bool ;  string is name of instrument Upper
 func projectInstrumentNamesMap(db *sqlx.DB, projectIDs []uuid.UUID) (map[uuid.UUID]map[string]bool, error) {
