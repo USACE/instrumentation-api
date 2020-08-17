@@ -17,6 +17,7 @@ drop table if exists
     public.measure,
     public.unit,
     public.instrument_type,
+    public.project_timeseries,
     public.project,
     public.status
 	CASCADE;
@@ -166,9 +167,19 @@ CREATE TABLE IF NOT EXISTS public.instrument_constants (
     CONSTRAINT instrument_unique_timeseries UNIQUE(instrument_id, timeseries_id)
 );
 
+-- project_timeseries
+CREATE TABLE IF NOT EXISTS public.project_timeseries (
+    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+    timeseries_id UUID NOT NULL REFERENCES timeseries(id) ON DELETE CASCADE,
+    project_id UUID NOT NULL REFERENCES project(id) ON DELETE CASCADE,
+    CONSTRAINT project_unique_timeseries UNIQUE(project_id, timeseries_id)
+);
+
 -- -----
 -- Views
 -- -----
+
+-- v_instrument
 CREATE OR REPLACE VIEW v_instrument AS (
         SELECT I.id,
             I.deleted,
@@ -216,6 +227,44 @@ CREATE OR REPLACE VIEW v_instrument AS (
                 GROUP BY instrument_id
             ) G on G.instrument_id = I.id
     );
+
+-- v_project
+CREATE OR REPLACE VIEW v_project AS (
+        SELECT p.id,
+            p.office_id,
+            p.deleted,
+            p.slug,
+            p.federal_id,
+            p.name,
+            p.creator,
+            p.create_date,
+            p.updater,
+            p.update_date,
+            COALESCE(t.timeseries, '{}') AS timeseries,
+            COALESCE(i.count, 0) AS instrument_count,
+            COALESCE(g.count, 0) AS instrument_group_count
+        FROM project p
+            LEFT JOIN (
+                SELECT project_id,
+                    COUNT(instrument) as count
+                FROM instrument
+                WHERE NOT instrument.deleted
+                GROUP BY project_id
+            ) i ON i.project_id = p.id
+            LEFT JOIN (
+                SELECT project_id,
+                    COUNT(instrument_group) as count
+                FROM instrument_group
+                WHERE NOT instrument_group.deleted
+                GROUP BY project_id
+            ) g ON g.project_id = p.id
+            LEFT JOIN (
+                SELECT array_agg(timeseries_id) as timeseries,
+                    project_id
+                FROM project_timeseries
+                GROUP BY project_id
+            ) t on t.project_id = p.id
+);
 
 -- -------
 -- Domains

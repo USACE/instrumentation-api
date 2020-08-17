@@ -185,7 +185,7 @@ func ListInstrumentGroupInstruments(db *sqlx.DB, ID uuid.UUID) ([]Instrument, er
 	if err != nil {
 		return make([]Instrument, 0), err
 	}
-	return InstrumentsFactory(db, rows)
+	return InstrumentsFactory(rows)
 }
 
 // CreateInstrumentGroupInstruments adds an instrument to an instrument group
@@ -225,4 +225,3 @@ var listInstrumentGroupsSQL = `SELECT id,
 				                      update_date,
 				                      project_id
 	                            FROM   instrument_group`
-

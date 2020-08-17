@@ -19,22 +19,22 @@ import (
 
 // Instrument is an instrument
 type Instrument struct {
-	ID                uuid.UUID        `json:"id"`
-	Groups            []uuid.UUID      `json:"groups"`
-	Constants         []uuid.UUID      `json:"constants"`
-	Formula           *string          `json:"formula"`
-	StatusID          uuid.UUID        `json:"status_id" db:"status_id"`
-	Status            string           `json:"status"`
-	StatusTime        time.Time        `json:"status_time" db:"status_time"`
-	Deleted           bool             `json:"-"`
-	Slug              string           `json:"slug"`
-	Name              string           `json:"name"`
-	TypeID            uuid.UUID        `json:"type_id" db:"type_id"`
-	Type              string           `json:"type"`
-	Geometry          geojson.Geometry `json:"geometry,omitempty"`
-	Station           *int             `json:"station"`
-	StationOffset     *int             `json:"offset" db:"station_offset"`
-	ProjectID         *uuid.UUID       `json:"project_id" db:"project_id"`
+	ID            uuid.UUID        `json:"id"`
+	Groups        []uuid.UUID      `json:"groups"`
+	Constants     []uuid.UUID      `json:"constants"`
+	Formula       *string          `json:"formula"`
+	StatusID      uuid.UUID        `json:"status_id" db:"status_id"`
+	Status        string           `json:"status"`
+	StatusTime    time.Time        `json:"status_time" db:"status_time"`
+	Deleted       bool             `json:"-"`
+	Slug          string           `json:"slug"`
+	Name          string           `json:"name"`
+	TypeID        uuid.UUID        `json:"type_id" db:"type_id"`
+	Type          string           `json:"type"`
+	Geometry      geojson.Geometry `json:"geometry,omitempty"`
+	Station       *int             `json:"station"`
+	StationOffset *int             `json:"offset" db:"station_offset"`
+	ProjectID     *uuid.UUID       `json:"project_id" db:"project_id"`
 	AuditInfo
 }
 
@@ -98,17 +98,17 @@ func ListInstruments(db *sqlx.DB) ([]Instrument, error) {
 	if err != nil {
 		return make([]Instrument, 0), err
 	}
-	return InstrumentsFactory(db, rows)
+	return InstrumentsFactory(rows)
 }
 
 // GetInstrument returns a single instrument
 func GetInstrument(db *sqlx.DB, id *uuid.UUID) (*Instrument, error) {
 
-	rows, err := db.Queryx(listInstrumentsSQL + " WHERE id = $1", id)
+	rows, err := db.Queryx(listInstrumentsSQL+" WHERE id = $1", id)
 	if err != nil {
 		return nil, err
 	}
-	ii, err := InstrumentsFactory(db, rows)
+	ii, err := InstrumentsFactory(rows)
 	if err != nil {
 		return nil, err
 	}
@@ -274,7 +274,7 @@ func DeleteFlagInstrument(db *sqlx.DB, id *uuid.UUID) error {
 }
 
 // InstrumentsFactory converts database rows to Instrument objects
-func InstrumentsFactory(db *sqlx.DB, rows *sqlx.Rows) ([]Instrument, error) {
+func InstrumentsFactory(rows *sqlx.Rows) ([]Instrument, error) {
 	defer rows.Close()
 	ii := make([]Instrument, 0) // Instrument
 	for rows.Next() {
