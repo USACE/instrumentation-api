@@ -1,4 +1,4 @@
-package appconfig
+package middleware
 
 import (
 	"net/http"
@@ -16,14 +16,6 @@ func IsLoggedIn(next echo.HandlerFunc) echo.HandlerFunc {
 		c.Set("action", c.Request().Method)
 		c.Set("action_time", time.Now())
 
-		// If Skipping JWT, skip this middleware too
-		if skipJWT(c) {
-			// Set a test user ID and role TEST
-			c.Set("actor", 0)
-			c.Set("actor_roles", "TEST")
-			return next(c)
-		}
-
 		// Get claims from JWT
 		user := c.Get("user").(*jwt.Token)
 		claims := user.Claims.(jwt.MapClaims)
@@ -33,11 +25,23 @@ func IsLoggedIn(next echo.HandlerFunc) echo.HandlerFunc {
 		if err != nil {
 			return c.NoContent(http.StatusForbidden)
 		}
+		c.Set("actor", userID)
 
 		userRoles := claims["roles"].([]interface{})
-
-		c.Set("actor", userID)
 		c.Set("actor_roles", userRoles)
+
+		return next(c)
+	}
+}
+
+// MockIsLoggedIn sets appropriate actor fields based on the time of the request and mocked user information
+// Necessary for running integration tests unauthenticated
+func MockIsLoggedIn(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		c.Set("action", c.Request().Method)
+		c.Set("action_time", time.Now())
+		c.Set("actor", 0)
+		c.Set("actor_roles", "TEST")
 
 		return next(c)
 	}
