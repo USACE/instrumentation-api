@@ -138,6 +138,10 @@ func main() {
 	private.PUT("instrumentation/instruments/:instrument_id", handlers.UpdateInstrument(db))
 	private.DELETE("instrumentation/instruments/:instrument_id", handlers.DeleteFlagInstrument(db))
 
+	// Add or Remove Instrument Constants
+	private.POST("instrumentation/instruments/:instrument_id/constants/:timeseries_id", handlers.CreateInstrumentConstant(db))
+	private.DELETE("instrumentation/instruments/:instrument_id/constants/:timeseries_id", handlers.DeleteInstrumentConstant(db))
+
 	// Instrument Notes(GET, PUT, DELETE work with or without instrument context in URL)
 	private.POST("instrumentation/instruments/notes", handlers.CreateInstrumentNote(db))
 	private.PUT("instrumentation/instruments/notes/:note_id", handlers.UpdateInstrumentNote(db))

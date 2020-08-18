@@ -161,7 +161,6 @@ CREATE TABLE IF NOT EXISTS public.timeseries_measurement (
 
 -- instrument_constants
 CREATE TABLE IF NOT EXISTS public.instrument_constants (
-    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     timeseries_id UUID NOT NULL REFERENCES timeseries(id) ON DELETE CASCADE,
     instrument_id UUID NOT NULL REFERENCES instrument(id) ON DELETE CASCADE,
     CONSTRAINT instrument_unique_timeseries UNIQUE(instrument_id, timeseries_id)
@@ -169,7 +168,6 @@ CREATE TABLE IF NOT EXISTS public.instrument_constants (
 
 -- project_timeseries
 CREATE TABLE IF NOT EXISTS public.project_timeseries (
-    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     timeseries_id UUID NOT NULL REFERENCES timeseries(id) ON DELETE CASCADE,
     project_id UUID NOT NULL REFERENCES project(id) ON DELETE CASCADE,
     CONSTRAINT project_unique_timeseries UNIQUE(project_id, timeseries_id)

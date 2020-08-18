@@ -111,6 +111,98 @@
 					"response": []
 				},
 				{
+					"name": "DeleteInstrumentConstant",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "445c10ee-9838-4bf1-82b2-cdb1f08d3d67",
+								"exec": [
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/instrumentation/instruments/a7540f69-c41e-43b3-b655-6e44097edb7e/constants/d9697351-3a38-4194-9ac4-41541927e475",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"instruments",
+								"a7540f69-c41e-43b3-b655-6e44097edb7e",
+								"constants",
+								"d9697351-3a38-4194-9ac4-41541927e475"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteInstrumentConstant Copy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "6a750f18-6473-4245-9a39-87b4c0225f92",
+								"exec": [
+									"// status code is 200",
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/instrumentation/instruments/a7540f69-c41e-43b3-b655-6e44097edb7e/constants/d9697351-3a38-4194-9ac4-41541927e475",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"instruments",
+								"a7540f69-c41e-43b3-b655-6e44097edb7e",
+								"constants",
+								"d9697351-3a38-4194-9ac4-41541927e475"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "GetInstrumentCount",
 					"event": [
 						{
