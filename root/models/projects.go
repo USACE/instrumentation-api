@@ -241,3 +241,30 @@ func projectInstrumentNamesMap(db *sqlx.DB, projectIDs []uuid.UUID) (map[uuid.UU
 	return m, nil
 
 }
+
+// CreateProjectTimeseries promotes a timeseries to the project level
+func CreateProjectTimeseries(db *sqlx.DB, projectID *uuid.UUID, timeseriesID *uuid.UUID) error {
+
+	// if the timeseries_id is already promoted to the project level, do nothing (i.e. RESTful 200)
+	if _, err := db.Exec(
+		`INSERT INTO project_timeseries (project_id, timeseries_id) VALUES ($1, $2)
+		 ON CONFLICT ON CONSTRAINT project_unique_timeseries DO NOTHING`,
+		projectID, timeseriesID,
+	); err != nil {
+		return err
+	}
+	return nil
+}
+
+// DeleteProjectTimeseries removes a timeseries from the project level; Does not delete underlying timeseries
+func DeleteProjectTimeseries(db *sqlx.DB, projectID *uuid.UUID, timeseriesID *uuid.UUID) error {
+
+	// if the timeseries_id is already promoted to the project level, do nothing (i.e. RESTful 200)
+	if _, err := db.Exec(
+		`DELETE FROM project_timeseries WHERE project_id = $1 AND timeseries_id = $2`,
+		projectID, timeseriesID,
+	); err != nil {
+		return err
+	}
+	return nil
+}

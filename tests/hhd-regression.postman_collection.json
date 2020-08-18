@@ -1600,6 +1600,100 @@
 					"response": []
 				},
 				{
+					"name": "CreateProjectTimeseries",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "090ce7df-6e93-401d-976b-bda7c0ab9ade",
+								"exec": [
+									"// status code is 200",
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/instrumentation/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/timeseries/8f4ca3a3-5971-4597-bd6f-332d1cf5af7c",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"projects",
+								"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+								"timeseries",
+								"8f4ca3a3-5971-4597-bd6f-332d1cf5af7c"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteProjectTimeseries",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "0b426523-ced8-4db4-b9c2-2c2cfd7c80fe",
+								"exec": [
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/instrumentation/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/timeseries/8f4ca3a3-5971-4597-bd6f-332d1cf5af7c",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"projects",
+								"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+								"timeseries",
+								"8f4ca3a3-5971-4597-bd6f-332d1cf5af7c"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "GetProjectCount",
 					"event": [
 						{

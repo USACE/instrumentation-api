@@ -120,6 +120,10 @@ func main() {
 	// Project Instruments
 	private.POST("instrumentation/projects/:project_id/instruments", handlers.CreateInstruments(db))
 
+	// Project Timeseries
+	private.POST("instrumentation/projects/:project_id/timeseries/:timeseries_id", handlers.CreateProjectTimeseries(db))
+	private.DELETE("instrumentation/projects/:project_id/timeseries/:timeseries_id", handlers.DeleteProjectTimeseries(db))
+
 	// Instrument Groups
 	private.POST("instrumentation/instrument_groups", handlers.CreateInstrumentGroup(db))
 	private.PUT("instrumentation/instrument_groups/:instrument_group_id", handlers.UpdateInstrumentGroup(db))
