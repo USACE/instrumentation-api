@@ -121,7 +121,7 @@ func main() {
 	private.POST("instrumentation/projects/:project_id/instruments", handlers.CreateInstruments(db))
 
 	// Instrument Groups
-	private.POST("instrumentation/instrument_groups", handlers.CreateInstrumentGroupBulk(db))
+	private.POST("instrumentation/instrument_groups", handlers.CreateInstrumentGroup(db))
 	private.PUT("instrumentation/instrument_groups/:instrument_group_id", handlers.UpdateInstrumentGroup(db))
 	private.DELETE("instrumentation/instrument_groups/:instrument_group_id", handlers.DeleteFlagInstrumentGroup(db))
 

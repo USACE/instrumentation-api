@@ -6,7 +6,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	"github.com/lib/pq"
 )
 
 // InstrumentNote is a note about an instrument
@@ -80,43 +79,38 @@ func GetInstrumentNote(db *sqlx.DB, id *uuid.UUID) (*InstrumentNote, error) {
 }
 
 // CreateInstrumentNote creates many instrument notes from an array of instrument notes
-func CreateInstrumentNote(db *sqlx.DB, a *Action, notes []InstrumentNote) error {
+func CreateInstrumentNote(db *sqlx.DB, a *Action, notes []InstrumentNote) ([]InstrumentNote, error) {
 
-	txn, err := db.Begin()
+	txn, err := db.Beginx()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	stmt, err := txn.Prepare(pq.CopyIn(
-		"instrument_note",
-		"id", "instrument_id", "title", "body", "time", "creator", "create_date", "updater", "update_date",
-	))
-
+	stmt, err := txn.Preparex(
+		`INSERT INTO instrument_note (id, instrument_id, title, body, time, creator, create_date, updater, update_date)
+		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+		 RETURNING id, instrument_id, title, body, time, creator, create_date, updater, update_date`,
+	)
 	if err != nil {
-		return err
+		return make([]InstrumentNote, 0), err
 	}
 
-	for _, n := range notes {
-		if _, err = stmt.Exec(
-			n.ID, n.InstrumentID, n.Title, n.Body, n.Time, a.Actor, a.Time, a.Actor, a.Time,
-		); err != nil {
-			return err
+	nn := make([]InstrumentNote, len(notes))
+	for idx, n := range notes {
+		if err := stmt.Get(&nn[idx], n.ID, n.InstrumentID, n.Title, n.Body, n.Time, a.Actor, a.Time, a.Actor, a.Time); err != nil {
+			return make([]InstrumentNote, 0), err
 		}
 	}
 
-	if _, err = stmt.Exec(); err != nil {
-		return err
-	}
-
 	if err := stmt.Close(); err != nil {
-		return err
+		return make([]InstrumentNote, 0), err
 	}
 
 	if err := txn.Commit(); err != nil {
-		return err
+		return make([]InstrumentNote, 0), err
 	}
 
-	return nil
+	return nn, nil
 }
 
 // UpdateInstrumentNote updates a single instrument note

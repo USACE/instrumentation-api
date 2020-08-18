@@ -6,8 +6,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-
-	"github.com/lib/pq"
 )
 
 // InstrumentGroup holds information for entity instrument_group
@@ -94,50 +92,39 @@ func GetInstrumentGroup(db *sqlx.DB, ID uuid.UUID) (*InstrumentGroup, error) {
 	return &g, nil
 }
 
-// CreateInstrumentGroupBulk creates many instruments from an array of instruments
-func CreateInstrumentGroupBulk(db *sqlx.DB, a *Action, groups []InstrumentGroup) error {
+// CreateInstrumentGroup creates many instruments from an array of instruments
+func CreateInstrumentGroup(db *sqlx.DB, a *Action, groups []InstrumentGroup) ([]InstrumentGroup, error) {
 
-	txn, err := db.Begin()
+	txn, err := db.Beginx()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	stmt, err := txn.Prepare(pq.CopyIn(
-		"instrument_group",
-		"id", "slug", "name", "description", "creator", "create_date", "updater", "update_date", "project_id",
-	))
-
+	stmt, err := txn.Preparex(
+		`INSERT INTO instrument_group (id, slug, name, description, creator, create_date, updater, update_date, project_id)
+		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+		 RETURNING id, slug, name, description, creator, create_date, updater, update_date, project_id`,
+	)
 	if err != nil {
-		return err
+		return make([]InstrumentGroup, 0), err
 	}
 
-	for _, g := range groups {
-
-		_, err := stmt.Exec(
-			g.ID, g.Slug, g.Name, g.Description, a.Actor, a.Time, a.Actor, a.Time, g.ProjectID,
-		)
-
-		if err != nil {
-			return err
+	gg := make([]InstrumentGroup, len(groups))
+	for idx, g := range groups {
+		if err := stmt.Get(&gg[idx], g.ID, g.Slug, g.Name, g.Description, a.Actor, a.Time, a.Actor, a.Time, g.ProjectID); err != nil {
+			return make([]InstrumentGroup, 0), err
 		}
 	}
 
-	_, err = stmt.Exec()
-	if err != nil {
-		return err
+	if err := stmt.Close(); err != nil {
+		return make([]InstrumentGroup, 0), err
 	}
 
-	err = stmt.Close()
-	if err != nil {
-		return err
+	if err := txn.Commit(); err != nil {
+		return make([]InstrumentGroup, 0), err
 	}
 
-	err = txn.Commit()
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return gg, nil
 }
 
 // UpdateInstrumentGroup updates an instrument group

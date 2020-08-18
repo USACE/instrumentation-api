@@ -96,11 +96,12 @@ func CreateTimeseries(db *sqlx.DB) echo.HandlerFunc {
 			slugsTaken = append(slugsTaken, s)
 		}
 
-		if err := models.CreateTimeseries(db, tc.Items); err != nil {
+		tt, err := models.CreateTimeseries(db, tc.Items)
+		if err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 
-		return c.NoContent(http.StatusCreated)
+		return c.JSON(http.StatusCreated, tt)
 	}
 }
 
