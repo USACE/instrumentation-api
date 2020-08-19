@@ -24,27 +24,6 @@ INSERT INTO instrument (project_id, id, slug, name, geometry, type_id) VALUES
 ('9e129231-8445-4e10-8e7c-989c1535b3b2', 'c4f79e18-97c9-4677-90c1-dd11ef925f4e', 'pz-7b', 'PZ-7B', ST_GeomFromText('POINT(-73.1056 41.6575)',4326),'1bb4bf7c-f5f8-44eb-9805-43b07ffadbef'),
 ('9e129231-8445-4e10-8e7c-989c1535b3b2', 'c9a67340-9699-4616-8f01-52299b5994f3', 'barometer', 'Barometer', ST_GeomFromText('POINT(-73.1056 41.6575)',4326), '3350b1d1-a946-49a8-bf19-587d7163e0f7');
 
--- Instrument ZReference
-INSERT INTO instrument_zreference (instrument_id, zreference, zreference_datum_id) VALUES
-('6de29534-ca51-403a-944f-aa164e74b116', 0, '72113f9a-982d-44e5-8fc1-8e595dafd344'),
-('d8c5d568-b557-4076-abe3-b7d33ffa6765', 0, '72113f9a-982d-44e5-8fc1-8e595dafd344'),
-('18cbf7c0-fccb-4e23-8281-709f9b2e3d4d', 0, '72113f9a-982d-44e5-8fc1-8e595dafd344'),
-('af8e8345-5447-4af2-9ec1-fb4c0740b446', 0, '72113f9a-982d-44e5-8fc1-8e595dafd344'),
-('3d78a3c5-6b2e-44e4-8063-7374e43d5a18', 0, '72113f9a-982d-44e5-8fc1-8e595dafd344'),
-('a80fb98c-a062-4c9d-a219-b42d694d4d02', 0, '72113f9a-982d-44e5-8fc1-8e595dafd344'),
-('fcd82a2d-0269-487b-9e71-91a99649d4e1', 0, '72113f9a-982d-44e5-8fc1-8e595dafd344'),
-('b4f19fb8-1f10-4f66-9d49-dd74ad766fc7', 0, '72113f9a-982d-44e5-8fc1-8e595dafd344'),
-('0827f14d-9d22-4dd6-918a-eb27fe469d88', 0, '72113f9a-982d-44e5-8fc1-8e595dafd344'),
-('f1895968-1639-4575-9635-9d263e638cbf', 0, '72113f9a-982d-44e5-8fc1-8e595dafd344'),
-('b96a34bf-9137-47f9-a3a2-97adfbde4e05', 0, '72113f9a-982d-44e5-8fc1-8e595dafd344'),
-('89797655-0682-415e-b714-257a7c1911c1', 0, '72113f9a-982d-44e5-8fc1-8e595dafd344'),
-('416b4ea0-2ae0-4fa3-8f2e-2ca7a4c2a3d1', 0, '72113f9a-982d-44e5-8fc1-8e595dafd344'),
-('d3e59119-fe47-44b1-afec-d5815a22ac0f', 0, '72113f9a-982d-44e5-8fc1-8e595dafd344'),
-('e85c6f6c-2fdf-4918-98c8-4fc26c0428b1', 0, '72113f9a-982d-44e5-8fc1-8e595dafd344'),
-('7c200e13-5ed6-40f2-9706-068842020009', 0, '72113f9a-982d-44e5-8fc1-8e595dafd344'),
-('c4f79e18-97c9-4677-90c1-dd11ef925f4e', 0, '72113f9a-982d-44e5-8fc1-8e595dafd344'),
-('c9a67340-9699-4616-8f01-52299b5994f3', 0, '72113f9a-982d-44e5-8fc1-8e595dafd344');
-
 -- instrument_status
 -- status 'active' for all instruments
 INSERT INTO instrument_status (instrument_id, status_id) VALUES

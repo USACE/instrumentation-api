@@ -37,8 +37,8 @@ func GetInstrumentGroup(db *sqlx.DB) echo.HandlerFunc {
 	}
 }
 
-// CreateInstrumentGroupBulk accepts an array of instruments for bulk upload to the database
-func CreateInstrumentGroupBulk(db *sqlx.DB) echo.HandlerFunc {
+// CreateInstrumentGroup accepts an array of instruments for bulk upload to the database
+func CreateInstrumentGroup(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 
 		gc := models.InstrumentGroupCollection{}
@@ -72,11 +72,12 @@ func CreateInstrumentGroupBulk(db *sqlx.DB) echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, err)
 		}
 
-		if err := models.CreateInstrumentGroupBulk(db, a, gc.Items); err != nil {
+		gg, err := models.CreateInstrumentGroup(db, a, gc.Items)
+		if err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 		// Send instrumentgroup
-		return c.JSON(http.StatusCreated, gc.Shorten().Items)
+		return c.JSON(http.StatusCreated, gg)
 	}
 }
 
@@ -156,8 +157,8 @@ func CreateInstrumentGroupInstruments(db *sqlx.DB) echo.HandlerFunc {
 		if err != nil || instrumentGroupID == uuid.Nil {
 			return c.NoContent(http.StatusBadRequest)
 		}
-		// InstrumentInformation
-		i := new(models.InstrumentInformation)
+		// Instrument
+		i := new(models.Instrument)
 		if err := c.Bind(i); err != nil || i.ID == uuid.Nil {
 			return c.NoContent(http.StatusBadRequest)
 		}

@@ -11,13 +11,15 @@ import (
 
 // Project is a project data structure
 type Project struct {
-	ID                   uuid.UUID `json:"id"`
-	Deleted              bool      `json:"-"`
-	FederalID            *string   `json:"federal_id" db:"federal_id"`
-	Slug                 string    `json:"slug"`
-	Name                 string    `json:"name"`
-	InstrumentCount      int       `json:"instrument_count" db:"instrument_count"`
-	InstrumentGroupCount int       `json:"instrument_group_count" db:"instrument_group_count"`
+	ID                   uuid.UUID   `json:"id"`
+	OfficeID             *uuid.UUID  `json:"office_id" db:"office_id"`
+	Deleted              bool        `json:"-"`
+	FederalID            *string     `json:"federal_id" db:"federal_id"`
+	Slug                 string      `json:"slug"`
+	Name                 string      `json:"name"`
+	Timeseries           []uuid.UUID `json:"timeseries" db:"timeseries"`
+	InstrumentCount      int         `json:"instrument_count" db:"instrument_count"`
+	InstrumentGroupCount int         `json:"instrument_group_count" db:"instrument_group_count"`
 	AuditInfo
 }
 
@@ -46,6 +48,24 @@ func (c *ProjectCollection) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+// ProjectFactory converts database rows to Project objects
+func ProjectFactory(rows *sqlx.Rows) ([]Project, error) {
+	defer rows.Close()
+	pp := make([]Project, 0) // Projects
+	var p Project
+	for rows.Next() {
+		err := rows.Scan(
+			&p.ID, &p.OfficeID, &p.Deleted, &p.Slug, &p.FederalID, &p.Name, &p.Creator, &p.CreateDate,
+			&p.Updater, &p.UpdateDate, &p.InstrumentCount, &p.InstrumentGroupCount, pq.Array(&p.Timeseries),
+		)
+		if err != nil {
+			return make([]Project, 0), err
+		}
+		pp = append(pp, p)
+	}
+	return pp, nil
+}
+
 // ListProjectSlugs returns a list of used slugs for projects
 func ListProjectSlugs(db *sqlx.DB) ([]string, error) {
 	ss := make([]string, 0)
@@ -57,24 +77,21 @@ func ListProjectSlugs(db *sqlx.DB) ([]string, error) {
 
 // ListProjects returns a slice of projects
 func ListProjects(db *sqlx.DB) ([]Project, error) {
-	pp := make([]Project, 0)
-	if err := db.Select(&pp, listProjectsSQL()+" WHERE NOT p.deleted"); err != nil {
+	rows, err := db.Queryx(listProjectsSQL + " WHERE NOT deleted")
+	if err != nil {
 		return make([]Project, 0), err
 	}
-	return pp, nil
+	return ProjectFactory(rows)
 }
 
 // ListProjectInstruments returns a slice of instruments for a project
 func ListProjectInstruments(db *sqlx.DB, id uuid.UUID) ([]Instrument, error) {
 
-	rows, err := db.Queryx(
-		listInstrumentsSQL()+" WHERE NOT I.deleted AND I.project_id = $1",
-		id,
-	)
+	rows, err := db.Queryx(listInstrumentsSQL+" WHERE project_id = $1 AND NOT deleted", id)
 	if err != nil {
 		return make([]Instrument, 0), err
 	}
-	return InstrumentsFactory(db, rows)
+	return InstrumentsFactory(rows)
 }
 
 // ListProjectInstrumentNames returns a slice of instrument names for a project
@@ -95,7 +112,7 @@ func ListProjectInstrumentGroups(db *sqlx.DB, id uuid.UUID) ([]InstrumentGroup, 
 	gg := make([]InstrumentGroup, 0)
 	if err := db.Select(
 		&gg,
-		listInstrumentGroupsSQL()+" WHERE NOT deleted AND project_id = $1",
+		listInstrumentGroupsSQL+" WHERE project_id = $1 AND NOT deleted",
 		id,
 	); err != nil {
 		return make([]InstrumentGroup, 0), err
@@ -114,20 +131,15 @@ func GetProjectCount(db *sqlx.DB) (int, error) {
 
 // GetProject returns a pointer to a project
 func GetProject(db *sqlx.DB, id uuid.UUID) (*Project, error) {
-	var p Project
-	if err := db.Get(&p, listProjectsSQL()+" WHERE p.id = $1", id); err != nil {
+	rows, err := db.Queryx(listProjectsSQL+" WHERE id = $1", id)
+	if err != nil {
 		return nil, err
 	}
-	return &p, nil
-}
-
-// GetProjectByFederalID returns a pointer to a project, looked-up by FederalID
-func GetProjectByFederalID(db *sqlx.DB, federalID string) (*Project, error) {
-	var p Project
-	if err := db.Get(&p, listProjectsSQL()+" WHERE federal_id = $1", federalID); err != nil {
+	pp, err := ProjectFactory(rows)
+	if err != nil {
 		return nil, err
 	}
-	return &p, nil
+	return &pp[0], nil
 }
 
 // CreateProjectBulk creates one or more projects from an array of projects
@@ -172,15 +184,14 @@ func CreateProjectBulk(db *sqlx.DB, a *Action, projects []Project) error {
 // UpdateProject updates a project
 func UpdateProject(db *sqlx.DB, a *Action, p *Project) (*Project, error) {
 
-	var pUpdated Project
-	if err := db.QueryRowx(
-		"UPDATE project SET federal_id=$2, name=$3, updater=$4, update_date=$5 WHERE id=$1 RETURNING *",
-		p.ID, p.FederalID, p.Name, a.Actor, a.Time,
-	).StructScan(&pUpdated); err != nil {
+	_, err := db.Exec(
+		"UPDATE project SET federal_id=$2, name=$3, updater=$4, update_date=$5, office_id=$6 WHERE id=$1 RETURNING id",
+		p.ID, p.FederalID, p.Name, a.Actor, a.Time, p.OfficeID,
+	)
+	if err != nil {
 		return nil, err
 	}
-
-	return &pUpdated, nil
+	return GetProject(db, p.ID)
 }
 
 // DeleteFlagProject sets deleted to true for a project
@@ -192,27 +203,9 @@ func DeleteFlagProject(db *sqlx.DB, id uuid.UUID) error {
 }
 
 // ListProjectsSQL is the standard SQL for listing all projects
-func listProjectsSQL() string {
-	return `SELECT p.*,
-	               COALESCE(i.count, 0) AS instrument_count,
-	               COALESCE(g.count, 0) AS instrument_group_count
-            FROM   project p
-            LEFT JOIN (
-                SELECT project_id,
-               	       COUNT(instrument) as count
-				FROM   instrument
-				WHERE NOT instrument.deleted
-                GROUP BY project_id
-            ) i ON i.project_id = p.id
-            LEFT JOIN (
-                SELECT project_id,
-            		   COUNT(instrument_group) as count
-				FROM   instrument_group
-				WHERE NOT instrument_group.deleted
-                GROUP BY project_id
-            ) g ON g.project_id = p.id
-	`
-}
+var listProjectsSQL = `SELECT id, office_id, deleted, slug, federal_id, name, creator, create_date,
+                              updater, update_date, instrument_count, instrument_group_count, timeseries
+                       FROM v_project`
 
 // projectInstrumentNamesMap returns a map of key: project_id , value: map[string]bool ;  string is name of instrument Upper
 func projectInstrumentNamesMap(db *sqlx.DB, projectIDs []uuid.UUID) (map[uuid.UUID]map[string]bool, error) {
@@ -247,4 +240,31 @@ func projectInstrumentNamesMap(db *sqlx.DB, projectIDs []uuid.UUID) (map[uuid.UU
 	}
 	return m, nil
 
+}
+
+// CreateProjectTimeseries promotes a timeseries to the project level
+func CreateProjectTimeseries(db *sqlx.DB, projectID *uuid.UUID, timeseriesID *uuid.UUID) error {
+
+	// if the timeseries_id is already promoted to the project level, do nothing (i.e. RESTful 200)
+	if _, err := db.Exec(
+		`INSERT INTO project_timeseries (project_id, timeseries_id) VALUES ($1, $2)
+		 ON CONFLICT ON CONSTRAINT project_unique_timeseries DO NOTHING`,
+		projectID, timeseriesID,
+	); err != nil {
+		return err
+	}
+	return nil
+}
+
+// DeleteProjectTimeseries removes a timeseries from the project level; Does not delete underlying timeseries
+func DeleteProjectTimeseries(db *sqlx.DB, projectID *uuid.UUID, timeseriesID *uuid.UUID) error {
+
+	// if the timeseries_id is already promoted to the project level, do nothing (i.e. RESTful 200)
+	if _, err := db.Exec(
+		`DELETE FROM project_timeseries WHERE project_id = $1 AND timeseries_id = $2`,
+		projectID, timeseriesID,
+	); err != nil {
+		return err
+	}
+	return nil
 }

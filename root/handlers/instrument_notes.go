@@ -64,14 +64,16 @@ func CreateInstrumentNote(db *sqlx.DB) echo.HandlerFunc {
 
 		// Get action information from context
 		a, err := models.NewAction(c)
-
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err)
 		}
-		if err := models.CreateInstrumentNote(db, a, nc.Items); err != nil {
+
+		nn, err := models.CreateInstrumentNote(db, a, nc.Items)
+		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err)
 		}
-		return c.NoContent(http.StatusCreated)
+
+		return c.JSON(http.StatusCreated, nn)
 	}
 }
 

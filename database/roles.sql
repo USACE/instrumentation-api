@@ -20,7 +20,6 @@ GRANT SELECT ON
     instrument_note,
     instrument_status,
     instrument_type,
-    instrument_zreference,
     measure,
     parameter,
     project,
@@ -28,8 +27,7 @@ GRANT SELECT ON
     timeseries,
     timeseries_measurement,
     unit,
-    unit_family,
-    zreference_datum
+    unit_family
 TO instrumentation_reader;
 
 -- Role instrumentation_writer
@@ -41,7 +39,6 @@ GRANT INSERT,UPDATE,DELETE ON
     instrument_note,
     instrument_status,
     instrument_type,
-    instrument_zreference,
     measure,
     parameter,
     project,
@@ -49,8 +46,7 @@ GRANT INSERT,UPDATE,DELETE ON
     timeseries,
     timeseries_measurement,
     unit,
-    unit_family,
-    zreference_datum
+    unit_family
 TO instrumentation_writer;
 
 -- Role postgis_reader

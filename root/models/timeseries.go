@@ -6,7 +6,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	"github.com/lib/pq"
 
 	// pq database driver
 	_ "github.com/lib/pq"
@@ -95,36 +94,40 @@ func GetTimeseries(db *sqlx.DB, id *uuid.UUID) (*ts.Timeseries, error) {
 }
 
 // CreateTimeseries creates many timeseries from an array of timeseries
-func CreateTimeseries(db *sqlx.DB, tt []ts.Timeseries) error {
+func CreateTimeseries(db *sqlx.DB, tt []ts.Timeseries) ([]ts.Timeseries, error) {
 
-	txn, err := db.Begin()
+	txn, err := db.Beginx()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	// Create Timeseries
-	stmt, err := txn.Prepare(pq.CopyIn("timeseries", "slug", "name", "instrument_id", "parameter_id", "unit_id"))
+	// Insert Timeseries
+	stmt, err := txn.Preparex(
+		`INSERT INTO timeseries (instrument_id, slug, name, parameter_id, unit_id)
+		 VALUES ($1, $2, $3, $4, $5)
+		 RETURNING id, instrument_id, slug, name, parameter_id, unit_id`,
+	)
 	if err != nil {
-		return err
+		return make([]ts.Timeseries, 0), err
 	}
 
-	// Iterate Timeseries
-	for _, t := range tt {
-		if _, err := stmt.Exec(t.Slug, t.Name, t.InstrumentID, t.ParameterID, t.UnitID); err != nil {
-			return err
+	// Insert
+	uu := make([]ts.Timeseries, len(tt))
+	for idx, t := range tt {
+		if err := stmt.Get(&uu[idx], t.InstrumentID, t.Slug, t.Name, t.ParameterID, t.UnitID); err != nil {
+			return make([]ts.Timeseries, 0), err
 		}
 	}
-	if _, err := stmt.Exec(); err != nil {
-		return err
-	}
+
 	if err := stmt.Close(); err != nil {
-		return err
-	}
-	if err := txn.Commit(); err != nil {
-		return err
+		return make([]ts.Timeseries, 0), err
 	}
 
-	return nil
+	if err := txn.Commit(); err != nil {
+		return make([]ts.Timeseries, 0), err
+	}
+
+	return uu, nil
 }
 
 // UpdateTimeseries updates a timeseries

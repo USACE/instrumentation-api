@@ -1,13 +1,10 @@
-package appconfig
+package middleware
 
 import (
 	"crypto/rsa"
 	"log"
-	"os"
-	"strings"
 
 	jwt "github.com/dgrijalva/jwt-go"
-	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 )
 
@@ -27,32 +24,17 @@ dtc8yA3y/USzK7j6eu1XfOECAwEAAQ==
 -----END PUBLIC KEY-----`
 
 func parsePublicKey(key string) *rsa.PublicKey {
-
 	publicKey, err := jwt.ParseRSAPublicKeyFromPEM([]byte(key))
-
 	if err != nil {
 		log.Printf(err.Error())
 	}
-
 	return publicKey
-
-}
-
-func skipJWT(c echo.Context) bool {
-	if c.Request().Method == "GET" {
-		return true
-	}
-	value, exists := os.LookupEnv("JWT_DISABLED")
-	if exists && strings.ToUpper(value) == "TRUE" {
-		return true
-	}
-	return false
 }
 
 // JWTConfig is JWT authentication configuration for this app
-var JWTConfig = middleware.JWTConfig{
+var jwtConfig = middleware.JWTConfig{
 	// Skipper defines a function to skip middleware.
-	Skipper: skipJWT,
+	Skipper: middleware.DefaultSkipper,
 	// Signing key to validate token.
 	// Required.
 	SigningKey: parsePublicKey(jwtVerifyKey),
@@ -82,3 +64,6 @@ var JWTConfig = middleware.JWTConfig{
 	// Optional. Default value "Bearer".
 	// AuthScheme: "Bearer"
 }
+
+// JWT is Fully Configured JWT Middleware to Support CWBI-Auth
+var JWT = middleware.JWTWithConfig(jwtConfig)

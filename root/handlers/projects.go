@@ -187,3 +187,41 @@ func DeleteFlagProject(db *sqlx.DB) echo.HandlerFunc {
 		return c.NoContent(http.StatusOK)
 	}
 }
+
+// CreateProjectTimeseries exposes a timeseries at the project level
+func CreateProjectTimeseries(db *sqlx.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		projectID, err := uuid.Parse(c.Param("project_id"))
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, err)
+		}
+		timeseriesID, err := uuid.Parse(c.Param("timeseries_id"))
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, err)
+		}
+		err = models.CreateProjectTimeseries(db, &projectID, &timeseriesID)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+		return c.NoContent(http.StatusCreated)
+	}
+}
+
+// DeleteProjectTimeseries removes a timeseries from the project level
+func DeleteProjectTimeseries(db *sqlx.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		projectID, err := uuid.Parse(c.Param("project_id"))
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, err)
+		}
+		timeseriesID, err := uuid.Parse(c.Param("timeseries_id"))
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, err)
+		}
+		err = models.DeleteProjectTimeseries(db, &projectID, &timeseriesID)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+		return c.NoContent(http.StatusOK)
+	}
+}

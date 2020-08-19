@@ -8,23 +8,24 @@ drop table if exists
     public.timeseries,
     public.instrument_group_instruments,
     public.instrument_status,
-    public.instrument_zreference,
     public.instrument_note,
     public.instrument,
     public.instrument_group,
+    public.instrument_constants,
     public.parameter,
     public.unit_family,
     public.measure,
     public.unit,
     public.instrument_type,
+    public.project_timeseries,
     public.project,
-    public.status,
-    public.zreference_datum
+    public.status
 	CASCADE;
 
 -- project
 CREATE TABLE IF NOT EXISTS public.project (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+    office_id UUID,
     deleted boolean NOT NULL DEFAULT false,
     slug VARCHAR(240) UNIQUE NOT NULL,
     federal_id VARCHAR(240),
@@ -46,12 +47,6 @@ CREATE TABLE IF NOT EXISTS public.status (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     name VARCHAR(20) UNIQUE NOT NULL,
     description VARCHAR(480)
-);
-
--- domain zreference_datum
-CREATE TABLE IF NOT EXISTS public.zreference_datum (
-    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
-    name VARCHAR(120) UNIQUE NOT NULL
 );
 
 -- measure
@@ -102,6 +97,7 @@ CREATE TABLE IF NOT EXISTS public.instrument (
     deleted BOOLEAN NOT NULL DEFAULT false,
     slug VARCHAR(240) UNIQUE NOT NULL,
     name VARCHAR(120) NOT NULL,
+    formula VARCHAR,
     geometry geometry,
     station int,
     station_offset int,
@@ -111,7 +107,6 @@ CREATE TABLE IF NOT EXISTS public.instrument (
     update_date TIMESTAMPTZ NOT NULL DEFAULT now(),
     type_id UUID NOT NULL REFERENCES instrument_type (id),
     project_id UUID REFERENCES project (id),
-    zreference_datum_id UUID REFERENCES zreference_datum (id),
     CONSTRAINT project_unique_instrument_name UNIQUE(name,project_id)
 );
 
@@ -144,16 +139,6 @@ CREATE TABLE IF NOT EXISTS public.instrument_status (
     CONSTRAINT instrument_unique_status_in_time UNIQUE (instrument_id, time)
 );
 
--- instrument_zreference
-CREATE TABLE IF NOT EXISTS public.instrument_zreference (
-    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
-    instrument_id UUID NOT NULL REFERENCES instrument (id),
-    time TIMESTAMPTZ NOT NULL DEFAULT '1776-08-02',
-    zreference REAL NOT NULL,
-    zreference_datum_id UUID NOT NULL REFERENCES zreference_datum (id),
-    CONSTRAINT instrument_unique_zreference_in_time UNIQUE(instrument_id, time)
-);
-
 -- timeseries
 CREATE TABLE IF NOT EXISTS public.timeseries (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
@@ -172,6 +157,111 @@ CREATE TABLE IF NOT EXISTS public.timeseries_measurement (
     value REAL NOT NULL,
     timeseries_id UUID NOT NULL REFERENCES timeseries (id) ON DELETE CASCADE,
     CONSTRAINT timeseries_unique_time UNIQUE(timeseries_id,time)
+);
+
+-- instrument_constants
+CREATE TABLE IF NOT EXISTS public.instrument_constants (
+    timeseries_id UUID NOT NULL REFERENCES timeseries(id) ON DELETE CASCADE,
+    instrument_id UUID NOT NULL REFERENCES instrument(id) ON DELETE CASCADE,
+    CONSTRAINT instrument_unique_timeseries UNIQUE(instrument_id, timeseries_id)
+);
+
+-- project_timeseries
+CREATE TABLE IF NOT EXISTS public.project_timeseries (
+    timeseries_id UUID NOT NULL REFERENCES timeseries(id) ON DELETE CASCADE,
+    project_id UUID NOT NULL REFERENCES project(id) ON DELETE CASCADE,
+    CONSTRAINT project_unique_timeseries UNIQUE(project_id, timeseries_id)
+);
+
+-- -----
+-- Views
+-- -----
+
+-- v_instrument
+CREATE OR REPLACE VIEW v_instrument AS (
+        SELECT I.id,
+            I.deleted,
+            S.status_id,
+            S.status,
+            S.status_time,
+            I.slug,
+            I.name,
+            I.type_id,
+            I.formula,
+            T.name AS type,
+            ST_AsBinary(I.geometry) AS geometry,
+            I.station,
+            I.station_offset,
+            I.creator,
+            I.create_date,
+            I.updater,
+            I.update_date,
+            I.project_id,
+            COALESCE(C.constants, '{}') AS constants,
+            COALESCE(G.groups, '{}') AS groups
+        FROM instrument I
+            INNER JOIN instrument_type T ON T.id = I.type_id
+            INNER JOIN (
+                SELECT DISTINCT ON (instrument_id) instrument_id,
+                    a.time AS status_time,
+                    a.status_id AS status_id,
+                    d.name AS status
+                FROM instrument_status a
+                    INNER JOIN status d ON d.id = a.status_id
+                WHERE a.time <= now()
+                ORDER BY instrument_id,
+                    a.time DESC
+            ) S ON S.instrument_id = I.id
+            LEFT JOIN (
+                SELECT array_agg(timeseries_id) as constants,
+                    instrument_id
+                FROM instrument_constants
+                GROUP BY instrument_id
+            ) C on C.instrument_id = I.id
+            LEFT JOIN (
+                SELECT array_agg(instrument_group_id) as groups,
+                    instrument_id
+                FROM instrument_group_instruments
+                GROUP BY instrument_id
+            ) G on G.instrument_id = I.id
+    );
+
+-- v_project
+CREATE OR REPLACE VIEW v_project AS (
+        SELECT p.id,
+            p.office_id,
+            p.deleted,
+            p.slug,
+            p.federal_id,
+            p.name,
+            p.creator,
+            p.create_date,
+            p.updater,
+            p.update_date,
+            COALESCE(t.timeseries, '{}') AS timeseries,
+            COALESCE(i.count, 0) AS instrument_count,
+            COALESCE(g.count, 0) AS instrument_group_count
+        FROM project p
+            LEFT JOIN (
+                SELECT project_id,
+                    COUNT(instrument) as count
+                FROM instrument
+                WHERE NOT instrument.deleted
+                GROUP BY project_id
+            ) i ON i.project_id = p.id
+            LEFT JOIN (
+                SELECT project_id,
+                    COUNT(instrument_group) as count
+                FROM instrument_group
+                WHERE NOT instrument_group.deleted
+                GROUP BY project_id
+            ) g ON g.project_id = p.id
+            LEFT JOIN (
+                SELECT array_agg(timeseries_id) as timeseries,
+                    project_id
+                FROM project_timeseries
+                GROUP BY project_id
+            ) t on t.project_id = p.id
 );
 
 -- -------
@@ -419,10 +509,6 @@ INSERT INTO parameter (id, name) VALUES
     ('83b5a1f7-948b-4373-a47c-d73ff622aafd', 'elevation'),
     ('430e5edb-e2b5-4f86-b19f-cda26a27e151', 'voltage');
 
--- zreference_datum (https://www.ngs.noaa.gov/datums/vertical/)
-INSERT INTO zreference_datum (id, name) VALUES
-    ('85fb892d-7d55-41f1-95f6-addea9914264', 'National Geodetic Vertical Datum of 1929 (NGVD 29)'),
-    ('72113f9a-982d-44e5-8fc1-8e595dafd344', 'North American Vertical Datum of 1988 (NAVD 88)');
 -- -------------------------------------------------
 -- basic seed data to demo the app and run API tests
 -- -------------------------------------------------
@@ -435,25 +521,13 @@ INSERT INTO instrument_group (project_id, id, slug, name, description) VALUES
     ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'd0916e8a-39a6-4f2f-bd31-879881f8b40c', 'sample-instrument-group', 'Sample Instrument Group 1', 'This is an example instrument group');
 
 -- instrument
-INSERT INTO instrument (project_id, id, slug, name, geometry, type_id) VALUES
-    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'a7540f69-c41e-43b3-b655-6e44097edb7e', 'demo-piezometer-1', 'Demo Piezometer 1', ST_GeomFromText('POINT(-80.8 26.7)',4326),'1bb4bf7c-f5f8-44eb-9805-43b07ffadbef'),
-    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', '9e8f2ca4-4037-45a4-aaca-d9e598877439', 'demo-staffgage-1', 'Demo Staffgage 1', ST_GeomFromText('POINT(-80.85 26.75)',4326),'0fd1f9ba-2731-4ff9-96dd-3c03215ab06f');
+INSERT INTO instrument (project_id, id, slug, name, formula, geometry, type_id) VALUES
+    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'a7540f69-c41e-43b3-b655-6e44097edb7e', 'demo-piezometer-1', 'Demo Piezometer 1', '[demo-piezometer-1.top-of-riser] - [demo-piezometer-1.distance-to-water]', ST_GeomFromText('POINT(-80.8 26.7)',4326),'1bb4bf7c-f5f8-44eb-9805-43b07ffadbef'),
+    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', '9e8f2ca4-4037-45a4-aaca-d9e598877439', 'demo-staffgage-1', 'Demo Staffgage 1', null, ST_GeomFromText('POINT(-80.85 26.75)',4326),'0fd1f9ba-2731-4ff9-96dd-3c03215ab06f');
 
 -- instrument_group_instruments
 INSERT INTO instrument_group_instruments (instrument_id, instrument_group_id) VALUES
     ('a7540f69-c41e-43b3-b655-6e44097edb7e', 'd0916e8a-39a6-4f2f-bd31-879881f8b40c');
-
--- instrument_zreference
--- Following simulates the described scenario
--- (1) Initial reference height (pz casing installed)
--- (2) PZ casing hit by mower, reducing height by 0.5 ft
--- (3) pz casing repaired/extended to be 4.0 ft higher
-INSERT INTO instrument_zreference (id, instrument_id, time, zreference, zreference_datum_id) VALUES
-    ('3f4718fb-897b-4840-8494-0f142cc11027', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '1975-01-01', 41.60, '85fb892d-7d55-41f1-95f6-addea9914264'),
-    ('d18e5577-5b28-4722-8833-5cb14430e02a', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '2000-01-01', 41.0, '72113f9a-982d-44e5-8fc1-8e595dafd344'),
-    ('99841fcc-16e7-408b-ba53-126bd2e764d1', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '2005-07-01', 40.5, '72113f9a-982d-44e5-8fc1-8e595dafd344'),
-    ('9b16d6bf-81ab-488d-a650-996280c628dc', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '2006-06-01', 44.5, '72113f9a-982d-44e5-8fc1-8e595dafd344'),
-    ('996b9650-24c7-4e43-b65c-abd767041ecd', '9e8f2ca4-4037-45a4-aaca-d9e598877439', '2020-01-01', 10.5, '72113f9a-982d-44e5-8fc1-8e595dafd344');
 
 -- instrument_status
 -- (1) Active    in 1980 (sample, project construction)
@@ -493,8 +567,15 @@ INSERT INTO instrument_note (id, instrument_id, title, body) VALUES
 INSERT INTO timeseries (id, instrument_id, parameter_id, unit_id, slug, name) VALUES
 ('869465fc-dc1e-445e-81f4-9979b5fadda9', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '1de79e29-fb70-45c3-ae7d-4695517ced90', '6407a23f-b5f8-4214-9343-50b6231e4bfe', 'atmospheric-pressure', 'Atmospheric Pressure'),
 ('9a3864a8-8766-4bfa-bad1-0328b166f6a8', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a', 'precipitation', 'Precipitation'),
-('7ee902a3-56d0-4acf-8956-67ac82c03a96', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce', 'height', 'Height'),
-('8f4ca3a3-5971-4597-bd6f-332d1cf5af7c', '9e8f2ca4-4037-45a4-aaca-d9e598877439', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce', 'height-1', 'Height');
+('7ee902a3-56d0-4acf-8956-67ac82c03a96', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce', 'distance-to-water', 'Distance to Water'),
+('8f4ca3a3-5971-4597-bd6f-332d1cf5af7c', '9e8f2ca4-4037-45a4-aaca-d9e598877439', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce', 'height', 'Height'),
+('d9697351-3a38-4194-9ac4-41541927e475', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce', 'top-of-riser', 'Top of Riser'),
+('22a734d6-dc24-451d-a462-43a32f335ae8', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce', 'tip-depth', 'Tip Depth');
+
+-- instrument_constants
+INSERT INTO instrument_constants (instrument_id, timeseries_id) VALUES
+('a7540f69-c41e-43b3-b655-6e44097edb7e', 'd9697351-3a38-4194-9ac4-41541927e475'),
+('a7540f69-c41e-43b3-b655-6e44097edb7e', '22a734d6-dc24-451d-a462-43a32f335ae8');
 
 -- Time Series Measurements
 INSERT INTO timeseries_measurement (timeseries_id, time, value) VALUES
@@ -548,4 +629,8 @@ INSERT INTO timeseries_measurement (timeseries_id, time, value) VALUES
 ('8f4ca3a3-5971-4597-bd6f-332d1cf5af7c', '3/7/2020' , 20.10),
 ('8f4ca3a3-5971-4597-bd6f-332d1cf5af7c', '3/8/2020' , 20.08),
 ('8f4ca3a3-5971-4597-bd6f-332d1cf5af7c', '3/9/2020' , 20.07),
-('8f4ca3a3-5971-4597-bd6f-332d1cf5af7c', '3/10/2020', 20.05);
+('8f4ca3a3-5971-4597-bd6f-332d1cf5af7c', '3/10/2020', 20.05),
+('d9697351-3a38-4194-9ac4-41541927e475', '3/10/2015', 40.50),
+('d9697351-3a38-4194-9ac4-41541927e475', '6/10/2020', 40.00),
+('d9697351-3a38-4194-9ac4-41541927e475', '3/10/2020', 39.50),
+('22a734d6-dc24-451d-a462-43a32f335ae8', '3/10/2015', 10.0);

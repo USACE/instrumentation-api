@@ -1,30 +1,30 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
-	"os"
-	"strings"
 
-	"api/root/appconfig"
 	"api/root/dbutils"
 	"api/root/handlers"
+	"api/root/middleware"
 
 	"github.com/apex/gateway"
+	"github.com/kelseyhightower/envconfig"
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
 
 	_ "github.com/lib/pq"
 )
 
-func lambdaContext() bool {
-
-	value, exists := os.LookupEnv("LAMBDA")
-
-	if exists && strings.ToUpper(value) == "TRUE" {
-		return true
-	}
-	return false
+// Config stores configuration information stored in environment variables
+type Config struct {
+	SkipJWT       bool
+	LambdaContext bool
+	DBUser        string
+	DBPass        string
+	DBName        string
+	DBHost        string
+	DBSSLMode     string
 }
 
 func main() {
@@ -47,28 +47,37 @@ func main() {
 	//    https://github.com/awslabs/aws-lambda-go-api-proxy
 	//
 
-	db := dbutils.Connection()
+	var cfg Config
+	if err := envconfig.Process("instrumentation", &cfg); err != nil {
+		log.Fatal(err.Error())
+	}
 
-	e := echo.New()
-	e.Use(
-		middleware.CORS(),
-		middleware.GzipWithConfig(middleware.GzipConfig{Level: 5}),
+	db := dbutils.Connection(
+		fmt.Sprintf(
+			"user=%s password=%s dbname=%s host=%s sslmode=%s binary_parameters=yes",
+			cfg.DBUser, cfg.DBPass, cfg.DBName, cfg.DBHost, cfg.DBSSLMode,
+		),
 	)
+
+	// All Routes
+	e := echo.New()
+	e.Use(middleware.CORS, middleware.GZIP)
 
 	// Public Routes
 	public := e.Group("")
+
 	// Private Routes
 	private := e.Group("")
+	if cfg.SkipJWT == true {
+		private.Use(middleware.MockIsLoggedIn)
+	} else {
+		private.Use(middleware.JWT, middleware.IsLoggedIn)
+	}
 
-	// JWT Middleware handles JWT Auth
-	// SetCreatorUpaterFields sets context values from JWT claims for
-	// creator, create_date, updater, update_date
-	private.Use(
-		middleware.JWTWithConfig(appconfig.JWTConfig),
-		appconfig.IsLoggedIn,
-	)
-
+	// /////////////////////////////////////
 	// Public Routes
+	// /////////////////////////////////////
+
 	// NOTE: ALL GET REQUESTS ARE ALLOWED WITHOUT AUTHENTICATION USING JWTConfig Skipper. See appconfig/jwt.go
 	public.GET("instrumentation/projects", handlers.ListProjects(db))
 	public.GET("instrumentation/projects/:project_id", handlers.GetProject(db))
@@ -87,8 +96,6 @@ func main() {
 	public.GET("instrumentation/instruments/notes/:note_id", handlers.GetInstrumentNote(db))
 	public.GET("instrumentation/instruments/:instrument_id/notes", handlers.ListInstrumentInstrumentNotes(db))
 	public.GET("instrumentation/instruments/:instrument_id/notes/:note_id", handlers.GetInstrumentNote(db))
-	public.GET("instrumentation/instruments/:instrument_id/zreference", handlers.ListInstrumentZReference(db))
-	public.GET("instrumentation/instruments/:instrument_id/zreference/:zreference_id", handlers.GetInstrumentZReference(db))
 	public.GET("instrumentation/instruments/:instrument_id/status", handlers.ListInstrumentStatus(db))
 	public.GET("instrumentation/instruments/:instrument_id/status/:status_id", handlers.GetInstrumentStatus(db))
 	public.GET("instrumentation/timeseries", handlers.ListTimeseries(db))
@@ -101,33 +108,47 @@ func main() {
 	public.GET("instrumentation/home", handlers.GetHome(db))
 	public.POST("instrumentation/explorer", handlers.PostExplorer(db))
 
+	// /////////////////////////////////////
 	// Authenticated Routes (Need CAC Login)
+	// /////////////////////////////////////
+
 	// Projects
 	private.POST("instrumentation/projects", handlers.CreateProjectBulk(db))
 	private.PUT("instrumentation/projects/:project_id", handlers.UpdateProject(db))
 	private.DELETE("instrumentation/projects/:project_id", handlers.DeleteFlagProject(db))
+
 	// Project Instruments
 	private.POST("instrumentation/projects/:project_id/instruments", handlers.CreateInstruments(db))
+
+	// Project Timeseries
+	private.POST("instrumentation/projects/:project_id/timeseries/:timeseries_id", handlers.CreateProjectTimeseries(db))
+	private.DELETE("instrumentation/projects/:project_id/timeseries/:timeseries_id", handlers.DeleteProjectTimeseries(db))
+
 	// Instrument Groups
-	private.POST("instrumentation/instrument_groups", handlers.CreateInstrumentGroupBulk(db))
+	private.POST("instrumentation/instrument_groups", handlers.CreateInstrumentGroup(db))
 	private.PUT("instrumentation/instrument_groups/:instrument_group_id", handlers.UpdateInstrumentGroup(db))
 	private.DELETE("instrumentation/instrument_groups/:instrument_group_id", handlers.DeleteFlagInstrumentGroup(db))
+
 	// Add or Remove instrument from Instrument Group
 	private.POST("instrumentation/instrument_groups/:instrument_group_id/instruments", handlers.CreateInstrumentGroupInstruments(db))
 	private.DELETE("instrumentation/instrument_groups/:instrument_group_id/instruments/:instrument_id", handlers.DeleteInstrumentGroupInstruments(db))
+
 	// Instruments
 	private.POST("instrumentation/instruments", handlers.CreateInstruments(db))
 	private.PUT("instrumentation/instruments/:instrument_id", handlers.UpdateInstrument(db))
 	private.DELETE("instrumentation/instruments/:instrument_id", handlers.DeleteFlagInstrument(db))
+
+	// Add or Remove Instrument Constants
+	private.POST("instrumentation/instruments/:instrument_id/constants/:timeseries_id", handlers.CreateInstrumentConstant(db))
+	private.DELETE("instrumentation/instruments/:instrument_id/constants/:timeseries_id", handlers.DeleteInstrumentConstant(db))
+
 	// Instrument Notes(GET, PUT, DELETE work with or without instrument context in URL)
 	private.POST("instrumentation/instruments/notes", handlers.CreateInstrumentNote(db))
 	private.PUT("instrumentation/instruments/notes/:note_id", handlers.UpdateInstrumentNote(db))
 	private.DELETE("instrumentation/instruments/notes/:note_id", handlers.DeleteInstrumentNote(db))
 	private.PUT("instrumentation/instruments/:instrument_id/notes/:note_id", handlers.UpdateInstrumentNote(db))
 	private.DELETE("instrumentation/instruments/:instrument_id/notes/:note_id", handlers.DeleteInstrumentNote(db))
-	// Instrument ZReference
-	private.POST("instrumentation/instruments/:instrument_id/zreference", handlers.CreateOrUpdateInstrumentZReference(db))
-	private.DELETE("instrumentation/instruments/:instrument_id/zreference/:zreference_id", handlers.DeleteInstrumentZReference(db))
+
 	// Instrument Status
 	private.POST("instrumentation/instruments/:instrument_id/status", handlers.CreateOrUpdateInstrumentStatus(db))
 	private.DELETE("instrumentation/instruments/:instrument_id/status/:status_id", handlers.DeleteInstrumentStatus(db))
@@ -138,13 +159,11 @@ func main() {
 	private.DELETE("instrumentation/timeseries/:timeseries_id", handlers.DeleteTimeseries(db))
 	private.POST("instrumentation/timeseries/measurements", handlers.CreateOrUpdateTimeseriesMeasurements(db))
 
-	log.Printf(
-		"starting server; Running On AWS LAMBDA: %t",
-		lambdaContext(),
-	)
-	if lambdaContext() {
+	if cfg.LambdaContext {
+		log.Print("starting server; Running On AWS LAMBDA")
 		log.Fatal(gateway.ListenAndServe("localhost:3030", e))
 	} else {
+		log.Print("starting server")
 		log.Fatal(http.ListenAndServe("localhost:3030", e))
 	}
 }

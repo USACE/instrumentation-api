@@ -11,13 +11,13 @@
       "mode": "auto",
       "program": "${workspaceFolder}/root/main.go",
       "env": {
-        "JWT_DISABLED": "TRUE",
-        "DB_USER": "postgres",
-        "DB_PASS": "postgres",
-        "DB_NAME": "postgres",
-        "DB_HOST": "localhost",
-        "DB_SSLMODE": "disable",
-        "LAMBDA": "FALSE"
+        "INSTRUMENTATION_LAMBDACONTEXT": "false",
+        "INSTRUMENTATION_SKIPJWT": "true",
+        "INSTRUMENTATION_DBUSER": "postgres",
+        "INSTRUMENTATION_DBPASS": "postgres",
+        "INSTRUMENTATION_DBNAME": "postgres",
+        "INSTRUMENTATION_DBHOST": "localhost",
+        "INSTRUMENTATION_DBSSLMODE": "disable"
       },
       "args": []
     }
