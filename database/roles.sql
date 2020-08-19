@@ -15,6 +15,7 @@ CREATE ROLE postgis_reader;
 -- Tables specific to instrumentation app
 GRANT SELECT ON
     instrument,
+    instrument_constants,
     instrument_group,
     instrument_group_instruments,
     instrument_note,
@@ -23,17 +24,21 @@ GRANT SELECT ON
     measure,
     parameter,
     project,
+    project_timeseries,
     status,
     timeseries,
     timeseries_measurement,
     unit,
-    unit_family
+    unit_family,
+    v_instrument,
+    v_project
 TO instrumentation_reader;
 
 -- Role instrumentation_writer
 -- Tables specific to instrumentation app
 GRANT INSERT,UPDATE,DELETE ON
     instrument,
+    instrument_constants,
     instrument_group,
     instrument_group_instruments,
     instrument_note,
@@ -42,6 +47,7 @@ GRANT INSERT,UPDATE,DELETE ON
     measure,
     parameter,
     project,
+    project_timeseries,
     status,
     timeseries,
     timeseries_measurement,
