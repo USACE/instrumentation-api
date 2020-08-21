@@ -112,6 +112,10 @@ func main() {
 	// Authenticated Routes (Need CAC Login)
 	// /////////////////////////////////////
 
+	// Profile
+	private.GET("instrumentation/myprofile", handlers.GetMyProfile(db))
+	private.POST("instrumentation/profiles", handlers.CreateProfile(db))
+
 	// Projects
 	private.POST("instrumentation/projects", handlers.CreateProjectBulk(db))
 	private.PUT("instrumentation/projects/:project_id", handlers.UpdateProject(db))
