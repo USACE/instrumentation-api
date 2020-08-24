@@ -15,6 +15,7 @@ CREATE ROLE postgis_reader;
 -- Tables specific to instrumentation app
 GRANT SELECT ON
     instrument,
+    profile,
     instrument_constants,
     instrument_group,
     instrument_group_instruments,
@@ -38,6 +39,7 @@ TO instrumentation_reader;
 -- Tables specific to instrumentation app
 GRANT INSERT,UPDATE,DELETE ON
     instrument,
+    profile,
     instrument_constants,
     instrument_group,
     instrument_group_instruments,

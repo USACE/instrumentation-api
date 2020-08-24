@@ -19,8 +19,17 @@ drop table if exists
     public.instrument_type,
     public.project_timeseries,
     public.project,
-    public.status
+    public.status,
+    public.profile
 	CASCADE;
+
+-- profile
+CREATE TABLE IF NOT EXISTS public.profile (
+    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+    edipi VARCHAR(240) UNIQUE NOT NULL,
+    username VARCHAR(240) UNIQUE NOT NULL,
+    email VARCHAR(240) UNIQUE NOT NULL
+);
 
 -- project
 CREATE TABLE IF NOT EXISTS public.project (
