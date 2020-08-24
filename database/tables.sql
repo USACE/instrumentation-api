@@ -523,8 +523,7 @@ INSERT INTO instrument_group (project_id, id, slug, name, description) VALUES
 -- instrument
 INSERT INTO instrument (project_id, id, slug, name, formula, geometry, type_id) VALUES
     ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'a7540f69-c41e-43b3-b655-6e44097edb7e', 'demo-piezometer-1', 'Demo Piezometer 1', '[demo-piezometer-1.top-of-riser] - [demo-piezometer-1.distance-to-water]', ST_GeomFromText('POINT(-80.8 26.7)',4326),'1bb4bf7c-f5f8-44eb-9805-43b07ffadbef'),
-    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', '9e8f2ca4-4037-45a4-aaca-d9e598877439', 'demo-staffgage-1', 'Demo Staffgage 1', null, ST_GeomFromText('POINT(-80.85 26.75)',4326),'0fd1f9ba-2731-4ff9-96dd-3c03215ab06f'),
-    ('88d63e1f-c491-4a8f-ba09-d9402ab1bdf3', '915138cb-dc4d-499b-8215-9f8c9a3fc5e8', 'hhd08-r1a-mw-11', 'HHD08-R1A-MW-11', null, ST_GeomFromText('POINT(-80.61015 26.95603)',4326), '1bb4bf7c-f5f8-44eb-9805-43b07ffadbef');
+    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', '9e8f2ca4-4037-45a4-aaca-d9e598877439', 'demo-staffgage-1', 'Demo Staffgage 1', null, ST_GeomFromText('POINT(-80.85 26.75)',4326),'0fd1f9ba-2731-4ff9-96dd-3c03215ab06f');
 
 -- instrument_group_instruments
 INSERT INTO instrument_group_instruments (instrument_id, instrument_group_id) VALUES
