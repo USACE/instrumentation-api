@@ -15,7 +15,11 @@ CREATE ROLE postgis_reader;
 -- Tables specific to instrumentation app
 GRANT SELECT ON
     instrument,
+    alert,
     profile,
+    profile_alerts,
+    email,
+    email_alerts,
     instrument_constants,
     instrument_group,
     instrument_group_instruments,
@@ -32,14 +36,19 @@ GRANT SELECT ON
     unit,
     unit_family,
     v_instrument,
-    v_project
+    v_project,
+    v_email_autocomplete
 TO instrumentation_reader;
 
 -- Role instrumentation_writer
 -- Tables specific to instrumentation app
 GRANT INSERT,UPDATE,DELETE ON
+    alert,
     instrument,
     profile,
+    profile_alerts,
+    email,
+    email_alerts,
     instrument_constants,
     instrument_group,
     instrument_group_instruments,

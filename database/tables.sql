@@ -20,14 +20,24 @@ drop table if exists
     public.project_timeseries,
     public.project,
     public.status,
-    public.profile
+    public.profile,
+    public.email,
+    public.alert,
+    public.profile_alerts,
+    public.email_alerts
 	CASCADE;
 
--- profile
+-- profile (login user)
 CREATE TABLE IF NOT EXISTS public.profile (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     edipi VARCHAR(240) UNIQUE NOT NULL,
     username VARCHAR(240) UNIQUE NOT NULL,
+    email VARCHAR(240) UNIQUE NOT NULL
+);
+
+-- email (user that will never login but still needs alerts; i.e. just an email)
+CREATE TABLE IF NOT EXISTS public.email (
+    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     email VARCHAR(240) UNIQUE NOT NULL
 );
 
@@ -118,6 +128,38 @@ CREATE TABLE IF NOT EXISTS public.instrument (
     project_id UUID REFERENCES project (id),
     CONSTRAINT project_unique_instrument_name UNIQUE(name,project_id)
 );
+
+-- alert
+CREATE TABLE IF NOT EXISTS public.alert (
+    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+    instrument_id UUID NOT NULL REFERENCES instrument (id),
+    name VARCHAR(480),
+    body TEXT,
+    formula TEXT,
+    schedule TEXT,
+    creator BIGINT NOT NULL DEFAULT 0,
+    create_date TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updater BIGINT NOT NULL DEFAULT 0,
+    update_date TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- profile alerts (subscribe profiles to alerts)
+CREATE TABLE IF NOT EXISTS public.profile_alerts (
+    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+    alert_id UUID NOT NULL REFERENCES alert (id),
+    profile_id UUID NOT NULL REFERENCES profile (id),
+    mute_ui boolean NOT NULL DEFAULT false,
+    mute_notify boolean NOT NULL DEFAULT false
+);
+
+-- email alerts (subscribe emails to alerts)
+CREATE TABLE IF NOT EXISTS public.email_alerts (
+    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+    alert_id UUID NOT NULL REFERENCES alert (id),
+    email_id UUID NOT NULL REFERENCES email (id),
+    mute_notify boolean NOT NULL DEFAULT false
+);
+
 
 -- instrument_note
 CREATE TABLE IF NOT EXISTS public.instrument_note (
@@ -271,6 +313,15 @@ CREATE OR REPLACE VIEW v_project AS (
                 FROM project_timeseries
                 GROUP BY project_id
             ) t on t.project_id = p.id
+);
+
+-- v_email_autocomplete
+CREATE OR REPLACE VIEW v_email_autocomplete AS (
+    SELECT id, 'email' AS user_type, email AS username_email
+      FROM email
+    UNION
+    SELECT id, 'profile' AS user_type, username||email AS username_email
+      FROM profile
 );
 
 -- -------

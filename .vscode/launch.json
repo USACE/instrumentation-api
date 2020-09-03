@@ -13,8 +13,8 @@
       "env": {
         "INSTRUMENTATION_LAMBDACONTEXT": "false",
         "INSTRUMENTATION_SKIPJWT": "true",
-        "INSTRUMENTATION_DBUSER": "postgres",
-        "INSTRUMENTATION_DBPASS": "postgres",
+        "INSTRUMENTATION_DBUSER": "instrumentation_user",
+        "INSTRUMENTATION_DBPASS": "password",
         "INSTRUMENTATION_DBNAME": "postgres",
         "INSTRUMENTATION_DBHOST": "localhost",
         "INSTRUMENTATION_DBSSLMODE": "disable"
