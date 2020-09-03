@@ -6,7 +6,6 @@ Table of Contents
     - [Project Instruments](#project-instruments)
     - [Instruments](#instruments)
     - [Instrument Groups](#instrument-groups)
-  - [https://api.rsgis.dev/development/instrumentation/instrument_groups](#httpsapirsgisdevdevelopmentinstrumentationinstrument_groups)
     - [Timeseries](#timeseries)
     - [Timeseries Measurements](#timeseries-measurements)
 
@@ -68,6 +67,7 @@ Table of Contents
 ### Instrument Groups
 - List Instrumentation Groups \
   [https://api.rsgis.dev/development/instrumentation/instrument_groups](https://api.rsgis.dev/development/instrumentation/instrument_groups)
+
 ---
 ### Timeseries
 - List Timeseries \
