@@ -108,6 +108,9 @@ func main() {
 	public.GET("instrumentation/home", handlers.GetHome(db))
 	public.POST("instrumentation/explorer", handlers.PostExplorer(db))
 
+	// Routes to Support Instrument Export to OpenDCS XML
+	public.GET("instrumentation/opendcs/sites", handlers.ListOpendcsSites(db))
+
 	// /////////////////////////////////////
 	// Authenticated Routes (Need CAC Login)
 	// /////////////////////////////////////
@@ -115,6 +118,9 @@ func main() {
 	// Profile
 	private.GET("instrumentation/myprofile", handlers.GetMyProfile(db))
 	private.POST("instrumentation/profiles", handlers.CreateProfile(db))
+
+	// Email Autocomplete
+	public.GET("instrumentation/email_autocomplete", handlers.ListEmailAutocomplete(db))
 
 	// Projects
 	private.POST("instrumentation/projects", handlers.CreateProjectBulk(db))
