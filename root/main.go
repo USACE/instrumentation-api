@@ -74,75 +74,67 @@ func main() {
 		private.Use(middleware.JWT, middleware.IsLoggedIn)
 	}
 
-	// /////////////////////////////////////
-	// Public Routes
-	// /////////////////////////////////////
+	// Alerts
+	public.GET("instrumentation/projects/:project_id/instruments/:instrument_id/alerts", handlers.ListInstrumentAlerts(db))
+	public.GET("instrumentation/projects/:project_id/instruments/:instrument_id/alerts/:alert_id", handlers.GetAlert(db))
+	private.POST("instrumentation/projects/:project_id/instruments/:instrument_id/alerts", handlers.CreateInstrumentAlert(db))
+	private.PUT("instrumentation/projects/:project_id/instruments/:instrument_id/alerts/:alert_id", handlers.UpdateInstrumentAlert(db))
+	private.DELETE("instrumentation/projects/:project_id/instruments/:instrument_id/alerts/:alert_id", handlers.DeleteInstrumentAlert(db))
 
-	// NOTE: ALL GET REQUESTS ARE ALLOWED WITHOUT AUTHENTICATION USING JWTConfig Skipper. See appconfig/jwt.go
+	// Profile
+	private.GET("instrumentation/myprofile", handlers.GetMyProfile(db))
+	private.POST("instrumentation/profiles", handlers.CreateProfile(db))
+
+	// Email Autocomplete
+	public.GET("instrumentation/email_autocomplete", handlers.ListEmailAutocomplete(db))
+
+	// Projects
 	public.GET("instrumentation/projects", handlers.ListProjects(db))
 	public.GET("instrumentation/projects/:project_id", handlers.GetProject(db))
 	public.GET("instrumentation/projects/count", handlers.GetProjectCount(db))
 	public.GET("instrumentation/projects/:project_id/instruments", handlers.ListProjectInstruments(db))
 	public.GET("instrumentation/projects/:project_id/instruments/names", handlers.ListProjectInstrumentNames(db))
 	public.GET("instrumentation/projects/:project_id/instrument_groups", handlers.ListProjectInstrumentGroups(db))
-	public.GET("instrumentation/instrument_groups", handlers.ListInstrumentGroups(db))
-	public.GET("instrumentation/instrument_groups/:instrument_group_id", handlers.GetInstrumentGroup(db))
-	public.GET("instrumentation/instrument_groups/:instrument_group_id/instruments", handlers.ListInstrumentGroupInstruments(db))
-	public.GET("instrumentation/instrument_groups/:instrument_group_id/timeseries", handlers.ListInstrumentGroupTimeseries(db))
-	public.GET("instrumentation/instruments", handlers.ListInstruments(db))
-	public.GET("instrumentation/instruments/count", handlers.GetInstrumentCount(db))
-	public.GET("instrumentation/instruments/:instrument_id", handlers.GetInstrument(db))
-	public.GET("instrumentation/instruments/notes", handlers.ListInstrumentNotes(db))
-	public.GET("instrumentation/instruments/notes/:note_id", handlers.GetInstrumentNote(db))
-	public.GET("instrumentation/instruments/:instrument_id/notes", handlers.ListInstrumentInstrumentNotes(db))
-	public.GET("instrumentation/instruments/:instrument_id/notes/:note_id", handlers.GetInstrumentNote(db))
-	public.GET("instrumentation/instruments/:instrument_id/status", handlers.ListInstrumentStatus(db))
-	public.GET("instrumentation/instruments/:instrument_id/status/:status_id", handlers.GetInstrumentStatus(db))
-	public.GET("instrumentation/timeseries", handlers.ListTimeseries(db))
-	public.GET("instrumentation/timeseries/:timeseries_id", handlers.GetTimeseries(db))
-	public.GET("instrumentation/timeseries/:timeseries_id/measurements", handlers.ListTimeseriesMeasurements(db))
-	public.GET("instrumentation/instruments/:instrument_id/timeseries", handlers.ListInstrumentTimeseries(db))
-	public.GET("instrumentation/instruments/:instrument_id/timeseries/:timeseries_id/measurements", handlers.ListTimeseriesMeasurements(db))
-	public.GET("instrumentation/instruments/:instrument_id/timeseries/:timeseries_id", handlers.GetTimeseries(db))
-	public.GET("instrumentation/domains", handlers.GetDomains(db))
-	public.GET("instrumentation/home", handlers.GetHome(db))
-	public.POST("instrumentation/explorer", handlers.PostExplorer(db))
-
-	// /////////////////////////////////////
-	// Authenticated Routes (Need CAC Login)
-	// /////////////////////////////////////
-
-	// Projects
 	private.POST("instrumentation/projects", handlers.CreateProjectBulk(db))
 	private.PUT("instrumentation/projects/:project_id", handlers.UpdateProject(db))
 	private.DELETE("instrumentation/projects/:project_id", handlers.DeleteFlagProject(db))
 
-	// Project Instruments
-	private.POST("instrumentation/projects/:project_id/instruments", handlers.CreateInstruments(db))
-
 	// Project Timeseries
+	public.GET("instrumentation/timeseries/:timeseries_id/measurements", handlers.ListTimeseriesMeasurements(db))
+	public.GET("instrumentation/instruments/:instrument_id/timeseries", handlers.ListInstrumentTimeseries(db))
 	private.POST("instrumentation/projects/:project_id/timeseries/:timeseries_id", handlers.CreateProjectTimeseries(db))
 	private.DELETE("instrumentation/projects/:project_id/timeseries/:timeseries_id", handlers.DeleteProjectTimeseries(db))
 
-	// Instrument Groups
-	private.POST("instrumentation/instrument_groups", handlers.CreateInstrumentGroup(db))
-	private.PUT("instrumentation/instrument_groups/:instrument_group_id", handlers.UpdateInstrumentGroup(db))
-	private.DELETE("instrumentation/instrument_groups/:instrument_group_id", handlers.DeleteFlagInstrumentGroup(db))
-
-	// Add or Remove instrument from Instrument Group
-	private.POST("instrumentation/instrument_groups/:instrument_group_id/instruments", handlers.CreateInstrumentGroupInstruments(db))
-	private.DELETE("instrumentation/instrument_groups/:instrument_group_id/instruments/:instrument_id", handlers.DeleteInstrumentGroupInstruments(db))
-
 	// Instruments
+	public.GET("instrumentation/instruments", handlers.ListInstruments(db))
+	public.GET("instrumentation/instruments/count", handlers.GetInstrumentCount(db))
+	public.GET("instrumentation/instruments/:instrument_id", handlers.GetInstrument(db))
+	private.POST("instrumentation/projects/:project_id/instruments", handlers.CreateInstruments(db))
 	private.POST("instrumentation/instruments", handlers.CreateInstruments(db))
 	private.PUT("instrumentation/instruments/:instrument_id", handlers.UpdateInstrument(db))
 	private.DELETE("instrumentation/instruments/:instrument_id", handlers.DeleteFlagInstrument(db))
+
+	// Instrument Groups
+	public.GET("instrumentation/instrument_groups", handlers.ListInstrumentGroups(db))
+	public.GET("instrumentation/instrument_groups/:instrument_group_id", handlers.GetInstrumentGroup(db))
+	public.GET("instrumentation/instrument_groups/:instrument_group_id/instruments", handlers.ListInstrumentGroupInstruments(db))
+	public.GET("instrumentation/instrument_groups/:instrument_group_id/timeseries", handlers.ListInstrumentGroupTimeseries(db))
+	private.POST("instrumentation/instrument_groups", handlers.CreateInstrumentGroup(db))
+	private.PUT("instrumentation/instrument_groups/:instrument_group_id", handlers.UpdateInstrumentGroup(db))
+	private.DELETE("instrumentation/instrument_groups/:instrument_group_id", handlers.DeleteFlagInstrumentGroup(db))
+	// Add or Remove instrument from Instrument Group
+	private.POST("instrumentation/instrument_groups/:instrument_group_id/instruments", handlers.CreateInstrumentGroupInstruments(db))
+	private.DELETE("instrumentation/instrument_groups/:instrument_group_id/instruments/:instrument_id", handlers.DeleteInstrumentGroupInstruments(db))
 
 	// Add or Remove Instrument Constants
 	private.POST("instrumentation/instruments/:instrument_id/constants/:timeseries_id", handlers.CreateInstrumentConstant(db))
 	private.DELETE("instrumentation/instruments/:instrument_id/constants/:timeseries_id", handlers.DeleteInstrumentConstant(db))
 
 	// Instrument Notes(GET, PUT, DELETE work with or without instrument context in URL)
+	public.GET("instrumentation/instruments/notes", handlers.ListInstrumentNotes(db))
+	public.GET("instrumentation/instruments/notes/:note_id", handlers.GetInstrumentNote(db))
+	public.GET("instrumentation/instruments/:instrument_id/notes", handlers.ListInstrumentInstrumentNotes(db))
+	public.GET("instrumentation/instruments/:instrument_id/notes/:note_id", handlers.GetInstrumentNote(db))
 	private.POST("instrumentation/instruments/notes", handlers.CreateInstrumentNote(db))
 	private.PUT("instrumentation/instruments/notes/:note_id", handlers.UpdateInstrumentNote(db))
 	private.DELETE("instrumentation/instruments/notes/:note_id", handlers.DeleteInstrumentNote(db))
@@ -150,14 +142,28 @@ func main() {
 	private.DELETE("instrumentation/instruments/:instrument_id/notes/:note_id", handlers.DeleteInstrumentNote(db))
 
 	// Instrument Status
+	public.GET("instrumentation/instruments/:instrument_id/status", handlers.ListInstrumentStatus(db))
+	public.GET("instrumentation/instruments/:instrument_id/status/:status_id", handlers.GetInstrumentStatus(db))
 	private.POST("instrumentation/instruments/:instrument_id/status", handlers.CreateOrUpdateInstrumentStatus(db))
 	private.DELETE("instrumentation/instruments/:instrument_id/status/:status_id", handlers.DeleteInstrumentStatus(db))
 
 	// Timeseries
+	public.GET("instrumentation/timeseries", handlers.ListTimeseries(db))
+	public.GET("instrumentation/timeseries/:timeseries_id", handlers.GetTimeseries(db))
+	public.GET("instrumentation/instruments/:instrument_id/timeseries/:timeseries_id/measurements", handlers.ListTimeseriesMeasurements(db))
+	public.GET("instrumentation/instruments/:instrument_id/timeseries/:timeseries_id", handlers.GetTimeseries(db))
 	private.POST("instrumentation/timeseries", handlers.CreateTimeseries(db))
 	private.PUT("instrumentation/timeseries/:timeseries_id", handlers.UpdateTimeseries(db))
 	private.DELETE("instrumentation/timeseries/:timeseries_id", handlers.DeleteTimeseries(db))
 	private.POST("instrumentation/timeseries/measurements", handlers.CreateOrUpdateTimeseriesMeasurements(db))
+
+	// Misc
+	public.GET("instrumentation/domains", handlers.GetDomains(db))
+	public.GET("instrumentation/home", handlers.GetHome(db))
+	public.POST("instrumentation/explorer", handlers.PostExplorer(db))
+
+	// OpenDCS Configuration
+	public.GET("instrumentation/opendcs/sites", handlers.ListOpendcsSites(db))
 
 	if cfg.LambdaContext {
 		log.Print("starting server; Running On AWS LAMBDA")

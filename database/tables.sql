@@ -19,8 +19,27 @@ drop table if exists
     public.instrument_type,
     public.project_timeseries,
     public.project,
-    public.status
+    public.status,
+    public.profile,
+    public.email,
+    public.alert,
+    public.profile_alerts,
+    public.email_alerts
 	CASCADE;
+
+-- profile (login user)
+CREATE TABLE IF NOT EXISTS public.profile (
+    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+    edipi VARCHAR(240) UNIQUE NOT NULL,
+    username VARCHAR(240) UNIQUE NOT NULL,
+    email VARCHAR(240) UNIQUE NOT NULL
+);
+
+-- email (user that will never login but still needs alerts; i.e. just an email)
+CREATE TABLE IF NOT EXISTS public.email (
+    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+    email VARCHAR(240) UNIQUE NOT NULL
+);
 
 -- project
 CREATE TABLE IF NOT EXISTS public.project (
@@ -108,6 +127,38 @@ CREATE TABLE IF NOT EXISTS public.instrument (
     type_id UUID NOT NULL REFERENCES instrument_type (id),
     project_id UUID REFERENCES project (id),
     CONSTRAINT project_unique_instrument_name UNIQUE(name,project_id)
+);
+
+-- alert
+CREATE TABLE IF NOT EXISTS public.alert (
+    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+    instrument_id UUID NOT NULL REFERENCES instrument (id),
+    name VARCHAR(480),
+    body TEXT,
+    formula TEXT,
+    schedule TEXT,
+    creator BIGINT NOT NULL DEFAULT 0,
+    create_date TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updater BIGINT NOT NULL DEFAULT 0,
+    update_date TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT instrument_unique_alert_name UNIQUE(name,instrument_id)
+);
+
+-- profile alerts (subscribe profiles to alerts)
+CREATE TABLE IF NOT EXISTS public.profile_alerts (
+    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+    alert_id UUID NOT NULL REFERENCES alert (id),
+    profile_id UUID NOT NULL REFERENCES profile (id),
+    mute_ui boolean NOT NULL DEFAULT false,
+    mute_notify boolean NOT NULL DEFAULT false
+);
+
+-- email alerts (subscribe emails to alerts)
+CREATE TABLE IF NOT EXISTS public.email_alerts (
+    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+    alert_id UUID NOT NULL REFERENCES alert (id),
+    email_id UUID NOT NULL REFERENCES email (id),
+    mute_notify boolean NOT NULL DEFAULT false
 );
 
 -- instrument_note
@@ -198,7 +249,8 @@ CREATE OR REPLACE VIEW v_instrument AS (
             I.update_date,
             I.project_id,
             COALESCE(C.constants, '{}') AS constants,
-            COALESCE(G.groups, '{}') AS groups
+            COALESCE(G.groups, '{}') AS groups,
+            COALESCE(A.alerts, '{}') AS alerts
         FROM instrument I
             INNER JOIN instrument_type T ON T.id = I.type_id
             INNER JOIN (
@@ -224,6 +276,12 @@ CREATE OR REPLACE VIEW v_instrument AS (
                 FROM instrument_group_instruments
                 GROUP BY instrument_id
             ) G on G.instrument_id = I.id
+            LEFT JOIN (
+                SELECT array_agg(id) as alerts,
+                    instrument_id
+                FROM alert
+                GROUP BY instrument_id
+            ) A on A.instrument_id = I.id
     );
 
 -- v_project
@@ -262,6 +320,23 @@ CREATE OR REPLACE VIEW v_project AS (
                 FROM project_timeseries
                 GROUP BY project_id
             ) t on t.project_id = p.id
+);
+
+-- v_email_autocomplete
+CREATE OR REPLACE VIEW v_email_autocomplete AS (
+    SELECT id,
+           'email' AS user_type,
+	       null AS username,
+	       email AS email,
+           email AS username_email
+    FROM email
+    UNION
+    SELECT id,
+           'profile' AS user_type,
+           username,
+           email,
+           username||email AS username_email
+    FROM profile
 );
 
 -- -------
@@ -512,6 +587,19 @@ INSERT INTO parameter (id, name) VALUES
 -- -------------------------------------------------
 -- basic seed data to demo the app and run API tests
 -- -------------------------------------------------
+-- Profile (Faked with: https://homepage.net/name_generator/)
+INSERT INTO profile (id, edipi, username, email) VALUES
+    ('57329df6-9f7a-4dad-9383-4633b452efab',1,'AnthonyLambert','anthony.lambert@fake.usace.army.mil'),
+    ('f320df83-e2ea-4fe9-969a-4e0239b8da51',2,'MollyRutherford','molly.rutherford@fake.usace.army.mil'),
+    ('89aa1e13-041a-4d15-9e45-f76eba3b0551',3,'DominicGlover','dominic.glover@fake.usace.army.mil'),
+    ('405ab7e1-20fc-4d26-a074-eccad88bf0a9',4,'JoeQuinn','joe.quinn@fake.usace.army.mil'),
+    ('81c77210-6244-46fe-bdf6-35da4f00934b',5,'TrevorDavidson','trevor.davidson@fake.usace.army.mil'),
+    ('f056201a-ffec-4f5b-aec5-14b34bb5e3d8',6,'ClaireButler','claire.butler@fake.usace.army.mil'),
+    ('9effda27-49f7-4745-8e55-fa819f550b09',7,'SophieBower','sophie.bower@fake.usace.army.mil'),
+    ('37407aba-904a-42fa-af73-6ab748ee1f98',8,'NeilMcLean','neil.mclean@fake.usace.army.mil'),
+    ('c0fd72ae-cccc-45c9-ba1d-4353170c352d',9,'JakeBurgess','jake.burgess@fake.usace.army.mil'),
+    ('be549c16-3f65-4af4-afb6-e18c814c44dc',10,'DanQuinn','dan.quinn@fake.usace.army.mil');
+
 -- project
 INSERT INTO project (id, slug, name) VALUES
     ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'blue-water-dam-example-project', 'Blue Water Dam Example Project');
@@ -634,3 +722,7 @@ INSERT INTO timeseries_measurement (timeseries_id, time, value) VALUES
 ('d9697351-3a38-4194-9ac4-41541927e475', '6/10/2020', 40.00),
 ('d9697351-3a38-4194-9ac4-41541927e475', '3/10/2020', 39.50),
 ('22a734d6-dc24-451d-a462-43a32f335ae8', '3/10/2015', 10.0);
+
+INSERT INTO alert (id, instrument_id, name, body, formula, schedule) VALUES
+    ('1efd2d85-d3ee-4388-85a0-f824a761ff8b', '9e8f2ca4-4037-45a4-aaca-d9e598877439','Above Target Height', 'The demo staff gage has exceeded the target height. Sincerely, Midas', '[stage] >= 10', '0,10,20,30,40,50 * * * *'),
+    ('243e9d32-2cba-4f12-9abe-63adc09fc5dd', 'a7540f69-c41e-43b3-b655-6e44097edb7e','Below Target Height', 'Distance to water is near artesian conditions. Sincerely, Midas', '[distance-to-water] <= 2', '0,10,20,30,40,50 * * * *');

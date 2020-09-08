@@ -22,6 +22,7 @@ type Instrument struct {
 	ID            uuid.UUID        `json:"id"`
 	Groups        []uuid.UUID      `json:"groups"`
 	Constants     []uuid.UUID      `json:"constants"`
+	Alerts        []uuid.UUID      `json:"alerts"`
 	Formula       *string          `json:"formula"`
 	StatusID      uuid.UUID        `json:"status_id" db:"status_id"`
 	Status        string           `json:"status"`
@@ -282,7 +283,7 @@ func InstrumentsFactory(rows *sqlx.Rows) ([]Instrument, error) {
 		var p orb.Point
 		err := rows.Scan(
 			&i.ID, &i.Deleted, &i.StatusID, &i.Status, &i.StatusTime, &i.Slug, &i.Name, &i.TypeID, &i.Type, wkb.Scanner(&p), &i.Station, &i.StationOffset,
-			&i.Creator, &i.CreateDate, &i.Updater, &i.UpdateDate, &i.ProjectID, pq.Array(&i.Constants), pq.Array(&i.Groups), &i.Formula,
+			&i.Creator, &i.CreateDate, &i.Updater, &i.UpdateDate, &i.ProjectID, pq.Array(&i.Constants), pq.Array(&i.Groups), pq.Array(&i.Alerts), &i.Formula,
 		)
 		if err != nil {
 			return make([]Instrument, 0), err
@@ -299,7 +300,7 @@ func InstrumentsFactory(rows *sqlx.Rows) ([]Instrument, error) {
 // ListInstrumentsSQL is the base SQL to retrieve all instrumentsJSON
 var listInstrumentsSQL = `SELECT id, deleted, status_id, status, status_time, slug,
 	name, type_id, name AS type, geometry, station, station_offset, creator, create_date,
-	updater, update_date, project_id, constants, groups, formula
+	updater, update_date, project_id, constants, groups, alerts, formula
 	FROM   v_instrument
 	`
 
