@@ -140,7 +140,8 @@ CREATE TABLE IF NOT EXISTS public.alert (
     creator BIGINT NOT NULL DEFAULT 0,
     create_date TIMESTAMPTZ NOT NULL DEFAULT now(),
     updater BIGINT NOT NULL DEFAULT 0,
-    update_date TIMESTAMPTZ NOT NULL DEFAULT now()
+    update_date TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT instrument_unique_alert_name UNIQUE(name,instrument_id)
 );
 
 -- profile alerts (subscribe profiles to alerts)

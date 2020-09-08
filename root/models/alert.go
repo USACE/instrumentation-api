@@ -15,6 +15,7 @@ type Alert struct {
 	Body         string    `json:"body"`
 	Formula      string    `json:"formula"`
 	Schedule     string    `json:"schedule"`
+	AuditInfo
 }
 
 // AlertCollection holds one ore more alert items
@@ -70,43 +71,75 @@ func GetAlert(db *sqlx.DB, alertID *uuid.UUID) (*Alert, error) {
 	return &a, nil
 }
 
-// CreateAlerts creates one or more new alerts
-func CreateAlerts(db *sqlx.DB, action *Action, alerts []Alert) ([]Alert, error) {
-	txn, err := db.Begin()
+// CreateInstrumentAlerts creates one or more new alerts
+func CreateInstrumentAlerts(db *sqlx.DB, action *Action, instrumentID *uuid.UUID, alerts []Alert) ([]Alert, error) {
+
+	txn, err := db.Beginx()
 	if err != nil {
-		return nil, err
+		return make([]Alert, 0), err
 	}
 
 	// Instrument
-	stmt1, err := txn.Prepare(
+	stmt1, err := txn.Preparex(
 		`INSERT INTO alert
-			(id, instrument_id, name, body, formula, schedule)
+			(instrument_id, name, body, formula, schedule, creator, create_date, updater, update_date)
 		VALUES
-		 	($1, $2, $3, $4, $5, $6)`,
+			 ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+		RETURNING *`,
 	)
+	if err != nil {
+		return make([]Alert, 0), err
+	}
+
+	newAlerts := make([]Alert, len(alerts))
+	for idx, a := range alerts {
+		var aCreated Alert
+		// Load Instrument
+		if err := stmt1.Get(
+			&aCreated,
+			instrumentID, a.Name, a.Body, a.Formula, a.Schedule,
+			action.Actor, action.Time, action.Actor, action.Time,
+		); err != nil {
+			return make([]Alert, 0), err
+		}
+		newAlerts[idx] = aCreated
+	}
+	if err := stmt1.Close(); err != nil {
+		return make([]Alert, 0), err
+	}
+	if err := txn.Commit(); err != nil {
+		return make([]Alert, 0), err
+	}
+
+	return newAlerts, nil
+}
+
+// UpdateInstrumentAlert updates an alert
+func UpdateInstrumentAlert(db *sqlx.DB, action *Action, instrumentID *uuid.UUID, alertID *uuid.UUID, a *Alert) (*Alert, error) {
+
+	var aUpdated Alert
+	err := db.QueryRowx(
+		`UPDATE alert SET name=$3, body=$4, formula=$5, schedule=$6, updater=$7, update_date=$8
+		WHERE id=$1 AND instrument_id=$2
+		RETURNING *`,
+		alertID, instrumentID, a.Name, a.Body, a.Formula, a.Schedule, action.Actor, action.Time,
+	).StructScan(&aUpdated)
 	if err != nil {
 		return nil, err
 	}
-
-	for _, a := range alerts {
-		// Load Instrument
-		if _, err := stmt1.Exec(
-			a.ID, a.InstrumentID, a.Name, a.Body, a.Formula, a.Schedule,
-		); err != nil {
-			return nil, err
-		}
-	}
-	if err := stmt1.Close(); err != nil {
-		return nil, err
-	}
-	if err := txn.Commit(); err != nil {
-		return nil, err
-	}
-
-	return nil, nil
+	return &aUpdated, nil
 }
 
-// UpdateAlert
+// DeleteInstrumentAlert deletes an alert by ID
+func DeleteInstrumentAlert(db *sqlx.DB, alertID *uuid.UUID, instrumentID *uuid.UUID) error {
+	_, err := db.Exec(
+		`DELETE FROM alert WHERE id = $1 AND instrument_id=$2`, alertID, instrumentID,
+	)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
 // SubscribeAlertProfile
 
