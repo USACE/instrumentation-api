@@ -24,13 +24,14 @@ drop table if exists
     public.email,
     public.alert,
     public.profile_alerts,
-    public.email_alerts
+    public.email_alerts,
+    public.heartbeat
 	CASCADE;
 
 -- profile (login user)
 CREATE TABLE IF NOT EXISTS public.profile (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
-    edipi VARCHAR(240) UNIQUE NOT NULL,
+    edipi BIGINT UNIQUE NOT NULL,
     username VARCHAR(240) UNIQUE NOT NULL,
     email VARCHAR(240) UNIQUE NOT NULL
 );
@@ -53,6 +54,11 @@ CREATE TABLE IF NOT EXISTS public.project (
     create_date TIMESTAMPTZ NOT NULL DEFAULT now(),
     updater BIGINT NOT NULL DEFAULT 0,
     update_date TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- heartbeat
+CREATE TABLE IF NOT EXISTS public.heartbeat (
+    time TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- instrument_type
@@ -193,7 +199,7 @@ CREATE TABLE IF NOT EXISTS public.instrument_status (
 -- timeseries
 CREATE TABLE IF NOT EXISTS public.timeseries (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
-    slug VARCHAR(240) UNIQUE NOT NULL,
+    slug VARCHAR(240) NOT NULL,
     name VARCHAR(240) NOT NULL,
     instrument_id UUID REFERENCES instrument (id),
     parameter_id UUID NOT NULL REFERENCES parameter (id),

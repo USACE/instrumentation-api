@@ -14,11 +14,11 @@ import (
 // GetMyProfile returns profile for credentials or returns 404
 func GetMyProfile(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		var a models.Action
-		if err := c.Bind(&a); err != nil {
+		a, err := models.NewAction(c)
+		if err != nil {
 			return c.NoContent(http.StatusBadRequest)
 		}
-		p, err := models.GetMyProfile(db, &a)
+		p, err := models.GetMyProfile(db, a)
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
 				return c.NoContent(http.StatusNotFound)
@@ -34,8 +34,13 @@ func CreateProfile(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var r models.CreateProfileRequest
 		if err := c.Bind(&r); err != nil {
-			return c.NoContent(http.StatusBadRequest)
+			return c.JSON(http.StatusBadRequest, err)
 		}
+		a, err := models.NewAction(c)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+		r.Action = *a
 		p, err := models.CreateProfile(db, &r)
 		if err != nil {
 			return c.NoContent(http.StatusBadRequest)
