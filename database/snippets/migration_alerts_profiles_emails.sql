@@ -88,5 +88,6 @@ GRANT INSERT,UPDATE,DELETE ON
     profile_alerts,
     email,
     email_alerts,
-    v_email_autocomplete
+    v_email_autocomplete,
+    v_instrument
 TO instrumentation_writer;

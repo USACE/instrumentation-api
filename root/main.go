@@ -25,6 +25,7 @@ type Config struct {
 	DBName        string
 	DBHost        string
 	DBSSLMode     string
+	HeartbeatKey  string
 }
 
 func main() {
@@ -68,11 +69,20 @@ func main() {
 
 	// Private Routes
 	private := e.Group("")
+
+	// Key Routes (Heartbeat Function)
+	keyed := e.Group("")
+	keyed.Use(middleware.KeyAuth(cfg.HeartbeatKey))
+
 	if cfg.SkipJWT == true {
 		private.Use(middleware.MockIsLoggedIn)
 	} else {
 		private.Use(middleware.JWT, middleware.IsLoggedIn)
 	}
+
+	// Heartbeat
+	keyed.POST("instrumentation/heartbeat", handlers.DoHeartbeat(db))
+	public.GET("instrumentation/heartbeat/latest", handlers.GetLatestHeartbeat(db))
 
 	// Alerts
 	public.GET("instrumentation/projects/:project_id/instruments/:instrument_id/alerts", handlers.ListInstrumentAlerts(db))

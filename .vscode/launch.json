@@ -17,7 +17,8 @@
         "INSTRUMENTATION_DBPASS": "password",
         "INSTRUMENTATION_DBNAME": "postgres",
         "INSTRUMENTATION_DBHOST": "localhost",
-        "INSTRUMENTATION_DBSSLMODE": "disable"
+        "INSTRUMENTATION_DBSSLMODE": "disable",
+        "INSTRUMENTATION_HEARTBEATKEY": "password"
       },
       "args": []
     }
