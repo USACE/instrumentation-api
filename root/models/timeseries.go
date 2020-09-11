@@ -39,7 +39,7 @@ func (c *TimeseriesCollection) UnmarshalJSON(b []byte) error {
 func ListTimeseriesSlugs(db *sqlx.DB) ([]string, error) {
 
 	ss := make([]string, 0)
-	if err := db.Select(&ss, "SELECT slug FROM timeseries"); err != nil {
+	if err := db.Select(&ss, "SELECT slug FROM v_timeseries"); err != nil {
 		return make([]string, 0), err
 	}
 	return ss, nil
@@ -49,7 +49,7 @@ func ListTimeseriesSlugs(db *sqlx.DB) ([]string, error) {
 func ListTimeseries(db *sqlx.DB) ([]ts.Timeseries, error) {
 
 	tt := make([]ts.Timeseries, 0)
-	if err := db.Select(&tt, listTimeseriesSQL()); err != nil {
+	if err := db.Select(&tt, "SELECT * FROM v_timeseries"); err != nil {
 		return make([]ts.Timeseries, 0), err
 	}
 	return tt, nil
@@ -58,7 +58,7 @@ func ListTimeseries(db *sqlx.DB) ([]ts.Timeseries, error) {
 // ListInstrumentTimeseries returns an array of timeseries for an instrument
 func ListInstrumentTimeseries(db *sqlx.DB, instrumentID *uuid.UUID) ([]ts.Timeseries, error) {
 	tt := make([]ts.Timeseries, 0)
-	if err := db.Select(&tt, listTimeseriesSQL()+" WHERE I.id = $1", instrumentID); err != nil {
+	if err := db.Select(&tt, "SELECT * FROM v_timeseries WHERE id = $1", instrumentID); err != nil {
 		return make([]ts.Timeseries, 0), err
 	}
 	return tt, nil
@@ -71,7 +71,7 @@ func ListInstrumentGroupTimeseries(db *sqlx.DB, instrumentGroupID *uuid.UUID) ([
 	if err := db.Select(
 		&tt,
 		`SELECT *
-		 FROM   timeseries
+		 FROM   v_timeseries
 		 WHERE  instrument_id IN (
 			SELECT instrument_id
 			FROM   instrument_group_instruments
@@ -87,7 +87,7 @@ func ListInstrumentGroupTimeseries(db *sqlx.DB, instrumentGroupID *uuid.UUID) ([
 func GetTimeseries(db *sqlx.DB, id *uuid.UUID) (*ts.Timeseries, error) {
 
 	var t ts.Timeseries
-	if err := db.Get(&t, listTimeseriesSQL()+" WHERE T.id = $1", id); err != nil {
+	if err := db.Get(&t, "SELECT * FROM v_timeseries WHERE id = $1", id); err != nil {
 		return nil, err
 	}
 	return &t, nil
@@ -152,28 +152,27 @@ func UpdateTimeseries(db *sqlx.DB, t *ts.Timeseries) (*ts.Timeseries, error) {
 
 // DeleteTimeseries deletes a timeseries and cascade deletes all measurements
 func DeleteTimeseries(db *sqlx.DB, id *uuid.UUID) error {
-	if _, err := db.Exec("DELETE from timeseries WHERE id = $1", id); err != nil {
+	if _, err := db.Exec("DELETE FROM timeseries WHERE id = $1", id); err != nil {
 		return err
 	}
 	return nil
 }
 
-func listTimeseriesSQL() string {
-	return `SELECT T.id as id,
-	               T.SLUG as slug, 
-				   T.NAME as name,
-				   I.ID   as instrument_id,
-				   I.Name as instrument,
-				   P.ID   as parameter_id,
-				   P.Name as parameter,
-				   U.ID   as unit_id,
-	               U.Name as unit
-            FROM timeseries T
-	        INNER JOIN instrument I
-				    ON I.id = T.instrument_id
-	        INNER JOIN parameter P
-				    ON P.id = T.parameter_id
-	        INNER JOIN unit U
-				    ON U.id = T.unit_id
-	`
-}
+// SELECT i.id AS instrument_id,
+//        i.slug AS instrument_slug,
+// 	   t.id AS timeseries_id,
+// 	   t.slug AS timeseries_slug,
+//        i.slug||'.'||t.slug AS formula_slug,
+//        m.id AS timeseries_measurement_id,
+// 	   m.time AS latest_time,
+// 	   m.value AS latest_value
+// 	   FROM timeseries_measurement m
+// LEFT JOIN (
+// 	SELECT timeseries_id,
+// 	MAX(time) AS time
+// 	FROM timeseries_measurement
+// 	GROUP BY timeseries_id
+// ) tmax ON tmax.timeseries_id = m.timeseries_id
+// LEFT JOIN timeseries t ON t.id = m.timeseries_id
+// LEFT JOIN instrument i ON i.id = t.instrument_id
+// WHERE tmax.time = m.time

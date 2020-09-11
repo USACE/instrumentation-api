@@ -328,6 +328,24 @@ CREATE OR REPLACE VIEW v_project AS (
             ) t on t.project_id = p.id
 );
 
+-- v_timeseries
+CREATE OR REPLACE VIEW v_timeseries AS (
+        SELECT t.id AS id,
+            t.slug AS slug,
+            t.name AS name,
+            i.slug || '.' || t.slug AS variable,
+            i.id AS instrument_id,
+            i.name AS instrument,
+            p.id AS parameter_id,
+            p.name AS parameter,
+            u.id AS unit_id,
+            u.name AS unit
+        FROM timeseries t
+            LEFT JOIN instrument i ON i.id = t.instrument_id
+            INNER JOIN parameter p ON p.id = t.parameter_id
+            INNER JOIN unit U ON u.id = t.unit_id
+    );
+
 -- v_email_autocomplete
 CREATE OR REPLACE VIEW v_email_autocomplete AS (
     SELECT id,

@@ -11,6 +11,7 @@ type Timeseries struct {
 	ID           uuid.UUID     `json:"id"`
 	Slug         string        `json:"slug"`
 	Name         string        `json:"name"`
+	Variable     string        `json:"variable"`
 	InstrumentID uuid.UUID     `json:"instrument_id" db:"instrument_id"`
 	Instrument   string        `json:"instrument,omitempty"`
 	ParameterID  uuid.UUID     `json:"parameter_id" db:"parameter_id"`
