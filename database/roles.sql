@@ -38,6 +38,7 @@ GRANT SELECT ON
     unit_family,
     v_instrument,
     v_project,
+    v_timeseries,
     v_email_autocomplete
 TO instrumentation_reader;
 
