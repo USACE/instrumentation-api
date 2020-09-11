@@ -30,3 +30,13 @@ func GetLatestHeartbeat(db *sqlx.DB) (*Heartbeat, error) {
 	}
 	return &h, nil
 }
+
+// ListHeartbeats returns all system heartbeats
+func ListHeartbeats(db *sqlx.DB) ([]Heartbeat, error) {
+	var hh []Heartbeat
+	err := db.Select(&hh, "SELECT * FROM heartbeat")
+	if err != nil {
+		return nil, err
+	}
+	return hh, nil
+}

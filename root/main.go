@@ -83,6 +83,7 @@ func main() {
 	// Heartbeat
 	keyed.POST("instrumentation/heartbeat", handlers.DoHeartbeat(db))
 	public.GET("instrumentation/heartbeat/latest", handlers.GetLatestHeartbeat(db))
+	public.GET("instrumentation/heartbeats", handlers.ListHeartbeats(db))
 
 	// Alerts
 	public.GET("instrumentation/projects/:project_id/instruments/:instrument_id/alerts", handlers.ListInstrumentAlerts(db))
