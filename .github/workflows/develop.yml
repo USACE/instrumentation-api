@@ -3,7 +3,7 @@ name: Build & Deploy to DEV
 on:
   push:
     branches:
-      - test
+      - develop
 
 jobs:
   build:
@@ -24,7 +24,7 @@ jobs:
 
       - name: Deploy to DEV
         env:
-          AWS_DEFAULT_REGION: ${{ secrets.CWBICI_TEST_AWS_REGION }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.CWBICI_TEST_AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.CWBICI_TEST_AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.CORPSMAPCI_AWS_DEFAULT_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.CORPSMAPCI_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CORPSMAPCI_AWS_SECRET_ACCESS_KEY }}
         run: make deploy-dev

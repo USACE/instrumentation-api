@@ -3,7 +3,7 @@ name: Build & Deploy to TEST
 on:
   push:
     branches:
-      - develop
+      - test
 
 jobs:
   build:
