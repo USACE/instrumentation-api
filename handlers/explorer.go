@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	ts "api/root/timeseries"
+	ts "github.com/USACE/instrumentation-api/timeseries"
 	"fmt"
 	"net/http"
 	"time"

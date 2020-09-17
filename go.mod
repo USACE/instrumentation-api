@@ -1,6 +1,6 @@
-module api
+module github.com/USACE/instrumentation-api
 
-go 1.13
+go 1.15
 
 require (
 	github.com/apex/gateway v1.1.1

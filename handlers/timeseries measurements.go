@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"api/root/models"
-	"api/root/timeseries"
+	"github.com/USACE/instrumentation-api/models"
+	"github.com/USACE/instrumentation-api/timeseries"
 	"net/http"
 	"time"
 

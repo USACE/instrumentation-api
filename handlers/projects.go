@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"api/root/dbutils"
-	"api/root/models"
+	"github.com/USACE/instrumentation-api/dbutils"
+	"github.com/USACE/instrumentation-api/models"
 	"net/http"
 
 	"github.com/google/uuid"

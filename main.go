@@ -5,9 +5,9 @@ import (
 	"log"
 	"net/http"
 
-	"api/root/dbutils"
-	"api/root/handlers"
-	"api/root/middleware"
+	"github.com/USACE/instrumentation-api/dbutils"
+	"github.com/USACE/instrumentation-api/handlers"
+	"github.com/USACE/instrumentation-api/middleware"
 
 	"github.com/apex/gateway"
 	"github.com/kelseyhightower/envconfig"

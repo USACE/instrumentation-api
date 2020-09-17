@@ -1,7 +1,7 @@
 package models
 
 import (
-	ts "api/root/timeseries"
+	ts "github.com/USACE/instrumentation-api/timeseries"
 	"encoding/json"
 
 	"github.com/google/uuid"

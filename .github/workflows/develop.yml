@@ -1,0 +1,30 @@
+name: Build & Deploy to DEV
+
+on:
+  push:
+    branches:
+      - test
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go 1.13
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.13
+        id: go
+
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+
+      - name: Build and Package for Lambda
+        run: make package
+
+      - name: Deploy to DEV
+        env:
+          AWS_DEFAULT_REGION: ${{ secrets.CWBICI_TEST_AWS_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.CWBICI_TEST_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CWBICI_TEST_AWS_SECRET_ACCESS_KEY }}
+        run: make deploy-dev

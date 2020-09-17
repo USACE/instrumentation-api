@@ -6,7 +6,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo"
 
-	"api/root/models"
+	"github.com/USACE/instrumentation-api/models"
 )
 
 // GetDomains returns all database domains in a single endpoint
