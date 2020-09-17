@@ -8,7 +8,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo"
 
-	"api/root/models"
+	"github.com/USACE/instrumentation-api/models"
 )
 
 // GetMyProfile returns profile for credentials or returns 404

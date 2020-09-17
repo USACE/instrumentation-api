@@ -1,8 +1,9 @@
 package handlers
 
 import (
-	"api/root/models"
 	"net/http"
+
+	"github.com/USACE/instrumentation-api/models"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"

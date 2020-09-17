@@ -1,9 +1,9 @@
 package handlers
 
 import (
-	"api/root/dbutils"
-	"api/root/models"
-	ts "api/root/timeseries"
+	"github.com/USACE/instrumentation-api/dbutils"
+	"github.com/USACE/instrumentation-api/models"
+	ts "github.com/USACE/instrumentation-api/timeseries"
 
 	"net/http"
 

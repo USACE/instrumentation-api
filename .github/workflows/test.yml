@@ -1,8 +1,9 @@
-name: Build API and Lambda Package
+name: Build & Deploy to TEST
 
 on:
   push:
-    branches: [develop]
+    branches:
+      - develop
 
 jobs:
   build:
@@ -21,9 +22,9 @@ jobs:
       - name: Build and Package for Lambda
         run: make package
 
-      - name: Deploy to Development
+      - name: Deploy to TEST
         env:
-          AWS_DEFAULT_REGION: ${{ secrets.CORPSMAPCI_AWS_DEFAULT_REGION }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.CORPSMAPCI_AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.CORPSMAPCI_AWS_SECRET_ACCESS_KEY }}
-        run: make deploy
+          AWS_DEFAULT_REGION: ${{ secrets.CWBICI_TEST_AWS_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.CWBICI_TEST_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CWBICI_TEST_AWS_SECRET_ACCESS_KEY }}
+        run: make deploy-test
