@@ -1,14 +1,15 @@
 package handlers
 
 import (
-	ts "github.com/USACE/instrumentation-api/timeseries"
 	"fmt"
 	"net/http"
 	"time"
 
+	ts "github.com/USACE/instrumentation-api/timeseries"
+
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 // ExplorerRow is used for sql scanning
@@ -37,16 +38,6 @@ func PostExplorer(db *sqlx.DB) echo.HandlerFunc {
 		// Instrument IDs from POST
 		if err := c.Bind(&f.InstrumentID); err != nil {
 			return c.String(http.StatusBadRequest, err.Error())
-		}
-
-		// Query Parameter "parameter_id"
-		parameterID := c.QueryParam("parameter_id")
-		if parameterID != "" {
-			_ID, err := uuid.Parse(parameterID)
-			if err != nil {
-				return c.String(http.StatusBadRequest, "Malformed UUID in query parameter 'parameter_id'")
-			}
-			f.ParameterID = append(f.ParameterID, _ID)
 		}
 
 		// Get Rows from the Database

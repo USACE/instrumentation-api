@@ -3,7 +3,7 @@ package models
 import (
 	"time"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 // AuditInfo holds common information about object creator and updater

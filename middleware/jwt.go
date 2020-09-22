@@ -5,7 +5,7 @@ import (
 	"log"
 
 	jwt "github.com/dgrijalva/jwt-go"
-	"github.com/labstack/echo/middleware"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 var jwtVerifyKey = `-----BEGIN PUBLIC KEY-----

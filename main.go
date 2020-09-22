@@ -11,7 +11,7 @@ import (
 
 	"github.com/apex/gateway"
 	"github.com/kelseyhightower/envconfig"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 
 	_ "github.com/lib/pq"
 )

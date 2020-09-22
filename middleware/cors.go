@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"github.com/labstack/echo/middleware"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 // CORS is ready-to-go CORS middleware

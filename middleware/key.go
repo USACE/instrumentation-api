@@ -1,8 +1,8 @@
 package middleware
 
 import (
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 // KeyAuth returns ready-to-go key auth middleware based on a known token
