@@ -3326,6 +3326,222 @@
 					"response": []
 				},
 				{
+					"name": "SubscribeProfileToInstrumentAlert",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "43ad4f4a-1205-48da-a0ac-691b58653365",
+								"exec": [
+									"// schema validation",
+									"// validate JSON schema",
+									"var schema = {",
+									"    \"type\": \"object\",",
+									"    \"properties\": {",
+									"        \"id\": { \"type\": \"string\" },",
+									"        \"alert_id\": { \"type\": \"string\" },",
+									"        \"profile_id\": { \"type\": \"string\" },",
+									"        \"mute_ui\": { \"type\": \"boolean\" },",
+									"        \"mute_notify\": { \"type\": \"boolean\" }",
+									"    },",
+									"    \"required\": [\"id\", \"alert_id\", \"profile_id\", \"mute_ui\", \"mute_notify\"],",
+									"    \"additionalProperties\": false",
+									"}",
+									"",
+									"pm.globals.set('ALERT_SUBSCRIPTION_OBJECT', JSON.stringify(schema));",
+									"",
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// validate schema",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(schema)",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/instrumentation/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/instruments/a7540f69-c41e-43b3-b655-6e44097edb7e/alerts/243e9d32-2cba-4f12-9abe-63adc09fc5dd/subscribe",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"projects",
+								"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+								"instruments",
+								"a7540f69-c41e-43b3-b655-6e44097edb7e",
+								"alerts",
+								"243e9d32-2cba-4f12-9abe-63adc09fc5dd",
+								"subscribe"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ListMyInstrumentAlertSubscriptions",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "34fdc350-6014-46b9-8c8b-d398c7914e49",
+								"exec": [
+									"var schema = {",
+									"    \"type\": \"array\",",
+									"    \"items\": JSON.parse(pm.globals.get('ALERT_SUBSCRIPTION_OBJECT'))",
+									"}",
+									"",
+									"pm.globals.set('ALERT_SUBSCRIPTION_ARRAY', JSON.stringify(schema));",
+									"",
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// schema validation",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(schema)",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/instrumentation/my_alert_subscriptions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"my_alert_subscriptions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateInstrumentAlertSubscription",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "794481e7-e9e1-4a8d-a158-3f3a1ed95762",
+								"exec": [
+									"// NOTE: No Test Coverage At Present on this endpoint.",
+									"// Revisit at a later date; There are challenges with dynamically created Profile ID and Subscription IDs"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "    {\n        \"id\": \"262a67bc-f317-4fd6-b809-bb10d50a25af\",\n        \"alert_id\": \"243e9d32-2cba-4f12-9abe-63adc09fc5dd\",\n        \"profile_id\": \"b53c468c-b6f6-4f82-9f91-effac3906fcc\",\n        \"mute_ui\": true,\n        \"mute_notify\": false\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/instrumentation/alert_subscriptions/262a67bc-f317-4fd6-b809-bb10d50a25af",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"alert_subscriptions",
+								"262a67bc-f317-4fd6-b809-bb10d50a25af"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UnsubscribeProfileToInstrumentAlert",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "6434d7bd-afd6-4e7c-9984-6e2cb1c64b08",
+								"exec": [
+									"// status code is 201",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/instrumentation/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/instruments/a7540f69-c41e-43b3-b655-6e44097edb7e/alerts/243e9d32-2cba-4f12-9abe-63adc09fc5dd/unsubscribe",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"projects",
+								"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+								"instruments",
+								"a7540f69-c41e-43b3-b655-6e44097edb7e",
+								"alerts",
+								"243e9d32-2cba-4f12-9abe-63adc09fc5dd",
+								"unsubscribe"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "DeleteAlert",
 					"event": [
 						{
