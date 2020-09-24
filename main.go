@@ -101,6 +101,7 @@ func main() {
 
 	// Profile
 	private.GET("instrumentation/myprofile", handlers.GetMyProfile(db))
+	private.GET("instrumentation/my_profile", handlers.GetMyProfile(db))
 	private.POST("instrumentation/profiles", handlers.CreateProfile(db))
 
 	// Email Autocomplete
