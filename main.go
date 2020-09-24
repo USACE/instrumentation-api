@@ -91,6 +91,13 @@ func main() {
 	private.POST("instrumentation/projects/:project_id/instruments/:instrument_id/alerts", handlers.CreateInstrumentAlert(db))
 	private.PUT("instrumentation/projects/:project_id/instruments/:instrument_id/alerts/:alert_id", handlers.UpdateInstrumentAlert(db))
 	private.DELETE("instrumentation/projects/:project_id/instruments/:instrument_id/alerts/:alert_id", handlers.DeleteInstrumentAlert(db))
+	// Private because requires auth token to determine user (i.e. "my alerts")
+
+	// Alert Subscriptions
+	private.GET("instrumentation/my_alert_subscriptions", handlers.ListMyAlertSubscriptions(db))
+	private.POST("instrumentation/projects/:project_id/instruments/:instrument_id/alerts/:alert_id/subscribe", handlers.SubscribeProfileToInstrumentAlert(db))
+	private.POST("instrumentation/projects/:project_id/instruments/:instrument_id/alerts/:alert_id/unsubscribe", handlers.UnsubscribeProfileToInstrumentAlert(db))
+	private.PUT("instrumentation/alert_subscriptions/:alert_subscription_id", handlers.UpdateMyAlertSubscription(db))
 
 	// Profile
 	private.GET("instrumentation/myprofile", handlers.GetMyProfile(db))

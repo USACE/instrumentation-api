@@ -11,14 +11,20 @@ import (
 	"github.com/USACE/instrumentation-api/models"
 )
 
+// myProfileFromContext isolates repeated code required to bind context
+// into an action and use the action to fetch profile from database
+func myProfileFromContext(c echo.Context, db *sqlx.DB) (*models.Profile, error) {
+	a, err := models.NewAction(c)
+	if err != nil {
+		return nil, err
+	}
+	return models.GetMyProfile(db, a)
+}
+
 // GetMyProfile returns profile for credentials or returns 404
 func GetMyProfile(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		a, err := models.NewAction(c)
-		if err != nil {
-			return c.NoContent(http.StatusBadRequest)
-		}
-		p, err := models.GetMyProfile(db, a)
+		p, err := myProfileFromContext(c, db)
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
 				return c.NoContent(http.StatusNotFound)
