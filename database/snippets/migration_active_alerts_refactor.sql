@@ -1,11 +1,11 @@
+-- drop affected views
+drop view v_instrument;
+
 -- drop affected tables
 drop table if exists
     public.alert,
     public.email_alerts,
     public.profile_alerts;
-
--- drop affected views
-drop view v_instrument;
 
 -- alert_config
 CREATE TABLE IF NOT EXISTS public.alert_config (
