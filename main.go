@@ -85,18 +85,18 @@ func main() {
 	public.GET("instrumentation/heartbeat/latest", handlers.GetLatestHeartbeat(db))
 	public.GET("instrumentation/heartbeats", handlers.ListHeartbeats(db))
 
-	// Alerts
-	public.GET("instrumentation/projects/:project_id/instruments/:instrument_id/alerts", handlers.ListInstrumentAlerts(db))
-	public.GET("instrumentation/projects/:project_id/instruments/:instrument_id/alerts/:alert_id", handlers.GetAlert(db))
-	private.POST("instrumentation/projects/:project_id/instruments/:instrument_id/alerts", handlers.CreateInstrumentAlert(db))
-	private.PUT("instrumentation/projects/:project_id/instruments/:instrument_id/alerts/:alert_id", handlers.UpdateInstrumentAlert(db))
-	private.DELETE("instrumentation/projects/:project_id/instruments/:instrument_id/alerts/:alert_id", handlers.DeleteInstrumentAlert(db))
+	// AlertConfigs
+	public.GET("instrumentation/projects/:project_id/instruments/:instrument_id/alert_configs", handlers.ListInstrumentAlertConfigs(db))
+	public.GET("instrumentation/projects/:project_id/instruments/:instrument_id/alert_configs/:alert_config_id", handlers.GetAlertConfig(db))
+	private.POST("instrumentation/projects/:project_id/instruments/:instrument_id/alert_configs", handlers.CreateInstrumentAlertConfigs(db))
+	private.PUT("instrumentation/projects/:project_id/instruments/:instrument_id/alert_configs/:alert_config_id", handlers.UpdateInstrumentAlertConfig(db))
+	private.DELETE("instrumentation/projects/:project_id/instruments/:instrument_id/alert_configs/:alert_config_id", handlers.DeleteInstrumentAlertConfig(db))
 	// Private because requires auth token to determine user (i.e. "my alerts")
 
-	// Alert Subscriptions
+	// AlertSubscriptions
 	private.GET("instrumentation/my_alert_subscriptions", handlers.ListMyAlertSubscriptions(db))
-	private.POST("instrumentation/projects/:project_id/instruments/:instrument_id/alerts/:alert_id/subscribe", handlers.SubscribeProfileToInstrumentAlert(db))
-	private.POST("instrumentation/projects/:project_id/instruments/:instrument_id/alerts/:alert_id/unsubscribe", handlers.UnsubscribeProfileToInstrumentAlert(db))
+	private.POST("instrumentation/projects/:project_id/instruments/:instrument_id/alert_configs/:alert_config_id/subscribe", handlers.SubscribeProfileToAlerts(db))
+	private.POST("instrumentation/projects/:project_id/instruments/:instrument_id/alert_configs/:alert_config_id/unsubscribe", handlers.UnsubscribeProfileToAlerts(db))
 	private.PUT("instrumentation/alert_subscriptions/:alert_subscription_id", handlers.UpdateMyAlertSubscription(db))
 
 	// Profile
