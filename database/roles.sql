@@ -16,10 +16,11 @@ CREATE ROLE postgis_reader;
 GRANT SELECT ON
     instrument,
     alert,
+    alert_config,
+    alert_email_subscription,
+    alert_profile_subscription,
     profile,
-    profile_alerts,
     email,
-    email_alerts,
     heartbeat,
     instrument_constants,
     instrument_group,
@@ -46,11 +47,12 @@ TO instrumentation_reader;
 -- Tables specific to instrumentation app
 GRANT INSERT,UPDATE,DELETE ON
     alert,
+    alert_config,
+    alert_email_subscription,
+    alert_profile_subscription,
     instrument,
     profile,
-    profile_alerts,
     email,
-    email_alerts,
     heartbeat,
     instrument_constants,
     instrument_group,

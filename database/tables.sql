@@ -23,8 +23,9 @@ drop table if exists
     public.profile,
     public.email,
     public.alert,
-    public.profile_alerts,
-    public.email_alerts,
+    public.alert_config,
+    public.alert_profile_subscription,
+    public.alert_email_subscription,
     public.heartbeat
 	CASCADE;
 
@@ -135,8 +136,8 @@ CREATE TABLE IF NOT EXISTS public.instrument (
     CONSTRAINT project_unique_instrument_name UNIQUE(name,project_id)
 );
 
--- alert
-CREATE TABLE IF NOT EXISTS public.alert (
+-- alert_config
+CREATE TABLE IF NOT EXISTS public.alert_config (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     instrument_id UUID NOT NULL REFERENCES instrument (id),
     name VARCHAR(480),
@@ -147,25 +148,33 @@ CREATE TABLE IF NOT EXISTS public.alert (
     create_date TIMESTAMPTZ NOT NULL DEFAULT now(),
     updater BIGINT NOT NULL DEFAULT 0,
     update_date TIMESTAMPTZ NOT NULL DEFAULT now(),
-    CONSTRAINT instrument_unique_alert_name UNIQUE(name,instrument_id)
+    CONSTRAINT instrument_unique_alert_config_name UNIQUE(name,instrument_id)
+);
+
+-- alert
+CREATE TABLE IF NOT EXISTS public.alert (
+    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+    alert_config_id UUID NOT NULL REFERENCES alert_config (id),
+    create_date TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- profile alerts (subscribe profiles to alerts)
-CREATE TABLE IF NOT EXISTS public.profile_alerts (
+CREATE TABLE IF NOT EXISTS public.alert_profile_subscription (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
-    alert_id UUID NOT NULL REFERENCES alert (id),
+    alert_config_id UUID NOT NULL REFERENCES alert_config (id),
     profile_id UUID NOT NULL REFERENCES profile (id),
     mute_ui boolean NOT NULL DEFAULT false,
     mute_notify boolean NOT NULL DEFAULT false,
-    CONSTRAINT profile_unique_alert UNIQUE(profile_id, alert_id)
+    CONSTRAINT profile_unique_alert_config UNIQUE(profile_id, alert_config_id)
 );
 
 -- email alerts (subscribe emails to alerts)
-CREATE TABLE IF NOT EXISTS public.email_alerts (
+CREATE TABLE IF NOT EXISTS public.alert_email_subscription (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
-    alert_id UUID NOT NULL REFERENCES alert (id),
+    alert_config_id UUID NOT NULL REFERENCES alert_config (id),
     email_id UUID NOT NULL REFERENCES email (id),
-    mute_notify boolean NOT NULL DEFAULT false
+    mute_notify boolean NOT NULL DEFAULT false,
+    CONSTRAINT email_unique_alert_config UNIQUE(email_id, alert_config_id)
 );
 
 -- instrument_note
@@ -257,7 +266,7 @@ CREATE OR REPLACE VIEW v_instrument AS (
             I.project_id,
             COALESCE(C.constants, '{}') AS constants,
             COALESCE(G.groups, '{}') AS groups,
-            COALESCE(A.alerts, '{}') AS alerts
+            COALESCE(A.alert_configs, '{}') AS alert_configs
         FROM instrument I
             INNER JOIN instrument_type T ON T.id = I.type_id
             INNER JOIN (
@@ -284,9 +293,9 @@ CREATE OR REPLACE VIEW v_instrument AS (
                 GROUP BY instrument_id
             ) G on G.instrument_id = I.id
             LEFT JOIN (
-                SELECT array_agg(id) as alerts,
+                SELECT array_agg(id) as alert_configs,
                     instrument_id
-                FROM alert
+                FROM alert_config
                 GROUP BY instrument_id
             ) A on A.instrument_id = I.id
     );
@@ -748,6 +757,6 @@ INSERT INTO timeseries_measurement (timeseries_id, time, value) VALUES
 ('d9697351-3a38-4194-9ac4-41541927e475', '3/10/2020', 39.50),
 ('22a734d6-dc24-451d-a462-43a32f335ae8', '3/10/2015', 10.0);
 
-INSERT INTO alert (id, instrument_id, name, body, formula, schedule) VALUES
+INSERT INTO alert_config (id, instrument_id, name, body, formula, schedule) VALUES
     ('1efd2d85-d3ee-4388-85a0-f824a761ff8b', '9e8f2ca4-4037-45a4-aaca-d9e598877439','Above Target Height', 'The demo staff gage has exceeded the target height. Sincerely, Midas', '[stage] >= 10', '0,10,20,30,40,50 * * * *'),
     ('243e9d32-2cba-4f12-9abe-63adc09fc5dd', 'a7540f69-c41e-43b3-b655-6e44097edb7e','Below Target Height', 'Distance to water is near artesian conditions. Sincerely, Midas', '[distance-to-water] <= 2', '0,10,20,30,40,50 * * * *');

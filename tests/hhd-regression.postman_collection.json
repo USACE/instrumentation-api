@@ -30,7 +30,7 @@
 									"            \"type\": \"array\",",
 									"            \"items\": { \"type\": \"string\" },",
 									"        },",
-									"        \"alerts\": {",
+									"        \"alert_configs\": {",
 									"            \"type\": \"array\",",
 									"            \"items\": { \"type\": \"string\" },",
 									"        },",
@@ -65,7 +65,7 @@
 									"        \"update_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
 									"        \"project_id\": { \"type\": [\"string\", \"null\"] }",
 									"    },",
-									"    \"required\": [\"id\", \"slug\", \"name\", \"type_id\", \"type\", \"status_id\", \"status\", \"status_time\", \"geometry\", \"creator\", \"create_date\", \"updater\", \"update_date\", \"project_id\", \"station\", \"offset\", \"constants\", \"alerts\", \"formula\"],",
+									"    \"required\": [\"id\", \"slug\", \"name\", \"type_id\", \"type\", \"status_id\", \"status\", \"status_time\", \"geometry\", \"creator\", \"create_date\", \"updater\", \"update_date\", \"project_id\", \"station\", \"offset\", \"constants\", \"alert_configs\", \"formula\"],",
 									"    \"additionalProperties\": false",
 									"}",
 									"",
@@ -3052,7 +3052,7 @@
 			"name": "Alerts",
 			"item": [
 				{
-					"name": "GetAlert",
+					"name": "GetAlertConfig",
 					"event": [
 						{
 							"listen": "test",
@@ -3078,7 +3078,7 @@
 									"    \"additionalProperties\": false",
 									"}",
 									"",
-									"pm.globals.set('ALERT_OBJ_SCHEMA', JSON.stringify(schema));",
+									"pm.globals.set('ALERTCONFIG_OBJ_SCHEMA', JSON.stringify(schema));",
 									"",
 									"// status code is 200",
 									"pm.test(\"Status code is 200\", function () {",
@@ -3098,7 +3098,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/instrumentation/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/instruments/a7540f69-c41e-43b3-b655-6e44097edb7e/alerts/243e9d32-2cba-4f12-9abe-63adc09fc5dd",
+							"raw": "{{base_url}}/instrumentation/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/instruments/a7540f69-c41e-43b3-b655-6e44097edb7e/alert_configs/243e9d32-2cba-4f12-9abe-63adc09fc5dd",
 							"host": [
 								"{{base_url}}"
 							],
@@ -3108,7 +3108,7 @@
 								"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
 								"instruments",
 								"a7540f69-c41e-43b3-b655-6e44097edb7e",
-								"alerts",
+								"alert_configs",
 								"243e9d32-2cba-4f12-9abe-63adc09fc5dd"
 							]
 						}
@@ -3116,7 +3116,7 @@
 					"response": []
 				},
 				{
-					"name": "ListInstrumentAlerts",
+					"name": "ListInstrumentAlertConfigs",
 					"event": [
 						{
 							"listen": "test",
@@ -3126,10 +3126,10 @@
 									"// schema validator",
 									"var schema = {",
 									"    \"type\": \"array\",",
-									"    \"items\": JSON.parse(pm.globals.get('ALERT_OBJ_SCHEMA'))",
+									"    \"items\": JSON.parse(pm.globals.get('ALERTCONFIG_OBJ_SCHEMA'))",
 									"}",
 									"",
-									"pm.globals.set('ALERT_ARRAY_SCHEMA', JSON.stringify(schema));",
+									"pm.globals.set('ALERTCONFIG_ARRAY_SCHEMA', JSON.stringify(schema));",
 									"",
 									"// status code is 200",
 									"pm.test(\"Status code is 200\", function () {",
@@ -3149,7 +3149,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/instrumentation/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/instruments/a7540f69-c41e-43b3-b655-6e44097edb7e/alerts",
+							"raw": "{{base_url}}/instrumentation/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/instruments/a7540f69-c41e-43b3-b655-6e44097edb7e/alert_configs",
 							"host": [
 								"{{base_url}}"
 							],
@@ -3159,14 +3159,14 @@
 								"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
 								"instruments",
 								"a7540f69-c41e-43b3-b655-6e44097edb7e",
-								"alerts"
+								"alert_configs"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "CreateAlert_Array",
+					"name": "CreateAlertConfig_Array",
 					"event": [
 						{
 							"listen": "test",
@@ -3180,7 +3180,7 @@
 									"// schema validation",
 									"pm.test(\"Schema validation\", function () {",
 									"    pm.response.to.have.jsonSchema(",
-									"        JSON.parse(pm.globals.get('ALERT_ARRAY_SCHEMA'))",
+									"        JSON.parse(pm.globals.get('ALERTCONFIG_ARRAY_SCHEMA'))",
 									"    )",
 									"});",
 									""
@@ -3202,7 +3202,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url}}/instrumentation/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/instruments/a7540f69-c41e-43b3-b655-6e44097edb7e/alerts",
+							"raw": "{{base_url}}/instrumentation/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/instruments/a7540f69-c41e-43b3-b655-6e44097edb7e/alert_configs",
 							"host": [
 								"{{base_url}}"
 							],
@@ -3212,14 +3212,14 @@
 								"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
 								"instruments",
 								"a7540f69-c41e-43b3-b655-6e44097edb7e",
-								"alerts"
+								"alert_configs"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "CreateAlert_Object",
+					"name": "CreateAlertConfig_Object",
 					"event": [
 						{
 							"listen": "test",
@@ -3233,7 +3233,7 @@
 									"// schema validation",
 									"pm.test(\"Schema validation\", function () {",
 									"    pm.response.to.have.jsonSchema(",
-									"        JSON.parse(pm.globals.get('ALERT_ARRAY_SCHEMA'))",
+									"        JSON.parse(pm.globals.get('ALERTCONFIG_ARRAY_SCHEMA'))",
 									"    )",
 									"});",
 									""
@@ -3255,7 +3255,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url}}/instrumentation/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/instruments/a7540f69-c41e-43b3-b655-6e44097edb7e/alerts",
+							"raw": "{{base_url}}/instrumentation/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/instruments/a7540f69-c41e-43b3-b655-6e44097edb7e/alert_configs",
 							"host": [
 								"{{base_url}}"
 							],
@@ -3265,14 +3265,14 @@
 								"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
 								"instruments",
 								"a7540f69-c41e-43b3-b655-6e44097edb7e",
-								"alerts"
+								"alert_configs"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "UpdateAlert",
+					"name": "UpdateAlertConfig",
 					"event": [
 						{
 							"listen": "test",
@@ -3286,7 +3286,7 @@
 									"// schema validation",
 									"pm.test(\"Schema validation\", function () {",
 									"    pm.response.to.have.jsonSchema(",
-									"        JSON.parse(pm.globals.get('ALERT_OBJ_SCHEMA'))",
+									"        JSON.parse(pm.globals.get('ALERTCONFIG_OBJ_SCHEMA'))",
 									"    )",
 									"});",
 									""
@@ -3308,7 +3308,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url}}/instrumentation/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/instruments/a7540f69-c41e-43b3-b655-6e44097edb7e/alerts/243e9d32-2cba-4f12-9abe-63adc09fc5dd",
+							"raw": "{{base_url}}/instrumentation/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/instruments/a7540f69-c41e-43b3-b655-6e44097edb7e/alert_configs/243e9d32-2cba-4f12-9abe-63adc09fc5dd",
 							"host": [
 								"{{base_url}}"
 							],
@@ -3318,7 +3318,7 @@
 								"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
 								"instruments",
 								"a7540f69-c41e-43b3-b655-6e44097edb7e",
-								"alerts",
+								"alert_configs",
 								"243e9d32-2cba-4f12-9abe-63adc09fc5dd"
 							]
 						}
@@ -3377,7 +3377,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url}}/instrumentation/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/instruments/a7540f69-c41e-43b3-b655-6e44097edb7e/alerts/243e9d32-2cba-4f12-9abe-63adc09fc5dd/subscribe",
+							"raw": "{{base_url}}/instrumentation/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/instruments/a7540f69-c41e-43b3-b655-6e44097edb7e/alert_configs/243e9d32-2cba-4f12-9abe-63adc09fc5dd/subscribe",
 							"host": [
 								"{{base_url}}"
 							],
@@ -3387,7 +3387,7 @@
 								"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
 								"instruments",
 								"a7540f69-c41e-43b3-b655-6e44097edb7e",
-								"alerts",
+								"alert_configs",
 								"243e9d32-2cba-4f12-9abe-63adc09fc5dd",
 								"subscribe"
 							]
@@ -3472,7 +3472,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "    {\n        \"id\": \"262a67bc-f317-4fd6-b809-bb10d50a25af\",\n        \"alert_id\": \"243e9d32-2cba-4f12-9abe-63adc09fc5dd\",\n        \"profile_id\": \"b53c468c-b6f6-4f82-9f91-effac3906fcc\",\n        \"mute_ui\": true,\n        \"mute_notify\": false\n    }",
+							"raw": "    {\n        \"id\": \"31b4fde0-5552-438d-8874-17dbdde54b78\",\n        \"alert_id\": \"243e9d32-2cba-4f12-9abe-63adc09fc5dd\",\n        \"profile_id\": \"24f6a20c-0e1e-41db-90d4-896b6e867e6f\",\n        \"mute_ui\": true,\n        \"mute_notify\": true\n    }",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -3480,14 +3480,14 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url}}/instrumentation/alert_subscriptions/262a67bc-f317-4fd6-b809-bb10d50a25af",
+							"raw": "{{base_url}}/instrumentation/alert_subscriptions/31b4fde0-5552-438d-8874-17dbdde54b78",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"instrumentation",
 								"alert_subscriptions",
-								"262a67bc-f317-4fd6-b809-bb10d50a25af"
+								"31b4fde0-5552-438d-8874-17dbdde54b78"
 							]
 						}
 					},
@@ -3523,7 +3523,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url}}/instrumentation/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/instruments/a7540f69-c41e-43b3-b655-6e44097edb7e/alerts/243e9d32-2cba-4f12-9abe-63adc09fc5dd/unsubscribe",
+							"raw": "{{base_url}}/instrumentation/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/instruments/a7540f69-c41e-43b3-b655-6e44097edb7e/alert_configs/243e9d32-2cba-4f12-9abe-63adc09fc5dd/unsubscribe",
 							"host": [
 								"{{base_url}}"
 							],
@@ -3533,7 +3533,7 @@
 								"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
 								"instruments",
 								"a7540f69-c41e-43b3-b655-6e44097edb7e",
-								"alerts",
+								"alert_configs",
 								"243e9d32-2cba-4f12-9abe-63adc09fc5dd",
 								"unsubscribe"
 							]
@@ -3562,7 +3562,7 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/instrumentation/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/instruments/a7540f69-c41e-43b3-b655-6e44097edb7e/alerts/243e9d32-2cba-4f12-9abe-63adc09fc5dd",
+							"raw": "{{base_url}}/instrumentation/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/instruments/a7540f69-c41e-43b3-b655-6e44097edb7e/alert_configs/243e9d32-2cba-4f12-9abe-63adc09fc5dd",
 							"host": [
 								"{{base_url}}"
 							],
@@ -3572,7 +3572,7 @@
 								"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
 								"instruments",
 								"a7540f69-c41e-43b3-b655-6e44097edb7e",
-								"alerts",
+								"alert_configs",
 								"243e9d32-2cba-4f12-9abe-63adc09fc5dd"
 							]
 						}
