@@ -381,7 +381,8 @@ CREATE OR REPLACE VIEW v_email_autocomplete AS (
 INSERT INTO instrument_type (id, name) VALUES
     ('0fd1f9ba-2731-4ff9-96dd-3c03215ab06f', 'Staff Gage'),
     ('1bb4bf7c-f5f8-44eb-9805-43b07ffadbef', 'Piezometer'),
-    ('3350b1d1-a946-49a8-bf19-587d7163e0f7', 'Barometer');
+    ('3350b1d1-a946-49a8-bf19-587d7163e0f7', 'Barometer'),
+    ('98a61f29-18a8-430a-9d02-0f53486e0984', 'Instrument');
 
 -- status
 INSERT INTO status (id, name, description) VALUES

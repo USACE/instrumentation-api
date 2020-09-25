@@ -9,9 +9,9 @@ import (
 
 // AlertSubscription is a profile subscription to an alert
 type AlertSubscription struct {
-	ID        uuid.UUID `json:"id"`
-	AlertID   uuid.UUID `json:"alert_id" db:"alert_id"`
-	ProfileID uuid.UUID `json:"profile_id" db:"profile_id"`
+	ID            uuid.UUID `json:"id"`
+	AlertConfigID uuid.UUID `json:"alert_config_id" db:"alert_config_id"`
+	ProfileID     uuid.UUID `json:"profile_id" db:"profile_id"`
 	AlertSubscriptionSettings
 }
 
@@ -28,10 +28,10 @@ type AlertSubscriptionCollection struct {
 
 // EmailAlert is an email subscription to an alert
 type EmailAlert struct {
-	ID         uuid.UUID `json:"id"`
-	AlertID    uuid.UUID `json:"alert_id"`
-	EmailID    uuid.UUID `json:"profile_id"`
-	MuteNotify bool      `json:"mute_notify" db:"mute_notify"`
+	ID            uuid.UUID `json:"id"`
+	AlertConfigID uuid.UUID `json:"alert_config_id"`
+	EmailID       uuid.UUID `json:"profile_id"`
+	MuteNotify    bool      `json:"mute_notify" db:"mute_notify"`
 }
 
 // UnmarshalJSON implements the UnmarshalJSON Interface for AlertSubscription
@@ -55,10 +55,10 @@ func (c *AlertSubscriptionCollection) UnmarshalJSON(b []byte) error {
 }
 
 // SubscribeProfileToAlerts subscribes a profile to an instrument alert
-func SubscribeProfileToAlerts(db *sqlx.DB, alertID *uuid.UUID, profileID *uuid.UUID) (*AlertSubscription, error) {
+func SubscribeProfileToAlerts(db *sqlx.DB, alertConfigID *uuid.UUID, profileID *uuid.UUID) (*AlertSubscription, error) {
 	var pa AlertSubscription
 	err := db.QueryRowx(
-		`INSERT INTO profile_alerts (alert_id, profile_id) VALUES ($1, $2) RETURNING *`, alertID, profileID,
+		`INSERT INTO alert_profile_subscription (alert_config_id, profile_id) VALUES ($1, $2) RETURNING *`, alertConfigID, profileID,
 	).StructScan(&pa)
 	if err != nil {
 		return nil, err
@@ -67,9 +67,9 @@ func SubscribeProfileToAlerts(db *sqlx.DB, alertID *uuid.UUID, profileID *uuid.U
 }
 
 // UnsubscribeProfileToAlerts subscribes a profile to an instrument alert
-func UnsubscribeProfileToAlerts(db *sqlx.DB, alertID *uuid.UUID, profileID *uuid.UUID) error {
+func UnsubscribeProfileToAlerts(db *sqlx.DB, alertConfigID *uuid.UUID, profileID *uuid.UUID) error {
 	if _, err := db.Exec(
-		`DELETE FROM profile_alerts WHERE alert_id = $1 AND profile_id = $2`, alertID, profileID,
+		`DELETE FROM alert_profile_subscription WHERE alert_config_id = $1 AND profile_id = $2`, alertConfigID, profileID,
 	); err != nil {
 		return err
 	}
@@ -77,10 +77,10 @@ func UnsubscribeProfileToAlerts(db *sqlx.DB, alertID *uuid.UUID, profileID *uuid
 }
 
 // GetAlertSubscription returns a AlertSubscription
-func GetAlertSubscription(db *sqlx.DB, alertID *uuid.UUID, profileID *uuid.UUID) (*AlertSubscription, error) {
+func GetAlertSubscription(db *sqlx.DB, alertConfigID *uuid.UUID, profileID *uuid.UUID) (*AlertSubscription, error) {
 	var pa AlertSubscription
 	if err := db.Get(
-		&pa, `SELECT * FROM profile_alerts WHERE alert_id = $1 AND profile_id = $2`, alertID, profileID,
+		&pa, `SELECT * FROM alert_profile_subscription WHERE alert_config_id = $1 AND profile_id = $2`, alertConfigID, profileID,
 	); err != nil {
 		return nil, err
 	}
@@ -90,7 +90,7 @@ func GetAlertSubscription(db *sqlx.DB, alertID *uuid.UUID, profileID *uuid.UUID)
 // GetAlertSubscriptionByID returns an alert subscription
 func GetAlertSubscriptionByID(db *sqlx.DB, id *uuid.UUID) (*AlertSubscription, error) {
 	var s AlertSubscription
-	if err := db.Get(&s, `SELECT * FROM profile_alerts WHERE id = $1`, id); err != nil {
+	if err := db.Get(&s, `SELECT * FROM alert_profile_subscription WHERE id = $1`, id); err != nil {
 		return nil, err
 	}
 	return &s, nil
@@ -100,7 +100,7 @@ func GetAlertSubscriptionByID(db *sqlx.DB, id *uuid.UUID) (*AlertSubscription, e
 func ListMyAlertSubscriptions(db *sqlx.DB, profileID *uuid.UUID) ([]AlertSubscription, error) {
 	ss := make([]AlertSubscription, 0)
 	if err := db.Select(
-		&ss, `SELECT * FROM profile_alerts WHERE profile_id = $1`, profileID,
+		&ss, `SELECT * FROM alert_profile_subscription WHERE profile_id = $1`, profileID,
 	); err != nil {
 		return make([]AlertSubscription, 0), err
 	}
@@ -111,11 +111,11 @@ func ListMyAlertSubscriptions(db *sqlx.DB, profileID *uuid.UUID) ([]AlertSubscri
 func UpdateMyAlertSubscription(db *sqlx.DB, s *AlertSubscription) (*AlertSubscription, error) {
 
 	_, err := db.Exec(
-		"UPDATE profile_alerts SET mute_ui=$1, mute_notify=$2 WHERE alert_id=$3 AND profile_id=$4",
-		s.MuteUI, s.MuteNotify, s.AlertID, s.ProfileID,
+		"UPDATE alert_profile_subscription SET mute_ui=$1, mute_notify=$2 WHERE alert_config_id=$3 AND profile_id=$4",
+		s.MuteUI, s.MuteNotify, s.AlertConfigID, s.ProfileID,
 	)
 	if err != nil {
 		return nil, err
 	}
-	return GetAlertSubscription(db, &s.AlertID, &s.ProfileID)
+	return GetAlertSubscription(db, &s.AlertConfigID, &s.ProfileID)
 }

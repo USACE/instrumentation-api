@@ -2,4 +2,4 @@
 
 newman run \
     -e ./postman_environment.local.json \
-    ./hhd-regression.postman_collection.json
+    ./instrumentation-regression.postman_collection.json
