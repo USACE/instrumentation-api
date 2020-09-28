@@ -16,6 +16,7 @@ CREATE ROLE postgis_reader;
 GRANT SELECT ON
     instrument,
     alert,
+    alert_read,
     alert_config,
     alert_email_subscription,
     alert_profile_subscription,
@@ -40,13 +41,15 @@ GRANT SELECT ON
     v_instrument,
     v_project,
     v_timeseries,
-    v_email_autocomplete
+    v_email_autocomplete,
+    v_alert
 TO instrumentation_reader;
 
 -- Role instrumentation_writer
 -- Tables specific to instrumentation app
 GRANT INSERT,UPDATE,DELETE ON
     alert,
+    alert_read,
     alert_config,
     alert_email_subscription,
     alert_profile_subscription,

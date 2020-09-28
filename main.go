@@ -91,10 +91,15 @@ func main() {
 	private.POST("instrumentation/projects/:project_id/instruments/:instrument_id/alert_configs", handlers.CreateInstrumentAlertConfigs(db))
 	private.PUT("instrumentation/projects/:project_id/instruments/:instrument_id/alert_configs/:alert_config_id", handlers.UpdateInstrumentAlertConfig(db))
 	private.DELETE("instrumentation/projects/:project_id/instruments/:instrument_id/alert_configs/:alert_config_id", handlers.DeleteInstrumentAlertConfig(db))
-	// Private because requires auth token to determine user (i.e. "my alerts")
+
+	// Alerts
+	public.GET("instrumentation/projects/:project_id/instruments/:instrument_id/alerts", handlers.ListAlertsForInstrument(db))
+	private.GET("instrumentation/my_alerts", handlers.ListMyAlerts(db)) // Private because token required to determine user (i.e. who is "me")
+	private.POST("instrumentation/my_alerts/:alert_id/read", handlers.DoAlertRead(db))
+	private.POST("instrumentation/my_alerts/:alert_id/unread", handlers.DoAlertUnread(db))
 
 	// AlertSubscriptions
-	private.GET("instrumentation/my_alert_subscriptions", handlers.ListMyAlertSubscriptions(db))
+	private.GET("instrumentation/my_alert_subscriptions", handlers.ListMyAlertSubscriptions(db)) // Private because token required to determine user (i.e. who is "me")
 	private.POST("instrumentation/projects/:project_id/instruments/:instrument_id/alert_configs/:alert_config_id/subscribe", handlers.SubscribeProfileToAlerts(db))
 	private.POST("instrumentation/projects/:project_id/instruments/:instrument_id/alert_configs/:alert_config_id/unsubscribe", handlers.UnsubscribeProfileToAlerts(db))
 	private.PUT("instrumentation/alert_subscriptions/:alert_subscription_id", handlers.UpdateMyAlertSubscription(db))
