@@ -1,8 +1,9 @@
 package handlers
 
 import (
-	"github.com/USACE/instrumentation-api/models"
 	"net/http"
+
+	"github.com/USACE/instrumentation-api/models"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
@@ -11,8 +12,12 @@ import (
 // DoHeartbeat triggers regular-interval tasks
 func DoHeartbeat(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
+		// Create a Record of Heartbeat
 		h, err := models.DoHeartbeat(db)
 		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+		if err := models.DoCheckAlerts(db); err != nil {
 			return c.JSON(http.StatusInternalServerError, err)
 		}
 		return c.JSON(http.StatusOK, h)

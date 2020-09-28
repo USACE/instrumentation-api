@@ -98,6 +98,19 @@ func DoAlertUnread(db *sqlx.DB, profileID *uuid.UUID, alertID *uuid.UUID) (*Aler
 	return GetMyAlert(db, profileID, alertID)
 }
 
+// DoCheckAlerts checks for alert conditions; Creates alerts as needed
+func DoCheckAlerts(db *sqlx.DB) error {
+	// TEMPORARY; SIMULATE ALERTS
+	alertID, err := uuid.Parse("243e9d32-2cba-4f12-9abe-63adc09fc5dd")
+	if err != nil {
+		return err
+	}
+	if err = CreateAlerts(db, []uuid.UUID{alertID}); err != nil {
+		return err
+	}
+	return nil
+}
+
 // ListAlertsForInstrumentSQL returns all alerts for a single instrument
 var listAlertsForInstrumentSQL = `SELECT * FROM v_alert WHERE instrument_id = $1`
 
