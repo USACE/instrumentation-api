@@ -125,7 +125,7 @@ func main() {
 
 	// Project Timeseries
 	public.GET("instrumentation/timeseries/:timeseries_id/measurements", handlers.ListTimeseriesMeasurements(db))
-	public.GET("instrumentation/instruments/:instrument_id/timeseries", handlers.ListInstrumentTimeseries(db))
+	public.GET("instrumentation/projects/:project_id/instruments/:instrument_id/timeseries", handlers.ListInstrumentTimeseries(db))
 	private.POST("instrumentation/projects/:project_id/timeseries/:timeseries_id", handlers.CreateProjectTimeseries(db))
 	private.DELETE("instrumentation/projects/:project_id/timeseries/:timeseries_id", handlers.DeleteProjectTimeseries(db))
 

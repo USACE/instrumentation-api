@@ -12,6 +12,8 @@ type Timeseries struct {
 	Slug         string        `json:"slug"`
 	Name         string        `json:"name"`
 	Variable     string        `json:"variable"`
+	ProjectID    uuid.UUID     `json:"project_id" db:"project_id"`
+	Project      string        `json:"project,omitempty" db:"project"`
 	InstrumentID uuid.UUID     `json:"instrument_id" db:"instrument_id"`
 	Instrument   string        `json:"instrument,omitempty"`
 	ParameterID  uuid.UUID     `json:"parameter_id" db:"parameter_id"`
