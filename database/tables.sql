@@ -352,6 +352,8 @@ CREATE OR REPLACE VIEW v_timeseries AS (
             t.slug AS slug,
             t.name AS name,
             i.slug || '.' || t.slug AS variable,
+            j.id AS project_id,
+            j.name AS project,
             i.id AS instrument_id,
             i.name AS instrument,
             p.id AS parameter_id,
@@ -360,6 +362,7 @@ CREATE OR REPLACE VIEW v_timeseries AS (
             u.name AS unit
         FROM timeseries t
             LEFT JOIN instrument i ON i.id = t.instrument_id
+            LEFT JOIN project j ON j.id = i.project_id
             INNER JOIN parameter p ON p.id = t.parameter_id
             INNER JOIN unit U ON u.id = t.unit_id
     );

@@ -124,8 +124,6 @@ func main() {
 	private.DELETE("instrumentation/projects/:project_id", handlers.DeleteFlagProject(db))
 
 	// Project Timeseries
-	public.GET("instrumentation/timeseries/:timeseries_id/measurements", handlers.ListTimeseriesMeasurements(db))
-	public.GET("instrumentation/instruments/:instrument_id/timeseries", handlers.ListInstrumentTimeseries(db))
 	private.POST("instrumentation/projects/:project_id/timeseries/:timeseries_id", handlers.CreateProjectTimeseries(db))
 	private.DELETE("instrumentation/projects/:project_id/timeseries/:timeseries_id", handlers.DeleteProjectTimeseries(db))
 
@@ -173,13 +171,17 @@ func main() {
 	private.DELETE("instrumentation/instruments/:instrument_id/status/:status_id", handlers.DeleteInstrumentStatus(db))
 
 	// Timeseries
+	public.GET("instrumentation/projects/:project_id/instruments/:instrument_id/timeseries", handlers.ListInstrumentTimeseries(db))
 	public.GET("instrumentation/timeseries", handlers.ListTimeseries(db))
 	public.GET("instrumentation/timeseries/:timeseries_id", handlers.GetTimeseries(db))
-	public.GET("instrumentation/instruments/:instrument_id/timeseries/:timeseries_id/measurements", handlers.ListTimeseriesMeasurements(db))
 	public.GET("instrumentation/instruments/:instrument_id/timeseries/:timeseries_id", handlers.GetTimeseries(db))
+	public.GET("instrumentation/timeseries/:timeseries_id/measurements", handlers.ListTimeseriesMeasurements(db))
+	public.GET("instrumentation/instruments/:instrument_id/timeseries/:timeseries_id/measurements", handlers.ListTimeseriesMeasurements(db))
+
 	private.POST("instrumentation/timeseries", handlers.CreateTimeseries(db))
 	private.PUT("instrumentation/timeseries/:timeseries_id", handlers.UpdateTimeseries(db))
 	private.DELETE("instrumentation/timeseries/:timeseries_id", handlers.DeleteTimeseries(db))
+
 	private.POST("instrumentation/timeseries/measurements", handlers.CreateOrUpdateTimeseriesMeasurements(db))
 
 	// Misc

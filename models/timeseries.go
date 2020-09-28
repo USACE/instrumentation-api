@@ -1,8 +1,9 @@
 package models
 
 import (
-	ts "github.com/USACE/instrumentation-api/timeseries"
 	"encoding/json"
+
+	ts "github.com/USACE/instrumentation-api/timeseries"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -56,9 +57,9 @@ func ListTimeseries(db *sqlx.DB) ([]ts.Timeseries, error) {
 }
 
 // ListInstrumentTimeseries returns an array of timeseries for an instrument
-func ListInstrumentTimeseries(db *sqlx.DB, instrumentID *uuid.UUID) ([]ts.Timeseries, error) {
+func ListInstrumentTimeseries(db *sqlx.DB, projectID *uuid.UUID, instrumentID *uuid.UUID) ([]ts.Timeseries, error) {
 	tt := make([]ts.Timeseries, 0)
-	if err := db.Select(&tt, "SELECT * FROM v_timeseries WHERE id = $1", instrumentID); err != nil {
+	if err := db.Select(&tt, "SELECT * FROM v_timeseries WHERE project_id = $1 AND instrument_id = $2", projectID, instrumentID); err != nil {
 		return make([]ts.Timeseries, 0), err
 	}
 	return tt, nil
@@ -157,22 +158,3 @@ func DeleteTimeseries(db *sqlx.DB, id *uuid.UUID) error {
 	}
 	return nil
 }
-
-// SELECT i.id AS instrument_id,
-//        i.slug AS instrument_slug,
-// 	   t.id AS timeseries_id,
-// 	   t.slug AS timeseries_slug,
-//        i.slug||'.'||t.slug AS formula_slug,
-//        m.id AS timeseries_measurement_id,
-// 	   m.time AS latest_time,
-// 	   m.value AS latest_value
-// 	   FROM timeseries_measurement m
-// LEFT JOIN (
-// 	SELECT timeseries_id,
-// 	MAX(time) AS time
-// 	FROM timeseries_measurement
-// 	GROUP BY timeseries_id
-// ) tmax ON tmax.timeseries_id = m.timeseries_id
-// LEFT JOIN timeseries t ON t.id = m.timeseries_id
-// LEFT JOIN instrument i ON i.id = t.instrument_id
-// WHERE tmax.time = m.time
