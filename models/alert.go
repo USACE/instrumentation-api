@@ -32,14 +32,11 @@ func CreateAlerts(db *sqlx.DB, alertConfigIDS []uuid.UUID) error {
 	if err != nil {
 		return err
 	}
-	newAlerts := make([]Alert, len(alertConfigIDS))
-	for idx, id := range alertConfigIDS {
-		var a Alert
+	for _, id := range alertConfigIDS {
 		// Load Alert
-		if err := stmt1.Get(&a, id); err != nil {
+		if _, err := stmt1.Exec(id); err != nil {
 			return err
 		}
-		newAlerts[idx] = a
 	}
 	if err := stmt1.Close(); err != nil {
 		return err
@@ -101,11 +98,11 @@ func DoAlertUnread(db *sqlx.DB, profileID *uuid.UUID, alertID *uuid.UUID) (*Aler
 // DoCheckAlerts checks for alert conditions; Creates alerts as needed
 func DoCheckAlerts(db *sqlx.DB) error {
 	// TEMPORARY; SIMULATE ALERTS
-	alertID, err := uuid.Parse("243e9d32-2cba-4f12-9abe-63adc09fc5dd")
+	alertID, err := uuid.Parse("6f3dfe9f-4664-4c78-931f-32ffac6d2d43")
 	if err != nil {
 		return err
 	}
-	if err = CreateAlerts(db, []uuid.UUID{alertID}); err != nil {
+	if err := CreateAlerts(db, []uuid.UUID{alertID}); err != nil {
 		return err
 	}
 	return nil

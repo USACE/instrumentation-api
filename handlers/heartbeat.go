@@ -18,7 +18,7 @@ func DoHeartbeat(db *sqlx.DB) echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, err)
 		}
 		if err := models.DoCheckAlerts(db); err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return c.String(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, h)
 	}
