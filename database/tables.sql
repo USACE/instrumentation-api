@@ -23,6 +23,7 @@ drop table if exists
     public.profile,
     public.email,
     public.alert,
+    public.alert_read,
     public.alert_config,
     public.alert_profile_subscription,
     public.alert_email_subscription,
@@ -156,6 +157,13 @@ CREATE TABLE IF NOT EXISTS public.alert (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     alert_config_id UUID NOT NULL REFERENCES alert_config (id),
     create_date TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- alert_read
+CREATE TABLE IF NOT EXISTS public.alert_read (
+    alert_id UUID NOT NULL REFERENCES alert (id),
+    profile_id UUID NOT NULL REFERENCES profile (id),
+    CONSTRAINT profile_unique_alert_read UNIQUE(alert_id, profile_id)
 );
 
 -- profile alerts (subscribe profiles to alerts)
@@ -371,6 +379,23 @@ CREATE OR REPLACE VIEW v_email_autocomplete AS (
            email,
            username||email AS username_email
     FROM profile
+);
+
+-- v_alert
+CREATE OR REPLACE VIEW v_alert AS (
+    SELECT a.id AS id,
+       a.alert_config_id AS alert_config_id,
+       a.create_date AS create_date,
+       p.id AS project_id,
+       p.name AS project_name,
+	   i.id AS instrument_id,
+	   i.name AS instrument_name,
+	   ac.name AS name,
+	   ac.body AS body
+FROM alert a
+INNER JOIN alert_config ac ON a.alert_config_id = ac.id
+INNER JOIN instrument i ON ac.instrument_id = i.id
+INNER JOIN project p ON i.project_id = p.id
 );
 
 -- -------
@@ -760,4 +785,7 @@ INSERT INTO timeseries_measurement (timeseries_id, time, value) VALUES
 
 INSERT INTO alert_config (id, instrument_id, name, body, formula, schedule) VALUES
     ('1efd2d85-d3ee-4388-85a0-f824a761ff8b', '9e8f2ca4-4037-45a4-aaca-d9e598877439','Above Target Height', 'The demo staff gage has exceeded the target height. Sincerely, Midas', '[stage] >= 10', '0,10,20,30,40,50 * * * *'),
-    ('243e9d32-2cba-4f12-9abe-63adc09fc5dd', 'a7540f69-c41e-43b3-b655-6e44097edb7e','Below Target Height', 'Distance to water is near artesian conditions. Sincerely, Midas', '[distance-to-water] <= 2', '0,10,20,30,40,50 * * * *');
+    ('243e9d32-2cba-4f12-9abe-63adc09fc5dd', 'a7540f69-c41e-43b3-b655-6e44097edb7e','Below Target Height', 'Distance to water is near artesian conditions. Sincerely, Midas', '[distance-to-water] <= 2', '0,10,20,30,40,50 * * * *'),
+    ('6f3dfe9f-4664-4c78-931f-32ffac6d2d43', 'a7540f69-c41e-43b3-b655-6e44097edb7e','Sample Demo Alert', 'Sample Alert Condition Has Been Triggered. Sincerely, Midas', '1 == 1', '0,10,20,30,40,50 * * * *');
+
+INSERT INTO alert (id, alert_config_id) VALUES ('e070be13-ef17-40f3-99c8-fef3ee1b9fb5', '6f3dfe9f-4664-4c78-931f-32ffac6d2d43');

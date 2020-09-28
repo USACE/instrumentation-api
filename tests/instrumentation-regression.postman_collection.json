@@ -523,7 +523,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"status_id\": \"94578354-ffdf-4119-9663-6bd4323e58f5\",\n    \"status\": \"destroyed\",\n    \"status_time\": \"2001-01-01T00:00:00Z\",\n    \"slug\": \"demo-piezometer-5\",\n    \"name\": \"Demo Piezometer 5\",\n    \"type_id\": \"1bb4bf7c-f5f8-44eb-9805-43b07ffadbef\",\n    \"type\": \"Piezometer\",\n    \"geometry\": {\n        \"type\": \"Point\",\n        \"coordinates\": [\n            -80.8,\n            26.7\n        ]\n    },\n    \"station\": null,\n    \"offset\": null,\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\",\n    \"zreference\": 44.5,\n    \"zreference_datum_id\": \"72113f9a-982d-44e5-8fc1-8e595dafd344\",\n    \"zreference_datum\": \"North American Vertical Datum of 1988 (NAVD 88)\",\n    \"zreference_time\": \"2006-06-01T00:00:00Z\"\n},",
+							"raw": "{\n    \"status_id\": \"94578354-ffdf-4119-9663-6bd4323e58f5\",\n    \"status\": \"destroyed\",\n    \"status_time\": \"2001-01-01T00:00:00Z\",\n    \"slug\": \"demo-piezometer-5\",\n    \"name\": \"Demo Piezometer 5\",\n    \"type_id\": \"1bb4bf7c-f5f8-44eb-9805-43b07ffadbef\",\n    \"type\": \"Piezometer\",\n    \"geometry\": {\n        \"type\": \"Point\",\n        \"coordinates\": [\n            -80.8,\n            26.7\n        ]\n    },\n    \"station\": null,\n    \"offset\": null,\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\",\n    \"zreference\": 44.5,\n    \"zreference_datum_id\": \"72113f9a-982d-44e5-8fc1-8e595dafd344\",\n    \"zreference_datum\": \"North American Vertical Datum of 1988 (NAVD 88)\",\n    \"zreference_time\": \"2006-06-01T00:00:00Z\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -3421,7 +3421,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url}}/instrumentation/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/instruments/a7540f69-c41e-43b3-b655-6e44097edb7e/alert_configs/243e9d32-2cba-4f12-9abe-63adc09fc5dd/subscribe",
+							"raw": "{{base_url}}/instrumentation/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/instruments/a7540f69-c41e-43b3-b655-6e44097edb7e/alert_configs/6f3dfe9f-4664-4c78-931f-32ffac6d2d43/subscribe",
 							"host": [
 								"{{base_url}}"
 							],
@@ -3432,7 +3432,7 @@
 								"instruments",
 								"a7540f69-c41e-43b3-b655-6e44097edb7e",
 								"alert_configs",
-								"243e9d32-2cba-4f12-9abe-63adc09fc5dd",
+								"6f3dfe9f-4664-4c78-931f-32ffac6d2d43",
 								"subscribe"
 							]
 						}
@@ -3538,6 +3538,201 @@
 					"response": []
 				},
 				{
+					"name": "ListAlertsForInstrument",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "29391efd-8ddf-4793-b2ca-12a6063bbd3d",
+								"exec": [
+									"// validate JSON schema",
+									"var schema = {",
+									"    \"type\": \"object\",",
+									"    \"properties\": {",
+									"        \"id\": { \"type\": \"string\" },",
+									"        \"alert_config_id\": { \"type\": \"string\" },",
+									"        \"project_id\": { \"type\": \"string\" },",
+									"        \"instrument_id\": { \"type\": \"string\" },",
+									"        \"project_name\": { \"type\": \"string\" },",
+									"        \"instrument_name\": { \"type\": \"string\" },",
+									"        \"name\": { \"type\": \"string\" },",
+									"        \"body\": { \"type\": \"string\" },",
+									"        \"create_date\": { \"type\": \"string\", \"format\": \"date-time\" }",
+									"    },",
+									"    \"required\": [\"id\", \"alert_config_id\", \"project_id\", \"instrument_id\", \"project_name\", \"instrument_name\", \"name\", \"body\", \"create_date\"],",
+									"    \"additionalProperties\": true",
+									"}",
+									"// additionalProperties: true because alert can also contain a property \"read\" when fetched from /my_alerts",
+									"",
+									"pm.globals.set('ALERT_OBJ_SCHEMA', JSON.stringify(schema));",
+									"",
+									"var list_schema = {",
+									"    \"type\": \"array\",",
+									"    \"items\": schema",
+									"};",
+									"",
+									"pm.globals.set('ALERT_ARRAY_SCHEMA', JSON.stringify(list_schema));",
+									"",
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// validate schema",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(list_schema)",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/instrumentation/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/instruments/a7540f69-c41e-43b3-b655-6e44097edb7e/alerts",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"projects",
+								"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+								"instruments",
+								"a7540f69-c41e-43b3-b655-6e44097edb7e",
+								"alerts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ListMyAlerts",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "539a07aa-3234-4423-b838-bb234dec0cb2",
+								"exec": [
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// schema validation",
+									"pm.test(\"Schema validation\", function () {",
+									"     pm.response.to.have.jsonSchema(",
+									"        JSON.parse(pm.globals.get('ALERT_ARRAY_SCHEMA'))",
+									"    )",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/instrumentation/my_alerts",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"my_alerts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DoAlertRead",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "d0f9200b-387e-4fb6-97d1-af73969de63d",
+								"exec": [
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// schema validation",
+									"pm.test(\"Schema validation\", function () {",
+									"     pm.response.to.have.jsonSchema(",
+									"        JSON.parse(pm.globals.get('ALERT_OBJ_SCHEMA'))",
+									"    )",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/instrumentation/my_alerts/e070be13-ef17-40f3-99c8-fef3ee1b9fb5/read",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"my_alerts",
+								"e070be13-ef17-40f3-99c8-fef3ee1b9fb5",
+								"read"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DoAlertUnread",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "a2a10015-35a3-4208-98d4-f9e463ec34a6",
+								"exec": [
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// schema validation",
+									"pm.test(\"Schema validation\", function () {",
+									"     pm.response.to.have.jsonSchema(",
+									"        JSON.parse(pm.globals.get('ALERT_OBJ_SCHEMA'))",
+									"    )",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/instrumentation/my_alerts/e070be13-ef17-40f3-99c8-fef3ee1b9fb5/unread",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"my_alerts",
+								"e070be13-ef17-40f3-99c8-fef3ee1b9fb5",
+								"unread"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "UnsubscribeProfileToInstrumentAlert",
 					"event": [
 						{
@@ -3567,7 +3762,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url}}/instrumentation/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/instruments/a7540f69-c41e-43b3-b655-6e44097edb7e/alert_configs/243e9d32-2cba-4f12-9abe-63adc09fc5dd/unsubscribe",
+							"raw": "{{base_url}}/instrumentation/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/instruments/a7540f69-c41e-43b3-b655-6e44097edb7e/alert_configs/6f3dfe9f-4664-4c78-931f-32ffac6d2d43/unsubscribe",
 							"host": [
 								"{{base_url}}"
 							],
@@ -3578,7 +3773,7 @@
 								"instruments",
 								"a7540f69-c41e-43b3-b655-6e44097edb7e",
 								"alert_configs",
-								"243e9d32-2cba-4f12-9abe-63adc09fc5dd",
+								"6f3dfe9f-4664-4c78-931f-32ffac6d2d43",
 								"unsubscribe"
 							]
 						}
