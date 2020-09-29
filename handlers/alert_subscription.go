@@ -63,7 +63,7 @@ func UnsubscribeProfileToAlerts(db *sqlx.DB) echo.HandlerFunc {
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
-		return c.NoContent(http.StatusOK)
+		return c.JSON(http.StatusOK, make(map[string]interface{}))
 	}
 }
 
