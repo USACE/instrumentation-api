@@ -303,30 +303,3 @@ var listInstrumentsSQL = `SELECT id, deleted, status_id, status, status_time, sl
 	updater, update_date, project_id, constants, groups, alert_configs, formula
 	FROM   v_instrument
 	`
-
-// CreateInstrumentConstant makes a timeseries an Instrument Constant
-func CreateInstrumentConstant(db *sqlx.DB, instrumentID *uuid.UUID, timeseriesID *uuid.UUID) error {
-
-	// if the timeseries_id is already promoted to the project level, do nothing (i.e. RESTful 200)
-	if _, err := db.Exec(
-		`INSERT INTO instrument_constants (instrument_id, timeseries_id) VALUES ($1, $2)
-		 ON CONFLICT ON CONSTRAINT instrument_unique_timeseries DO NOTHING`,
-		instrumentID, timeseriesID,
-	); err != nil {
-		return err
-	}
-	return nil
-}
-
-// DeleteInstrumentConstant removes a timeseries as an Instrument Constant; Does not delete underlying timeseries
-func DeleteInstrumentConstant(db *sqlx.DB, instrumentID *uuid.UUID, timeseriesID *uuid.UUID) error {
-
-	// if the timeseries_id is already promoted to the project level, do nothing (i.e. RESTful 200)
-	if _, err := db.Exec(
-		`DELETE FROM instrument_constants WHERE instrument_id = $1 AND timeseries_id = $2`,
-		instrumentID, timeseriesID,
-	); err != nil {
-		return err
-	}
-	return nil
-}

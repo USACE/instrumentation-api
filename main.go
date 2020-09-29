@@ -149,12 +149,10 @@ func main() {
 	private.POST("instrumentation/instrument_groups/:instrument_group_id/instruments", handlers.CreateInstrumentGroupInstruments(db))
 	private.DELETE("instrumentation/instrument_groups/:instrument_group_id/instruments/:instrument_id", handlers.DeleteInstrumentGroupInstruments(db))
 
-	// Add or Remove Instrument Constants
-	private.POST("instrumentation/instruments/:instrument_id/constants/:timeseries_id", handlers.CreateInstrumentConstant(db))
-	private.DELETE("instrumentation/instruments/:instrument_id/constants/:timeseries_id", handlers.DeleteInstrumentConstant(db))
-
-	// Timeseries and Instrument Constants
-	// private.POST("instrumentation/projects/:project_id/instruments/:instrument_id/constants", handlers.CreateInstrumentConstants(db))
+	// Instrument Constants (same as a timeseries in structure/payload)
+	public.GET("instrumentation/projects/:project_id/instruments/:instrument_id/constants", handlers.ListInstrumentConstants(db))
+	private.POST("instrumentation/projects/:project_id/instruments/:instrument_id/constants", handlers.CreateInstrumentConstants(db))
+	private.DELETE("instrumentation/projects/:project_id/instruments/:instrument_id/constants/:timeseries_id", handlers.DeleteInstrumentConstant(db))
 
 	// Instrument Notes(GET, PUT, DELETE work with or without instrument context in URL)
 	public.GET("instrumentation/instruments/notes", handlers.ListInstrumentNotes(db))

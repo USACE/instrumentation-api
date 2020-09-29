@@ -721,12 +721,14 @@ INSERT INTO timeseries (id, instrument_id, parameter_id, unit_id, slug, name) VA
 ('7ee902a3-56d0-4acf-8956-67ac82c03a96', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce', 'distance-to-water', 'Distance to Water'),
 ('8f4ca3a3-5971-4597-bd6f-332d1cf5af7c', '9e8f2ca4-4037-45a4-aaca-d9e598877439', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce', 'height', 'Height'),
 ('d9697351-3a38-4194-9ac4-41541927e475', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce', 'top-of-riser', 'Top of Riser'),
-('22a734d6-dc24-451d-a462-43a32f335ae8', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce', 'tip-depth', 'Tip Depth');
+('22a734d6-dc24-451d-a462-43a32f335ae8', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce', 'tip-depth', 'Tip Depth'),
+('14247bc8-b264-4857-836f-182d47ebb39d', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce', 'constant-to-test-delete', 'Constant to Test Delete');
 
 -- instrument_constants
 INSERT INTO instrument_constants (instrument_id, timeseries_id) VALUES
 ('a7540f69-c41e-43b3-b655-6e44097edb7e', 'd9697351-3a38-4194-9ac4-41541927e475'),
-('a7540f69-c41e-43b3-b655-6e44097edb7e', '22a734d6-dc24-451d-a462-43a32f335ae8');
+('a7540f69-c41e-43b3-b655-6e44097edb7e', '22a734d6-dc24-451d-a462-43a32f335ae8'),
+('a7540f69-c41e-43b3-b655-6e44097edb7e', '14247bc8-b264-4857-836f-182d47ebb39d');
 
 -- Time Series Measurements
 INSERT INTO timeseries_measurement (timeseries_id, time, value) VALUES

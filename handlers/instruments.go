@@ -1,9 +1,10 @@
 package handlers
 
 import (
+	"net/http"
+
 	"github.com/USACE/instrumentation-api/dbutils"
 	"github.com/USACE/instrumentation-api/models"
-	"net/http"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -170,44 +171,6 @@ func DeleteFlagInstrument(db *sqlx.DB) echo.HandlerFunc {
 			return c.NoContent(http.StatusBadRequest)
 		}
 
-		return c.NoContent(http.StatusOK)
-	}
-}
-
-// CreateInstrumentConstant makes a timeseries an Instrument Constant
-func CreateInstrumentConstant(db *sqlx.DB) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		instrumentID, err := uuid.Parse(c.Param("instrument_id"))
-		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
-		}
-		timeseriesID, err := uuid.Parse(c.Param("timeseries_id"))
-		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
-		}
-		err = models.CreateInstrumentConstant(db, &instrumentID, &timeseriesID)
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
-		}
-		return c.NoContent(http.StatusCreated)
-	}
-}
-
-// DeleteInstrumentConstant removes a timeseries as an Instrument Constant
-func DeleteInstrumentConstant(db *sqlx.DB) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		instrumentID, err := uuid.Parse(c.Param("instrument_id"))
-		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
-		}
-		timeseriesID, err := uuid.Parse(c.Param("timeseries_id"))
-		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
-		}
-		err = models.DeleteInstrumentConstant(db, &instrumentID, &timeseriesID)
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
-		}
 		return c.NoContent(http.StatusOK)
 	}
 }

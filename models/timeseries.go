@@ -46,6 +46,16 @@ func ListTimeseriesSlugs(db *sqlx.DB) ([]string, error) {
 	return ss, nil
 }
 
+// ListTimeseriesSlugsForInstrument lists used timeseries slugs for a given instrument
+func ListTimeseriesSlugsForInstrument(db *sqlx.DB, id *uuid.UUID) ([]string, error) {
+
+	ss := make([]string, 0)
+	if err := db.Select(&ss, "SELECT slug FROM v_timeseries WHERE instrument_id = $1", id); err != nil {
+		return make([]string, 0), err
+	}
+	return ss, nil
+}
+
 // ListTimeseries lists all timeseries
 func ListTimeseries(db *sqlx.DB) ([]ts.Timeseries, error) {
 
