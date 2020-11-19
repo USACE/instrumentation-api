@@ -27,7 +27,9 @@ drop table if exists
     public.alert_config,
     public.alert_profile_subscription,
     public.alert_email_subscription,
-    public.heartbeat
+    public.heartbeat,
+    public.collection_group_timeseries,
+    public.collection_group
 	CASCADE;
 
 -- profile (login user)
@@ -248,6 +250,26 @@ CREATE TABLE IF NOT EXISTS public.project_timeseries (
     CONSTRAINT project_unique_timeseries UNIQUE(project_id, timeseries_id)
 );
 
+-- collection_group
+CREATE TABLE IF NOT EXISTS public.collection_group (
+    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+    project_id UUID NOT NULL REFERENCES project(id) ON DELETE CASCADE,
+    name VARCHAR NOT NULL,
+    slug VARCHAR NOT NULL,
+    creator BIGINT NOT NULL DEFAULT 0,
+    create_date TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updater BIGINT NOT NULL DEFAULT 0,
+    update_date TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT project_unique_collection_group_name UNIQUE(project_id, name),
+    CONSTRAINT project_unique_collection_group_slug UNIQUE(project_id, slug)
+);
+
+CREATE TABLE IF NOT EXISTS public.collection_group_timeseries (
+    collection_group_id UUID NOT NULL REFERENCES collection_group(id) ON DELETE CASCADE,
+    timeseries_id UUID NOT NULL REFERENCES timeseries(id) ON DELETE CASCADE,
+    CONSTRAINT collection_group_unique_timeseries UNIQUE(collection_group_id, timeseries_id)
+);
+
 -- -----
 -- Views
 -- -----
@@ -366,6 +388,19 @@ CREATE OR REPLACE VIEW v_timeseries AS (
             INNER JOIN parameter p ON p.id = t.parameter_id
             INNER JOIN unit U ON u.id = t.unit_id
     );
+
+-- v_timeseries_latest; same as v_timeseries, joined with latest times and values
+CREATE OR REPLACE VIEW v_timeseries_latest AS (
+    SELECT t.*,
+       m.time AS latest_time,
+	   m.value AS latest_value
+    FROM v_timeseries t
+    LEFT JOIN (
+	    SELECT DISTINCT ON (timeseries_id) timeseries_id, time, value
+	    FROM timeseries_measurement
+	    ORDER BY timeseries_id, time DESC
+    ) m ON t.id = m.timeseries_id
+);
 
 -- v_email_autocomplete
 CREATE OR REPLACE VIEW v_email_autocomplete AS (
@@ -788,9 +823,21 @@ INSERT INTO timeseries_measurement (timeseries_id, time, value) VALUES
 ('d9697351-3a38-4194-9ac4-41541927e475', '3/10/2020', 39.50),
 ('22a734d6-dc24-451d-a462-43a32f335ae8', '3/10/2015', 10.0);
 
+-- alert_config
 INSERT INTO alert_config (id, instrument_id, name, body, formula, schedule) VALUES
     ('1efd2d85-d3ee-4388-85a0-f824a761ff8b', '9e8f2ca4-4037-45a4-aaca-d9e598877439','Above Target Height', 'The demo staff gage has exceeded the target height. Sincerely, Midas', '[stage] >= 10', '0,10,20,30,40,50 * * * *'),
     ('243e9d32-2cba-4f12-9abe-63adc09fc5dd', 'a7540f69-c41e-43b3-b655-6e44097edb7e','Below Target Height', 'Distance to water is near artesian conditions. Sincerely, Midas', '[distance-to-water] <= 2', '0,10,20,30,40,50 * * * *'),
     ('6f3dfe9f-4664-4c78-931f-32ffac6d2d43', 'a7540f69-c41e-43b3-b655-6e44097edb7e','Sample Demo Alert', 'Sample Alert Condition Has Been Triggered. Sincerely, Midas', '1 == 1', '0,10,20,30,40,50 * * * *');
 
+-- alert
 INSERT INTO alert (id, alert_config_id) VALUES ('e070be13-ef17-40f3-99c8-fef3ee1b9fb5', '6f3dfe9f-4664-4c78-931f-32ffac6d2d43');
+
+-- collection_group
+INSERT INTO collection_group (id, project_id, name, slug) VALUES
+    ('1519eaea-1799-4375-aa37-0e35aa654643', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'Manual Collection Route 1', 'manual-collection-route-1'),
+    ('30b32cb1-0936-42c4-95d1-63a7832a57db', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'High Water Inspection', 'high-water-inspection');
+
+-- collection_group_timeseries
+INSERT INTO collection_group_timeseries (collection_group_id, timeseries_id) VALUES
+    ('30b32cb1-0936-42c4-95d1-63a7832a57db', '7ee902a3-56d0-4acf-8956-67ac82c03a96'),
+    ('30b32cb1-0936-42c4-95d1-63a7832a57db', '9a3864a8-8766-4bfa-bad1-0328b166f6a8');
