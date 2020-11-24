@@ -45,7 +45,8 @@ GRANT SELECT ON
     v_timeseries,
     v_email_autocomplete,
     v_alert,
-    v_timeseries_latest
+    v_timeseries_latest,
+    v_timeseries_project_map
 TO instrumentation_reader;
 
 -- Role instrumentation_writer

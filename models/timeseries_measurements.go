@@ -1,8 +1,9 @@
 package models
 
 import (
-	ts "github.com/USACE/instrumentation-api/timeseries"
 	"encoding/json"
+
+	ts "github.com/USACE/instrumentation-api/timeseries"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -15,6 +16,16 @@ import (
 // i.e an array of structs, each containing timeseries measurements not necessarily from the same time series
 type TimeseriesMeasurementCollectionCollection struct {
 	Items []ts.MeasurementCollection
+}
+
+// TimeseriesIDs returns a slice of all timeseries IDs contained in the MeasurementCollectionCollection
+func (cc *TimeseriesMeasurementCollectionCollection) TimeseriesIDs() []uuid.UUID {
+
+	dd := make([]uuid.UUID, 0)
+	for _, item := range cc.Items {
+		dd = append(dd, item.TimeseriesID)
+	}
+	return dd
 }
 
 // UnmarshalJSON implements UnmarshalJSON interface

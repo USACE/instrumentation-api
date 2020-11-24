@@ -375,8 +375,10 @@ CREATE OR REPLACE VIEW v_timeseries AS (
             t.name AS name,
             i.slug || '.' || t.slug AS variable,
             j.id AS project_id,
+            j.slug AS project_slug,
             j.name AS project,
             i.id AS instrument_id,
+            i.slug AS instrument_slug,
             i.name AS instrument,
             p.id AS parameter_id,
             p.name AS parameter,
@@ -388,6 +390,15 @@ CREATE OR REPLACE VIEW v_timeseries AS (
             INNER JOIN parameter p ON p.id = t.parameter_id
             INNER JOIN unit U ON u.id = t.unit_id
     );
+
+-- v_timeseries_project_map
+CREATE OR REPLACE VIEW v_timeseries_project_map AS (
+    SELECT t.id AS timeseries_id,
+           p.id AS project_id
+    FROM timeseries t
+    LEFT JOIN instrument n ON t.instrument_id = n.id
+    LEFT JOIN project p ON p.id = n.project_id
+);
 
 -- v_timeseries_latest; same as v_timeseries, joined with latest times and values
 CREATE OR REPLACE VIEW v_timeseries_latest AS (

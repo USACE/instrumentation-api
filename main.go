@@ -184,6 +184,7 @@ func main() {
 	private.DELETE("instrumentation/timeseries/:timeseries_id", handlers.DeleteTimeseries(db))
 
 	private.POST("instrumentation/timeseries/measurements", handlers.CreateOrUpdateTimeseriesMeasurements(db))
+	private.POST("instrumentation/projects/:project_id/timeseries_measurements", handlers.CreateOrUpdateTimeseriesMeasurements(db))
 
 	// Collection Groups
 	public.GET("instrumentation/projects/:project_id/collection_groups", handlers.ListCollectionGroups(db))

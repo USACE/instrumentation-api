@@ -8,19 +8,21 @@ import (
 
 // Timeseries is a timeseries data structure
 type Timeseries struct {
-	ID           uuid.UUID     `json:"id"`
-	Slug         string        `json:"slug"`
-	Name         string        `json:"name"`
-	Variable     string        `json:"variable"`
-	ProjectID    uuid.UUID     `json:"project_id" db:"project_id"`
-	Project      string        `json:"project,omitempty" db:"project"`
-	InstrumentID uuid.UUID     `json:"instrument_id" db:"instrument_id"`
-	Instrument   string        `json:"instrument,omitempty"`
-	ParameterID  uuid.UUID     `json:"parameter_id" db:"parameter_id"`
-	Parameter    string        `json:"parameter,omitempty"`
-	UnitID       uuid.UUID     `json:"unit_id" db:"unit_id"`
-	Unit         string        `json:"unit,omitempty"`
-	Values       []Measurement `json:"values,omitempty"`
+	ID             uuid.UUID     `json:"id"`
+	Slug           string        `json:"slug"`
+	Name           string        `json:"name"`
+	Variable       string        `json:"variable"`
+	ProjectID      uuid.UUID     `json:"project_id" db:"project_id"`
+	ProjectSlug    string        `json:"project_slug" db:"project_slug"`
+	Project        string        `json:"project,omitempty" db:"project"`
+	InstrumentID   uuid.UUID     `json:"instrument_id" db:"instrument_id"`
+	InstrumentSlug string        `json:"instrument_slug" db:"instrument_slug"`
+	Instrument     string        `json:"instrument,omitempty"`
+	ParameterID    uuid.UUID     `json:"parameter_id" db:"parameter_id"`
+	Parameter      string        `json:"parameter,omitempty"`
+	UnitID         uuid.UUID     `json:"unit_id" db:"unit_id"`
+	Unit           string        `json:"unit,omitempty"`
+	Values         []Measurement `json:"values,omitempty"`
 }
 
 // Measurement is a time and value associated with a timeseries
