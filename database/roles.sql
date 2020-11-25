@@ -20,6 +20,8 @@ GRANT SELECT ON
     alert_config,
     alert_email_subscription,
     alert_profile_subscription,
+    collection_group,
+    collection_group_timeseries,
     profile,
     email,
     heartbeat,
@@ -42,7 +44,9 @@ GRANT SELECT ON
     v_project,
     v_timeseries,
     v_email_autocomplete,
-    v_alert
+    v_alert,
+    v_timeseries_latest,
+    v_timeseries_project_map
 TO instrumentation_reader;
 
 -- Role instrumentation_writer
@@ -53,6 +57,8 @@ GRANT INSERT,UPDATE,DELETE ON
     alert_config,
     alert_email_subscription,
     alert_profile_subscription,
+    collection_group,
+    collection_group_timeseries,
     instrument,
     profile,
     email,

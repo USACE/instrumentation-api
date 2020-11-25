@@ -2123,15 +2123,19 @@
 									"        \"slug\": { \"type\": \"string\" },",
 									"        \"name\": { \"type\": \"string\" },",
 									"        \"variable\": {\"type\": \"string\"},",
+									"        \"project_id\": {\"type\": \"string\"},",
+									"        \"project\": {\"type\": \"string\"},",
+									"        \"project_slug\": {\"type\": \"string\"},",
 									"        \"instrument_id\": { \"type\": \"string\" },",
 									"        \"instrument\": { \"type\": \"string\"  },",
+									"        \"instrument_slug\": {\"type\": \"string\"},",
 									"        \"parameter_id\": { \"type\": \"string\" },",
 									"        \"parameter\": { \"type\": \"string\"  },",
 									"        \"unit_id\": { \"type\": \"string\" },",
 									"        \"unit\": { \"type\": \"string\"  }",
 									"    },",
 									"    \"required\": [\"id\", \"slug\", \"name\", \"variable\", \"instrument_id\", \"parameter_id\", \"unit_id\"],",
-									"    \"additionalProperties\": true",
+									"    \"additionalProperties\": false",
 									"};",
 									"",
 									"pm.globals.set('TIMESERIES_OBJ_SCHEMA', JSON.stringify(schema));",
@@ -2474,14 +2478,15 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url}}/instrumentation/timeseries/measurements",
+							"raw": "{{base_url}}/instrumentation/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/timeseries_measurements",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"instrumentation",
-								"timeseries",
-								"measurements"
+								"projects",
+								"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+								"timeseries_measurements"
 							]
 						}
 					},
@@ -2517,14 +2522,15 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url}}/instrumentation/timeseries/measurements",
+							"raw": "{{base_url}}/instrumentation/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/timeseries_measurements",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"instrumentation",
-								"timeseries",
-								"measurements"
+								"projects",
+								"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+								"timeseries_measurements"
 							]
 						}
 					},
@@ -3841,6 +3847,201 @@
 								"alert_configs",
 								"6f3dfe9f-4664-4c78-931f-32ffac6d2d43",
 								"unsubscribe"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Collection Groups",
+			"item": [
+				{
+					"name": "ListCollectionGroups",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "3ea64c0d-7286-452e-bbd0-4c42c71ed53f",
+								"exec": [
+									"// validate JSON schema",
+									"var obj_schema = {",
+									"    \"type\": \"object\",",
+									"    \"properties\": {",
+									"        \"id\": { \"type\": \"string\" },",
+									"        \"project_id\": { \"type\": \"string\" },",
+									"        \"slug\": { \"type\": \"string\" },",
+									"        \"name\": { \"type\": \"string\" },",
+									"        \"creator\": { \"type\": \"number\" },",
+									"        \"create_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
+									"        \"updater\": { \"type\": \"number\" },",
+									"        \"update_date\": { \"type\": \"string\", \"format\": \"date-time\" }",
+									"    },",
+									"    \"required\": [\"id\", \"project_id\", \"name\", \"slug\", \"creator\", \"create_date\", \"updater\", \"update_date\"],",
+									"    \"additionalProperties\": false",
+									"}",
+									"",
+									"var array_schema = {",
+									"    \"type\": \"array\",",
+									"    \"items\": obj_schema",
+									"}",
+									"",
+									"pm.globals.set('COLLECTIONGROUP_OBJ_SCHEMA', JSON.stringify(obj_schema));",
+									"",
+									"pm.globals.set('COLLECTIONGROUP_ARRAY_SCHEMA', JSON.stringify(array_schema));",
+									"",
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// validate schema",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(array_schema)",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/instrumentation/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/collection_groups",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"projects",
+								"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+								"collection_groups"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetCollectionGroupDetails",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "11cf6b87-e801-4ee3-9a59-1fe1296d5ffd",
+								"exec": [
+									"// validate JSON schema",
+									"var schema = {",
+									"    \"type\": \"object\",",
+									"    \"properties\": {",
+									"        \"id\": { \"type\": \"string\" },",
+									"        \"project_id\": { \"type\": \"string\" },",
+									"        \"slug\": { \"type\": \"string\" },",
+									"        \"name\": { \"type\": \"string\" },",
+									"        \"creator\": { \"type\": \"number\" },",
+									"        \"create_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
+									"        \"updater\": { \"type\": \"number\" },",
+									"        \"update_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
+									"        \"timeseries\": {",
+									"            \"type\": \"array\",",
+									"            \"items\": {",
+									"                \"type\": \"object\",",
+									"                \"properties\": {",
+									"                    \"id\": { \"type\": \"string\" },",
+									"                    \"slug\": { \"type\": \"string\" },",
+									"                    \"name\": { \"type\": \"string\" },",
+									"                    \"variable\": {\"type\": \"string\"},",
+									"                    \"project_id\": {\"type\": \"string\"},",
+									"                    \"project\": {\"type\": \"string\"},",
+									"                    \"project_slug\": {\"type\": \"string\"},",
+									"                    \"instrument_id\": { \"type\": \"string\" },",
+									"                    \"instrument\": { \"type\": \"string\"  },",
+									"                    \"instrument_slug\": {\"type\": \"string\"},",
+									"                    \"parameter_id\": { \"type\": \"string\" },",
+									"                    \"parameter\": { \"type\": \"string\"  },",
+									"                    \"unit_id\": { \"type\": \"string\" },",
+									"                    \"unit\": { \"type\": \"string\"  },",
+									"                    \"latest_time\": {\"type\": \"string\", \"format\": \"date-time\"},",
+									"                    \"latest_value\": {\"type\": \"number\"}",
+									"                },",
+									"                \"required\": [\"id\", \"slug\", \"name\", \"variable\", \"project_id\", \"project\", \"project_slug\", \"instrument_id\", \"instrument\", \"instrument_slug\", \"parameter_id\", \"parameter\", \"unit_id\", \"unit\", \"latest_time\", \"latest_value\"],",
+									"                \"additionalProperties\": false",
+									"            },",
+									"        },",
+									"    },",
+									"    \"required\": [\"id\", \"project_id\", \"name\", \"slug\", \"creator\", \"create_date\", \"updater\", \"update_date\", \"timeseries\"],",
+									"    \"additionalProperties\": false",
+									"}",
+									"",
+									"pm.globals.set('COLLECTIONGROUP_DETAILS_OBJ_SCHEMA', JSON.stringify(schema));",
+									"",
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// validate schema",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(schema)",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/instrumentation/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/collection_groups/30b32cb1-0936-42c4-95d1-63a7832a57db",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"projects",
+								"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+								"collection_groups",
+								"30b32cb1-0936-42c4-95d1-63a7832a57db"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteCollectionGroup",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "e80f6912-d14d-44a5-8056-e147039da2f7",
+								"exec": [
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/instrumentation/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/collection_groups/1519eaea-1799-4375-aa37-0e35aa654643",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrumentation",
+								"projects",
+								"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+								"collection_groups",
+								"1519eaea-1799-4375-aa37-0e35aa654643"
 							]
 						}
 					},

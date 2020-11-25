@@ -184,6 +184,18 @@ func main() {
 	private.DELETE("instrumentation/timeseries/:timeseries_id", handlers.DeleteTimeseries(db))
 
 	private.POST("instrumentation/timeseries/measurements", handlers.CreateOrUpdateTimeseriesMeasurements(db))
+	private.POST("instrumentation/projects/:project_id/timeseries_measurements", handlers.CreateOrUpdateTimeseriesMeasurements(db))
+
+	// Collection Groups
+	public.GET("instrumentation/projects/:project_id/collection_groups", handlers.ListCollectionGroups(db))
+	public.GET("instrumentation/projects/:project_id/collection_groups/:collection_group_id", handlers.GetCollectionGroupDetails(db))
+	private.POST("instrumentation/projects/:project_id/collection_groups", handlers.CreateCollectionGroup(db))
+	private.PUT("instrumentation/projects/:project_id/collection_groups/:collection_group_id", handlers.UpdateCollectionGroup(db))
+	private.DELETE("instrumentation/projects/:project_id/collection_groups/:collection_group_id", handlers.DeleteCollectionGroup(db))
+	// // Collection Group; Add Timeseries to collection_group
+	private.POST("instrumentation/projects/:project_id/collection_groups/:collection_group_id/timeseries/:timeseries_id", handlers.AddTimeseriesToCollectionGroup(db))
+	// // Collection Group; Remove Timeseries from collection_group
+	private.DELETE("instrumentation/projects/:project_id/collection_groups/:collection_group_id/timeseries/:timeseries_id", handlers.RemoveTimeseriesFromCollectionGroup(db))
 
 	// Misc
 	public.GET("instrumentation/domains", handlers.GetDomains(db))

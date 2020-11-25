@@ -46,6 +46,34 @@ func ListTimeseriesSlugs(db *sqlx.DB) ([]string, error) {
 	return ss, nil
 }
 
+// GetTimeseriesProjectMap returns a map of { timeseries_id: project_id, }
+func GetTimeseriesProjectMap(db *sqlx.DB, timeseriesIDS []uuid.UUID) (map[uuid.UUID]uuid.UUID, error) {
+	query, args, err := sqlx.In(
+		`SELECT timeseries_id, project_id
+		 FROM v_timeseries_project_map
+		 WHERE timeseries_id IN (?);`,
+		timeseriesIDS,
+	)
+	if err != nil {
+		return nil, err
+	}
+	query = db.Rebind(query)
+
+	// struct to temporarily hold SQL Query Result
+	var result []struct {
+		TimeseriesID uuid.UUID `db:"timeseries_id"`
+		ProjectID    uuid.UUID `db:"project_id"`
+	}
+	if err = db.Select(&result, query, args...); err != nil {
+		return nil, err
+	}
+	m := make(map[uuid.UUID]uuid.UUID)
+	for _, r := range result {
+		m[r.TimeseriesID] = r.ProjectID
+	}
+	return m, nil
+}
+
 // ListTimeseriesSlugsForInstrument lists used timeseries slugs for a given instrument
 func ListTimeseriesSlugsForInstrument(db *sqlx.DB, id *uuid.UUID) ([]string, error) {
 

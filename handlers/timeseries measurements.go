@@ -1,15 +1,40 @@
 package handlers
 
 import (
-	"github.com/USACE/instrumentation-api/models"
-	"github.com/USACE/instrumentation-api/timeseries"
+	"fmt"
 	"net/http"
 	"time"
+
+	"github.com/USACE/instrumentation-api/models"
+	"github.com/USACE/instrumentation-api/timeseries"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
 )
+
+// allTimeseriesBelongToProject is a helper function to determine if all timeseries IDs belong to a given project ID
+func allTimeseriesBelongToProject(db *sqlx.DB, mcc *models.TimeseriesMeasurementCollectionCollection, projectID *uuid.UUID) (bool, error) {
+	// timeseries IDs
+	dd := mcc.TimeseriesIDs()
+	m, err := models.GetTimeseriesProjectMap(db, dd)
+	if err != nil {
+		fmt.Println(err)
+		return false, err
+	}
+	for _, tID := range dd {
+		pID, ok := m[tID]
+		// timeseries does not exist; therefore does not belong to project
+		if !ok {
+			return false, nil
+		}
+		// timeseries' project_id in database does not match projectID
+		if pID != *projectID {
+			return false, nil
+		}
+	}
+	return true, nil
+}
 
 // ListTimeseriesMeasurements returns a timeseries with measurements
 func ListTimeseriesMeasurements(db *sqlx.DB) echo.HandlerFunc {
@@ -59,9 +84,23 @@ func CreateOrUpdateTimeseriesMeasurements(db *sqlx.DB) echo.HandlerFunc {
 		if err := c.Bind(&mcc); err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
+
+		// Check :project_id from route against each timeseries' project_id in the database
+		pID, err := uuid.Parse(c.Param("project_id"))
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, err)
+		}
+		isTrue, err := allTimeseriesBelongToProject(db, &mcc, &pID)
+		if err != nil {
+			return c.String(http.StatusBadRequest, err.Error())
+		}
+		if !isTrue {
+			return c.String(http.StatusBadRequest, "all timeseries posted do not belong to project")
+		}
+		// Post timeseries
 		if err := models.CreateOrUpdateTimeseriesMeasurements(db, mcc.Items); err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
-		return c.NoContent(http.StatusCreated)
+		return c.JSON(http.StatusCreated, make(map[string]interface{}))
 	}
 }
