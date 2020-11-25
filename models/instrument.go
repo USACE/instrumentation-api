@@ -299,7 +299,7 @@ func InstrumentsFactory(rows *sqlx.Rows) ([]Instrument, error) {
 
 // ListInstrumentsSQL is the base SQL to retrieve all instrumentsJSON
 var listInstrumentsSQL = `SELECT id, deleted, status_id, status, status_time, slug,
-	name, type_id, name AS type, geometry, station, station_offset, creator, create_date,
+	name, type_id, type, geometry, station, station_offset, creator, create_date,
 	updater, update_date, project_id, constants, groups, alert_configs, formula
 	FROM   v_instrument
 	`
