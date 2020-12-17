@@ -7,15 +7,17 @@ services:
   postgres:
     image: mdillon/postgis
     volumes:
-      - instrumentation_postgres_data:/var/lib/postgresql/data
+      - ./sql:/sql
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/z_init.sql
+      # - instrumentation_postgres_data:/var/lib/postgresql/data
     environment:
-        - POSTGRES_PASSWORD=postgres
+      - POSTGRES_PASSWORD=postgres
     ports:
-        - "5432:5432"
+      - "5432:5432"
   pgadmin:
     image: dpage/pgadmin4
     environment:
-        - PGADMIN_DEFAULT_EMAIL=postgres@postgres.com
-        - PGADMIN_DEFAULT_PASSWORD=postgres
+      - PGADMIN_DEFAULT_EMAIL=postgres@postgres.com
+      - PGADMIN_DEFAULT_PASSWORD=postgres
     ports:
-        - "8081:80"
+      - "8081:80"
