@@ -152,6 +152,6 @@ func DeleteTimeseries(db *sqlx.DB) echo.HandlerFunc {
 		if err := models.DeleteTimeseries(db, &id); err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
-		return c.NoContent(http.StatusOK)
+		return c.JSON(http.StatusOK, make(map[string]interface{}))
 	}
 }

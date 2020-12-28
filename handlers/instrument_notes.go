@@ -1,8 +1,9 @@
 package handlers
 
 import (
-	"github.com/USACE/instrumentation-api/models"
 	"net/http"
+
+	"github.com/USACE/instrumentation-api/models"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -122,6 +123,6 @@ func DeleteInstrumentNote(db *sqlx.DB) echo.HandlerFunc {
 		if err := models.DeleteInstrumentNote(db, &noteID); err != nil {
 			return c.JSON(http.StatusInternalServerError, err)
 		}
-		return c.NoContent(http.StatusOK)
+		return c.JSON(http.StatusOK, make(map[string]interface{}))
 	}
 }

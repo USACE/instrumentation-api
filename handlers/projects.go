@@ -1,9 +1,10 @@
 package handlers
 
 import (
+	"net/http"
+
 	"github.com/USACE/instrumentation-api/dbutils"
 	"github.com/USACE/instrumentation-api/models"
-	"net/http"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -184,7 +185,7 @@ func DeleteFlagProject(db *sqlx.DB) echo.HandlerFunc {
 		if err := models.DeleteFlagProject(db, id); err != nil {
 			return c.JSON(http.StatusInternalServerError, err)
 		}
-		return c.NoContent(http.StatusOK)
+		return c.JSON(http.StatusOK, make(map[string]interface{}))
 	}
 }
 
@@ -222,6 +223,6 @@ func DeleteProjectTimeseries(db *sqlx.DB) echo.HandlerFunc {
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err)
 		}
-		return c.NoContent(http.StatusOK)
+		return c.JSON(http.StatusOK, make(map[string]interface{}))
 	}
 }
