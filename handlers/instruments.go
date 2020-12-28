@@ -171,6 +171,6 @@ func DeleteFlagInstrument(db *sqlx.DB) echo.HandlerFunc {
 			return c.NoContent(http.StatusBadRequest)
 		}
 
-		return c.NoContent(http.StatusOK)
+		return c.JSON(http.StatusOK, make(map[string]interface{}))
 	}
 }

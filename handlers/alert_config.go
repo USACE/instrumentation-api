@@ -112,6 +112,6 @@ func DeleteInstrumentAlertConfig(db *sqlx.DB) echo.HandlerFunc {
 		if err := models.DeleteInstrumentAlertConfig(db, &alertID, &instrumentID); err != nil {
 			return c.JSON(http.StatusInternalServerError, err)
 		}
-		return c.NoContent(http.StatusOK)
+		return c.JSON(http.StatusOK, make(map[string]interface{}))
 	}
 }

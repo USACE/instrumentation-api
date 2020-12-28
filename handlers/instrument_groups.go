@@ -1,9 +1,10 @@
 package handlers
 
 import (
+	"net/http"
+
 	"github.com/USACE/instrumentation-api/dbutils"
 	"github.com/USACE/instrumentation-api/models"
-	"net/http"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -129,7 +130,7 @@ func DeleteFlagInstrumentGroup(db *sqlx.DB) echo.HandlerFunc {
 		if err := models.DeleteFlagInstrumentGroup(db, id); err != nil {
 			return c.JSON(http.StatusInternalServerError, err)
 		}
-		return c.NoContent(http.StatusOK)
+		return c.JSON(http.StatusOK, make(map[string]interface{}))
 	}
 }
 
@@ -168,7 +169,7 @@ func CreateInstrumentGroupInstruments(db *sqlx.DB) echo.HandlerFunc {
 				switch err.Code {
 				case "23505":
 					// Instrument is already a member of instrument_group
-					return c.NoContent(http.StatusOK)
+					return c.JSON(http.StatusOK, make(map[string]interface{}))
 				default:
 					return c.JSON(http.StatusInternalServerError, err)
 				}
@@ -198,6 +199,6 @@ func DeleteInstrumentGroupInstruments(db *sqlx.DB) echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 
-		return c.NoContent(http.StatusOK)
+		return c.JSON(http.StatusOK, make(map[string]interface{}))
 	}
 }
