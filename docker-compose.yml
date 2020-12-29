@@ -24,6 +24,29 @@ services:
       - INSTRUMENTATION_HEARTBEATKEY=password
     ports:
       - "80:80"
+  minio:
+    image: minio/minio
+    environment:
+      - MINIO_ACCESS_KEY=AKIAIOSFODNN7EXAMPLE
+      - MINIO_SECRET_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+    command: server /data
+    ports:
+      - "9000:9000"
+  # configure minio on startup (create buckets, etc)
+  # inspired by https://github.com/minio/minio/issues/4769
+  # and         https://gist.github.com/haxoza/22afe7cc4a9da7e8bdc09aad393a99cc    
+  minio_init:
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      echo 'sleeping for 10 seconds while minio starts...';
+      sleep 10;
+      /usr/bin/mc config host add minio http://minio:9000 AKIAIOSFODNN7EXAMPLE wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY;
+      /usr/bin/mc mb   minio/corpsmap-data-incoming   minio/corpsmap-data;
+      exit 0;
+      "
   pgadmin:
     image: dpage/pgadmin4
     environment:
