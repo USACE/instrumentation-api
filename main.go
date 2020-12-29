@@ -210,6 +210,6 @@ func main() {
 		log.Fatal(gateway.ListenAndServe("localhost:3030", e))
 	} else {
 		log.Print("starting server")
-		log.Fatal(http.ListenAndServe("localhost:3030", e))
+		log.Fatal(http.ListenAndServe(":80", e))
 	}
 }
