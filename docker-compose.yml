@@ -1,19 +1,29 @@
 version: "3"
-# Create a standin database for local development for testing
-volumes:
-  instrumentation_postgres_data: {}
 
 services:
   postgres:
     image: mdillon/postgis
     volumes:
-      - ./sql:/sql
-      - ./sql/init.sql:/docker-entrypoint-initdb.d/z_init.sql
-      # - instrumentation_postgres_data:/var/lib/postgresql/data
+      - ./database/sql:/sql
+      - ./database/sql/init.sql:/docker-entrypoint-initdb.d/z_init.sql
     environment:
       - POSTGRES_PASSWORD=postgres
     ports:
       - "5432:5432"
+  api:
+    build:
+      context: ./
+    environment:
+      - INSTRUMENTATION_LAMBDACONTEXT=false
+      - INSTRUMENTATION_SKIPJWT=true
+      - INSTRUMENTATION_DBUSER=instrumentation_user
+      - INSTRUMENTATION_DBPASS=password
+      - INSTRUMENTATION_DBNAME=postgres
+      - INSTRUMENTATION_DBHOST=postgres
+      - INSTRUMENTATION_DBSSLMODE=disable
+      - INSTRUMENTATION_HEARTBEATKEY=password
+    ports:
+      - "80:80"
   pgadmin:
     image: dpage/pgadmin4
     environment:
