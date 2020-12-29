@@ -8,9 +8,9 @@ import (
 	"github.com/USACE/instrumentation-api/dbutils"
 	"github.com/USACE/instrumentation-api/handlers"
 	"github.com/USACE/instrumentation-api/middleware"
+	"github.com/kelseyhightower/envconfig"
 
 	"github.com/apex/gateway"
-	"github.com/kelseyhightower/envconfig"
 	"github.com/labstack/echo/v4"
 
 	_ "github.com/lib/pq"

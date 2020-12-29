@@ -29,8 +29,16 @@ drop table if exists
     public.alert_email_subscription,
     public.heartbeat,
     public.collection_group_timeseries,
-    public.collection_group
+    public.collection_group,
+    public.config
 	CASCADE;
+
+-- config (application config variables)
+CREATE TABLE IF NOT EXISTS public.config (
+    static_host VARCHAR NOT NULL DEFAULT 'http://minio:9000',
+    static_bucket VARCHAR NOT NULL DEFAULT 'corpsmap-data',
+    static_prefix VARCHAR NOT NULL DEFAULT '/instrumentation'
+);
 
 -- profile (login user)
 CREATE TABLE IF NOT EXISTS public.profile (
@@ -49,6 +57,7 @@ CREATE TABLE IF NOT EXISTS public.email (
 -- project
 CREATE TABLE IF NOT EXISTS public.project (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+    image VARCHAR,
     office_id UUID,
     deleted boolean NOT NULL DEFAULT false,
     slug VARCHAR(240) UNIQUE NOT NULL,
@@ -269,6 +278,14 @@ CREATE TABLE IF NOT EXISTS public.collection_group_timeseries (
     timeseries_id UUID NOT NULL REFERENCES timeseries(id) ON DELETE CASCADE,
     CONSTRAINT collection_group_unique_timeseries UNIQUE(collection_group_id, timeseries_id)
 );
+
+-- ------
+-- Config
+-- ------
+
+-- Config for Local Development (minio replicating S3 Storage)
+INSERT INTO config (static_host, static_prefix, static_bucket) VALUES
+    ('http://localhost:9000', '/instrumentation', 'corpsmap-data');
 
 -- -------
 -- Domains
