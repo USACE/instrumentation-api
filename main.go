@@ -8,9 +8,9 @@ import (
 	"github.com/USACE/instrumentation-api/dbutils"
 	"github.com/USACE/instrumentation-api/handlers"
 	"github.com/USACE/instrumentation-api/middleware"
+	"github.com/apex/gateway"
 	"github.com/kelseyhightower/envconfig"
 
-	"github.com/apex/gateway"
 	"github.com/labstack/echo/v4"
 
 	_ "github.com/lib/pq"
@@ -60,20 +60,24 @@ func main() {
 		),
 	)
 
-	// All Routes
 	e := echo.New()
 	e.Use(middleware.CORS, middleware.GZIP)
+	versioned := e.Group("/instrumentation") // TODO: /instrumentation/v1/
 
-	// Public Routes
-	public := e.Group("/instrumentation")
-
-	// Private Routes
-	private := e.Group("/instrumentation")
+	// Public Media Routes (No Version)
+	publicMedia := versioned.Group("") // TODO: /instrumentation
+	publicMedia.GET("/projects/:project_id/images/*", handlers.GetMedia)
 
 	// Key Routes (Heartbeat Function)
-	keyed := e.Group("/instrumentation")
+	keyed := versioned.Group("")
 	keyed.Use(middleware.KeyAuth(cfg.HeartbeatKey))
+	keyed.POST("/heartbeat", handlers.DoHeartbeat(db))
 
+	// Public Routes
+	public := versioned.Group("")
+
+	// Private Routes (Authenticated, Authorized)
+	private := versioned.Group("")
 	if cfg.SkipJWT == true {
 		private.Use(middleware.MockIsLoggedIn)
 	} else {
@@ -81,7 +85,6 @@ func main() {
 	}
 
 	// Heartbeat
-	keyed.POST("/heartbeat", handlers.DoHeartbeat(db))
 	public.GET("/heartbeat/latest", handlers.GetLatestHeartbeat(db))
 	public.GET("/heartbeats", handlers.ListHeartbeats(db))
 
@@ -122,8 +125,6 @@ func main() {
 	private.POST("/projects", handlers.CreateProjectBulk(db))
 	private.PUT("/projects/:project_id", handlers.UpdateProject(db))
 	private.DELETE("/projects/:project_id", handlers.DeleteFlagProject(db))
-
-	public.GET("/projects/:project_id/images/*", handlers.GetMedia)
 
 	// Project Timeseries
 	private.POST("/projects/:project_id/timeseries/:timeseries_id", handlers.CreateProjectTimeseries(db))
