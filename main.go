@@ -123,6 +123,8 @@ func main() {
 	private.PUT("/projects/:project_id", handlers.UpdateProject(db))
 	private.DELETE("/projects/:project_id", handlers.DeleteFlagProject(db))
 
+	public.GET("/projects/:project_id/images/*", handlers.GetMedia)
+
 	// Project Timeseries
 	private.POST("/projects/:project_id/timeseries/:timeseries_id", handlers.CreateProjectTimeseries(db))
 	private.DELETE("/projects/:project_id/timeseries/:timeseries_id", handlers.DeleteProjectTimeseries(db))

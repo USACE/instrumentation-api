@@ -36,7 +36,6 @@ drop table if exists
 -- config (application config variables)
 CREATE TABLE IF NOT EXISTS public.config (
     static_host VARCHAR NOT NULL DEFAULT 'http://minio:9000',
-    static_bucket VARCHAR NOT NULL DEFAULT 'corpsmap-data',
     static_prefix VARCHAR NOT NULL DEFAULT '/instrumentation'
 );
 
@@ -284,8 +283,8 @@ CREATE TABLE IF NOT EXISTS public.collection_group_timeseries (
 -- ------
 
 -- Config for Local Development (minio replicating S3 Storage)
-INSERT INTO config (static_host, static_prefix, static_bucket) VALUES
-    ('http://localhost:9000', '/instrumentation', 'corpsmap-data');
+INSERT INTO config (static_host, static_prefix) VALUES
+    ('http://localhost', '/instrumentation');
 
 -- -------
 -- Domains
@@ -550,8 +549,8 @@ INSERT INTO profile (id, edipi, username, email) VALUES
     ('be549c16-3f65-4af4-afb6-e18c814c44dc',10,'DanQuinn','dan.quinn@fake.usace.army.mil');
 
 -- project
-INSERT INTO project (id, slug, name) VALUES
-    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'blue-water-dam-example-project', 'Blue Water Dam Example Project');
+INSERT INTO project (id, slug, name, image) VALUES
+    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'blue-water-dam-example-project', 'Blue Water Dam Example Project', 'site_photo.jpg');
 
 -- instrument_group
 INSERT INTO instrument_group (project_id, id, slug, name, description) VALUES
