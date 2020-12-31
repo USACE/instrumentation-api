@@ -60,7 +60,11 @@ CREATE OR REPLACE VIEW v_instrument AS (
 
 -- v_project
 CREATE OR REPLACE VIEW v_project AS (
-        SELECT p.id,
+    SELECT  p.id,
+            CASE WHEN p.image IS NOT NULL
+                THEN cfg.static_host || cfg.static_prefix || '/projects/' || p.id || '/images/' || p.image
+                ELSE NULL
+            END AS image,
             p.office_id,
             p.deleted,
             p.slug,
@@ -94,6 +98,7 @@ CREATE OR REPLACE VIEW v_project AS (
                 FROM project_timeseries
                 GROUP BY project_id
             ) t on t.project_id = p.id
+			CROSS JOIN config cfg
 );
 
 -- v_timeseries

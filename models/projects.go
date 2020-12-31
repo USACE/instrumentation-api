@@ -9,10 +9,15 @@ import (
 	"github.com/lib/pq"
 )
 
+const listProjectsSQL = `SELECT id, image, office_id, deleted, slug, federal_id, name, creator, create_date,
+     updater, update_date, instrument_count, instrument_group_count, timeseries
+	 FROM v_project`
+
 // Project is a project data structure
 type Project struct {
 	ID                   uuid.UUID   `json:"id"`
 	OfficeID             *uuid.UUID  `json:"office_id" db:"office_id"`
+	Image                *string     `json:"image" db:"image"`
 	Deleted              bool        `json:"-"`
 	FederalID            *string     `json:"federal_id" db:"federal_id"`
 	Slug                 string      `json:"slug"`
@@ -55,7 +60,7 @@ func ProjectFactory(rows *sqlx.Rows) ([]Project, error) {
 	var p Project
 	for rows.Next() {
 		err := rows.Scan(
-			&p.ID, &p.OfficeID, &p.Deleted, &p.Slug, &p.FederalID, &p.Name, &p.Creator, &p.CreateDate,
+			&p.ID, &p.Image, &p.OfficeID, &p.Deleted, &p.Slug, &p.FederalID, &p.Name, &p.Creator, &p.CreateDate,
 			&p.Updater, &p.UpdateDate, &p.InstrumentCount, &p.InstrumentGroupCount, pq.Array(&p.Timeseries),
 		)
 		if err != nil {
@@ -201,11 +206,6 @@ func DeleteFlagProject(db *sqlx.DB, id uuid.UUID) error {
 	}
 	return nil
 }
-
-// ListProjectsSQL is the standard SQL for listing all projects
-var listProjectsSQL = `SELECT id, office_id, deleted, slug, federal_id, name, creator, create_date,
-                              updater, update_date, instrument_count, instrument_group_count, timeseries
-                       FROM v_project`
 
 // projectInstrumentNamesMap returns a map of key: project_id , value: map[string]bool ;  string is name of instrument Upper
 func projectInstrumentNamesMap(db *sqlx.DB, projectIDs []uuid.UUID) (map[uuid.UUID]map[string]bool, error) {
