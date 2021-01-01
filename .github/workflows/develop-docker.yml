@@ -21,20 +21,20 @@ jobs:
       
       - name: Run Tests
         run: ./test_and_report.sh
-      
-      - name: Upload Test Results
-        if: ${{ always() }}
-        run: |
-          aws s3 rm s3://corpsmap-appz/api_test_results/instrumentation.html
-          aws s3 cp ./tests/instrumentation.html s3://corpsmap-appz/api_test_results/instrumentation.html
-
+        
       - name: Configure AWS credentials
-        if: ${{ success() }}
+        if: ${{ always() }}
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.RSGISCI_AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.RSGISCI_AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.RSGISCI_AWS_DEFAULT_REGION }}
+
+      - name: Upload Test Results
+        if: ${{ always() }}
+        run: |
+          aws s3 rm s3://corpsmap-appz/api_test_results/instrumentation.html
+          aws s3 cp ./tests/instrumentation.html s3://corpsmap-appz/api_test_results/instrumentation.html
     
       - name: Login to Amazon ECR
         if: ${{ success() }}
