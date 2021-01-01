@@ -20,9 +20,16 @@ jobs:
         run: docker-compose up -d
       
       - name: Run Tests
-        run: ./test.sh
+        run: ./test_and_report.sh
+      
+      - name: Upload Test Results
+        if: ${{ always() }}
+        run: |
+          aws s3 rm s3://corpsmap-appz/api_test_results/instrumentation.html
+          aws s3 cp ./tests/instrumentation.html s3://corpsmap-appz/api_test_results/instrumentation.html
 
       - name: Configure AWS credentials
+        if: ${{ success() }}
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.RSGISCI_AWS_ACCESS_KEY_ID }}
@@ -30,10 +37,12 @@ jobs:
           aws-region: ${{ secrets.RSGISCI_AWS_DEFAULT_REGION }}
     
       - name: Login to Amazon ECR
+        if: ${{ success() }}
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Build, tag, and push image to Amazon ECR (instrumentation-api)
+        if: ${{ success() }}
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: instrumentation-api
@@ -44,5 +53,5 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
       - name: Logout of Amazon ECR
-        if: always()
+        if: ${{ always() }}
         run: docker logout ${{ steps.login-ecr.outputs.registry }}
