@@ -29,8 +29,15 @@ drop table if exists
     public.alert_email_subscription,
     public.heartbeat,
     public.collection_group_timeseries,
-    public.collection_group
+    public.collection_group,
+    public.config
 	CASCADE;
+
+-- config (application config variables)
+CREATE TABLE IF NOT EXISTS public.config (
+    static_host VARCHAR NOT NULL DEFAULT 'http://minio:9000',
+    static_prefix VARCHAR NOT NULL DEFAULT '/instrumentation'
+);
 
 -- profile (login user)
 CREATE TABLE IF NOT EXISTS public.profile (
@@ -49,6 +56,7 @@ CREATE TABLE IF NOT EXISTS public.email (
 -- project
 CREATE TABLE IF NOT EXISTS public.project (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+    image VARCHAR,
     office_id UUID,
     deleted boolean NOT NULL DEFAULT false,
     slug VARCHAR(240) UNIQUE NOT NULL,
@@ -269,6 +277,14 @@ CREATE TABLE IF NOT EXISTS public.collection_group_timeseries (
     timeseries_id UUID NOT NULL REFERENCES timeseries(id) ON DELETE CASCADE,
     CONSTRAINT collection_group_unique_timeseries UNIQUE(collection_group_id, timeseries_id)
 );
+
+-- ------
+-- Config
+-- ------
+
+-- Config for Local Development (minio replicating S3 Storage)
+INSERT INTO config (static_host, static_prefix) VALUES
+    ('http://localhost', '/instrumentation');
 
 -- -------
 -- Domains
@@ -533,8 +549,8 @@ INSERT INTO profile (id, edipi, username, email) VALUES
     ('be549c16-3f65-4af4-afb6-e18c814c44dc',10,'DanQuinn','dan.quinn@fake.usace.army.mil');
 
 -- project
-INSERT INTO project (id, slug, name) VALUES
-    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'blue-water-dam-example-project', 'Blue Water Dam Example Project');
+INSERT INTO project (id, slug, name, image) VALUES
+    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'blue-water-dam-example-project', 'Blue Water Dam Example Project', 'site_photo.jpg');
 
 -- instrument_group
 INSERT INTO instrument_group (project_id, id, slug, name, description) VALUES

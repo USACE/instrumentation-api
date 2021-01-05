@@ -9,5 +9,6 @@ begin;
 \i '/sql/32-data_lrc.sql'
 \i '/sql/33-data_nae.sql'
 \i '/sql/34-data_poa.sql'
+\i '/sql/35-data_lrc_images.sql'
 
 commit;
