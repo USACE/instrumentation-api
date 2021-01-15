@@ -65,11 +65,11 @@ func ListTimeseriesMeasurements(db *sqlx.DB, timeseriesID *uuid.UUID, tw *ts.Tim
 
 // CreateOrUpdateTimeseriesMeasurements creates many timeseries from an array of timeseries
 // If a timeseries measurement already exists for a given timeseries_id and time, the value is updated
-func CreateOrUpdateTimeseriesMeasurements(db *sqlx.DB, mc []ts.MeasurementCollection) error {
+func CreateOrUpdateTimeseriesMeasurements(db *sqlx.DB, mc []ts.MeasurementCollection) ([]ts.MeasurementCollection, error) {
 
 	txn, err := db.Begin()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	stmt, err := txn.Prepare(
@@ -78,25 +78,25 @@ func CreateOrUpdateTimeseriesMeasurements(db *sqlx.DB, mc []ts.MeasurementCollec
 		`,
 	)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// Iterate All Timeseries Measurements
 	for _, c := range mc {
 		for _, m := range c.Items {
 			if _, err := stmt.Exec(c.TimeseriesID, m.Time, m.Value); err != nil {
-				return err
+				return nil, err
 			}
 		}
 	}
 	if err := stmt.Close(); err != nil {
-		return err
+		return nil, err
 	}
 	if err := txn.Commit(); err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return mc, nil
 }
 
 func listTimeseriesMeasurementsSQL() string {

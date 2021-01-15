@@ -98,9 +98,10 @@ func CreateOrUpdateTimeseriesMeasurements(db *sqlx.DB) echo.HandlerFunc {
 			return c.String(http.StatusBadRequest, "all timeseries posted do not belong to project")
 		}
 		// Post timeseries
-		if err := models.CreateOrUpdateTimeseriesMeasurements(db, mcc.Items); err != nil {
+		stored, err := models.CreateOrUpdateTimeseriesMeasurements(db, mcc.Items)
+		if err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
-		return c.JSON(http.StatusCreated, make(map[string]interface{}))
+		return c.JSON(http.StatusCreated, stored)
 	}
 }
