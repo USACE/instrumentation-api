@@ -19,3 +19,5 @@ vendor
 *.out
 
 __debug*
+
+**/.DS_Store
