@@ -9,6 +9,7 @@ import (
 	"github.com/USACE/instrumentation-api/handlers"
 	"github.com/USACE/instrumentation-api/middleware"
 	"github.com/apex/gateway"
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/kelseyhightower/envconfig"
 
 	"github.com/labstack/echo/v4"
@@ -18,14 +19,32 @@ import (
 
 // Config stores configuration information stored in environment variables
 type Config struct {
-	SkipJWT       bool
-	LambdaContext bool
-	DBUser        string
-	DBPass        string
-	DBName        string
-	DBHost        string
-	DBSSLMode     string
-	HeartbeatKey  string
+	SkipJWT             bool
+	LambdaContext       bool
+	DBUser              string
+	DBPass              string
+	DBName              string
+	DBHost              string
+	DBSSLMode           string
+	HeartbeatKey        string
+	AWSS3Endpoint       string `envconfig:"INSTRUMENTATION_AWS_S3_ENDPOINT"`
+	AWSS3Region         string `envconfig:"INSTRUMENTATION_AWS_S3_REGION"`
+	AWSS3DisableSSL     bool   `envconfig:"INSTRUMENTATION_AWS_S3_DISABLE_SSL"`
+	AWSS3ForcePathStyle bool   `envconfig:"INSTRUMENTATION_AWS_S3_FORCE_PATH_STYLE"`
+	AWSS3Bucket         string `envconfig:"INSTRUMENTATION_AWS_S3_BUCKET"`
+}
+
+func awsConfig(cfg *Config) *aws.Config {
+	awsConfig := aws.NewConfig().WithRegion(cfg.AWSS3Region)
+
+	// Used for "minio" during development
+	awsConfig.WithDisableSSL(cfg.AWSS3DisableSSL)
+	awsConfig.WithS3ForcePathStyle(cfg.AWSS3ForcePathStyle)
+	if cfg.AWSS3Endpoint != "" {
+		awsConfig.WithEndpoint(cfg.AWSS3Endpoint)
+	}
+
+	return awsConfig
 }
 
 func main() {
@@ -48,10 +67,14 @@ func main() {
 	//    https://github.com/awslabs/aws-lambda-go-api-proxy
 	//
 
+	// Config holding all environment variables
 	var cfg Config
 	if err := envconfig.Process("instrumentation", &cfg); err != nil {
 		log.Fatal(err.Error())
 	}
+
+	// AWS Config used to get S3 Session/Client
+	awsCfg := awsConfig(&cfg)
 
 	db := dbutils.Connection(
 		fmt.Sprintf(
@@ -66,7 +89,7 @@ func main() {
 
 	// Public Media Routes (No Version)
 	publicMedia := versioned.Group("") // TODO: /instrumentation
-	publicMedia.GET("/projects/:project_id/images/*", handlers.GetMedia)
+	publicMedia.GET("/projects/:project_slug/images/*", handlers.GetMedia(awsCfg, &cfg.AWSS3Bucket))
 
 	// Key Routes (Heartbeat Function)
 	keyed := versioned.Group("")

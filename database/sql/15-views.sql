@@ -62,7 +62,7 @@ CREATE OR REPLACE VIEW v_instrument AS (
 CREATE OR REPLACE VIEW v_project AS (
     SELECT  p.id,
             CASE WHEN p.image IS NOT NULL
-                THEN cfg.static_host || cfg.static_prefix || '/projects/' || p.id || '/images/' || p.image
+                THEN cfg.static_host || cfg.static_prefix || '/projects/' || p.slug || '/images/' || p.image
                 ELSE NULL
             END AS image,
             p.office_id,

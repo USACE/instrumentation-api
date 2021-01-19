@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/labstack/echo/v4"
@@ -31,43 +30,34 @@ func cleanFilepath(rawPath string) (string, error) {
 }
 
 // GetMedia serves media, files, etc for a given project
-func GetMedia(c echo.Context) error {
+func GetMedia(s3Config *aws.Config, bucket *string) echo.HandlerFunc {
+	return func(c echo.Context) error {
 
-	// Get Wildcard Path
-	keyPath, err := cleanFilepath(c.Request().RequestURI)
-	if err != nil {
-		return c.String(http.StatusBadRequest, err.Error())
+		// Get Wildcard Path
+		keyPath, err := cleanFilepath(c.Request().RequestURI)
+		if err != nil {
+			return c.String(http.StatusBadRequest, err.Error())
+		}
+		key := aws.String(keyPath)
+
+		newSession := session.New(s3Config)
+		s3Client := s3.New(newSession)
+
+		output, err := s3Client.GetObject(&s3.GetObjectInput{Bucket: bucket, Key: key})
+		if err != nil {
+			return c.String(500, err.Error())
+		}
+
+		// S3 Output Body to Buffer
+		buff, buffErr := ioutil.ReadAll(output.Body)
+		if buffErr != nil {
+			return c.String(500, err.Error())
+		}
+
+		// Buffered Reader
+		reader := bytes.NewReader(buff)
+
+		c.Response().Header().Set(echo.HeaderContentDisposition, "attachment")
+		return c.Stream(http.StatusOK, "image/jpg", reader)
 	}
-	bucket := aws.String("corpsmap-data")
-	key := aws.String(keyPath)
-
-	s3Config := &aws.Config{
-		Credentials: credentials.NewStaticCredentials(
-			"AKIAIOSFODNN7EXAMPLE", "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY", "",
-		),
-		Endpoint:         aws.String("http://minio:9000"),
-		Region:           aws.String("us-east-1"),
-		DisableSSL:       aws.Bool(true),
-		S3ForcePathStyle: aws.Bool(true),
-	}
-	newSession := session.New(s3Config)
-
-	s3Client := s3.New(newSession)
-
-	output, err := s3Client.GetObject(&s3.GetObjectInput{Bucket: bucket, Key: key})
-	if err != nil {
-		return c.String(500, err.Error())
-	}
-
-	// S3 Output Body to Buffer
-	buff, buffErr := ioutil.ReadAll(output.Body)
-	if buffErr != nil {
-		return c.String(500, err.Error())
-	}
-
-	// Buffered Reader
-	reader := bytes.NewReader(buff)
-
-	c.Response().Header().Set(echo.HeaderContentDisposition, "attachment")
-	return c.Stream(http.StatusOK, "image/jpg", reader)
 }
