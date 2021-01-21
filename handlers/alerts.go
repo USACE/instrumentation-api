@@ -29,7 +29,7 @@ func ListAlertsForInstrument(db *sqlx.DB) echo.HandlerFunc {
 // ListMyAlerts returns all alerts a profile is subscribed to
 func ListMyAlerts(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		p, err := myProfileFromContext(c, db)
+		p, err := profileFromContext(c, db)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
@@ -45,7 +45,7 @@ func ListMyAlerts(db *sqlx.DB) echo.HandlerFunc {
 // DoAlertRead marks an alert as read for a profile
 func DoAlertRead(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		p, err := myProfileFromContext(c, db)
+		p, err := profileFromContext(c, db)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
@@ -79,7 +79,7 @@ func DoAlertRead(db *sqlx.DB) echo.HandlerFunc {
 // DoAlertUnread marks an alert as unread for a profile
 func DoAlertUnread(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		p, err := myProfileFromContext(c, db)
+		p, err := profileFromContext(c, db)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}

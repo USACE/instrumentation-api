@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/USACE/instrumentation-api/dbutils"
 
@@ -71,12 +72,12 @@ func CreateCollectionGroup(db *sqlx.DB) echo.HandlerFunc {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
 		cg.Slug = slug
-		// Actor Information (creator, create_date, updater, update_date)
-		a, err := models.NewAction(c)
+		// Profile of user creating collection group
+		p, err := profileFromContext(c, db)
 		if err != nil {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
-		cg.Creator, cg.CreateDate, cg.Updater, cg.UpdateDate = a.Actor, a.Time, a.Actor, a.Time
+		cg.Creator, cg.CreateDate = p.ID, time.Now()
 		// Create Collection Group
 		cgNew, err := models.CreateCollectionGroup(db, &cg)
 		if err != nil {
@@ -113,11 +114,12 @@ func UpdateCollectionGroup(db *sqlx.DB) echo.HandlerFunc {
 			)
 		}
 		// Actor Information (creator, create_date, updater, update_date)
-		a, err := models.NewAction(c)
+		p, err := profileFromContext(c, db)
 		if err != nil {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
-		cg.Updater, cg.UpdateDate = a.Actor, a.Time
+		t := time.Now()
+		cg.Updater, cg.UpdateDate = &p.ID, &t
 		// Update Collection Group
 		cgUpdated, err := models.UpdateCollectionGroup(db, &cg)
 		if err != nil {

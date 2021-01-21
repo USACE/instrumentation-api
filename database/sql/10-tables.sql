@@ -21,6 +21,7 @@ drop table if exists
     public.project,
     public.status,
     public.profile,
+    public.profile_token,
     public.email,
     public.alert,
     public.alert_read,
@@ -39,12 +40,21 @@ CREATE TABLE IF NOT EXISTS public.config (
     static_prefix VARCHAR NOT NULL DEFAULT '/instrumentation'
 );
 
--- profile (login user)
+-- profile
 CREATE TABLE IF NOT EXISTS public.profile (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     edipi BIGINT UNIQUE NOT NULL,
     username VARCHAR(240) UNIQUE NOT NULL,
     email VARCHAR(240) UNIQUE NOT NULL
+);
+
+-- profile_token
+CREATE TABLE IF NOT EXISTS public.profile_token (
+    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+    token_id VARCHAR NOT NULL,
+    profile_id UUID NOT NULL REFERENCES profile(id),
+    issued TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    hash VARCHAR(240) NOT NULL
 );
 
 -- email (user that will never login but still needs alerts; i.e. just an email)
@@ -62,10 +72,10 @@ CREATE TABLE IF NOT EXISTS public.project (
     slug VARCHAR(240) UNIQUE NOT NULL,
     federal_id VARCHAR(240),
     name VARCHAR(240) UNIQUE NOT NULL,
-    creator BIGINT NOT NULL DEFAULT 0,
+    creator UUID NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
     create_date TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updater BIGINT NOT NULL DEFAULT 0,
-    update_date TIMESTAMPTZ NOT NULL DEFAULT now()
+    updater UUID,
+    update_date TIMESTAMPTZ
 );
 
 -- heartbeat
@@ -120,10 +130,10 @@ CREATE TABLE IF NOT EXISTS public.instrument_group (
     slug VARCHAR(240) UNIQUE NOT NULL,
     name VARCHAR(120) NOT NULL,
     description VARCHAR(360),
-    creator BIGINT NOT NULL DEFAULT 0,
+    creator UUID NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
     create_date TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updater BIGINT NOT NULL DEFAULT 0,
-    update_date TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updater UUID,
+    update_date TIMESTAMPTZ,
     project_id UUID REFERENCES project (id),
     CONSTRAINT project_unique_instrument_group_name UNIQUE(name,project_id)
 	);
@@ -138,10 +148,10 @@ CREATE TABLE IF NOT EXISTS public.instrument (
     geometry geometry,
     station int,
     station_offset int,
-    creator BIGINT NOT NULL DEFAULT 0,
+    creator UUID NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
     create_date TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updater BIGINT NOT NULL DEFAULT 0,
-    update_date TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updater UUID,
+    update_date TIMESTAMPTZ,
     type_id UUID NOT NULL REFERENCES instrument_type (id),
     project_id UUID REFERENCES project (id),
     CONSTRAINT project_unique_instrument_name UNIQUE(name,project_id)
@@ -155,10 +165,10 @@ CREATE TABLE IF NOT EXISTS public.alert_config (
     body TEXT,
     formula TEXT,
     schedule TEXT,
-    creator BIGINT NOT NULL DEFAULT 0,
+    creator UUID NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
     create_date TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updater BIGINT NOT NULL DEFAULT 0,
-    update_date TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updater UUID,
+    update_date TIMESTAMPTZ,
     CONSTRAINT instrument_unique_alert_config_name UNIQUE(name,instrument_id)
 );
 
@@ -202,10 +212,10 @@ CREATE TABLE IF NOT EXISTS public.instrument_note (
     title VARCHAR(240) NOT NULL,
     body VARCHAR(65535) NOT NULL,
     time TIMESTAMPTZ NOT NULL DEFAULT now(),
-    creator BIGINT NOT NULL DEFAULT 0,
+    creator UUID NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
     create_date TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updater BIGINT NOT NULL DEFAULT 0,
-    update_date TIMESTAMPTZ NOT NULL DEFAULT now()
+    updater UUID,
+    update_date TIMESTAMPTZ
 );
 
 -- instrument_group_instruments
@@ -264,10 +274,10 @@ CREATE TABLE IF NOT EXISTS public.collection_group (
     project_id UUID NOT NULL REFERENCES project(id) ON DELETE CASCADE,
     name VARCHAR NOT NULL,
     slug VARCHAR NOT NULL,
-    creator BIGINT NOT NULL DEFAULT 0,
+    creator UUID NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
     create_date TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updater BIGINT NOT NULL DEFAULT 0,
-    update_date TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updater UUID,
+    update_date TIMESTAMPTZ,
     CONSTRAINT project_unique_collection_group_name UNIQUE(project_id, name),
     CONSTRAINT project_unique_collection_group_slug UNIQUE(project_id, slug)
 );
@@ -536,17 +546,18 @@ INSERT INTO parameter (id, name) VALUES
 -- basic seed data to demo the app and run API tests
 -- -------------------------------------------------
 -- Profile (Faked with: https://homepage.net/name_generator/)
+-- NOTE: EDIPI 1 should not be used; test user with EDIPI = 1 created by integration tests
 INSERT INTO profile (id, edipi, username, email) VALUES
-    ('57329df6-9f7a-4dad-9383-4633b452efab',1,'AnthonyLambert','anthony.lambert@fake.usace.army.mil'),
-    ('f320df83-e2ea-4fe9-969a-4e0239b8da51',2,'MollyRutherford','molly.rutherford@fake.usace.army.mil'),
-    ('89aa1e13-041a-4d15-9e45-f76eba3b0551',3,'DominicGlover','dominic.glover@fake.usace.army.mil'),
-    ('405ab7e1-20fc-4d26-a074-eccad88bf0a9',4,'JoeQuinn','joe.quinn@fake.usace.army.mil'),
-    ('81c77210-6244-46fe-bdf6-35da4f00934b',5,'TrevorDavidson','trevor.davidson@fake.usace.army.mil'),
-    ('f056201a-ffec-4f5b-aec5-14b34bb5e3d8',6,'ClaireButler','claire.butler@fake.usace.army.mil'),
-    ('9effda27-49f7-4745-8e55-fa819f550b09',7,'SophieBower','sophie.bower@fake.usace.army.mil'),
-    ('37407aba-904a-42fa-af73-6ab748ee1f98',8,'NeilMcLean','neil.mclean@fake.usace.army.mil'),
-    ('c0fd72ae-cccc-45c9-ba1d-4353170c352d',9,'JakeBurgess','jake.burgess@fake.usace.army.mil'),
-    ('be549c16-3f65-4af4-afb6-e18c814c44dc',10,'DanQuinn','dan.quinn@fake.usace.army.mil');
+    ('57329df6-9f7a-4dad-9383-4633b452efab',2,'AnthonyLambert','anthony.lambert@fake.usace.army.mil'),
+    ('f320df83-e2ea-4fe9-969a-4e0239b8da51',3,'MollyRutherford','molly.rutherford@fake.usace.army.mil'),
+    ('89aa1e13-041a-4d15-9e45-f76eba3b0551',4,'DominicGlover','dominic.glover@fake.usace.army.mil'),
+    ('405ab7e1-20fc-4d26-a074-eccad88bf0a9',5,'JoeQuinn','joe.quinn@fake.usace.army.mil'),
+    ('81c77210-6244-46fe-bdf6-35da4f00934b',6,'TrevorDavidson','trevor.davidson@fake.usace.army.mil'),
+    ('f056201a-ffec-4f5b-aec5-14b34bb5e3d8',7,'ClaireButler','claire.butler@fake.usace.army.mil'),
+    ('9effda27-49f7-4745-8e55-fa819f550b09',8,'SophieBower','sophie.bower@fake.usace.army.mil'),
+    ('37407aba-904a-42fa-af73-6ab748ee1f98',9,'NeilMcLean','neil.mclean@fake.usace.army.mil'),
+    ('c0fd72ae-cccc-45c9-ba1d-4353170c352d',10,'JakeBurgess','jake.burgess@fake.usace.army.mil'),
+    ('be549c16-3f65-4af4-afb6-e18c814c44dc',11,'DanQuinn','dan.quinn@fake.usace.army.mil');
 
 -- project
 INSERT INTO project (id, slug, name, image) VALUES

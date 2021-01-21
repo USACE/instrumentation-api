@@ -5,6 +5,7 @@ import (
 	"log"
 
 	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
 
@@ -31,39 +32,69 @@ func parsePublicKey(key string) *rsa.PublicKey {
 	return publicKey
 }
 
-// JWTConfig is JWT authentication configuration for this app
-var jwtConfig = middleware.JWTConfig{
-	// Skipper defines a function to skip middleware.
-	Skipper: middleware.DefaultSkipper,
-	// Signing key to validate token.
-	// Required.
-	SigningKey: parsePublicKey(jwtVerifyKey),
+// JWT is Fully Configured JWT Middleware to Support CWBI-Auth
+func JWT(isDisabled bool, skipIfKey bool) echo.MiddlewareFunc {
+	return middleware.JWTWithConfig(middleware.JWTConfig{
+		// `skipIfKey` behavior allows skipping of the middleware
+		// if ?key= is in Query Params. This is useful for routes
+		// where JWT Auth or simple Key Auth is allowed.
+		Skipper: func(c echo.Context) bool {
+			if isDisabled {
+				return true
+			}
+			if skipIfKey && c.QueryParam("key") != "" {
+				return true
+			}
+			return false
+		},
+		// Signing key to validate token.
+		// Required.
+		SigningKey: parsePublicKey(jwtVerifyKey),
 
-	// Signing method, used to check token signing method.
-	// Optional. Default value HS256.
-	SigningMethod: "RS512",
+		// Signing method, used to check token signing method.
+		// Optional. Default value HS256.
+		SigningMethod: "RS512",
 
-	// Context key to store user information from the token into context.
-	// Optional. Default value "user".
-	// ContextKey:
+		// Context key to store user information from the token into context.
+		// Optional. Default value "user".
+		// ContextKey:
 
-	// Claims are extendable claims data defining token content.
-	// Optional. Default value jwt.MapClaims
-	// Claims: jwt.MapClaims,
+		// Claims are extendable claims data defining token content.
+		// Optional. Default value jwt.MapClaims
+		// Claims: jwt.MapClaims,
 
-	// TokenLookup is a string in the form of "<source>:<name>" that is used
-	// to extract token from the request.
-	// Optional. Default value "header:Authorization".
-	// Possible values:
-	// - "header:<name>"
-	// - "query:<name>"
-	// - "cookie:<name>"
-	// TokenLookup:
+		// TokenLookup is a string in the form of "<source>:<name>" that is used
+		// to extract token from the request.
+		// Optional. Default value "header:Authorization".
+		// Possible values:
+		// - "header:<name>"
+		// - "query:<name>"
+		// - "cookie:<name>"
+		// TokenLookup:
 
-	// AuthScheme to be used in the Authorization header.
-	// Optional. Default value "Bearer".
-	// AuthScheme: "Bearer"
+		// AuthScheme to be used in the Authorization header.
+		// Optional. Default value "Bearer".
+		// AuthScheme: "Bearer"
+	})
 }
 
-// JWT is Fully Configured JWT Middleware to Support CWBI-Auth
-var JWT = middleware.JWTWithConfig(jwtConfig)
+// JWTMock is JWT Middleware
+func JWTMock(isDisabled bool, skipIfKey bool) echo.MiddlewareFunc {
+	return middleware.JWTWithConfig(
+		middleware.JWTConfig{
+			SigningKey: []byte("mock"),
+			// `skipIfKey` behavior allows skipping of the middleware
+			// if ?key= is in Query Params. This is useful for routes
+			// where JWT Auth or simple Key Auth is allowed.
+			Skipper: func(c echo.Context) bool {
+				if isDisabled {
+					return true
+				}
+				if skipIfKey && c.QueryParam("key") != "" {
+					return true
+				}
+				return false
+			},
+		},
+	)
+}
