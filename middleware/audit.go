@@ -33,16 +33,3 @@ func IsLoggedIn(next echo.HandlerFunc) echo.HandlerFunc {
 		return next(c)
 	}
 }
-
-// MockIsLoggedIn sets appropriate actor fields based on the time of the request and mocked user information
-// Necessary for running integration tests unauthenticated
-func MockIsLoggedIn(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		c.Set("action", c.Request().Method)
-		c.Set("action_time", time.Now())
-		c.Set("actor", 0)
-		c.Set("actor_roles", "TEST")
-
-		return next(c)
-	}
-}

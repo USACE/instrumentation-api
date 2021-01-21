@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -19,7 +18,6 @@ func allTimeseriesBelongToProject(db *sqlx.DB, mcc *models.TimeseriesMeasurement
 	dd := mcc.TimeseriesIDs()
 	m, err := models.GetTimeseriesProjectMap(db, dd)
 	if err != nil {
-		fmt.Println(err)
 		return false, err
 	}
 	for _, tID := range dd {

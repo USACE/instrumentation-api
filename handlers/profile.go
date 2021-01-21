@@ -5,26 +5,50 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/USACE/instrumentation-api/models"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
-
-	"github.com/USACE/instrumentation-api/models"
 )
 
-// myProfileFromContext isolates repeated code required to bind context
-// into an action and use the action to fetch profile from database
-func myProfileFromContext(c echo.Context, db *sqlx.DB) (*models.Profile, error) {
-	a, err := models.NewAction(c)
-	if err != nil {
-		return nil, err
-	}
-	return models.GetMyProfile(db, a)
+func edipiFromContext(c echo.Context) int {
+	return c.Get("actor").(int)
 }
 
-// GetMyProfile returns profile for credentials or returns 404
+// profileFromContext is a helper function that uses the current context to return
+// the corresponding profile
+func profileFromContext(c echo.Context, db *sqlx.DB) (*models.Profile, error) {
+	if edipi, ok := c.Get("actor").(int); ok {
+		p, err := models.GetProfileFromEDIPI(db, edipi)
+		if err != nil {
+			return nil, err
+		}
+		return p, nil
+	}
+	return nil, nil
+}
+
+// CreateProfile creates a user profile
+func CreateProfile(db *sqlx.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		var n models.ProfileInfo
+		if err := c.Bind(&n); err != nil {
+			return c.String(http.StatusBadRequest, err.Error())
+		}
+		// Set EDIPI
+		n.EDIPI = edipiFromContext(c)
+
+		p, err := models.CreateProfile(db, &n)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, err.Error())
+		}
+		return c.JSON(http.StatusCreated, p)
+	}
+}
+
+// GetMyProfile returns profile for current authenticated user or 404
 func GetMyProfile(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		p, err := myProfileFromContext(c, db)
+		p, err := profileFromContext(c, db)
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
 				return c.NoContent(http.StatusNotFound)
@@ -35,43 +59,41 @@ func GetMyProfile(db *sqlx.DB) echo.HandlerFunc {
 	}
 }
 
-// CreateProfile creates a new profile
-func CreateProfile(db *sqlx.DB) echo.HandlerFunc {
+// CreateToken returns a list of all products
+func CreateToken(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		var r models.CreateProfileRequest
-		if err := c.Bind(&r); err != nil {
-			return c.JSON(http.StatusBadRequest, err)
-		}
-		a, err := models.NewAction(c)
+		p, err := profileFromContext(c, db)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
-		}
-		r.Action = *a
-		p, err := models.CreateProfile(db, &r)
-		if err != nil {
-			return c.NoContent(http.StatusBadRequest)
-		}
-		return c.JSON(http.StatusCreated, &p)
-	}
-}
-
-// ListEmailAutocomplete lists results of email autocomplete
-func ListEmailAutocomplete(db *sqlx.DB) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		// Get Search String
-		searchText := c.QueryParam("q")
-		if searchText == "" {
-			return c.JSON(
-				http.StatusOK,
-				make([]models.EmailAutocompleteResult, 0),
+			return c.String(
+				http.StatusBadRequest,
+				"could not locate user profile with information provided",
 			)
 		}
-		// Get Desired Number of Results; Hardcode 5 for now;
-		limit := 5
-		rr, err := models.ListEmailAutocomplete(db, &searchText, &limit)
+		token, err := models.CreateProfileToken(db, &p.ID)
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
-		return c.JSON(http.StatusOK, rr)
+		return c.JSON(http.StatusCreated, token)
+	}
+}
+
+// DeleteToken deletes a token
+func DeleteToken(db *sqlx.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		// Get ProfileID
+		p, err := profileFromContext(c, db)
+		if err != nil {
+			return c.NoContent(http.StatusBadRequest)
+		}
+		// Get Token ID
+		tokenID := c.Param("token_id")
+		if tokenID == "" {
+			return c.String(http.StatusBadRequest, "Bad Token ID")
+		}
+		// Delete Token
+		if err := models.DeleteToken(db, &p.ID, &tokenID); err != nil {
+			return c.String(http.StatusInternalServerError, err.Error())
+		}
+		return c.JSON(http.StatusOK, make(map[string]interface{}))
 	}
 }

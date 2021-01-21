@@ -8,6 +8,7 @@ import (
 	"github.com/USACE/instrumentation-api/dbutils"
 	"github.com/USACE/instrumentation-api/handlers"
 	"github.com/USACE/instrumentation-api/middleware"
+	"github.com/USACE/instrumentation-api/models"
 	"github.com/apex/gateway"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/kelseyhightower/envconfig"
@@ -19,7 +20,9 @@ import (
 
 // Config stores configuration information stored in environment variables
 type Config struct {
-	SkipJWT             bool
+	AuthDisabled        bool   `envconfig:"AUTH_DISABLED"`
+	AuthJWTMocked       bool   `envconfig:"AUTH_JWT_MOCKED"`
+	ApplicationKey      string `envconfig:"APPLICATION_KEY"`
 	LambdaContext       bool
 	DBUser              string
 	DBPass              string
@@ -27,11 +30,11 @@ type Config struct {
 	DBHost              string
 	DBSSLMode           string
 	HeartbeatKey        string
-	AWSS3Endpoint       string `envconfig:"INSTRUMENTATION_AWS_S3_ENDPOINT"`
-	AWSS3Region         string `envconfig:"INSTRUMENTATION_AWS_S3_REGION"`
-	AWSS3DisableSSL     bool   `envconfig:"INSTRUMENTATION_AWS_S3_DISABLE_SSL"`
-	AWSS3ForcePathStyle bool   `envconfig:"INSTRUMENTATION_AWS_S3_FORCE_PATH_STYLE"`
-	AWSS3Bucket         string `envconfig:"INSTRUMENTATION_AWS_S3_BUCKET"`
+	AWSS3Endpoint       string `envconfig:"AWS_S3_ENDPOINT"`
+	AWSS3Region         string `envconfig:"AWS_S3_REGION"`
+	AWSS3DisableSSL     bool   `envconfig:"AWS_S3_DISABLE_SSL"`
+	AWSS3ForcePathStyle bool   `envconfig:"AWS_S3_FORCE_PATH_STYLE"`
+	AWSS3Bucket         string `envconfig:"AWS_S3_BUCKET"`
 }
 
 func awsConfig(cfg *Config) *aws.Config {
@@ -85,31 +88,54 @@ func main() {
 
 	e := echo.New()
 	e.Use(middleware.CORS, middleware.GZIP)
-	versioned := e.Group("/instrumentation") // TODO: /instrumentation/v1/
+	public := e.Group("/instrumentation") // TODO: /instrumentation/v1/
 
-	// Public Media Routes (No Version)
-	publicMedia := versioned.Group("") // TODO: /instrumentation
-	publicMedia.GET("/projects/:project_slug/images/*", handlers.GetMedia(awsCfg, &cfg.AWSS3Bucket))
+	// Media Routes
+	public.GET("/projects/:project_slug/images/*", handlers.GetMedia(awsCfg, &cfg.AWSS3Bucket))
 
-	// Key Routes (Heartbeat Function)
-	keyed := versioned.Group("")
-	keyed.Use(middleware.KeyAuth(cfg.HeartbeatKey))
-	keyed.POST("/heartbeat", handlers.DoHeartbeat(db))
-
-	// Public Routes
-	public := versioned.Group("")
-
-	// Private Routes (Authenticated, Authorized)
-	private := versioned.Group("")
-	if cfg.SkipJWT == true {
-		private.Use(middleware.MockIsLoggedIn)
+	// private routes; can be authenticated via cac or token
+	// setting the second parameter passed to each middleware function to "true"
+	// means that if `?key=` is in the query parameters, JWT middleware will automatically
+	// pass (call next(c)); authentication will then be handled by keyauth
+	private := e.Group("/instrumentation")
+	if cfg.AuthJWTMocked {
+		private.Use(middleware.JWTMock(cfg.AuthDisabled, true))
 	} else {
-		private.Use(middleware.JWT, middleware.IsLoggedIn)
+		private.Use(middleware.JWT(cfg.AuthDisabled, true))
 	}
+	// Attach keyauth middleware
+	private.Use(middleware.KeyAuth(
+		cfg.AuthDisabled,
+		cfg.ApplicationKey,
+		func(keyID string) (string, error) {
+			k, err := models.GetTokenInfoByTokenID(db, &keyID)
+			if err != nil {
+				return "", err
+			}
+			return k.Hash, nil
+		},
+	))
+	private.Use(middleware.IsLoggedIn)
+
+	// keyAuth not allowed on these routes
+	noKeyAuth := e.Group("/instrumentation")
+	if cfg.AuthJWTMocked {
+		noKeyAuth.Use(middleware.JWTMock(cfg.AuthDisabled, false))
+	} else {
+		noKeyAuth.Use(middleware.JWT(cfg.AuthDisabled, false))
+	}
+	noKeyAuth.Use(middleware.IsLoggedIn)
+
+	// Profile and Tokens
+	noKeyAuth.POST("/profiles", handlers.CreateProfile(db))
+	noKeyAuth.GET("/my_profile", handlers.GetMyProfile(db))
+	noKeyAuth.POST("/my_tokens", handlers.CreateToken(db))
+	noKeyAuth.DELETE("/my_tokens/:token_id", handlers.DeleteToken(db))
 
 	// Heartbeat
-	public.GET("/heartbeat/latest", handlers.GetLatestHeartbeat(db))
+	private.POST("/heartbeat", handlers.DoHeartbeat(db))
 	public.GET("/heartbeats", handlers.ListHeartbeats(db))
+	public.GET("/heartbeat/latest", handlers.GetLatestHeartbeat(db))
 
 	// AlertConfigs
 	public.GET("/projects/:project_id/instruments/:instrument_id/alert_configs", handlers.ListInstrumentAlertConfigs(db))
@@ -129,11 +155,6 @@ func main() {
 	private.POST("/projects/:project_id/instruments/:instrument_id/alert_configs/:alert_config_id/subscribe", handlers.SubscribeProfileToAlerts(db))
 	private.POST("/projects/:project_id/instruments/:instrument_id/alert_configs/:alert_config_id/unsubscribe", handlers.UnsubscribeProfileToAlerts(db))
 	private.PUT("/alert_subscriptions/:alert_subscription_id", handlers.UpdateMyAlertSubscription(db))
-
-	// Profile
-	private.GET("/myprofile", handlers.GetMyProfile(db))
-	private.GET("/my_profile", handlers.GetMyProfile(db))
-	private.POST("/profiles", handlers.CreateProfile(db))
 
 	// Email Autocomplete
 	public.GET("/email_autocomplete", handlers.ListEmailAutocomplete(db))

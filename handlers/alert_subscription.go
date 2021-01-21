@@ -14,7 +14,7 @@ import (
 // SubscribeProfileToAlerts subscribes a profile to an alert
 func SubscribeProfileToAlerts(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		p, err := myProfileFromContext(c, db)
+		p, err := profileFromContext(c, db)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
@@ -49,7 +49,7 @@ func SubscribeProfileToAlerts(db *sqlx.DB) echo.HandlerFunc {
 // UnsubscribeProfileToAlerts unsubscribes a profile to an alert
 func UnsubscribeProfileToAlerts(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		p, err := myProfileFromContext(c, db)
+		p, err := profileFromContext(c, db)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
@@ -70,7 +70,7 @@ func UnsubscribeProfileToAlerts(db *sqlx.DB) echo.HandlerFunc {
 // ListMyAlertSubscriptions returns all alerts you are subscribed to and settings
 func ListMyAlertSubscriptions(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		p, err := myProfileFromContext(c, db)
+		p, err := profileFromContext(c, db)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
@@ -99,7 +99,7 @@ func UpdateMyAlertSubscription(db *sqlx.DB) echo.HandlerFunc {
 			return c.String(http.StatusBadRequest, "route parameter subscription_id does not match id in JSON payload")
 		}
 		// Get Profile
-		p, err := myProfileFromContext(c, db)
+		p, err := profileFromContext(c, db)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}

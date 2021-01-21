@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/USACE/instrumentation-api/dbutils"
 	"github.com/USACE/instrumentation-api/models"
@@ -108,9 +109,19 @@ func CreateProjectBulk(db *sqlx.DB) echo.HandlerFunc {
 			return err
 		}
 
+		// profile of user creating instruments
+		p, err := profileFromContext(c, db)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, err.Error())
+		}
+		// timestamp
+		t := time.Now()
+
 		for idx := range pc.Projects {
-			// Assign UUID
-			pc.Projects[idx].ID = uuid.Must(uuid.NewRandom())
+			// creator
+			pc.Projects[idx].Creator = p.ID
+			// create date
+			pc.Projects[idx].CreateDate = t
 			// Assign Slug
 			s, err := dbutils.NextUniqueSlug(pc.Projects[idx].Name, slugsTaken)
 			if err != nil {
@@ -122,13 +133,7 @@ func CreateProjectBulk(db *sqlx.DB) echo.HandlerFunc {
 			slugsTaken = append(slugsTaken, s)
 		}
 
-		// Get action information from context
-		a, err := models.NewAction(c)
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
-		}
-
-		if err := models.CreateProjectBulk(db, a, pc.Projects); err != nil {
+		if err := models.CreateProjectBulk(db, pc.Projects); err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 		// Send Project
@@ -159,14 +164,17 @@ func UpdateProject(db *sqlx.DB) echo.HandlerFunc {
 			)
 		}
 
-		// Get action information from context
-		a, err := models.NewAction(c)
+		// profile of user creating instruments
+		profile, err := profileFromContext(c, db)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return c.String(http.StatusInternalServerError, err.Error())
 		}
+		// timestamp
+		t := time.Now()
+		p.Updater, p.UpdateDate = &profile.ID, &t
 
 		// update
-		pUpdated, err := models.UpdateProject(db, a, p)
+		pUpdated, err := models.UpdateProject(db, p)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}

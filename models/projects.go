@@ -148,14 +148,14 @@ func GetProject(db *sqlx.DB, id uuid.UUID) (*Project, error) {
 }
 
 // CreateProjectBulk creates one or more projects from an array of projects
-func CreateProjectBulk(db *sqlx.DB, a *Action, projects []Project) error {
+func CreateProjectBulk(db *sqlx.DB, projects []Project) error {
 
 	txn, err := db.Begin()
 	if err != nil {
 		return err
 	}
 
-	stmt, err := txn.Prepare(pq.CopyIn("project", "id", "federal_id", "slug", "name", "creator", "create_date", "updater", "update_date"))
+	stmt, err := txn.Prepare(pq.CopyIn("project", "federal_id", "slug", "name", "creator", "create_date"))
 	if err != nil {
 		return err
 	}
@@ -166,7 +166,7 @@ func CreateProjectBulk(db *sqlx.DB, a *Action, projects []Project) error {
 			return err
 		}
 
-		if _, err = stmt.Exec(i.ID, i.FederalID, i.Slug, i.Name, a.Actor, a.Time, a.Actor, a.Time); err != nil {
+		if _, err = stmt.Exec(i.FederalID, i.Slug, i.Name, i.Creator, i.CreateDate); err != nil {
 			return err
 		}
 	}
@@ -187,11 +187,11 @@ func CreateProjectBulk(db *sqlx.DB, a *Action, projects []Project) error {
 }
 
 // UpdateProject updates a project
-func UpdateProject(db *sqlx.DB, a *Action, p *Project) (*Project, error) {
+func UpdateProject(db *sqlx.DB, p *Project) (*Project, error) {
 
 	_, err := db.Exec(
 		"UPDATE project SET federal_id=$2, name=$3, updater=$4, update_date=$5, office_id=$6 WHERE id=$1 RETURNING id",
-		p.ID, p.FederalID, p.Name, a.Actor, a.Time, p.OfficeID,
+		p.ID, p.FederalID, p.Name, p.Updater, p.UpdateDate, p.OfficeID,
 	)
 	if err != nil {
 		return nil, err

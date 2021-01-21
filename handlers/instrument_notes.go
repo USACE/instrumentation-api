@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/USACE/instrumentation-api/models"
 
@@ -58,18 +59,17 @@ func CreateInstrumentNote(db *sqlx.DB) echo.HandlerFunc {
 		if err := c.Bind(&nc); err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
-		for idx := range nc.Items {
-			// Assign UUID
-			nc.Items[idx].ID = uuid.Must(uuid.NewRandom())
-		}
-
-		// Get action information from context
-		a, err := models.NewAction(c)
+		// profile and timestamp
+		p, err := profileFromContext(c, db)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return c.String(http.StatusInternalServerError, err.Error())
 		}
-
-		nn, err := models.CreateInstrumentNote(db, a, nc.Items)
+		t := time.Now()
+		for idx := range nc.Items {
+			nc.Items[idx].Creator = p.ID
+			nc.Items[idx].CreateDate = t
+		}
+		nn, err := models.CreateInstrumentNote(db, nc.Items)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err)
 		}
@@ -96,15 +96,16 @@ func UpdateInstrumentNote(db *sqlx.DB) echo.HandlerFunc {
 				"url note_id does not match object id in body",
 			)
 		}
-
-		// Get action information from context
-		a, err := models.NewAction(c)
+		// profile and timestamp
+		p, err := profileFromContext(c, db)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return c.String(http.StatusInternalServerError, err.Error())
 		}
+		t := time.Now()
+		n.Updater, n.UpdateDate = &p.ID, &t
 
 		// update
-		nUpdated, err := models.UpdateInstrumentNote(db, a, &n)
+		nUpdated, err := models.UpdateInstrumentNote(db, &n)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}

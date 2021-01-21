@@ -93,7 +93,7 @@ func GetInstrumentGroup(db *sqlx.DB, ID uuid.UUID) (*InstrumentGroup, error) {
 }
 
 // CreateInstrumentGroup creates many instruments from an array of instruments
-func CreateInstrumentGroup(db *sqlx.DB, a *Action, groups []InstrumentGroup) ([]InstrumentGroup, error) {
+func CreateInstrumentGroup(db *sqlx.DB, groups []InstrumentGroup) ([]InstrumentGroup, error) {
 
 	txn, err := db.Beginx()
 	if err != nil {
@@ -101,8 +101,8 @@ func CreateInstrumentGroup(db *sqlx.DB, a *Action, groups []InstrumentGroup) ([]
 	}
 
 	stmt, err := txn.Preparex(
-		`INSERT INTO instrument_group (id, slug, name, description, creator, create_date, updater, update_date, project_id)
-		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+		`INSERT INTO instrument_group (slug, name, description, creator, create_date, project_id)
+		 VALUES ($1, $2, $3, $4, $5, $6)
 		 RETURNING id, slug, name, description, creator, create_date, updater, update_date, project_id`,
 	)
 	if err != nil {
@@ -111,7 +111,7 @@ func CreateInstrumentGroup(db *sqlx.DB, a *Action, groups []InstrumentGroup) ([]
 
 	gg := make([]InstrumentGroup, len(groups))
 	for idx, g := range groups {
-		if err := stmt.Get(&gg[idx], g.ID, g.Slug, g.Name, g.Description, a.Actor, a.Time, a.Actor, a.Time, g.ProjectID); err != nil {
+		if err := stmt.Get(&gg[idx], g.Slug, g.Name, g.Description, g.Creator, g.CreateDate, g.ProjectID); err != nil {
 			return make([]InstrumentGroup, 0), err
 		}
 	}
@@ -128,7 +128,7 @@ func CreateInstrumentGroup(db *sqlx.DB, a *Action, groups []InstrumentGroup) ([]
 }
 
 // UpdateInstrumentGroup updates an instrument group
-func UpdateInstrumentGroup(db *sqlx.DB, a *Action, g *InstrumentGroup) (*InstrumentGroup, error) {
+func UpdateInstrumentGroup(db *sqlx.DB, g *InstrumentGroup) (*InstrumentGroup, error) {
 
 	var gUpdated InstrumentGroup
 	if err := db.QueryRowx(
@@ -141,11 +141,10 @@ func UpdateInstrumentGroup(db *sqlx.DB, a *Action, g *InstrumentGroup) (*Instrum
 				project_id = $7
 		 WHERE id = $1
 		 RETURNING *
-		`, g.ID, g.Name, g.Deleted, g.Description, a.Actor, a.Time, g.ProjectID,
+		`, g.ID, g.Name, g.Deleted, g.Description, g.Updater, g.UpdateDate, g.ProjectID,
 	).StructScan(&gUpdated); err != nil {
 		return nil, err
 	}
-
 	return &gUpdated, nil
 }
 

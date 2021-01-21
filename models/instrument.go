@@ -127,57 +127,58 @@ func GetInstrumentCount(db *sqlx.DB) (int, error) {
 }
 
 // CreateInstruments creates many instruments from an array of instruments
-func CreateInstruments(db *sqlx.DB, a *Action, instruments []Instrument) error {
+func CreateInstruments(db *sqlx.DB, instruments []Instrument) ([]IDAndSlug, error) {
 
-	txn, err := db.Begin()
+	txn, err := db.Beginx()
 	if err != nil {
-		return err
+		return make([]IDAndSlug, 0), err
 	}
 
 	// Instrument
-	stmt1, err := txn.Prepare(
+	stmt1, err := txn.Preparex(
 		`INSERT INTO instrument
-			(id, slug, name, type_id, geometry, station, station_offset, creator, create_date, updater, update_date, project_id, formula)
+			(slug, name, type_id, geometry, station, station_offset, creator, create_date, project_id, formula)
 		 VALUES
-		 	($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
+			 ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+		 RETURNING id, slug`,
 	)
 	if err != nil {
-		return err
+		return make([]IDAndSlug, 0), err
 	}
 
 	// Instrument Status
-	stmt2, err := txn.Prepare(createInstrumentStatusSQL())
+	stmt2, err := txn.Preparex(createInstrumentStatusSQL())
 	if err != nil {
-		return err
+		return make([]IDAndSlug, 0), err
 	}
 
-	for _, i := range instruments {
-		// Load Instrument
-		if _, err := stmt1.Exec(
-			i.ID, i.Slug, i.Name, i.TypeID, wkt.MarshalString(i.Geometry.Geometry()),
-			i.Station, i.StationOffset, a.Actor, a.Time, a.Actor, a.Time, i.ProjectID, i.Formula,
+	ii := make([]IDAndSlug, len(instruments))
+	for idx, i := range instruments {
+		if err := stmt1.Get(
+			&ii[idx],
+			i.Slug, i.Name, i.TypeID, wkt.MarshalString(i.Geometry.Geometry()),
+			i.Station, i.StationOffset, i.Creator, i.CreateDate, i.ProjectID, i.Formula,
 		); err != nil {
-			return err
+			return make([]IDAndSlug, 0), err
 		}
-		if _, err := stmt2.Exec(i.ID, i.StatusID, i.StatusTime); err != nil {
-			return err
+		if _, err := stmt2.Exec(ii[idx].ID, i.StatusID, i.StatusTime); err != nil {
+			return make([]IDAndSlug, 0), err
 		}
 	}
 	if err := stmt1.Close(); err != nil {
-		return err
+		return make([]IDAndSlug, 0), err
 	}
 	if err := stmt2.Close(); err != nil {
-		return err
+		return make([]IDAndSlug, 0), err
 	}
 	if err := txn.Commit(); err != nil {
-		return err
+		return make([]IDAndSlug, 0), err
 	}
-
-	return nil
+	return ii, nil
 }
 
 // ValidateCreateInstruments creates many instruments from an array of instruments
-func ValidateCreateInstruments(db *sqlx.DB, a *Action, instruments []Instrument) (CreateInstrumentsValidationResult, error) {
+func ValidateCreateInstruments(db *sqlx.DB, instruments []Instrument) (CreateInstrumentsValidationResult, error) {
 
 	validationResult := CreateInstrumentsValidationResult{Errors: make([]string, 0)}
 
@@ -210,7 +211,7 @@ func ValidateCreateInstruments(db *sqlx.DB, a *Action, instruments []Instrument)
 }
 
 // UpdateInstrument updates a single instrument
-func UpdateInstrument(db *sqlx.DB, a *Action, i *Instrument) (*Instrument, error) {
+func UpdateInstrument(db *sqlx.DB, i *Instrument) (*Instrument, error) {
 
 	txn, err := db.Begin()
 	if err != nil {
@@ -236,7 +237,7 @@ func UpdateInstrument(db *sqlx.DB, a *Action, i *Instrument) (*Instrument, error
 	var updatedID uuid.UUID
 	if err := stmt1.QueryRow(
 		i.ID, i.Name, i.TypeID, wkb.Value(i.Geometry.Geometry()),
-		a.Actor, a.Time, i.ProjectID, i.Station, i.StationOffset, i.Formula,
+		i.Updater, i.UpdateDate, i.ProjectID, i.Station, i.StationOffset, i.Formula,
 	).Scan(&updatedID); err != nil {
 		return nil, err
 	}

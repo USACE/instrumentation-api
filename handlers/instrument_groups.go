@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/USACE/instrumentation-api/dbutils"
 	"github.com/USACE/instrumentation-api/models"
@@ -53,9 +54,20 @@ func CreateInstrumentGroup(db *sqlx.DB) echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, err)
 		}
 
+		// profile
+		p, err := profileFromContext(c, db)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, err.Error())
+		}
+
+		// timestamp
+		t := time.Now()
+
 		for idx := range gc.Items {
-			// Assign UUID
-			gc.Items[idx].ID = uuid.Must(uuid.NewRandom())
+			// Creator
+			gc.Items[idx].Creator = p.ID
+			// CreateDate
+			gc.Items[idx].CreateDate = t
 			// Assign Slug
 			s, err := dbutils.NextUniqueSlug(gc.Items[idx].Name, slugsTaken)
 			if err != nil {
@@ -67,13 +79,7 @@ func CreateInstrumentGroup(db *sqlx.DB) echo.HandlerFunc {
 			slugsTaken = append(slugsTaken, s)
 		}
 
-		// Get action information from context
-		a, err := models.NewAction(c)
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
-		}
-
-		gg, err := models.CreateInstrumentGroup(db, a, gc.Items)
+		gg, err := models.CreateInstrumentGroup(db, gc.Items)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
@@ -104,14 +110,16 @@ func UpdateInstrumentGroup(db *sqlx.DB) echo.HandlerFunc {
 			)
 		}
 
-		// Get action information from context
-		a, err := models.NewAction(c)
+		// profile information and timestamp
+		p, err := profileFromContext(c, db)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return c.String(http.StatusInternalServerError, err.Error())
 		}
+		t := time.Now()
+		g.Updater, g.UpdateDate = &p.ID, &t
 
 		// update
-		gUpdated, err := models.UpdateInstrumentGroup(db, a, &g)
+		gUpdated, err := models.UpdateInstrumentGroup(db, &g)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
