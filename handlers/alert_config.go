@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/USACE/instrumentation-api/models"
 
@@ -52,12 +53,16 @@ func CreateInstrumentAlertConfigs(db *sqlx.DB) echo.HandlerFunc {
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
-		// Get action information from context
-		a, err := models.NewAction(c)
+		// Set Creator, CreateDate on all items
+		p, err := profileFromContext(c, db)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err)
 		}
-		aa, err := models.CreateInstrumentAlertConfigs(db, a, &instrumentID, ac.Items)
+		t := time.Now()
+		for idx := range ac.Items {
+			ac.Items[idx].Creator, ac.Items[idx].CreateDate = p.ID, t
+		}
+		aa, err := models.CreateInstrumentAlertConfigs(db, &instrumentID, ac.Items)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
@@ -83,12 +88,14 @@ func UpdateInstrumentAlertConfig(db *sqlx.DB) echo.HandlerFunc {
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
-		// Get action information from context
-		action, err := models.NewAction(c)
+		// Profile and timestamp
+		p, err := profileFromContext(c, db)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return c.String(http.StatusInternalServerError, err.Error())
 		}
-		aUpdated, err := models.UpdateInstrumentAlertConfig(db, action, &instrumentID, &alertID, &alert)
+		t := time.Now()
+		alert.Updater, alert.UpdateDate = &p.ID, &t
+		aUpdated, err := models.UpdateInstrumentAlertConfig(db, &instrumentID, &alertID, &alert)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}

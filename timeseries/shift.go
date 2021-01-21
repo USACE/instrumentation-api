@@ -1,9 +1,5 @@
 package timeseries
 
-func printit() string {
-	return "hello from printit"
-}
-
 // Work in progress
 
 // Shifter adjusts measurements using any number of adjusters

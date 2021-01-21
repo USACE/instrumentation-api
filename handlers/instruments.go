@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/USACE/instrumentation-api/dbutils"
 	"github.com/USACE/instrumentation-api/models"
@@ -72,9 +73,15 @@ func CreateInstruments(db *sqlx.DB) echo.HandlerFunc {
 				return models.InstrumentCollection{}, err
 			}
 
+			// profile of user creating instruments
+			p, err := profileFromContext(c, db)
+			if err != nil {
+				return models.InstrumentCollection{}, err
+			}
+			// timestamp
+			t := time.Now()
+
 			for idx := range ic.Items {
-				// Assign UUID
-				ic.Items[idx].ID = uuid.Must(uuid.NewRandom())
 				// Assign ProjectID
 				ic.Items[idx].ProjectID = &projectID
 				// Assign Slug
@@ -83,6 +90,10 @@ func CreateInstruments(db *sqlx.DB) echo.HandlerFunc {
 					return models.InstrumentCollection{}, err
 				}
 				ic.Items[idx].Slug = s
+				// Assign Creator
+				ic.Items[idx].Creator = p.ID
+				// Assign CreateDate
+				ic.Items[idx].CreateDate = t
 				// Add slug to array of slugs originally fetched from the database
 				// to catch duplicate names/slugs from the same bulk upload
 				slugsTaken = append(slugsTaken, s)
@@ -97,15 +108,9 @@ func CreateInstruments(db *sqlx.DB) echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 
-		// Get action information from context
-		a, err := models.NewAction(c)
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
-		}
-
 		// Validate POST
 		if c.QueryParam("dry_run") == "true" {
-			v, err := models.ValidateCreateInstruments(db, a, ic.Items)
+			v, err := models.ValidateCreateInstruments(db, ic.Items)
 			if err != nil {
 				return c.JSON(http.StatusBadRequest, err)
 			}
@@ -113,11 +118,12 @@ func CreateInstruments(db *sqlx.DB) echo.HandlerFunc {
 		}
 
 		// Actually POST
-		if err := models.CreateInstruments(db, a, ic.Items); err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+		nn, err := models.CreateInstruments(db, ic.Items)
+		if err != nil {
+			return c.String(http.StatusBadRequest, err.Error())
 		}
 
-		return c.JSON(http.StatusCreated, ic.Shorten().Items)
+		return c.JSON(http.StatusCreated, nn)
 	}
 }
 
@@ -143,14 +149,17 @@ func UpdateInstrument(db *sqlx.DB) echo.HandlerFunc {
 			)
 		}
 
-		// Get action information from context
-		a, err := models.NewAction(c)
+		// profile of user creating instruments
+		p, err := profileFromContext(c, db)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return c.String(http.StatusInternalServerError, err.Error())
 		}
+		// timestamp
+		t := time.Now()
+		i.Updater, i.UpdateDate = &p.ID, &t
 
 		// update
-		iUpdated, err := models.UpdateInstrument(db, a, i)
+		iUpdated, err := models.UpdateInstrument(db, i)
 		if err != nil {
 			return c.String(http.StatusBadRequest, err.Error())
 		}

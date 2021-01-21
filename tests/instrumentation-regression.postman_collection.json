@@ -1,10 +1,118 @@
 {
 	"info": {
-		"_postman_id": "46e69ff5-debb-43ba-af8a-1b3906e10082",
+		"_postman_id": "363b59f1-fd40-424d-b26a-f48ea4bb1616",
 		"name": "instrumentation-regression",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
+		{
+			"name": "Profiles",
+			"item": [
+				{
+					"name": "CreateProfile",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// status code is 201",
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testuser\",\n    \"email\": \"test.user@gmail.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/profiles",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"profiles"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetMyProfile",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// validate JSON schema",
+									"var schema = {",
+									"    \"type\": \"object\",",
+									"    \"properties\": {",
+									"        \"id\": { \"type\": \"string\" },",
+									"        \"edipi\": { \"type\": \"number\" },",
+									"        \"username\": { \"type\": \"string\" },",
+									"        \"email\": { \"type\": \"string\" },",
+									"    },",
+									"    \"required\": [\"id\", \"edipi\", \"username\", \"email\"],",
+									"    \"additionalProperties\": true",
+									"}",
+									"",
+									"pm.globals.set('PROFILE_SCHEMA', JSON.stringify(schema));",
+									"",
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// validate schema",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(schema)",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/my_profile",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"my_profile"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
 		{
 			"name": "Instruments",
 			"item": [
@@ -58,10 +166,10 @@
 									"        },",
 									"        \"station\": { \"type\": [\"number\", \"null\"] },",
 									"        \"offset\": { \"type\": [\"number\", \"null\"] },",
-									"        \"creator\": { \"type\": \"number\" },",
+									"        \"creator\": { \"type\": \"string\" },",
 									"        \"create_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
-									"        \"updater\": { \"type\": \"number\" },",
-									"        \"update_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
+									"        \"updater\": {  \"type\": [\"string\", \"null\"] },",
+									"        \"update_date\": { \"type\": [\"string\", \"null\"], \"format\": \"date-time\" },",
 									"        \"project_id\": { \"type\": [\"string\", \"null\"] }",
 									"    },",
 									"    \"required\": [\"id\", \"slug\", \"name\", \"type_id\", \"type\", \"status_id\", \"status\", \"status_time\", \"geometry\", \"creator\", \"create_date\", \"updater\", \"update_date\", \"project_id\", \"station\", \"offset\", \"constants\", \"alert_configs\", \"formula\"],",
@@ -716,10 +824,10 @@
 									"        \"title\": { \"type\": \"string\" },",
 									"        \"body\": { \"type\": \"string\" },",
 									"        \"time\": { \"type\": \"string\" },",
-									"        \"creator\": { \"type\": \"number\" },",
+									"        \"creator\": { \"type\": \"string\" },",
 									"        \"create_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
-									"        \"updater\": { \"type\": \"number\" },",
-									"        \"update_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
+									"        \"updater\": {  \"type\": [\"string\", \"null\"] },",
+									"        \"update_date\": { \"type\": [\"string\", \"null\"], \"format\": \"date-time\" },",
 									"    },",
 									"    \"required\": [\"id\", \"instrument_id\", \"title\", \"body\", \"time\", \"creator\", \"create_date\", \"updater\", \"update_date\"],",
 									"    \"additionalProperties\": false",
@@ -1081,10 +1189,10 @@
 									"        \"slug\": { \"type\": \"string\" },",
 									"        \"name\": { \"type\": \"string\" },",
 									"        \"description\": { \"type\": \"string\" },",
-									"        \"creator\": { \"type\": \"number\" },",
+									"        \"creator\": { \"type\": \"string\" },",
 									"        \"create_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
-									"        \"updater\": { \"type\": \"number\" },",
-									"        \"update_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
+									"        \"updater\": {  \"type\": [\"string\", \"null\"] },",
+									"        \"update_date\": { \"type\": [\"string\", \"null\"], \"format\": \"date-time\" },",
 									"        \"project_id\": { \"type\": [\"string\", \"null\"] }",
 									"    },",
 									"    \"required\": [\"id\", \"slug\", \"name\", \"description\", \"creator\", \"create_date\", \"updater\", \"update_date\", \"project_id\"],",
@@ -1494,10 +1602,10 @@
 									"        \"federal_id\": { \"type\": [\"string\", \"null\"] },",
 									"        \"slug\": { \"type\": \"string\" },",
 									"        \"name\": { \"type\": \"string\" },",
-									"        \"creator\": { \"type\": \"number\" },",
+									"        \"creator\": { \"type\": \"string\" },",
 									"        \"create_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
-									"        \"updater\": { \"type\": \"number\" },",
-									"        \"update_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
+									"        \"updater\": {  \"type\": [\"string\", \"null\"] },",
+									"        \"update_date\": { \"type\": [\"string\", \"null\"], \"format\": \"date-time\" },",
 									"        \"instrument_count\": {\"type\": \"number\"},",
 									"        \"instrument_group_count\": {\"type\": \"number\"},",
 									"        \"timeseries\": {",
@@ -2885,114 +2993,6 @@
 			"description": "Tests for explorer endpoints"
 		},
 		{
-			"name": "Profiles",
-			"item": [
-				{
-					"name": "CreateProfile",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// status code is 201",
-									"pm.test(\"Status code is 201\", function () {",
-									"    pm.response.to.have.status(201);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"username\": \"testuser\",\n    \"email\": \"test.user@gmail.com\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/profiles",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"profiles"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "GetMyProfile",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// validate JSON schema",
-									"var schema = {",
-									"    \"type\": \"object\",",
-									"    \"properties\": {",
-									"        \"id\": { \"type\": \"string\" },",
-									"        \"edipi\": { \"type\": \"number\" },",
-									"        \"username\": { \"type\": \"string\" },",
-									"        \"email\": { \"type\": \"string\" },",
-									"    },",
-									"    \"required\": [\"id\", \"edipi\", \"username\", \"email\"],",
-									"    \"additionalProperties\": false",
-									"}",
-									"",
-									"pm.globals.set('PROFILE_SCHEMA', JSON.stringify(schema));",
-									"",
-									"// status code is 200",
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"// validate schema",
-									"pm.test(\"Schema validation\", function () {",
-									"    pm.response.to.have.jsonSchema(schema)",
-									"});",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/myprofile",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"myprofile"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
 			"name": "Alert Configs",
 			"item": [
 				{
@@ -3012,10 +3012,10 @@
 									"        \"body\": { \"type\": \"string\" },",
 									"        \"formula\": { \"type\": \"string\" },",
 									"        \"schedule\": { \"type\": \"string\" },",
-									"        \"creator\": { \"type\": \"number\" },",
+									"        \"creator\": { \"type\": \"string\" },",
 									"        \"create_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
-									"        \"updater\": { \"type\": \"number\" },",
-									"        \"update_date\": { \"type\": \"string\", \"format\": \"date-time\" }",
+									"        \"updater\": {  \"type\": [\"string\", \"null\"] },",
+									"        \"update_date\": { \"type\": [\"string\", \"null\"], \"format\": \"date-time\" }",
 									"    },",
 									"    \"required\": [\"id\", \"instrument_id\", \"name\", \"body\", \"formula\", \"schedule\", \"creator\", \"create_date\", \"updater\", \"update_date\"],",
 									"    \"additionalProperties\": false",
@@ -3715,10 +3715,10 @@
 									"        \"project_id\": { \"type\": \"string\" },",
 									"        \"slug\": { \"type\": \"string\" },",
 									"        \"name\": { \"type\": \"string\" },",
-									"        \"creator\": { \"type\": \"number\" },",
+									"        \"creator\": { \"type\": \"string\" },",
 									"        \"create_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
-									"        \"updater\": { \"type\": \"number\" },",
-									"        \"update_date\": { \"type\": \"string\", \"format\": \"date-time\" }",
+									"        \"updater\": {  \"type\": [\"string\", \"null\"] },",
+									"        \"update_date\": { \"type\": [\"string\", \"null\"], \"format\": \"date-time\" }",
 									"    },",
 									"    \"required\": [\"id\", \"project_id\", \"name\", \"slug\", \"creator\", \"create_date\", \"updater\", \"update_date\"],",
 									"    \"additionalProperties\": false",
@@ -3779,10 +3779,10 @@
 									"        \"project_id\": { \"type\": \"string\" },",
 									"        \"slug\": { \"type\": \"string\" },",
 									"        \"name\": { \"type\": \"string\" },",
-									"        \"creator\": { \"type\": \"number\" },",
+									"        \"creator\": { \"type\": \"string\" },",
 									"        \"create_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
-									"        \"updater\": { \"type\": \"number\" },",
-									"        \"update_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
+									"        \"updater\": {  \"type\": [\"string\", \"null\"] },",
+									"        \"update_date\": { \"type\": [\"string\", \"null\"], \"format\": \"date-time\" },",
 									"        \"timeseries\": {",
 									"            \"type\": \"array\",",
 									"            \"items\": {",

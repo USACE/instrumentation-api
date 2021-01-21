@@ -72,7 +72,7 @@ func GetAlertConfig(db *sqlx.DB, alertID *uuid.UUID) (*AlertConfig, error) {
 }
 
 // CreateInstrumentAlertConfigs creates one or more new alert configurations
-func CreateInstrumentAlertConfigs(db *sqlx.DB, action *Action, instrumentID *uuid.UUID, alertConfigs []AlertConfig) ([]AlertConfig, error) {
+func CreateInstrumentAlertConfigs(db *sqlx.DB, instrumentID *uuid.UUID, alertConfigs []AlertConfig) ([]AlertConfig, error) {
 
 	txn, err := db.Beginx()
 	if err != nil {
@@ -82,9 +82,9 @@ func CreateInstrumentAlertConfigs(db *sqlx.DB, action *Action, instrumentID *uui
 	// Instrument
 	stmt1, err := txn.Preparex(
 		`INSERT INTO alert_config
-			(instrument_id, name, body, formula, schedule, creator, create_date, updater, update_date)
+			(instrument_id, name, body, formula, schedule, creator, create_date)
 		VALUES
-			 ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+			 ($1, $2, $3, $4, $5, $6, $7)
 		RETURNING *`,
 	)
 	if err != nil {
@@ -95,11 +95,7 @@ func CreateInstrumentAlertConfigs(db *sqlx.DB, action *Action, instrumentID *uui
 	for idx, c := range alertConfigs {
 		var aCreated AlertConfig
 		// Load Instrument
-		if err := stmt1.Get(
-			&aCreated,
-			instrumentID, c.Name, c.Body, c.Formula, c.Schedule,
-			action.Actor, action.Time, action.Actor, action.Time,
-		); err != nil {
+		if err := stmt1.Get(&aCreated, instrumentID, c.Name, c.Body, c.Formula, c.Schedule, c.Creator, c.CreateDate); err != nil {
 			return make([]AlertConfig, 0), err
 		}
 		newAlertConfigs[idx] = aCreated
@@ -110,19 +106,18 @@ func CreateInstrumentAlertConfigs(db *sqlx.DB, action *Action, instrumentID *uui
 	if err := txn.Commit(); err != nil {
 		return make([]AlertConfig, 0), err
 	}
-
 	return newAlertConfigs, nil
 }
 
 // UpdateInstrumentAlertConfig updates an alert
-func UpdateInstrumentAlertConfig(db *sqlx.DB, action *Action, instrumentID *uuid.UUID, alertConfigID *uuid.UUID, ac *AlertConfig) (*AlertConfig, error) {
+func UpdateInstrumentAlertConfig(db *sqlx.DB, instrumentID *uuid.UUID, alertConfigID *uuid.UUID, ac *AlertConfig) (*AlertConfig, error) {
 
 	var cUpdated AlertConfig
 	err := db.QueryRowx(
 		`UPDATE alert_config SET name=$3, body=$4, formula=$5, schedule=$6, updater=$7, update_date=$8
 		WHERE id=$1 AND instrument_id=$2
 		RETURNING *`,
-		alertConfigID, instrumentID, ac.Name, ac.Body, ac.Formula, ac.Schedule, action.Actor, action.Time,
+		alertConfigID, instrumentID, ac.Name, ac.Body, ac.Formula, ac.Schedule, ac.Updater, ac.UpdateDate,
 	).StructScan(&cUpdated)
 	if err != nil {
 		return nil, err

@@ -79,7 +79,7 @@ func GetInstrumentNote(db *sqlx.DB, id *uuid.UUID) (*InstrumentNote, error) {
 }
 
 // CreateInstrumentNote creates many instrument notes from an array of instrument notes
-func CreateInstrumentNote(db *sqlx.DB, a *Action, notes []InstrumentNote) ([]InstrumentNote, error) {
+func CreateInstrumentNote(db *sqlx.DB, notes []InstrumentNote) ([]InstrumentNote, error) {
 
 	txn, err := db.Beginx()
 	if err != nil {
@@ -87,8 +87,8 @@ func CreateInstrumentNote(db *sqlx.DB, a *Action, notes []InstrumentNote) ([]Ins
 	}
 
 	stmt, err := txn.Preparex(
-		`INSERT INTO instrument_note (id, instrument_id, title, body, time, creator, create_date, updater, update_date)
-		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+		`INSERT INTO instrument_note (instrument_id, title, body, time, creator, create_date)
+		 VALUES ($1, $2, $3, $4, $5, $6)
 		 RETURNING id, instrument_id, title, body, time, creator, create_date, updater, update_date`,
 	)
 	if err != nil {
@@ -97,7 +97,7 @@ func CreateInstrumentNote(db *sqlx.DB, a *Action, notes []InstrumentNote) ([]Ins
 
 	nn := make([]InstrumentNote, len(notes))
 	for idx, n := range notes {
-		if err := stmt.Get(&nn[idx], n.ID, n.InstrumentID, n.Title, n.Body, n.Time, a.Actor, a.Time, a.Actor, a.Time); err != nil {
+		if err := stmt.Get(&nn[idx], n.InstrumentID, n.Title, n.Body, n.Time, n.Creator, n.CreateDate); err != nil {
 			return make([]InstrumentNote, 0), err
 		}
 	}
@@ -114,7 +114,7 @@ func CreateInstrumentNote(db *sqlx.DB, a *Action, notes []InstrumentNote) ([]Ins
 }
 
 // UpdateInstrumentNote updates a single instrument note
-func UpdateInstrumentNote(db *sqlx.DB, a *Action, n *InstrumentNote) (*InstrumentNote, error) {
+func UpdateInstrumentNote(db *sqlx.DB, n *InstrumentNote) (*InstrumentNote, error) {
 
 	var nUpdated InstrumentNote
 	if err := db.QueryRowx(
@@ -126,7 +126,7 @@ func UpdateInstrumentNote(db *sqlx.DB, a *Action, n *InstrumentNote) (*Instrumen
 				update_date = $6
 		 WHERE id = $1
 		 RETURNING id, instrument_id, title, body, time, creator, create_date, updater, update_date
-		`, n.ID, n.Title, n.Body, n.Time, a.Actor, a.Time,
+		`, n.ID, n.Title, n.Body, n.Time, n.Updater, n.UpdateDate,
 	).StructScan(&nUpdated); err != nil {
 		return nil, err
 	}

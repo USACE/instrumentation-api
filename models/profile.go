@@ -1,74 +1,113 @@
 package models
 
 import (
+	"time"
+
+	"github.com/USACE/instrumentation-api/passwords"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
 
 // Profile is a user profile
 type Profile struct {
-	ID    uuid.UUID `json:"id"`
-	EDIPI int       `json:"edipi"`
-	ProfileData
+	ID uuid.UUID `json:"id"`
+	ProfileInfo
+	Tokens []TokenInfoProfile `json:"tokens"`
 }
 
-// ProfileData holds the incoming data for a create profile request
-type ProfileData struct {
+// TokenInfoProfile is token information embedded in Profile
+type TokenInfoProfile struct {
+	TokenID string    `json:"token_id" db:"token_id"`
+	Issued  time.Time `json:"issued"`
+}
+
+// ProfileInfo is information necessary to construct a profile
+type ProfileInfo struct {
+	EDIPI    int    `json:"edipi"`
 	Username string `json:"username"`
 	Email    string `json:"email"`
 }
 
-// CreateProfileRequest holds the data required to create a profile
-type CreateProfileRequest struct {
-	Action
-	ProfileData
+// TokenInfo represents the information held in the database about a token
+type TokenInfo struct {
+	ID        uuid.UUID `json:"-"`
+	TokenID   string    `json:"token_id" db:"token_id"`
+	ProfileID uuid.UUID `json:"profile_id" db:"profile_id"`
+	Issued    time.Time `json:"issued"`
+	Hash      string    `json:"-"`
 }
 
-// Email is like a profile, but for a user that will never log-in.
-// Useful for subscribing any email to alerts
-type Email struct {
-	ID    uuid.UUID `json:"id"`
-	Email string    `json:"email"`
+// Token includes all TokenInfo and the actual token string generated for a user
+// this is only returned the first time a token is generated
+type Token struct {
+	SecretToken string `json:"secret_token"`
+	TokenInfo
 }
 
-// EmailAutocompleteResult stores search result in profiles and emails
-type EmailAutocompleteResult struct {
-	ID       uuid.UUID `json:"id"`
-	UserType string    `json:"user_type" db:"user_type"`
-	Username *string   `json:"username"`
-	Email    string    `json:"email"`
-}
-
-// GetMyProfile returns profile
-func GetMyProfile(db *sqlx.DB, action *Action) (*Profile, error) {
+// GetProfileFromEDIPI returns a profile given an edipi
+func GetProfileFromEDIPI(db *sqlx.DB, e int) (*Profile, error) {
+	// Would prefer to do this in one query using a join and postgres json/array aggregation
+	// for now it's implemented with two queries
 	var p Profile
-	if err := db.Get(&p, "SELECT * FROM profile WHERE edipi=$1", action.Actor); err != nil {
+	if err := db.Get(&p, "SELECT id, edipi, username, email FROM profile WHERE edipi=$1", e); err != nil {
+		return nil, err
+	}
+	p.Tokens = make([]TokenInfoProfile, 0)
+	if err := db.Select(&p.Tokens, "SELECT token_id, issued FROM profile_token WHERE profile_id=$1", p.ID); err != nil {
 		return nil, err
 	}
 	return &p, nil
 }
 
 // CreateProfile creates a new profile
-func CreateProfile(db *sqlx.DB, r *CreateProfileRequest) (*Profile, error) {
-	sql := "INSERT INTO profile (edipi, username, email) VALUES ($1, $2, $3) RETURNING *"
+func CreateProfile(db *sqlx.DB, n *ProfileInfo) (*Profile, error) {
+	sql := "INSERT INTO profile (edipi, username, email) VALUES ($1, $2, $3) RETURNING edipi, username, email"
 	var p Profile
-	if err := db.Get(&p, sql, r.Actor, r.Username, r.Email); err != nil {
+	if err := db.Get(&p, sql, n.EDIPI, n.Username, n.Email); err != nil {
 		return nil, err
 	}
 	return &p, nil
 }
 
-// ListEmailAutocomplete returns search results for email autocomplete
-func ListEmailAutocomplete(db *sqlx.DB, str *string, limit *int) ([]EmailAutocompleteResult, error) {
+// CreateProfileToken creates a secret token and stores the HASH (not the actual token)
+// to the database. The return payload of this function is the first and last time you'll see
+// the raw token unless the user writes it down or stores it somewhere safe.
+func CreateProfileToken(db *sqlx.DB, profileID *uuid.UUID) (*Token, error) {
+	secretToken := passwords.GenerateRandom(40)
+	tokenID := passwords.GenerateRandom(40)
 
-	rr := make([]EmailAutocompleteResult, 0)
-	sql := `SELECT id, user_type, username, email
-			FROM v_email_autocomplete
-			WHERE username_email ILIKE '%'||$1||'%'
-			LIMIT $2
-	`
-	if err := db.Select(&rr, sql, str, limit); err != nil {
-		return make([]EmailAutocompleteResult, 0), err
+	hash, err := passwords.CreateHash(secretToken, passwords.DefaultParams)
+	if err != nil {
+		return nil, err
 	}
-	return rr, nil
+	var t Token
+	if err := db.Get(
+		&t, "INSERT INTO profile_token (token_id, profile_id, hash) VALUES ($1,$2,$3) RETURNING *",
+		tokenID, profileID, hash,
+	); err != nil {
+		return nil, err
+	}
+	t.SecretToken = secretToken
+	return &t, nil
+}
+
+// GetTokenInfoByTokenID returns a single token by token id
+func GetTokenInfoByTokenID(db *sqlx.DB, tokenID *string) (*TokenInfo, error) {
+	var n TokenInfo
+	if err := db.Get(
+		&n, "SELECT * FROM profile_token WHERE token_id=$1 LIMIT 1",
+	); err != nil {
+		return nil, err
+	}
+	return &n, nil
+}
+
+// DeleteToken deletes a token by token_id
+func DeleteToken(db *sqlx.DB, profileID *uuid.UUID, tokenID *string) error {
+	sql := "DELETE FROM profile_token WHERE profile_id=$1 AND token_id=$2"
+	_, err := db.Exec(sql, profileID, tokenID)
+	if err != nil {
+		return err
+	}
+	return nil
 }
