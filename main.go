@@ -137,6 +137,9 @@ func main() {
 	public.GET("/heartbeats", handlers.ListHeartbeats(db))
 	public.GET("/heartbeat/latest", handlers.GetLatestHeartbeat(db))
 
+	// Aware
+	public.GET("/aware/parameters", handlers.ListAwareParameters(db))
+
 	// AlertConfigs
 	public.GET("/projects/:project_id/instruments/:instrument_id/alert_configs", handlers.ListInstrumentAlertConfigs(db))
 	public.GET("/projects/:project_id/instruments/:instrument_id/alert_configs/:alert_config_id", handlers.GetAlertConfig(db))
