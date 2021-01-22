@@ -5,7 +5,7 @@ drop table if exists
 
 CREATE TABLE IF NOT EXISTS public.aware_platform (
     id UUID UNIQUE NOT NULL DEFAULT uuid_generate_v4(),
-    platform_id VARCHAR NOT NULL,
+    aware_id UUID NOT NULL,
     instrument_id UUID REFERENCES instrument(id)
 );
 

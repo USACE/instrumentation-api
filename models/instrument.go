@@ -20,6 +20,7 @@ import (
 // Instrument is an instrument
 type Instrument struct {
 	ID            uuid.UUID        `json:"id"`
+	AwareID       *uuid.UUID       `json:"aware_id"`
 	Groups        []uuid.UUID      `json:"groups"`
 	Constants     []uuid.UUID      `json:"constants"`
 	AlertConfigs  []uuid.UUID      `json:"alert_configs"`
@@ -152,6 +153,12 @@ func CreateInstruments(db *sqlx.DB, instruments []Instrument) ([]IDAndSlug, erro
 		return make([]IDAndSlug, 0), err
 	}
 
+	// AWARE Gage Info (if provided)
+	stmt3, err := txn.Preparex(`INSERT INTO aware_platform (instrument_id, aware_id) VALUES ($1, $2)`)
+	if err != nil {
+		return make([]IDAndSlug, 0), err
+	}
+
 	ii := make([]IDAndSlug, len(instruments))
 	for idx, i := range instruments {
 		if err := stmt1.Get(
@@ -164,11 +171,20 @@ func CreateInstruments(db *sqlx.DB, instruments []Instrument) ([]IDAndSlug, erro
 		if _, err := stmt2.Exec(ii[idx].ID, i.StatusID, i.StatusTime); err != nil {
 			return make([]IDAndSlug, 0), err
 		}
+		// Store Aware ID if Provided
+		if i.AwareID != nil {
+			if _, err := stmt3.Exec(ii[idx].ID, i.AwareID); err != nil {
+				return make([]IDAndSlug, 0), err
+			}
+		}
 	}
 	if err := stmt1.Close(); err != nil {
 		return make([]IDAndSlug, 0), err
 	}
 	if err := stmt2.Close(); err != nil {
+		return make([]IDAndSlug, 0), err
+	}
+	if err := stmt3.Close(); err != nil {
 		return make([]IDAndSlug, 0), err
 	}
 	if err := txn.Commit(); err != nil {

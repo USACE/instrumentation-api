@@ -21,3 +21,19 @@ func ListAwareParameters(db *sqlx.DB) ([]AwareParameter, error) {
 	}
 	return pp, nil
 }
+
+// func ListAwareEnabled(db *sqlx.DB) error {
+// 	sql := `
+// 	SELECT i.project_id          AS project_id,
+// 	       i.id                  AS instrument_id,
+// 	       e.aware_platform_id   AS platform_id,
+// 	       e.key                 AS aware_parameter_key,
+// 	       t.id                  AS timeseries_id
+//     FROM aware_platform_parameter_enabled e
+//     INNER JOIN aware_platform a ON a.platform_id = e.aware_platform_id
+//     INNER JOIN instrument i ON i.id = a.instrument_id
+//     INNER JOIN aware_parameter b ON b.id = e.aware_parameter_id
+// 	LEFT JOIN timeseries t ON t.instrument_id=i.id, t.parameter_id=b.parameter_id, t.unit_id=b.parameter_id   `
+
+// 	return nil
+// }
