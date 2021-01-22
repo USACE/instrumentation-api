@@ -20,7 +20,7 @@ import (
 // Instrument is an instrument
 type Instrument struct {
 	ID            uuid.UUID        `json:"id"`
-	AwareID       *uuid.UUID       `json:"aware_id"`
+	AwareID       *uuid.UUID       `json:"aware_id,omitempty"`
 	Groups        []uuid.UUID      `json:"groups"`
 	Constants     []uuid.UUID      `json:"constants"`
 	AlertConfigs  []uuid.UUID      `json:"alert_configs"`
