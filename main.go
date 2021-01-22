@@ -115,22 +115,25 @@ func main() {
 			return k.Hash, nil
 		},
 	))
-	private.Use(middleware.IsLoggedIn)
 
 	// keyAuth not allowed on these routes
-	noKeyAuth := e.Group("/instrumentation")
+	CACOnly := e.Group("/instrumentation")
 	if cfg.AuthJWTMocked {
-		noKeyAuth.Use(middleware.JWTMock(cfg.AuthDisabled, false))
+		CACOnly.Use(middleware.JWTMock(cfg.AuthDisabled, false))
 	} else {
-		noKeyAuth.Use(middleware.JWT(cfg.AuthDisabled, false))
+		CACOnly.Use(middleware.JWT(cfg.AuthDisabled, false))
 	}
-	noKeyAuth.Use(middleware.IsLoggedIn)
+
+	// AttachProfileMiddleware attaches ProfileID to context, whether
+	// authenticated by token or api key
+	private.Use(middleware.EDIPIMiddleware, middleware.AttachProfileMiddleware(db))
+	CACOnly.Use(middleware.EDIPIMiddleware, middleware.CACOnlyMiddleware)
 
 	// Profile and Tokens
-	noKeyAuth.POST("/profiles", handlers.CreateProfile(db))
-	noKeyAuth.GET("/my_profile", handlers.GetMyProfile(db))
-	noKeyAuth.POST("/my_tokens", handlers.CreateToken(db))
-	noKeyAuth.DELETE("/my_tokens/:token_id", handlers.DeleteToken(db))
+	CACOnly.POST("/profiles", handlers.CreateProfile(db))
+	CACOnly.GET("/my_profile", handlers.GetMyProfile(db))
+	CACOnly.POST("/my_tokens", handlers.CreateToken(db))
+	CACOnly.DELETE("/my_tokens/:token_id", handlers.DeleteToken(db))
 
 	// Heartbeat
 	private.POST("/heartbeat", handlers.DoHeartbeat(db))

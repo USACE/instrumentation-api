@@ -110,10 +110,8 @@ func CreateProjectBulk(db *sqlx.DB) echo.HandlerFunc {
 		}
 
 		// profile of user creating instruments
-		p, err := profileFromContext(c, db)
-		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
-		}
+		p := c.Get("profile").(*models.Profile)
+
 		// timestamp
 		t := time.Now()
 
@@ -164,11 +162,8 @@ func UpdateProject(db *sqlx.DB) echo.HandlerFunc {
 			)
 		}
 
-		// profile of user creating instruments
-		profile, err := profileFromContext(c, db)
-		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
-		}
+		profile := c.Get("profile").(*models.Profile)
+
 		// timestamp
 		t := time.Now()
 		p.Updater, p.UpdateDate = &profile.ID, &t

@@ -49,6 +49,8 @@ func KeyAuth(isDisabled bool, appKey string, h HashExtractor) echo.MiddlewareFun
 				}
 				// Compare provided key with key hash; Allow access if match
 				if match {
+					c.Set("KeyAuthSuccess", true)
+					c.Set("KeyAuthKeyID", keyID)
 					return true, nil
 				}
 				// Deny Access otherwise

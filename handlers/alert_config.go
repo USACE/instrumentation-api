@@ -54,10 +54,7 @@ func CreateInstrumentAlertConfigs(db *sqlx.DB) echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 		// Set Creator, CreateDate on all items
-		p, err := profileFromContext(c, db)
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
-		}
+		p := c.Get("profile").(*models.Profile)
 		t := time.Now()
 		for idx := range ac.Items {
 			ac.Items[idx].Creator, ac.Items[idx].CreateDate = p.ID, t
@@ -89,10 +86,7 @@ func UpdateInstrumentAlertConfig(db *sqlx.DB) echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 		// Profile and timestamp
-		p, err := profileFromContext(c, db)
-		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
-		}
+		p := c.Get("profile").(*models.Profile)
 		t := time.Now()
 		alert.Updater, alert.UpdateDate = &p.ID, &t
 		aUpdated, err := models.UpdateInstrumentAlertConfig(db, &instrumentID, &alertID, &alert)

@@ -60,10 +60,8 @@ func CreateInstrumentNote(db *sqlx.DB) echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 		// profile and timestamp
-		p, err := profileFromContext(c, db)
-		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
-		}
+		p := c.Get("profile").(*models.Profile)
+
 		t := time.Now()
 		for idx := range nc.Items {
 			nc.Items[idx].Creator = p.ID
@@ -97,10 +95,7 @@ func UpdateInstrumentNote(db *sqlx.DB) echo.HandlerFunc {
 			)
 		}
 		// profile and timestamp
-		p, err := profileFromContext(c, db)
-		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
-		}
+		p := c.Get("profile").(*models.Profile)
 		t := time.Now()
 		n.Updater, n.UpdateDate = &p.ID, &t
 

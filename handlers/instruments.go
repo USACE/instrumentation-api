@@ -74,10 +74,8 @@ func CreateInstruments(db *sqlx.DB) echo.HandlerFunc {
 			}
 
 			// profile of user creating instruments
-			p, err := profileFromContext(c, db)
-			if err != nil {
-				return models.InstrumentCollection{}, err
-			}
+			p := c.Get("profile").(*models.Profile)
+
 			// timestamp
 			t := time.Now()
 
@@ -150,10 +148,8 @@ func UpdateInstrument(db *sqlx.DB) echo.HandlerFunc {
 		}
 
 		// profile of user creating instruments
-		p, err := profileFromContext(c, db)
-		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
-		}
+		p := c.Get("profile").(*models.Profile)
+
 		// timestamp
 		t := time.Now()
 		i.Updater, i.UpdateDate = &p.ID, &t

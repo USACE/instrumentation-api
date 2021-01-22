@@ -55,10 +55,7 @@ func CreateInstrumentGroup(db *sqlx.DB) echo.HandlerFunc {
 		}
 
 		// profile
-		p, err := profileFromContext(c, db)
-		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
-		}
+		p := c.Get("profile").(*models.Profile)
 
 		// timestamp
 		t := time.Now()
@@ -111,10 +108,8 @@ func UpdateInstrumentGroup(db *sqlx.DB) echo.HandlerFunc {
 		}
 
 		// profile information and timestamp
-		p, err := profileFromContext(c, db)
-		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
-		}
+		p := c.Get("profile").(*models.Profile)
+
 		t := time.Now()
 		g.Updater, g.UpdateDate = &p.ID, &t
 
