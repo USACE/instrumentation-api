@@ -22,8 +22,21 @@ CREATE TABLE IF NOT EXISTS public.aware_platform_parameter_enabled (
     CONSTRAINT aware_platform_unique_parameter UNIQUE(aware_platform_id, aware_parameter_id)
 );
 
--- Seed Data
+CREATE OR REPLACE VIEW v_aware_platform_parameter_enabled AS (
+    SELECT i.project_id          AS project_id,
+        i.id                  AS instrument_id,
+        e.aware_platform_id   AS platform_id,
+        b.key                 AS aware_parameter_key,
+        t.id                  AS timeseries_id
+    FROM aware_platform_parameter_enabled e
+    INNER JOIN aware_platform a ON a.id = e.aware_platform_id
+    INNER JOIN instrument i ON i.id = a.instrument_id
+    INNER JOIN aware_parameter b ON b.id = e.aware_parameter_id
+    LEFT JOIN timeseries t ON t.instrument_id=i.id AND t.parameter_id=b.parameter_id AND t.unit_id=b.unit_id
+    ORDER BY project_id, platform_id
+);
 
+-- Seed Data
 INSERT INTO aware_parameter (id, key, parameter_id, unit_id) VALUES
     ('1d9f9d06-6fcb-41dd-9fe4-e513a2575e74', 'depth1', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
     ('c5f2842d-a5a9-4f53-9583-f613080a9c36', 'battery', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
