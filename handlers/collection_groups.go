@@ -73,10 +73,7 @@ func CreateCollectionGroup(db *sqlx.DB) echo.HandlerFunc {
 		}
 		cg.Slug = slug
 		// Profile of user creating collection group
-		p, err := profileFromContext(c, db)
-		if err != nil {
-			return c.String(http.StatusBadRequest, err.Error())
-		}
+		p := c.Get("profile").(*models.Profile)
 		cg.Creator, cg.CreateDate = p.ID, time.Now()
 		// Create Collection Group
 		cgNew, err := models.CreateCollectionGroup(db, &cg)
@@ -114,10 +111,7 @@ func UpdateCollectionGroup(db *sqlx.DB) echo.HandlerFunc {
 			)
 		}
 		// Actor Information (creator, create_date, updater, update_date)
-		p, err := profileFromContext(c, db)
-		if err != nil {
-			return c.String(http.StatusBadRequest, err.Error())
-		}
+		p := c.Get("profile").(*models.Profile)
 		t := time.Now()
 		cg.Updater, cg.UpdateDate = &p.ID, &t
 		// Update Collection Group

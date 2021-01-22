@@ -23,7 +23,7 @@ type TokenInfoProfile struct {
 
 // ProfileInfo is information necessary to construct a profile
 type ProfileInfo struct {
-	EDIPI    int    `json:"edipi"`
+	EDIPI    int    `json:"-"`
 	Username string `json:"username"`
 	Email    string `json:"email"`
 }
@@ -59,9 +59,21 @@ func GetProfileFromEDIPI(db *sqlx.DB, e int) (*Profile, error) {
 	return &p, nil
 }
 
+func GetProfileFromTokenID(db *sqlx.DB, tokenID string) (*Profile, error) {
+	var p Profile
+	sql := `SELECT p.id, p.edipi, p.username, p.email
+			FROM profile_token t
+			LEFT JOIN profile p ON p.id = t.profile_id
+			WHERE t.token_id=$1`
+	if err := db.Get(&p, sql, tokenID); err != nil {
+		return nil, err
+	}
+	return &p, nil
+}
+
 // CreateProfile creates a new profile
 func CreateProfile(db *sqlx.DB, n *ProfileInfo) (*Profile, error) {
-	sql := "INSERT INTO profile (edipi, username, email) VALUES ($1, $2, $3) RETURNING edipi, username, email"
+	sql := "INSERT INTO profile (edipi, username, email) VALUES ($1, $2, $3) RETURNING id, username, email"
 	var p Profile
 	if err := db.Get(&p, sql, n.EDIPI, n.Username, n.Email); err != nil {
 		return nil, err
@@ -95,7 +107,7 @@ func CreateProfileToken(db *sqlx.DB, profileID *uuid.UUID) (*Token, error) {
 func GetTokenInfoByTokenID(db *sqlx.DB, tokenID *string) (*TokenInfo, error) {
 	var n TokenInfo
 	if err := db.Get(
-		&n, "SELECT * FROM profile_token WHERE token_id=$1 LIMIT 1",
+		&n, "SELECT * FROM profile_token WHERE token_id=$1 LIMIT 1", tokenID,
 	); err != nil {
 		return nil, err
 	}

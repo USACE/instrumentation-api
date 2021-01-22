@@ -14,10 +14,7 @@ import (
 // SubscribeProfileToAlerts subscribes a profile to an alert
 func SubscribeProfileToAlerts(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		p, err := profileFromContext(c, db)
-		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
-		}
+		p := c.Get("profile").(*models.Profile)
 		profileID := p.ID
 
 		alertConfigID, err := uuid.Parse(c.Param("alert_config_id"))
@@ -49,10 +46,7 @@ func SubscribeProfileToAlerts(db *sqlx.DB) echo.HandlerFunc {
 // UnsubscribeProfileToAlerts unsubscribes a profile to an alert
 func UnsubscribeProfileToAlerts(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		p, err := profileFromContext(c, db)
-		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
-		}
+		p := c.Get("profile").(*models.Profile)
 		profileID := p.ID
 
 		alertConfigID, err := uuid.Parse(c.Param("alert_config_id"))
@@ -70,10 +64,7 @@ func UnsubscribeProfileToAlerts(db *sqlx.DB) echo.HandlerFunc {
 // ListMyAlertSubscriptions returns all alerts you are subscribed to and settings
 func ListMyAlertSubscriptions(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		p, err := profileFromContext(c, db)
-		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
-		}
+		p := c.Get("profile").(*models.Profile)
 		profileID := p.ID
 		ss, err := models.ListMyAlertSubscriptions(db, &profileID)
 		if err != nil {
@@ -99,10 +90,7 @@ func UpdateMyAlertSubscription(db *sqlx.DB) echo.HandlerFunc {
 			return c.String(http.StatusBadRequest, "route parameter subscription_id does not match id in JSON payload")
 		}
 		// Get Profile
-		p, err := profileFromContext(c, db)
-		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
-		}
+		p := c.Get("profile").(*models.Profile)
 		// Verify Profile ID matches ProfileID of Subscription to be Modified
 		// No Modifying anyone else's settings
 		t, err := models.GetAlertSubscriptionByID(db, &sID)

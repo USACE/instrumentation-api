@@ -60,11 +60,10 @@
 									"    \"type\": \"object\",",
 									"    \"properties\": {",
 									"        \"id\": { \"type\": \"string\" },",
-									"        \"edipi\": { \"type\": \"number\" },",
 									"        \"username\": { \"type\": \"string\" },",
 									"        \"email\": { \"type\": \"string\" },",
 									"    },",
-									"    \"required\": [\"id\", \"edipi\", \"username\", \"email\"],",
+									"    \"required\": [\"id\", \"username\", \"email\"],",
 									"    \"additionalProperties\": true",
 									"}",
 									"",
@@ -106,6 +105,23 @@
 							],
 							"path": [
 								"my_profile"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CreateToken",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/my_tokens",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"my_tokens"
 							]
 						}
 					},

@@ -10,23 +10,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func edipiFromContext(c echo.Context) int {
-	return c.Get("actor").(int)
-}
-
-// profileFromContext is a helper function that uses the current context to return
-// the corresponding profile
-func profileFromContext(c echo.Context, db *sqlx.DB) (*models.Profile, error) {
-	if edipi, ok := c.Get("actor").(int); ok {
-		p, err := models.GetProfileFromEDIPI(db, edipi)
-		if err != nil {
-			return nil, err
-		}
-		return p, nil
-	}
-	return nil, nil
-}
-
 // CreateProfile creates a user profile
 func CreateProfile(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
@@ -35,7 +18,7 @@ func CreateProfile(db *sqlx.DB) echo.HandlerFunc {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
 		// Set EDIPI
-		n.EDIPI = edipiFromContext(c)
+		n.EDIPI = c.Get("EDIPI").(int)
 
 		p, err := models.CreateProfile(db, &n)
 		if err != nil {
@@ -48,7 +31,8 @@ func CreateProfile(db *sqlx.DB) echo.HandlerFunc {
 // GetMyProfile returns profile for current authenticated user or 404
 func GetMyProfile(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		p, err := profileFromContext(c, db)
+		EDIPI := c.Get("EDIPI").(int)
+		p, err := models.GetProfileFromEDIPI(db, EDIPI)
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
 				return c.NoContent(http.StatusNotFound)
@@ -62,7 +46,8 @@ func GetMyProfile(db *sqlx.DB) echo.HandlerFunc {
 // CreateToken returns a list of all products
 func CreateToken(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		p, err := profileFromContext(c, db)
+		EDIPI := c.Get("EDIPI").(int)
+		p, err := models.GetProfileFromEDIPI(db, EDIPI)
 		if err != nil {
 			return c.String(
 				http.StatusBadRequest,
@@ -81,7 +66,8 @@ func CreateToken(db *sqlx.DB) echo.HandlerFunc {
 func DeleteToken(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		// Get ProfileID
-		p, err := profileFromContext(c, db)
+		EDIPI := c.Get("EDIPI").(int)
+		p, err := models.GetProfileFromEDIPI(db, EDIPI)
 		if err != nil {
 			return c.NoContent(http.StatusBadRequest)
 		}
