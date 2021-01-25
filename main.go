@@ -142,6 +142,7 @@ func main() {
 
 	// Aware
 	public.GET("/aware/parameters", handlers.ListAwareParameters(db))
+	public.GET("/aware/data_acquisition_config", handlers.ListAwarePlatformParameterConfig(db))
 
 	// AlertConfigs
 	public.GET("/projects/:project_id/instruments/:instrument_id/alert_configs", handlers.ListInstrumentAlertConfigs(db))
