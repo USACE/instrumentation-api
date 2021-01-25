@@ -242,7 +242,8 @@ CREATE TABLE IF NOT EXISTS public.timeseries (
     instrument_id UUID REFERENCES instrument (id),
     parameter_id UUID NOT NULL REFERENCES parameter (id),
     unit_id UUID NOT NULL REFERENCES unit (id),
-    CONSTRAINT instrument_unique_timeseries_name UNIQUE(instrument_id, name)
+    CONSTRAINT instrument_unique_timeseries_name UNIQUE(instrument_id, name),
+    CONSTRAINT instrument_unique_timeseries_slug UNIQUE(instrument_id, slug)
 );
 
 -- timeseries_measurement
