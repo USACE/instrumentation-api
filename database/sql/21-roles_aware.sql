@@ -6,7 +6,8 @@
 GRANT SELECT ON
     aware_platform_parameter_enabled,
     aware_platform,
-    aware_parameter
+    aware_parameter,
+    v_aware_platform_parameter_enabled
 TO instrumentation_reader;
 
 -- Role instrumentation_writer
