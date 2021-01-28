@@ -338,6 +338,7 @@ INSERT INTO measure (id, name) VALUES
     ('3ce398f2-985f-4ed4-93f6-23595d1849b7','energy'),
     ('700ebff9-4997-4462-8d20-7fb770557ee2','flow'),
     ('cd70a8e1-b914-42ca-8554-40e3c72e54c2','force'),
+    ('1351e7ed-9e7e-4b24-a081-e436206b8a6d','intensity')
     ('98c548e8-caea-4042-b083-7ba1d4ab57d5','irradiance'),
     ('0ca977f6-a74c-4bb5-86c9-0166dba80034','irradiation'),
     ('2c2b39d2-186d-46e9-8dc7-aca36f03aa23','length'),
@@ -374,6 +375,7 @@ INSERT INTO unit (id, unit_family_id, measure_id, name, abbreviation) VALUES
 ('67d3c3f0-ae76-4807-8cdd-4e29fa8d8b39', '19ad5455-4d6a-47d3-a28a-87bdfac2d75c', '68bd29ef-5908-4776-bcda-8e41056707fd', 'Cubic meters per second', 'cms'),
 ('5a2922f1-3553-4b0f-88ff-1ce12c47bf5c', 'c4eccc63-4bfb-4dd2-9f73-920ec7b385a0', '4f18ff01-aeba-46bd-b5c8-05eec8cd8b43', 'Cubic miles', 'mile3'),
 ('28da1a36-4a7a-4f82-b65d-39ad543189ac', 'c9f3b6d2-3136-4330-a330-66e402b4ee04', 'f3f9c804-5379-492e-b08e-d13b31598cd8', 'Degrees', 'deg'),
+('be854f6e-e36e-4bba-9e06-6d5aa09485be', 'c9f3b6d2-3136-4330-a330-66e402b4ee04', '1351e7ed-9e7e-4b24-a081-e436206b8a6d', 'Decibels', 'dB'),
 ('f2b8e84d-be4d-44d2-b772-a87e4c04cc46', 'c9f3b6d2-3136-4330-a330-66e402b4ee04', '0a1d1d80-ad12-482e-a91e-bd905748b282', 'Dollars', '$'),
 ('10e05b5c-7e96-434b-9182-a547333e1c52', 'c4eccc63-4bfb-4dd2-9f73-920ec7b385a0', '955f207d-9a48-45c5-9697-60a4ad7c9ca4', 'Fahrenheit', 'F'),
 ('7d8e5bb9-b9ea-4920-9def-0589160ea412', 'c9f3b6d2-3136-4330-a330-66e402b4ee04', '631347f1-b12e-4d09-8d1c-9359148d8b22', 'Formazin Nephelometric Unit', 'FNU'),
@@ -541,7 +543,8 @@ INSERT INTO parameter (id, name) VALUES
     ('de6112da-8489-4286-ae56-ec72aa09974d', 'temperature'),
     ('0ce77a5a-8283-47cd-9126-c440bcec4ef6', 'precipitation'),
     ('83b5a1f7-948b-4373-a47c-d73ff622aafd', 'elevation'),
-    ('430e5edb-e2b5-4f86-b19f-cda26a27e151', 'voltage');
+    ('430e5edb-e2b5-4f86-b19f-cda26a27e151', 'voltage'),
+    ('b23b141d-ce7b-4e0d-82ab-c8beb39c8325', 'signal-strength');
 
 -- -------------------------------------------------
 -- basic seed data to demo the app and run API tests
