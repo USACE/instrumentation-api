@@ -77,6 +77,10 @@ EXECUTE PROCEDURE public.aware_create_timeseries();
 
 
 -- Trigger Function; Enable all AWARE parameters when new record insert into aware_platform
+CREATE OR REPLACE FUNCTION public.aware_enable_params()
+    RETURNS TRIGGER
+    LANGUAGE PLPGSQL
+    AS $$
 BEGIN
 
 INSERT INTO aware_platform_parameter_enabled (aware_platform_id, aware_parameter_id) (
@@ -91,13 +95,13 @@ INSERT INTO aware_platform_parameter_enabled (aware_platform_id, aware_parameter
 ON CONFLICT DO NOTHING;
 RETURN NEW;
 END;
+$$;
 
 -- Trigger; Enable all AWARE parameters when new record insert into aware_platform
 CREATE TRIGGER aware_enable_params
-    AFTER INSERT
-    ON public.aware_platform
-    FOR EACH ROW 
-    EXECUTE PROCEDURE public.aware_enable_params();
+AFTER INSERT ON public.aware_platform
+FOR EACH ROW 
+EXECUTE PROCEDURE public.aware_enable_params();
 
 
 
@@ -115,4 +119,6 @@ INSERT INTO aware_platform_parameter_enabled (aware_platform_id, aware_parameter
 	FROM aware_platform a
 	CROSS JOIN aware_parameter b
 	ORDER BY aware_platform_id
-);
+    
+)
+ON CONFLICT DO NOTHING;
