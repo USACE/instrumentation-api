@@ -338,7 +338,7 @@ INSERT INTO measure (id, name) VALUES
     ('3ce398f2-985f-4ed4-93f6-23595d1849b7','energy'),
     ('700ebff9-4997-4462-8d20-7fb770557ee2','flow'),
     ('cd70a8e1-b914-42ca-8554-40e3c72e54c2','force'),
-    ('1351e7ed-9e7e-4b24-a081-e436206b8a6d','intensity')
+    ('1351e7ed-9e7e-4b24-a081-e436206b8a6d','intensity'),
     ('98c548e8-caea-4042-b083-7ba1d4ab57d5','irradiance'),
     ('0ca977f6-a74c-4bb5-86c9-0166dba80034','irradiation'),
     ('2c2b39d2-186d-46e9-8dc7-aca36f03aa23','length'),
