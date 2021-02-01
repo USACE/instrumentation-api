@@ -12,5 +12,6 @@ begin;
 \i '/sql/33-data_nae.sql'
 \i '/sql/34-data_poa.sql'
 \i '/sql/35-data_lrc_images.sql'
+\i '/sql/36-data_lrh.sql'
 
 commit;
