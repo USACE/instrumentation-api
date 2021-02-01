@@ -15,6 +15,9 @@ CREATE ROLE postgis_reader;
 -- Tables specific to instrumentation app
 GRANT SELECT ON
     instrument,
+    instrument_telemetry,
+    telemetry_goes,
+    telemetry_iridium,
     alert,
     alert_read,
     alert_config,
@@ -48,7 +51,8 @@ GRANT SELECT ON
     v_email_autocomplete,
     v_alert,
     v_timeseries_latest,
-    v_timeseries_project_map
+    v_timeseries_project_map,
+    v_instrument_telemetry
 TO instrumentation_reader;
 
 -- Role instrumentation_writer
@@ -63,6 +67,7 @@ GRANT INSERT,UPDATE,DELETE ON
     collection_group_timeseries,
     config,
     instrument,
+    instrument_telemetry,
     profile,
     profile_token,
     email,
@@ -78,6 +83,8 @@ GRANT INSERT,UPDATE,DELETE ON
     project,
     project_timeseries,
     status,
+    telemetry_goes,
+    telemetry_iridium,
     timeseries,
     timeseries_measurement,
     unit,

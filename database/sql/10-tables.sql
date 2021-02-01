@@ -6,6 +6,9 @@ CREATE extension IF NOT EXISTS "uuid-ossp";
 drop table if exists 
     public.timeseries_measurement,
     public.timeseries,
+    public.instrument_telemetry,
+    public.telemetry_goes,
+    public.telemetry_iridium,
     public.instrument_group_instruments,
     public.instrument_status,
     public.instrument_note,
@@ -287,6 +290,39 @@ CREATE TABLE IF NOT EXISTS public.collection_group_timeseries (
     collection_group_id UUID NOT NULL REFERENCES collection_group(id) ON DELETE CASCADE,
     timeseries_id UUID NOT NULL REFERENCES timeseries(id) ON DELETE CASCADE,
     CONSTRAINT collection_group_unique_timeseries UNIQUE(collection_group_id, timeseries_id)
+);
+
+
+-- ---------
+-- Telemetry
+-- ---------
+
+-- telemetry_type
+CREATE TABLE IF NOT EXISTS public.telemetry_type (
+    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+    slug VARCHAR NOT NULL,
+    name VARCHAR NOT NULL
+);
+
+-- instrument_telemetry
+CREATE TABLE IF NOT EXISTS public.instrument_telemetry (
+    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+    instrument_id UUID NOT NULL REFERENCES instrument(id),
+    telemetry_type_id UUID NOT NULL REFERENCES telemetry_type(id),
+    telemetry_id UUID NOT NULL,
+    CONSTRAINT instrument_unique_telemetry_type_id UNIQUE(instrument_id, telemetry_type_id)
+);
+
+-- GOES
+CREATE TABLE IF NOT EXISTS public.telemetry_goes (
+    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+    nesdis_id VARCHAR NOT NULL
+);
+
+-- IRIDIUM
+CREATE TABLE IF NOT EXISTS public.telemetry_iridium (
+    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+    imei VARCHAR(15) NOT NULL
 );
 
 -- ------
@@ -706,3 +742,9 @@ INSERT INTO collection_group (id, project_id, name, slug) VALUES
 INSERT INTO collection_group_timeseries (collection_group_id, timeseries_id) VALUES
     ('30b32cb1-0936-42c4-95d1-63a7832a57db', '7ee902a3-56d0-4acf-8956-67ac82c03a96'),
     ('30b32cb1-0936-42c4-95d1-63a7832a57db', '9a3864a8-8766-4bfa-bad1-0328b166f6a8');
+
+
+--
+INSERT INTO public.telemetry_type (id, slug, name) VALUES
+    ('10a32652-af43-4451-bd52-4980c5690cc9', 'goes-self-timed', 'GOES Self Timed'),
+    ('c0b03b0d-bfce-453a-b5a9-636118940449', 'iridium', 'Iridium');

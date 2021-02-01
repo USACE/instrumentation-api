@@ -179,3 +179,15 @@ INNER JOIN alert_config ac ON a.alert_config_id = ac.id
 INNER JOIN instrument i ON ac.instrument_id = i.id
 INNER JOIN project p ON i.project_id = p.id
 );
+
+-- v_telemetry
+CREATE OR REPLACE VIEW v_instrument_telemetry AS (
+    SELECT a.id,
+           b.id AS telemetry_type_id,
+           b.slug AS telemetry_type_slug,
+           b.name AS telemetry_type_name
+    FROM instrument_telemetry a
+    INNER JOIN telemetry_type b ON b.id = a.telemetry_type_id
+    LEFT JOIN telemetry_goes tg ON a.telemetry_id = tg.id
+    LEFT JOIN telemetry_iridium ti ON a.telemetry_id = ti.id
+);
