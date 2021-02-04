@@ -148,42 +148,39 @@ func GetProject(db *sqlx.DB, id uuid.UUID) (*Project, error) {
 }
 
 // CreateProjectBulk creates one or more projects from an array of projects
-func CreateProjectBulk(db *sqlx.DB, projects []Project) error {
+func CreateProjectBulk(db *sqlx.DB, projects []Project) ([]IDAndSlug, error) {
 
-	txn, err := db.Begin()
+	txn, err := db.Beginx()
 	if err != nil {
-		return err
+		return make([]IDAndSlug, 0), err
 	}
 
-	stmt, err := txn.Prepare(pq.CopyIn("project", "federal_id", "slug", "name", "creator", "create_date"))
+	// Instrument
+	stmt1, err := txn.Preparex(
+		`INSERT INTO project (federal_id, slug, name, creator, create_date)
+		 VALUES ($1, $2, $3, $4, $5)
+		 RETURNING id, slug`,
+	)
 	if err != nil {
-		return err
+		return make([]IDAndSlug, 0), err
 	}
 
-	for _, i := range projects {
-
-		if err != nil {
-			return err
+	pp := make([]IDAndSlug, len(projects))
+	for idx, p := range projects {
+		if err := stmt1.Get(
+			&pp[idx],
+			p.FederalID, p.Slug, p.Name, p.Creator, p.CreateDate,
+		); err != nil {
+			return make([]IDAndSlug, 0), err
 		}
-
-		if _, err = stmt.Exec(i.FederalID, i.Slug, i.Name, i.Creator, i.CreateDate); err != nil {
-			return err
-		}
 	}
-
-	if _, err := stmt.Exec(); err != nil {
-		return err
+	if err := stmt1.Close(); err != nil {
+		return make([]IDAndSlug, 0), err
 	}
-
-	if err := stmt.Close(); err != nil {
-		return err
-	}
-
 	if err := txn.Commit(); err != nil {
-		return err
+		return make([]IDAndSlug, 0), err
 	}
-
-	return nil
+	return pp, nil
 }
 
 // UpdateProject updates a project

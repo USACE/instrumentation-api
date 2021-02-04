@@ -6,9 +6,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-
-	// pq library
-	_ "github.com/lib/pq"
 )
 
 // InstrumentStatus is an instrument status

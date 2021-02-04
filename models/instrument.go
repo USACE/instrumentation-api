@@ -8,9 +8,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
 
-	// pq library
-	pq "github.com/lib/pq"
 	"github.com/paulmach/orb"
 	"github.com/paulmach/orb/encoding/wkb"
 	"github.com/paulmach/orb/encoding/wkt"

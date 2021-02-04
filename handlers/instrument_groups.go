@@ -10,7 +10,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
-	"github.com/lib/pq"
 )
 
 // ListInstrumentGroups returns instrument groups
@@ -168,18 +167,9 @@ func CreateInstrumentGroupInstruments(db *sqlx.DB) echo.HandlerFunc {
 		}
 
 		if err := models.CreateInstrumentGroupInstruments(db, instrumentGroupID, i.ID); err != nil {
-			if err, ok := err.(*pq.Error); ok {
-				switch err.Code {
-				case "23505":
-					// Instrument is already a member of instrument_group
-					return c.JSON(http.StatusOK, make(map[string]interface{}))
-				default:
-					return c.JSON(http.StatusInternalServerError, err)
-				}
-			}
 			return c.JSON(http.StatusInternalServerError, err)
 		}
-		return c.NoContent(http.StatusCreated)
+		return c.JSON(http.StatusCreated, make(map[string]interface{}))
 	}
 }
 

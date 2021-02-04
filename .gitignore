@@ -21,3 +21,6 @@ vendor
 __debug*
 
 **/.DS_Store
+
+# regression test results
+tests/instrumentation.html

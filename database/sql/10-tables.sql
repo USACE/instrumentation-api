@@ -300,8 +300,8 @@ CREATE TABLE IF NOT EXISTS public.collection_group_timeseries (
 -- telemetry_type
 CREATE TABLE IF NOT EXISTS public.telemetry_type (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
-    slug VARCHAR NOT NULL,
-    name VARCHAR NOT NULL
+    slug VARCHAR UNIQUE NOT NULL,
+    name VARCHAR UNIQUE NOT NULL
 );
 
 -- instrument_telemetry
@@ -310,19 +310,19 @@ CREATE TABLE IF NOT EXISTS public.instrument_telemetry (
     instrument_id UUID NOT NULL REFERENCES instrument(id),
     telemetry_type_id UUID NOT NULL REFERENCES telemetry_type(id),
     telemetry_id UUID NOT NULL,
-    CONSTRAINT instrument_unique_telemetry_type_id UNIQUE(instrument_id, telemetry_type_id)
+    CONSTRAINT instrument_unique_telemetry_id UNIQUE(instrument_id, telemetry_id)
 );
 
 -- GOES
 CREATE TABLE IF NOT EXISTS public.telemetry_goes (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
-    nesdis_id VARCHAR NOT NULL
+    nesdis_id VARCHAR UNIQUE NOT NULL
 );
 
 -- IRIDIUM
 CREATE TABLE IF NOT EXISTS public.telemetry_iridium (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
-    imei VARCHAR(15) NOT NULL
+    imei VARCHAR(15) UNIQUE NOT NULL
 );
 
 -- ------
@@ -743,8 +743,21 @@ INSERT INTO collection_group_timeseries (collection_group_id, timeseries_id) VAL
     ('30b32cb1-0936-42c4-95d1-63a7832a57db', '7ee902a3-56d0-4acf-8956-67ac82c03a96'),
     ('30b32cb1-0936-42c4-95d1-63a7832a57db', '9a3864a8-8766-4bfa-bad1-0328b166f6a8');
 
-
---
 INSERT INTO public.telemetry_type (id, slug, name) VALUES
     ('10a32652-af43-4451-bd52-4980c5690cc9', 'goes-self-timed', 'GOES Self Timed'),
     ('c0b03b0d-bfce-453a-b5a9-636118940449', 'iridium', 'Iridium');
+
+
+-- THE FOLLOWING IS A 100% SAMPLE TELEMETRY CONFIGURATION;
+-- THIS REPRESENTS A SINGLE INSTRUMENT WITH GOES AND IRIDIUM DATA TRANSMISSION
+INSERT INTO public.telemetry_goes (id, nesdis_id) VALUES
+    ('52fb5fbc-af7d-4a60-9fe3-3d1237091e6d', 'TEST123'),
+    ('c6b18827-5841-49dd-a7f8-bfafc681e158', 'TEST456');
+
+INSERT INTO public.telemetry_iridium (id, imei) VALUES
+    ('a5e8df6c-554f-4312-a84a-3876c41b4b1a', '123456789098765'),
+    ('1bda5844-1065-4bdb-8f49-d35c7a75b1de', '098765432123456');
+
+INSERT INTO public.instrument_telemetry (id, instrument_id, telemetry_type_id, telemetry_id) VALUES
+    ('8bb7c44f-7c72-4715-8337-457643b1a0d5', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '10a32652-af43-4451-bd52-4980c5690cc9', '52fb5fbc-af7d-4a60-9fe3-3d1237091e6d'),
+    ('a7cab13d-f6d2-44ba-8e08-8550ac690427', 'a7540f69-c41e-43b3-b655-6e44097edb7e', 'c0b03b0d-bfce-453a-b5a9-636118940449', 'a5e8df6c-554f-4312-a84a-3876c41b4b1a');

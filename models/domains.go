@@ -2,8 +2,6 @@ package models
 
 import (
 	"github.com/jmoiron/sqlx"
-	// pq library
-	_ "github.com/lib/pq"
 )
 
 // Domain is a struct for returning all database domain values
