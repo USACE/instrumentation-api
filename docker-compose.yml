@@ -8,8 +8,6 @@ services:
       - ./database/sql/init.sql:/docker-entrypoint-initdb.d/z_init.sql
     environment:
       - POSTGRES_PASSWORD=postgres
-    ports:
-      - "5432:5432"
   api:
     build:
       context: ./
