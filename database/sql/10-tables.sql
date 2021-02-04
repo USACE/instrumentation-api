@@ -9,6 +9,7 @@ drop table if exists
     public.instrument_telemetry,
     public.telemetry_goes,
     public.telemetry_iridium,
+    public.telemetry_type,
     public.instrument_group_instruments,
     public.instrument_status,
     public.instrument_note,
