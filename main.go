@@ -14,8 +14,6 @@ import (
 	"github.com/kelseyhightower/envconfig"
 
 	"github.com/labstack/echo/v4"
-
-	_ "github.com/lib/pq"
 )
 
 // Config stores configuration information stored in environment variables
@@ -50,6 +48,10 @@ func awsConfig(cfg *Config) *aws.Config {
 	return awsConfig
 }
 
+func (c *Config) dbConnStr() string {
+	return fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=%s", c.DBUser, c.DBPass, c.DBHost, c.DBName, c.DBSSLMode)
+}
+
 func main() {
 	//  Here's what would typically be here:
 	// lambda.Start(Handler)
@@ -79,12 +81,7 @@ func main() {
 	// AWS Config used to get S3 Session/Client
 	awsCfg := awsConfig(&cfg)
 
-	db := dbutils.Connection(
-		fmt.Sprintf(
-			"user=%s password=%s dbname=%s host=%s sslmode=%s binary_parameters=yes",
-			cfg.DBUser, cfg.DBPass, cfg.DBName, cfg.DBHost, cfg.DBSSLMode,
-		),
-	)
+	db := dbutils.Connection(cfg.dbConnStr())
 
 	e := echo.New()
 	e.Use(middleware.CORS, middleware.GZIP)

@@ -7,9 +7,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-
-	// pq database driver
-	_ "github.com/lib/pq"
 )
 
 // TimeseriesMeasurementCollectionCollection is a collection of timeseries measurement collections

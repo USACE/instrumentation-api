@@ -5,9 +5,6 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/jmoiron/sqlx"
-
-	// pq database driver
-	_ "github.com/lib/pq"
 )
 
 // ListInstrumentConstants lists constants for a given instrument id

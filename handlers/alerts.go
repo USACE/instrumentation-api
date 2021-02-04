@@ -5,7 +5,6 @@ import (
 
 	"github.com/USACE/instrumentation-api/models"
 	"github.com/google/uuid"
-	"github.com/lib/pq"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
@@ -50,20 +49,6 @@ func DoAlertRead(db *sqlx.DB) echo.HandlerFunc {
 		}
 		a, err := models.DoAlertRead(db, &profileID, &alertID)
 		if err != nil {
-			if err, ok := err.(*pq.Error); ok {
-				switch err.Code {
-				case "23505":
-					// Alert already Marked "Read"; Request hit constraint
-					// "alert_read" entry already exists, so return RESTful 200
-					a, err := models.GetMyAlert(db, &profileID, &alertID)
-					if err != nil {
-						return c.JSON(http.StatusInternalServerError, err)
-					}
-					return c.JSON(http.StatusOK, a)
-				default:
-					return c.JSON(http.StatusInternalServerError, err)
-				}
-			}
 			return c.JSON(http.StatusInternalServerError, err)
 		}
 		return c.JSON(http.StatusOK, a)

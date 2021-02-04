@@ -11,6 +11,7 @@ services:
   api:
     build:
       context: ./
+    restart: always
     environment:
       # NOTE: AWS_ Variables provided by execution role in deployed version
       - AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE

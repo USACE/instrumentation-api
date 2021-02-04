@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/USACE/instrumentation-api/models"
-	"github.com/lib/pq"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -23,23 +22,9 @@ func SubscribeProfileToAlerts(db *sqlx.DB) echo.HandlerFunc {
 		}
 		pa, err := models.SubscribeProfileToAlerts(db, &alertConfigID, &profileID)
 		if err != nil {
-			if err, ok := err.(*pq.Error); ok {
-				switch err.Code {
-				// Profile already subscribed to instrument alert; Get ProfileAlert and return it
-				// Return a RESTful 200; i.e. nothing wrong, state of data is already "subscribed"
-				case "23505":
-					pa, err := models.GetAlertSubscription(db, &alertConfigID, &profileID)
-					if err != nil {
-						return c.JSON(http.StatusInternalServerError, err)
-					}
-					return c.JSON(http.StatusOK, &pa)
-				default:
-					return c.JSON(http.StatusInternalServerError, err)
-				}
-			}
-			return c.JSON(http.StatusInternalServerError, err)
+			return c.String(http.StatusInternalServerError, err.Error())
 		}
-		return c.JSON(http.StatusOK, &pa)
+		return c.JSON(http.StatusOK, pa)
 	}
 }
 
@@ -53,8 +38,7 @@ func UnsubscribeProfileToAlerts(db *sqlx.DB) echo.HandlerFunc {
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
-		err = models.UnsubscribeProfileToAlerts(db, &alertConfigID, &profileID)
-		if err != nil {
+		if err = models.UnsubscribeProfileToAlerts(db, &alertConfigID, &profileID); err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, make(map[string]interface{}))

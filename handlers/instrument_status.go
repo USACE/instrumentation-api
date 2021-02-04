@@ -66,7 +66,7 @@ func CreateOrUpdateInstrumentStatus(db *sqlx.DB) echo.HandlerFunc {
 		if err := models.CreateOrUpdateInstrumentStatus(db, &instrumentID, sc.Items); err != nil {
 			return c.JSON(http.StatusInternalServerError, err)
 		}
-		return c.NoContent(http.StatusCreated)
+		return c.JSON(http.StatusCreated, make(map[string]interface{}))
 	}
 }
 

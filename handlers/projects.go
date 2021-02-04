@@ -109,7 +109,7 @@ func CreateProjectBulk(db *sqlx.DB) echo.HandlerFunc {
 			return err
 		}
 
-		// profile of user creating instruments
+		// profile of user creating projects
 		p := c.Get("profile").(*models.Profile)
 
 		// timestamp
@@ -131,11 +131,12 @@ func CreateProjectBulk(db *sqlx.DB) echo.HandlerFunc {
 			slugsTaken = append(slugsTaken, s)
 		}
 
-		if err := models.CreateProjectBulk(db, pc.Projects); err != nil {
+		pp, err := models.CreateProjectBulk(db, pc.Projects)
+		if err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 		// Send Project
-		return c.NoContent(http.StatusCreated)
+		return c.JSON(http.StatusCreated, pp)
 	}
 }
 
@@ -207,7 +208,7 @@ func CreateProjectTimeseries(db *sqlx.DB) echo.HandlerFunc {
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err)
 		}
-		return c.NoContent(http.StatusCreated)
+		return c.JSON(http.StatusCreated, make(map[string]interface{}))
 	}
 }
 

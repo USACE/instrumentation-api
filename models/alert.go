@@ -78,7 +78,8 @@ func GetMyAlert(db *sqlx.DB, profileID *uuid.UUID, alertID *uuid.UUID) (*Alert, 
 // DoAlertRead marks an alert as read for a profile
 func DoAlertRead(db *sqlx.DB, profileID *uuid.UUID, alertID *uuid.UUID) (*Alert, error) {
 	if _, err := db.Exec(
-		`INSERT INTO alert_read (profile_id, alert_id) VALUES ($1, $2)`, profileID, alertID,
+		`INSERT INTO alert_read (profile_id, alert_id) VALUES ($1, $2)
+		 ON CONFLICT DO NOTHING`, profileID, alertID,
 	); err != nil {
 		return nil, err
 	}

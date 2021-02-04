@@ -56,14 +56,14 @@ func (c *AlertSubscriptionCollection) UnmarshalJSON(b []byte) error {
 
 // SubscribeProfileToAlerts subscribes a profile to an instrument alert
 func SubscribeProfileToAlerts(db *sqlx.DB, alertConfigID *uuid.UUID, profileID *uuid.UUID) (*AlertSubscription, error) {
-	var pa AlertSubscription
-	err := db.QueryRowx(
-		`INSERT INTO alert_profile_subscription (alert_config_id, profile_id) VALUES ($1, $2) RETURNING *`, alertConfigID, profileID,
-	).StructScan(&pa)
+	_, err := db.Exec(
+		`INSERT INTO alert_profile_subscription (alert_config_id, profile_id) VALUES ($1, $2)
+		 ON CONFLICT DO NOTHING`, alertConfigID, profileID,
+	)
 	if err != nil {
 		return nil, err
 	}
-	return &pa, nil
+	return GetAlertSubscription(db, alertConfigID, profileID)
 }
 
 // UnsubscribeProfileToAlerts subscribes a profile to an instrument alert

@@ -3,13 +3,16 @@ package dbutils
 import (
 	"log"
 
+	// _ "github.com/jackc/pgx/v4/"
+	_ "github.com/jackc/pgx/v4/stdlib"
+
 	"github.com/jmoiron/sqlx"
 )
 
 func initDB(connStr string) *sqlx.DB {
 
 	log.Printf("Getting database connection")
-	db, err := sqlx.Open("postgres", connStr)
+	db, err := sqlx.Connect("pgx", connStr)
 
 	if err != nil {
 		log.Fatal("Could not connect to database")
@@ -19,6 +22,8 @@ func initDB(connStr string) *sqlx.DB {
 	if db == nil {
 		log.Panicf("database is nil")
 	}
+
+	db.SetMaxOpenConns(10)
 
 	return db
 }
