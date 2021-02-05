@@ -280,6 +280,19 @@ func UpdateInstrument(db *sqlx.DB, i *Instrument) (*Instrument, error) {
 	return GetInstrument(db, &updatedID)
 }
 
+// UpdateInstrumentGeometry updates instrument geometry property
+func UpdateInstrumentGeometry(db *sqlx.DB, projectID *uuid.UUID, instrumentID *uuid.UUID, geom *geojson.Geometry, p *Profile) (*Instrument, error) {
+	var nID uuid.UUID
+	if err := db.Get(
+		&nID, `UPDATE instrument SET geometry=ST_GeomFromWKB($3), updater=$4, update_date=now()
+			   WHERE project_id=$1 AND id=$2
+			   RETURNING id`, projectID, instrumentID, wkb.Value(geom.Geometry()), p.ID,
+	); err != nil {
+		return nil, err
+	}
+	return GetInstrument(db, &nID)
+}
+
 // DeleteFlagInstrument changes delete flag to true
 func DeleteFlagInstrument(db *sqlx.DB, id *uuid.UUID) error {
 

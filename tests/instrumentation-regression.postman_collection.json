@@ -296,7 +296,7 @@
 					"response": []
 				},
 				{
-					"name": "PutInstrument",
+					"name": "UpdateInstrument",
 					"event": [
 						{
 							"listen": "test",
@@ -338,6 +338,62 @@
 							"path": [
 								"instruments",
 								"a7540f69-c41e-43b3-b655-6e44097edb7e"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateInstrumentGeometry",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// schema validation",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(",
+									"        JSON.parse(pm.globals.get('INSTRUMENT_OBJ_SCHEMA'))",
+									"    )",
+									"});",
+									"// Assert known updated values of lat/lon",
+									"pm.test(\"Response lat/lon matches submitted values\", function () {",
+									"  pm.expect(pm.response.json().geometry.coordinates).to.include(-78);",
+									"  pm.expect(pm.response.json().geometry.coordinates).to.include(25);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"type\": \"Point\",\n    \"coordinates\": [\n        -78.0,\n        25.0\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/instruments/a7540f69-c41e-43b3-b655-6e44097edb7e/geometry",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"projects",
+								"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+								"instruments",
+								"a7540f69-c41e-43b3-b655-6e44097edb7e",
+								"geometry"
 							]
 						}
 					},

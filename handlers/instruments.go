@@ -6,6 +6,7 @@ import (
 
 	"github.com/USACE/instrumentation-api/dbutils"
 	"github.com/USACE/instrumentation-api/models"
+	"github.com/paulmach/orb/geojson"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -161,6 +162,31 @@ func UpdateInstrument(db *sqlx.DB) echo.HandlerFunc {
 		}
 		// return updated instrument
 		return c.JSON(http.StatusOK, iUpdated)
+	}
+}
+
+// UpdateInstrumentGeometry updates only the geometry property of an instrument
+func UpdateInstrumentGeometry(db *sqlx.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		projectID, err := uuid.Parse(c.Param("project_id"))
+		if err != nil {
+			return c.String(http.StatusBadRequest, err.Error())
+		}
+		instrumentID, err := uuid.Parse(c.Param("instrument_id"))
+		if err != nil {
+			return c.String(http.StatusBadRequest, err.Error())
+		}
+		var geom geojson.Geometry
+		if err := c.Bind(&geom); err != nil {
+			return c.String(http.StatusBadRequest, err.Error())
+		}
+		// profile of user creating instruments
+		p := c.Get("profile").(*models.Profile)
+		instrument, err := models.UpdateInstrumentGeometry(db, &projectID, &instrumentID, &geom, p)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, err.Error())
+		}
+		return c.JSON(http.StatusOK, instrument)
 	}
 }
 
