@@ -185,6 +185,7 @@ func main() {
 	private.POST("/projects/:project_id/instruments", handlers.CreateInstruments(db))
 	private.POST("/instruments", handlers.CreateInstruments(db))
 	private.PUT("/instruments/:instrument_id", handlers.UpdateInstrument(db))
+	private.PUT("/projects/:project_id/instruments/:instrument_id/geometry", handlers.UpdateInstrumentGeometry(db))
 	private.PUT("/projects/:project_id/instruments/:instrument_id", handlers.UpdateInstrument(db))
 	private.DELETE("/instruments/:instrument_id", handlers.DeleteFlagInstrument(db))
 
