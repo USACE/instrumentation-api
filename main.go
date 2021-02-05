@@ -14,6 +14,8 @@ import (
 	"github.com/kelseyhightower/envconfig"
 
 	"github.com/labstack/echo/v4"
+
+	_ "github.com/jackc/pgx/v4/stdlib"
 )
 
 // Config stores configuration information stored in environment variables
@@ -49,7 +51,7 @@ func awsConfig(cfg *Config) *aws.Config {
 }
 
 func (c *Config) dbConnStr() string {
-	return fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=%s", c.DBUser, c.DBPass, c.DBHost, c.DBName, c.DBSSLMode)
+	return fmt.Sprintf("user=%s password=%s dbname=%s host=%s sslmode=%s", c.DBUser, c.DBPass, c.DBName, c.DBHost, c.DBSSLMode)
 }
 
 func main() {
