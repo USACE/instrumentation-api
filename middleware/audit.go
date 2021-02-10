@@ -22,7 +22,7 @@ func EDIPIMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			// Get EDIPI
 			EDIPI, err := strconv.Atoi(claims["sub"].(string))
 			if err != nil {
-				return c.NoContent(http.StatusForbidden)
+				return c.JSON(http.StatusForbidden, models.DefaultMessageUnauthorized)
 			}
 			c.Set("EDIPI", EDIPI)
 		}
@@ -34,7 +34,7 @@ func CACOnlyMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		EDIPI := c.Get("EDIPI")
 		if EDIPI == nil {
-			return c.NoContent(http.StatusForbidden)
+			return c.JSON(http.StatusForbidden, models.DefaultMessageUnauthorized)
 		}
 		return next(c)
 
@@ -52,7 +52,7 @@ func AttachProfileMiddleware(db *sqlx.DB) echo.MiddlewareFunc {
 				keyID := c.Get("KeyAuthKeyID").(string)
 				p, err := models.GetProfileFromTokenID(db, keyID)
 				if err != nil {
-					return c.NoContent(http.StatusForbidden)
+					return c.JSON(http.StatusForbidden, models.DefaultMessageUnauthorized)
 				}
 				c.Set("profile", p)
 				return next(c)
@@ -60,11 +60,11 @@ func AttachProfileMiddleware(db *sqlx.DB) echo.MiddlewareFunc {
 			// Lookup Profile by EDIPI
 			EDIPI := c.Get("EDIPI")
 			if EDIPI == nil {
-				return c.NoContent(http.StatusForbidden)
+				return c.JSON(http.StatusForbidden, models.DefaultMessageUnauthorized)
 			}
 			p, err := models.GetProfileFromEDIPI(db, EDIPI.(int))
 			if err != nil {
-				return c.NoContent(http.StatusForbidden)
+				return c.JSON(http.StatusForbidden, models.DefaultMessageUnauthorized)
 			}
 			c.Set("profile", p)
 			// userRoles := claims["roles"].([]interface{})

@@ -199,7 +199,7 @@ func DeleteFlagInstrument(db *sqlx.DB) echo.HandlerFunc {
 		}
 
 		if err := models.DeleteFlagInstrument(db, &id); err != nil {
-			return c.NoContent(http.StatusBadRequest)
+			return c.JSON(http.StatusBadRequest, models.DefaultMessageBadRequest)
 		}
 
 		return c.JSON(http.StatusOK, make(map[string]interface{}))

@@ -158,12 +158,12 @@ func CreateInstrumentGroupInstruments(db *sqlx.DB) echo.HandlerFunc {
 		instrumentGroupID, err := uuid.Parse(c.Param("instrument_group_id"))
 
 		if err != nil || instrumentGroupID == uuid.Nil {
-			return c.NoContent(http.StatusBadRequest)
+			return c.JSON(http.StatusBadRequest, models.DefaultMessageBadRequest)
 		}
 		// Instrument
 		i := new(models.Instrument)
 		if err := c.Bind(i); err != nil || i.ID == uuid.Nil {
-			return c.NoContent(http.StatusBadRequest)
+			return c.JSON(http.StatusBadRequest, models.DefaultMessageBadRequest)
 		}
 
 		if err := models.CreateInstrumentGroupInstruments(db, instrumentGroupID, i.ID); err != nil {

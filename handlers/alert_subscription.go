@@ -82,7 +82,7 @@ func UpdateMyAlertSubscription(db *sqlx.DB) echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 		if p.ID != t.ProfileID {
-			return c.NoContent(http.StatusUnauthorized)
+			return c.JSON(http.StatusUnauthorized, models.DefaultMessageUnauthorized)
 		}
 		sUpdated, err := models.UpdateMyAlertSubscription(db, &s)
 		if err != nil {
