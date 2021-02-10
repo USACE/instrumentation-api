@@ -35,9 +35,9 @@ func GetMyProfile(db *sqlx.DB) echo.HandlerFunc {
 		p, err := models.GetProfileFromEDIPI(db, EDIPI)
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
-				return c.NoContent(http.StatusNotFound)
+				return c.JSON(http.StatusNotFound, models.DefaultMessageNotFound)
 			}
-			return c.NoContent(http.StatusInternalServerError)
+			return c.JSON(http.StatusInternalServerError, models.DefaultMessageInternalServerError)
 		}
 		return c.JSON(http.StatusOK, &p)
 	}
@@ -69,7 +69,7 @@ func DeleteToken(db *sqlx.DB) echo.HandlerFunc {
 		EDIPI := c.Get("EDIPI").(int)
 		p, err := models.GetProfileFromEDIPI(db, EDIPI)
 		if err != nil {
-			return c.NoContent(http.StatusBadRequest)
+			return c.JSON(http.StatusBadRequest, models.DefaultMessageBadRequest)
 		}
 		// Get Token ID
 		tokenID := c.Param("token_id")
