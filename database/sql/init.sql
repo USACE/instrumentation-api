@@ -7,11 +7,13 @@ begin;
 \i '/sql/20-roles.sql'
 \i '/sql/21-roles_aware.sql'
 \i '/sql/30-data_hhd.sql'
-\i '/sql/31-data_lrb.sql'
 \i '/sql/32-data_lrc.sql'
 \i '/sql/33-data_nae.sql'
 \i '/sql/34-data_poa.sql'
 \i '/sql/35-data_lrc_images.sql'
-\i '/sql/36-data_lrh.sql'
+\i '/sql/district_streamgages/lrb.sql'
+\i '/sql/district_streamgages/lrh.sql'
+\i '/sql/district_streamgages/nwdm.sql'
+\i '/sql/district_streamgages/sas.sql'
 
 commit;

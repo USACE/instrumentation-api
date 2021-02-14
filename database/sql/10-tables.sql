@@ -574,14 +574,21 @@ INSERT INTO unit (id, unit_family_id, measure_id, name, abbreviation) VALUES
 
 -- parameter
 INSERT INTO parameter (id, name) VALUES
+    ('377ecec0-f785-46ab-b0e2-5fd8c682dfea', 'conductivity'),
+    ('98007857-d027-4524-9a63-d07ae93e5fa2', 'dissolved-oxygen'),
+    ('83b5a1f7-948b-4373-a47c-d73ff622aafd', 'elevation'),
+    ('a63a3202-3115-4ad4-9e5b-3d35f94647d2', 'flow'),
     ('068b59b0-aafb-4c98-ae4b-ed0365a6fbac', 'length'),
+    ('5d0b2c85-6a4c-4d82-aed3-193b066349f1', 'ph'),
+    ('0ce77a5a-8283-47cd-9126-c440bcec4ef6', 'precipitation'),
     ('1de79e29-fb70-45c3-ae7d-4695517ced90', 'pressure'),
+    ('b23b141d-ce7b-4e0d-82ab-c8beb39c8325', 'signal-strength'),
+    ('e46deb1d-e7e4-4d49-a874-18306991ecfe', 'speed'),
     ('b49f214e-f69f-43da-9ce3-ad96042268d0', 'stage'),
     ('de6112da-8489-4286-ae56-ec72aa09974d', 'temperature'),
-    ('0ce77a5a-8283-47cd-9126-c440bcec4ef6', 'precipitation'),
-    ('83b5a1f7-948b-4373-a47c-d73ff622aafd', 'elevation'),
-    ('430e5edb-e2b5-4f86-b19f-cda26a27e151', 'voltage'),
-    ('b23b141d-ce7b-4e0d-82ab-c8beb39c8325', 'signal-strength');
+    ('3676df6a-37c2-4a81-9072-ddcd4ab93702', 'turbidity'),
+    ('06189199-a25f-4101-b8bd-991c6a5a7ab3', 'velocity'),  
+    ('430e5edb-e2b5-4f86-b19f-cda26a27e151', 'voltage');
 
 -- -------------------------------------------------
 -- basic seed data to demo the app and run API tests
