@@ -1,6 +1,6 @@
 -- Project
-INSERT INTO project (id, slug, name) VALUES
-    ('a012e753-9eff-426d-b0ee-090b430d1980', 'buffalo-district-streamgages', 'Buffalo District Streamgages');
+INSERT INTO project (id, slug, name, image) VALUES
+    ('a012e753-9eff-426d-b0ee-090b430d1980', 'buffalo-district-streamgages', 'Buffalo District Streamgages', 'buffalo-district-streamgages.jpg');
 
 -- Instrument Groups
 INSERT INTO instrument_group (project_id, id, slug, name, description) VALUES
