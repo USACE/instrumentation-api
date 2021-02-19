@@ -1,3 +1,11 @@
+-- The below statements are designed to quickly remove project instruments
+-- and associated tables.  It may not be completely comprehensive yet.
+-- Statements are using SELECT on purpose.  You have to change to DELETE
+-- when ready (safety first :-) ).
+-- *******************************************************************
+-- Replace the project_id with YOUR target project
+-- *******************************************************************
+
 -- Delete Timeseries Measurements
 select * from timeseries_measurement
 where timeseries_id in (
@@ -48,17 +56,23 @@ where instrument_id in (
 	select i.id 
 	from instrument i
 	where i.project_id = 'a6e542eb-41bc-45b3-aab7-7f45004ad8d3')
+
+-- Delete Instrument Group
+select * from instrument_group_instruments
+where instrument_id in (
+	select id from instrument i
+	where i.project_id = 'a6e542eb-41bc-45b3-aab7-7f45004ad8d3'
+	)
 	
--- Delete Instrument
+--Delete Collection Groups
+
+--Delete collection_group_timeseries
+
+-- Delete Instruments
 select * 
 from instrument i
 where i.project_id = 'a6e542eb-41bc-45b3-aab7-7f45004ad8d3'
 
---Delete Instrument Groups
-
---Delete Collection Groups
-
--- Delete collection_group_timeseries
 
 -- Delete Alert Config
 
