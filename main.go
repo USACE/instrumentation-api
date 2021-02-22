@@ -251,6 +251,9 @@ func main() {
 	// // Collection Group; Remove Timeseries from collection_group
 	private.DELETE("/projects/:project_id/collection_groups/:collection_group_id/timeseries/:timeseries_id", handlers.RemoveTimeseriesFromCollectionGroup(db))
 
+	// Plotting Configurations
+	public.GET("/projects/:project_id/plot_configurations", handlers.ListPlotConfigurations(db))
+
 	// Misc
 	public.GET("/domains", handlers.GetDomains(db))
 	public.GET("/home", handlers.GetHome(db))

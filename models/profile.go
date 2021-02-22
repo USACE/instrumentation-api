@@ -59,6 +59,7 @@ func GetProfileFromEDIPI(db *sqlx.DB, e int) (*Profile, error) {
 	return &p, nil
 }
 
+// GetProfileFromTokenID returns a profile given a token ID
 func GetProfileFromTokenID(db *sqlx.DB, tokenID string) (*Profile, error) {
 	var p Profile
 	sql := `SELECT p.id, p.edipi, p.username, p.email

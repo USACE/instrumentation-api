@@ -35,6 +35,8 @@ drop table if exists
     public.heartbeat,
     public.collection_group_timeseries,
     public.collection_group,
+    public.plot_configuration,
+    public.plot_configuration_timeseries,
     public.config
 	CASCADE;
 
@@ -291,6 +293,28 @@ CREATE TABLE IF NOT EXISTS public.collection_group_timeseries (
     collection_group_id UUID NOT NULL REFERENCES collection_group(id) ON DELETE CASCADE,
     timeseries_id UUID NOT NULL REFERENCES timeseries(id) ON DELETE CASCADE,
     CONSTRAINT collection_group_unique_timeseries UNIQUE(collection_group_id, timeseries_id)
+);
+
+-- plot_configuration
+CREATE TABLE IF NOT EXISTS public.plot_configuration (
+    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+    deleted BOOLEAN NOT NULL DEFAULT false,
+    slug VARCHAR NOT NULL,
+    name VARCHAR NOT NULL,
+    description VARCHAR(360),
+    project_id UUID NOT NULL REFERENCES project(id) ON DELETE CASCADE,
+    creator UUID NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
+    create_date TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updater UUID,
+    update_date TIMESTAMPTZ,
+    CONSTRAINT project_unique_plot_configuration_name UNIQUE(project_id, name),
+    CONSTRAINT project_unique_plot_configuration_slug UNIQUE(project_id, slug)
+);
+
+CREATE TABLE IF NOT EXISTS public.plot_configuration_timeseries (
+    plot_configuration_id UUID NOT NULL REFERENCES plot_configuration(id) ON DELETE CASCADE,
+    timeseries_id UUID NOT NULL REFERENCES timeseries(id) ON DELETE CASCADE,
+    UNIQUE(plot_configuration_id, timeseries_id)
 );
 
 
@@ -751,6 +775,20 @@ INSERT INTO collection_group_timeseries (collection_group_id, timeseries_id) VAL
     ('30b32cb1-0936-42c4-95d1-63a7832a57db', '7ee902a3-56d0-4acf-8956-67ac82c03a96'),
     ('30b32cb1-0936-42c4-95d1-63a7832a57db', '9a3864a8-8766-4bfa-bad1-0328b166f6a8');
 
+-- plot_configuration
+INSERT INTO public.plot_configuration (project_id, id, slug, name, description) VALUES
+    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'cc28ca81-f125-46c6-a5cd-cc055a003c19', 'all-plots', 'All Plots', 'This is an example plot group'),
+    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', '64879f68-6a2c-4d78-8e8b-5e9b9d2e0d6a', 'pz-1a-plot', 'PZ-1A PLOT', 'Example plot group configurations');
+
+
+-- plot_configuration_timeseries
+INSERT INTO public.plot_configuration_timeseries (plot_configuration_id, timeseries_id) VALUES
+    ('cc28ca81-f125-46c6-a5cd-cc055a003c19', '8f4ca3a3-5971-4597-bd6f-332d1cf5af7c'),
+    ('cc28ca81-f125-46c6-a5cd-cc055a003c19', '9a3864a8-8766-4bfa-bad1-0328b166f6a8'),
+    ('64879f68-6a2c-4d78-8e8b-5e9b9d2e0d6a', '8f4ca3a3-5971-4597-bd6f-332d1cf5af7c'),
+    ('64879f68-6a2c-4d78-8e8b-5e9b9d2e0d6a', '9a3864a8-8766-4bfa-bad1-0328b166f6a8');
+
+-- telemetry_type
 INSERT INTO public.telemetry_type (id, slug, name) VALUES
     ('10a32652-af43-4451-bd52-4980c5690cc9', 'goes-self-timed', 'GOES Self Timed'),
     ('c0b03b0d-bfce-453a-b5a9-636118940449', 'iridium', 'Iridium');
