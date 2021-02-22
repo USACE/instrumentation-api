@@ -5,6 +5,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+// AwareParameter struct
 type AwareParameter struct {
 	ID          uuid.UUID `json:"id"`
 	Key         string    `json:"key"`
@@ -30,6 +31,7 @@ type awarePlatformParameterEnabled struct {
 	TimeseriesID      *uuid.UUID `json:"timeseries_id" db:"timeseries_id"`
 }
 
+// ListAwareParameters returns aware parameters
 func ListAwareParameters(db *sqlx.DB) ([]AwareParameter, error) {
 	pp := make([]AwareParameter, 0)
 	if err := db.Select(
@@ -53,6 +55,7 @@ func listAwarePlatformParameterEnabled(db *sqlx.DB) ([]awarePlatformParameterEna
 	return aa, nil
 }
 
+// ListAwarePlatformParameterConfig returns aware platform parameter configs
 func ListAwarePlatformParameterConfig(db *sqlx.DB) ([]AwarePlatformParameterConfig, error) {
 	ee, err := listAwarePlatformParameterEnabled(db)
 	if err != nil {
