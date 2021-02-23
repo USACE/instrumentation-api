@@ -43,7 +43,7 @@ func (c *PlotConfigurationCollection) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-// PlotConfigFactory converts database rows to Project objects
+// PlotConfigFactory converts database rows to PlotConfiguration objects
 func PlotConfigFactory(rows *sqlx.Rows) ([]PlotConfiguration, error) {
 	defer rows.Close()
 	pp := make([]PlotConfiguration, 0) // PlotConfigurations
@@ -83,4 +83,28 @@ func ListPlotConfigurations(db *sqlx.DB, projectID *uuid.UUID) ([]PlotConfigurat
 		return nil, err
 	}
 	return PlotConfigFactory(rows)
+}
+
+// GetPlotConfiguration returns a single plot configuration
+func GetPlotConfiguration(db *sqlx.DB, ID uuid.UUID) (*PlotConfiguration, error) {
+	var GetPlotConfigurationSQL = `SELECT id,
+									deleted,
+									slug,
+									name,
+									description,
+									project_id,
+									creator,
+									create_date,
+									updater,
+									update_date
+									FROM plot_configuration`
+
+	var g PlotConfiguration
+	if err := db.QueryRowx(
+		GetPlotConfigurationSQL+" WHERE id = $1",
+		ID,
+	).StructScan(&g); err != nil {
+		return nil, err
+	}
+	return &g, nil
 }
