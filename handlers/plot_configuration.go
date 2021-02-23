@@ -25,3 +25,18 @@ func ListPlotConfigurations(db *sqlx.DB) echo.HandlerFunc {
 		return c.JSON(http.StatusOK, &cc)
 	}
 }
+
+// GetPlotConfiguration returns single instrument group
+func GetPlotConfiguration(db *sqlx.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		id, err := uuid.Parse(c.Param("plot_configuration_id"))
+		if err != nil {
+			return c.String(http.StatusBadRequest, "Malformed ID")
+		}
+		g, err := models.GetPlotConfiguration(db, id)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+		return c.JSON(http.StatusOK, g)
+	}
+}
