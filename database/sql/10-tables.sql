@@ -340,10 +340,39 @@ INSERT INTO config (static_host, static_prefix) VALUES
 
 -- instrument_type
 INSERT INTO instrument_type (id, name) VALUES
-    ('0fd1f9ba-2731-4ff9-96dd-3c03215ab06f', 'Staff Gage'),
-    ('1bb4bf7c-f5f8-44eb-9805-43b07ffadbef', 'Piezometer'),
+    ('2f340c02-8bac-4bf4-9d5e-08a6f395ee8f', 'Adas'),
     ('3350b1d1-a946-49a8-bf19-587d7163e0f7', 'Barometer'),
-    ('98a61f29-18a8-430a-9d02-0f53486e0984', 'Instrument');
+    ('43671cb6-4141-45e4-9d17-b75a0e0508e1', 'Crackmeter'),
+    ('6b8ef914-79ec-41d1-93bc-ba44694baa71', 'Drain'),
+    ('03b950c9-7b53-408f-b874-b42353dc1ba7', 'Earth Pressure Cell'),
+    ('69c8fcc2-0bbc-43b0-bdc2-a44f6ce5c1de', 'Extensometer'),
+    ('11ffb059-e3d2-4cd7-a076-4fba7828bfbb', 'Extraction Well'),
+    ('d65f62d0-57d7-49af-8078-d8f3fdb75477', 'Flowmeter'),
+    ('135460f1-033f-46e0-b204-ed23074c0817', 'Flume'),
+    ('3c3dfc23-ed2a-4a4a-9ce0-683c7c1d4d20', 'Inclinometer'),
+    ('98a61f29-18a8-430a-9d02-0f53486e0984', 'Instrument'),
+    ('1c8e8b3b-3322-4175-8d3a-c4c08ca1a86c', 'Joint Meter'),
+    ('cb6a616e-4953-4807-a312-50622a57570a', 'Liquid Level Gauge'),
+    ('39d299ee-6cf6-4924-bba3-39f20d713b0f', 'Load Cell'),
+    ('486da6b4-f7a8-4c7f-a0cc-ee13c39673fb', 'Observation Well'),
+    ('d9cf24af-bfef-45ec-8812-c76faa2b8feb', 'Pendulum'),
+    ('1bb4bf7c-f5f8-44eb-9805-43b07ffadbef', 'Piezometer'),
+    ('835bb7b9-5c80-48db-8c7f-06dfcacfc5d8', 'Plumbline'),
+    ('f735d3e5-3741-4946-9913-0b5f178f8052', 'Pore Pressure Cell'),
+    ('f371126d-fbe9-494d-869c-d55d8c393e65', 'Precipitation'),
+    ('466b7603-0763-4aae-a67b-9bc78e630934', 'Relief Well'),
+    ('c7c6f90b-1621-4bd6-95ea-e87cd8c326b1', 'Seismic Monitoring Device'),
+    ('21f37666-0fb2-401d-bd8e-b9bcb8240b8d', 'Settlement Plate'),
+    ('0fd1f9ba-2731-4ff9-96dd-3c03215ab06f', 'Staff Gage'),
+    ('3fd6186e-39bd-4ec0-b57e-91da0b542d79', 'Strain Gauge'),
+    ('daf1e5f4-32bf-4a3d-bb31-94ffc5c95436', 'Stress Cell'),
+    ('4a91ca85-86c7-4055-8185-2155f5e60fd8', 'Surface Monitoring Point'),
+    ('e5ab6dfe-185c-4a72-a493-f7e3844df3fd', 'Survey Monitoring Point'),
+    ('0dabc138-265f-4278-87d7-412e3ec469ec', 'Thermister'),
+    ('d98aa744-ac14-4cb5-adbc-d275a7498951', 'Tiltmeter'),
+    ('78ade434-d845-4195-b1c6-5ab5b376be97', 'Water Level'),
+    ('02a518e8-12de-4a0b-a07d-441989e920c1', 'Water Quality'),
+    ('7e63a703-aa68-444f-8cd4-9f7d09cbcb83', 'Weir');
 
 -- status
 INSERT INTO status (id, name, description) VALUES
