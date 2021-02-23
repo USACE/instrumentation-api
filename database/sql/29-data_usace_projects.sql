@@ -14,7 +14,6 @@ INSERT INTO project (id, slug, name, image) VALUES
     ('0356320d-c89b-45f0-9e77-faea8ee39d5c','little-rock-district','Little Rock District', 'midas-project-default.jpg'),
     ('63e96826-4dac-4a7c-9d15-6cddf27965c3','los-angeles-district','Los Angeles District', 'midas-project-default.jpg'),
     ('42869cd4-840f-4494-949e-6b5090ccfd41','louisville-district','Louisville District', 'midas-project-default.jpg'),
-    ('f728c94b-741d-448f-992a-74438396ae0d','mvs-l','MVS-L', 'midas-project-default.jpg'),
     ('8db17b8e-8e5e-45cb-9816-ae3d4b6e8c54','memphis-district','Memphis District', 'midas-project-default.jpg'),
     ('d8eba071-d9ce-4a9c-bfc0-79d55b602c8b','mobile-district','Mobile District', 'midas-project-default.jpg'),
     ('d12c79b2-1adb-44ae-910b-ba29ad1e96d8','nashville-district','Nashville District', 'midas-project-default.jpg'),
