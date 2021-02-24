@@ -59,7 +59,7 @@ func GetMedia(s3Config *aws.Config, bucket *string) echo.HandlerFunc {
 
 		c.Response().Header().Set(echo.HeaderContentDisposition, "attachment")
 		// Set Cache Control to 1 Year
-		c.Response().Header().Set("Cache-Control", "max-age=31536000")
+		c.Response().Header().Set("Cache-Control", "public, max-age=31536000")
 		return c.Stream(http.StatusOK, "image/jpg", reader)
 	}
 }
