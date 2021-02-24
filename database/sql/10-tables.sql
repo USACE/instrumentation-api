@@ -505,7 +505,7 @@ INSERT INTO unit (id, unit_family_id, measure_id, name, abbreviation) VALUES
 ('c4a66be8-6bdf-4ded-8199-0233813fe777', 'c9f3b6d2-3136-4330-a330-66e402b4ee04', '513bafdb-48e3-44ff-8189-54e8130ec76a', 'Terawatts', 'TW'),
 ('c768c0c8-36e4-495a-bb9a-2065402db3c5', '19ad5455-4d6a-47d3-a28a-87bdfac2d75c', '4f18ff01-aeba-46bd-b5c8-05eec8cd8b43', 'Thousands of cubic meters', '1000 m3'),
 ('3383d7d4-ffa1-4522-a8f5-f16561c5bd2f', '19ad5455-4d6a-47d3-a28a-87bdfac2d75c', '71daec34-d255-4dd5-8075-70ff93411389', 'Thousands of square meters', '1000 m2'),
-('6b5bd788-8c78-43bb-b5a3-ad544b858a64', '19ad5455-4d6a-47d3-a28a-87bdfac2d75c', 'a08f3cd5-233d-43f4-8f21-633a6aa63f0c', 'Volts', 'volt'),
+('6b5bd788-8c78-43bb-b5a3-ad544b858a64', '19ad5455-4d6a-47d3-a28a-87bdfac2d75c', 'a08f3cd5-233d-43f4-8f21-633a6aa63f0c', 'Volts', 'V'),
 ('a0be2c0a-e6e7-41c1-9417-91f6a4d2f8ea', 'c9f3b6d2-3136-4330-a330-66e402b4ee04', '3ce398f2-985f-4ed4-93f6-23595d1849b7', 'Watt-hours', 'Wh'),
 ('3008e1ff-338b-4072-865b-0ff68e0d68b6', '19ad5455-4d6a-47d3-a28a-87bdfac2d75c', '98c548e8-caea-4042-b083-7ba1d4ab57d5', 'Watts per square meter', 'W/m2'),
 ('23aa81c1-74a0-4186-a481-1fd2f146986e', 'c4eccc63-4bfb-4dd2-9f73-920ec7b385a0', '4f18ff01-aeba-46bd-b5c8-05eec8cd8b43', 'acre feet', 'acre*ft'),
