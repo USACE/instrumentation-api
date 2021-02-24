@@ -252,8 +252,11 @@ func main() {
 	private.DELETE("/projects/:project_id/collection_groups/:collection_group_id/timeseries/:timeseries_id", handlers.RemoveTimeseriesFromCollectionGroup(db))
 
 	// Plotting Configurations
-	public.GET("/:project_id/plot_configurations", handlers.ListPlotConfigurations(db))
-	public.GET("/:project_id/plot_configurations/:plot_configuration_id", handlers.GetPlotConfiguration(db))
+	public.GET("/projects/:project_id/plot_configurations", handlers.ListPlotConfigurations(db))
+	public.GET("/projects/:project_id/plot_configurations/:plot_configuration_id", handlers.GetPlotConfiguration(db))
+	public.POST("/projects/:project_id/plot_configurations", handlers.CreatePlotConfiguration(db))
+	// public.PUT("/project/:project_id/plot_configuration/:plot_configuration", handlers.UpdatePlotConfiguration(db))
+	private.DELETE("/projects/:project_id/plot_configuration/:plot_configuration_id", handlers.DeletePlotConfiguration(db))
 
 	// Misc
 	public.GET("/domains", handlers.GetDomains(db))
