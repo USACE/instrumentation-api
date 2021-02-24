@@ -36,6 +36,7 @@ type Instrument struct {
 	Station       *int             `json:"station"`
 	StationOffset *int             `json:"offset" db:"station_offset"`
 	ProjectID     *uuid.UUID       `json:"project_id" db:"project_id"`
+	NIDID         *string          `json:"nid_id" db:"nid_id"`
 	AuditInfo
 }
 
@@ -137,9 +138,9 @@ func CreateInstruments(db *sqlx.DB, instruments []Instrument) ([]IDAndSlug, erro
 	// Instrument
 	stmt1, err := txn.Preparex(
 		`INSERT INTO instrument
-			(slug, name, type_id, geometry, station, station_offset, creator, create_date, project_id, formula)
+			(slug, name, type_id, geometry, station, station_offset, creator, create_date, project_id, formula, nid_id)
 		 VALUES
-			 ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+			 ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
 		 RETURNING id, slug`,
 	)
 	if err != nil {
@@ -163,7 +164,7 @@ func CreateInstruments(db *sqlx.DB, instruments []Instrument) ([]IDAndSlug, erro
 		if err := stmt1.Get(
 			&ii[idx],
 			i.Slug, i.Name, i.TypeID, wkt.MarshalString(i.Geometry.Geometry()),
-			i.Station, i.StationOffset, i.Creator, i.CreateDate, i.ProjectID, i.Formula,
+			i.Station, i.StationOffset, i.Creator, i.CreateDate, i.ProjectID, i.Formula, i.NIDID,
 		); err != nil {
 			return make([]IDAndSlug, 0), err
 		}
@@ -244,7 +245,8 @@ func UpdateInstrument(db *sqlx.DB, i *Instrument) (*Instrument, error) {
 				project_id = $7,
 				station = $8,
 				station_offset = $9,
-				formula = $10
+				formula = $10,
+				nid_id = $11
 		 WHERE id = $1
 		 RETURNING id`,
 	)
@@ -252,7 +254,7 @@ func UpdateInstrument(db *sqlx.DB, i *Instrument) (*Instrument, error) {
 	var updatedID uuid.UUID
 	if err := stmt1.QueryRow(
 		i.ID, i.Name, i.TypeID, wkb.Value(i.Geometry.Geometry()),
-		i.Updater, i.UpdateDate, i.ProjectID, i.Station, i.StationOffset, i.Formula,
+		i.Updater, i.UpdateDate, i.ProjectID, i.Station, i.StationOffset, i.Formula, i.NIDID,
 	).Scan(&updatedID); err != nil {
 		return nil, err
 	}
@@ -312,7 +314,7 @@ func InstrumentsFactory(rows *sqlx.Rows) ([]Instrument, error) {
 		var p orb.Point
 		err := rows.Scan(
 			&i.ID, &i.Deleted, &i.StatusID, &i.Status, &i.StatusTime, &i.Slug, &i.Name, &i.TypeID, &i.Type, wkb.Scanner(&p), &i.Station, &i.StationOffset,
-			&i.Creator, &i.CreateDate, &i.Updater, &i.UpdateDate, &i.ProjectID, pq.Array(&i.Constants), pq.Array(&i.Groups), pq.Array(&i.AlertConfigs), &i.Formula,
+			&i.Creator, &i.CreateDate, &i.Updater, &i.UpdateDate, &i.ProjectID, pq.Array(&i.Constants), pq.Array(&i.Groups), pq.Array(&i.AlertConfigs), &i.Formula, &i.NIDID,
 		)
 		if err != nil {
 			return make([]Instrument, 0), err
@@ -329,6 +331,6 @@ func InstrumentsFactory(rows *sqlx.Rows) ([]Instrument, error) {
 // ListInstrumentsSQL is the base SQL to retrieve all instrumentsJSON
 var listInstrumentsSQL = `SELECT id, deleted, status_id, status, status_time, slug,
 	name, type_id, type, geometry, station, station_offset, creator, create_date,
-	updater, update_date, project_id, constants, groups, alert_configs, formula
+	updater, update_date, project_id, constants, groups, alert_configs, formula, nid_id
 	FROM   v_instrument
 	`
