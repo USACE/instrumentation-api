@@ -74,7 +74,6 @@ CREATE TABLE IF NOT EXISTS public.project (
     office_id UUID,
     deleted boolean NOT NULL DEFAULT false,
     slug VARCHAR(240) UNIQUE NOT NULL,
-    federal_id VARCHAR(240),
     name VARCHAR(240) UNIQUE NOT NULL,
     creator UUID NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
     create_date TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -158,6 +157,7 @@ CREATE TABLE IF NOT EXISTS public.instrument (
     update_date TIMESTAMPTZ,
     type_id UUID NOT NULL REFERENCES instrument_type (id),
     project_id UUID REFERENCES project (id),
+    nid_id VARCHAR,
     CONSTRAINT project_unique_instrument_name UNIQUE(name,project_id)
 );
 
