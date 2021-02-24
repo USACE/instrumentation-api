@@ -505,7 +505,7 @@ INSERT INTO unit (id, unit_family_id, measure_id, name, abbreviation) VALUES
 ('c4a66be8-6bdf-4ded-8199-0233813fe777', 'c9f3b6d2-3136-4330-a330-66e402b4ee04', '513bafdb-48e3-44ff-8189-54e8130ec76a', 'Terawatts', 'TW'),
 ('c768c0c8-36e4-495a-bb9a-2065402db3c5', '19ad5455-4d6a-47d3-a28a-87bdfac2d75c', '4f18ff01-aeba-46bd-b5c8-05eec8cd8b43', 'Thousands of cubic meters', '1000 m3'),
 ('3383d7d4-ffa1-4522-a8f5-f16561c5bd2f', '19ad5455-4d6a-47d3-a28a-87bdfac2d75c', '71daec34-d255-4dd5-8075-70ff93411389', 'Thousands of square meters', '1000 m2'),
-('6b5bd788-8c78-43bb-b5a3-ad544b858a64', '19ad5455-4d6a-47d3-a28a-87bdfac2d75c', 'a08f3cd5-233d-43f4-8f21-633a6aa63f0c', 'Volts', 'volt'),
+('6b5bd788-8c78-43bb-b5a3-ad544b858a64', '19ad5455-4d6a-47d3-a28a-87bdfac2d75c', 'a08f3cd5-233d-43f4-8f21-633a6aa63f0c', 'Volts', 'V'),
 ('a0be2c0a-e6e7-41c1-9417-91f6a4d2f8ea', 'c9f3b6d2-3136-4330-a330-66e402b4ee04', '3ce398f2-985f-4ed4-93f6-23595d1849b7', 'Watt-hours', 'Wh'),
 ('3008e1ff-338b-4072-865b-0ff68e0d68b6', '19ad5455-4d6a-47d3-a28a-87bdfac2d75c', '98c548e8-caea-4042-b083-7ba1d4ab57d5', 'Watts per square meter', 'W/m2'),
 ('23aa81c1-74a0-4186-a481-1fd2f146986e', 'c4eccc63-4bfb-4dd2-9f73-920ec7b385a0', '4f18ff01-aeba-46bd-b5c8-05eec8cd8b43', 'acre feet', 'acre*ft'),
@@ -595,7 +595,6 @@ INSERT INTO unit (id, unit_family_id, measure_id, name, abbreviation) VALUES
 ('290f1547-a3c5-4158-a088-b50f5cabe8be', '19ad5455-4d6a-47d3-a28a-87bdfac2d75c', '71daec34-d255-4dd5-8075-70ff93411389', 'square millimeters', 'mM^2'),
 ('e0b63a59-6da5-43d8-8e1b-f9d50078eec6', 'c4eccc63-4bfb-4dd2-9f73-920ec7b385a0', '71daec34-d255-4dd5-8075-70ff93411389', 'square yards', 'yd^2'),
 ('0b2ecf01-9034-4043-953e-ae20f0e8c935', 'c4eccc63-4bfb-4dd2-9f73-920ec7b385a0', '5042b88e-ad61-454d-953e-f07224be4f07', 'tons', 'ton'),
---('0fcf6088-7a05-43d3-bec6-5e825a68a2a9', '19ad5455-4d6a-47d3-a28a-87bdfac2d75c', 'a08f3cd5-233d-43f4-8f21-633a6aa63f0c', 'volts', 'V'),
 ('c0a116ef-058d-41b0-a845-557226ce557c', '19ad5455-4d6a-47d3-a28a-87bdfac2d75c', '513bafdb-48e3-44ff-8189-54e8130ec76a', 'watts', 'W'),
 ('5fa61c67-38e6-46ae-ac1f-114278706261', 'c9f3b6d2-3136-4330-a330-66e402b4ee04', 'b85b9367-f034-4783-bf5b-9220e32d4e6a', 'weeks', 'week'),
 ('cc83a42b-16a7-46a8-b3a6-966bad7ae2d7', 'c4eccc63-4bfb-4dd2-9f73-920ec7b385a0', '2c2b39d2-186d-46e9-8dc7-aca36f03aa23', 'yards', 'yd'),
@@ -603,6 +602,7 @@ INSERT INTO unit (id, unit_family_id, measure_id, name, abbreviation) VALUES
 
 -- parameter
 INSERT INTO parameter (id, name) VALUES
+    ('b4ea8385-48a3-4e95-82fb-d102dfcbcb54', 'air-temperature'),
     ('377ecec0-f785-46ab-b0e2-5fd8c682dfea', 'conductivity'),
     ('98007857-d027-4524-9a63-d07ae93e5fa2', 'dissolved-oxygen'),
     ('83b5a1f7-948b-4373-a47c-d73ff622aafd', 'elevation'),
@@ -613,11 +613,11 @@ INSERT INTO parameter (id, name) VALUES
     ('1de79e29-fb70-45c3-ae7d-4695517ced90', 'pressure'),
     ('b23b141d-ce7b-4e0d-82ab-c8beb39c8325', 'signal-strength'),
     ('e46deb1d-e7e4-4d49-a874-18306991ecfe', 'speed'),
-    ('b49f214e-f69f-43da-9ce3-ad96042268d0', 'stage'),
-    ('de6112da-8489-4286-ae56-ec72aa09974d', 'temperature'),
+    ('b49f214e-f69f-43da-9ce3-ad96042268d0', 'stage'),   
     ('3676df6a-37c2-4a81-9072-ddcd4ab93702', 'turbidity'),
     ('06189199-a25f-4101-b8bd-991c6a5a7ab3', 'velocity'),  
-    ('430e5edb-e2b5-4f86-b19f-cda26a27e151', 'voltage');
+    ('430e5edb-e2b5-4f86-b19f-cda26a27e151', 'voltage'),
+    ('de6112da-8489-4286-ae56-ec72aa09974d', 'water-temperature');
 
 -- -------------------------------------------------
 -- basic seed data to demo the app and run API tests
