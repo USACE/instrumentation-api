@@ -253,8 +253,9 @@ func main() {
 
 	// Misc
 	public.GET("/domains", handlers.GetDomains(db))
-	public.GET("/home", handlers.GetHome(db))
 	public.POST("/explorer", handlers.PostExplorer(db))
+	public.GET("/home", handlers.GetHome(db))
+	public.GET("/units", handlers.ListUnits(db))
 
 	// OpenDCS Configuration
 	public.GET("/opendcs/sites", handlers.ListOpendcsSites(db))
