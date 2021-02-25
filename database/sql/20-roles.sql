@@ -53,7 +53,8 @@ GRANT SELECT ON
     v_alert,
     v_timeseries_latest,
     v_timeseries_project_map,
-    v_instrument_telemetry
+    v_instrument_telemetry,
+    v_unit
 TO instrumentation_reader;
 
 -- Role instrumentation_writer

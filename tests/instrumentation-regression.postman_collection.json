@@ -3019,6 +3019,67 @@
 			]
 		},
 		{
+			"name": "Units",
+			"item": [
+				{
+					"name": "ListUnits",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// validate JSON schema",
+									"var schema = {",
+									"    \"type\": \"array\",",
+									"    \"items\": {",
+									"        \"type\": \"object\",",
+									"        \"properties\": {",
+									"            \"id\": { \"type\": \"string\" },",
+									"            \"name\": { \"type\": \"string\" },",
+									"            \"abbreviation\": { \"type\": \"string\" },",
+									"            \"unit_family_id\": { \"type\": \"string\" },",
+									"            \"unit_family\": { \"type\": \"string\" },",
+									"            \"measure_id\": { \"type\": \"string\" },",
+									"            \"measure\": { \"type\": [\"string\", \"null\"] },",
+									"        },",
+									"        \"required\": [\"id\", \"name\", \"abbreviation\", \"unit_family_id\", \"unit_family\", \"measure_id\", \"measure\"],",
+									"        \"additionalProperties\": false",
+									"    }",
+									"}",
+									"pm.globals.set('UNIT_ARRAY_SCHEMA', schema);",
+									"",
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// schema validation",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(schema)",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/units",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"units"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "explorer",
 			"item": [
 				{
