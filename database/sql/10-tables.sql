@@ -145,8 +145,8 @@ CREATE TABLE IF NOT EXISTS public.instrument_group (
 CREATE TABLE IF NOT EXISTS public.instrument (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     deleted BOOLEAN NOT NULL DEFAULT false,
-    slug VARCHAR(240) UNIQUE NOT NULL,
-    name VARCHAR(120) NOT NULL,
+    slug VARCHAR UNIQUE NOT NULL,
+    name VARCHAR(360) NOT NULL,
     formula VARCHAR,
     geometry geometry,
     station int,
@@ -157,8 +157,7 @@ CREATE TABLE IF NOT EXISTS public.instrument (
     update_date TIMESTAMPTZ,
     type_id UUID NOT NULL REFERENCES instrument_type (id),
     project_id UUID REFERENCES project (id),
-    nid_id VARCHAR,
-    CONSTRAINT project_unique_instrument_name UNIQUE(name,project_id)
+    nid_id VARCHAR
 );
 
 -- alert_config
