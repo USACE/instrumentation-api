@@ -14,6 +14,7 @@ begin;
 \i '/sql/35-data_lrc_images.sql'
 \i '/sql/district_streamgages/lrb.sql'
 \i '/sql/district_streamgages/lrh.sql'
+\i '/sql/district_streamgages/lrn.sql'
 \i '/sql/district_streamgages/nwdm.sql'
 \i '/sql/district_streamgages/sas.sql'
 
