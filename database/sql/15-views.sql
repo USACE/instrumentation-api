@@ -217,3 +217,22 @@ CREATE OR REPLACE VIEW v_unit AS (
     INNER JOIN unit_family f ON f.id = u.unit_family_id
     INNER JOIN measure m ON m.id = u.measure_id
 );
+
+CREATE OR REPLACE VIEW v_plot_configuration AS (
+    SELECT pc.id            AS id,
+           pc.slug          AS slug,
+           pc.name          AS name,
+           pc.project_id    AS project_id,
+           t.timeseries_id     AS timeseries_id,
+           pc.creator       AS creator,
+           pc.create_date   AS create_date,
+           pc.updater       AS updater,
+           pc.update_date   AS update_date
+    FROM plot_configuration pc
+    LEFT JOIN (
+        SELECT plot_configuration_id    as plot_configuration_id,
+               array_agg(timeseries_id) as timeseries_id
+        FROM plot_configuration_timeseries
+        GROUP BY plot_configuration_id
+    ) as t ON pc.id = t.plot_configuration_id
+);
