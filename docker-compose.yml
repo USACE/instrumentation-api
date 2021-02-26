@@ -32,6 +32,7 @@ services:
       - INSTRUMENTATION_DBHOST=postgres
       - INSTRUMENTATION_DBSSLMODE=disable
       - INSTRUMENTATION_HEARTBEATKEY=password
+      - INSTRUMENTATION_ROUTE_PREFIX=/instrumentation
     ports:
       - "80:80"
   minio:

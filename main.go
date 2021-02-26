@@ -30,6 +30,7 @@ type Config struct {
 	DBHost              string
 	DBSSLMode           string
 	HeartbeatKey        string
+	RoutePrefix         string `envconfig:"ROUTE_PREFIX"`
 	AWSS3Endpoint       string `envconfig:"AWS_S3_ENDPOINT"`
 	AWSS3Region         string `envconfig:"AWS_S3_REGION"`
 	AWSS3DisableSSL     bool   `envconfig:"AWS_S3_DISABLE_SSL"`
@@ -87,7 +88,7 @@ func main() {
 
 	e := echo.New()
 	e.Use(middleware.CORS, middleware.GZIP)
-	public := e.Group("/instrumentation") // TODO: /instrumentation/v1/
+	public := e.Group(cfg.RoutePrefix) // TODO: /instrumentation/v1/
 
 	// Media Routes
 	public.GET("/projects/:project_slug/images/*", handlers.GetMedia(awsCfg, &cfg.AWSS3Bucket))
@@ -96,7 +97,7 @@ func main() {
 	// setting the second parameter passed to each middleware function to "true"
 	// means that if `?key=` is in the query parameters, JWT middleware will automatically
 	// pass (call next(c)); authentication will then be handled by keyauth
-	private := e.Group("/instrumentation")
+	private := e.Group(cfg.RoutePrefix)
 	if cfg.AuthJWTMocked {
 		private.Use(middleware.JWTMock(cfg.AuthDisabled, true))
 	} else {
@@ -116,7 +117,7 @@ func main() {
 	))
 
 	// keyAuth not allowed on these routes
-	CACOnly := e.Group("/instrumentation")
+	CACOnly := e.Group(cfg.RoutePrefix)
 	if cfg.AuthJWTMocked {
 		CACOnly.Use(middleware.JWTMock(cfg.AuthDisabled, false))
 	} else {
@@ -257,7 +258,6 @@ func main() {
 	private.POST("/projects/:project_id/plot_configurations", handlers.CreatePlotConfiguration(db))
 	private.PUT("/projects/:project_id/plot_configurations/:plot_configuration_id", handlers.UpdatePlotConfiguration(db))
 	private.DELETE("/projects/:project_id/plot_configurations/:plot_configuration_id", handlers.DeletePlotConfiguration(db))
-
 
 	// Misc
 	public.GET("/domains", handlers.GetDomains(db))
