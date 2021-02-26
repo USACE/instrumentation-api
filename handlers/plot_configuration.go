@@ -41,7 +41,7 @@ func GetPlotConfiguration(db *sqlx.DB) echo.HandlerFunc {
 			return c.String(http.StatusBadRequest, "Malformed ID")
 		}
 		// Get the plot configuration
-		g, err := models.GetPlotConfiguration(db, pID, cID)
+		g, err := models.GetPlotConfiguration(db, &pID, &cID)
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
@@ -52,88 +52,77 @@ func GetPlotConfiguration(db *sqlx.DB) echo.HandlerFunc {
 // CreatePlotConfiguration add plot configuration for a project
 func CreatePlotConfiguration(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		// Sanatized instruments with ID, PID, and slug assigned
-		newPlotConfigCollection := func(c echo.Context) (models.PlotConfigurationCollection, error) {
-			pc := models.PlotConfigurationCollection{}
-			if err := c.Bind(&pc); err != nil {
-				return models.PlotConfigurationCollection{}, err
-			}
 
-			// Get PID of Instruments
-			projectID, err := uuid.Parse(c.Param("project_id"))
-			if err != nil {
-				return models.PlotConfigurationCollection{}, err
-			}
-
-			// slugs already taken in the database
-			slugsTaken, err := models.ListInstrumentSlugs(db)
-			if err != nil {
-				return models.PlotConfigurationCollection{}, err
-			}
-
-			// profile of user creating instruments
-			p := c.Get("profile").(*models.Profile)
-
-			// timestamp
-			t := time.Now()
-
-			for idx := range pc.Items {
-				// Assign projectID
-				pc.Items[idx].ProjectID = &projectID
-				// Assign Slug
-				s, err := dbutils.NextUniqueSlug(pc.Items[idx].Name, slugsTaken)
-				if err != nil {
-					return models.PlotConfigurationCollection{}, err
-				}
-				pc.Items[idx].Slug = s
-				// Assign Creator
-				pc.Items[idx].Creator = p.ID
-				// Assign CreateDate
-				pc.Items[idx].CreateDate = t
-				// Add slug to array of slugs originally fetched from the database
-				// to catch duplicate names/slugs from the same bulk upload
-				slugsTaken = append(slugsTaken, s)
-			}
-
-			return pc, nil
+		var pc models.PlotConfiguration
+		// Bind Information Provided in Request Body
+		if err := c.Bind(&pc); err != nil {
+			return c.String(http.StatusBadRequest, err.Error())
 		}
-
-		// Plot Configurations
-		pc, err := newPlotConfigCollection(c)
-		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
-		}
-
-		// // Validate POST
-		// if c.QueryParam("dry_run") == "true" {
-		// 	v, err := models.ValidateCreateInstruments(db, pc.Items)
-		// 	if err != nil {
-		// 		return c.JSON(http.StatusBadRequest, err)
-		// 	}
-		// 	return c.JSON(http.StatusOK, v)
-		// }
-
-		// Actually POST
-		nn, err := models.CreatePlotConfiguration(db, pc.Items)
+		// Project ID from Route Params
+		pID, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
+		// Check Project ID in payload vs. Project ID in Route Params
+		if pID != pc.ProjectID {
+			return c.String(http.StatusBadRequest, "route parameter project_id does not match project_id in JSON payload")
+		}
+		// Generate Unique Slug
+		slugsTaken, err := models.ListPlotConfigurationSlugs(db)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, err.Error())
+		}
+		slug, err := dbutils.NextUniqueSlug(pc.Name, slugsTaken)
+		if err != nil {
+			return c.String(http.StatusBadRequest, err.Error())
+		}
+		pc.Slug = slug
 
-		return c.JSON(http.StatusCreated, nn)
+		// Profile of user creating collection group
+		p := c.Get("profile").(*models.Profile)
+		pc.Creator, pc.CreateDate = p.ID, time.Now()
+
+		// Create Collection Group
+		pcNew, err := models.CreatePlotConfiguration(db, &pc)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, err.Error())
+		}
+		return c.JSON(http.StatusCreated, pcNew)
 	}
 }
 
-// // UpdatePlotConfiguration update plot configuration for a project
-// func UpdatePlotConfiguration() echo.HandlerFunc {
-// 	if err != nil {
-// 		return c.JSON(http.StatusBadRequest, err.Error())
-// 	}
-// 	cc, err := models.UpdatePlotConfiguration(db, &pID)
-// 	if err != nil {
-// 		return c.JSON(http.StatusInternalServerError, err)
-// 	}
-// 	return c.JSON(http.StatusOK, &cc)
-// }
+// UpdatePlotConfiguration updates a plot configuration for a project
+func UpdatePlotConfiguration(db *sqlx.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+
+		var pc models.PlotConfiguration
+		// Bind Information Provided in Request Body
+		if err := c.Bind(&pc); err != nil {
+			return c.String(http.StatusBadRequest, err.Error())
+		}
+		// Project ID from Route Params
+		pID, err := uuid.Parse(c.Param("project_id"))
+		if err != nil {
+			return c.String(http.StatusBadRequest, err.Error())
+		}
+		// Check Project ID in payload vs. Project ID in Route Params
+		if pID != pc.ProjectID {
+			return c.String(http.StatusBadRequest, "route parameter project_id does not match project_id in JSON payload")
+		}
+
+		// Profile of user creating Plot Configuration
+		p := c.Get("profile").(*models.Profile)
+		tNow := time.Now()
+		pc.Updater, pc.UpdateDate = &p.ID, &tNow
+
+		// Update Plot Configuration
+		pcUpdated, err := models.UpdatePlotConfiguration(db, &pc)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, err.Error())
+		}
+		return c.JSON(http.StatusOK, pcUpdated)
+	}
+}
 
 // DeletePlotConfiguration delete plot configuration for a project
 func DeletePlotConfiguration(db *sqlx.DB) echo.HandlerFunc {

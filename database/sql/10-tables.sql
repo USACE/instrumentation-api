@@ -297,10 +297,8 @@ CREATE TABLE IF NOT EXISTS public.collection_group_timeseries (
 -- plot_configuration
 CREATE TABLE IF NOT EXISTS public.plot_configuration (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
-    deleted BOOLEAN NOT NULL DEFAULT false,
     slug VARCHAR NOT NULL,
     name VARCHAR NOT NULL,
-    description VARCHAR(360),
     project_id UUID NOT NULL REFERENCES project(id) ON DELETE CASCADE,
     creator UUID NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
     create_date TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -310,10 +308,11 @@ CREATE TABLE IF NOT EXISTS public.plot_configuration (
     CONSTRAINT project_unique_plot_configuration_slug UNIQUE(project_id, slug)
 );
 
+-- plot_configuration_timeseries
 CREATE TABLE IF NOT EXISTS public.plot_configuration_timeseries (
     plot_configuration_id UUID NOT NULL REFERENCES plot_configuration(id) ON DELETE CASCADE,
     timeseries_id UUID NOT NULL REFERENCES timeseries(id) ON DELETE CASCADE,
-    UNIQUE(plot_configuration_id, timeseries_id)
+    CONSTRAINT plot_configuration_unique_timeseries UNIQUE(plot_configuration_id, timeseries_id)
 );
 
 
@@ -804,9 +803,9 @@ INSERT INTO collection_group_timeseries (collection_group_id, timeseries_id) VAL
     ('30b32cb1-0936-42c4-95d1-63a7832a57db', '9a3864a8-8766-4bfa-bad1-0328b166f6a8');
 
 -- plot_configuration
-INSERT INTO public.plot_configuration (project_id, id, slug, name, description) VALUES
-    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'cc28ca81-f125-46c6-a5cd-cc055a003c19', 'all-plots', 'All Plots', 'This is an example plot group'),
-    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', '64879f68-6a2c-4d78-8e8b-5e9b9d2e0d6a', 'pz-1a-plot', 'PZ-1A PLOT', 'Example plot group configurations');
+INSERT INTO public.plot_configuration (project_id, id, slug, name) VALUES
+    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'cc28ca81-f125-46c6-a5cd-cc055a003c19', 'all-plots', 'All Plots'),
+    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', '64879f68-6a2c-4d78-8e8b-5e9b9d2e0d6a', 'pz-1a-plot', 'PZ-1A PLOT');
 
 
 -- plot_configuration_timeseries
