@@ -1,15 +1,16 @@
 package models
 
 import (
+	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
 
 // Domain is a struct for returning all database domain values
 type Domain struct {
-	ID          string  `json:"id"`
-	Group       string  `json:"group"`
-	Value       string  `json:"value"`
-	Description *string `json:"description"`
+	ID          uuid.UUID `json:"id"`
+	Group       string    `json:"group"`
+	Value       string    `json:"value"`
+	Description *string   `json:"description"`
 }
 
 // GetDomains returns a UNION of all domain tables in the database

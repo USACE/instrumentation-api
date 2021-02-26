@@ -76,7 +76,6 @@ CREATE TABLE IF NOT EXISTS public.project (
     office_id UUID,
     deleted boolean NOT NULL DEFAULT false,
     slug VARCHAR(240) UNIQUE NOT NULL,
-    federal_id VARCHAR(240),
     name VARCHAR(240) UNIQUE NOT NULL,
     creator UUID NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
     create_date TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -148,8 +147,8 @@ CREATE TABLE IF NOT EXISTS public.instrument_group (
 CREATE TABLE IF NOT EXISTS public.instrument (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     deleted BOOLEAN NOT NULL DEFAULT false,
-    slug VARCHAR(240) UNIQUE NOT NULL,
-    name VARCHAR(120) NOT NULL,
+    slug VARCHAR UNIQUE NOT NULL,
+    name VARCHAR(360) NOT NULL,
     formula VARCHAR,
     geometry geometry,
     station int,
@@ -160,7 +159,7 @@ CREATE TABLE IF NOT EXISTS public.instrument (
     update_date TIMESTAMPTZ,
     type_id UUID NOT NULL REFERENCES instrument_type (id),
     project_id UUID REFERENCES project (id),
-    CONSTRAINT project_unique_instrument_name UNIQUE(name,project_id)
+    nid_id VARCHAR
 );
 
 -- alert_config
@@ -298,10 +297,8 @@ CREATE TABLE IF NOT EXISTS public.collection_group_timeseries (
 -- plot_configuration
 CREATE TABLE IF NOT EXISTS public.plot_configuration (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
-    deleted BOOLEAN NOT NULL DEFAULT false,
     slug VARCHAR NOT NULL,
     name VARCHAR NOT NULL,
-    description VARCHAR(360),
     project_id UUID NOT NULL REFERENCES project(id) ON DELETE CASCADE,
     creator UUID NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
     create_date TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -311,10 +308,11 @@ CREATE TABLE IF NOT EXISTS public.plot_configuration (
     CONSTRAINT project_unique_plot_configuration_slug UNIQUE(project_id, slug)
 );
 
+
 CREATE TABLE IF NOT EXISTS public.plot_configuration_timeseries (
     plot_configuration_id UUID NOT NULL REFERENCES plot_configuration(id) ON DELETE CASCADE,
     timeseries_id UUID NOT NULL REFERENCES timeseries(id) ON DELETE CASCADE,
-    UNIQUE(plot_configuration_id, timeseries_id)
+    CONSTRAINT plot_configuration_unique_timeseries UNIQUE(plot_configuration_id, timeseries_id)
 );
 
 
@@ -364,10 +362,39 @@ INSERT INTO config (static_host, static_prefix) VALUES
 
 -- instrument_type
 INSERT INTO instrument_type (id, name) VALUES
-    ('0fd1f9ba-2731-4ff9-96dd-3c03215ab06f', 'Staff Gage'),
-    ('1bb4bf7c-f5f8-44eb-9805-43b07ffadbef', 'Piezometer'),
+    ('2f340c02-8bac-4bf4-9d5e-08a6f395ee8f', 'Adas'),
     ('3350b1d1-a946-49a8-bf19-587d7163e0f7', 'Barometer'),
-    ('98a61f29-18a8-430a-9d02-0f53486e0984', 'Instrument');
+    ('43671cb6-4141-45e4-9d17-b75a0e0508e1', 'Crackmeter'),
+    ('6b8ef914-79ec-41d1-93bc-ba44694baa71', 'Drain'),
+    ('03b950c9-7b53-408f-b874-b42353dc1ba7', 'Earth Pressure Cell'),
+    ('69c8fcc2-0bbc-43b0-bdc2-a44f6ce5c1de', 'Extensometer'),
+    ('11ffb059-e3d2-4cd7-a076-4fba7828bfbb', 'Extraction Well'),
+    ('d65f62d0-57d7-49af-8078-d8f3fdb75477', 'Flowmeter'),
+    ('135460f1-033f-46e0-b204-ed23074c0817', 'Flume'),
+    ('3c3dfc23-ed2a-4a4a-9ce0-683c7c1d4d20', 'Inclinometer'),
+    ('98a61f29-18a8-430a-9d02-0f53486e0984', 'Instrument'),
+    ('1c8e8b3b-3322-4175-8d3a-c4c08ca1a86c', 'Joint Meter'),
+    ('cb6a616e-4953-4807-a312-50622a57570a', 'Liquid Level Gauge'),
+    ('39d299ee-6cf6-4924-bba3-39f20d713b0f', 'Load Cell'),
+    ('486da6b4-f7a8-4c7f-a0cc-ee13c39673fb', 'Observation Well'),
+    ('d9cf24af-bfef-45ec-8812-c76faa2b8feb', 'Pendulum'),
+    ('1bb4bf7c-f5f8-44eb-9805-43b07ffadbef', 'Piezometer'),
+    ('835bb7b9-5c80-48db-8c7f-06dfcacfc5d8', 'Plumbline'),
+    ('f735d3e5-3741-4946-9913-0b5f178f8052', 'Pore Pressure Cell'),
+    ('f371126d-fbe9-494d-869c-d55d8c393e65', 'Precipitation'),
+    ('466b7603-0763-4aae-a67b-9bc78e630934', 'Relief Well'),
+    ('c7c6f90b-1621-4bd6-95ea-e87cd8c326b1', 'Seismic Monitoring Device'),
+    ('21f37666-0fb2-401d-bd8e-b9bcb8240b8d', 'Settlement Plate'),
+    ('0fd1f9ba-2731-4ff9-96dd-3c03215ab06f', 'Staff Gage'),
+    ('3fd6186e-39bd-4ec0-b57e-91da0b542d79', 'Strain Gauge'),
+    ('daf1e5f4-32bf-4a3d-bb31-94ffc5c95436', 'Stress Cell'),
+    ('4a91ca85-86c7-4055-8185-2155f5e60fd8', 'Surface Monitoring Point'),
+    ('e5ab6dfe-185c-4a72-a493-f7e3844df3fd', 'Survey Monitoring Point'),
+    ('0dabc138-265f-4278-87d7-412e3ec469ec', 'Thermister'),
+    ('d98aa744-ac14-4cb5-adbc-d275a7498951', 'Tiltmeter'),
+    ('78ade434-d845-4195-b1c6-5ab5b376be97', 'Water Level'),
+    ('02a518e8-12de-4a0b-a07d-441989e920c1', 'Water Quality'),
+    ('7e63a703-aa68-444f-8cd4-9f7d09cbcb83', 'Weir');
 
 -- status
 INSERT INTO status (id, name, description) VALUES
@@ -500,7 +527,7 @@ INSERT INTO unit (id, unit_family_id, measure_id, name, abbreviation) VALUES
 ('c4a66be8-6bdf-4ded-8199-0233813fe777', 'c9f3b6d2-3136-4330-a330-66e402b4ee04', '513bafdb-48e3-44ff-8189-54e8130ec76a', 'Terawatts', 'TW'),
 ('c768c0c8-36e4-495a-bb9a-2065402db3c5', '19ad5455-4d6a-47d3-a28a-87bdfac2d75c', '4f18ff01-aeba-46bd-b5c8-05eec8cd8b43', 'Thousands of cubic meters', '1000 m3'),
 ('3383d7d4-ffa1-4522-a8f5-f16561c5bd2f', '19ad5455-4d6a-47d3-a28a-87bdfac2d75c', '71daec34-d255-4dd5-8075-70ff93411389', 'Thousands of square meters', '1000 m2'),
-('6b5bd788-8c78-43bb-b5a3-ad544b858a64', '19ad5455-4d6a-47d3-a28a-87bdfac2d75c', 'a08f3cd5-233d-43f4-8f21-633a6aa63f0c', 'Volts', 'volt'),
+('6b5bd788-8c78-43bb-b5a3-ad544b858a64', '19ad5455-4d6a-47d3-a28a-87bdfac2d75c', 'a08f3cd5-233d-43f4-8f21-633a6aa63f0c', 'Volts', 'V'),
 ('a0be2c0a-e6e7-41c1-9417-91f6a4d2f8ea', 'c9f3b6d2-3136-4330-a330-66e402b4ee04', '3ce398f2-985f-4ed4-93f6-23595d1849b7', 'Watt-hours', 'Wh'),
 ('3008e1ff-338b-4072-865b-0ff68e0d68b6', '19ad5455-4d6a-47d3-a28a-87bdfac2d75c', '98c548e8-caea-4042-b083-7ba1d4ab57d5', 'Watts per square meter', 'W/m2'),
 ('23aa81c1-74a0-4186-a481-1fd2f146986e', 'c4eccc63-4bfb-4dd2-9f73-920ec7b385a0', '4f18ff01-aeba-46bd-b5c8-05eec8cd8b43', 'acre feet', 'acre*ft'),
@@ -590,7 +617,6 @@ INSERT INTO unit (id, unit_family_id, measure_id, name, abbreviation) VALUES
 ('290f1547-a3c5-4158-a088-b50f5cabe8be', '19ad5455-4d6a-47d3-a28a-87bdfac2d75c', '71daec34-d255-4dd5-8075-70ff93411389', 'square millimeters', 'mM^2'),
 ('e0b63a59-6da5-43d8-8e1b-f9d50078eec6', 'c4eccc63-4bfb-4dd2-9f73-920ec7b385a0', '71daec34-d255-4dd5-8075-70ff93411389', 'square yards', 'yd^2'),
 ('0b2ecf01-9034-4043-953e-ae20f0e8c935', 'c4eccc63-4bfb-4dd2-9f73-920ec7b385a0', '5042b88e-ad61-454d-953e-f07224be4f07', 'tons', 'ton'),
---('0fcf6088-7a05-43d3-bec6-5e825a68a2a9', '19ad5455-4d6a-47d3-a28a-87bdfac2d75c', 'a08f3cd5-233d-43f4-8f21-633a6aa63f0c', 'volts', 'V'),
 ('c0a116ef-058d-41b0-a845-557226ce557c', '19ad5455-4d6a-47d3-a28a-87bdfac2d75c', '513bafdb-48e3-44ff-8189-54e8130ec76a', 'watts', 'W'),
 ('5fa61c67-38e6-46ae-ac1f-114278706261', 'c9f3b6d2-3136-4330-a330-66e402b4ee04', 'b85b9367-f034-4783-bf5b-9220e32d4e6a', 'weeks', 'week'),
 ('cc83a42b-16a7-46a8-b3a6-966bad7ae2d7', 'c4eccc63-4bfb-4dd2-9f73-920ec7b385a0', '2c2b39d2-186d-46e9-8dc7-aca36f03aa23', 'yards', 'yd'),
@@ -598,6 +624,7 @@ INSERT INTO unit (id, unit_family_id, measure_id, name, abbreviation) VALUES
 
 -- parameter
 INSERT INTO parameter (id, name) VALUES
+    ('b4ea8385-48a3-4e95-82fb-d102dfcbcb54', 'air-temperature'),
     ('377ecec0-f785-46ab-b0e2-5fd8c682dfea', 'conductivity'),
     ('98007857-d027-4524-9a63-d07ae93e5fa2', 'dissolved-oxygen'),
     ('83b5a1f7-948b-4373-a47c-d73ff622aafd', 'elevation'),
@@ -608,11 +635,11 @@ INSERT INTO parameter (id, name) VALUES
     ('1de79e29-fb70-45c3-ae7d-4695517ced90', 'pressure'),
     ('b23b141d-ce7b-4e0d-82ab-c8beb39c8325', 'signal-strength'),
     ('e46deb1d-e7e4-4d49-a874-18306991ecfe', 'speed'),
-    ('b49f214e-f69f-43da-9ce3-ad96042268d0', 'stage'),
-    ('de6112da-8489-4286-ae56-ec72aa09974d', 'temperature'),
+    ('b49f214e-f69f-43da-9ce3-ad96042268d0', 'stage'),   
     ('3676df6a-37c2-4a81-9072-ddcd4ab93702', 'turbidity'),
     ('06189199-a25f-4101-b8bd-991c6a5a7ab3', 'velocity'),  
-    ('430e5edb-e2b5-4f86-b19f-cda26a27e151', 'voltage');
+    ('430e5edb-e2b5-4f86-b19f-cda26a27e151', 'voltage'),
+    ('de6112da-8489-4286-ae56-ec72aa09974d', 'water-temperature');
 
 -- -------------------------------------------------
 -- basic seed data to demo the app and run API tests
@@ -776,9 +803,9 @@ INSERT INTO collection_group_timeseries (collection_group_id, timeseries_id) VAL
     ('30b32cb1-0936-42c4-95d1-63a7832a57db', '9a3864a8-8766-4bfa-bad1-0328b166f6a8');
 
 -- plot_configuration
-INSERT INTO public.plot_configuration (project_id, id, slug, name, description) VALUES
-    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'cc28ca81-f125-46c6-a5cd-cc055a003c19', 'all-plots', 'All Plots', 'This is an example plot group'),
-    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', '64879f68-6a2c-4d78-8e8b-5e9b9d2e0d6a', 'pz-1a-plot', 'PZ-1A PLOT', 'Example plot group configurations');
+INSERT INTO public.plot_configuration (project_id, id, slug, name) VALUES
+    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'cc28ca81-f125-46c6-a5cd-cc055a003c19', 'all-plots', 'All Plots'),
+    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', '64879f68-6a2c-4d78-8e8b-5e9b9d2e0d6a', 'pz-1a-plot', 'PZ-1A PLOT');
 
 
 -- plot_configuration_timeseries

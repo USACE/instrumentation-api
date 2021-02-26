@@ -1,7 +1,9 @@
--- -----
--- Views
--- -----
--- v_telemetry
+
+DROP VIEW v_instrument;
+DROP VIEW v_project;
+
+ALTER TABLE INSTRUMENT ADD COLUMN nid_id VARCHAR;
+ALTER TABLE PROJECT DROP COLUMN federal_id;
 
 CREATE OR REPLACE VIEW v_instrument_telemetry AS (
     SELECT a.id,
@@ -15,7 +17,6 @@ CREATE OR REPLACE VIEW v_instrument_telemetry AS (
     LEFT JOIN telemetry_iridium ti ON a.telemetry_id = ti.id
 );
 
--- v_instrument
 CREATE OR REPLACE VIEW v_instrument AS (
     SELECT I.id,
         I.deleted,
@@ -126,113 +127,8 @@ CREATE OR REPLACE VIEW v_project AS (
 			CROSS JOIN config cfg
 );
 
--- v_timeseries
-CREATE OR REPLACE VIEW v_timeseries AS (
-        SELECT t.id AS id,
-            t.slug AS slug,
-            t.name AS name,
-            i.slug || '.' || t.slug AS variable,
-            j.id AS project_id,
-            j.slug AS project_slug,
-            j.name AS project,
-            i.id AS instrument_id,
-            i.slug AS instrument_slug,
-            i.name AS instrument,
-            p.id AS parameter_id,
-            p.name AS parameter,
-            u.id AS unit_id,
-            u.name AS unit
-        FROM timeseries t
-            LEFT JOIN instrument i ON i.id = t.instrument_id
-            LEFT JOIN project j ON j.id = i.project_id
-            INNER JOIN parameter p ON p.id = t.parameter_id
-            INNER JOIN unit U ON u.id = t.unit_id
-    );
-
--- v_timeseries_project_map
-CREATE OR REPLACE VIEW v_timeseries_project_map AS (
-    SELECT t.id AS timeseries_id,
-           p.id AS project_id
-    FROM timeseries t
-    LEFT JOIN instrument n ON t.instrument_id = n.id
-    LEFT JOIN project p ON p.id = n.project_id
-);
-
--- v_timeseries_latest; same as v_timeseries, joined with latest times and values
-CREATE OR REPLACE VIEW v_timeseries_latest AS (
-    SELECT t.*,
-       m.time AS latest_time,
-	   m.value AS latest_value
-    FROM v_timeseries t
-    LEFT JOIN (
-	    SELECT DISTINCT ON (timeseries_id) timeseries_id, time, value
-	    FROM timeseries_measurement
-	    ORDER BY timeseries_id, time DESC
-    ) m ON t.id = m.timeseries_id
-);
-
--- v_email_autocomplete
-CREATE OR REPLACE VIEW v_email_autocomplete AS (
-    SELECT id,
-           'email' AS user_type,
-	       null AS username,
-	       email AS email,
-           email AS username_email
-    FROM email
-    UNION
-    SELECT id,
-           'profile' AS user_type,
-           username,
-           email,
-           username||email AS username_email
-    FROM profile
-);
-
--- v_alert
-CREATE OR REPLACE VIEW v_alert AS (
-    SELECT a.id AS id,
-       a.alert_config_id AS alert_config_id,
-       a.create_date AS create_date,
-       p.id AS project_id,
-       p.name AS project_name,
-	   i.id AS instrument_id,
-	   i.name AS instrument_name,
-	   ac.name AS name,
-	   ac.body AS body
-FROM alert a
-INNER JOIN alert_config ac ON a.alert_config_id = ac.id
-INNER JOIN instrument i ON ac.instrument_id = i.id
-INNER JOIN project p ON i.project_id = p.id
-);
-
-CREATE OR REPLACE VIEW v_unit AS (
-    SELECT u.id AS id,
-           u.name AS name,
-           u.abbreviation AS abbreviation,
-           u.unit_family_id AS unit_family_id,
-           f.name           AS unit_family,
-           u.measure_id     AS measure_id,
-           m.name           AS measure
-    FROM unit u
-    INNER JOIN unit_family f ON f.id = u.unit_family_id
-    INNER JOIN measure m ON m.id = u.measure_id
-);
-
-CREATE OR REPLACE VIEW v_plot_configuration AS (
-    SELECT pc.id            AS id,
-           pc.slug          AS slug,
-           pc.name          AS name,
-           pc.project_id    AS project_id,
-           t.timeseries_id     AS timeseries_id,
-           pc.creator       AS creator,
-           pc.create_date   AS create_date,
-           pc.updater       AS updater,
-           pc.update_date   AS update_date
-    FROM plot_configuration pc
-    LEFT JOIN (
-        SELECT plot_configuration_id    as plot_configuration_id,
-               array_agg(timeseries_id) as timeseries_id
-        FROM plot_configuration_timeseries
-        GROUP BY plot_configuration_id
-    ) as t ON pc.id = t.plot_configuration_id
-);
+GRANT SELECT ON
+    v_instrument,
+    v_instrument_telemetry,
+    v_project
+TO instrumentation_reader;

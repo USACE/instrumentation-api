@@ -49,13 +49,15 @@ GRANT SELECT ON
     unit,
     unit_family,
     v_instrument,
+    v_plot_configuration,
     v_project,
     v_timeseries,
     v_email_autocomplete,
     v_alert,
     v_timeseries_latest,
     v_timeseries_project_map,
-    v_instrument_telemetry
+    v_instrument_telemetry,
+    v_unit
 TO instrumentation_reader;
 
 -- Role instrumentation_writer

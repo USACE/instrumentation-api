@@ -186,9 +186,10 @@
 									"        \"create_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
 									"        \"updater\": {  \"type\": [\"string\", \"null\"] },",
 									"        \"update_date\": { \"type\": [\"string\", \"null\"], \"format\": \"date-time\" },",
-									"        \"project_id\": { \"type\": [\"string\", \"null\"] }",
+									"        \"project_id\": { \"type\": [\"string\", \"null\"] },",
+									"        \"nid_id\": { \"type\": [\"string\", \"null\"] }",
 									"    },",
-									"    \"required\": [\"id\", \"slug\", \"name\", \"type_id\", \"type\", \"status_id\", \"status\", \"status_time\", \"geometry\", \"creator\", \"create_date\", \"updater\", \"update_date\", \"project_id\", \"station\", \"offset\", \"constants\", \"alert_configs\", \"formula\"],",
+									"    \"required\": [\"id\", \"slug\", \"name\", \"type_id\", \"type\", \"status_id\", \"status\", \"status_time\", \"geometry\", \"creator\", \"create_date\", \"updater\", \"update_date\", \"project_id\", \"station\", \"offset\", \"constants\", \"alert_configs\", \"formula\", \"nid_id\"],",
 									"    \"additionalProperties\": false",
 									"}",
 									"",
@@ -1655,6 +1656,326 @@
 			]
 		},
 		{
+			"name": "Plot Configurations",
+			"item": [
+				{
+					"name": "GetPlotConfiguration",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// validate JSON schema",
+									"var schema = {",
+									"    \"type\": \"object\",",
+									"    \"properties\": {",
+									"        \"id\": { \"type\": \"string\" },",
+									"        \"timeseries_id\": {",
+									"            \"type\": \"array\",",
+									"            \"items\": { \"type\": \"string\" },",
+									"        },",
+									"        \"slug\": { \"type\": \"string\" },",
+									"        \"name\": { \"type\": \"string\" },",
+									"        \"creator\": { \"type\": \"string\" },",
+									"        \"create_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
+									"        \"updater\": {  \"type\": [\"string\", \"null\"] },",
+									"        \"update_date\": { \"type\": [\"string\", \"null\"], \"format\": \"date-time\" },",
+									"        \"project_id\": { \"type\": [\"string\", \"null\"] },",
+									"    },",
+									"    \"required\": [\"id\", \"slug\", \"name\", \"creator\", \"create_date\", \"updater\", \"update_date\", \"project_id\", \"timeseries_id\"],",
+									"    \"additionalProperties\": false",
+									"}",
+									"",
+									"pm.globals.set('PLOT_CONFIGURATION_OBJ_SCHEMA', JSON.stringify(schema));",
+									"",
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// validate schema",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(schema)",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/plot_configurations/64879f68-6a2c-4d78-8e8b-5e9b9d2e0d6a",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"projects",
+								"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+								"plot_configurations",
+								"64879f68-6a2c-4d78-8e8b-5e9b9d2e0d6a"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ListPlotConfigurations",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// schema validator",
+									"var schema = {",
+									"    \"type\": \"array\",",
+									"    \"items\": JSON.parse(pm.globals.get('PLOT_CONFIGURATION_OBJ_SCHEMA'))",
+									"}",
+									"",
+									"pm.globals.set('PLOT_CONFIGURATION_ARRAY_SCHEMA', JSON.stringify(schema));",
+									"",
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// schema validation",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(schema)",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/plot_configurations",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"projects",
+								"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+								"plot_configurations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdatePlotConfiguration - Remove Timeseries",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// schema validation",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(JSON.parse(pm.globals.get('PLOT_CONFIGURATION_OBJ_SCHEMA')))",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"64879f68-6a2c-4d78-8e8b-5e9b9d2e0d6a\",\n    \"name\": \"PZ-1A PLOT\",\n    \"slug\": \"pz-1a-plot\",\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\",\n    \"timeseries_id\": [\n        \"9a3864a8-8766-4bfa-bad1-0328b166f6a8\"\n    ],\n    \"creator\": \"00000000-0000-0000-0000-000000000000\",\n    \"create_date\": \"2021-02-26T15:54:18.982835Z\",\n    \"updater\": null,\n    \"update_date\": null\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/plot_configurations/64879f68-6a2c-4d78-8e8b-5e9b9d2e0d6a",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"projects",
+								"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+								"plot_configurations",
+								"64879f68-6a2c-4d78-8e8b-5e9b9d2e0d6a"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdatePlotConfiguration - Add Many Timeseries",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// schema validation",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(JSON.parse(pm.globals.get('PLOT_CONFIGURATION_OBJ_SCHEMA')))",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"64879f68-6a2c-4d78-8e8b-5e9b9d2e0d6a\",\n    \"name\": \"PZ-1A PLOT\",\n    \"slug\": \"pz-1a-plot\",\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\",\n    \"timeseries_id\": [\n        \"8f4ca3a3-5971-4597-bd6f-332d1cf5af7c\",\n        \"869465fc-dc1e-445e-81f4-9979b5fadda9\",\n        \"9a3864a8-8766-4bfa-bad1-0328b166f6a8\",\n        \"7ee902a3-56d0-4acf-8956-67ac82c03a96\",\n        \"d9697351-3a38-4194-9ac4-41541927e475\",\n        \"22a734d6-dc24-451d-a462-43a32f335ae8\",\n        \"14247bc8-b264-4857-836f-182d47ebb39d\"\n    ],\n    \"creator\": \"00000000-0000-0000-0000-000000000000\",\n    \"create_date\": \"2021-02-26T16:21:07.925124Z\",\n    \"updater\": null,\n    \"update_date\": null\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/plot_configurations/64879f68-6a2c-4d78-8e8b-5e9b9d2e0d6a",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"projects",
+								"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+								"plot_configurations",
+								"64879f68-6a2c-4d78-8e8b-5e9b9d2e0d6a"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CreatePlotConfiguration",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// status code is 201",
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"// schema validation",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(JSON.parse(pm.globals.get('PLOT_CONFIGURATION_OBJ_SCHEMA')))",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test Create Plot Configuration\",\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\",\n    \"timeseries_id\": [\n        \"8f4ca3a3-5971-4597-bd6f-332d1cf5af7c\",\n        \"869465fc-dc1e-445e-81f4-9979b5fadda9\",\n        \"9a3864a8-8766-4bfa-bad1-0328b166f6a8\",\n        \"7ee902a3-56d0-4acf-8956-67ac82c03a96\",\n        \"d9697351-3a38-4194-9ac4-41541927e475\",\n        \"22a734d6-dc24-451d-a462-43a32f335ae8\",\n        \"14247bc8-b264-4857-836f-182d47ebb39d\"\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/plot_configurations",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"projects",
+								"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+								"plot_configurations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeletePlotConfiguration",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/plot_configurations/64879f68-6a2c-4d78-8e8b-5e9b9d2e0d6a",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"projects",
+								"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+								"plot_configurations",
+								"64879f68-6a2c-4d78-8e8b-5e9b9d2e0d6a"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "Projects",
 			"item": [
 				{
@@ -1671,7 +1992,6 @@
 									"        \"id\": { \"type\": \"string\" },",
 									"        \"image\": { \"type\": [\"string\", \"null\"]},",
 									"        \"office_id\": { \"type\": [ \"string\", \"null\" ]},",
-									"        \"federal_id\": { \"type\": [\"string\", \"null\"] },",
 									"        \"slug\": { \"type\": \"string\" },",
 									"        \"name\": { \"type\": \"string\" },",
 									"        \"creator\": { \"type\": \"string\" },",
@@ -1685,7 +2005,7 @@
 									"            \"items\": { \"type\": \"string\" },",
 									"        },",
 									"    },",
-									"    \"required\": [\"id\", \"image\", \"office_id\", \"federal_id\", \"slug\", \"name\", \"creator\", \"create_date\", \"updater\", \"update_date\", \"instrument_count\", \"instrument_group_count\", \"timeseries\"],",
+									"    \"required\": [\"id\", \"image\", \"office_id\", \"slug\", \"name\", \"creator\", \"create_date\", \"updater\", \"update_date\", \"instrument_count\", \"instrument_group_count\", \"timeseries\"],",
 									"    \"additionalProperties\": false",
 									"}",
 									"",
@@ -3011,6 +3331,67 @@
 							"path": [
 								"heartbeats",
 								"latest"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Units",
+			"item": [
+				{
+					"name": "ListUnits",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// validate JSON schema",
+									"var schema = {",
+									"    \"type\": \"array\",",
+									"    \"items\": {",
+									"        \"type\": \"object\",",
+									"        \"properties\": {",
+									"            \"id\": { \"type\": \"string\" },",
+									"            \"name\": { \"type\": \"string\" },",
+									"            \"abbreviation\": { \"type\": \"string\" },",
+									"            \"unit_family_id\": { \"type\": \"string\" },",
+									"            \"unit_family\": { \"type\": \"string\" },",
+									"            \"measure_id\": { \"type\": \"string\" },",
+									"            \"measure\": { \"type\": [\"string\", \"null\"] },",
+									"        },",
+									"        \"required\": [\"id\", \"name\", \"abbreviation\", \"unit_family_id\", \"unit_family\", \"measure_id\", \"measure\"],",
+									"        \"additionalProperties\": false",
+									"    }",
+									"}",
+									"pm.globals.set('UNIT_ARRAY_SCHEMA', schema);",
+									"",
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// schema validation",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(schema)",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/units",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"units"
 							]
 						}
 					},
