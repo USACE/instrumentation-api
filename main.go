@@ -258,6 +258,7 @@ func main() {
 	private.PUT("/projects/:project_id/plot_configurations/:plot_configuration_id", handlers.UpdatePlotConfiguration(db))
 	private.DELETE("/projects/:project_id/plot_configurations/:plot_configuration_id", handlers.DeletePlotConfiguration(db))
 
+
 	// Misc
 	public.GET("/domains", handlers.GetDomains(db))
 	public.POST("/explorer", handlers.PostExplorer(db))

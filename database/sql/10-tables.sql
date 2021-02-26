@@ -308,7 +308,7 @@ CREATE TABLE IF NOT EXISTS public.plot_configuration (
     CONSTRAINT project_unique_plot_configuration_slug UNIQUE(project_id, slug)
 );
 
--- plot_configuration_timeseries
+
 CREATE TABLE IF NOT EXISTS public.plot_configuration_timeseries (
     plot_configuration_id UUID NOT NULL REFERENCES plot_configuration(id) ON DELETE CASCADE,
     timeseries_id UUID NOT NULL REFERENCES timeseries(id) ON DELETE CASCADE,
