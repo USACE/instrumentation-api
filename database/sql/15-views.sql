@@ -36,6 +36,7 @@ CREATE OR REPLACE VIEW v_instrument AS (
         I.update_date,
         I.project_id,
         I.nid_id,
+        I.usgs_id,
         TEL.telemetry AS telemetry,
         COALESCE(C.constants, '{}') AS constants,
         COALESCE(G.groups, '{}') AS groups,
