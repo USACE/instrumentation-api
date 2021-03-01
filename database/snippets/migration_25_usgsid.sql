@@ -70,3 +70,7 @@ CREATE OR REPLACE VIEW v_instrument AS (
         GROUP BY instrument_id
     ) TEL ON TEL.instrument_id = I.id
 );
+
+GRANT SELECT ON
+    v_instrument
+TO instrumentation_reader;
