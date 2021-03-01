@@ -159,7 +159,8 @@ CREATE TABLE IF NOT EXISTS public.instrument (
     update_date TIMESTAMPTZ,
     type_id UUID NOT NULL REFERENCES instrument_type (id),
     project_id UUID REFERENCES project (id),
-    nid_id VARCHAR
+    nid_id VARCHAR,
+    usgs_id VARCHAR
 );
 
 -- alert_config
