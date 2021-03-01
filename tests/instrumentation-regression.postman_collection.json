@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "363b59f1-fd40-424d-b26a-f48ea4bb1616",
+		"_postman_id": "832f9ce2-d5e3-4258-a338-dae4c4820d25",
 		"name": "instrumentation-regression",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -187,9 +187,10 @@
 									"        \"updater\": {  \"type\": [\"string\", \"null\"] },",
 									"        \"update_date\": { \"type\": [\"string\", \"null\"], \"format\": \"date-time\" },",
 									"        \"project_id\": { \"type\": [\"string\", \"null\"] },",
-									"        \"nid_id\": { \"type\": [\"string\", \"null\"] }",
+									"        \"nid_id\": { \"type\": [\"string\", \"null\"] },",
+									"        \"usgs_id\": { \"type\": [\"string\", \"null\"] }",
 									"    },",
-									"    \"required\": [\"id\", \"slug\", \"name\", \"type_id\", \"type\", \"status_id\", \"status\", \"status_time\", \"geometry\", \"creator\", \"create_date\", \"updater\", \"update_date\", \"project_id\", \"station\", \"offset\", \"constants\", \"alert_configs\", \"formula\", \"nid_id\"],",
+									"    \"required\": [\"id\", \"slug\", \"name\", \"type_id\", \"type\", \"status_id\", \"status\", \"status_time\", \"geometry\", \"creator\", \"create_date\", \"updater\", \"update_date\", \"project_id\", \"station\", \"offset\", \"constants\", \"alert_configs\", \"formula\", \"nid_id\", \"usgs_id\"],",
 									"    \"additionalProperties\": false",
 									"}",
 									"",
