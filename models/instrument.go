@@ -256,7 +256,7 @@ func UpdateInstrument(db *sqlx.DB, i *Instrument) (*Instrument, error) {
 	var updatedID uuid.UUID
 	if err := stmt1.QueryRow(
 		i.ID, i.Name, i.TypeID, wkb.Value(i.Geometry.Geometry()),
-		i.Updater, i.UpdateDate, i.ProjectID, i.Station, i.StationOffset, i.Formula, i.NIDID,
+		i.Updater, i.UpdateDate, i.ProjectID, i.Station, i.StationOffset, i.Formula, i.NIDID, i.USGSID,
 	).Scan(&updatedID); err != nil {
 		return nil, err
 	}
