@@ -74,8 +74,9 @@ func ListTimeseriesMeasurements(db *sqlx.DB) echo.HandlerFunc {
 	}
 }
 
-// CreateOrUpdateTimeseriesMeasurements Creates or Updates a TimeseriesMeasurement object or array of objects
-func CreateOrUpdateTimeseriesMeasurements(db *sqlx.DB) echo.HandlerFunc {
+// CreateOrUpdateProjectTimeseriesMeasurements Creates or Updates a TimeseriesMeasurement object or array of objects
+// All timeseries must belong to the same project
+func CreateOrUpdateProjectTimeseriesMeasurements(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 
 		var mcc models.TimeseriesMeasurementCollectionCollection
@@ -94,6 +95,24 @@ func CreateOrUpdateTimeseriesMeasurements(db *sqlx.DB) echo.HandlerFunc {
 		}
 		if !isTrue {
 			return c.String(http.StatusBadRequest, "all timeseries posted do not belong to project")
+		}
+		// Post timeseries
+		stored, err := models.CreateOrUpdateTimeseriesMeasurements(db, mcc.Items)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, err)
+		}
+		return c.JSON(http.StatusCreated, stored)
+	}
+}
+
+// CreateOrUpdateTimeseriesMeasurements Creates or Updates a TimeseriesMeasurement object or array of objects
+// Timeseries may belong to one or more projects
+func CreateOrUpdateTimeseriesMeasurements(db *sqlx.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+
+		var mcc models.TimeseriesMeasurementCollectionCollection
+		if err := c.Bind(&mcc); err != nil {
+			return c.JSON(http.StatusBadRequest, err)
 		}
 		// Post timeseries
 		stored, err := models.CreateOrUpdateTimeseriesMeasurements(db, mcc.Items)
