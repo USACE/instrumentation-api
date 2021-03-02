@@ -14,6 +14,7 @@ import (
 	"github.com/kelseyhightower/envconfig"
 
 	"github.com/labstack/echo/v4"
+	echomw "github.com/labstack/echo/v4/middleware"
 
 	_ "github.com/jackc/pgx/v4/stdlib"
 )
@@ -124,6 +125,14 @@ func main() {
 		CACOnly.Use(middleware.JWT(cfg.AuthDisabled, false))
 	}
 
+	app := e.Group(cfg.RoutePrefix)
+	app.Use(echomw.KeyAuthWithConfig(echomw.KeyAuthConfig{
+		KeyLookup: "query:key",
+		Validator: func(key string, c echo.Context) (bool, error) {
+			return key == cfg.ApplicationKey, nil
+		},
+	}))
+
 	// AttachProfileMiddleware attaches ProfileID to context, whether
 	// authenticated by token or api key
 	private.Use(middleware.EDIPIMiddleware, middleware.AttachProfileMiddleware(db))
@@ -135,8 +144,12 @@ func main() {
 	CACOnly.POST("/my_tokens", handlers.CreateToken(db))
 	CACOnly.DELETE("/my_tokens/:token_id", handlers.DeleteToken(db))
 
+	// Authenticated with Appkey only (routes only to be used by other components of the app)
+	// Routes do not have /project/:project_id context and are typically authorized
+	app.POST("/timeseries_measurements", handlers.CreateOrUpdateTimeseriesMeasurements(db))
+	app.POST("/heartbeat", handlers.DoHeartbeat(db))
+
 	// Heartbeat
-	private.POST("/heartbeat", handlers.DoHeartbeat(db))
 	public.GET("/heartbeats", handlers.ListHeartbeats(db))
 	public.GET("/heartbeat/latest", handlers.GetLatestHeartbeat(db))
 
@@ -186,10 +199,13 @@ func main() {
 	public.GET("/instruments/count", handlers.GetInstrumentCount(db))
 	public.GET("/instruments/:instrument_id", handlers.GetInstrument(db))
 	private.POST("/projects/:project_id/instruments", handlers.CreateInstruments(db))
+	// TODO: Remove endpoint /instruments (no project context)
 	private.POST("/instruments", handlers.CreateInstruments(db))
+	// TODO: Remove endpoint (no project context)
 	private.PUT("/instruments/:instrument_id", handlers.UpdateInstrument(db))
 	private.PUT("/projects/:project_id/instruments/:instrument_id/geometry", handlers.UpdateInstrumentGeometry(db))
 	private.PUT("/projects/:project_id/instruments/:instrument_id", handlers.UpdateInstrument(db))
+	// TODO: Remove endpoint (no project context)
 	private.DELETE("/instruments/:instrument_id", handlers.DeleteFlagInstrument(db))
 
 	// Instrument Groups
@@ -237,9 +253,7 @@ func main() {
 	private.POST("/timeseries", handlers.CreateTimeseries(db))
 	private.PUT("/timeseries/:timeseries_id", handlers.UpdateTimeseries(db))
 	private.DELETE("/timeseries/:timeseries_id", handlers.DeleteTimeseries(db))
-
-	private.POST("/timeseries/measurements", handlers.CreateOrUpdateTimeseriesMeasurements(db))
-	private.POST("/projects/:project_id/timeseries_measurements", handlers.CreateOrUpdateTimeseriesMeasurements(db))
+	private.POST("/projects/:project_id/timeseries_measurements", handlers.CreateOrUpdateProjectTimeseriesMeasurements(db))
 
 	// Collection Groups
 	public.GET("/projects/:project_id/collection_groups", handlers.ListCollectionGroups(db))
