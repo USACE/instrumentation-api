@@ -22,5 +22,6 @@ begin;
 \i '/sql/district_streamgages/nae.sql'
 \i '/sql/district_streamgages/spa.sql'
 \i '/sql/district_streamgages/lrb.sql'
+\i '/sql/district_streamgages/lrc.sql'
 
 commit;
