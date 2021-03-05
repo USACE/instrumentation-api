@@ -57,12 +57,16 @@ where instrument_id in (
 	from instrument i
 	where i.project_id = 'a6e542eb-41bc-45b3-aab7-7f45004ad8d3')
 
--- Delete Instrument Group
+-- Delete Instrument Group Instruments
 select * from instrument_group_instruments
 where instrument_id in (
 	select id from instrument i
 	where i.project_id = 'a6e542eb-41bc-45b3-aab7-7f45004ad8d3'
 	)
+
+-- Delete Instrument Groups
+select * from instrument_group 
+where project_id = 'a6e542eb-41bc-45b3-aab7-7f45004ad8d3'
 	
 --Delete Collection Groups
 

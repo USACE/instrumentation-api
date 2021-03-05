@@ -1,4 +1,3 @@
-\set ON_ERROR_STOP 1
 begin;
 
 \i '/sql/10-tables.sql'
@@ -12,10 +11,17 @@ begin;
 \i '/sql/33-data_nae.sql'
 \i '/sql/34-data_poa.sql'
 \i '/sql/35-data_lrc_images.sql'
-\i '/sql/district_streamgages/lrb.sql'
+-- New district streamgages should be appended below and not in 
+-- alphabetical order due to script that ensures slugs are unique.
 \i '/sql/district_streamgages/lrh.sql'
 \i '/sql/district_streamgages/lrn.sql'
+\i '/sql/district_streamgages/mvk.sql'
+\i '/sql/district_streamgages/mvn.sql'
 \i '/sql/district_streamgages/nwdm.sql'
 \i '/sql/district_streamgages/sas.sql'
+\i '/sql/district_streamgages/nae.sql'
+\i '/sql/district_streamgages/spa.sql'
+\i '/sql/district_streamgages/lrb.sql'
+\i '/sql/district_streamgages/lrc.sql'
 
 commit;
