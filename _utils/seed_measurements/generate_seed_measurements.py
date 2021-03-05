@@ -50,23 +50,22 @@ def generate_measurements(timeseries_id, param, measurements_sql):
 ########################################################################
 
 API_HOST = f"http://{os.getenv('INSTRUMENTATION_API_HOST', default='http://instrumentation-api_api_1')}"
+INSTRUMENTATION_ROUTE_PREFIX = os.getenv('INSTRUMENTATION_ROUTE_PREFIX', default='/instrumentation')
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
 measurements_sql = 'INSERT INTO timeseries_measurement (timeseries_id, time, value) VALUES\n'
 
 print('Fetching timeseries from Instrumentation API')
-r = requests.get(f'{API_HOST}/instrumentation/timeseries')
+r = requests.get(f'{API_HOST}{INSTRUMENTATION_ROUTE_PREFIX}/timeseries')
 timeseries = r.json()
 
 
 for ts in timeseries:
-    # if ts['name'].lower() in ['stage', 'elevation', 'precipitation']:
-    r = requests.get(f"{API_HOST}/instrumentation/timeseries/{ts['id']}/measurements")
+    r = requests.get(f"{API_HOST}{INSTRUMENTATION_ROUTE_PREFIX}/timeseries/{ts['id']}/measurements")
     ts_measurements = r.json()
     # Only add sample data if none exists
     if ts_measurements['items'] is None:
         measurements_sql = generate_measurements(ts['id'], ts['name'], measurements_sql)
-
 
 # remove the last comma and new line and replace with ; and \n
 measurements_sql = measurements_sql[:-2]+';\n'
@@ -84,9 +83,8 @@ finally:
     c.close()
     conn.close()
 
-
-with open(f'{script_dir}/seed_measurements.sql', 'w+') as f:
-    f.write(measurements_sql)
+# with open(f'{script_dir}/seed_measurements.sql', 'w+') as f:
+#     f.write(measurements_sql)
 
 print('################################')
 print('Sample measurements data loaded.')
