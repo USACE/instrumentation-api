@@ -71,3 +71,24 @@ services:
       - PGADMIN_DEFAULT_PASSWORD=postgres
     ports:
       - '8081:80'
+  # Seed data using container was required as the sql file was so large
+  # that it caused the postgres init to hang and exit early.
+  seed_data:
+    image: python:3
+    depends_on:
+      - api
+    volumes:
+      - ./_utils/seed_measurements:/app
+    environment:
+      - INSTRUMENTATION_API_HOST=instrumentation-api_api_1
+      - INSTRUMENTATION_DBUSER=instrumentation_user
+      - INSTRUMENTATION_DBPASS=password
+      - INSTRUMENTATION_DBNAME=postgres
+      - INSTRUMENTATION_DBHOST=instrumentation-api_postgres_1
+      - INSTRUMENTATION_ROUTE_PREFIX=/instrumentation
+    entrypoint: >
+      /bin/sh -c "
+      pip3 install requests psycopg2;
+      python3 /app/generate_seed_measurements.py
+      exit 0;
+      "
