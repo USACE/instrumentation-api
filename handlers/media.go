@@ -3,7 +3,6 @@ package handlers
 import (
 	"bytes"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"path/filepath"
@@ -44,8 +43,6 @@ func GetMedia(awsCfg *aws.Config, bucket *string, bucketPrefix string, routePref
 		// Example: If api hosted at /develop/<endpoint>... and images in bucket under prefix /instrumentation
 		//          S3 Key = (1) Start with URL of request (2) remove /develop (3) prepend /instrumentation
 		key := aws.String(bucketPrefix + strings.TrimPrefix(path, *routePrefix))
-
-		log.Printf("KEY/PATH: Path: %s; Key: %s;", path, *key)
 
 		newSession := session.New(awsCfg)
 		s3c := s3.New(newSession)
