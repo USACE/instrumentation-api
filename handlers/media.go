@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"path/filepath"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -30,20 +31,23 @@ func cleanFilepath(rawPath string) (string, error) {
 }
 
 // GetMedia serves media, files, etc for a given project
-func GetMedia(s3Config *aws.Config, bucket *string) echo.HandlerFunc {
+func GetMedia(awsCfg *aws.Config, bucket *string, bucketPrefix string, routePrefix *string) echo.HandlerFunc {
 	return func(c echo.Context) error {
 
 		// Get Wildcard Path
-		keyPath, err := cleanFilepath(c.Request().RequestURI)
+		path, err := cleanFilepath(c.Request().RequestURI)
 		if err != nil {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
-		key := aws.String(keyPath)
+		// Remove URL Route Prefix; Prefix with bucketPrefix
+		// Example: If api hosted at /develop/<endpoint>... and images in bucket under prefix /instrumentation
+		//          S3 Key = (1) Start with URL of request (2) remove /develop (3) prepend /instrumentation
+		key := aws.String(bucketPrefix + strings.TrimPrefix(path, *routePrefix))
 
-		newSession := session.New(s3Config)
-		s3Client := s3.New(newSession)
+		newSession := session.New(awsCfg)
+		s3c := s3.New(newSession)
 
-		output, err := s3Client.GetObject(&s3.GetObjectInput{Bucket: bucket, Key: key})
+		output, err := s3c.GetObject(&s3.GetObjectInput{Bucket: bucket, Key: key})
 		if err != nil {
 			return c.String(500, err.Error())
 		}

@@ -82,7 +82,7 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	// AWS Config used to get S3 Session/Client
+	// AWS S3 Config
 	awsCfg := awsConfig(&cfg)
 
 	db := dbutils.Connection(cfg.dbConnStr())
@@ -92,7 +92,7 @@ func main() {
 	public := e.Group(cfg.RoutePrefix) // TODO: /instrumentation/v1/
 
 	// Media Routes
-	public.GET("/projects/:project_slug/images/*", handlers.GetMedia(awsCfg, &cfg.AWSS3Bucket))
+	public.GET("/projects/:project_slug/images/*", handlers.GetMedia(awsCfg, &cfg.AWSS3Bucket, "/instrumentation", &cfg.RoutePrefix))
 
 	// private routes; can be authenticated via cac or token
 	// setting the second parameter passed to each middleware function to "true"
