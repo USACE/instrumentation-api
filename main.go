@@ -82,7 +82,7 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	// AWS S3 Config, Session, Client
+	// AWS S3 Config
 	awsCfg := awsConfig(&cfg)
 
 	db := dbutils.Connection(cfg.dbConnStr())
