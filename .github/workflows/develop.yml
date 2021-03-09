@@ -1,30 +1,57 @@
-name: Build & Deploy to DEV
+name: API Docker Image
 
 on:
   push:
-    branches:
-      - develop
+    branches: [develop]
 
 jobs:
-  build:
-    name: Build
+
+  APIDockerImage:
+    name: API Container Image
+    # The type of runner that the job will run on
     runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - name: Set up Go 1.13
-        uses: actions/setup-go@v1
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - name: Docker Compose; Test API
+        run: docker-compose up -d
+      
+      - name: Run Tests
+        run: ./test_and_report.sh
+        
+      - name: Configure AWS credentials
+        if: ${{ always() }}
+        uses: aws-actions/configure-aws-credentials@v1
         with:
-          go-version: 1.13
-        id: go
+          aws-access-key-id: ${{ secrets.CWBICI_DEVELOP_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.CWBICI_DEVELOP_AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.CWBICI_DEVELOP_AWS_REGION }}
 
-      - name: Check out code into the Go module directory
-        uses: actions/checkout@v2
+      - name: Upload Test Results
+        if: ${{ always() }}
+        run: |
+          aws s3 rm s3://corpsmap-appz/api_test_results/instrumentation.html
+          aws s3 cp ./tests/instrumentation.html s3://corpsmap-appz/api_test_results/instrumentation.html
+    
+      - name: Login to Amazon ECR
+        if: ${{ success() }}
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Build and Package for Lambda
-        run: make package
-
-      - name: Deploy to DEV
+      - name: Build, tag, and push image to Amazon ECR (midas-api)
+        if: ${{ success() }}
         env:
-          AWS_DEFAULT_REGION: ${{ secrets.CORPSMAPCI_AWS_DEFAULT_REGION }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.CORPSMAPCI_AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.CORPSMAPCI_AWS_SECRET_ACCESS_KEY }}
-        run: make deploy-dev
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: midas-api
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+      - name: Logout of Amazon ECR
+        if: ${{ always() }}
+        run: docker logout ${{ steps.login-ecr.outputs.registry }}
