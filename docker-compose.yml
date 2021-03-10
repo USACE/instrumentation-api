@@ -86,7 +86,7 @@ services:
       - INSTRUMENTATION_DBPASS=password
       - INSTRUMENTATION_DBNAME=postgres
       - INSTRUMENTATION_DBHOST=instrumentation-api_postgres_1
-      - INSTRUMENTATION_ROUTE_PREFIX=/instrumentation
+      - INSTRUMENTATION_ROUTE_PREFIX=
     entrypoint: >
       /bin/sh -c "
       pip3 install requests psycopg2;

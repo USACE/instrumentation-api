@@ -2,6 +2,7 @@ package dbutils
 
 import (
 	"log"
+	"time"
 
 	// _ "github.com/jackc/pgx/v4/"
 	_ "github.com/jackc/pgx/v4/stdlib"
@@ -23,7 +24,9 @@ func initDB(connStr string) *sqlx.DB {
 		log.Panicf("database is nil")
 	}
 
-	db.SetMaxOpenConns(10)
+	db.SetMaxOpenConns(15)
+	db.SetMaxIdleConns(5)
+	db.SetConnMaxLifetime(time.Minute *30)
 
 	return db
 }
