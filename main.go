@@ -152,6 +152,9 @@ func main() {
 	// Heartbeat
 	public.GET("/heartbeats", handlers.ListHeartbeats(db))
 	public.GET("/heartbeat/latest", handlers.GetLatestHeartbeat(db))
+	public.GET("/health", func(c echo.Context) error {
+		return c.String(http.StatusOK, "OK")
+	})
 
 	// Aware
 	public.GET("/aware/parameters", handlers.ListAwareParameters(db))

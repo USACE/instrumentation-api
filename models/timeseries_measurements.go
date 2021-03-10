@@ -75,6 +75,7 @@ func CreateOrUpdateTimeseriesMeasurements(db *sqlx.DB, mc []ts.MeasurementCollec
 		`,
 	)
 	if err != nil {
+		txn.Rollback()
 		return nil, err
 	}
 
@@ -82,14 +83,17 @@ func CreateOrUpdateTimeseriesMeasurements(db *sqlx.DB, mc []ts.MeasurementCollec
 	for _, c := range mc {
 		for _, m := range c.Items {
 			if _, err := stmt.Exec(c.TimeseriesID, m.Time, m.Value); err != nil {
+				txn.Rollback()
 				return nil, err
 			}
 		}
 	}
 	if err := stmt.Close(); err != nil {
+		txn.Rollback()
 		return nil, err
 	}
 	if err := txn.Commit(); err != nil {
+		txn.Rollback()
 		return nil, err
 	}
 
