@@ -77,7 +77,6 @@ select *
 from instrument i
 where i.project_id = 'a6e542eb-41bc-45b3-aab7-7f45004ad8d3'
 
-
 -- Delete Alert Config
 
 -- Delete Alert

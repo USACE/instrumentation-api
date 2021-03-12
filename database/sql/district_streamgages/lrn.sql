@@ -1,6 +1,77 @@
 INSERT INTO project (id, office_id, slug, name, image) VALUES
-    ('2bd0903c-6e4d-4d83-8558-1eab52079de0', '552e59f7-c0cc-4689-8a4d-e791c028430a', 'nashville-district-streamgages', 'Nashville District Streamgages', 'nashville-district-streamgages.jpg');
+    ('2bd0903c-6e4d-4d83-8558-1eab52079de0', '552e59f7-c0cc-4689-8a4d-e791c028430a', 
+    'nashville-district-streamgages', 'Nashville District Streamgages', 'nashville-district-streamgages.jpg');
 
+--#################################################
+--DELETE existing data (mostly for dev, test, prod)
+--#################################################
+
+-- Delete Timeseries Measurements
+delete from timeseries_measurement where timeseries_id in (
+	select t.id from instrument i 
+	join timeseries t on i.id = t.instrument_id
+	where i.project_id = '2bd0903c-6e4d-4d83-8558-1eab52079de0');
+
+-- Delete Timeseries
+delete from timeseries where instrument_id in (
+	select i.id from instrument i
+	where i.project_id = '2bd0903c-6e4d-4d83-8558-1eab52079de0');
+	
+-- Delete Telemetry GOES
+delete from telemetry_goes where id in (
+	select telemetry_id from instrument_telemetry
+	where telemetry_type_id='10a32652-af43-4451-bd52-4980c5690cc9'
+	and instrument_id in (
+		select i.id from instrument i
+		where i.project_id = '2bd0903c-6e4d-4d83-8558-1eab52079de0')
+	);
+
+-- Delete Telemetry Iridium
+delete from telemetry_iridium where id in (
+	select telemetry_id from instrument_telemetry
+	where telemetry_type_id='c0b03b0d-bfce-453a-b5a9-636118940449'
+	and	instrument_id in (
+		select i.id from instrument i
+		where i.project_id = '2bd0903c-6e4d-4d83-8558-1eab52079de0')
+	);
+	
+-- Delete Instrument Telemetry
+delete from instrument_telemetry where instrument_id in (
+	select i.id from instrument i
+	where i.project_id = '2bd0903c-6e4d-4d83-8558-1eab52079de0'
+    );
+	
+-- Delete Instrument Status
+delete from instrument_status where instrument_id in (
+	select i.id from instrument i
+	where i.project_id = '2bd0903c-6e4d-4d83-8558-1eab52079de0'
+    );
+
+-- Delete Instrument Group Instruments
+delete from instrument_group_instruments where instrument_id in (
+	select id from instrument i
+	where i.project_id = '2bd0903c-6e4d-4d83-8558-1eab52079de0'
+	);
+
+-- Delete Instrument Groups
+delete from instrument_group 
+where project_id = '2bd0903c-6e4d-4d83-8558-1eab52079de0';
+	
+--Delete Collection Groups
+
+--Delete collection_group_timeseries
+
+-- Delete Instruments
+delete from instrument i 
+where i.project_id = '2bd0903c-6e4d-4d83-8558-1eab52079de0';
+
+-- Delete Alert Config
+
+-- Delete Alert
+
+--########################################
+-- INSERT new data (built by script)
+--########################################
 
 --Ignoring Barkley-Spillway-Gates site/instrument, already in instruments unique list
 --Ignoring MFLK2-MARTINS_FORK site/instrument, already in instruments unique list
@@ -8,718 +79,718 @@ INSERT INTO project (id, office_id, slug, name, image) VALUES
 --INSERT INSTRUMENTS--COUNT:176
 INSERT INTO public.instrument(id, deleted, slug, name, formula, geometry, station, station_offset, create_date, update_date, type_id, project_id, creator, updater, usgs_id)
  VALUES 
-('27317472-68f5-4341-9152-be4e3cd35aba', False, 'amok2-clarksr-almoky', 'AMOK2-ClarksR-AlmoKY', null, ST_GeomFromText('POINT(-88.2736 36.6917)',4326), null, null, '2021-03-08T18:56:06.298722Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03610200'),
-('ff959a3d-2723-4984-abca-f2bd03aa489d', False, 'csst1-crossvilletn', 'CSST1-CrossvilleTN', null, ST_GeomFromText('POINT(-84.9972 35.9178)',4326), null, null, '2021-03-08T18:56:06.298972Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('83b90989-01ac-443a-98a6-73579bdcd6cd', False, 'fcrt1-fortcampbelltn', 'FCRT1-FortCampbellTN', null, ST_GeomFromText('POINT(-87.5369 36.6256)',4326), null, null, '2021-03-08T18:56:06.299102Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('7c7f7d23-824b-4325-a64e-f12ce009530e', False, 'albk2-albanyky', 'ALBK2-AlbanyKY', null, ST_GeomFromText('POINT(-85.1217 36.7453)',4326), null, null, '2021-03-08T18:56:06.299217Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('0459d406-5eca-4171-9af6-dfba3a7a45c6', False, 'alpt1-wfkobeyr-alpinetn', 'ALPT1-WFkObeyR-AlpineTN', null, ST_GeomFromText('POINT(-85.1745 36.3973)',4326), null, null, '2021-03-08T18:56:06.299647Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03415000'),
-('76972f3b-4723-40c5-adb6-8c8fd05dbf86', False, 'aplv2-appalachiava', 'APLV2-AppalachiaVA', null, ST_GeomFromText('POINT(-82.7883 36.8983)',4326), null, null, '2021-03-08T18:56:06.300054Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('74b37f6e-51db-4daf-8c91-f6b4f2723de6', False, 'artt1-powellr-arthurtn', 'ARTT1-PowellR-ArthurTN', null, ST_GeomFromText('POINT(-83.6303 36.5419)',4326), null, null, '2021-03-08T18:56:06.300471Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03532000'),
-('127e78c0-dcb2-4a3e-a50a-f016f06ce941', False, 'bahk2-barkley', 'BAHK2-BARKLEY', null, ST_GeomFromText('POINT(-88.2228 37.0244)',4326), null, null, '2021-03-08T18:56:06.300918Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('cde9c93e-070e-4386-b6ce-66d539304ad4', False, 'asht1-cheatham', 'ASHT1-CHEATHAM', null, ST_GeomFromText('POINT(-87.2283 36.3228)',4326), null, null, '2021-03-08T18:56:06.301351Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('8cdac320-0eed-41df-8983-5e71f1278b08', False, 'coht1-cordell-hull', 'COHT1-CORDELL_HULL', null, ST_GeomFromText('POINT(-85.9389 36.2917)',4326), null, null, '2021-03-08T18:56:06.301792Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('aeb9ed17-50fe-42bb-acd6-9a2cf808cbba', False, 'cort1-cordell-hull', 'CORT1-CORDELL_HULL', null, ST_GeomFromText('POINT(-85.9397 36.2853)',4326), null, null, '2021-03-08T18:56:06.302206Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03418420'),
-('cc3b9f84-b4f9-4916-96b0-fc73c44d6b0d', False, 'dhtt1-dale-hollow', 'DHTT1-DALE_HOLLOW', null, ST_GeomFromText('POINT(-85.4611 63.5472)',4326), null, null, '2021-03-08T18:56:06.302635Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('8c53aaa6-aad4-497c-9286-741291847fc3', False, 'dlht1-dale-hollow', 'DLHT1-DALE_HOLLOW', null, ST_GeomFromText('POINT(-85.4564 36.5414)',4326), null, null, '2021-03-08T18:56:06.303053Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('6ba15fe7-dfcf-49c3-8230-599356d0c4b0', False, 'caft1-calfkillerr-blwspartatn', 'CAFT1-CalfkillerR-blwSpartaTN', null, ST_GeomFromText('POINT(-85.4763 35.9121)',4326), null, null, '2021-03-08T18:56:06.303507Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03419530'),
-('9375532a-4fcb-4bfc-a80c-a9a8d10aa1f2', False, 'wbnt1-millcr-nrwoodbinetn', 'WBNT1-MillCr-nrWoodbineTN', null, ST_GeomFromText('POINT(-86.719 36.1167)',4326), null, null, '2021-03-08T18:56:06.304008Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03431060'),
-('4955897d-c97b-4d36-bd40-d46623c798a2', False, 'wlck2-wolf-creek', 'WLCK2-WOLF_CREEK', null, ST_GeomFromText('POINT(-85.1469 36.8683)',4326), null, null, '2021-03-08T18:56:06.304449Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('57d58971-a9a5-454b-bc24-07d5dc98ae5e', False, 'burkesville', 'Burkesville', null, ST_GeomFromText('POINT(-85.3681 36.7953)',4326), null, null, '2021-03-08T18:56:06.304872Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03414100'),
-('9c72d20a-7806-4b72-8753-a339dcf9955f', False, 'cfak2-cumberlandr-cumberlandfallsky', 'CFAK2-CumberlandR-CumberlandFallsKY', null, ST_GeomFromText('POINT(-84.3414 36.8358)',4326), null, null, '2021-03-08T18:56:06.305309Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03404500'),
-('f9d084c4-0cef-4974-88b9-969ed553da51', False, 'lbvt1-buffalor-blwlobelvilletn', 'LBVT1-BuffaloR-blwLobelvilleTN', null, ST_GeomFromText('POINT(-87.7803 35.8108)',4326), null, null, '2021-03-08T18:56:06.305744Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('b0035cd2-b103-4df1-8561-15a38d56dcc3', False, 'ltwt1-sfkcumberlandr-leatherwoodfordtn', 'LTWT1-SFkCumberlandR-LeatherwoodFordTN', null, ST_GeomFromText('POINT(-84.6694 36.4773)',4326), null, null, '2021-03-08T18:56:06.306183Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03410210'),
-('eaff91e3-8907-4aaa-96b5-24d011fd5c1f', False, 'nast1-cumberlandr-nashvilletn', 'NAST1-CumberlandR-NashvilleTN', null, ST_GeomFromText('POINT(-86.7731 36.1614)',4326), null, null, '2021-03-08T18:56:06.306620Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03431500'),
-('9ea8edb4-d7c8-4a40-96ea-f0997b66e16d', False, 'shet1-duckr-shelbyvilletn', 'SHET1-DuckR-ShelbyvilleTN', null, ST_GeomFromText('POINT(-86.4625 35.4828)',4326), null, null, '2021-03-08T18:56:06.307053Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('9ab06dac-707f-48de-bec4-8e0488918b0b', False, 'smhk2-martinsfk-smithky', 'SMHK2-MartinsFk-SmithKY', null, ST_GeomFromText('POINT(-83.2869 36.7258)',4326), null, null, '2021-03-08T18:56:06.307515Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03400785'),
-('ded99a0f-330c-4cda-9417-c83bc7b24af3', False, 'ncfk2-martinsfk-harlanky', 'NCFK2-MartinsFk-HarlanKY', null, ST_GeomFromText('POINT(-83.3253 36.8447)',4326), null, null, '2021-03-08T18:56:06.307935Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03400986'),
-('0b464357-6d6b-4dc0-87ea-aa4f65aa8e9e', False, 'mnlk2-martins-fork', 'MNLK2-MARTINS_FORK', null, ST_GeomFromText('POINT(-83.255 36.7503)',4326), null, null, '2021-03-08T18:56:06.308397Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03400800'),
-('cd329248-0df2-4a36-aeac-8e18b54d98f5', False, 'clat1-cumberlandr-celinatn', 'CLAT1-CumberlandR-CelinaTN', null, ST_GeomFromText('POINT(-85.5156 36.5544)',4326), null, null, '2021-03-08T18:56:06.308819Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03417500'),
-('6961517e-7f6e-4a2e-a362-d2d85362c5c1', False, 'dovt1-cumberlandr-dovertn', 'DOVT1-CumberlandR-DoverTN', null, ST_GeomFromText('POINT(-87.8389 36.4897)',4326), null, null, '2021-03-08T18:56:06.309266Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03437000'),
-('3877d14f-4d39-4369-9a63-498851e9d8cd', False, 'hntt1-cumberlandr-hunterspointtn', 'HNTT1-CumberlandR-HuntersPointTN', null, ST_GeomFromText('POINT(-86.2642 36.2992)',4326), null, null, '2021-03-08T18:56:06.309702Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03425400'),
-('346fcc23-8ed0-4e80-99b7-75c2f2261525', False, 'hpkk2-sfklittler-hopkinsvilleky', 'HPKK2-SFkLittleR-HopkinsvilleKY', null, ST_GeomFromText('POINT(-87.4814 36.8394)',4326), null, null, '2021-03-08T18:56:06.310134Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03437500'),
-('58beadda-81ea-4950-b21a-18405d67583c', False, 'stwt1-caneyfk-stonewalltn', 'STWT1-CaneyFk-StonewallTN', null, ST_GeomFromText('POINT(-85.9047 36.19)',4326), null, null, '2021-03-08T18:56:06.310607Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03424860'),
-('0d485c9a-928b-448f-9a13-814f14cefe0f', False, 'ckdt1-chickamauga', 'CKDT1-CHICKAMAUGA', null, ST_GeomFromText('POINT(-85.2294 35.1)',4326), null, null, '2021-03-08T18:56:06.311136Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('11332d06-0506-4a42-8698-c80f3aff861d', False, 'clbt1-columbiatn', 'CLBT1-ColumbiaTN', null, ST_GeomFromText('POINT(-87.0328 35.6636)',4326), null, null, '2021-03-08T18:56:06.311738Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('324034f3-e9fb-429c-b741-1d6d65ea7b4c', False, 'clmt1-coalmonttn', 'CLMT1-CoalmontTN', null, ST_GeomFromText('POINT(-85.6964 35.345)',4326), null, null, '2021-03-08T18:56:06.312201Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('5ddae2ed-a0a9-4fef-a4da-864604996342', False, 'spst1-springfieldtn', 'SPST1-SpringfieldTN', null, ST_GeomFromText('POINT(-86.8417 36.4711)',4326), null, null, '2021-03-08T18:56:06.312641Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('9a25e374-d27d-4f12-b228-7363f70a71f3', False, 'dert1-derossettn', 'DERT1-DeRossetTN', null, ST_GeomFromText('POINT(-85.2817 35.9631)',4326), null, null, '2021-03-08T18:56:06.313055Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('b30e8722-5dfb-4677-b44f-45d49e81a925', False, 'sstk2-somersetky', 'SSTK2-SomersetKY', null, ST_GeomFromText('POINT(-84.6158 37.1044)',4326), null, null, '2021-03-08T18:56:06.313482Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('9ea21f67-c8cb-48ad-9f6f-b3fc729f7b9a', False, 'sbvt1', 'SBVT1', null, ST_GeomFromText('POINT(86.4622 35.4825)',4326), null, null, '2021-03-08T18:56:06.313899Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('224d3ada-e83b-4d19-b152-05d8b099c056', False, 'isot1-isolinetn', 'ISOT1-IsolineTN', null, ST_GeomFromText('POINT(-85.0611 36.0783)',4326), null, null, '2021-03-08T18:56:06.314313Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('5b8a204e-bd38-40bd-b108-4118f962586b', False, 'onit1-oneidatn', 'ONIT1-OneidaTN', null, ST_GeomFromText('POINT(-84.5167 36.5)',4326), null, null, '2021-03-08T18:56:06.314742Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('58278b8b-54d4-4b56-8969-e6a176b900f9', False, 'whla1-wheeler', 'WHLA1-WHEELER', null, ST_GeomFromText('POINT(-87.3836 34.7625)',4326), null, null, '2021-03-08T18:56:06.315185Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('9c89f1b8-6c18-4a42-ae3d-470299b7194b', False, 'lftt1-lafayettetn', 'LFTT1-LafayetteTN', null, ST_GeomFromText('POINT(-85.0311 36.5192)',4326), null, null, '2021-03-08T18:56:06.315636Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('1cdebe4a-52d6-4356-8817-c5984ce4100f', False, 'stlt1-statesvilletn', 'STLT1-StatesvilleTN', null, ST_GeomFromText('POINT(-86.1214 36.0183)',4326), null, null, '2021-03-08T18:56:06.316056Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('9a97a37b-e18f-4cca-9d7c-137a1d3af595', False, 'pict1-pickwick', 'PICT1-PICKWICK', null, ST_GeomFromText('POINT(-88.2511 3.0681)',4326), null, null, '2021-03-08T18:56:06.316464Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('903d19ae-0f01-4bd9-b7ef-c72b6551739d', False, 'mant1-manchestertn', 'MANT1-ManchesterTN', null, ST_GeomFromText('POINT(-86.0831 35.4711)',4326), null, null, '2021-03-08T18:56:06.316901Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('652fcd72-0891-481d-9fa1-7aa96508d0a0', False, 'mnyt1-montereytn', 'MNYT1-MontereyTN', null, ST_GeomFromText('POINT(-85.3 36.1333)',4326), null, null, '2021-03-08T18:56:06.317312Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('64a28953-4f08-4eab-baf5-11b49dc7f957', False, 'lvlt1', 'LVLT1', null, ST_GeomFromText('POINT(87.7747 35.7828)',4326), null, null, '2021-03-08T18:56:06.317780Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('f72eacc7-7a2d-4bf8-827c-a81d80952183', False, 'grtt1-great-falls', 'GRTT1-GREAT_FALLS', null, ST_GeomFromText('POINT(-85.6336 35.8081)',4326), null, null, '2021-03-08T18:56:06.318207Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('9a6682e4-92fd-4d67-87ea-59ffd0bec6ce', False, 'ptst1-petrostn', 'PTST1-PetrosTN', null, ST_GeomFromText('POINT(-84.4461 36.0989)',4326), null, null, '2021-03-08T18:56:06.318664Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('f25498d3-d819-4a59-862d-769f2aba0e74', False, 'newt1-newcombtn', 'NEWT1-NewcombTN', null, ST_GeomFromText('POINT(-84.1731 36.5444)',4326), null, null, '2021-03-08T18:56:06.319120Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('e401d6d3-8111-4f04-8c90-6ccf2d269bc2', False, 'gvda1-guntersville', 'GVDA1-GUNTERSVILLE', null, ST_GeomFromText('POINT(-86.3933 34.4211)',4326), null, null, '2021-03-08T18:56:06.319575Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('7e2ef036-c14a-4e0a-9528-1bcfbaa84219', False, 'grhk2-mckeeky', 'GRHK2-McKeeKY', null, ST_GeomFromText('POINT(-83.9261 37.3842)',4326), null, null, '2021-03-08T18:56:06.320015Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('0a1c5198-b7bd-4090-bc0c-89f44635d8eb', False, 'snnt1', 'SNNT1', null, ST_GeomFromText('POINT(88.2097 35.1797)',4326), null, null, '2021-03-08T18:56:06.320466Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('c9d371d7-9933-484f-853b-cc7483011c0d', False, 'wsda1-wilson', 'WSDA1-WILSON', null, ST_GeomFromText('POINT(-87.625 34.7925)',4326), null, null, '2021-03-08T18:56:06.321032Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('c856ec08-c7f1-4d20-8804-481da266339d', False, 'bcht1-beechr-nrlexingtontn', 'BCHT1-BeechR-nrLexingtonTN', null, ST_GeomFromText('POINT(-88.4147 35.6342)',4326), null, null, '2021-03-08T18:56:06.321593Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03594421'),
-('9b52884d-a446-4a1a-8db2-6d73aed87d66', False, 'prvt1-tennesseer-perryvilletn', 'PRVT1-TennesseeR-PerryvilleTN', null, ST_GeomFromText('POINT(-88.0389 35.6247)',4326), null, null, '2021-03-08T18:56:06.322172Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('cb6708b0-9599-470a-8460-411c3969ab01', False, 'hmlt1-duckr-abvhurricanemillstn', 'HMLT1-DuckR-abvHurricaneMillsTN', null, ST_GeomFromText('POINT(-87.7431 35.9297)',4326), null, null, '2021-03-08T18:56:06.322604Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('d40d94c2-4b9c-411f-82d2-e48ad6d1119b', False, 'vert1-pineyr-vernontn', 'VERT1-PineyR-VernonTN', null, ST_GeomFromText('POINT(-87.5014 35.8711)',4326), null, null, '2021-03-08T18:56:06.323022Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03602500'),
-('0b5abf6f-d9e5-42fb-bf70-8965a8da9965', False, 'fltt1-buffalor-nrflatwoodstn', 'FLTT1-BuffaloR-nrFlatWoodsTN', null, ST_GeomFromText('POINT(-87.8328 35.4958)',4326), null, null, '2021-03-08T18:56:06.323516Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03604000'),
-('2a5999e7-03b5-45e3-9161-215e4fdd8167', False, 'jpht1-j-percy-priest', 'JPHT1-J_PERCY_PRIEST', null, ST_GeomFromText('POINT(-86.6194 36.1489)',4326), null, null, '2021-03-08T18:56:06.323946Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('f8acc6f8-9158-482d-9074-6f2c04f402a0', False, 'jppt1-j-percy-priest', 'JPPT1-J_PERCY_PRIEST', null, ST_GeomFromText('POINT(-86.6181 36.1567)',4326), null, null, '2021-03-08T18:56:06.324379Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('184e1fa0-dd7b-4ef3-a571-1708ca60874d', False, 'blwk2-rockcastler-billowsky', 'BLWK2-RockcastleR-BillowsKY', null, ST_GeomFromText('POINT(-84.2967 37.1711)',4326), null, null, '2021-03-08T18:56:06.324797Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03406500'),
-('0badc723-222f-47e1-a723-8ccd56363484', False, 'bygt1-wolfr-byrdstowntn', 'BYGT1-WolfR-ByrdstownTN', null, ST_GeomFromText('POINT(-85.0728 36.8631)',4326), null, null, '2021-03-08T18:56:06.325303Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03416000'),
-('7fabbbeb-74da-4853-af05-497eb59b17ac', False, 'cclk2-cranks-creek', 'CCLK2-CRANKS_CREEK', null, ST_GeomFromText('POINT(-83.2383 36.7394)',4326), null, null, '2021-03-08T18:56:06.325874Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('b11b1374-9353-4247-9366-b03ec33097bc', False, 'cdzk2-littler-cadizky', 'CDZK2-LittleR-CadizKY', null, ST_GeomFromText('POINT(-87.7217 36.7778)',4326), null, null, '2021-03-08T18:56:06.326399Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03438000'),
-('94945eaa-d3ac-4c69-8fe7-314607ef41b2', False, 'last1-efkstonesr-lascassastn', 'LAST1-EFkStonesR-LascassasTN', null, ST_GeomFromText('POINT(-86.3336 35.9183)',4326), null, null, '2021-03-08T18:56:06.326867Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03427500'),
-('49a8d0e0-08c1-46ff-838f-51812f118415', False, 'jagt1-efkobeyr-jamestowntn', 'JAGT1-EFkObeyR-JamestownTN', null, ST_GeomFromText('POINT(-85.0261 36.4158)',4326), null, null, '2021-03-08T18:56:06.327382Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('1afa8d2f-8d7e-4ca9-9b17-d49d11cdf84a', False, 'cfkt1-clearfkr-nrrobinstn', 'CFKT1-ClearFkR-nrRobinsTN', null, ST_GeomFromText('POINT(-84.6302 36.3882)',4326), null, null, '2021-03-08T18:56:06.327870Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03409500'),
-('52fa325e-25ef-4d95-9253-a31bf613afd4', False, 'frat1-harpethr-franklintn', 'FRAT1-HarpethR-FranklinTN', null, ST_GeomFromText('POINT(-86.8656 35.9211)',4326), null, null, '2021-03-08T18:56:06.328360Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03432350'),
-('f8083600-9aca-4d24-a87e-1b290aaea940', False, 'lylk2-cumberlandr-loyallky', 'LYLK2-CumberlandR-LoyallKY', null, ST_GeomFromText('POINT(-83.3544 36.8478)',4326), null, null, '2021-03-08T18:56:06.328866Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03401000'),
-('dfe34baa-508b-4471-9ac1-b918021ae6a9', False, 'mugt1-efkstonesr-murfreesborotn', 'MUGT1-EFkStonesR-MurfreesboroTN', null, ST_GeomFromText('POINT(-86.4286 35.9025)',4326), null, null, '2021-03-08T18:56:06.329327Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03428200'),
-('ee6d3280-490b-498e-ab9f-90e5698cd181', False, 'port1-redr-portroyaltn', 'PORT1-RedR-PortRoyalTN', null, ST_GeomFromText('POINT(-87.1422 36.5539)',4326), null, null, '2021-03-08T18:56:06.329828Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03436100'),
-('e8d3b2e6-3b58-410f-96bb-6f8453529940', False, 'strk2-sfkcumberlandr-stearnsky', 'STRK2-SFkCumberlandR-StearnsKY', null, ST_GeomFromText('POINT(-84.5325 36.6292)',4326), null, null, '2021-03-08T18:56:06.330306Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03410500'),
-('2a76c74a-aada-4995-8fa6-3722a521fd32', False, 'nrvt1-newr-nrrobinstn', 'NRVT1-NewR-nrRobinsTN', null, ST_GeomFromText('POINT(-84.5548 36.3854)',4326), null, null, '2021-03-08T18:56:06.330792Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03408500'),
-('a129aa7b-7ec4-4f2d-88ae-457caa2adec7', False, 'smlk2-cumberlandr-smithlandky', 'SMLK2-CumberlandR-SmithlandKY', null, ST_GeomFromText('POINT(-88.3997 37.1467)',4326), null, null, '2021-03-08T18:56:06.331314Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('04117943-7a09-4015-b476-cf3f5cd469ba', False, 'mcgt1-collinsr-mcminnvilletn', 'MCGT1-CollinsR-McMinnvilleTN', null, ST_GeomFromText('POINT(-85.7319 35.7083)',4326), null, null, '2021-03-08T18:56:06.331777Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03421000'),
-('67d97a3a-a3d5-4c8c-9aa2-7329065c902c', False, 'pvlk2-cumberlandr-pinevilleky', 'PVLK2-CumberlandR-PinevilleKY', null, ST_GeomFromText('POINT(-83.6925 36.7644)',4326), null, null, '2021-03-08T18:56:06.332277Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03402900'),
-('2bb2b7cf-5ad8-4158-a42b-9727f61a02a8', False, 'lbst1-springcr-lebanontn', 'LBST1-SpringCr-LebanonTN', null, ST_GeomFromText('POINT(-86.2369 36.2217)',4326), null, null, '2021-03-08T18:56:06.332743Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03425520'),
-('07a61743-18ae-42ef-b47d-c4e20096b086', False, 'pent1-cumberlandr-penitentiarybrtn', 'PENT1-CumberlandR-PenitentiaryBrTN', null, ST_GeomFromText('POINT(-85.5958 36.4394)',4326), null, null, '2021-03-08T18:56:06.333230Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03417600'),
-('32d49c6a-b02c-4d4d-ba52-9a528cd1c80f', False, 'mdlk2-yellowcr-middlesboroky', 'MDLK2-YellowCr-MiddlesboroKY', null, ST_GeomFromText('POINT(-83.6881 36.6678)',4326), null, null, '2021-03-08T18:56:06.333716Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('2a045b91-fdda-45d0-b264-6c21b9790e36', False, 'jnct1-jenningscr-whitleyvilletn', 'JNCT1-JenningsCr-WhitleyvilleTN', null, ST_GeomFromText('POINT(-85.6747 36.4403)',4326), null, null, '2021-03-08T18:56:06.334187Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03418224'),
-('1ff25fb7-8cb9-49b1-a83c-4917e1842b6e', False, 'gvst1-smithfkcr-temperancehalltn', 'GVST1-SmithFkCr-TemperanceHallTN', null, ST_GeomFromText('POINT(-85.9078 36.0875)',4326), null, null, '2021-03-08T18:56:06.334639Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03424730'),
-('89e3534d-b0a3-422a-82ca-58b3b0e0871a', False, 'sxtk2-clearfk-saxtonky', 'SXTK2-ClearFk-SaxtonKY', null, ST_GeomFromText('POINT(-84.1144 36.6339)',4326), null, null, '2021-03-08T18:56:06.335137Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03403910'),
-('3e55442c-b36a-493c-b2f8-6fec535fc2cc', False, 'njnt1-tennesseer-nrnewjohnsonvilletn', 'NJNT1-TennesseeR-nrNewJohnsonvilleTN', null, ST_GeomFromText('POINT(-88.0003 35.0178)',4326), null, null, '2021-03-08T18:56:06.335633Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('8714bb02-ecdf-4116-9f37-9bb8158d0a1d', False, 'kint1-harpethr-kingstonsprngstn', 'KINT1-HarpethR-KingstonSprngsTN', null, ST_GeomFromText('POINT(-87.0989 36.1222)',4326), null, null, '2021-03-08T18:56:06.336136Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03434500'),
-('f1a69f11-6790-4d16-92b0-7bf2907d4039', False, 'hort1-horsecr-nrsavannahtn', 'HORT1-HorseCr-nrSavannahTN', null, ST_GeomFromText('POINT(-88.2094 35.1806)',4326), null, null, '2021-03-08T18:56:06.336607Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('a5a15c22-bced-4ea0-8342-a56df99d753f', False, 'emgt1-yellowcr-ellismillstn', 'EMGT1-YellowCr-EllisMillsTN', null, ST_GeomFromText('POINT(-87.5536 36.3108)',4326), null, null, '2021-03-08T18:56:06.337125Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03436690'),
-('38f9a880-6c47-4b1c-9476-92daa6b8164b', False, 'mtck2-beavercr-monticelloky', 'MTCK2-BeaverCr-MonticelloKY', null, ST_GeomFromText('POINT(-84.8961 36.7975)',4326), null, null, '2021-03-08T18:56:06.337641Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03413200'),
-('7d7e410b-ea8d-48a9-b09f-a6f7212b4ebe', False, 'colt1-duckr-columbiatn', 'COLT1-DuckR-ColumbiaTN', null, ST_GeomFromText('POINT(-87.0325 35.6181)',4326), null, null, '2021-03-08T18:56:06.338147Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('e1508b90-1bcf-4608-acae-0ab4e1ef01d4', False, 'ohit1-old-hickory', 'OHIT1-OLD_HICKORY', null, ST_GeomFromText('POINT(-86.6589 36.2972)',4326), null, null, '2021-03-08T18:56:06.338621Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('6758f2d6-ac16-4a8d-8a89-676578f6a639', False, 'wlbk2-cumberlandr-williamsburgky', 'WLBK2-CumberlandR-WilliamsburgKY', null, ST_GeomFromText('POINT(-84.1564 36.7436)',4326), null, null, '2021-03-08T18:56:06.339105Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03404000'),
-('8d3041bc-ff78-4dca-8044-a904ec35321f', False, 'shvt1-duckr-nrshelbyvilletn', 'SHVT1-DuckR-nrShelbyvilleTN', null, ST_GeomFromText('POINT(-86.4992 35.4803)',4326), null, null, '2021-03-08T18:56:06.339684Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('e88f7b9e-772d-42a3-9d66-33dad5c6b3a8', False, 'fldt1-fort-loudon', 'FLDT1-FORT_LOUDON', null, ST_GeomFromText('POINT(-84.2456 35.7922)',4326), null, null, '2021-03-08T18:56:06.340148Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('bf472550-0dfc-4310-ab39-19160a8e073a', False, 'lvgt1-livingstontn', 'LVGT1-LivingstonTN', null, ST_GeomFromText('POINT(-85.3167 36.3833)',4326), null, null, '2021-03-08T18:56:06.340669Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('60804aad-a4c4-41a5-938c-989619315126', False, 'jnvt1', 'JNVT1', null, ST_GeomFromText('POINT(87.9758 36.0308)',4326), null, null, '2021-03-08T18:56:06.341166Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('eebb0956-f1c8-4d76-a78a-e823509fce4d', False, 'lebt1-lebanontn', 'LEBT1-LebanonTN', null, ST_GeomFromText('POINT(-86.3178 36.2286)',4326), null, null, '2021-03-08T18:56:06.341660Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('f017d31a-573e-4993-ba15-10d4224f08d9', False, 'unvt1-unionvilletn', 'UNVT1-UnionvilleTN', null, ST_GeomFromText('POINT(-86.5864 35.6211)',4326), null, null, '2021-03-08T18:56:06.342169Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('81c785c7-365b-49d8-b06b-f85fcd3479e7', False, 'wdbt1-woodburytn', 'WDBT1-WoodburyTN', null, ST_GeomFromText('POINT(-86.0733 35.8292)',4326), null, null, '2021-03-08T18:56:06.342700Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('6a6ca44d-f9f0-4f0e-ab52-ac7af764c6ab', False, 'lbyk2-libertyky', 'LBYK2-LibertyKY', null, ST_GeomFromText('POINT(-84.9333 37.3)',4326), null, null, '2021-03-08T18:56:06.343226Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('f882e4e4-7aaa-422f-a7dd-4a59dfb0a41a', False, 'nkjt1-nickajack', 'NKJT1-NICKAJACK', null, ST_GeomFromText('POINT(-85.6222 35.0017)',4326), null, null, '2021-03-08T18:56:06.343720Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('b8c41a11-f7b0-4a01-8145-4f28fdbbfde9', False, 'wbot1-watts-bar', 'WBOT1-WATTS_BAR', null, ST_GeomFromText('POINT(-84.7886 35.6086)',4326), null, null, '2021-03-08T18:56:06.344223Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('103af248-70db-436b-9b98-882c6db5f95f', False, 'orlt1-orlindatn', 'ORLT1-OrlindaTN', null, ST_GeomFromText('POINT(-86.7153 36.6025)',4326), null, null, '2021-03-08T18:56:06.344697Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('884801ba-13ec-4638-8f8e-fda673a63fb2', False, 'cntt1', 'CNTT1', null, ST_GeomFromText('POINT(0 0)',4326), null, null, '2021-03-08T18:56:06.345166Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('51055b7d-d298-4971-ba98-08de16960b74', False, 'ctnk2-cantonky', 'CTNK2-CantonKY', null, ST_GeomFromText('POINT(-87.9644 36.7942)',4326), null, null, '2021-03-08T18:56:06.345638Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('b1ae57c6-40dc-4fde-9852-e42bdabd4d2e', False, 'coot1-cookevilletn', 'COOT1-CookevilleTN', null, ST_GeomFromText('POINT(-85.5 36.15)',4326), null, null, '2021-03-08T18:56:06.346132Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('13c24865-3fab-4a81-acd5-4bc84334cd2b', False, 'kwtt1-knoxvilletn-wtp', 'KWTT1-KnoxvilleTN-WTP', null, ST_GeomFromText('POINT(-83.9289 5.9456)',4326), null, null, '2021-03-08T18:56:06.346571Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('cd2b9a42-0f5a-4660-9c53-10ebdc7d422f', False, 'brak2-bereaky', 'BRAK2-BereaKY', null, ST_GeomFromText('POINT(-84.2525 37.5744)',4326), null, null, '2021-03-08T18:56:06.347048Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('2cba28f2-a50f-4ee4-9653-96d6dbaaa74c', False, 'cbbk2-cobbky', 'CBBK2-CobbKY', null, ST_GeomFromText('POINT(-87.7781 36.9933)',4326), null, null, '2021-03-08T18:56:06.347557Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('14e6dda0-c35e-4b77-8c38-7e126a43fa30', False, 'ektk2-elktonky', 'EKTK2-ElktonKY', null, ST_GeomFromText('POINT(-87.1022 36.8022)',4326), null, null, '2021-03-08T18:56:06.348020Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('69bad009-9c10-446a-a782-84b847554bbe', False, 'hbft1-harpethr-blwfranklin', 'HBFT1-HarpethR-blwFranklin', null, ST_GeomFromText('POINT(-86.8817 35.9481)',4326), null, null, '2021-03-08T18:56:06.348453Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03432400'),
-('e6f235c0-acff-4145-af79-f80065678138', False, 'bigt1-bigsandyr-brucetontn', 'BIGT1-BigSandyR-BrucetonTN', null, ST_GeomFromText('POINT(-88.2289 36.0369)',4326), null, null, '2021-03-08T18:56:06.348906Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03606500'),
-('f5284c44-6b5c-407d-9e9d-04ce3b942b22', False, 'mltt1-duckr-avbmilltowntn', 'MLTT1-DuckR-avbMilltownTN', null, ST_GeomFromText('POINT(-86.7789 35.5764)',4326), null, null, '2021-03-08T18:56:06.349428Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03599240'),
-('fc5b94e8-5d1b-43b6-973a-acaa2cd1a4d2', False, 'chpt1-cheatham', 'CHPT1-CHEATHAM', null, ST_GeomFromText('POINT(-87.2275 36.3144)',4326), null, null, '2021-03-08T18:56:06.349906Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('665586c1-2bbd-4218-8cb2-5515ec82faf8', False, 'ceht1-center-hill', 'CEHT1-CENTER_HILL', null, ST_GeomFromText('POINT(-85.8272 36.0939)',4326), null, null, '2021-03-08T18:56:06.350406Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('29b2ac8c-5ce0-4692-adf6-eab3c6dc33bc', False, 'lapk2-laurel', 'LAPK2-LAUREL', null, ST_GeomFromText('POINT(-84.2678 36.9625)',4326), null, null, '2021-03-08T18:56:06.350887Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('03961c4b-8278-4159-a5d7-9d7dd11cae34', False, 'cmbk2-poorfk-cumberlandky', 'CMBK2-PoorFk-CumberlandKY', null, ST_GeomFromText('POINT(-82.9939 36.9733)',4326), null, null, '2021-03-08T18:56:06.351407Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03400500'),
-('3c9d0224-ee9d-4738-91b5-8d407512d259', False, 'fnht1-fountaincr-nrfountainheightstn', 'FNHT1-FountainCr-nrFountainHeightsTN', null, ST_GeomFromText('POINT(-86.9419 35.5181)',4326), null, null, '2021-03-08T18:56:06.351904Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03599450'),
-('3ee98fa5-5742-4161-908a-24d8053148ab', False, 'bpgt1-bethpagetn', 'BPGT1-BethpageTN', null, ST_GeomFromText('POINT(-86.3106 36.4872)',4326), null, null, '2021-03-08T18:56:06.352441Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('2ede45f1-2a9f-44c9-a40e-1eda74eca784', False, 'bbvk2-cumberlandr-barbourvilleky', 'BBVK2-CumberlandR-BarbourvilleKY', null, ST_GeomFromText('POINT(-83.8875 36.8631)',4326), null, null, '2021-03-08T18:56:06.352941Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03403500'),
-('0b6ee7cb-30b1-477a-94a0-cb0aaa2bb0f1', False, 'cnvt1-duckr-centervilletn', 'CNVT1-DuckR-CentervilleTN', null, ST_GeomFromText('POINT(-87.46 35.7842)',4326), null, null, '2021-03-08T18:56:06.353151Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03601990'),
-('e83479c4-637f-4cf9-80b5-37a891a72216', False, 'dblt1-bigrockcr-nrdoublebridgestn', 'DBLT1-BigRockCr-nrDoubleBridgesTN', null, ST_GeomFromText('POINT(-86.7686 35.5044)',4326), null, null, '2021-03-08T18:56:06.353743Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03599100'),
-('a10b6a71-84ad-4075-b7a9-94091f296ca8', False, 'mcet1-mcewentn', 'MCET1-McEwenTN', null, ST_GeomFromText('POINT(-87.6369 36.1069)',4326), null, null, '2021-03-08T18:56:06.354447Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('e03229c6-97ce-484b-9584-521189519f41', False, 'ohht1-old-hickory', 'OHHT1-OLD_HICKORY', null, ST_GeomFromText('POINT(-86.6589 36.2972)',4326), null, null, '2021-03-08T18:56:06.354899Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('9cb955c5-93cb-4402-822b-12e99580abe3', False, 'ohgt1-old-hickory', 'OHGT1-OLD_HICKORY', null, ST_GeomFromText('POINT(-86.6586 36.2969)',4326), null, null, '2021-03-08T18:56:06.355520Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('57b92e3d-19f6-4ce9-b711-d43f42fab3d9', False, 'barkley-spillway-gates', 'Barkley-Spillway-Gates', null, ST_GeomFromText('POINT(-88.2235 37.0207)',4326), null, null, '2021-03-08T18:56:06.356307Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('5f01ad2c-67aa-4cae-b7b3-36fb7a1881ab', False, 'cordell-hull-spillway-gates', 'Cordell-Hull-Spillway-Gates', null, ST_GeomFromText('POINT(-85.9432 36.2901)',4326), null, null, '2021-03-08T18:56:06.356840Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('828ffaa0-cfbc-4545-bb0e-8bacad7945da', False, 'cheatham-spillway-gates', 'Cheatham-Spillway-Gates', null, ST_GeomFromText('POINT(-87.2226 36.3196)',4326), null, null, '2021-03-08T18:56:06.357672Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('dd724991-14c8-4899-8489-f6ace618a088', False, 'bort1', 'BORT1', null, ST_GeomFromText('POINT(-86.8203 36.2175)',4326), null, null, '2021-03-08T18:56:06.358388Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03431599'),
-('54f189a0-4f94-46ea-bdb5-616ccff04bad', False, 'nrct1', 'NRCT1', null, ST_GeomFromText('POINT(-86.8542 36.1511)',4326), null, null, '2021-03-08T18:56:06.358902Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03431700'),
-('42a6e80b-5767-4ffe-b302-692cf97da00b', False, 'nbct1', 'NBCT1', null, ST_GeomFromText('POINT(-86.7611 36.13)',4326), null, null, '2021-03-08T18:56:06.359460Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03431300'),
-('ffa13475-c097-4316-88e1-9a8ce6f67699', False, 'cumberlandnashville', 'CumberlandNashville', null, ST_GeomFromText('POINT(-86.7764 36.1672)',4326), null, null, '2021-03-08T18:56:06.359981Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '034315005'),
-('e9c58cf6-2093-4359-bba1-3f8ad409d273', False, 'mflk2-martins-fork', 'MFLK2-MARTINS_FORK', null, ST_GeomFromText('POINT(-83.2597 36.7506)',4326), null, null, '2021-03-08T18:56:06.360147Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03400798'),
-('f5dbba6e-7dc3-4c62-b833-c980f950ce9e', False, 'ckvt1-cumberlandr-clarksvilletn', 'CKVT1-CumberlandR-ClarksvilleTN', null, ST_GeomFromText('POINT(-87.3678 36.5414)',4326), null, null, '2021-03-08T18:56:06.360655Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03436500'),
-('a2fa2bde-b031-43d9-b00a-3302beb181c6', False, 'normandy-rain-near-normandy', 'Normandy_Rain_Near_Normandy', null, ST_GeomFromText('POINT(-86.2453 35.4575)',4326), null, null, '2021-03-08T18:56:06.361185Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('24924cc6-ac6d-49f3-bbc6-3a0fdf99323a', False, 'normandy-tailwater', 'NORMANDY_TAILWATER', null, ST_GeomFromText('POINT(-86.2467 35.4628)',4326), null, null, '2021-03-08T18:56:06.361692Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('e0821f6a-a83e-4939-b7e5-e6214d6370f8', False, 'normandy-headwater', 'Normandy_Headwater', null, ST_GeomFromText('POINT(-86.2472 35.4653)',4326), null, null, '2021-03-08T18:56:06.361784Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('afe26545-5c47-4c18-9d6c-bed4e5f42a8a', False, 'rwnk2-wolf-creek', 'RWNK2-WOLF_CREEK', null, ST_GeomFromText('POINT(-85.1394 36.8836)',4326), null, null, '2021-03-08T18:56:06.361856Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03414000'),
-('73f36663-edb9-4c1e-b3bd-7a56dd66695d', False, 'falt1-fallsstateparktn', 'FALT1-FallsStateParkTN', null, ST_GeomFromText('POINT(-85.3086 35.6825)',4326), null, null, '2021-03-08T18:56:06.362389Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('09247b70-5a7b-4830-ae49-28465698b875', False, 'fallingwaterr', 'FallingWaterR', null, ST_GeomFromText('POINT(-85.5214 36.0772)',4326), null, null, '2021-03-08T18:56:06.362886Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03423000'),
-('e6bc7078-e633-45fd-95a6-f3b0b954d915', False, 'cett1-center-hill', 'CETT1-CENTER_HILL', null, ST_GeomFromText('POINT(-85.8333 36.0917)',4326), null, null, '2021-03-08T18:56:06.363445Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('02ae0b07-11c5-4599-bda0-1c3f8cc7492b', False, 'south-chick-cr-near-chattanooga', 'South_Chick_Cr_near_Chattanooga', null, ST_GeomFromText('POINT(-85.2106 35.0136)',4326), null, null, '2021-03-08T18:56:06.363960Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('b81d3d17-3201-4611-aafc-1b594d8942f3', False, 'tenn-river-at-s-pittsburg', 'Tenn_River_at_S_Pittsburg', null, ST_GeomFromText('POINT(-85.6975 35.0114)',4326), null, null, '2021-03-08T18:56:06.364463Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('6c847545-5c33-4916-a837-6c4ff8cea45f', False, 'anderson-rain', 'Anderson_Rain', null, ST_GeomFromText('POINT(-85.8972 35.0028)',4326), null, null, '2021-03-08T18:56:06.364962Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('7b616286-586c-4a46-9573-b25cb76b8758', False, 'n-chick-cr-at-mile-straight', 'N_Chick_Cr_at_Mile_Straight', null, ST_GeomFromText('POINT(-85.2153 35.2111)',4326), null, null, '2021-03-08T18:56:06.365504Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03566535'),
-('46c63d47-8fb2-4279-b1a5-b9fad7e05a00', False, 'mcdonald', 'McDonald', null, ST_GeomFromText('POINT(-84.9897 35.0967)',4326), null, null, '2021-03-08T18:56:06.366034Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('27fd522f-a619-43a2-8011-6cda06261819', False, 'cleveland', 'Cleveland', null, ST_GeomFromText('POINT(-84.8214 35.1836)',4326), null, null, '2021-03-08T18:56:06.366559Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('f9a665ed-ed3e-4593-b02c-bfc852e742f4', False, 'georgetown', 'Georgetown', null, ST_GeomFromText('POINT(-84.9656 35.3217)',4326), null, null, '2021-03-08T18:56:06.367062Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('b8a42122-b8f0-411d-9576-8d24f0091729', False, 'sequatchie-river-near-whitwell', 'Sequatchie_River_near_Whitwell', null, ST_GeomFromText('POINT(-85.4972 35.2064)',4326), null, null, '2021-03-08T18:56:06.367637Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('b0fd85c0-2c44-4081-b390-d50a804e729a', False, 'whitwell', 'Whitwell', null, ST_GeomFromText('POINT(-85.5194 35.2097)',4326), null, null, '2021-03-08T18:56:06.368137Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('6ac6c1fc-f21c-4780-ae21-b9c4ae7084cb', False, 'raccoon-mountain-near-whitwell', 'Raccoon_Mountain_near_Whitwell', null, ST_GeomFromText('POINT(-85.3875 35.0567)',4326), null, null, '2021-03-08T18:56:06.368661Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('7816be03-2d3f-45fe-9390-6f194fa13821', False, 'wckg1-westchickamaugacr-lakeviewga', 'WCKG1-WestChickamaugaCr-LakeviewGA', null, ST_GeomFromText('POINT(-85.2056 34.9572)',4326), null, null, '2021-03-08T18:56:06.369182Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03567340'),
-('b9d0b218-08c9-4a91-9028-811f98542a54', False, 'ccfg1-chattanoogacr-flintstonega', 'CCFG1-ChattanoogaCr-FlintstoneGA', null, ST_GeomFromText('POINT(-85.3344 34.9572)',4326), null, null, '2021-03-08T18:56:06.369714Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03568400'),
-('43c6c79f-9c45-49b0-a8f0-bbbf81db0d51', False, 'sckg1-southchickamaugacr-ringoldga', 'SCKG1-SouthChickamaugaCr-RingoldGA', null, ST_GeomFromText('POINT(-85.1256 34.9189)',4326), null, null, '2021-03-08T18:56:06.370240Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03566700'),
-('fc1a7d87-5598-49b0-beb9-3779829fc8d0', False, 'kydk2-kentucky', 'KYDK2-KENTUCKY', null, ST_GeomFromText('POINT(-88.2678 37.0144)',4326), null, null, '2021-03-08T18:56:06.370879Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
-('87126358-87ec-4974-90f3-a40f14c0d2b3', False, 'ctht1-cumberlandr-carthagetn', 'CTHT1-CumberlandR-CarthageTN', null, ST_GeomFromText('POINT(-85.9564 36.2475)',4326), null, null, '2021-03-08T18:56:06.371029Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03425000'),
-('b24fc5a4-962c-4a0b-a1b4-d2f08a55989b', False, 'antt1-millcr-antiochtn', 'ANTT1-MillCr-AntiochTN', null, ST_GeomFromText('POINT(-86.6808 36.0817)',4326), null, null, '2021-03-08T18:56:06.371588Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03430400'),
-('6fcd34f0-dbc7-4ad2-bdbc-4eddd8277322', False, 'yamacraw', 'Yamacraw', null, ST_GeomFromText('POINT(-84.5631 36.7028)',4326), null, null, '2021-03-08T18:56:06.371725Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03410590'),
-('b172624d-0eab-4c0b-9e95-47438e1b4afd', False, 'cumbr-ashlandcity', 'CumbR_AshlandCity', null, ST_GeomFromText('POINT(-87.0761 36.2706)',4326), null, null, '2021-03-08T18:56:06.371989Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03431790'),
-('6b20e874-02f0-40de-95ce-bb1f3e565d46', False, 'bledsoe-cr-nr-bethpage', 'Bledsoe_Cr_nr_Bethpage', null, ST_GeomFromText('POINT(-86.332 36.4456)',4326), null, null, '2021-03-08T18:56:06.372485Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03425622'),
-('cec009f7-5cd7-4194-980a-ebdc69995f0d', False, 'duckr-blw-manchester', 'DuckR_blw_Manchester', null, ST_GeomFromText('POINT(0 0)',4326), null, null, '2021-03-08T18:56:06.373014Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03596000'),
-('b1d3fc99-abaf-4055-b4e6-6ab0c9a60c3d', False, 'duckr-nr-pottsville', 'DuckR_nr_Pottsville', null, ST_GeomFromText('POINT(-86.8714 35.5703)',4326), null, null, '2021-03-08T18:56:06.373629Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03599419'),
-('9e569018-ce7e-4a89-8f8e-0fdf0aed9adf', False, 'duckr-nr-shadygrove', 'DuckR_nr_ShadyGrove', null, ST_GeomFromText('POINT(0 0)',4326), null, null, '2021-03-08T18:56:06.374322Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03601600'),
-('9cda93fc-a495-4722-8834-7023a281b66a', False, 'redr-at-dot', 'RedR_at_Dot', null, ST_GeomFromText('POINT(-86.9521 36.6767)',4326), null, null, '2021-03-08T18:56:06.374953Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03435105'),
-('2a86face-8c5b-48c8-8c4f-def396a8489a', False, 'roaringr-nr-hilham', 'RoaringR_nr_Hilham', null, ST_GeomFromText('POINT(-85.4264 36.3408)',4326), null, null, '2021-03-08T18:56:06.375154Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03418000'),
-('554a7daa-b00f-4d14-a959-68c989ce5bda', False, 'wartracecr-at-wartrace', 'WartraceCr_at_Wartrace', null, ST_GeomFromText('POINT(-86.3403 35.5272)',4326), null, null, '2021-03-08T18:56:06.375775Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03597590'),
-('7a40ac4f-904a-4068-9efb-ef41e81db0b7', False, 'buckcr-shopville', 'BuckCr_Shopville', null, ST_GeomFromText('POINT(-84.4644 37.2106)',4326), null, null, '2021-03-08T18:56:06.376365Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03407500'),
-('5a1b8894-1fb1-4289-b943-8f74b28d7f76', False, 'millcr-nolensvll', 'MillCr_Nolensvll', null, ST_GeomFromText('POINT(-86.7015 36.0091)',4326), null, null, '2021-03-08T18:56:06.376557Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03430550'),
-('aa0341b6-4bed-4683-bb50-7ccb5da4eff7', False, 'drycr-edenwold', 'DryCr_Edenwold', null, ST_GeomFromText('POINT(-86.7063 36.2845)',4326), null, null, '2021-03-08T18:56:06.377116Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03426470'),
-('902be564-bff4-4495-bc2c-388ddcf998d4', False, 'sflittler-hopkin', 'SFLittleR Hopkin', null, ST_GeomFromText('POINT(-87.4289 36.8494)',4326), null, null, '2021-03-08T18:56:06.377695Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03437495'),
-('90d6254b-f8ff-47ff-b97a-981e710e7160', False, 'acst1-sycamorecr-ashlandcitytn', 'ACST1-SycamoreCr-AshlandCityTN', null, ST_GeomFromText('POINT(-87.0539 36.3231)',4326), null, null, '2021-03-08T18:56:06.377879Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03431800'),
-('cc2b904b-d99f-4583-8fb7-056ba1ba320f', False, 'cork2-lynncampcr-corbinky', 'CORK2-LynnCampCr-CorbinKY', null, ST_GeomFromText('POINT(-84.0875 36.945)',4326), null, null, '2021-03-08T18:56:06.378457Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03404900'),
-('b7abd272-ba0c-428b-88a4-a2dcc5bcda0e', False, 'cbnk2-laurelr-corbinky', 'CBNK2-LaurelR-CorbinKY', null, ST_GeomFromText('POINT(-84.1194 36.9706)',4326), null, null, '2021-03-08T18:56:06.379016Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03404820'),
-('e7902c45-6800-4b84-a70e-b70e77d43bb1', False, 'duckr-abv-williamsport', 'DuckR_abv_Williamsport', null, ST_GeomFromText('POINT(0 0)',4326), null, null, '2021-03-08T18:56:06.379666Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03600358'),
-('ed9c351b-c5cd-411c-aa45-fbca9ac69d7d', False, 'belt1-harpethr-bellevuetn', 'BELT1-HarpethR-BellevueTN', null, ST_GeomFromText('POINT(-86.9286 35.0547)',4326), null, null, '2021-03-08T18:56:06.380258Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03433500'),
-('0929af2a-a93e-4aaa-a926-cfeeba57372b', False, 'cmtt1-cypresscr-camdentn', 'CMTT1-CypressCr-CamdenTN', null, ST_GeomFromText('POINT(-88.0758 36.0469)',4326), null, null, '2021-03-08T18:56:06.380868Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03605078'),
-('8c48ae3d-4581-4aa5-8b81-592c907dd7a0', False, 'crocus-cr', 'Crocus Cr', null, ST_GeomFromText('POINT(-85.3107 36.8967)',4326), null, null, '2021-03-08T18:56:06.381471Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03414078'),
-('b5a6d737-0f49-4d0a-9405-5fded7f886ea', False, 'stonesr-donelson', 'StonesR_Donelson', null, ST_GeomFromText('POINT(-86.6334 36.1862)',4326), null, null, '2021-03-08T18:56:06.382082Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03430200');
+('27317472-68f5-4341-9152-be4e3cd35aba', False, 'amok2-clarksr-almoky', 'AMOK2-ClarksR-AlmoKY', null, ST_GeomFromText('POINT(-88.2736 36.6917)',4326), null, null, '2021-03-12T16:00:20.196776Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03610200'),
+('ff959a3d-2723-4984-abca-f2bd03aa489d', False, 'csst1-crossvilletn', 'CSST1-CrossvilleTN', null, ST_GeomFromText('POINT(-84.9972 35.9178)',4326), null, null, '2021-03-12T16:00:20.197035Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('83b90989-01ac-443a-98a6-73579bdcd6cd', False, 'fcrt1-fortcampbelltn', 'FCRT1-FortCampbellTN', null, ST_GeomFromText('POINT(-87.5369 36.6256)',4326), null, null, '2021-03-12T16:00:20.197142Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('7c7f7d23-824b-4325-a64e-f12ce009530e', False, 'albk2-albanyky', 'ALBK2-AlbanyKY', null, ST_GeomFromText('POINT(-85.1217 36.7453)',4326), null, null, '2021-03-12T16:00:20.197232Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('0459d406-5eca-4171-9af6-dfba3a7a45c6', False, 'alpt1-wfkobeyr-alpinetn', 'ALPT1-WFkObeyR-AlpineTN', null, ST_GeomFromText('POINT(-85.1745 36.3973)',4326), null, null, '2021-03-12T16:00:20.197635Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03415000'),
+('76972f3b-4723-40c5-adb6-8c8fd05dbf86', False, 'aplv2-appalachiava', 'APLV2-AppalachiaVA', null, ST_GeomFromText('POINT(-82.7883 36.8983)',4326), null, null, '2021-03-12T16:00:20.198075Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('74b37f6e-51db-4daf-8c91-f6b4f2723de6', False, 'artt1-powellr-arthurtn', 'ARTT1-PowellR-ArthurTN', null, ST_GeomFromText('POINT(-83.6303 36.5419)',4326), null, null, '2021-03-12T16:00:20.198465Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03532000'),
+('127e78c0-dcb2-4a3e-a50a-f016f06ce941', False, 'bahk2-barkley', 'BAHK2-BARKLEY', null, ST_GeomFromText('POINT(-88.2228 37.0244)',4326), null, null, '2021-03-12T16:00:20.198902Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('cde9c93e-070e-4386-b6ce-66d539304ad4', False, 'asht1-cheatham', 'ASHT1-CHEATHAM', null, ST_GeomFromText('POINT(-87.2283 36.3228)',4326), null, null, '2021-03-12T16:00:20.199286Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('8cdac320-0eed-41df-8983-5e71f1278b08', False, 'coht1-cordell-hull', 'COHT1-CORDELL_HULL', null, ST_GeomFromText('POINT(-85.9389 36.2917)',4326), null, null, '2021-03-12T16:00:20.199683Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('aeb9ed17-50fe-42bb-acd6-9a2cf808cbba', False, 'cort1-cordell-hull', 'CORT1-CORDELL_HULL', null, ST_GeomFromText('POINT(-85.9397 36.2853)',4326), null, null, '2021-03-12T16:00:20.200060Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03418420'),
+('cc3b9f84-b4f9-4916-96b0-fc73c44d6b0d', False, 'dhtt1-dale-hollow', 'DHTT1-DALE_HOLLOW', null, ST_GeomFromText('POINT(-85.4611 63.5472)',4326), null, null, '2021-03-12T16:00:20.200496Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('8c53aaa6-aad4-497c-9286-741291847fc3', False, 'dlht1-dale-hollow', 'DLHT1-DALE_HOLLOW', null, ST_GeomFromText('POINT(-85.4564 36.5414)',4326), null, null, '2021-03-12T16:00:20.200896Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('6ba15fe7-dfcf-49c3-8230-599356d0c4b0', False, 'caft1-calfkillerr-blwspartatn', 'CAFT1-CalfkillerR-blwSpartaTN', null, ST_GeomFromText('POINT(-85.4763 35.9121)',4326), null, null, '2021-03-12T16:00:20.201311Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03419530'),
+('9375532a-4fcb-4bfc-a80c-a9a8d10aa1f2', False, 'wbnt1-millcr-nrwoodbinetn', 'WBNT1-MillCr-nrWoodbineTN', null, ST_GeomFromText('POINT(-86.719 36.1167)',4326), null, null, '2021-03-12T16:00:20.201745Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03431060'),
+('4955897d-c97b-4d36-bd40-d46623c798a2', False, 'wlck2-wolf-creek', 'WLCK2-WOLF_CREEK', null, ST_GeomFromText('POINT(-85.1469 36.8683)',4326), null, null, '2021-03-12T16:00:20.202240Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('57d58971-a9a5-454b-bc24-07d5dc98ae5e', False, 'burkesville', 'Burkesville', null, ST_GeomFromText('POINT(-85.3681 36.7953)',4326), null, null, '2021-03-12T16:00:20.202636Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03414100'),
+('9c72d20a-7806-4b72-8753-a339dcf9955f', False, 'cfak2-cumberlandr-cumberlandfallsky', 'CFAK2-CumberlandR-CumberlandFallsKY', null, ST_GeomFromText('POINT(-84.3414 36.8358)',4326), null, null, '2021-03-12T16:00:20.203135Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03404500'),
+('f9d084c4-0cef-4974-88b9-969ed553da51', False, 'lbvt1-buffalor-blwlobelvilletn', 'LBVT1-BuffaloR-blwLobelvilleTN', null, ST_GeomFromText('POINT(-87.7803 35.8108)',4326), null, null, '2021-03-12T16:00:20.203623Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('b0035cd2-b103-4df1-8561-15a38d56dcc3', False, 'ltwt1-sfkcumberlandr-leatherwoodfordtn', 'LTWT1-SFkCumberlandR-LeatherwoodFordTN', null, ST_GeomFromText('POINT(-84.6694 36.4773)',4326), null, null, '2021-03-12T16:00:20.204026Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03410210'),
+('eaff91e3-8907-4aaa-96b5-24d011fd5c1f', False, 'nast1-cumberlandr-nashvilletn', 'NAST1-CumberlandR-NashvilleTN', null, ST_GeomFromText('POINT(-86.7731 36.1614)',4326), null, null, '2021-03-12T16:00:20.204497Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03431500'),
+('9ea8edb4-d7c8-4a40-96ea-f0997b66e16d', False, 'shet1-duckr-shelbyvilletn', 'SHET1-DuckR-ShelbyvilleTN', null, ST_GeomFromText('POINT(-86.4625 35.4828)',4326), null, null, '2021-03-12T16:00:20.205001Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('9ab06dac-707f-48de-bec4-8e0488918b0b', False, 'smhk2-martinsfk-smithky', 'SMHK2-MartinsFk-SmithKY', null, ST_GeomFromText('POINT(-83.2869 36.7258)',4326), null, null, '2021-03-12T16:00:20.205444Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03400785'),
+('ded99a0f-330c-4cda-9417-c83bc7b24af3', False, 'ncfk2-martinsfk-harlanky', 'NCFK2-MartinsFk-HarlanKY', null, ST_GeomFromText('POINT(-83.3253 36.8447)',4326), null, null, '2021-03-12T16:00:20.205843Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03400986'),
+('0b464357-6d6b-4dc0-87ea-aa4f65aa8e9e', False, 'mnlk2-martins-fork', 'MNLK2-MARTINS_FORK', null, ST_GeomFromText('POINT(-83.255 36.7503)',4326), null, null, '2021-03-12T16:00:20.206371Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03400800'),
+('cd329248-0df2-4a36-aeac-8e18b54d98f5', False, 'clat1-cumberlandr-celinatn', 'CLAT1-CumberlandR-CelinaTN', null, ST_GeomFromText('POINT(-85.5156 36.5544)',4326), null, null, '2021-03-12T16:00:20.206865Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03417500'),
+('6961517e-7f6e-4a2e-a362-d2d85362c5c1', False, 'dovt1-cumberlandr-dovertn', 'DOVT1-CumberlandR-DoverTN', null, ST_GeomFromText('POINT(-87.8389 36.4897)',4326), null, null, '2021-03-12T16:00:20.207442Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03437000'),
+('3877d14f-4d39-4369-9a63-498851e9d8cd', False, 'hntt1-cumberlandr-hunterspointtn', 'HNTT1-CumberlandR-HuntersPointTN', null, ST_GeomFromText('POINT(-86.2642 36.2992)',4326), null, null, '2021-03-12T16:00:20.207924Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03425400'),
+('346fcc23-8ed0-4e80-99b7-75c2f2261525', False, 'hpkk2-sfklittler-hopkinsvilleky', 'HPKK2-SFkLittleR-HopkinsvilleKY', null, ST_GeomFromText('POINT(-87.4814 36.8394)',4326), null, null, '2021-03-12T16:00:20.208417Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03437500'),
+('58beadda-81ea-4950-b21a-18405d67583c', False, 'stwt1-caneyfk-stonewalltn', 'STWT1-CaneyFk-StonewallTN', null, ST_GeomFromText('POINT(-85.9047 36.19)',4326), null, null, '2021-03-12T16:00:20.208904Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03424860'),
+('0d485c9a-928b-448f-9a13-814f14cefe0f', False, 'ckdt1-chickamauga', 'CKDT1-CHICKAMAUGA', null, ST_GeomFromText('POINT(-85.2294 35.1)',4326), null, null, '2021-03-12T16:00:20.209328Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('11332d06-0506-4a42-8698-c80f3aff861d', False, 'clbt1-columbiatn', 'CLBT1-ColumbiaTN', null, ST_GeomFromText('POINT(-87.0328 35.6636)',4326), null, null, '2021-03-12T16:00:20.209713Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('324034f3-e9fb-429c-b741-1d6d65ea7b4c', False, 'clmt1-coalmonttn', 'CLMT1-CoalmontTN', null, ST_GeomFromText('POINT(-85.6964 35.345)',4326), null, null, '2021-03-12T16:00:20.210160Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('5ddae2ed-a0a9-4fef-a4da-864604996342', False, 'spst1-springfieldtn', 'SPST1-SpringfieldTN', null, ST_GeomFromText('POINT(-86.8417 36.4711)',4326), null, null, '2021-03-12T16:00:20.210560Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('9a25e374-d27d-4f12-b228-7363f70a71f3', False, 'dert1-derossettn', 'DERT1-DeRossetTN', null, ST_GeomFromText('POINT(-85.2817 35.9631)',4326), null, null, '2021-03-12T16:00:20.210962Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('b30e8722-5dfb-4677-b44f-45d49e81a925', False, 'sstk2-somersetky', 'SSTK2-SomersetKY', null, ST_GeomFromText('POINT(-84.6158 37.1044)',4326), null, null, '2021-03-12T16:00:20.211346Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('9ea21f67-c8cb-48ad-9f6f-b3fc729f7b9a', False, 'sbvt1', 'SBVT1', null, ST_GeomFromText('POINT(86.4622 35.4825)',4326), null, null, '2021-03-12T16:00:20.211742Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('224d3ada-e83b-4d19-b152-05d8b099c056', False, 'isot1-isolinetn', 'ISOT1-IsolineTN', null, ST_GeomFromText('POINT(-85.0611 36.0783)',4326), null, null, '2021-03-12T16:00:20.212129Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('5b8a204e-bd38-40bd-b108-4118f962586b', False, 'onit1-oneidatn', 'ONIT1-OneidaTN', null, ST_GeomFromText('POINT(-84.5167 36.5)',4326), null, null, '2021-03-12T16:00:20.212513Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('58278b8b-54d4-4b56-8969-e6a176b900f9', False, 'whla1-wheeler', 'WHLA1-WHEELER', null, ST_GeomFromText('POINT(-87.3836 34.7625)',4326), null, null, '2021-03-12T16:00:20.212935Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('9c89f1b8-6c18-4a42-ae3d-470299b7194b', False, 'lftt1-lafayettetn', 'LFTT1-LafayetteTN', null, ST_GeomFromText('POINT(-85.0311 36.5192)',4326), null, null, '2021-03-12T16:00:20.213388Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('1cdebe4a-52d6-4356-8817-c5984ce4100f', False, 'stlt1-statesvilletn', 'STLT1-StatesvilleTN', null, ST_GeomFromText('POINT(-86.1214 36.0183)',4326), null, null, '2021-03-12T16:00:20.213764Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('9a97a37b-e18f-4cca-9d7c-137a1d3af595', False, 'pict1-pickwick', 'PICT1-PICKWICK', null, ST_GeomFromText('POINT(-88.2511 3.0681)',4326), null, null, '2021-03-12T16:00:20.214223Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('903d19ae-0f01-4bd9-b7ef-c72b6551739d', False, 'mant1-manchestertn', 'MANT1-ManchesterTN', null, ST_GeomFromText('POINT(-86.0831 35.4711)',4326), null, null, '2021-03-12T16:00:20.214610Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('652fcd72-0891-481d-9fa1-7aa96508d0a0', False, 'mnyt1-montereytn', 'MNYT1-MontereyTN', null, ST_GeomFromText('POINT(-85.3 36.1333)',4326), null, null, '2021-03-12T16:00:20.214981Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('64a28953-4f08-4eab-baf5-11b49dc7f957', False, 'lvlt1', 'LVLT1', null, ST_GeomFromText('POINT(87.7747 35.7828)',4326), null, null, '2021-03-12T16:00:20.215358Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('f72eacc7-7a2d-4bf8-827c-a81d80952183', False, 'grtt1-great-falls', 'GRTT1-GREAT_FALLS', null, ST_GeomFromText('POINT(-85.6336 35.8081)',4326), null, null, '2021-03-12T16:00:20.215734Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('9a6682e4-92fd-4d67-87ea-59ffd0bec6ce', False, 'ptst1-petrostn', 'PTST1-PetrosTN', null, ST_GeomFromText('POINT(-84.4461 36.0989)',4326), null, null, '2021-03-12T16:00:20.216108Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('f25498d3-d819-4a59-862d-769f2aba0e74', False, 'newt1-newcombtn', 'NEWT1-NewcombTN', null, ST_GeomFromText('POINT(-84.1731 36.5444)',4326), null, null, '2021-03-12T16:00:20.216509Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('e401d6d3-8111-4f04-8c90-6ccf2d269bc2', False, 'gvda1-guntersville', 'GVDA1-GUNTERSVILLE', null, ST_GeomFromText('POINT(-86.3933 34.4211)',4326), null, null, '2021-03-12T16:00:20.216909Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('7e2ef036-c14a-4e0a-9528-1bcfbaa84219', False, 'grhk2-mckeeky', 'GRHK2-McKeeKY', null, ST_GeomFromText('POINT(-83.9261 37.3842)',4326), null, null, '2021-03-12T16:00:20.217352Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('0a1c5198-b7bd-4090-bc0c-89f44635d8eb', False, 'snnt1', 'SNNT1', null, ST_GeomFromText('POINT(88.2097 35.1797)',4326), null, null, '2021-03-12T16:00:20.217730Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('c9d371d7-9933-484f-853b-cc7483011c0d', False, 'wsda1-wilson', 'WSDA1-WILSON', null, ST_GeomFromText('POINT(-87.625 34.7925)',4326), null, null, '2021-03-12T16:00:20.218149Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('c856ec08-c7f1-4d20-8804-481da266339d', False, 'bcht1-beechr-nrlexingtontn', 'BCHT1-BeechR-nrLexingtonTN', null, ST_GeomFromText('POINT(-88.4147 35.6342)',4326), null, null, '2021-03-12T16:00:20.218537Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03594421'),
+('9b52884d-a446-4a1a-8db2-6d73aed87d66', False, 'prvt1-tennesseer-perryvilletn', 'PRVT1-TennesseeR-PerryvilleTN', null, ST_GeomFromText('POINT(-88.0389 35.6247)',4326), null, null, '2021-03-12T16:00:20.218958Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('cb6708b0-9599-470a-8460-411c3969ab01', False, 'hmlt1-duckr-abvhurricanemillstn', 'HMLT1-DuckR-abvHurricaneMillsTN', null, ST_GeomFromText('POINT(-87.7431 35.9297)',4326), null, null, '2021-03-12T16:00:20.219426Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('d40d94c2-4b9c-411f-82d2-e48ad6d1119b', False, 'vert1-pineyr-vernontn', 'VERT1-PineyR-VernonTN', null, ST_GeomFromText('POINT(-87.5014 35.8711)',4326), null, null, '2021-03-12T16:00:20.219839Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03602500'),
+('0b5abf6f-d9e5-42fb-bf70-8965a8da9965', False, 'fltt1-buffalor-nrflatwoodstn', 'FLTT1-BuffaloR-nrFlatWoodsTN', null, ST_GeomFromText('POINT(-87.8328 35.4958)',4326), null, null, '2021-03-12T16:00:20.220271Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03604000'),
+('2a5999e7-03b5-45e3-9161-215e4fdd8167', False, 'jpht1-j-percy-priest', 'JPHT1-J_PERCY_PRIEST', null, ST_GeomFromText('POINT(-86.6194 36.1489)',4326), null, null, '2021-03-12T16:00:20.220815Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('f8acc6f8-9158-482d-9074-6f2c04f402a0', False, 'jppt1-j-percy-priest', 'JPPT1-J_PERCY_PRIEST', null, ST_GeomFromText('POINT(-86.6181 36.1567)',4326), null, null, '2021-03-12T16:00:20.221264Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('184e1fa0-dd7b-4ef3-a571-1708ca60874d', False, 'blwk2-rockcastler-billowsky', 'BLWK2-RockcastleR-BillowsKY', null, ST_GeomFromText('POINT(-84.2967 37.1711)',4326), null, null, '2021-03-12T16:00:20.221657Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03406500'),
+('0badc723-222f-47e1-a723-8ccd56363484', False, 'bygt1-wolfr-byrdstowntn', 'BYGT1-WolfR-ByrdstownTN', null, ST_GeomFromText('POINT(-85.0728 36.8631)',4326), null, null, '2021-03-12T16:00:20.222133Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03416000'),
+('7fabbbeb-74da-4853-af05-497eb59b17ac', False, 'cclk2-cranks-creek', 'CCLK2-CRANKS_CREEK', null, ST_GeomFromText('POINT(-83.2383 36.7394)',4326), null, null, '2021-03-12T16:00:20.222612Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('b11b1374-9353-4247-9366-b03ec33097bc', False, 'cdzk2-littler-cadizky', 'CDZK2-LittleR-CadizKY', null, ST_GeomFromText('POINT(-87.7217 36.7778)',4326), null, null, '2021-03-12T16:00:20.223034Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03438000'),
+('94945eaa-d3ac-4c69-8fe7-314607ef41b2', False, 'last1-efkstonesr-lascassastn', 'LAST1-EFkStonesR-LascassasTN', null, ST_GeomFromText('POINT(-86.3336 35.9183)',4326), null, null, '2021-03-12T16:00:20.223525Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03427500'),
+('49a8d0e0-08c1-46ff-838f-51812f118415', False, 'jagt1-efkobeyr-jamestowntn', 'JAGT1-EFkObeyR-JamestownTN', null, ST_GeomFromText('POINT(-85.0261 36.4158)',4326), null, null, '2021-03-12T16:00:20.223992Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('1afa8d2f-8d7e-4ca9-9b17-d49d11cdf84a', False, 'cfkt1-clearfkr-nrrobinstn', 'CFKT1-ClearFkR-nrRobinsTN', null, ST_GeomFromText('POINT(-84.6302 36.3882)',4326), null, null, '2021-03-12T16:00:20.224378Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03409500'),
+('52fa325e-25ef-4d95-9253-a31bf613afd4', False, 'frat1-harpethr-franklintn', 'FRAT1-HarpethR-FranklinTN', null, ST_GeomFromText('POINT(-86.8656 35.9211)',4326), null, null, '2021-03-12T16:00:20.224848Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03432350'),
+('f8083600-9aca-4d24-a87e-1b290aaea940', False, 'lylk2-cumberlandr-loyallky', 'LYLK2-CumberlandR-LoyallKY', null, ST_GeomFromText('POINT(-83.3544 36.8478)',4326), null, null, '2021-03-12T16:00:20.225364Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03401000'),
+('dfe34baa-508b-4471-9ac1-b918021ae6a9', False, 'mugt1-efkstonesr-murfreesborotn', 'MUGT1-EFkStonesR-MurfreesboroTN', null, ST_GeomFromText('POINT(-86.4286 35.9025)',4326), null, null, '2021-03-12T16:00:20.225805Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03428200'),
+('ee6d3280-490b-498e-ab9f-90e5698cd181', False, 'port1-redr-portroyaltn', 'PORT1-RedR-PortRoyalTN', null, ST_GeomFromText('POINT(-87.1422 36.5539)',4326), null, null, '2021-03-12T16:00:20.226285Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03436100'),
+('e8d3b2e6-3b58-410f-96bb-6f8453529940', False, 'strk2-sfkcumberlandr-stearnsky', 'STRK2-SFkCumberlandR-StearnsKY', null, ST_GeomFromText('POINT(-84.5325 36.6292)',4326), null, null, '2021-03-12T16:00:20.226776Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03410500'),
+('2a76c74a-aada-4995-8fa6-3722a521fd32', False, 'nrvt1-newr-nrrobinstn', 'NRVT1-NewR-nrRobinsTN', null, ST_GeomFromText('POINT(-84.5548 36.3854)',4326), null, null, '2021-03-12T16:00:20.227233Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03408500'),
+('a129aa7b-7ec4-4f2d-88ae-457caa2adec7', False, 'smlk2-cumberlandr-smithlandky', 'SMLK2-CumberlandR-SmithlandKY', null, ST_GeomFromText('POINT(-88.3997 37.1467)',4326), null, null, '2021-03-12T16:00:20.227728Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('04117943-7a09-4015-b476-cf3f5cd469ba', False, 'mcgt1-collinsr-mcminnvilletn', 'MCGT1-CollinsR-McMinnvilleTN', null, ST_GeomFromText('POINT(-85.7319 35.7083)',4326), null, null, '2021-03-12T16:00:20.228209Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03421000'),
+('67d97a3a-a3d5-4c8c-9aa2-7329065c902c', False, 'pvlk2-cumberlandr-pinevilleky', 'PVLK2-CumberlandR-PinevilleKY', null, ST_GeomFromText('POINT(-83.6925 36.7644)',4326), null, null, '2021-03-12T16:00:20.228751Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03402900'),
+('2bb2b7cf-5ad8-4158-a42b-9727f61a02a8', False, 'lbst1-springcr-lebanontn', 'LBST1-SpringCr-LebanonTN', null, ST_GeomFromText('POINT(-86.2369 36.2217)',4326), null, null, '2021-03-12T16:00:20.229294Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03425520'),
+('07a61743-18ae-42ef-b47d-c4e20096b086', False, 'pent1-cumberlandr-penitentiarybrtn', 'PENT1-CumberlandR-PenitentiaryBrTN', null, ST_GeomFromText('POINT(-85.5958 36.4394)',4326), null, null, '2021-03-12T16:00:20.229796Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03417600'),
+('32d49c6a-b02c-4d4d-ba52-9a528cd1c80f', False, 'mdlk2-yellowcr-middlesboroky', 'MDLK2-YellowCr-MiddlesboroKY', null, ST_GeomFromText('POINT(-83.6881 36.6678)',4326), null, null, '2021-03-12T16:00:20.230478Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('2a045b91-fdda-45d0-b264-6c21b9790e36', False, 'jnct1-jenningscr-whitleyvilletn', 'JNCT1-JenningsCr-WhitleyvilleTN', null, ST_GeomFromText('POINT(-85.6747 36.4403)',4326), null, null, '2021-03-12T16:00:20.231137Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03418224'),
+('1ff25fb7-8cb9-49b1-a83c-4917e1842b6e', False, 'gvst1-smithfkcr-temperancehalltn', 'GVST1-SmithFkCr-TemperanceHallTN', null, ST_GeomFromText('POINT(-85.9078 36.0875)',4326), null, null, '2021-03-12T16:00:20.231800Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03424730'),
+('89e3534d-b0a3-422a-82ca-58b3b0e0871a', False, 'sxtk2-clearfk-saxtonky', 'SXTK2-ClearFk-SaxtonKY', null, ST_GeomFromText('POINT(-84.1144 36.6339)',4326), null, null, '2021-03-12T16:00:20.232482Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03403910'),
+('3e55442c-b36a-493c-b2f8-6fec535fc2cc', False, 'njnt1-tennesseer-nrnewjohnsonvilletn', 'NJNT1-TennesseeR-nrNewJohnsonvilleTN', null, ST_GeomFromText('POINT(-88.0003 35.0178)',4326), null, null, '2021-03-12T16:00:20.233277Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('8714bb02-ecdf-4116-9f37-9bb8158d0a1d', False, 'kint1-harpethr-kingstonsprngstn', 'KINT1-HarpethR-KingstonSprngsTN', null, ST_GeomFromText('POINT(-87.0989 36.1222)',4326), null, null, '2021-03-12T16:00:20.233965Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03434500'),
+('f1a69f11-6790-4d16-92b0-7bf2907d4039', False, 'hort1-horsecr-nrsavannahtn', 'HORT1-HorseCr-nrSavannahTN', null, ST_GeomFromText('POINT(-88.2094 35.1806)',4326), null, null, '2021-03-12T16:00:20.234753Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('a5a15c22-bced-4ea0-8342-a56df99d753f', False, 'emgt1-yellowcr-ellismillstn', 'EMGT1-YellowCr-EllisMillsTN', null, ST_GeomFromText('POINT(-87.5536 36.3108)',4326), null, null, '2021-03-12T16:00:20.235447Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03436690'),
+('38f9a880-6c47-4b1c-9476-92daa6b8164b', False, 'mtck2-beavercr-monticelloky', 'MTCK2-BeaverCr-MonticelloKY', null, ST_GeomFromText('POINT(-84.8961 36.7975)',4326), null, null, '2021-03-12T16:00:20.236236Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03413200'),
+('7d7e410b-ea8d-48a9-b09f-a6f7212b4ebe', False, 'colt1-duckr-columbiatn', 'COLT1-DuckR-ColumbiaTN', null, ST_GeomFromText('POINT(-87.0325 35.6181)',4326), null, null, '2021-03-12T16:00:20.237027Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('e1508b90-1bcf-4608-acae-0ab4e1ef01d4', False, 'ohit1-old-hickory', 'OHIT1-OLD_HICKORY', null, ST_GeomFromText('POINT(-86.6589 36.2972)',4326), null, null, '2021-03-12T16:00:20.237762Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('6758f2d6-ac16-4a8d-8a89-676578f6a639', False, 'wlbk2-cumberlandr-williamsburgky', 'WLBK2-CumberlandR-WilliamsburgKY', null, ST_GeomFromText('POINT(-84.1564 36.7436)',4326), null, null, '2021-03-12T16:00:20.238470Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03404000'),
+('8d3041bc-ff78-4dca-8044-a904ec35321f', False, 'shvt1-duckr-nrshelbyvilletn', 'SHVT1-DuckR-nrShelbyvilleTN', null, ST_GeomFromText('POINT(-86.4992 35.4803)',4326), null, null, '2021-03-12T16:00:20.239248Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('e88f7b9e-772d-42a3-9d66-33dad5c6b3a8', False, 'fldt1-fort-loudon', 'FLDT1-FORT_LOUDON', null, ST_GeomFromText('POINT(-84.2456 35.7922)',4326), null, null, '2021-03-12T16:00:20.239845Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('bf472550-0dfc-4310-ab39-19160a8e073a', False, 'lvgt1-livingstontn', 'LVGT1-LivingstonTN', null, ST_GeomFromText('POINT(-85.3167 36.3833)',4326), null, null, '2021-03-12T16:00:20.240266Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('60804aad-a4c4-41a5-938c-989619315126', False, 'jnvt1', 'JNVT1', null, ST_GeomFromText('POINT(87.9758 36.0308)',4326), null, null, '2021-03-12T16:00:20.240891Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('eebb0956-f1c8-4d76-a78a-e823509fce4d', False, 'lebt1-lebanontn', 'LEBT1-LebanonTN', null, ST_GeomFromText('POINT(-86.3178 36.2286)',4326), null, null, '2021-03-12T16:00:20.241584Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('f017d31a-573e-4993-ba15-10d4224f08d9', False, 'unvt1-unionvilletn', 'UNVT1-UnionvilleTN', null, ST_GeomFromText('POINT(-86.5864 35.6211)',4326), null, null, '2021-03-12T16:00:20.242313Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('81c785c7-365b-49d8-b06b-f85fcd3479e7', False, 'wdbt1-woodburytn', 'WDBT1-WoodburyTN', null, ST_GeomFromText('POINT(-86.0733 35.8292)',4326), null, null, '2021-03-12T16:00:20.242975Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('6a6ca44d-f9f0-4f0e-ab52-ac7af764c6ab', False, 'lbyk2-libertyky', 'LBYK2-LibertyKY', null, ST_GeomFromText('POINT(-84.9333 37.3)',4326), null, null, '2021-03-12T16:00:20.243674Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('f882e4e4-7aaa-422f-a7dd-4a59dfb0a41a', False, 'nkjt1-nickajack', 'NKJT1-NICKAJACK', null, ST_GeomFromText('POINT(-85.6222 35.0017)',4326), null, null, '2021-03-12T16:00:20.244369Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('b8c41a11-f7b0-4a01-8145-4f28fdbbfde9', False, 'wbot1-watts-bar', 'WBOT1-WATTS_BAR', null, ST_GeomFromText('POINT(-84.7886 35.6086)',4326), null, null, '2021-03-12T16:00:20.245101Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('103af248-70db-436b-9b98-882c6db5f95f', False, 'orlt1-orlindatn', 'ORLT1-OrlindaTN', null, ST_GeomFromText('POINT(-86.7153 36.6025)',4326), null, null, '2021-03-12T16:00:20.245823Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('884801ba-13ec-4638-8f8e-fda673a63fb2', False, 'cntt1', 'CNTT1', null, ST_GeomFromText('POINT(0 0)',4326), null, null, '2021-03-12T16:00:20.246794Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('51055b7d-d298-4971-ba98-08de16960b74', False, 'ctnk2-cantonky', 'CTNK2-CantonKY', null, ST_GeomFromText('POINT(-87.9644 36.7942)',4326), null, null, '2021-03-12T16:00:20.247273Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('b1ae57c6-40dc-4fde-9852-e42bdabd4d2e', False, 'coot1-cookevilletn', 'COOT1-CookevilleTN', null, ST_GeomFromText('POINT(-85.5 36.15)',4326), null, null, '2021-03-12T16:00:20.247825Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('13c24865-3fab-4a81-acd5-4bc84334cd2b', False, 'kwtt1-knoxvilletn-wtp', 'KWTT1-KnoxvilleTN-WTP', null, ST_GeomFromText('POINT(-83.9289 5.9456)',4326), null, null, '2021-03-12T16:00:20.248522Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('cd2b9a42-0f5a-4660-9c53-10ebdc7d422f', False, 'brak2-bereaky', 'BRAK2-BereaKY', null, ST_GeomFromText('POINT(-84.2525 37.5744)',4326), null, null, '2021-03-12T16:00:20.249243Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('2cba28f2-a50f-4ee4-9653-96d6dbaaa74c', False, 'cbbk2-cobbky', 'CBBK2-CobbKY', null, ST_GeomFromText('POINT(-87.7781 36.9933)',4326), null, null, '2021-03-12T16:00:20.249910Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('14e6dda0-c35e-4b77-8c38-7e126a43fa30', False, 'ektk2-elktonky', 'EKTK2-ElktonKY', null, ST_GeomFromText('POINT(-87.1022 36.8022)',4326), null, null, '2021-03-12T16:00:20.250455Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('69bad009-9c10-446a-a782-84b847554bbe', False, 'hbft1-harpethr-blwfranklin', 'HBFT1-HarpethR-blwFranklin', null, ST_GeomFromText('POINT(-86.8817 35.9481)',4326), null, null, '2021-03-12T16:00:20.250856Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03432400'),
+('e6f235c0-acff-4145-af79-f80065678138', False, 'bigt1-bigsandyr-brucetontn', 'BIGT1-BigSandyR-BrucetonTN', null, ST_GeomFromText('POINT(-88.2289 36.0369)',4326), null, null, '2021-03-12T16:00:20.251348Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03606500'),
+('f5284c44-6b5c-407d-9e9d-04ce3b942b22', False, 'mltt1-duckr-avbmilltowntn', 'MLTT1-DuckR-avbMilltownTN', null, ST_GeomFromText('POINT(-86.7789 35.5764)',4326), null, null, '2021-03-12T16:00:20.251816Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03599240'),
+('fc5b94e8-5d1b-43b6-973a-acaa2cd1a4d2', False, 'chpt1-cheatham', 'CHPT1-CHEATHAM', null, ST_GeomFromText('POINT(-87.2275 36.3144)',4326), null, null, '2021-03-12T16:00:20.252289Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('665586c1-2bbd-4218-8cb2-5515ec82faf8', False, 'ceht1-center-hill', 'CEHT1-CENTER_HILL', null, ST_GeomFromText('POINT(-85.8272 36.0939)',4326), null, null, '2021-03-12T16:00:20.252723Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('29b2ac8c-5ce0-4692-adf6-eab3c6dc33bc', False, 'lapk2-laurel', 'LAPK2-LAUREL', null, ST_GeomFromText('POINT(-84.2678 36.9625)',4326), null, null, '2021-03-12T16:00:20.253213Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('03961c4b-8278-4159-a5d7-9d7dd11cae34', False, 'cmbk2-poorfk-cumberlandky', 'CMBK2-PoorFk-CumberlandKY', null, ST_GeomFromText('POINT(-82.9939 36.9733)',4326), null, null, '2021-03-12T16:00:20.253670Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03400500'),
+('3c9d0224-ee9d-4738-91b5-8d407512d259', False, 'fnht1-fountaincr-nrfountainheightstn', 'FNHT1-FountainCr-nrFountainHeightsTN', null, ST_GeomFromText('POINT(-86.9419 35.5181)',4326), null, null, '2021-03-12T16:00:20.254348Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03599450'),
+('3ee98fa5-5742-4161-908a-24d8053148ab', False, 'bpgt1-bethpagetn', 'BPGT1-BethpageTN', null, ST_GeomFromText('POINT(-86.3106 36.4872)',4326), null, null, '2021-03-12T16:00:20.255071Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('2ede45f1-2a9f-44c9-a40e-1eda74eca784', False, 'bbvk2-cumberlandr-barbourvilleky', 'BBVK2-CumberlandR-BarbourvilleKY', null, ST_GeomFromText('POINT(-83.8875 36.8631)',4326), null, null, '2021-03-12T16:00:20.255757Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03403500'),
+('0b6ee7cb-30b1-477a-94a0-cb0aaa2bb0f1', False, 'cnvt1-duckr-centervilletn', 'CNVT1-DuckR-CentervilleTN', null, ST_GeomFromText('POINT(-87.46 35.7842)',4326), null, null, '2021-03-12T16:00:20.256017Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03601990'),
+('e83479c4-637f-4cf9-80b5-37a891a72216', False, 'dblt1-bigrockcr-nrdoublebridgestn', 'DBLT1-BigRockCr-nrDoubleBridgesTN', null, ST_GeomFromText('POINT(-86.7686 35.5044)',4326), null, null, '2021-03-12T16:00:20.256702Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03599100'),
+('a10b6a71-84ad-4075-b7a9-94091f296ca8', False, 'mcet1-mcewentn', 'MCET1-McEwenTN', null, ST_GeomFromText('POINT(-87.6369 36.1069)',4326), null, null, '2021-03-12T16:00:20.257434Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('e03229c6-97ce-484b-9584-521189519f41', False, 'ohht1-old-hickory', 'OHHT1-OLD_HICKORY', null, ST_GeomFromText('POINT(-86.6589 36.2972)',4326), null, null, '2021-03-12T16:00:20.257747Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('9cb955c5-93cb-4402-822b-12e99580abe3', False, 'ohgt1-old-hickory', 'OHGT1-OLD_HICKORY', null, ST_GeomFromText('POINT(-86.6586 36.2969)',4326), null, null, '2021-03-12T16:00:20.258249Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('57b92e3d-19f6-4ce9-b711-d43f42fab3d9', False, 'barkley-spillway-gates', 'Barkley-Spillway-Gates', null, ST_GeomFromText('POINT(-88.2235 37.0207)',4326), null, null, '2021-03-12T16:00:20.258714Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('5f01ad2c-67aa-4cae-b7b3-36fb7a1881ab', False, 'cordell-hull-spillway-gates', 'Cordell-Hull-Spillway-Gates', null, ST_GeomFromText('POINT(-85.9432 36.2901)',4326), null, null, '2021-03-12T16:00:20.259052Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('828ffaa0-cfbc-4545-bb0e-8bacad7945da', False, 'cheatham-spillway-gates', 'Cheatham-Spillway-Gates', null, ST_GeomFromText('POINT(-87.2226 36.3196)',4326), null, null, '2021-03-12T16:00:20.259620Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('dd724991-14c8-4899-8489-f6ace618a088', False, 'bort1', 'BORT1', null, ST_GeomFromText('POINT(-86.8203 36.2175)',4326), null, null, '2021-03-12T16:00:20.260120Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03431599'),
+('54f189a0-4f94-46ea-bdb5-616ccff04bad', False, 'nrct1', 'NRCT1', null, ST_GeomFromText('POINT(-86.8542 36.1511)',4326), null, null, '2021-03-12T16:00:20.260706Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03431700'),
+('42a6e80b-5767-4ffe-b302-692cf97da00b', False, 'nbct1', 'NBCT1', null, ST_GeomFromText('POINT(-86.7611 36.13)',4326), null, null, '2021-03-12T16:00:20.261234Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03431300'),
+('ffa13475-c097-4316-88e1-9a8ce6f67699', False, 'cumberlandnashville', 'CumberlandNashville', null, ST_GeomFromText('POINT(-86.7764 36.1672)',4326), null, null, '2021-03-12T16:00:20.261697Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '034315005'),
+('e9c58cf6-2093-4359-bba1-3f8ad409d273', False, 'mflk2-martins-fork', 'MFLK2-MARTINS_FORK', null, ST_GeomFromText('POINT(-83.2597 36.7506)',4326), null, null, '2021-03-12T16:00:20.261828Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03400798'),
+('f5dbba6e-7dc3-4c62-b833-c980f950ce9e', False, 'ckvt1-cumberlandr-clarksvilletn', 'CKVT1-CumberlandR-ClarksvilleTN', null, ST_GeomFromText('POINT(-87.3678 36.5414)',4326), null, null, '2021-03-12T16:00:20.262545Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03436500'),
+('a2fa2bde-b031-43d9-b00a-3302beb181c6', False, 'normandy-rain-near-normandy', 'Normandy_Rain_Near_Normandy', null, ST_GeomFromText('POINT(-86.2453 35.4575)',4326), null, null, '2021-03-12T16:00:20.263251Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('24924cc6-ac6d-49f3-bbc6-3a0fdf99323a', False, 'normandy-tailwater', 'NORMANDY_TAILWATER', null, ST_GeomFromText('POINT(-86.2467 35.4628)',4326), null, null, '2021-03-12T16:00:20.263737Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('e0821f6a-a83e-4939-b7e5-e6214d6370f8', False, 'normandy-headwater', 'Normandy_Headwater', null, ST_GeomFromText('POINT(-86.2472 35.4653)',4326), null, null, '2021-03-12T16:00:20.263816Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('afe26545-5c47-4c18-9d6c-bed4e5f42a8a', False, 'rwnk2-wolf-creek', 'RWNK2-WOLF_CREEK', null, ST_GeomFromText('POINT(-85.1394 36.8836)',4326), null, null, '2021-03-12T16:00:20.263889Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03414000'),
+('73f36663-edb9-4c1e-b3bd-7a56dd66695d', False, 'falt1-fallsstateparktn', 'FALT1-FallsStateParkTN', null, ST_GeomFromText('POINT(-85.3086 35.6825)',4326), null, null, '2021-03-12T16:00:20.264533Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('09247b70-5a7b-4830-ae49-28465698b875', False, 'fallingwaterr', 'FallingWaterR', null, ST_GeomFromText('POINT(-85.5214 36.0772)',4326), null, null, '2021-03-12T16:00:20.265113Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03423000'),
+('e6bc7078-e633-45fd-95a6-f3b0b954d915', False, 'cett1-center-hill', 'CETT1-CENTER_HILL', null, ST_GeomFromText('POINT(-85.8333 36.0917)',4326), null, null, '2021-03-12T16:00:20.265577Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('02ae0b07-11c5-4599-bda0-1c3f8cc7492b', False, 'south-chick-cr-near-chattanooga', 'South_Chick_Cr_near_Chattanooga', null, ST_GeomFromText('POINT(-85.2106 35.0136)',4326), null, null, '2021-03-12T16:00:20.266183Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('b81d3d17-3201-4611-aafc-1b594d8942f3', False, 'tenn-river-at-s-pittsburg', 'Tenn_River_at_S_Pittsburg', null, ST_GeomFromText('POINT(-85.6975 35.0114)',4326), null, null, '2021-03-12T16:00:20.266653Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('6c847545-5c33-4916-a837-6c4ff8cea45f', False, 'anderson-rain', 'Anderson_Rain', null, ST_GeomFromText('POINT(-85.8972 35.0028)',4326), null, null, '2021-03-12T16:00:20.267095Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('7b616286-586c-4a46-9573-b25cb76b8758', False, 'n-chick-cr-at-mile-straight', 'N_Chick_Cr_at_Mile_Straight', null, ST_GeomFromText('POINT(-85.2153 35.2111)',4326), null, null, '2021-03-12T16:00:20.267593Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03566535'),
+('46c63d47-8fb2-4279-b1a5-b9fad7e05a00', False, 'mcdonald', 'McDonald', null, ST_GeomFromText('POINT(-84.9897 35.0967)',4326), null, null, '2021-03-12T16:00:20.268158Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('27fd522f-a619-43a2-8011-6cda06261819', False, 'cleveland', 'Cleveland', null, ST_GeomFromText('POINT(-84.8214 35.1836)',4326), null, null, '2021-03-12T16:00:20.268836Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('f9a665ed-ed3e-4593-b02c-bfc852e742f4', False, 'georgetown', 'Georgetown', null, ST_GeomFromText('POINT(-84.9656 35.3217)',4326), null, null, '2021-03-12T16:00:20.269396Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('b8a42122-b8f0-411d-9576-8d24f0091729', False, 'sequatchie-river-near-whitwell', 'Sequatchie_River_near_Whitwell', null, ST_GeomFromText('POINT(-85.4972 35.2064)',4326), null, null, '2021-03-12T16:00:20.269996Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('b0fd85c0-2c44-4081-b390-d50a804e729a', False, 'whitwell', 'Whitwell', null, ST_GeomFromText('POINT(-85.5194 35.2097)',4326), null, null, '2021-03-12T16:00:20.270480Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('6ac6c1fc-f21c-4780-ae21-b9c4ae7084cb', False, 'raccoon-mountain-near-whitwell', 'Raccoon_Mountain_near_Whitwell', null, ST_GeomFromText('POINT(-85.3875 35.0567)',4326), null, null, '2021-03-12T16:00:20.270985Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('7816be03-2d3f-45fe-9390-6f194fa13821', False, 'wckg1-westchickamaugacr-lakeviewga', 'WCKG1-WestChickamaugaCr-LakeviewGA', null, ST_GeomFromText('POINT(-85.2056 34.9572)',4326), null, null, '2021-03-12T16:00:20.271454Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03567340'),
+('b9d0b218-08c9-4a91-9028-811f98542a54', False, 'ccfg1-chattanoogacr-flintstonega', 'CCFG1-ChattanoogaCr-FlintstoneGA', null, ST_GeomFromText('POINT(-85.3344 34.9572)',4326), null, null, '2021-03-12T16:00:20.271967Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03568400'),
+('43c6c79f-9c45-49b0-a8f0-bbbf81db0d51', False, 'sckg1-southchickamaugacr-ringoldga', 'SCKG1-SouthChickamaugaCr-RingoldGA', null, ST_GeomFromText('POINT(-85.1256 34.9189)',4326), null, null, '2021-03-12T16:00:20.272449Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03566700'),
+('fc1a7d87-5598-49b0-beb9-3779829fc8d0', False, 'kydk2-kentucky', 'KYDK2-KENTUCKY', null, ST_GeomFromText('POINT(-88.2678 37.0144)',4326), null, null, '2021-03-12T16:00:20.272983Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, null),
+('87126358-87ec-4974-90f3-a40f14c0d2b3', False, 'ctht1-cumberlandr-carthagetn', 'CTHT1-CumberlandR-CarthageTN', null, ST_GeomFromText('POINT(-85.9564 36.2475)',4326), null, null, '2021-03-12T16:00:20.273107Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03425000'),
+('b24fc5a4-962c-4a0b-a1b4-d2f08a55989b', False, 'antt1-millcr-antiochtn', 'ANTT1-MillCr-AntiochTN', null, ST_GeomFromText('POINT(-86.6808 36.0817)',4326), null, null, '2021-03-12T16:00:20.273676Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03430400'),
+('6fcd34f0-dbc7-4ad2-bdbc-4eddd8277322', False, 'yamacraw', 'Yamacraw', null, ST_GeomFromText('POINT(-84.5631 36.7028)',4326), null, null, '2021-03-12T16:00:20.273969Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03410590'),
+('b172624d-0eab-4c0b-9e95-47438e1b4afd', False, 'cumbr-ashlandcity', 'CumbR_AshlandCity', null, ST_GeomFromText('POINT(-87.0761 36.2706)',4326), null, null, '2021-03-12T16:00:20.274443Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03431790'),
+('6b20e874-02f0-40de-95ce-bb1f3e565d46', False, 'bledsoe-cr-nr-bethpage', 'Bledsoe_Cr_nr_Bethpage', null, ST_GeomFromText('POINT(-86.332 36.4456)',4326), null, null, '2021-03-12T16:00:20.275301Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03425622'),
+('cec009f7-5cd7-4194-980a-ebdc69995f0d', False, 'duckr-blw-manchester', 'DuckR_blw_Manchester', null, ST_GeomFromText('POINT(0 0)',4326), null, null, '2021-03-12T16:00:20.276038Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03596000'),
+('b1d3fc99-abaf-4055-b4e6-6ab0c9a60c3d', False, 'duckr-nr-pottsville', 'DuckR_nr_Pottsville', null, ST_GeomFromText('POINT(-86.8714 35.5703)',4326), null, null, '2021-03-12T16:00:20.277067Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03599419'),
+('9e569018-ce7e-4a89-8f8e-0fdf0aed9adf', False, 'duckr-nr-shadygrove', 'DuckR_nr_ShadyGrove', null, ST_GeomFromText('POINT(0 0)',4326), null, null, '2021-03-12T16:00:20.278362Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03601600'),
+('9cda93fc-a495-4722-8834-7023a281b66a', False, 'redr-at-dot', 'RedR_at_Dot', null, ST_GeomFromText('POINT(-86.9521 36.6767)',4326), null, null, '2021-03-12T16:00:20.279487Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03435105'),
+('2a86face-8c5b-48c8-8c4f-def396a8489a', False, 'roaringr-nr-hilham', 'RoaringR_nr_Hilham', null, ST_GeomFromText('POINT(-85.4264 36.3408)',4326), null, null, '2021-03-12T16:00:20.279832Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03418000'),
+('554a7daa-b00f-4d14-a959-68c989ce5bda', False, 'wartracecr-at-wartrace', 'WartraceCr_at_Wartrace', null, ST_GeomFromText('POINT(-86.3403 35.5272)',4326), null, null, '2021-03-12T16:00:20.280774Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03597590'),
+('7a40ac4f-904a-4068-9efb-ef41e81db0b7', False, 'buckcr-shopville', 'BuckCr_Shopville', null, ST_GeomFromText('POINT(-84.4644 37.2106)',4326), null, null, '2021-03-12T16:00:20.281760Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03407500'),
+('5a1b8894-1fb1-4289-b943-8f74b28d7f76', False, 'millcr-nolensvll', 'MillCr_Nolensvll', null, ST_GeomFromText('POINT(-86.7015 36.0091)',4326), null, null, '2021-03-12T16:00:20.282084Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03430550'),
+('aa0341b6-4bed-4683-bb50-7ccb5da4eff7', False, 'drycr-edenwold', 'DryCr_Edenwold', null, ST_GeomFromText('POINT(-86.7063 36.2845)',4326), null, null, '2021-03-12T16:00:20.282874Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03426470'),
+('902be564-bff4-4495-bc2c-388ddcf998d4', False, 'sflittler-hopkin', 'SFLittleR Hopkin', null, ST_GeomFromText('POINT(-87.4289 36.8494)',4326), null, null, '2021-03-12T16:00:20.283830Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03437495'),
+('90d6254b-f8ff-47ff-b97a-981e710e7160', False, 'acst1-sycamorecr-ashlandcitytn', 'ACST1-SycamoreCr-AshlandCityTN', null, ST_GeomFromText('POINT(-87.0539 36.3231)',4326), null, null, '2021-03-12T16:00:20.284163Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03431800'),
+('cc2b904b-d99f-4583-8fb7-056ba1ba320f', False, 'cork2-lynncampcr-corbinky', 'CORK2-LynnCampCr-CorbinKY', null, ST_GeomFromText('POINT(-84.0875 36.945)',4326), null, null, '2021-03-12T16:00:20.285218Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03404900'),
+('b7abd272-ba0c-428b-88a4-a2dcc5bcda0e', False, 'cbnk2-laurelr-corbinky', 'CBNK2-LaurelR-CorbinKY', null, ST_GeomFromText('POINT(-84.1194 36.9706)',4326), null, null, '2021-03-12T16:00:20.286441Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03404820'),
+('e7902c45-6800-4b84-a70e-b70e77d43bb1', False, 'duckr-abv-williamsport', 'DuckR_abv_Williamsport', null, ST_GeomFromText('POINT(0 0)',4326), null, null, '2021-03-12T16:00:20.288155Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03600358'),
+('ed9c351b-c5cd-411c-aa45-fbca9ac69d7d', False, 'belt1-harpethr-bellevuetn', 'BELT1-HarpethR-BellevueTN', null, ST_GeomFromText('POINT(-86.9286 35.0547)',4326), null, null, '2021-03-12T16:00:20.289424Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03433500'),
+('0929af2a-a93e-4aaa-a926-cfeeba57372b', False, 'cmtt1-cypresscr-camdentn', 'CMTT1-CypressCr-CamdenTN', null, ST_GeomFromText('POINT(-88.0758 36.0469)',4326), null, null, '2021-03-12T16:00:20.290678Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03605078'),
+('8c48ae3d-4581-4aa5-8b81-592c907dd7a0', False, 'crocus-cr', 'Crocus Cr', null, ST_GeomFromText('POINT(-85.3107 36.8967)',4326), null, null, '2021-03-12T16:00:20.291845Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03414078'),
+('b5a6d737-0f49-4d0a-9405-5fded7f886ea', False, 'stonesr-donelson', 'StonesR_Donelson', null, ST_GeomFromText('POINT(-86.6334 36.1862)',4326), null, null, '2021-03-12T16:00:20.292705Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '2bd0903c-6e4d-4d83-8558-1eab52079de0', '00000000-0000-0000-0000-000000000000', null, '03430200');
 
 --INSERT INSTRUMENT STATUS--
 INSERT INTO public.instrument_status(id, instrument_id, status_id, "time")
  VALUES 
-('724aaa97-5b6d-4ea9-b0b3-c2f57e1686e2', '27317472-68f5-4341-9152-be4e3cd35aba', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.298722Z'),
-('8c12d37b-ab4a-4d97-b757-d1c29774a0ea', 'ff959a3d-2723-4984-abca-f2bd03aa489d', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.298972Z'),
-('e7ecff5c-7c95-49f8-b206-1e76d5b832ce', '83b90989-01ac-443a-98a6-73579bdcd6cd', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.299102Z'),
-('a7533400-0cc7-4b06-8723-13fbad8bcf30', '7c7f7d23-824b-4325-a64e-f12ce009530e', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.299217Z'),
-('82e9a606-c1b4-4307-907e-e2b44fa9cff3', '0459d406-5eca-4171-9af6-dfba3a7a45c6', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.299647Z'),
-('b1eb431a-cd3a-41dd-85f0-9eb377a567d3', '76972f3b-4723-40c5-adb6-8c8fd05dbf86', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.300054Z'),
-('dc8543c4-7d07-4254-a8a7-629337056c0a', '74b37f6e-51db-4daf-8c91-f6b4f2723de6', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.300471Z'),
-('39695775-eac9-4ec6-b8b5-5885baa5b11e', '127e78c0-dcb2-4a3e-a50a-f016f06ce941', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.300918Z'),
-('abc056ee-f661-4ad4-b395-1835743e8812', 'cde9c93e-070e-4386-b6ce-66d539304ad4', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.301351Z'),
-('116c049c-6cf8-4b3d-96aa-17a1d699269e', '8cdac320-0eed-41df-8983-5e71f1278b08', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.301792Z'),
-('1879d7a4-6301-4b8e-a0ec-17de7a536613', 'aeb9ed17-50fe-42bb-acd6-9a2cf808cbba', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.302206Z'),
-('c6be92ac-0a21-4942-a7ee-144aeca6ed7a', 'cc3b9f84-b4f9-4916-96b0-fc73c44d6b0d', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.302635Z'),
-('0746ca01-deb6-4b32-aca7-274d66345635', '8c53aaa6-aad4-497c-9286-741291847fc3', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.303053Z'),
-('2b8eebe7-0d56-418d-907c-7d1a4c122902', '6ba15fe7-dfcf-49c3-8230-599356d0c4b0', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.303507Z'),
-('443bce03-c0d0-4a7a-b152-7e7dd4a08218', '9375532a-4fcb-4bfc-a80c-a9a8d10aa1f2', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.304008Z'),
-('16ea7fb0-3323-439f-9660-474643456abc', '4955897d-c97b-4d36-bd40-d46623c798a2', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.304449Z'),
-('968e8ced-19d1-422b-a62a-160a12377e9a', '57d58971-a9a5-454b-bc24-07d5dc98ae5e', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.304872Z'),
-('bf1efba6-c0f5-4411-9fa6-0b04efd8fe80', '9c72d20a-7806-4b72-8753-a339dcf9955f', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.305309Z'),
-('3d3d47c3-43b3-4cac-a198-4aa83b36e41b', 'f9d084c4-0cef-4974-88b9-969ed553da51', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.305744Z'),
-('060a65cc-bf0a-4b47-bcf2-3239344824e0', 'b0035cd2-b103-4df1-8561-15a38d56dcc3', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.306183Z'),
-('af76aeea-593d-47e8-ac36-6f312b0d15e3', 'eaff91e3-8907-4aaa-96b5-24d011fd5c1f', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.306620Z'),
-('ab385a83-fb0a-479e-a663-415e2dcdd1bd', '9ea8edb4-d7c8-4a40-96ea-f0997b66e16d', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.307053Z'),
-('02d03682-1e5b-474c-9ad9-3bfc9f488db6', '9ab06dac-707f-48de-bec4-8e0488918b0b', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.307515Z'),
-('26eb2434-cf85-45e2-a3dd-34d3615638d1', 'ded99a0f-330c-4cda-9417-c83bc7b24af3', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.307935Z'),
-('1e078142-1592-4bd9-acc6-adc75dce0b69', '0b464357-6d6b-4dc0-87ea-aa4f65aa8e9e', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.308397Z'),
-('28ca0fd2-bf99-42b0-8686-24df0dba9fa3', 'cd329248-0df2-4a36-aeac-8e18b54d98f5', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.308819Z'),
-('1297b222-fcdb-40c2-925f-a189988ba84f', '6961517e-7f6e-4a2e-a362-d2d85362c5c1', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.309266Z'),
-('622a7d2a-73eb-4c92-9aa3-24dafe4da27f', '3877d14f-4d39-4369-9a63-498851e9d8cd', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.309702Z'),
-('bcfce416-f15f-4641-ad7a-234462eabd83', '346fcc23-8ed0-4e80-99b7-75c2f2261525', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.310134Z'),
-('571c0b6c-ccea-44c2-adb1-20b191200225', '58beadda-81ea-4950-b21a-18405d67583c', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.310607Z'),
-('6217af10-b0c7-47d0-bb19-5089c9450759', '0d485c9a-928b-448f-9a13-814f14cefe0f', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.311136Z'),
-('c7defa6e-48a0-4a6f-8b1c-4278180b4123', '11332d06-0506-4a42-8698-c80f3aff861d', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.311738Z'),
-('843cc6db-699d-4389-868b-ff04eb80c3cd', '324034f3-e9fb-429c-b741-1d6d65ea7b4c', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.312201Z'),
-('232624c1-e1dc-42fa-8305-36539714fff5', '5ddae2ed-a0a9-4fef-a4da-864604996342', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.312641Z'),
-('c3ec47ea-6a72-40c2-9874-09ef897b0170', '9a25e374-d27d-4f12-b228-7363f70a71f3', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.313055Z'),
-('6f55a396-1d49-4b63-8368-5ca868e63719', 'b30e8722-5dfb-4677-b44f-45d49e81a925', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.313482Z'),
-('3332f249-f505-497f-a74b-76a51f6b4fc6', '9ea21f67-c8cb-48ad-9f6f-b3fc729f7b9a', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.313899Z'),
-('1541a02b-18e6-46b5-a2d4-4a644e2ca472', '224d3ada-e83b-4d19-b152-05d8b099c056', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.314313Z'),
-('8dfe37ff-7129-4d71-a7a5-48ceb27c5eb8', '5b8a204e-bd38-40bd-b108-4118f962586b', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.314742Z'),
-('0a03b498-df6d-43a3-af7d-434f3b0a7a0a', '58278b8b-54d4-4b56-8969-e6a176b900f9', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.315185Z'),
-('c514dbdc-728d-45b1-b2e1-e8046b87999a', '9c89f1b8-6c18-4a42-ae3d-470299b7194b', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.315636Z'),
-('125c5e2d-cafc-4e2d-8ad0-6117d3a48f3e', '1cdebe4a-52d6-4356-8817-c5984ce4100f', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.316056Z'),
-('7b375cdc-05c3-4f89-9612-dfd2302903b8', '9a97a37b-e18f-4cca-9d7c-137a1d3af595', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.316464Z'),
-('d80e3dea-3332-4af8-9998-310532eeffcf', '903d19ae-0f01-4bd9-b7ef-c72b6551739d', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.316901Z'),
-('434b5b2d-142d-4dac-930a-33fb10a3ad7f', '652fcd72-0891-481d-9fa1-7aa96508d0a0', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.317312Z'),
-('fc682243-f986-45e9-adf0-c98e4e11b7b8', '64a28953-4f08-4eab-baf5-11b49dc7f957', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.317780Z'),
-('5ac0382d-7baa-4556-a288-5d1b25011907', 'f72eacc7-7a2d-4bf8-827c-a81d80952183', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.318207Z'),
-('6079017c-3a58-4392-96e9-b2eaeb0c3bfa', '9a6682e4-92fd-4d67-87ea-59ffd0bec6ce', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.318664Z'),
-('4c7748f6-6813-4ebd-8283-dd05dc2fcc29', 'f25498d3-d819-4a59-862d-769f2aba0e74', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.319120Z'),
-('bef8c0e0-474e-42a0-9628-ff8c4d5a7829', 'e401d6d3-8111-4f04-8c90-6ccf2d269bc2', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.319575Z'),
-('457e9150-d991-4203-bdc6-a81c07b6922f', '7e2ef036-c14a-4e0a-9528-1bcfbaa84219', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.320015Z'),
-('22d22171-2368-4f53-9c0e-4b7f47b0f2a5', '0a1c5198-b7bd-4090-bc0c-89f44635d8eb', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.320466Z'),
-('87fa8df6-5c9d-4a68-846a-ed9e483394bf', 'c9d371d7-9933-484f-853b-cc7483011c0d', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.321032Z'),
-('9c2eb5ec-aeb5-44f1-ae0c-f82a17f2b95c', 'c856ec08-c7f1-4d20-8804-481da266339d', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.321593Z'),
-('5ba58cdb-c0f1-4149-9e5b-c1f8177c8d99', '9b52884d-a446-4a1a-8db2-6d73aed87d66', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.322172Z'),
-('4b654323-d006-4cdd-b746-1b358f3372b5', 'cb6708b0-9599-470a-8460-411c3969ab01', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.322604Z'),
-('aac98105-ea08-46ee-9a97-76bba14cffb4', 'd40d94c2-4b9c-411f-82d2-e48ad6d1119b', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.323022Z'),
-('a8c1c4c2-1e7a-4e04-b1f0-97559576e0cb', '0b5abf6f-d9e5-42fb-bf70-8965a8da9965', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.323516Z'),
-('ba7c7b4d-df4d-43b7-9be8-8b44aa7f8320', '2a5999e7-03b5-45e3-9161-215e4fdd8167', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.323946Z'),
-('8fd9c969-d42a-4a41-82d3-f352dcb56643', 'f8acc6f8-9158-482d-9074-6f2c04f402a0', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.324379Z'),
-('3414a20b-9aaf-4e4d-ab95-0f4f93653469', '184e1fa0-dd7b-4ef3-a571-1708ca60874d', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.324797Z'),
-('3ea34add-ad59-42c0-a3f8-f943d0ef2e73', '0badc723-222f-47e1-a723-8ccd56363484', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.325303Z'),
-('cc90ff47-ffe6-40dc-bfaf-cc3ddc05d054', '7fabbbeb-74da-4853-af05-497eb59b17ac', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.325874Z'),
-('98ed95f2-7fe0-4e6b-8365-f3188b004e75', 'b11b1374-9353-4247-9366-b03ec33097bc', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.326399Z'),
-('b09dbcf4-5227-4feb-a311-b91ccef0d95a', '94945eaa-d3ac-4c69-8fe7-314607ef41b2', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.326867Z'),
-('b8da5214-d3c2-4cf8-87ec-a1bd11d155b2', '49a8d0e0-08c1-46ff-838f-51812f118415', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.327382Z'),
-('4d1b1bb9-bf55-4906-81a5-21cb2385590d', '1afa8d2f-8d7e-4ca9-9b17-d49d11cdf84a', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.327870Z'),
-('84f46f95-a9ce-4905-bb68-97cf7351653f', '52fa325e-25ef-4d95-9253-a31bf613afd4', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.328360Z'),
-('e954c65e-ed8a-4e6e-a2d2-07437cdf2b40', 'f8083600-9aca-4d24-a87e-1b290aaea940', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.328866Z'),
-('bd49ea8a-9dde-41b4-8f7f-267aafa34ddd', 'dfe34baa-508b-4471-9ac1-b918021ae6a9', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.329327Z'),
-('da2522b5-e744-4693-b8d5-d0092742cd7c', 'ee6d3280-490b-498e-ab9f-90e5698cd181', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.329828Z'),
-('173eeeb5-d5eb-470a-99d7-2fb9593776e6', 'e8d3b2e6-3b58-410f-96bb-6f8453529940', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.330306Z'),
-('e080b7ab-c986-4e8b-b389-d2d933352c2c', '2a76c74a-aada-4995-8fa6-3722a521fd32', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.330792Z'),
-('73f89c00-1f63-42ce-830c-1ff4b4b18fc6', 'a129aa7b-7ec4-4f2d-88ae-457caa2adec7', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.331314Z'),
-('b6717ff2-0269-415f-a813-79459a472790', '04117943-7a09-4015-b476-cf3f5cd469ba', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.331777Z'),
-('4df8c4a1-661c-43b8-bb8a-5eb9447f4d4d', '67d97a3a-a3d5-4c8c-9aa2-7329065c902c', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.332277Z'),
-('3c051bd1-81e0-4f46-acff-4f18cf145caa', '2bb2b7cf-5ad8-4158-a42b-9727f61a02a8', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.332743Z'),
-('113b3916-c629-488e-805f-e54f5229609a', '07a61743-18ae-42ef-b47d-c4e20096b086', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.333230Z'),
-('74ade48d-8160-4628-b817-6d8e94c94e30', '32d49c6a-b02c-4d4d-ba52-9a528cd1c80f', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.333716Z'),
-('b399fa0b-279d-4b75-a0f7-042a36aa8943', '2a045b91-fdda-45d0-b264-6c21b9790e36', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.334187Z'),
-('8f65c2fc-57a8-48df-81d6-976af9e0f99f', '1ff25fb7-8cb9-49b1-a83c-4917e1842b6e', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.334639Z'),
-('3c734bfd-8030-4b55-94a6-ecf616bc6047', '89e3534d-b0a3-422a-82ca-58b3b0e0871a', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.335137Z'),
-('e9ef674f-e56c-463a-8143-b7e9a8e0410d', '3e55442c-b36a-493c-b2f8-6fec535fc2cc', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.335633Z'),
-('938c4292-a873-4b7a-88ac-6619f607b85e', '8714bb02-ecdf-4116-9f37-9bb8158d0a1d', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.336136Z'),
-('3c7cc4e2-308b-424b-82a5-05dcc9fd7fea', 'f1a69f11-6790-4d16-92b0-7bf2907d4039', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.336607Z'),
-('198786a7-d6d8-42f0-80c2-2cacabd35eb6', 'a5a15c22-bced-4ea0-8342-a56df99d753f', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.337125Z'),
-('27b4f554-c242-4f7d-beeb-0ee5c3707c24', '38f9a880-6c47-4b1c-9476-92daa6b8164b', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.337641Z'),
-('1251e4dc-5f73-4a12-8943-3b3174cd16d6', '7d7e410b-ea8d-48a9-b09f-a6f7212b4ebe', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.338147Z'),
-('edba94c0-bac6-41fe-bcbe-caf2a3ce024f', 'e1508b90-1bcf-4608-acae-0ab4e1ef01d4', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.338621Z'),
-('82183aa8-afda-428d-a4e2-9c978a21e2d0', '6758f2d6-ac16-4a8d-8a89-676578f6a639', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.339105Z'),
-('10d234d4-7595-4c76-919e-4707f35e253b', '8d3041bc-ff78-4dca-8044-a904ec35321f', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.339684Z'),
-('6cd232ad-c724-487d-bf17-5a6673afb351', 'e88f7b9e-772d-42a3-9d66-33dad5c6b3a8', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.340148Z'),
-('182fc858-ba17-4796-9bbd-3ee5fbb3724b', 'bf472550-0dfc-4310-ab39-19160a8e073a', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.340669Z'),
-('8bb157af-94c3-478d-9947-f2c87f38b0b5', '60804aad-a4c4-41a5-938c-989619315126', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.341166Z'),
-('05462113-ef95-4cdd-aa37-3c2f3b56fcbf', 'eebb0956-f1c8-4d76-a78a-e823509fce4d', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.341660Z'),
-('e8da0a03-0b9d-4183-b7ab-8d8640a7b914', 'f017d31a-573e-4993-ba15-10d4224f08d9', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.342169Z'),
-('5ddcffe0-f4e3-4500-a933-5a3465b83429', '81c785c7-365b-49d8-b06b-f85fcd3479e7', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.342700Z'),
-('665e4c0d-d411-4886-b96f-3437d411d327', '6a6ca44d-f9f0-4f0e-ab52-ac7af764c6ab', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.343226Z'),
-('50aa7187-9abf-4253-9889-61be6046703c', 'f882e4e4-7aaa-422f-a7dd-4a59dfb0a41a', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.343720Z'),
-('a485508c-3e47-485e-8925-8995d53ef091', 'b8c41a11-f7b0-4a01-8145-4f28fdbbfde9', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.344223Z'),
-('b6a24ed1-3da3-4ab1-83a5-39e80291c968', '103af248-70db-436b-9b98-882c6db5f95f', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.344697Z'),
-('b7b295f7-b538-4452-9593-e2bce7791211', '884801ba-13ec-4638-8f8e-fda673a63fb2', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.345166Z'),
-('e8f18746-3a1e-47cb-bb3c-67be0e392fb7', '51055b7d-d298-4971-ba98-08de16960b74', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.345638Z'),
-('3f542986-8ab2-44d7-85d7-6fa98a8c46d5', 'b1ae57c6-40dc-4fde-9852-e42bdabd4d2e', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.346132Z'),
-('d7036247-788e-4eac-b135-226be061f648', '13c24865-3fab-4a81-acd5-4bc84334cd2b', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.346571Z'),
-('d1decfd2-ace6-4bf3-85fa-581b23fde75a', 'cd2b9a42-0f5a-4660-9c53-10ebdc7d422f', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.347048Z'),
-('722ac425-73e6-427a-9750-1576bf661a37', '2cba28f2-a50f-4ee4-9653-96d6dbaaa74c', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.347557Z'),
-('679eb318-0de3-4388-834a-10bd13cad202', '14e6dda0-c35e-4b77-8c38-7e126a43fa30', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.348020Z'),
-('00201aaa-78e6-4804-a910-67c10afd7f3a', '69bad009-9c10-446a-a782-84b847554bbe', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.348453Z'),
-('6d439482-6724-4b75-a496-357501429a08', 'e6f235c0-acff-4145-af79-f80065678138', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.348906Z'),
-('9da32849-f291-42a1-8486-5426ef2c0d03', 'f5284c44-6b5c-407d-9e9d-04ce3b942b22', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.349428Z'),
-('88f5da2b-3212-494b-b605-f232a45624f5', 'fc5b94e8-5d1b-43b6-973a-acaa2cd1a4d2', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.349906Z'),
-('4e0bca23-f2d0-4086-aa91-722210fc0f2d', '665586c1-2bbd-4218-8cb2-5515ec82faf8', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.350406Z'),
-('7ea59b60-da92-4eee-b115-ec615fbaa41b', '29b2ac8c-5ce0-4692-adf6-eab3c6dc33bc', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.350887Z'),
-('8d7f5b4f-5cb1-439f-8dde-64da7f0fa2fa', '03961c4b-8278-4159-a5d7-9d7dd11cae34', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.351407Z'),
-('d28f0835-f033-4daa-abbf-ea5402a1caf9', '3c9d0224-ee9d-4738-91b5-8d407512d259', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.351904Z'),
-('7d8d9ac9-48b3-4da2-880e-833e87befae8', '3ee98fa5-5742-4161-908a-24d8053148ab', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.352441Z'),
-('31b97e99-39c3-42cb-8584-753fe914e747', '2ede45f1-2a9f-44c9-a40e-1eda74eca784', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.352941Z'),
-('5409a86a-e8e0-44f6-a812-2a4c265d4f6a', '0b6ee7cb-30b1-477a-94a0-cb0aaa2bb0f1', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.353151Z'),
-('64ec2af7-eb93-4d89-9f7f-cc51b3a989e4', 'e83479c4-637f-4cf9-80b5-37a891a72216', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.353743Z'),
-('977a424e-9ce0-41ae-b071-d21dd8a03816', 'a10b6a71-84ad-4075-b7a9-94091f296ca8', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.354447Z'),
-('1e04d6d9-d2fb-4092-9616-b1668d259d7b', 'e03229c6-97ce-484b-9584-521189519f41', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.354899Z'),
-('6a9dcb5b-dc8a-4f23-a52e-4ffe7f2343e8', '9cb955c5-93cb-4402-822b-12e99580abe3', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.355520Z'),
-('2791ff84-c166-499e-be50-9c80a6ca8ab1', '57b92e3d-19f6-4ce9-b711-d43f42fab3d9', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.356307Z'),
-('e8cd2994-9f7f-4284-99c1-1785859b6b86', '5f01ad2c-67aa-4cae-b7b3-36fb7a1881ab', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.356840Z'),
-('091318a9-b425-4aa0-bcd8-aae928dccf99', '828ffaa0-cfbc-4545-bb0e-8bacad7945da', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.357672Z'),
-('3379ad61-3ed1-4b9c-991a-e479b3f08681', 'dd724991-14c8-4899-8489-f6ace618a088', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.358388Z'),
-('32108393-608f-4467-a94f-01c1f1da41fa', '54f189a0-4f94-46ea-bdb5-616ccff04bad', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.358902Z'),
-('d71bb449-4a3f-4531-86a8-9bf06583faf9', '42a6e80b-5767-4ffe-b302-692cf97da00b', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.359460Z'),
-('8b0328cb-062c-4299-a704-370643d50e3a', 'ffa13475-c097-4316-88e1-9a8ce6f67699', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.359981Z'),
-('494f2a13-f28e-4d07-82a2-2114980b0424', 'e9c58cf6-2093-4359-bba1-3f8ad409d273', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.360147Z'),
-('365d8a3e-abcf-4cc2-9c82-f3c62ad5ab4b', 'f5dbba6e-7dc3-4c62-b833-c980f950ce9e', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.360655Z'),
-('9cb248ad-50fd-4ea0-a178-8a49aec935e0', 'a2fa2bde-b031-43d9-b00a-3302beb181c6', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.361185Z'),
-('f8eede81-0ecc-4a6d-ab6d-e1d087583f9e', '24924cc6-ac6d-49f3-bbc6-3a0fdf99323a', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.361692Z'),
-('95ceafa2-2baa-420a-89ed-2b5b4c53c256', 'e0821f6a-a83e-4939-b7e5-e6214d6370f8', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.361784Z'),
-('9da415df-b75c-4f75-a6b3-d55759de184f', 'afe26545-5c47-4c18-9d6c-bed4e5f42a8a', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.361856Z'),
-('dbdfb120-3e4a-4d6c-9c3d-6dcc65cb0b54', '73f36663-edb9-4c1e-b3bd-7a56dd66695d', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.362389Z'),
-('a7e8a390-324d-410d-b61f-045ef4e7dbb4', '09247b70-5a7b-4830-ae49-28465698b875', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.362886Z'),
-('3d4b6f64-aeda-47c4-962c-6f42db3137eb', 'e6bc7078-e633-45fd-95a6-f3b0b954d915', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.363445Z'),
-('dcef0142-da59-4a8a-9cfe-120ac1b71e23', '02ae0b07-11c5-4599-bda0-1c3f8cc7492b', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.363960Z'),
-('0c4f1b73-6d58-4c86-aca6-8e998dbe388f', 'b81d3d17-3201-4611-aafc-1b594d8942f3', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.364463Z'),
-('2b8882f6-8bcc-4edc-b2f7-422ba932045a', '6c847545-5c33-4916-a837-6c4ff8cea45f', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.364962Z'),
-('e0f525d3-7d8e-49db-bdb1-2735093fcb25', '7b616286-586c-4a46-9573-b25cb76b8758', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.365504Z'),
-('9d88aaa9-e7f0-4257-8f58-99ee04ae9621', '46c63d47-8fb2-4279-b1a5-b9fad7e05a00', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.366034Z'),
-('07fc17bf-dd2d-4352-a127-9ace0e14259b', '27fd522f-a619-43a2-8011-6cda06261819', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.366559Z'),
-('a2139935-4681-4a5d-9c9f-6caf74484f00', 'f9a665ed-ed3e-4593-b02c-bfc852e742f4', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.367062Z'),
-('770e166f-e023-4b0f-a096-4846737e15f5', 'b8a42122-b8f0-411d-9576-8d24f0091729', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.367637Z'),
-('dad97ed3-2cbe-4ac2-a508-890782a70037', 'b0fd85c0-2c44-4081-b390-d50a804e729a', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.368137Z'),
-('c978d1c0-5fd6-43e8-a4c7-3741aacfbe6c', '6ac6c1fc-f21c-4780-ae21-b9c4ae7084cb', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.368661Z'),
-('b5a4b56f-2780-4503-be35-3e4333c36c98', '7816be03-2d3f-45fe-9390-6f194fa13821', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.369182Z'),
-('8950ff25-64ea-4562-b962-36157d413ad6', 'b9d0b218-08c9-4a91-9028-811f98542a54', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.369714Z'),
-('38eb12f6-66ca-45d1-802e-ef68516aee7b', '43c6c79f-9c45-49b0-a8f0-bbbf81db0d51', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.370240Z'),
-('0a98157d-d196-4dd9-81d8-96de37c8e4be', 'fc1a7d87-5598-49b0-beb9-3779829fc8d0', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.370879Z'),
-('aa16a80e-0996-46aa-a0de-9c4671edf187', '87126358-87ec-4974-90f3-a40f14c0d2b3', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.371029Z'),
-('d720dff3-44db-4fb9-98ea-ec0aa2399706', 'b24fc5a4-962c-4a0b-a1b4-d2f08a55989b', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.371588Z'),
-('31821826-2bca-4918-bb73-d3cfaddd18ba', '6fcd34f0-dbc7-4ad2-bdbc-4eddd8277322', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.371725Z'),
-('58796e88-4168-4bba-a83e-58885c0d9ec0', 'b172624d-0eab-4c0b-9e95-47438e1b4afd', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.371989Z'),
-('e8aa5b6d-5ba9-4c7d-a95b-17fd70916d51', '6b20e874-02f0-40de-95ce-bb1f3e565d46', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.372485Z'),
-('e43339fa-031b-4617-bd8e-7cb03b7e3a23', 'cec009f7-5cd7-4194-980a-ebdc69995f0d', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.373014Z'),
-('7ab43758-697a-4f9a-a388-9a1a3c67b3f0', 'b1d3fc99-abaf-4055-b4e6-6ab0c9a60c3d', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.373629Z'),
-('bb4f3a61-c4de-4e53-bf15-351da4a7a3b4', '9e569018-ce7e-4a89-8f8e-0fdf0aed9adf', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.374322Z'),
-('bff76f75-ef66-4967-9a3f-e77bf9f47ab4', '9cda93fc-a495-4722-8834-7023a281b66a', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.374953Z'),
-('380b45bf-cbc1-40d2-b78b-62d9c5de51d3', '2a86face-8c5b-48c8-8c4f-def396a8489a', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.375154Z'),
-('3b24db94-58b3-4559-a189-3badb7a825a8', '554a7daa-b00f-4d14-a959-68c989ce5bda', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.375775Z'),
-('cc38ee0d-82c0-4e26-958a-4daeade92bb2', '7a40ac4f-904a-4068-9efb-ef41e81db0b7', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.376365Z'),
-('fcf4c632-1fdf-4cf0-88f9-0d7dc3577754', '5a1b8894-1fb1-4289-b943-8f74b28d7f76', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.376557Z'),
-('ecfaeafd-5246-4979-b273-62fd2c6c620a', 'aa0341b6-4bed-4683-bb50-7ccb5da4eff7', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.377116Z'),
-('b2896858-55d3-4a84-bcf0-07acc642e429', '902be564-bff4-4495-bc2c-388ddcf998d4', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.377695Z'),
-('2f5f3577-d1f0-44e7-a479-647e46549916', '90d6254b-f8ff-47ff-b97a-981e710e7160', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.377879Z'),
-('679a1685-23c2-4d29-9c99-82aad571bdb7', 'cc2b904b-d99f-4583-8fb7-056ba1ba320f', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.378457Z'),
-('143a7c98-69be-4dc7-ade1-ffcc37d4fdb2', 'b7abd272-ba0c-428b-88a4-a2dcc5bcda0e', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.379016Z'),
-('ecb8a112-12bf-40d5-b18c-6aaaafec5340', 'e7902c45-6800-4b84-a70e-b70e77d43bb1', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.379666Z'),
-('07f0c84a-35de-486e-b4ff-1cc961a3aa4a', 'ed9c351b-c5cd-411c-aa45-fbca9ac69d7d', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.380258Z'),
-('d2eb5e52-4cb5-490c-865c-6314245e3ac1', '0929af2a-a93e-4aaa-a926-cfeeba57372b', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.380868Z'),
-('29066eea-0e5e-4770-80b7-4de195dbb707', '8c48ae3d-4581-4aa5-8b81-592c907dd7a0', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.381471Z'),
-('7adfec37-3559-4c86-99af-b9cf2f8b1d4d', 'b5a6d737-0f49-4d0a-9405-5fded7f886ea', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-08T18:56:06.382082Z');
+('dbca64d4-100e-4aef-a1f9-fa3ec88f9ea8', '27317472-68f5-4341-9152-be4e3cd35aba', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.196776Z'),
+('9888c79f-4bba-4354-b6fe-24f06943dada', 'ff959a3d-2723-4984-abca-f2bd03aa489d', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.197035Z'),
+('f6d6094f-b1c0-4f48-91e9-e0ac046116d9', '83b90989-01ac-443a-98a6-73579bdcd6cd', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.197142Z'),
+('5e9e7846-93fe-416d-a095-bbb4472c2c99', '7c7f7d23-824b-4325-a64e-f12ce009530e', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.197232Z'),
+('946f3a0c-039e-415d-a05a-73bf0ae8d75a', '0459d406-5eca-4171-9af6-dfba3a7a45c6', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.197635Z'),
+('aee655d7-6b2b-41d3-a43e-272827b317a9', '76972f3b-4723-40c5-adb6-8c8fd05dbf86', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.198075Z'),
+('3ef05ea3-f1d6-4ceb-9a50-89535ed7cad7', '74b37f6e-51db-4daf-8c91-f6b4f2723de6', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.198465Z'),
+('f950f16b-c3f5-4729-abf4-b51d532eb103', '127e78c0-dcb2-4a3e-a50a-f016f06ce941', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.198902Z'),
+('5a77a38e-d4ac-4d8c-b65f-185b6811467f', 'cde9c93e-070e-4386-b6ce-66d539304ad4', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.199286Z'),
+('0ee019bb-3c71-4e0c-a2b3-bf3360feb161', '8cdac320-0eed-41df-8983-5e71f1278b08', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.199683Z'),
+('a1f2621b-f510-4689-9a49-8f4055c7865e', 'aeb9ed17-50fe-42bb-acd6-9a2cf808cbba', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.200060Z'),
+('8ff700bb-99de-481b-b4ff-675d06936ea8', 'cc3b9f84-b4f9-4916-96b0-fc73c44d6b0d', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.200496Z'),
+('7a386349-040c-4aea-848c-7d2ab543d8ad', '8c53aaa6-aad4-497c-9286-741291847fc3', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.200896Z'),
+('fc3bf100-130a-4524-a2c5-00ce2bc9ec8c', '6ba15fe7-dfcf-49c3-8230-599356d0c4b0', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.201311Z'),
+('5a809f57-3909-45cb-b837-8eb7c19815ad', '9375532a-4fcb-4bfc-a80c-a9a8d10aa1f2', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.201745Z'),
+('622d1425-4083-4888-90fe-e6341f58e7e8', '4955897d-c97b-4d36-bd40-d46623c798a2', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.202240Z'),
+('1fbb73b4-37c6-4eff-85d4-98a8d632705c', '57d58971-a9a5-454b-bc24-07d5dc98ae5e', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.202636Z'),
+('7a01befc-7c3e-47f4-892b-20bc9cae1374', '9c72d20a-7806-4b72-8753-a339dcf9955f', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.203135Z'),
+('e289054e-abb3-468e-9c2e-34013c4f20dd', 'f9d084c4-0cef-4974-88b9-969ed553da51', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.203623Z'),
+('e0ee3c19-323c-4666-a721-7c013c1a4e44', 'b0035cd2-b103-4df1-8561-15a38d56dcc3', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.204026Z'),
+('cae5e89b-01b8-41f4-abcb-6a95206ba4d4', 'eaff91e3-8907-4aaa-96b5-24d011fd5c1f', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.204497Z'),
+('fe6869c1-0bc2-44f0-9ff8-925edf509e4c', '9ea8edb4-d7c8-4a40-96ea-f0997b66e16d', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.205001Z'),
+('13b33b74-3673-456d-9164-131651ddc1ee', '9ab06dac-707f-48de-bec4-8e0488918b0b', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.205444Z'),
+('4a2ce008-aa42-4c4d-bebf-286aed951d0c', 'ded99a0f-330c-4cda-9417-c83bc7b24af3', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.205843Z'),
+('638b13e8-6ec6-406f-b265-ff1d5e5210a5', '0b464357-6d6b-4dc0-87ea-aa4f65aa8e9e', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.206371Z'),
+('b1b5efce-dc97-4bce-af38-e44310c13c04', 'cd329248-0df2-4a36-aeac-8e18b54d98f5', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.206865Z'),
+('154422d8-c67e-4213-a784-d6e452cc1534', '6961517e-7f6e-4a2e-a362-d2d85362c5c1', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.207442Z'),
+('370a09f3-4624-4ed7-817c-22b101a0dc92', '3877d14f-4d39-4369-9a63-498851e9d8cd', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.207924Z'),
+('858d09b6-c892-4c38-a7ba-4b31da95a6a0', '346fcc23-8ed0-4e80-99b7-75c2f2261525', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.208417Z'),
+('d3e5cba3-2841-4f49-972a-3ee305df4f16', '58beadda-81ea-4950-b21a-18405d67583c', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.208904Z'),
+('eb6fa4d0-8262-43e2-8ab3-489a9bca078e', '0d485c9a-928b-448f-9a13-814f14cefe0f', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.209328Z'),
+('d876264f-5387-4124-aac0-b30f542f6125', '11332d06-0506-4a42-8698-c80f3aff861d', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.209713Z'),
+('26e2f28a-1a4b-47af-afa1-51aa4155222f', '324034f3-e9fb-429c-b741-1d6d65ea7b4c', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.210160Z'),
+('e74b66db-b962-492d-bc9c-6ba8d72410bb', '5ddae2ed-a0a9-4fef-a4da-864604996342', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.210560Z'),
+('d8cdbe48-9380-451a-81df-7cc67433fc58', '9a25e374-d27d-4f12-b228-7363f70a71f3', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.210962Z'),
+('92a0a7f7-ba56-4d19-aa26-b1a51e26b214', 'b30e8722-5dfb-4677-b44f-45d49e81a925', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.211346Z'),
+('5ba9fc94-558b-4f4a-9876-d166dd764b9f', '9ea21f67-c8cb-48ad-9f6f-b3fc729f7b9a', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.211742Z'),
+('39a95ce5-5d6f-4a53-bed0-a07c0f9df1cd', '224d3ada-e83b-4d19-b152-05d8b099c056', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.212129Z'),
+('7d7c0180-f4b7-4f38-895a-2ec1f8e6f2ca', '5b8a204e-bd38-40bd-b108-4118f962586b', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.212513Z'),
+('e0974300-bf44-42b5-b203-c87dc62f01b6', '58278b8b-54d4-4b56-8969-e6a176b900f9', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.212935Z'),
+('0d107927-06dd-43ab-9de3-6cf057b7961b', '9c89f1b8-6c18-4a42-ae3d-470299b7194b', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.213388Z'),
+('22f0910b-3a5f-4789-9d28-cb52d7b9cd0d', '1cdebe4a-52d6-4356-8817-c5984ce4100f', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.213764Z'),
+('5ff6cada-f186-43a1-8cab-64aa44379198', '9a97a37b-e18f-4cca-9d7c-137a1d3af595', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.214223Z'),
+('2f6806ae-33ac-46d6-8038-d8df4f7ecb7a', '903d19ae-0f01-4bd9-b7ef-c72b6551739d', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.214610Z'),
+('03ad87d9-a17e-4d04-afe3-1be8bc8a060a', '652fcd72-0891-481d-9fa1-7aa96508d0a0', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.214981Z'),
+('9da6aa21-390f-4235-a301-ef7d45f8c7be', '64a28953-4f08-4eab-baf5-11b49dc7f957', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.215358Z'),
+('f1ad5f2b-467d-4c2d-bf0b-9577d6286105', 'f72eacc7-7a2d-4bf8-827c-a81d80952183', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.215734Z'),
+('8fe79804-63f1-4e3b-a8b7-f91654e23f98', '9a6682e4-92fd-4d67-87ea-59ffd0bec6ce', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.216108Z'),
+('593ebb9d-bcb7-4e80-a2fc-b212859bac10', 'f25498d3-d819-4a59-862d-769f2aba0e74', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.216509Z'),
+('47a179e2-4ebd-4bd0-852d-90e93f8d55cf', 'e401d6d3-8111-4f04-8c90-6ccf2d269bc2', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.216909Z'),
+('1febe64c-ba1c-4d05-856a-24958274cb4f', '7e2ef036-c14a-4e0a-9528-1bcfbaa84219', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.217352Z'),
+('c0f360cb-484c-4eb9-b4d7-e7d7ff2bf374', '0a1c5198-b7bd-4090-bc0c-89f44635d8eb', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.217730Z'),
+('2b7fa9c5-7772-4288-acab-3b01961f5108', 'c9d371d7-9933-484f-853b-cc7483011c0d', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.218149Z'),
+('c1d14e35-877d-4f78-926a-0a429f315546', 'c856ec08-c7f1-4d20-8804-481da266339d', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.218537Z'),
+('af140c9f-f0d7-46cb-95d0-a4731a734b0f', '9b52884d-a446-4a1a-8db2-6d73aed87d66', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.218958Z'),
+('742898aa-94d2-4d71-b5b6-a418bda84efe', 'cb6708b0-9599-470a-8460-411c3969ab01', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.219426Z'),
+('505c8ffa-173e-4d30-b6bd-d08efcc6b127', 'd40d94c2-4b9c-411f-82d2-e48ad6d1119b', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.219839Z'),
+('0e8cd106-17ed-490f-8c67-a1131385254b', '0b5abf6f-d9e5-42fb-bf70-8965a8da9965', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.220271Z'),
+('52f2fee1-2790-467a-aae6-f425e168af80', '2a5999e7-03b5-45e3-9161-215e4fdd8167', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.220815Z'),
+('0b82f22c-eb69-4464-bec3-b4a681288ba7', 'f8acc6f8-9158-482d-9074-6f2c04f402a0', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.221264Z'),
+('8fc2b86a-3984-4f22-aef1-984c2ec770f6', '184e1fa0-dd7b-4ef3-a571-1708ca60874d', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.221657Z'),
+('ceaf400a-b843-4778-9cf7-e1517cf167ef', '0badc723-222f-47e1-a723-8ccd56363484', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.222133Z'),
+('e950aeba-366a-40f8-a388-f0b477243db8', '7fabbbeb-74da-4853-af05-497eb59b17ac', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.222612Z'),
+('db9cd032-9afe-4e33-b9c4-af43942f680f', 'b11b1374-9353-4247-9366-b03ec33097bc', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.223034Z'),
+('ea6913c4-6b91-46fc-8cd1-a3d2c4960ead', '94945eaa-d3ac-4c69-8fe7-314607ef41b2', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.223525Z'),
+('8a54c5df-8a17-4806-a44f-146f63c9ebe6', '49a8d0e0-08c1-46ff-838f-51812f118415', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.223992Z'),
+('8228522a-2ab1-4ab4-9d3f-6b3bb64b3f74', '1afa8d2f-8d7e-4ca9-9b17-d49d11cdf84a', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.224378Z'),
+('b8625c7e-2fd5-47a4-b9a8-8aa3b005c103', '52fa325e-25ef-4d95-9253-a31bf613afd4', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.224848Z'),
+('485ef740-42a0-4651-ab14-947ebae9bb77', 'f8083600-9aca-4d24-a87e-1b290aaea940', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.225364Z'),
+('c0077a8f-8696-428c-8891-beaa1b3d137d', 'dfe34baa-508b-4471-9ac1-b918021ae6a9', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.225805Z'),
+('6e5a9a41-100a-4e62-9a54-2d0acfd256ed', 'ee6d3280-490b-498e-ab9f-90e5698cd181', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.226285Z'),
+('1ab64ba2-58d4-4b4a-a98b-aa4acf234cce', 'e8d3b2e6-3b58-410f-96bb-6f8453529940', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.226776Z'),
+('623fa2ed-c7df-43d2-af6b-2171045a278e', '2a76c74a-aada-4995-8fa6-3722a521fd32', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.227233Z'),
+('f4c3ee38-e841-4c33-8394-370b0cfdafc1', 'a129aa7b-7ec4-4f2d-88ae-457caa2adec7', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.227728Z'),
+('7b572c3f-8334-4d8f-a8cb-432780504fbe', '04117943-7a09-4015-b476-cf3f5cd469ba', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.228209Z'),
+('4e8ef6eb-a055-4393-b928-1f9da2a65521', '67d97a3a-a3d5-4c8c-9aa2-7329065c902c', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.228751Z'),
+('41ebf0f3-8419-4eba-8b1a-0f2637230b02', '2bb2b7cf-5ad8-4158-a42b-9727f61a02a8', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.229294Z'),
+('97ae1d1b-5c15-4e51-9042-43b251befbc2', '07a61743-18ae-42ef-b47d-c4e20096b086', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.229796Z'),
+('67823b1f-a379-483b-8c3f-4d12553c480f', '32d49c6a-b02c-4d4d-ba52-9a528cd1c80f', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.230478Z'),
+('27b08cc2-0afb-4b3c-82a8-05ae5ec9370c', '2a045b91-fdda-45d0-b264-6c21b9790e36', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.231137Z'),
+('6944233b-6ae8-483d-9797-7e50bbb78df9', '1ff25fb7-8cb9-49b1-a83c-4917e1842b6e', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.231800Z'),
+('873eea34-f0f1-483b-96f5-328bb9396ef3', '89e3534d-b0a3-422a-82ca-58b3b0e0871a', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.232482Z'),
+('a98dc849-7097-413e-81dc-45e142ec5127', '3e55442c-b36a-493c-b2f8-6fec535fc2cc', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.233277Z'),
+('4eb7e2f6-44ae-4c69-9ca9-0658569377bc', '8714bb02-ecdf-4116-9f37-9bb8158d0a1d', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.233965Z'),
+('eacff3f7-a536-454a-be31-0b3eb233df09', 'f1a69f11-6790-4d16-92b0-7bf2907d4039', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.234753Z'),
+('c061735a-6b63-49e0-b9c3-53b100eefe2c', 'a5a15c22-bced-4ea0-8342-a56df99d753f', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.235447Z'),
+('9777605f-030b-4d3b-a09f-e4f9b0daff80', '38f9a880-6c47-4b1c-9476-92daa6b8164b', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.236236Z'),
+('96181921-6fb4-4646-94d0-7caa689dd441', '7d7e410b-ea8d-48a9-b09f-a6f7212b4ebe', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.237027Z'),
+('002ab82d-f720-4a8d-b039-a45b4169dbc1', 'e1508b90-1bcf-4608-acae-0ab4e1ef01d4', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.237762Z'),
+('44994323-d3ad-4f19-9aea-bb68b76634da', '6758f2d6-ac16-4a8d-8a89-676578f6a639', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.238470Z'),
+('95a3b9fc-bdc6-42b3-8140-5eec1d43a7e2', '8d3041bc-ff78-4dca-8044-a904ec35321f', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.239248Z'),
+('2c07a1c0-b465-41be-b1e9-ccbf619b20ea', 'e88f7b9e-772d-42a3-9d66-33dad5c6b3a8', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.239845Z'),
+('e1e4c6eb-4fd9-4648-aeec-85de45f13647', 'bf472550-0dfc-4310-ab39-19160a8e073a', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.240266Z'),
+('3dad8d46-273c-45eb-abc3-c8fac56a6575', '60804aad-a4c4-41a5-938c-989619315126', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.240891Z'),
+('37463d4d-ae16-4b9a-9ef3-653cb61c8f29', 'eebb0956-f1c8-4d76-a78a-e823509fce4d', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.241584Z'),
+('c696a9a3-114b-4aa3-a119-a73ce596b1a6', 'f017d31a-573e-4993-ba15-10d4224f08d9', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.242313Z'),
+('e606131f-0def-40b1-ae8c-6a670ae8bcbf', '81c785c7-365b-49d8-b06b-f85fcd3479e7', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.242975Z'),
+('fca5f597-4563-45dd-9e4f-3faf0d8affb3', '6a6ca44d-f9f0-4f0e-ab52-ac7af764c6ab', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.243674Z'),
+('c424a9ae-69cc-482f-9108-bcefb267183c', 'f882e4e4-7aaa-422f-a7dd-4a59dfb0a41a', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.244369Z'),
+('e44134a4-8208-49ef-b081-989be23f239f', 'b8c41a11-f7b0-4a01-8145-4f28fdbbfde9', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.245101Z'),
+('0e082e5a-f57c-4fed-9ee2-64497fc1229b', '103af248-70db-436b-9b98-882c6db5f95f', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.245823Z'),
+('281ea9af-622d-4046-9eae-33b3b03bd2c4', '884801ba-13ec-4638-8f8e-fda673a63fb2', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.246794Z'),
+('6918acd7-4a73-4454-b6f9-494b475e7add', '51055b7d-d298-4971-ba98-08de16960b74', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.247273Z'),
+('ad0241c1-2941-4013-9cf3-aa943e6569c8', 'b1ae57c6-40dc-4fde-9852-e42bdabd4d2e', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.247825Z'),
+('a315ef54-d7fc-4a44-8e0b-2bbba1537a91', '13c24865-3fab-4a81-acd5-4bc84334cd2b', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.248522Z'),
+('7ed418b9-fb37-4209-94db-16606d820fac', 'cd2b9a42-0f5a-4660-9c53-10ebdc7d422f', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.249243Z'),
+('ba0ee63d-37c6-441b-8751-40dd05fca5e9', '2cba28f2-a50f-4ee4-9653-96d6dbaaa74c', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.249910Z'),
+('4b9d2c97-5e04-44de-84d1-71e92b822ad7', '14e6dda0-c35e-4b77-8c38-7e126a43fa30', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.250455Z'),
+('6a92b0ae-3832-4b2f-9c5e-73cad9d7cfe9', '69bad009-9c10-446a-a782-84b847554bbe', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.250856Z'),
+('51de4275-d8fc-4094-9058-21f4583729dc', 'e6f235c0-acff-4145-af79-f80065678138', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.251348Z'),
+('2eb5f56e-547f-4114-a5a8-67592ee1cd56', 'f5284c44-6b5c-407d-9e9d-04ce3b942b22', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.251816Z'),
+('912a82e0-afb5-48f0-9780-a52579121b07', 'fc5b94e8-5d1b-43b6-973a-acaa2cd1a4d2', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.252289Z'),
+('57932d94-ba46-4dd6-96cc-db5b203f7766', '665586c1-2bbd-4218-8cb2-5515ec82faf8', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.252723Z'),
+('ebbb3b0c-bd47-4e90-b379-0de3dbca06ec', '29b2ac8c-5ce0-4692-adf6-eab3c6dc33bc', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.253213Z'),
+('51c32cfb-d37f-4bbb-b98f-9f465145fd68', '03961c4b-8278-4159-a5d7-9d7dd11cae34', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.253670Z'),
+('322d0c0d-cda2-408f-a0c2-4d5c1a3079c9', '3c9d0224-ee9d-4738-91b5-8d407512d259', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.254348Z'),
+('80db9522-f911-4340-aeff-1c8e2168621a', '3ee98fa5-5742-4161-908a-24d8053148ab', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.255071Z'),
+('96c33621-dfed-4ed5-b3ad-5cf5f7cfe78d', '2ede45f1-2a9f-44c9-a40e-1eda74eca784', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.255757Z'),
+('f1db5441-1211-40ee-b787-9163688bf9fc', '0b6ee7cb-30b1-477a-94a0-cb0aaa2bb0f1', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.256017Z'),
+('cbf9814d-c3a4-425a-9574-60a9dcd5e095', 'e83479c4-637f-4cf9-80b5-37a891a72216', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.256702Z'),
+('084ec835-99b3-4c0d-83ee-ea7d3f88ac68', 'a10b6a71-84ad-4075-b7a9-94091f296ca8', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.257434Z'),
+('30ad2e8c-d019-4f28-a2f0-08024de097d6', 'e03229c6-97ce-484b-9584-521189519f41', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.257747Z'),
+('eab6750b-9d29-40e2-b61f-59bfe63e7986', '9cb955c5-93cb-4402-822b-12e99580abe3', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.258249Z'),
+('4586fec8-9726-41d0-b15d-d84312588bda', '57b92e3d-19f6-4ce9-b711-d43f42fab3d9', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.258714Z'),
+('f213b504-dd2c-4591-89af-e44796d7257a', '5f01ad2c-67aa-4cae-b7b3-36fb7a1881ab', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.259052Z'),
+('a2aac15f-2729-48e6-98e2-96e74d619310', '828ffaa0-cfbc-4545-bb0e-8bacad7945da', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.259620Z'),
+('395ad6b6-d277-49ce-9430-56ab80276960', 'dd724991-14c8-4899-8489-f6ace618a088', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.260120Z'),
+('4e33930f-0c3a-4345-b9d2-356e7f2e6998', '54f189a0-4f94-46ea-bdb5-616ccff04bad', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.260706Z'),
+('e12f41e0-7b78-45e1-98f5-94b8114dc0a0', '42a6e80b-5767-4ffe-b302-692cf97da00b', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.261234Z'),
+('09a5aeb2-25b1-46a4-94a6-0fcbc67e4bd1', 'ffa13475-c097-4316-88e1-9a8ce6f67699', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.261697Z'),
+('4df8037a-2f83-4d84-a9ff-df0d0c7b464d', 'e9c58cf6-2093-4359-bba1-3f8ad409d273', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.261828Z'),
+('58d91542-32b3-480d-a9ee-b9f49b886d8e', 'f5dbba6e-7dc3-4c62-b833-c980f950ce9e', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.262545Z'),
+('a4f5db72-38b3-4dc9-979e-00e92eed3b05', 'a2fa2bde-b031-43d9-b00a-3302beb181c6', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.263251Z'),
+('202df132-5116-4550-a07f-c71a7a3cb316', '24924cc6-ac6d-49f3-bbc6-3a0fdf99323a', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.263737Z'),
+('807dcf75-69e4-4747-8cdb-f1a3f0cc05bd', 'e0821f6a-a83e-4939-b7e5-e6214d6370f8', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.263816Z'),
+('7ad7d7f7-1b18-4196-96e3-2eb53424074a', 'afe26545-5c47-4c18-9d6c-bed4e5f42a8a', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.263889Z'),
+('96931c0c-ba95-4014-ac29-4913638997d2', '73f36663-edb9-4c1e-b3bd-7a56dd66695d', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.264533Z'),
+('8807df1e-ca95-4638-9a7c-d2880846b192', '09247b70-5a7b-4830-ae49-28465698b875', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.265113Z'),
+('c87121cf-5d84-40b6-b8d2-9d17c4b04df4', 'e6bc7078-e633-45fd-95a6-f3b0b954d915', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.265577Z'),
+('0c9c9818-89d3-4db7-9988-b042405feec2', '02ae0b07-11c5-4599-bda0-1c3f8cc7492b', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.266183Z'),
+('16301115-4743-4cbe-ab1c-f8263fc117aa', 'b81d3d17-3201-4611-aafc-1b594d8942f3', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.266653Z'),
+('6d77dc0d-960f-4154-953a-1f3ec0ee8d23', '6c847545-5c33-4916-a837-6c4ff8cea45f', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.267095Z'),
+('c25f764f-7599-443d-a524-3127a4d52db0', '7b616286-586c-4a46-9573-b25cb76b8758', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.267593Z'),
+('07c74f22-ed44-47f2-9af3-4dfa3dde4504', '46c63d47-8fb2-4279-b1a5-b9fad7e05a00', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.268158Z'),
+('0ee5d791-e5b4-49ec-9de1-e8d3b7b84e7d', '27fd522f-a619-43a2-8011-6cda06261819', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.268836Z'),
+('1586d111-d106-49f7-9255-cbe59bf2a31e', 'f9a665ed-ed3e-4593-b02c-bfc852e742f4', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.269396Z'),
+('b885185f-81b3-4402-8cdc-88024e6f55e4', 'b8a42122-b8f0-411d-9576-8d24f0091729', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.269996Z'),
+('ecfbbeab-ab53-45ee-808e-8ee148c3bf4c', 'b0fd85c0-2c44-4081-b390-d50a804e729a', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.270480Z'),
+('b7a39c46-a09a-4add-9190-837eaca231a4', '6ac6c1fc-f21c-4780-ae21-b9c4ae7084cb', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.270985Z'),
+('9cbaad1f-9a92-443f-8e14-bd69d93db46b', '7816be03-2d3f-45fe-9390-6f194fa13821', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.271454Z'),
+('ef1a4e15-5aad-4783-8624-ebd665e93185', 'b9d0b218-08c9-4a91-9028-811f98542a54', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.271967Z'),
+('47184bfe-9036-43e9-b77d-b1692cdb424d', '43c6c79f-9c45-49b0-a8f0-bbbf81db0d51', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.272449Z'),
+('204ce2be-11b1-4da2-b319-4abaea182463', 'fc1a7d87-5598-49b0-beb9-3779829fc8d0', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.272983Z'),
+('aa41dcb0-731e-4c6a-b540-bc35b1219980', '87126358-87ec-4974-90f3-a40f14c0d2b3', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.273107Z'),
+('7ae79859-ae66-4fd2-85d8-3e12db45d31c', 'b24fc5a4-962c-4a0b-a1b4-d2f08a55989b', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.273676Z'),
+('19db3623-dc6e-42f0-bfdc-6fb370f75796', '6fcd34f0-dbc7-4ad2-bdbc-4eddd8277322', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.273969Z'),
+('f6597836-c5d8-49b9-bc08-a6b51314e4e8', 'b172624d-0eab-4c0b-9e95-47438e1b4afd', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.274443Z'),
+('5ccb6da8-fef7-4800-9f02-b0d84ef99310', '6b20e874-02f0-40de-95ce-bb1f3e565d46', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.275301Z'),
+('d2c44887-24d2-4192-b02e-106cc26cbad0', 'cec009f7-5cd7-4194-980a-ebdc69995f0d', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.276038Z'),
+('f34c3f96-039a-4ad2-87d8-6dccebd573cd', 'b1d3fc99-abaf-4055-b4e6-6ab0c9a60c3d', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.277067Z'),
+('8223aba9-5efc-4d6d-9525-a9be0a2ba11d', '9e569018-ce7e-4a89-8f8e-0fdf0aed9adf', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.278362Z'),
+('53eaa015-9292-484f-9d3d-c9402e5459cb', '9cda93fc-a495-4722-8834-7023a281b66a', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.279487Z'),
+('27777336-7cf0-4ad9-9aba-09931054d09d', '2a86face-8c5b-48c8-8c4f-def396a8489a', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.279832Z'),
+('cf171145-1c2c-4708-b296-a54450cb4869', '554a7daa-b00f-4d14-a959-68c989ce5bda', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.280774Z'),
+('b0596b04-413c-4166-8cf8-ef380877f52f', '7a40ac4f-904a-4068-9efb-ef41e81db0b7', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.281760Z'),
+('29fd8e0e-8c03-4990-a0ba-42902f7b6e7c', '5a1b8894-1fb1-4289-b943-8f74b28d7f76', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.282084Z'),
+('5ef69f89-274c-4421-825e-886c7ba3ef7a', 'aa0341b6-4bed-4683-bb50-7ccb5da4eff7', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.282874Z'),
+('f03d39b7-957c-4d23-927f-79819d908fbc', '902be564-bff4-4495-bc2c-388ddcf998d4', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.283830Z'),
+('9a8873d6-df7c-480d-bee0-499b46a03c41', '90d6254b-f8ff-47ff-b97a-981e710e7160', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.284163Z'),
+('06a61057-ffd8-4404-bcc2-346aa01f7567', 'cc2b904b-d99f-4583-8fb7-056ba1ba320f', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.285218Z'),
+('7026d12c-1b1a-4c16-a2e1-4e2957d959a1', 'b7abd272-ba0c-428b-88a4-a2dcc5bcda0e', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.286441Z'),
+('78f8bfe4-5139-47d9-aa12-3ff97f1982a7', 'e7902c45-6800-4b84-a70e-b70e77d43bb1', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.288155Z'),
+('13c8c1e0-abf0-44dd-911a-81c52cfb43de', 'ed9c351b-c5cd-411c-aa45-fbca9ac69d7d', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.289424Z'),
+('7e43f5b5-8224-4e8f-8a99-c0e1f4775d72', '0929af2a-a93e-4aaa-a926-cfeeba57372b', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.290678Z'),
+('0e0e7b1d-f1bb-468c-8668-5bcaceacf0f6', '8c48ae3d-4581-4aa5-8b81-592c907dd7a0', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.291845Z'),
+('3a18381a-02d2-48f1-a790-a69f51659dcd', 'b5a6d737-0f49-4d0a-9405-5fded7f886ea', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:00:20.292705Z');
 
 --INSERT TELEMETRY_GOES--COUNT:175
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '1cf575a8-aa29-4b02-895f-31fbe1fbeb10', '1769321E' where not exists (select 1 from telemetry_goes where nesdis_id = '1769321E');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '615f3506-2a5b-42b1-a414-b192ecef0610', '02608762' where not exists (select 1 from telemetry_goes where nesdis_id = '02608762');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'ff1fd007-8a56-4dba-ad3b-2464dc8f86b0', 'C50003F6' where not exists (select 1 from telemetry_goes where nesdis_id = 'C50003F6');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '06b6f524-b5f8-4859-886d-0943fee3ae23', 'CE664DF6' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE664DF6');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '1b684af3-f120-42d0-86c2-b96697e3435b', '1762F4A8' where not exists (select 1 from telemetry_goes where nesdis_id = '1762F4A8');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '364da51e-82e5-4c8d-9a53-22e2008b9761', '24406168' where not exists (select 1 from telemetry_goes where nesdis_id = '24406168');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '8ef53e8f-62fc-4d9d-b158-758f9ea77af8', 'D11ED764' where not exists (select 1 from telemetry_goes where nesdis_id = 'D11ED764');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'c8051d31-3569-4c85-9799-58c2b7facf9a', 'CE8597C8' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE8597C8');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'c3392bf6-81ba-4f2d-952e-2d9356bb71c7', 'CE66D646' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE66D646');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '23048d3f-6c5a-4a98-b249-10cbfbf8108c', 'CE24450C' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE24450C');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '50e4664a-02f7-42b0-b33d-f072d89d958b', 'CE564554' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE564554');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '751ff6af-0de2-4530-b93c-490f5559c527', 'CE04928A' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE04928A');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '550281ac-e320-480f-8a11-05e15c3535b5', 'CE562E60' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE562E60');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'dcdb9275-2568-46f7-aa06-15ff8ff30e45', 'DDB04572' where not exists (select 1 from telemetry_goes where nesdis_id = 'DDB04572');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'c43f086e-9647-42c1-8fa1-4e14ccac8149', 'DD8557B4' where not exists (select 1 from telemetry_goes where nesdis_id = 'DD8557B4');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'fb66ea18-51d6-4a84-962e-2bc96b05e325', 'CE56CD92' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE56CD92');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '5098e147-c64a-42f9-bf16-dc9cd71a3a5c', 'CE665052' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE665052');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '66e58832-7b84-454e-ba50-d558683eca32', 'CE1801EA' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE1801EA');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '7801c132-87bc-4889-a710-2e1a27f14ef2', '244A734C' where not exists (select 1 from telemetry_goes where nesdis_id = '244A734C');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '7b1e30e8-2044-411a-ab2d-31f41a8dbf88', 'DD532210' where not exists (select 1 from telemetry_goes where nesdis_id = 'DD532210');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'a4292b9e-d9b6-4489-ac1d-9909f674e58d', 'CE56E5AC' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE56E5AC');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '926b450d-6a95-4ffb-b165-4af9b17975d3', '244A2330' where not exists (select 1 from telemetry_goes where nesdis_id = '244A2330');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'f88ae60f-03f1-4edf-b1cd-fed8c69fc09f', 'CE18640C' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE18640C');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'aa54f1ca-0f13-428c-b4ba-c73d3850e740', 'CE4BC7B8' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE4BC7B8');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'bac1c80c-80ce-4142-9a97-6fe9ac4c21f5', 'CE4C7602' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE4C7602');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '8052e34f-1d87-4246-830d-6ce7e6341199', 'CE56A874' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE56A874');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '608bc83b-a36a-499c-a22d-aa91d9205a0b', 'CE56DEE4' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE56DEE4');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'b7626e3d-b303-4c15-92df-2456791d8ff5', 'CE55F1D4' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE55F1D4');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'fc9f1409-8d95-4e17-9512-2e1f53532619', 'CE561BFA' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE561BFA');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'e1fd2c20-48b8-4695-80b7-c8624a585abf', 'CE56C340' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE56C340');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'e1f82e0f-2788-4f46-a92f-c46b0db5647e', '2447F63E' where not exists (select 1 from telemetry_goes where nesdis_id = '2447F63E');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'efa6624a-aaaf-4ff6-ad3c-14f77c3e3f10', '2446D228' where not exists (select 1 from telemetry_goes where nesdis_id = '2446D228');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '4a5463b3-d487-4f20-ad47-04c17211f976', '2445A3B6' where not exists (select 1 from telemetry_goes where nesdis_id = '2445A3B6');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'cefaf84d-e99c-45ec-9778-b692b5b9e989', 'CE66CBE2' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE66CBE2');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '5aaccd8b-7519-4eed-a19a-78bcf7b96434', '2440A476' where not exists (select 1 from telemetry_goes where nesdis_id = '2440A476');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '300ec867-f014-4abf-8dfa-a246ca9f403f', 'CE66E3DC' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE66E3DC');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '5cf34bb6-7a88-4cb2-aa69-9cf1fa8cda8d', '2448135E' where not exists (select 1 from telemetry_goes where nesdis_id = '2448135E');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '14d95e01-9636-427c-916f-06e1666d59cb', '244B575A' where not exists (select 1 from telemetry_goes where nesdis_id = '244B575A');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '9c62dcd8-d6d6-485f-a2ad-1438d5c852cf', 'CE66954C' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE66954C');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'ef9fb666-4d50-49dc-a08a-09c84576726d', '2446C15E' where not exists (select 1 from telemetry_goes where nesdis_id = '2446C15E');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'b14bd321-5ed9-4d63-ae86-e2737d5c0183', 'CE666B1A' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE666B1A');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '98607e1b-1c9f-4168-aba9-ca8f1acf6db8', 'CE66786C' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE66786C');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'e4ed0bf4-6c2d-4fb3-aa3e-84c3b22d948c', '244FD474' where not exists (select 1 from telemetry_goes where nesdis_id = '244FD474');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '337720ce-2508-4598-a11b-ae4ba768b9eb', '244CA5EA' where not exists (select 1 from telemetry_goes where nesdis_id = '244CA5EA');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '7aa36b0b-2bc4-4d81-aa35-66a492f68615', 'CE66863A' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE66863A');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'ed706e09-b667-48f5-94cb-4f26e22dabd9', '244715CC' where not exists (select 1 from telemetry_goes where nesdis_id = '244715CC');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '04ea500c-71f9-4ab6-b7fd-d565579e1743', 'CE24339C' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE24339C');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'b1391d57-535d-442f-9f85-1be5c81a0086', '2443C69E' where not exists (select 1 from telemetry_goes where nesdis_id = '2443C69E');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'c4cde639-e8ec-4dfc-91eb-069eadd3670c', 'CE66D894' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE66D894');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '9ae64187-ff8d-4d78-a40e-09bce99729de', '2442120C' where not exists (select 1 from telemetry_goes where nesdis_id = '2442120C');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'a2036fca-e0fe-4183-bb37-07a1dd60e67d', 'CE66AE04' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE66AE04');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '7452ec2d-d146-42e2-85cc-6eeae43ce9d9', '2445E0BC' where not exists (select 1 from telemetry_goes where nesdis_id = '2445E0BC');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'ecc8a85b-72ff-46ac-85fd-2a299c38ade6', '244C23FE' where not exists (select 1 from telemetry_goes where nesdis_id = '244C23FE');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'a5bc2958-cf50-4885-8017-a1db0634cb39', '17EB55B4' where not exists (select 1 from telemetry_goes where nesdis_id = '17EB55B4');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'd9d5f074-4967-4a54-ae7f-470484cde1d2', '2450401A' where not exists (select 1 from telemetry_goes where nesdis_id = '2450401A');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '4e412ef6-ba08-4347-bf50-7090f97eb73d', '244D620E' where not exists (select 1 from telemetry_goes where nesdis_id = '244D620E');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '91d570b0-2e56-491c-a3c3-d07d86451940', '1762A4D4' where not exists (select 1 from telemetry_goes where nesdis_id = '1762A4D4');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'aeaa3e3a-1738-430d-9225-2e5509a51965', 'DD85622E' where not exists (select 1 from telemetry_goes where nesdis_id = 'DD85622E');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '4196512f-8fb3-4853-8f70-910e42e09049', 'CE8584BE' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE8584BE');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '1e14696b-be52-451b-9bf4-dd8dfbe18095', 'CE563D16' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE563D16');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'e7851658-ec41-4be9-8328-4a57ea6b053d', 'CE56933C' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE56933C');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'a327a16b-f0c2-4d7c-a534-1a7ec99bace7', 'CE56B5D0' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE56B5D0');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '1496b0e8-6fca-4b68-be53-412f73423aa7', 'CE4BD4CE' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE4BD4CE');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '60a0b179-50e1-44a2-976a-e5ee7f0ecfc6', 'CE55E2A2' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE55E2A2');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '836f8578-7422-4160-98ed-e5edfe91045c', 'CE55EC70' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE55EC70');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '21d76e72-ff85-4d83-9a3c-70b783939609', 'CE56EB7E' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE56EB7E');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'd2c1ec3f-972f-4282-ad73-e85eeb0e250b', '17C0D1E6' where not exists (select 1 from telemetry_goes where nesdis_id = '17C0D1E6');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '4e17dec8-2170-46b7-bf2b-1932d5287a21', 'CE152460' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE152460');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'dd4c73d0-7e53-4750-91a8-05766fce4ab1', 'CE6B2B76' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE6B2B76');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '82c2ac0f-652c-4e9b-b0c4-e7ca6f56d8a8', 'CE55FF06' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE55FF06');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '7ce394cf-c754-4ef4-bdcb-aa50d6b626d8', 'CE56F808' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE56F808');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '05857127-41b7-45db-a316-4b68caecaf9c', 'CE56804A' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE56804A');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '0b0fe752-e8e1-4dff-b626-124574a11816', 'DD149076' where not exists (select 1 from telemetry_goes where nesdis_id = 'DD149076');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'b89e7888-6759-4e4c-b8a1-562bac12f963', 'CE55D9EA' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE55D9EA');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'bdb49112-c063-4afc-8215-bb88872907f9', 'CE56065E' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE56065E');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '7c7a0438-d759-4a91-9bcb-cfa1a92bd2de', 'CE77E86A' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE77E86A');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '16010f5d-3d66-4eee-99a7-5d235b943efb', 'CE1D803E' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE1D803E');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'a5aaa7e3-fbbe-42e8-a239-b97730bc71ef', 'CE56BB02' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE56BB02');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'def7e568-bf43-4abc-add2-1efa2fd66509', 'CE569DEE' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE569DEE');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '034af858-38d3-4259-b697-5ae0eecadb8d', 'CE1D9348' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE1D9348');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'cc9097aa-3ac7-4b26-9fc6-c64193cf4b46', 'CE1DB5A4' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE1DB5A4');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'bbde0139-6d7a-441c-919c-c07c7b9efb04', 'CE5663B8' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE5663B8');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '3ba28ca8-7149-47cb-bf35-ffbaffb7dfd2', '244FA2E4' where not exists (select 1 from telemetry_goes where nesdis_id = '244FA2E4');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '7c09283c-0c92-4fff-b485-f815ef1cc386', 'CE6B36D2' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE6B36D2');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '0b6cdf1d-bed9-4ece-a61e-017e63d9700a', '2450536C' where not exists (select 1 from telemetry_goes where nesdis_id = '2450536C');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'ff4af477-d553-4ef2-9d57-e7af74891515', 'CE561528' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE561528');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'a5998e89-aa53-428d-8796-2fe4b257adf5', 'CE66ED0E' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE66ED0E');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'c3e3b1cc-d48a-46f4-91e7-e5efe088e63c', '2440048E' where not exists (select 1 from telemetry_goes where nesdis_id = '2440048E');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'f125853b-48bb-4309-a569-454dea27019a', 'CE564B86' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE564B86');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'a489739c-f25f-4dee-ab6f-762a745aa05f', 'CE568E98' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE568E98');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '6123d6ad-f775-47e2-a4ec-c5dc993adaa0', '244E00E6' where not exists (select 1 from telemetry_goes where nesdis_id = '244E00E6');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '9d1ca436-3861-4875-abac-9ba40cb6f401', '244EE314' where not exists (select 1 from telemetry_goes where nesdis_id = '244EE314');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '6fdc5498-04c9-4bb3-b296-7b42c88b3bbb', 'CE66A0D6' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE66A0D6');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '14924637-3724-40dd-b41f-b59460e44824', '2447702A' where not exists (select 1 from telemetry_goes where nesdis_id = '2447702A');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'cc799e7b-79ab-4f20-95c5-7bfb83eaa21b', 'CE6676BE' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE6676BE');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'c6cfb22b-24b0-402b-affd-ea8ec6aea897', '244A90BE' where not exists (select 1 from telemetry_goes where nesdis_id = '244A90BE');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'fc0a7f36-cc87-4c3c-9b3e-c15a50ae0643', 'CE665E80' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE665E80');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'dfe36b64-361c-4c81-8813-d691af0cdfae', 'CE66F0AA' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE66F0AA');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'd9d3102c-392e-4057-8f84-1ee2be63b762', '24419316' where not exists (select 1 from telemetry_goes where nesdis_id = '24419316');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'c38cbc20-857d-4c71-9d80-3955411d5aa8', '244EF062' where not exists (select 1 from telemetry_goes where nesdis_id = '244EF062');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'c4f8a8c0-1cb3-4c90-b302-6bc33edc32ba', 'CE5620B2' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE5620B2');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '50bcf8de-c9ed-4123-831c-d1db9ec597d6', '2446B7CE' where not exists (select 1 from telemetry_goes where nesdis_id = '2446B7CE');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '1568ac79-5ca3-4bc0-af8e-5b678c919a4a', 'CE66BD72' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE66BD72');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'c6bcce7c-b74f-4cde-b6e1-490edda602c9', 'CE5633C4' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE5633C4');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'b4341e3d-c1b2-468a-a7db-f6fa99e2ed56', '2449F256' where not exists (select 1 from telemetry_goes where nesdis_id = '2449F256');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'ec71fc9a-e35b-43a0-8729-48a31bd05313', 'CE66FE78' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE66FE78');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '6bbf9302-f3c6-423a-b52e-1427c386683d', 'CE663B66' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE663B66');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '6d5d65bb-2090-4892-9b0b-a2b89dc06871', 'CE66C530' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE66C530');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '577fc572-a224-407e-81ba-ce670ed5b3d6', 'DDB1A47A' where not exists (select 1 from telemetry_goes where nesdis_id = 'DDB1A47A');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '0cdfe868-77d0-49df-b849-ccda76067125', 'DDB17212' where not exists (select 1 from telemetry_goes where nesdis_id = 'DDB17212');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '6aca7612-dc12-494a-b395-156ce439a00e', 'DD4654DE' where not exists (select 1 from telemetry_goes where nesdis_id = 'DD4654DE');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '23678e92-0239-4037-8e91-cfe7882431e6', 'CE30C1BC' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE30C1BC');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'db09f3fe-76c7-4772-afcc-6e760c37bc30', 'CE56088C' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE56088C');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'b1a94527-24f1-4649-843d-be732bf217ef', 'CE30A45A' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE30A45A');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '9aa827e6-fbfd-4187-a62a-8ea946df3114', 'CE56A6A6' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE56A6A6');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '2188a303-8701-4372-a745-7c8e4b78dcfa', '17E7B7DA' where not exists (select 1 from telemetry_goes where nesdis_id = '17E7B7DA');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '3fba1aed-20a2-409d-80a3-35cc5ab2e5cb', 'CE6688E8' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE6688E8');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '4b332817-e6df-487c-83e7-aba6684d106c', 'CE566D6A' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE566D6A');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '64231d4f-6aa8-4d4d-97d3-dea37b248761', 'DDB1E770' where not exists (select 1 from telemetry_goes where nesdis_id = 'DDB1E770');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'afef97a5-1ced-46b1-9024-b62b3015a223', 'DD4C05F0' where not exists (select 1 from telemetry_goes where nesdis_id = 'DD4C05F0');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '59d2897d-bd68-4864-bded-46248136b716', '244396E2' where not exists (select 1 from telemetry_goes where nesdis_id = '244396E2');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '3f3d62c4-e3da-418d-b865-c41448374526', 'CE2025D0' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE2025D0');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'bd5d1cb2-4bdb-4ea9-93e6-1c3950d6a97b', 'CE30B72C' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE30B72C');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'd56a362b-16ab-474c-a426-8c23d0893c9a', 'CE0AD5E8' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE0AD5E8');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'e398dd75-2bba-4673-81bb-fe82be802375', 'CE05F596' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE05F596');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '68bb1de2-e622-4d48-ab85-e580e1f5c0e6', 'CE0954F2' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE0954F2');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '08d97d90-6449-41bc-8847-52c74cb32e08', '17EB46C2' where not exists (select 1 from telemetry_goes where nesdis_id = '17EB46C2');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '8b1c0f77-a00e-4347-899e-b72e8eed3636', 'DD6C728E' where not exists (select 1 from telemetry_goes where nesdis_id = 'DD6C728E');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '579cb884-cacb-4ced-b3f7-f63e6aefc63a', 'DDB070E8' where not exists (select 1 from telemetry_goes where nesdis_id = 'DDB070E8');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '75a0ee47-34ad-4b19-b340-25613799a202', '166AF1AC' where not exists (select 1 from telemetry_goes where nesdis_id = '166AF1AC');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '570745c5-fa39-4932-8a7e-f40076bdb9b2', 'CE77B816' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE77B816');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '3cb72f2e-936d-4467-8a1c-e9882ca45ea8', 'CE56D036' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE56D036');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '9eb63787-e5b6-4881-8e99-908596cc4231', '24461736' where not exists (select 1 from telemetry_goes where nesdis_id = '24461736');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'd153979c-15e9-4847-b1e9-b950006cd007', '244F748C' where not exists (select 1 from telemetry_goes where nesdis_id = '244F748C');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '58fe0e0e-47a0-4933-b81f-0b92d3580a0e', '2440F40A' where not exists (select 1 from telemetry_goes where nesdis_id = '2440F40A');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '834ccd3f-1bbb-45ca-9d37-35ab8a2dd5f9', 'CE183470' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE183470');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '09a5dd32-316c-4ea2-a2a8-23d69d682615', '244661A6' where not exists (select 1 from telemetry_goes where nesdis_id = '244661A6');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'fbdcde7a-3fea-40f5-9a52-a25c19ee9ad8', '1782343C' where not exists (select 1 from telemetry_goes where nesdis_id = '1782343C');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'cfab1aaf-f503-4a82-b3e9-631b3508d5bc', 'CE05D37A' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE05D37A');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '8a11d55f-586a-4059-b51b-68e2d8ac93d5', '244EA01E' where not exists (select 1 from telemetry_goes where nesdis_id = '244EA01E');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'd5ecead5-d0b7-46c3-8c9f-0006188678ca', '244E260A' where not exists (select 1 from telemetry_goes where nesdis_id = '244E260A');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '012c5ec2-041a-4b1a-8812-0f334be1ed79', '244234E0' where not exists (select 1 from telemetry_goes where nesdis_id = '244234E0');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'ce346a73-22cf-4104-9a64-e5375efd06c8', '1676A7D2' where not exists (select 1 from telemetry_goes where nesdis_id = '1676A7D2');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '0b0eeef8-f064-4774-8f71-7757ade22b1f', '2442C464' where not exists (select 1 from telemetry_goes where nesdis_id = '2442C464');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '696b7409-b761-4e7d-b8fd-94ca11f649cc', '2445D526' where not exists (select 1 from telemetry_goes where nesdis_id = '2445D526');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'cc8b985b-5bee-4f82-a71c-530901ab949c', '244536D4' where not exists (select 1 from telemetry_goes where nesdis_id = '244536D4');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'e32104f0-b6c1-4aa8-acb2-19428e246119', '244575DE' where not exists (select 1 from telemetry_goes where nesdis_id = '244575DE');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'ddc035b8-300d-4bbf-84fd-1196c993b7bc', '244C1664' where not exists (select 1 from telemetry_goes where nesdis_id = '244C1664');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '2453795d-9772-4e00-8fae-1aa45cff0bd2', '2446F4C4' where not exists (select 1 from telemetry_goes where nesdis_id = '2446F4C4');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'f4635ab8-22b4-4a75-8bc7-d1bdf6b3f619', 'DF00316E' where not exists (select 1 from telemetry_goes where nesdis_id = 'DF00316E');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '10958c80-c120-4a3a-b931-9f24bd1a4978', '17A8C404' where not exists (select 1 from telemetry_goes where nesdis_id = '17A8C404');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'a118d14f-c160-4ecc-8ba3-9c06033ee76f', '17A8B294' where not exists (select 1 from telemetry_goes where nesdis_id = '17A8B294');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'bdfdf943-3e76-4703-8649-cc4cce916283', '244A3046' where not exists (select 1 from telemetry_goes where nesdis_id = '244A3046');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '2b143eea-7677-4436-94c8-1e287d537c9a', 'CE77F5CE' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE77F5CE');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'f08d0678-491d-43c2-b653-33bb2fb18580', '176E235C' where not exists (select 1 from telemetry_goes where nesdis_id = '176E235C');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'e10ba98d-579b-467b-b8bd-b4e95df6ac02', '1676813E' where not exists (select 1 from telemetry_goes where nesdis_id = '1676813E');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '260ba71a-dc46-463b-9980-d6fdd1afebad', 'CE17F7FC' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE17F7FC');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '917be9ea-732e-4287-b3bb-d32d7b49886d', '244D7178' where not exists (select 1 from telemetry_goes where nesdis_id = '244D7178');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '1872f191-0c7b-4368-b4c3-3f788ff87895', '1676B4A4' where not exists (select 1 from telemetry_goes where nesdis_id = '1676B4A4');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '8d02cb89-b4d8-40f0-a4c8-8b10cdc8ad25', '17871510' where not exists (select 1 from telemetry_goes where nesdis_id = '17871510');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'feb7f7d6-6a61-42c2-92ca-9c992534ac17', '16DE05DA' where not exists (select 1 from telemetry_goes where nesdis_id = '16DE05DA');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '324fd1e1-ad1f-4462-80a7-b16fd3088a01', 'CE56F6DA' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE56F6DA');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '3d15239f-d5d5-4031-847e-b0aac82f8265', 'DDB05604' where not exists (select 1 from telemetry_goes where nesdis_id = 'DDB05604');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '2c61d23e-89aa-4a5b-a601-c305189c38cc', '172590A6' where not exists (select 1 from telemetry_goes where nesdis_id = '172590A6');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '2b6460b3-e444-463a-b140-b801e57e52db', 'DE2793EE' where not exists (select 1 from telemetry_goes where nesdis_id = 'DE2793EE');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '1f78e41b-3fe6-4ada-8825-be8d5e4008e5', 'DDB1B70C' where not exists (select 1 from telemetry_goes where nesdis_id = 'DDB1B70C');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '470fe35d-1cbd-4b15-8905-afa1814da597', 'DE13305C' where not exists (select 1 from telemetry_goes where nesdis_id = 'DE13305C');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'b64f2944-d452-41f9-b0e9-ea084bf83351', 'CE2B350E' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE2B350E');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '7afe6d19-9f32-4aee-a021-10cb3e5917de', 'CE567E1C' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE567E1C');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'cc012b0d-efd3-4e11-b3e0-425cebbe805d', 'CE5670CE' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE5670CE');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'b1c039b5-6377-4e39-a9e8-cef97b8e9573', '1704E522' where not exists (select 1 from telemetry_goes where nesdis_id = '1704E522');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '1437ed2d-52ea-4f97-90e6-81fd85663db0', 'CE77FB1C' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE77FB1C');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'b4b1631c-989c-4841-a3f9-c335e2a5f31d', '17F1369E' where not exists (select 1 from telemetry_goes where nesdis_id = '17F1369E');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '20fbae59-8d34-4c30-94c4-589971553e4d', 'CE0D2758' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE0D2758');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '75435c1a-7d9c-4da7-8c26-de5658a624f0', '16769248' where not exists (select 1 from telemetry_goes where nesdis_id = '16769248');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '4035609b-85a2-4696-a8a2-cefbd45a6e4b', '1769321E' where not exists (select 1 from telemetry_goes where nesdis_id = '1769321E');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '3345b343-b53a-4e3d-976b-cce3dcf403b4', '02608762' where not exists (select 1 from telemetry_goes where nesdis_id = '02608762');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '2cf5df20-3608-45f0-9929-3739f81b5d68', 'C50003F6' where not exists (select 1 from telemetry_goes where nesdis_id = 'C50003F6');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '69129a5b-d121-4d46-a89f-6c836a1cf50e', 'CE664DF6' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE664DF6');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'f775ad80-f027-4036-892f-09c94c8cbd4b', '1762F4A8' where not exists (select 1 from telemetry_goes where nesdis_id = '1762F4A8');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '8559989b-507e-4de9-bbbd-f1eefb78b26a', '24406168' where not exists (select 1 from telemetry_goes where nesdis_id = '24406168');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'a445594d-d77d-4367-ac03-d850ad15afc5', 'D11ED764' where not exists (select 1 from telemetry_goes where nesdis_id = 'D11ED764');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '565b8a50-bed5-44bc-8ee8-21a6b8f9ae0c', 'CE8597C8' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE8597C8');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'f3ac732b-e287-447a-bba1-d16642e5c431', 'CE66D646' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE66D646');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '9451220b-c218-4757-b7ae-dcf0f407d0a2', 'CE24450C' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE24450C');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '8852bd4b-dbbe-413f-91c2-8fc2b5865373', 'CE564554' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE564554');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '842eb870-82db-4767-8999-1191bcaa0a54', 'CE04928A' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE04928A');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '90872cc2-114b-44c3-a181-77347756546a', 'CE562E60' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE562E60');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'ed7c56bb-2bd4-4bfc-9a27-f373315c70fa', 'DDB04572' where not exists (select 1 from telemetry_goes where nesdis_id = 'DDB04572');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'a8e4ce3f-627b-441e-9b65-0dd1c51546ea', 'DD8557B4' where not exists (select 1 from telemetry_goes where nesdis_id = 'DD8557B4');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'a90c6e93-374d-44fc-8ce1-b35f3ec5ac9f', 'CE56CD92' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE56CD92');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'e39edb2b-02f1-41de-b65a-fe8641e78a65', 'CE665052' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE665052');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '6424d8de-c1ba-42e5-906b-13d1d82fc2ff', 'CE1801EA' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE1801EA');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '9e5f81c4-fdb0-42bf-abe5-7795fd03b049', '244A734C' where not exists (select 1 from telemetry_goes where nesdis_id = '244A734C');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'ad34c975-5c6b-4ed9-8054-44e94f5e6a80', 'DD532210' where not exists (select 1 from telemetry_goes where nesdis_id = 'DD532210');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '6b38cc18-afb3-42fd-aca4-2836c1c4d263', 'CE56E5AC' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE56E5AC');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '0ca6d34e-2bf7-4f09-99cf-b45dfbaa04de', '244A2330' where not exists (select 1 from telemetry_goes where nesdis_id = '244A2330');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '13670bb0-551e-46e6-ad48-f946c63c3412', 'CE18640C' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE18640C');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '87ec84d7-6a49-4dc1-910c-e99506bb1a93', 'CE4BC7B8' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE4BC7B8');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '89677a04-84a9-4e24-866b-96c88ee58041', 'CE4C7602' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE4C7602');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'af1e7d76-211e-4c5b-b2ca-9248d3fda02c', 'CE56A874' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE56A874');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '6e9da201-b4bd-414e-a92a-132bd943c1d4', 'CE56DEE4' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE56DEE4');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '0b2c34fd-a0eb-4959-bb50-53f5140c729a', 'CE55F1D4' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE55F1D4');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '04bbb052-2de2-40fd-9d38-a9e66a602ccf', 'CE561BFA' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE561BFA');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '7610dd0c-1911-49e5-b8b9-19e6d2920a8c', 'CE56C340' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE56C340');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'ded1a2ec-6078-48f3-a9e8-1f0902fd32ae', '2447F63E' where not exists (select 1 from telemetry_goes where nesdis_id = '2447F63E');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '1ea53322-3198-478d-8df3-5ab9e5570184', '2446D228' where not exists (select 1 from telemetry_goes where nesdis_id = '2446D228');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '4146a63f-8f71-402f-a752-4f1bc2d633b1', '2445A3B6' where not exists (select 1 from telemetry_goes where nesdis_id = '2445A3B6');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '34d3c055-ffd6-46af-aa21-af733456aa6d', 'CE66CBE2' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE66CBE2');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '7091b900-6e1a-4e67-a657-daa06009bf33', '2440A476' where not exists (select 1 from telemetry_goes where nesdis_id = '2440A476');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'a751b3df-cdbb-4c3b-8d05-f9563702a54c', 'CE66E3DC' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE66E3DC');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'df37415a-9cb5-402d-b144-e20bdf02ce61', '2448135E' where not exists (select 1 from telemetry_goes where nesdis_id = '2448135E');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '6125e881-797e-4156-9218-5cb961514506', '244B575A' where not exists (select 1 from telemetry_goes where nesdis_id = '244B575A');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'd9e808db-5629-4150-92b5-740a749c6e02', 'CE66954C' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE66954C');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'f3ce2329-f2b7-4525-8074-c97a608ce60b', '2446C15E' where not exists (select 1 from telemetry_goes where nesdis_id = '2446C15E');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'c1bf9415-8d2c-4674-965a-b5b7154fefc6', 'CE666B1A' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE666B1A');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '23f8b526-8448-4f5d-bcb9-67f6228988e8', 'CE66786C' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE66786C');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '7e4a5110-6273-46bd-ab72-6888ea583f7d', '244FD474' where not exists (select 1 from telemetry_goes where nesdis_id = '244FD474');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '639eb44c-2e56-4428-a066-0b250e24ee19', '244CA5EA' where not exists (select 1 from telemetry_goes where nesdis_id = '244CA5EA');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '284a2b6a-d87c-48c2-8704-486141b75393', 'CE66863A' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE66863A');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '8a1a605a-3586-44d3-9c20-508f772569db', '244715CC' where not exists (select 1 from telemetry_goes where nesdis_id = '244715CC');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '9383ad8a-7cc0-4154-bf15-04b5a778a257', 'CE24339C' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE24339C');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '42bfef31-b81d-405d-bbc4-db132d20e918', '2443C69E' where not exists (select 1 from telemetry_goes where nesdis_id = '2443C69E');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '31c5ac37-5980-41ef-8288-2ccfc526bed8', 'CE66D894' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE66D894');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '5d0f30d8-4cdd-4f76-8857-3abd967d0f0c', '2442120C' where not exists (select 1 from telemetry_goes where nesdis_id = '2442120C');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '8084315d-970d-4e21-ba78-f84d9e27044a', 'CE66AE04' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE66AE04');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '5cb7bc73-fbd3-4ee4-b478-7bfb4e59694a', '2445E0BC' where not exists (select 1 from telemetry_goes where nesdis_id = '2445E0BC');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '0ead3fd3-c8dd-49ee-8a66-8786ca94aa6a', '244C23FE' where not exists (select 1 from telemetry_goes where nesdis_id = '244C23FE');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '1672b989-9e32-4c68-a98f-bb5dd791f560', '17EB55B4' where not exists (select 1 from telemetry_goes where nesdis_id = '17EB55B4');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '5c0eae0f-9078-4138-b1bf-fe791158ed0a', '2450401A' where not exists (select 1 from telemetry_goes where nesdis_id = '2450401A');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'a44fc8e3-f3ca-4609-9d2d-fe5712439fa4', '244D620E' where not exists (select 1 from telemetry_goes where nesdis_id = '244D620E');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '107d3d1f-b0f9-4178-bb74-aec9cc87238b', '1762A4D4' where not exists (select 1 from telemetry_goes where nesdis_id = '1762A4D4');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'dbd73513-ed50-47dc-b852-0015c2a451a8', 'DD85622E' where not exists (select 1 from telemetry_goes where nesdis_id = 'DD85622E');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '372d0574-210b-4717-90e7-9bf9872b0315', 'CE8584BE' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE8584BE');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '5db5991b-aaf7-497b-993e-988b8b16d13c', 'CE563D16' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE563D16');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'ca61bd81-a22f-465c-ab32-a9b48c06e34f', 'CE56933C' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE56933C');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'f502205f-c320-462d-b4cf-f5449c019d24', 'CE56B5D0' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE56B5D0');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '053b6315-1b12-44a9-92c0-2713bb767de8', 'CE4BD4CE' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE4BD4CE');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'c3d1d608-5b00-4190-847b-84268c3554dd', 'CE55E2A2' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE55E2A2');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'a8af9bd7-0693-4c97-82ae-041ffe634b59', 'CE55EC70' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE55EC70');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'b240ca43-a0b1-4426-9ad3-6dc7c7c56c65', 'CE56EB7E' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE56EB7E');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '8c1d3029-2da0-48fb-a222-bb423ec3bef3', '17C0D1E6' where not exists (select 1 from telemetry_goes where nesdis_id = '17C0D1E6');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'e334c5dc-9771-4a61-be48-c301be4a3bcf', 'CE152460' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE152460');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'ce950194-4987-40cf-afaf-425911ad7649', 'CE6B2B76' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE6B2B76');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '1173e986-77f5-4c1f-b0e6-cb87c1b32fe4', 'CE55FF06' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE55FF06');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '1359310a-2f31-404f-9167-09b676655294', 'CE56F808' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE56F808');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '653aab93-d31f-4d24-8b1e-3c038e45db33', 'CE56804A' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE56804A');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '1e493638-4578-4876-b7ed-52c5af4d8838', 'DD149076' where not exists (select 1 from telemetry_goes where nesdis_id = 'DD149076');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'e316cdff-6f06-4fed-8246-1c33a6d53c2d', 'CE55D9EA' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE55D9EA');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '2b6c363c-8f20-4a87-977f-80440968a37d', 'CE56065E' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE56065E');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '96df6a79-b543-43e7-893d-b3f98f3ef3c7', 'CE77E86A' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE77E86A');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '09807d0c-598b-484e-bd18-98cc73453b8e', 'CE1D803E' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE1D803E');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'e9fcc70d-d5dc-446b-86d7-90ff2800360e', 'CE56BB02' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE56BB02');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'd3e42e99-043e-498c-824f-fd47677480bd', 'CE569DEE' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE569DEE');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'dedc0459-2dd7-4f39-838c-194b5fcd08b2', 'CE1D9348' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE1D9348');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'd313a475-6688-498e-bfbb-48de402034d1', 'CE1DB5A4' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE1DB5A4');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'ffb12163-1ff2-4813-9658-0980a3fbb78e', 'CE5663B8' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE5663B8');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '1d38822b-3822-4cb4-b3a0-4a79cb6baadf', '244FA2E4' where not exists (select 1 from telemetry_goes where nesdis_id = '244FA2E4');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'b09b4b40-ec4d-4546-a2a4-575f39b60220', 'CE6B36D2' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE6B36D2');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'b71906fa-5e25-435c-a132-c7cf86a06344', '2450536C' where not exists (select 1 from telemetry_goes where nesdis_id = '2450536C');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'd1e1f279-44ca-471d-adc8-fe708726b8f4', 'CE561528' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE561528');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'd7f4de65-812c-432c-ac2d-7eb58adbcec7', 'CE66ED0E' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE66ED0E');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '3bd57717-c13c-44ba-9bc7-4ccb5ef452d2', '2440048E' where not exists (select 1 from telemetry_goes where nesdis_id = '2440048E');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '1062a370-b53a-4ec0-94f2-4ea3188030a8', 'CE564B86' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE564B86');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'e70541ff-0e32-4f9d-b83b-f675b425aef6', 'CE568E98' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE568E98');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '37de549a-ce15-4fba-9b28-b8898cf2a64c', '244E00E6' where not exists (select 1 from telemetry_goes where nesdis_id = '244E00E6');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '65d5214c-b6c9-430f-85c5-96aa7237e5c5', '244EE314' where not exists (select 1 from telemetry_goes where nesdis_id = '244EE314');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'a2a10554-7053-42b8-a791-7af2bc36104e', 'CE66A0D6' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE66A0D6');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '0ee48d85-d282-44f5-9e8d-665138beeedd', '2447702A' where not exists (select 1 from telemetry_goes where nesdis_id = '2447702A');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '4b528029-b2c1-4583-8d17-9d364a7f8c88', 'CE6676BE' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE6676BE');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'c52e2b7b-1db3-4301-a3cc-c70a7c23f691', '244A90BE' where not exists (select 1 from telemetry_goes where nesdis_id = '244A90BE');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '6213dad6-4319-4d6a-bbe1-e85f5374ca26', 'CE665E80' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE665E80');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '2a68f265-1508-467d-9616-1e76460ad1e8', 'CE66F0AA' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE66F0AA');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'e42149f7-db5d-4b29-930a-c3f7a86ddb27', '24419316' where not exists (select 1 from telemetry_goes where nesdis_id = '24419316');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '1a30496d-0891-42b4-849d-96ad0e880753', '244EF062' where not exists (select 1 from telemetry_goes where nesdis_id = '244EF062');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '64ed6a4c-1502-414b-b2e5-5054a449fc01', 'CE5620B2' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE5620B2');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'bd634999-9b1a-4aae-bb3b-fb8f95ef4ad2', '2446B7CE' where not exists (select 1 from telemetry_goes where nesdis_id = '2446B7CE');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '0ee1ba81-f683-4f55-97ad-aace902412c1', 'CE66BD72' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE66BD72');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'd3e7062a-bcfb-47aa-889a-009e6fd1cc3e', 'CE5633C4' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE5633C4');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '81621d3e-fbe0-4f2b-b88b-f0b9e4427530', '2449F256' where not exists (select 1 from telemetry_goes where nesdis_id = '2449F256');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '982b3ab6-60ef-4470-9f2c-9a9d497b5990', 'CE66FE78' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE66FE78');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '1a4b3a83-3ca1-42d7-82f6-fd83c43c7e83', 'CE663B66' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE663B66');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'f54d4386-8186-4d73-873f-eb87d9ae8653', 'CE66C530' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE66C530');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '633f4bbd-d7dc-4151-b0cd-3b005124ff99', 'DDB1A47A' where not exists (select 1 from telemetry_goes where nesdis_id = 'DDB1A47A');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '0e0cbd0c-1ca9-4f6a-96d0-1819f884f781', 'DDB17212' where not exists (select 1 from telemetry_goes where nesdis_id = 'DDB17212');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '891663fd-aabe-4e8f-80aa-7751fd2ee318', 'DD4654DE' where not exists (select 1 from telemetry_goes where nesdis_id = 'DD4654DE');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'afdeae6e-43cc-4552-a22a-7aba2c8d7200', 'CE30C1BC' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE30C1BC');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'df908d63-ff7a-493a-8809-9b17e3cc9b9e', 'CE56088C' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE56088C');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'c0300856-7d36-421e-b94f-94a2c85ebdb2', 'CE30A45A' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE30A45A');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'ea7aa055-8e13-457b-b12f-3ae8138ab0d6', 'CE56A6A6' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE56A6A6');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '15589539-7c4f-45f8-b6b1-7418852b0283', '17E7B7DA' where not exists (select 1 from telemetry_goes where nesdis_id = '17E7B7DA');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'f2a79a0c-e13a-44ab-bc01-6c617de8c201', 'CE6688E8' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE6688E8');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '6a1b93c7-586a-4610-b8bd-fd6c797261e9', 'CE566D6A' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE566D6A');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'e443f23a-0e8b-47b5-a61e-25c1c09a2ad1', 'DDB1E770' where not exists (select 1 from telemetry_goes where nesdis_id = 'DDB1E770');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'a242339b-f347-47a1-abee-93b04a9d76ac', 'DD4C05F0' where not exists (select 1 from telemetry_goes where nesdis_id = 'DD4C05F0');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'eaaed458-6566-4a03-9fba-2d193d904839', '244396E2' where not exists (select 1 from telemetry_goes where nesdis_id = '244396E2');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'c1db1ca2-856a-45cc-9456-e8457be3f66a', 'CE2025D0' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE2025D0');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '035d86ff-9028-4e24-8f5b-19b819c45560', 'CE30B72C' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE30B72C');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '9a960cde-b2ba-4d13-a2ae-b8e5a28dc4ae', 'CE0AD5E8' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE0AD5E8');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '6bb07c21-753d-47a9-a35c-4f3ce05a71db', 'CE05F596' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE05F596');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'fca5dd4e-1e43-4826-991f-40a8f0a69c56', 'CE0954F2' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE0954F2');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '22ae9ff7-efd0-4b88-8951-200b675fd5ba', '17EB46C2' where not exists (select 1 from telemetry_goes where nesdis_id = '17EB46C2');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '53126b83-16c4-499c-9282-09f51049590d', 'DD6C728E' where not exists (select 1 from telemetry_goes where nesdis_id = 'DD6C728E');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'e6014362-3473-4925-93d3-4736b6e60c39', 'DDB070E8' where not exists (select 1 from telemetry_goes where nesdis_id = 'DDB070E8');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '64636100-cf4e-42d0-9506-e2983b4d4769', '166AF1AC' where not exists (select 1 from telemetry_goes where nesdis_id = '166AF1AC');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'ff4b664d-72fa-4a21-8ab6-36669c6e111d', 'CE77B816' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE77B816');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'c0261b63-4e07-4c51-8a68-fe885a93119e', 'CE56D036' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE56D036');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '69a03738-3a8c-475c-858a-01997fdf6895', '24461736' where not exists (select 1 from telemetry_goes where nesdis_id = '24461736');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '7c327a21-74a1-4589-8508-92e990a40cab', '244F748C' where not exists (select 1 from telemetry_goes where nesdis_id = '244F748C');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '775dd4e2-0581-463a-89a5-8f1e028b13ff', '2440F40A' where not exists (select 1 from telemetry_goes where nesdis_id = '2440F40A');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'b2673ccc-99fa-4725-a095-7c9e0873ee78', 'CE183470' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE183470');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '31e693d4-48d1-4f5f-b992-e440a40081eb', '244661A6' where not exists (select 1 from telemetry_goes where nesdis_id = '244661A6');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '8afca6c6-4717-4fd0-b96c-54523acba33f', '1782343C' where not exists (select 1 from telemetry_goes where nesdis_id = '1782343C');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'b0f1971a-2dc8-42aa-8a46-2f6824aaf69b', 'CE05D37A' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE05D37A');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'ef534e9c-0558-4712-9cae-8e9f55ee8304', '244EA01E' where not exists (select 1 from telemetry_goes where nesdis_id = '244EA01E');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '2ee3e647-65f5-4710-b985-ff0727d8da06', '244E260A' where not exists (select 1 from telemetry_goes where nesdis_id = '244E260A');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '1943cc66-5b85-4314-a5f2-46b53dee8245', '244234E0' where not exists (select 1 from telemetry_goes where nesdis_id = '244234E0');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '58fa18d9-df32-418e-b60d-f35e0dabf39e', '1676A7D2' where not exists (select 1 from telemetry_goes where nesdis_id = '1676A7D2');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '7eb73dbf-7b27-4af7-ad3d-ff3c811ed04a', '2442C464' where not exists (select 1 from telemetry_goes where nesdis_id = '2442C464');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'fb3de460-a996-484c-9e9a-fbb0f7c1702a', '2445D526' where not exists (select 1 from telemetry_goes where nesdis_id = '2445D526');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'aa5b8ebb-354c-4912-a784-e6740aba30a0', '244536D4' where not exists (select 1 from telemetry_goes where nesdis_id = '244536D4');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '93d9b138-a1f1-4739-85fd-496a78dda66b', '244575DE' where not exists (select 1 from telemetry_goes where nesdis_id = '244575DE');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'dff776f4-7857-47b9-a9db-ae323d617211', '244C1664' where not exists (select 1 from telemetry_goes where nesdis_id = '244C1664');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '7a25adab-0664-45f7-81cb-b5cd0f9976f4', '2446F4C4' where not exists (select 1 from telemetry_goes where nesdis_id = '2446F4C4');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'dec16421-3753-408a-9a28-d1523557c9b3', 'DF00316E' where not exists (select 1 from telemetry_goes where nesdis_id = 'DF00316E');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '1b8839c2-e536-44d9-ad6a-2141018ed138', '17A8C404' where not exists (select 1 from telemetry_goes where nesdis_id = '17A8C404');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'ba77a832-349f-4ec3-946f-0a5de0693dab', '17A8B294' where not exists (select 1 from telemetry_goes where nesdis_id = '17A8B294');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '6cf7121b-3f0e-4b2e-a767-e2f3eef73af0', '244A3046' where not exists (select 1 from telemetry_goes where nesdis_id = '244A3046');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'c4b0da47-3491-4b92-99b4-8f735eec142d', 'CE77F5CE' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE77F5CE');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'f156d49d-518a-4930-aba8-0e5d5249d165', '176E235C' where not exists (select 1 from telemetry_goes where nesdis_id = '176E235C');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '52354fdd-0b4f-4fd2-a154-f5152af01055', '1676813E' where not exists (select 1 from telemetry_goes where nesdis_id = '1676813E');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'd1442e2c-339a-46b8-8b0c-14c11b2749f9', 'CE17F7FC' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE17F7FC');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'dc5804c7-bce0-4835-9346-f4e62c8aa944', '244D7178' where not exists (select 1 from telemetry_goes where nesdis_id = '244D7178');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '920b937e-876b-42aa-8881-fadfc8dd396a', '1676B4A4' where not exists (select 1 from telemetry_goes where nesdis_id = '1676B4A4');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '84cfcef6-fdf5-48d2-b75b-664f33224195', '17871510' where not exists (select 1 from telemetry_goes where nesdis_id = '17871510');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '25f9750f-3437-4224-95cd-c04ccc3a41a9', '16DE05DA' where not exists (select 1 from telemetry_goes where nesdis_id = '16DE05DA');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '205d9c7b-f4e8-4a32-9374-7a90d5737765', 'CE56F6DA' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE56F6DA');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '9adf7159-7eea-467e-b509-ff05c80d02e7', 'DDB05604' where not exists (select 1 from telemetry_goes where nesdis_id = 'DDB05604');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'e2d5567a-4de2-4d18-a207-bd518e6a9a28', '172590A6' where not exists (select 1 from telemetry_goes where nesdis_id = '172590A6');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '619d5098-9375-498c-ad68-e64c3c9429bf', 'DE2793EE' where not exists (select 1 from telemetry_goes where nesdis_id = 'DE2793EE');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '4598713c-56b1-4435-b73b-b4a11fbcb3f3', 'DDB1B70C' where not exists (select 1 from telemetry_goes where nesdis_id = 'DDB1B70C');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '8ae0c6ea-6bf6-40ef-a47a-96ff772c95a5', 'DE13305C' where not exists (select 1 from telemetry_goes where nesdis_id = 'DE13305C');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '1ea115cd-6c1f-4117-be78-bf30718b65db', 'CE2B350E' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE2B350E');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '5ab90a19-2464-44fc-b978-e436d025fbab', 'CE567E1C' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE567E1C');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '2d30e782-c555-4676-833c-c1813dbc0b12', 'CE5670CE' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE5670CE');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '6fd7bba0-0c37-4869-89b6-53e1342f1da7', '1704E522' where not exists (select 1 from telemetry_goes where nesdis_id = '1704E522');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'c93fccfb-bb0a-4530-90a3-d65a52f4445a', 'CE77FB1C' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE77FB1C');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select 'b413d900-bc79-4d94-9479-69662e48766b', '17F1369E' where not exists (select 1 from telemetry_goes where nesdis_id = '17F1369E');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '97112dd5-94d5-4d08-8c64-e47da8cd9498', 'CE0D2758' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE0D2758');
+INSERT INTO public.telemetry_goes (id, nesdis_id) select '3b838489-c9d6-4cf6-8413-2aae2d9afec7', '16769248' where not exists (select 1 from telemetry_goes where nesdis_id = '16769248');
 
 --INSERT INSTRUMENT_TELEMETRY--COUNT:175
 INSERT INTO public.instrument_telemetry (instrument_id, telemetry_type_id, telemetry_id) 
 VALUES
-('27317472-68f5-4341-9152-be4e3cd35aba', '10a32652-af43-4451-bd52-4980c5690cc9', '1cf575a8-aa29-4b02-895f-31fbe1fbeb10'),
-('ff959a3d-2723-4984-abca-f2bd03aa489d', '10a32652-af43-4451-bd52-4980c5690cc9', '615f3506-2a5b-42b1-a414-b192ecef0610'),
-('83b90989-01ac-443a-98a6-73579bdcd6cd', '10a32652-af43-4451-bd52-4980c5690cc9', 'ff1fd007-8a56-4dba-ad3b-2464dc8f86b0'),
-('7c7f7d23-824b-4325-a64e-f12ce009530e', '10a32652-af43-4451-bd52-4980c5690cc9', '06b6f524-b5f8-4859-886d-0943fee3ae23'),
-('0459d406-5eca-4171-9af6-dfba3a7a45c6', '10a32652-af43-4451-bd52-4980c5690cc9', '1b684af3-f120-42d0-86c2-b96697e3435b'),
-('76972f3b-4723-40c5-adb6-8c8fd05dbf86', '10a32652-af43-4451-bd52-4980c5690cc9', '364da51e-82e5-4c8d-9a53-22e2008b9761'),
-('74b37f6e-51db-4daf-8c91-f6b4f2723de6', '10a32652-af43-4451-bd52-4980c5690cc9', '8ef53e8f-62fc-4d9d-b158-758f9ea77af8'),
-('127e78c0-dcb2-4a3e-a50a-f016f06ce941', '10a32652-af43-4451-bd52-4980c5690cc9', 'c8051d31-3569-4c85-9799-58c2b7facf9a'),
-('cde9c93e-070e-4386-b6ce-66d539304ad4', '10a32652-af43-4451-bd52-4980c5690cc9', 'c3392bf6-81ba-4f2d-952e-2d9356bb71c7'),
-('8cdac320-0eed-41df-8983-5e71f1278b08', '10a32652-af43-4451-bd52-4980c5690cc9', '23048d3f-6c5a-4a98-b249-10cbfbf8108c'),
-('aeb9ed17-50fe-42bb-acd6-9a2cf808cbba', '10a32652-af43-4451-bd52-4980c5690cc9', '50e4664a-02f7-42b0-b33d-f072d89d958b'),
-('cc3b9f84-b4f9-4916-96b0-fc73c44d6b0d', '10a32652-af43-4451-bd52-4980c5690cc9', '751ff6af-0de2-4530-b93c-490f5559c527'),
-('8c53aaa6-aad4-497c-9286-741291847fc3', '10a32652-af43-4451-bd52-4980c5690cc9', '550281ac-e320-480f-8a11-05e15c3535b5'),
-('6ba15fe7-dfcf-49c3-8230-599356d0c4b0', '10a32652-af43-4451-bd52-4980c5690cc9', 'dcdb9275-2568-46f7-aa06-15ff8ff30e45'),
-('9375532a-4fcb-4bfc-a80c-a9a8d10aa1f2', '10a32652-af43-4451-bd52-4980c5690cc9', 'c43f086e-9647-42c1-8fa1-4e14ccac8149'),
-('4955897d-c97b-4d36-bd40-d46623c798a2', '10a32652-af43-4451-bd52-4980c5690cc9', 'fb66ea18-51d6-4a84-962e-2bc96b05e325'),
-('57d58971-a9a5-454b-bc24-07d5dc98ae5e', '10a32652-af43-4451-bd52-4980c5690cc9', '5098e147-c64a-42f9-bf16-dc9cd71a3a5c'),
-('9c72d20a-7806-4b72-8753-a339dcf9955f', '10a32652-af43-4451-bd52-4980c5690cc9', '66e58832-7b84-454e-ba50-d558683eca32'),
-('f9d084c4-0cef-4974-88b9-969ed553da51', '10a32652-af43-4451-bd52-4980c5690cc9', '7801c132-87bc-4889-a710-2e1a27f14ef2'),
-('b0035cd2-b103-4df1-8561-15a38d56dcc3', '10a32652-af43-4451-bd52-4980c5690cc9', '7b1e30e8-2044-411a-ab2d-31f41a8dbf88'),
-('eaff91e3-8907-4aaa-96b5-24d011fd5c1f', '10a32652-af43-4451-bd52-4980c5690cc9', 'a4292b9e-d9b6-4489-ac1d-9909f674e58d'),
-('9ea8edb4-d7c8-4a40-96ea-f0997b66e16d', '10a32652-af43-4451-bd52-4980c5690cc9', '926b450d-6a95-4ffb-b165-4af9b17975d3'),
-('9ab06dac-707f-48de-bec4-8e0488918b0b', '10a32652-af43-4451-bd52-4980c5690cc9', 'f88ae60f-03f1-4edf-b1cd-fed8c69fc09f'),
-('ded99a0f-330c-4cda-9417-c83bc7b24af3', '10a32652-af43-4451-bd52-4980c5690cc9', 'aa54f1ca-0f13-428c-b4ba-c73d3850e740'),
-('0b464357-6d6b-4dc0-87ea-aa4f65aa8e9e', '10a32652-af43-4451-bd52-4980c5690cc9', 'bac1c80c-80ce-4142-9a97-6fe9ac4c21f5'),
-('cd329248-0df2-4a36-aeac-8e18b54d98f5', '10a32652-af43-4451-bd52-4980c5690cc9', '8052e34f-1d87-4246-830d-6ce7e6341199'),
-('6961517e-7f6e-4a2e-a362-d2d85362c5c1', '10a32652-af43-4451-bd52-4980c5690cc9', '608bc83b-a36a-499c-a22d-aa91d9205a0b'),
-('3877d14f-4d39-4369-9a63-498851e9d8cd', '10a32652-af43-4451-bd52-4980c5690cc9', 'b7626e3d-b303-4c15-92df-2456791d8ff5'),
-('346fcc23-8ed0-4e80-99b7-75c2f2261525', '10a32652-af43-4451-bd52-4980c5690cc9', 'fc9f1409-8d95-4e17-9512-2e1f53532619'),
-('58beadda-81ea-4950-b21a-18405d67583c', '10a32652-af43-4451-bd52-4980c5690cc9', 'e1fd2c20-48b8-4695-80b7-c8624a585abf'),
-('0d485c9a-928b-448f-9a13-814f14cefe0f', '10a32652-af43-4451-bd52-4980c5690cc9', 'e1f82e0f-2788-4f46-a92f-c46b0db5647e'),
-('11332d06-0506-4a42-8698-c80f3aff861d', '10a32652-af43-4451-bd52-4980c5690cc9', 'efa6624a-aaaf-4ff6-ad3c-14f77c3e3f10'),
-('324034f3-e9fb-429c-b741-1d6d65ea7b4c', '10a32652-af43-4451-bd52-4980c5690cc9', '4a5463b3-d487-4f20-ad47-04c17211f976'),
-('5ddae2ed-a0a9-4fef-a4da-864604996342', '10a32652-af43-4451-bd52-4980c5690cc9', 'cefaf84d-e99c-45ec-9778-b692b5b9e989'),
-('9a25e374-d27d-4f12-b228-7363f70a71f3', '10a32652-af43-4451-bd52-4980c5690cc9', '5aaccd8b-7519-4eed-a19a-78bcf7b96434'),
-('b30e8722-5dfb-4677-b44f-45d49e81a925', '10a32652-af43-4451-bd52-4980c5690cc9', '300ec867-f014-4abf-8dfa-a246ca9f403f'),
-('9ea21f67-c8cb-48ad-9f6f-b3fc729f7b9a', '10a32652-af43-4451-bd52-4980c5690cc9', '5cf34bb6-7a88-4cb2-aa69-9cf1fa8cda8d'),
-('224d3ada-e83b-4d19-b152-05d8b099c056', '10a32652-af43-4451-bd52-4980c5690cc9', '14d95e01-9636-427c-916f-06e1666d59cb'),
-('5b8a204e-bd38-40bd-b108-4118f962586b', '10a32652-af43-4451-bd52-4980c5690cc9', '9c62dcd8-d6d6-485f-a2ad-1438d5c852cf'),
-('58278b8b-54d4-4b56-8969-e6a176b900f9', '10a32652-af43-4451-bd52-4980c5690cc9', 'ef9fb666-4d50-49dc-a08a-09c84576726d'),
-('9c89f1b8-6c18-4a42-ae3d-470299b7194b', '10a32652-af43-4451-bd52-4980c5690cc9', 'b14bd321-5ed9-4d63-ae86-e2737d5c0183'),
-('1cdebe4a-52d6-4356-8817-c5984ce4100f', '10a32652-af43-4451-bd52-4980c5690cc9', '98607e1b-1c9f-4168-aba9-ca8f1acf6db8'),
-('9a97a37b-e18f-4cca-9d7c-137a1d3af595', '10a32652-af43-4451-bd52-4980c5690cc9', 'e4ed0bf4-6c2d-4fb3-aa3e-84c3b22d948c'),
-('903d19ae-0f01-4bd9-b7ef-c72b6551739d', '10a32652-af43-4451-bd52-4980c5690cc9', '337720ce-2508-4598-a11b-ae4ba768b9eb'),
-('652fcd72-0891-481d-9fa1-7aa96508d0a0', '10a32652-af43-4451-bd52-4980c5690cc9', '7aa36b0b-2bc4-4d81-aa35-66a492f68615'),
-('64a28953-4f08-4eab-baf5-11b49dc7f957', '10a32652-af43-4451-bd52-4980c5690cc9', 'ed706e09-b667-48f5-94cb-4f26e22dabd9'),
-('f72eacc7-7a2d-4bf8-827c-a81d80952183', '10a32652-af43-4451-bd52-4980c5690cc9', '04ea500c-71f9-4ab6-b7fd-d565579e1743'),
-('9a6682e4-92fd-4d67-87ea-59ffd0bec6ce', '10a32652-af43-4451-bd52-4980c5690cc9', 'b1391d57-535d-442f-9f85-1be5c81a0086'),
-('f25498d3-d819-4a59-862d-769f2aba0e74', '10a32652-af43-4451-bd52-4980c5690cc9', 'c4cde639-e8ec-4dfc-91eb-069eadd3670c'),
-('e401d6d3-8111-4f04-8c90-6ccf2d269bc2', '10a32652-af43-4451-bd52-4980c5690cc9', '9ae64187-ff8d-4d78-a40e-09bce99729de'),
-('7e2ef036-c14a-4e0a-9528-1bcfbaa84219', '10a32652-af43-4451-bd52-4980c5690cc9', 'a2036fca-e0fe-4183-bb37-07a1dd60e67d'),
-('0a1c5198-b7bd-4090-bc0c-89f44635d8eb', '10a32652-af43-4451-bd52-4980c5690cc9', '7452ec2d-d146-42e2-85cc-6eeae43ce9d9'),
-('c9d371d7-9933-484f-853b-cc7483011c0d', '10a32652-af43-4451-bd52-4980c5690cc9', 'ecc8a85b-72ff-46ac-85fd-2a299c38ade6'),
-('c856ec08-c7f1-4d20-8804-481da266339d', '10a32652-af43-4451-bd52-4980c5690cc9', 'a5bc2958-cf50-4885-8017-a1db0634cb39'),
-('9b52884d-a446-4a1a-8db2-6d73aed87d66', '10a32652-af43-4451-bd52-4980c5690cc9', 'd9d5f074-4967-4a54-ae7f-470484cde1d2'),
-('cb6708b0-9599-470a-8460-411c3969ab01', '10a32652-af43-4451-bd52-4980c5690cc9', '4e412ef6-ba08-4347-bf50-7090f97eb73d'),
-('d40d94c2-4b9c-411f-82d2-e48ad6d1119b', '10a32652-af43-4451-bd52-4980c5690cc9', '91d570b0-2e56-491c-a3c3-d07d86451940'),
-('0b5abf6f-d9e5-42fb-bf70-8965a8da9965', '10a32652-af43-4451-bd52-4980c5690cc9', 'aeaa3e3a-1738-430d-9225-2e5509a51965'),
-('2a5999e7-03b5-45e3-9161-215e4fdd8167', '10a32652-af43-4451-bd52-4980c5690cc9', '4196512f-8fb3-4853-8f70-910e42e09049'),
-('f8acc6f8-9158-482d-9074-6f2c04f402a0', '10a32652-af43-4451-bd52-4980c5690cc9', '1e14696b-be52-451b-9bf4-dd8dfbe18095'),
-('184e1fa0-dd7b-4ef3-a571-1708ca60874d', '10a32652-af43-4451-bd52-4980c5690cc9', 'e7851658-ec41-4be9-8328-4a57ea6b053d'),
-('0badc723-222f-47e1-a723-8ccd56363484', '10a32652-af43-4451-bd52-4980c5690cc9', 'a327a16b-f0c2-4d7c-a534-1a7ec99bace7'),
-('7fabbbeb-74da-4853-af05-497eb59b17ac', '10a32652-af43-4451-bd52-4980c5690cc9', '1496b0e8-6fca-4b68-be53-412f73423aa7'),
-('b11b1374-9353-4247-9366-b03ec33097bc', '10a32652-af43-4451-bd52-4980c5690cc9', '60a0b179-50e1-44a2-976a-e5ee7f0ecfc6'),
-('94945eaa-d3ac-4c69-8fe7-314607ef41b2', '10a32652-af43-4451-bd52-4980c5690cc9', '836f8578-7422-4160-98ed-e5edfe91045c'),
-('49a8d0e0-08c1-46ff-838f-51812f118415', '10a32652-af43-4451-bd52-4980c5690cc9', '21d76e72-ff85-4d83-9a3c-70b783939609'),
-('1afa8d2f-8d7e-4ca9-9b17-d49d11cdf84a', '10a32652-af43-4451-bd52-4980c5690cc9', 'd2c1ec3f-972f-4282-ad73-e85eeb0e250b'),
-('52fa325e-25ef-4d95-9253-a31bf613afd4', '10a32652-af43-4451-bd52-4980c5690cc9', '4e17dec8-2170-46b7-bf2b-1932d5287a21'),
-('f8083600-9aca-4d24-a87e-1b290aaea940', '10a32652-af43-4451-bd52-4980c5690cc9', 'dd4c73d0-7e53-4750-91a8-05766fce4ab1'),
-('dfe34baa-508b-4471-9ac1-b918021ae6a9', '10a32652-af43-4451-bd52-4980c5690cc9', '82c2ac0f-652c-4e9b-b0c4-e7ca6f56d8a8'),
-('ee6d3280-490b-498e-ab9f-90e5698cd181', '10a32652-af43-4451-bd52-4980c5690cc9', '7ce394cf-c754-4ef4-bdcb-aa50d6b626d8'),
-('e8d3b2e6-3b58-410f-96bb-6f8453529940', '10a32652-af43-4451-bd52-4980c5690cc9', '05857127-41b7-45db-a316-4b68caecaf9c'),
-('2a76c74a-aada-4995-8fa6-3722a521fd32', '10a32652-af43-4451-bd52-4980c5690cc9', '0b0fe752-e8e1-4dff-b626-124574a11816'),
-('a129aa7b-7ec4-4f2d-88ae-457caa2adec7', '10a32652-af43-4451-bd52-4980c5690cc9', 'b89e7888-6759-4e4c-b8a1-562bac12f963'),
-('04117943-7a09-4015-b476-cf3f5cd469ba', '10a32652-af43-4451-bd52-4980c5690cc9', 'bdb49112-c063-4afc-8215-bb88872907f9'),
-('67d97a3a-a3d5-4c8c-9aa2-7329065c902c', '10a32652-af43-4451-bd52-4980c5690cc9', '7c7a0438-d759-4a91-9bcb-cfa1a92bd2de'),
-('2bb2b7cf-5ad8-4158-a42b-9727f61a02a8', '10a32652-af43-4451-bd52-4980c5690cc9', '16010f5d-3d66-4eee-99a7-5d235b943efb'),
-('07a61743-18ae-42ef-b47d-c4e20096b086', '10a32652-af43-4451-bd52-4980c5690cc9', 'a5aaa7e3-fbbe-42e8-a239-b97730bc71ef'),
-('32d49c6a-b02c-4d4d-ba52-9a528cd1c80f', '10a32652-af43-4451-bd52-4980c5690cc9', 'def7e568-bf43-4abc-add2-1efa2fd66509'),
-('2a045b91-fdda-45d0-b264-6c21b9790e36', '10a32652-af43-4451-bd52-4980c5690cc9', '034af858-38d3-4259-b697-5ae0eecadb8d'),
-('1ff25fb7-8cb9-49b1-a83c-4917e1842b6e', '10a32652-af43-4451-bd52-4980c5690cc9', 'cc9097aa-3ac7-4b26-9fc6-c64193cf4b46'),
-('89e3534d-b0a3-422a-82ca-58b3b0e0871a', '10a32652-af43-4451-bd52-4980c5690cc9', 'bbde0139-6d7a-441c-919c-c07c7b9efb04'),
-('3e55442c-b36a-493c-b2f8-6fec535fc2cc', '10a32652-af43-4451-bd52-4980c5690cc9', '3ba28ca8-7149-47cb-bf35-ffbaffb7dfd2'),
-('8714bb02-ecdf-4116-9f37-9bb8158d0a1d', '10a32652-af43-4451-bd52-4980c5690cc9', '7c09283c-0c92-4fff-b485-f815ef1cc386'),
-('f1a69f11-6790-4d16-92b0-7bf2907d4039', '10a32652-af43-4451-bd52-4980c5690cc9', '0b6cdf1d-bed9-4ece-a61e-017e63d9700a'),
-('a5a15c22-bced-4ea0-8342-a56df99d753f', '10a32652-af43-4451-bd52-4980c5690cc9', 'ff4af477-d553-4ef2-9d57-e7af74891515'),
-('38f9a880-6c47-4b1c-9476-92daa6b8164b', '10a32652-af43-4451-bd52-4980c5690cc9', 'a5998e89-aa53-428d-8796-2fe4b257adf5'),
-('7d7e410b-ea8d-48a9-b09f-a6f7212b4ebe', '10a32652-af43-4451-bd52-4980c5690cc9', 'c3e3b1cc-d48a-46f4-91e7-e5efe088e63c'),
-('e1508b90-1bcf-4608-acae-0ab4e1ef01d4', '10a32652-af43-4451-bd52-4980c5690cc9', 'f125853b-48bb-4309-a569-454dea27019a'),
-('6758f2d6-ac16-4a8d-8a89-676578f6a639', '10a32652-af43-4451-bd52-4980c5690cc9', 'a489739c-f25f-4dee-ab6f-762a745aa05f'),
-('8d3041bc-ff78-4dca-8044-a904ec35321f', '10a32652-af43-4451-bd52-4980c5690cc9', '6123d6ad-f775-47e2-a4ec-c5dc993adaa0'),
-('e88f7b9e-772d-42a3-9d66-33dad5c6b3a8', '10a32652-af43-4451-bd52-4980c5690cc9', '9d1ca436-3861-4875-abac-9ba40cb6f401'),
-('bf472550-0dfc-4310-ab39-19160a8e073a', '10a32652-af43-4451-bd52-4980c5690cc9', '6fdc5498-04c9-4bb3-b296-7b42c88b3bbb'),
-('60804aad-a4c4-41a5-938c-989619315126', '10a32652-af43-4451-bd52-4980c5690cc9', '14924637-3724-40dd-b41f-b59460e44824'),
-('eebb0956-f1c8-4d76-a78a-e823509fce4d', '10a32652-af43-4451-bd52-4980c5690cc9', 'cc799e7b-79ab-4f20-95c5-7bfb83eaa21b'),
-('f017d31a-573e-4993-ba15-10d4224f08d9', '10a32652-af43-4451-bd52-4980c5690cc9', 'c6cfb22b-24b0-402b-affd-ea8ec6aea897'),
-('81c785c7-365b-49d8-b06b-f85fcd3479e7', '10a32652-af43-4451-bd52-4980c5690cc9', 'fc0a7f36-cc87-4c3c-9b3e-c15a50ae0643'),
-('6a6ca44d-f9f0-4f0e-ab52-ac7af764c6ab', '10a32652-af43-4451-bd52-4980c5690cc9', 'dfe36b64-361c-4c81-8813-d691af0cdfae'),
-('f882e4e4-7aaa-422f-a7dd-4a59dfb0a41a', '10a32652-af43-4451-bd52-4980c5690cc9', 'd9d3102c-392e-4057-8f84-1ee2be63b762'),
-('b8c41a11-f7b0-4a01-8145-4f28fdbbfde9', '10a32652-af43-4451-bd52-4980c5690cc9', 'c38cbc20-857d-4c71-9d80-3955411d5aa8'),
-('103af248-70db-436b-9b98-882c6db5f95f', '10a32652-af43-4451-bd52-4980c5690cc9', 'c4f8a8c0-1cb3-4c90-b302-6bc33edc32ba'),
-('884801ba-13ec-4638-8f8e-fda673a63fb2', '10a32652-af43-4451-bd52-4980c5690cc9', '50bcf8de-c9ed-4123-831c-d1db9ec597d6'),
-('51055b7d-d298-4971-ba98-08de16960b74', '10a32652-af43-4451-bd52-4980c5690cc9', '1568ac79-5ca3-4bc0-af8e-5b678c919a4a'),
-('b1ae57c6-40dc-4fde-9852-e42bdabd4d2e', '10a32652-af43-4451-bd52-4980c5690cc9', 'c6bcce7c-b74f-4cde-b6e1-490edda602c9'),
-('13c24865-3fab-4a81-acd5-4bc84334cd2b', '10a32652-af43-4451-bd52-4980c5690cc9', 'b4341e3d-c1b2-468a-a7db-f6fa99e2ed56'),
-('cd2b9a42-0f5a-4660-9c53-10ebdc7d422f', '10a32652-af43-4451-bd52-4980c5690cc9', 'ec71fc9a-e35b-43a0-8729-48a31bd05313'),
-('2cba28f2-a50f-4ee4-9653-96d6dbaaa74c', '10a32652-af43-4451-bd52-4980c5690cc9', '6bbf9302-f3c6-423a-b52e-1427c386683d'),
-('14e6dda0-c35e-4b77-8c38-7e126a43fa30', '10a32652-af43-4451-bd52-4980c5690cc9', '6d5d65bb-2090-4892-9b0b-a2b89dc06871'),
-('69bad009-9c10-446a-a782-84b847554bbe', '10a32652-af43-4451-bd52-4980c5690cc9', '577fc572-a224-407e-81ba-ce670ed5b3d6'),
-('e6f235c0-acff-4145-af79-f80065678138', '10a32652-af43-4451-bd52-4980c5690cc9', '0cdfe868-77d0-49df-b849-ccda76067125'),
-('f5284c44-6b5c-407d-9e9d-04ce3b942b22', '10a32652-af43-4451-bd52-4980c5690cc9', '6aca7612-dc12-494a-b395-156ce439a00e'),
-('fc5b94e8-5d1b-43b6-973a-acaa2cd1a4d2', '10a32652-af43-4451-bd52-4980c5690cc9', '23678e92-0239-4037-8e91-cfe7882431e6'),
-('665586c1-2bbd-4218-8cb2-5515ec82faf8', '10a32652-af43-4451-bd52-4980c5690cc9', 'db09f3fe-76c7-4772-afcc-6e760c37bc30'),
-('29b2ac8c-5ce0-4692-adf6-eab3c6dc33bc', '10a32652-af43-4451-bd52-4980c5690cc9', 'b1a94527-24f1-4649-843d-be732bf217ef'),
-('03961c4b-8278-4159-a5d7-9d7dd11cae34', '10a32652-af43-4451-bd52-4980c5690cc9', '9aa827e6-fbfd-4187-a62a-8ea946df3114'),
-('3c9d0224-ee9d-4738-91b5-8d407512d259', '10a32652-af43-4451-bd52-4980c5690cc9', '2188a303-8701-4372-a745-7c8e4b78dcfa'),
-('3ee98fa5-5742-4161-908a-24d8053148ab', '10a32652-af43-4451-bd52-4980c5690cc9', '3fba1aed-20a2-409d-80a3-35cc5ab2e5cb'),
-('2ede45f1-2a9f-44c9-a40e-1eda74eca784', '10a32652-af43-4451-bd52-4980c5690cc9', '4b332817-e6df-487c-83e7-aba6684d106c'),
-('0b6ee7cb-30b1-477a-94a0-cb0aaa2bb0f1', '10a32652-af43-4451-bd52-4980c5690cc9', '64231d4f-6aa8-4d4d-97d3-dea37b248761'),
-('e83479c4-637f-4cf9-80b5-37a891a72216', '10a32652-af43-4451-bd52-4980c5690cc9', 'afef97a5-1ced-46b1-9024-b62b3015a223'),
-('a10b6a71-84ad-4075-b7a9-94091f296ca8', '10a32652-af43-4451-bd52-4980c5690cc9', '59d2897d-bd68-4864-bded-46248136b716'),
-('e03229c6-97ce-484b-9584-521189519f41', '10a32652-af43-4451-bd52-4980c5690cc9', '3f3d62c4-e3da-418d-b865-c41448374526'),
-('9cb955c5-93cb-4402-822b-12e99580abe3', '10a32652-af43-4451-bd52-4980c5690cc9', 'bd5d1cb2-4bdb-4ea9-93e6-1c3950d6a97b'),
-('57b92e3d-19f6-4ce9-b711-d43f42fab3d9', '10a32652-af43-4451-bd52-4980c5690cc9', 'd56a362b-16ab-474c-a426-8c23d0893c9a'),
-('5f01ad2c-67aa-4cae-b7b3-36fb7a1881ab', '10a32652-af43-4451-bd52-4980c5690cc9', 'e398dd75-2bba-4673-81bb-fe82be802375'),
-('828ffaa0-cfbc-4545-bb0e-8bacad7945da', '10a32652-af43-4451-bd52-4980c5690cc9', '68bb1de2-e622-4d48-ab85-e580e1f5c0e6'),
-('dd724991-14c8-4899-8489-f6ace618a088', '10a32652-af43-4451-bd52-4980c5690cc9', '08d97d90-6449-41bc-8847-52c74cb32e08'),
-('54f189a0-4f94-46ea-bdb5-616ccff04bad', '10a32652-af43-4451-bd52-4980c5690cc9', '8b1c0f77-a00e-4347-899e-b72e8eed3636'),
-('42a6e80b-5767-4ffe-b302-692cf97da00b', '10a32652-af43-4451-bd52-4980c5690cc9', '579cb884-cacb-4ced-b3f7-f63e6aefc63a'),
-('ffa13475-c097-4316-88e1-9a8ce6f67699', '10a32652-af43-4451-bd52-4980c5690cc9', '75a0ee47-34ad-4b19-b340-25613799a202'),
-('e9c58cf6-2093-4359-bba1-3f8ad409d273', '10a32652-af43-4451-bd52-4980c5690cc9', '570745c5-fa39-4932-8a7e-f40076bdb9b2'),
-('f5dbba6e-7dc3-4c62-b833-c980f950ce9e', '10a32652-af43-4451-bd52-4980c5690cc9', '3cb72f2e-936d-4467-8a1c-e9882ca45ea8'),
-('a2fa2bde-b031-43d9-b00a-3302beb181c6', '10a32652-af43-4451-bd52-4980c5690cc9', '9eb63787-e5b6-4881-8e99-908596cc4231'),
-('24924cc6-ac6d-49f3-bbc6-3a0fdf99323a', '10a32652-af43-4451-bd52-4980c5690cc9', 'd153979c-15e9-4847-b1e9-b950006cd007'),
-('e0821f6a-a83e-4939-b7e5-e6214d6370f8', '10a32652-af43-4451-bd52-4980c5690cc9', '58fe0e0e-47a0-4933-b81f-0b92d3580a0e'),
-('afe26545-5c47-4c18-9d6c-bed4e5f42a8a', '10a32652-af43-4451-bd52-4980c5690cc9', '834ccd3f-1bbb-45ca-9d37-35ab8a2dd5f9'),
-('73f36663-edb9-4c1e-b3bd-7a56dd66695d', '10a32652-af43-4451-bd52-4980c5690cc9', '09a5dd32-316c-4ea2-a2a8-23d69d682615'),
-('09247b70-5a7b-4830-ae49-28465698b875', '10a32652-af43-4451-bd52-4980c5690cc9', 'fbdcde7a-3fea-40f5-9a52-a25c19ee9ad8'),
-('e6bc7078-e633-45fd-95a6-f3b0b954d915', '10a32652-af43-4451-bd52-4980c5690cc9', 'cfab1aaf-f503-4a82-b3e9-631b3508d5bc'),
-('02ae0b07-11c5-4599-bda0-1c3f8cc7492b', '10a32652-af43-4451-bd52-4980c5690cc9', '8a11d55f-586a-4059-b51b-68e2d8ac93d5'),
-('b81d3d17-3201-4611-aafc-1b594d8942f3', '10a32652-af43-4451-bd52-4980c5690cc9', 'd5ecead5-d0b7-46c3-8c9f-0006188678ca'),
-('6c847545-5c33-4916-a837-6c4ff8cea45f', '10a32652-af43-4451-bd52-4980c5690cc9', '012c5ec2-041a-4b1a-8812-0f334be1ed79'),
-('7b616286-586c-4a46-9573-b25cb76b8758', '10a32652-af43-4451-bd52-4980c5690cc9', 'ce346a73-22cf-4104-9a64-e5375efd06c8'),
-('46c63d47-8fb2-4279-b1a5-b9fad7e05a00', '10a32652-af43-4451-bd52-4980c5690cc9', '0b0eeef8-f064-4774-8f71-7757ade22b1f'),
-('27fd522f-a619-43a2-8011-6cda06261819', '10a32652-af43-4451-bd52-4980c5690cc9', '696b7409-b761-4e7d-b8fd-94ca11f649cc'),
-('f9a665ed-ed3e-4593-b02c-bfc852e742f4', '10a32652-af43-4451-bd52-4980c5690cc9', 'cc8b985b-5bee-4f82-a71c-530901ab949c'),
-('b8a42122-b8f0-411d-9576-8d24f0091729', '10a32652-af43-4451-bd52-4980c5690cc9', 'e32104f0-b6c1-4aa8-acb2-19428e246119'),
-('b0fd85c0-2c44-4081-b390-d50a804e729a', '10a32652-af43-4451-bd52-4980c5690cc9', 'ddc035b8-300d-4bbf-84fd-1196c993b7bc'),
-('6ac6c1fc-f21c-4780-ae21-b9c4ae7084cb', '10a32652-af43-4451-bd52-4980c5690cc9', '2453795d-9772-4e00-8fae-1aa45cff0bd2'),
-('7816be03-2d3f-45fe-9390-6f194fa13821', '10a32652-af43-4451-bd52-4980c5690cc9', 'f4635ab8-22b4-4a75-8bc7-d1bdf6b3f619'),
-('b9d0b218-08c9-4a91-9028-811f98542a54', '10a32652-af43-4451-bd52-4980c5690cc9', '10958c80-c120-4a3a-b931-9f24bd1a4978'),
-('43c6c79f-9c45-49b0-a8f0-bbbf81db0d51', '10a32652-af43-4451-bd52-4980c5690cc9', 'a118d14f-c160-4ecc-8ba3-9c06033ee76f'),
-('fc1a7d87-5598-49b0-beb9-3779829fc8d0', '10a32652-af43-4451-bd52-4980c5690cc9', 'bdfdf943-3e76-4703-8649-cc4cce916283'),
-('87126358-87ec-4974-90f3-a40f14c0d2b3', '10a32652-af43-4451-bd52-4980c5690cc9', '2b143eea-7677-4436-94c8-1e287d537c9a'),
-('6fcd34f0-dbc7-4ad2-bdbc-4eddd8277322', '10a32652-af43-4451-bd52-4980c5690cc9', 'f08d0678-491d-43c2-b653-33bb2fb18580'),
-('b172624d-0eab-4c0b-9e95-47438e1b4afd', '10a32652-af43-4451-bd52-4980c5690cc9', 'e10ba98d-579b-467b-b8bd-b4e95df6ac02'),
-('6b20e874-02f0-40de-95ce-bb1f3e565d46', '10a32652-af43-4451-bd52-4980c5690cc9', '260ba71a-dc46-463b-9980-d6fdd1afebad'),
-('cec009f7-5cd7-4194-980a-ebdc69995f0d', '10a32652-af43-4451-bd52-4980c5690cc9', '917be9ea-732e-4287-b3bb-d32d7b49886d'),
-('b1d3fc99-abaf-4055-b4e6-6ab0c9a60c3d', '10a32652-af43-4451-bd52-4980c5690cc9', '1872f191-0c7b-4368-b4c3-3f788ff87895'),
-('9e569018-ce7e-4a89-8f8e-0fdf0aed9adf', '10a32652-af43-4451-bd52-4980c5690cc9', '8d02cb89-b4d8-40f0-a4c8-8b10cdc8ad25'),
-('9cda93fc-a495-4722-8834-7023a281b66a', '10a32652-af43-4451-bd52-4980c5690cc9', 'feb7f7d6-6a61-42c2-92ca-9c992534ac17'),
-('2a86face-8c5b-48c8-8c4f-def396a8489a', '10a32652-af43-4451-bd52-4980c5690cc9', '324fd1e1-ad1f-4462-80a7-b16fd3088a01'),
-('554a7daa-b00f-4d14-a959-68c989ce5bda', '10a32652-af43-4451-bd52-4980c5690cc9', '3d15239f-d5d5-4031-847e-b0aac82f8265'),
-('7a40ac4f-904a-4068-9efb-ef41e81db0b7', '10a32652-af43-4451-bd52-4980c5690cc9', '2c61d23e-89aa-4a5b-a601-c305189c38cc'),
-('5a1b8894-1fb1-4289-b943-8f74b28d7f76', '10a32652-af43-4451-bd52-4980c5690cc9', '2b6460b3-e444-463a-b140-b801e57e52db'),
-('aa0341b6-4bed-4683-bb50-7ccb5da4eff7', '10a32652-af43-4451-bd52-4980c5690cc9', '1f78e41b-3fe6-4ada-8825-be8d5e4008e5'),
-('902be564-bff4-4495-bc2c-388ddcf998d4', '10a32652-af43-4451-bd52-4980c5690cc9', '470fe35d-1cbd-4b15-8905-afa1814da597'),
-('90d6254b-f8ff-47ff-b97a-981e710e7160', '10a32652-af43-4451-bd52-4980c5690cc9', 'b64f2944-d452-41f9-b0e9-ea084bf83351'),
-('cc2b904b-d99f-4583-8fb7-056ba1ba320f', '10a32652-af43-4451-bd52-4980c5690cc9', '7afe6d19-9f32-4aee-a021-10cb3e5917de'),
-('b7abd272-ba0c-428b-88a4-a2dcc5bcda0e', '10a32652-af43-4451-bd52-4980c5690cc9', 'cc012b0d-efd3-4e11-b3e0-425cebbe805d'),
-('e7902c45-6800-4b84-a70e-b70e77d43bb1', '10a32652-af43-4451-bd52-4980c5690cc9', 'b1c039b5-6377-4e39-a9e8-cef97b8e9573'),
-('ed9c351b-c5cd-411c-aa45-fbca9ac69d7d', '10a32652-af43-4451-bd52-4980c5690cc9', '1437ed2d-52ea-4f97-90e6-81fd85663db0'),
-('0929af2a-a93e-4aaa-a926-cfeeba57372b', '10a32652-af43-4451-bd52-4980c5690cc9', 'b4b1631c-989c-4841-a3f9-c335e2a5f31d'),
-('8c48ae3d-4581-4aa5-8b81-592c907dd7a0', '10a32652-af43-4451-bd52-4980c5690cc9', '20fbae59-8d34-4c30-94c4-589971553e4d'),
-('b5a6d737-0f49-4d0a-9405-5fded7f886ea', '10a32652-af43-4451-bd52-4980c5690cc9', '75435c1a-7d9c-4da7-8c26-de5658a624f0');
+('27317472-68f5-4341-9152-be4e3cd35aba', '10a32652-af43-4451-bd52-4980c5690cc9', '4035609b-85a2-4696-a8a2-cefbd45a6e4b'),
+('ff959a3d-2723-4984-abca-f2bd03aa489d', '10a32652-af43-4451-bd52-4980c5690cc9', '3345b343-b53a-4e3d-976b-cce3dcf403b4'),
+('83b90989-01ac-443a-98a6-73579bdcd6cd', '10a32652-af43-4451-bd52-4980c5690cc9', '2cf5df20-3608-45f0-9929-3739f81b5d68'),
+('7c7f7d23-824b-4325-a64e-f12ce009530e', '10a32652-af43-4451-bd52-4980c5690cc9', '69129a5b-d121-4d46-a89f-6c836a1cf50e'),
+('0459d406-5eca-4171-9af6-dfba3a7a45c6', '10a32652-af43-4451-bd52-4980c5690cc9', 'f775ad80-f027-4036-892f-09c94c8cbd4b'),
+('76972f3b-4723-40c5-adb6-8c8fd05dbf86', '10a32652-af43-4451-bd52-4980c5690cc9', '8559989b-507e-4de9-bbbd-f1eefb78b26a'),
+('74b37f6e-51db-4daf-8c91-f6b4f2723de6', '10a32652-af43-4451-bd52-4980c5690cc9', 'a445594d-d77d-4367-ac03-d850ad15afc5'),
+('127e78c0-dcb2-4a3e-a50a-f016f06ce941', '10a32652-af43-4451-bd52-4980c5690cc9', '565b8a50-bed5-44bc-8ee8-21a6b8f9ae0c'),
+('cde9c93e-070e-4386-b6ce-66d539304ad4', '10a32652-af43-4451-bd52-4980c5690cc9', 'f3ac732b-e287-447a-bba1-d16642e5c431'),
+('8cdac320-0eed-41df-8983-5e71f1278b08', '10a32652-af43-4451-bd52-4980c5690cc9', '9451220b-c218-4757-b7ae-dcf0f407d0a2'),
+('aeb9ed17-50fe-42bb-acd6-9a2cf808cbba', '10a32652-af43-4451-bd52-4980c5690cc9', '8852bd4b-dbbe-413f-91c2-8fc2b5865373'),
+('cc3b9f84-b4f9-4916-96b0-fc73c44d6b0d', '10a32652-af43-4451-bd52-4980c5690cc9', '842eb870-82db-4767-8999-1191bcaa0a54'),
+('8c53aaa6-aad4-497c-9286-741291847fc3', '10a32652-af43-4451-bd52-4980c5690cc9', '90872cc2-114b-44c3-a181-77347756546a'),
+('6ba15fe7-dfcf-49c3-8230-599356d0c4b0', '10a32652-af43-4451-bd52-4980c5690cc9', 'ed7c56bb-2bd4-4bfc-9a27-f373315c70fa'),
+('9375532a-4fcb-4bfc-a80c-a9a8d10aa1f2', '10a32652-af43-4451-bd52-4980c5690cc9', 'a8e4ce3f-627b-441e-9b65-0dd1c51546ea'),
+('4955897d-c97b-4d36-bd40-d46623c798a2', '10a32652-af43-4451-bd52-4980c5690cc9', 'a90c6e93-374d-44fc-8ce1-b35f3ec5ac9f'),
+('57d58971-a9a5-454b-bc24-07d5dc98ae5e', '10a32652-af43-4451-bd52-4980c5690cc9', 'e39edb2b-02f1-41de-b65a-fe8641e78a65'),
+('9c72d20a-7806-4b72-8753-a339dcf9955f', '10a32652-af43-4451-bd52-4980c5690cc9', '6424d8de-c1ba-42e5-906b-13d1d82fc2ff'),
+('f9d084c4-0cef-4974-88b9-969ed553da51', '10a32652-af43-4451-bd52-4980c5690cc9', '9e5f81c4-fdb0-42bf-abe5-7795fd03b049'),
+('b0035cd2-b103-4df1-8561-15a38d56dcc3', '10a32652-af43-4451-bd52-4980c5690cc9', 'ad34c975-5c6b-4ed9-8054-44e94f5e6a80'),
+('eaff91e3-8907-4aaa-96b5-24d011fd5c1f', '10a32652-af43-4451-bd52-4980c5690cc9', '6b38cc18-afb3-42fd-aca4-2836c1c4d263'),
+('9ea8edb4-d7c8-4a40-96ea-f0997b66e16d', '10a32652-af43-4451-bd52-4980c5690cc9', '0ca6d34e-2bf7-4f09-99cf-b45dfbaa04de'),
+('9ab06dac-707f-48de-bec4-8e0488918b0b', '10a32652-af43-4451-bd52-4980c5690cc9', '13670bb0-551e-46e6-ad48-f946c63c3412'),
+('ded99a0f-330c-4cda-9417-c83bc7b24af3', '10a32652-af43-4451-bd52-4980c5690cc9', '87ec84d7-6a49-4dc1-910c-e99506bb1a93'),
+('0b464357-6d6b-4dc0-87ea-aa4f65aa8e9e', '10a32652-af43-4451-bd52-4980c5690cc9', '89677a04-84a9-4e24-866b-96c88ee58041'),
+('cd329248-0df2-4a36-aeac-8e18b54d98f5', '10a32652-af43-4451-bd52-4980c5690cc9', 'af1e7d76-211e-4c5b-b2ca-9248d3fda02c'),
+('6961517e-7f6e-4a2e-a362-d2d85362c5c1', '10a32652-af43-4451-bd52-4980c5690cc9', '6e9da201-b4bd-414e-a92a-132bd943c1d4'),
+('3877d14f-4d39-4369-9a63-498851e9d8cd', '10a32652-af43-4451-bd52-4980c5690cc9', '0b2c34fd-a0eb-4959-bb50-53f5140c729a'),
+('346fcc23-8ed0-4e80-99b7-75c2f2261525', '10a32652-af43-4451-bd52-4980c5690cc9', '04bbb052-2de2-40fd-9d38-a9e66a602ccf'),
+('58beadda-81ea-4950-b21a-18405d67583c', '10a32652-af43-4451-bd52-4980c5690cc9', '7610dd0c-1911-49e5-b8b9-19e6d2920a8c'),
+('0d485c9a-928b-448f-9a13-814f14cefe0f', '10a32652-af43-4451-bd52-4980c5690cc9', 'ded1a2ec-6078-48f3-a9e8-1f0902fd32ae'),
+('11332d06-0506-4a42-8698-c80f3aff861d', '10a32652-af43-4451-bd52-4980c5690cc9', '1ea53322-3198-478d-8df3-5ab9e5570184'),
+('324034f3-e9fb-429c-b741-1d6d65ea7b4c', '10a32652-af43-4451-bd52-4980c5690cc9', '4146a63f-8f71-402f-a752-4f1bc2d633b1'),
+('5ddae2ed-a0a9-4fef-a4da-864604996342', '10a32652-af43-4451-bd52-4980c5690cc9', '34d3c055-ffd6-46af-aa21-af733456aa6d'),
+('9a25e374-d27d-4f12-b228-7363f70a71f3', '10a32652-af43-4451-bd52-4980c5690cc9', '7091b900-6e1a-4e67-a657-daa06009bf33'),
+('b30e8722-5dfb-4677-b44f-45d49e81a925', '10a32652-af43-4451-bd52-4980c5690cc9', 'a751b3df-cdbb-4c3b-8d05-f9563702a54c'),
+('9ea21f67-c8cb-48ad-9f6f-b3fc729f7b9a', '10a32652-af43-4451-bd52-4980c5690cc9', 'df37415a-9cb5-402d-b144-e20bdf02ce61'),
+('224d3ada-e83b-4d19-b152-05d8b099c056', '10a32652-af43-4451-bd52-4980c5690cc9', '6125e881-797e-4156-9218-5cb961514506'),
+('5b8a204e-bd38-40bd-b108-4118f962586b', '10a32652-af43-4451-bd52-4980c5690cc9', 'd9e808db-5629-4150-92b5-740a749c6e02'),
+('58278b8b-54d4-4b56-8969-e6a176b900f9', '10a32652-af43-4451-bd52-4980c5690cc9', 'f3ce2329-f2b7-4525-8074-c97a608ce60b'),
+('9c89f1b8-6c18-4a42-ae3d-470299b7194b', '10a32652-af43-4451-bd52-4980c5690cc9', 'c1bf9415-8d2c-4674-965a-b5b7154fefc6'),
+('1cdebe4a-52d6-4356-8817-c5984ce4100f', '10a32652-af43-4451-bd52-4980c5690cc9', '23f8b526-8448-4f5d-bcb9-67f6228988e8'),
+('9a97a37b-e18f-4cca-9d7c-137a1d3af595', '10a32652-af43-4451-bd52-4980c5690cc9', '7e4a5110-6273-46bd-ab72-6888ea583f7d'),
+('903d19ae-0f01-4bd9-b7ef-c72b6551739d', '10a32652-af43-4451-bd52-4980c5690cc9', '639eb44c-2e56-4428-a066-0b250e24ee19'),
+('652fcd72-0891-481d-9fa1-7aa96508d0a0', '10a32652-af43-4451-bd52-4980c5690cc9', '284a2b6a-d87c-48c2-8704-486141b75393'),
+('64a28953-4f08-4eab-baf5-11b49dc7f957', '10a32652-af43-4451-bd52-4980c5690cc9', '8a1a605a-3586-44d3-9c20-508f772569db'),
+('f72eacc7-7a2d-4bf8-827c-a81d80952183', '10a32652-af43-4451-bd52-4980c5690cc9', '9383ad8a-7cc0-4154-bf15-04b5a778a257'),
+('9a6682e4-92fd-4d67-87ea-59ffd0bec6ce', '10a32652-af43-4451-bd52-4980c5690cc9', '42bfef31-b81d-405d-bbc4-db132d20e918'),
+('f25498d3-d819-4a59-862d-769f2aba0e74', '10a32652-af43-4451-bd52-4980c5690cc9', '31c5ac37-5980-41ef-8288-2ccfc526bed8'),
+('e401d6d3-8111-4f04-8c90-6ccf2d269bc2', '10a32652-af43-4451-bd52-4980c5690cc9', '5d0f30d8-4cdd-4f76-8857-3abd967d0f0c'),
+('7e2ef036-c14a-4e0a-9528-1bcfbaa84219', '10a32652-af43-4451-bd52-4980c5690cc9', '8084315d-970d-4e21-ba78-f84d9e27044a'),
+('0a1c5198-b7bd-4090-bc0c-89f44635d8eb', '10a32652-af43-4451-bd52-4980c5690cc9', '5cb7bc73-fbd3-4ee4-b478-7bfb4e59694a'),
+('c9d371d7-9933-484f-853b-cc7483011c0d', '10a32652-af43-4451-bd52-4980c5690cc9', '0ead3fd3-c8dd-49ee-8a66-8786ca94aa6a'),
+('c856ec08-c7f1-4d20-8804-481da266339d', '10a32652-af43-4451-bd52-4980c5690cc9', '1672b989-9e32-4c68-a98f-bb5dd791f560'),
+('9b52884d-a446-4a1a-8db2-6d73aed87d66', '10a32652-af43-4451-bd52-4980c5690cc9', '5c0eae0f-9078-4138-b1bf-fe791158ed0a'),
+('cb6708b0-9599-470a-8460-411c3969ab01', '10a32652-af43-4451-bd52-4980c5690cc9', 'a44fc8e3-f3ca-4609-9d2d-fe5712439fa4'),
+('d40d94c2-4b9c-411f-82d2-e48ad6d1119b', '10a32652-af43-4451-bd52-4980c5690cc9', '107d3d1f-b0f9-4178-bb74-aec9cc87238b'),
+('0b5abf6f-d9e5-42fb-bf70-8965a8da9965', '10a32652-af43-4451-bd52-4980c5690cc9', 'dbd73513-ed50-47dc-b852-0015c2a451a8'),
+('2a5999e7-03b5-45e3-9161-215e4fdd8167', '10a32652-af43-4451-bd52-4980c5690cc9', '372d0574-210b-4717-90e7-9bf9872b0315'),
+('f8acc6f8-9158-482d-9074-6f2c04f402a0', '10a32652-af43-4451-bd52-4980c5690cc9', '5db5991b-aaf7-497b-993e-988b8b16d13c'),
+('184e1fa0-dd7b-4ef3-a571-1708ca60874d', '10a32652-af43-4451-bd52-4980c5690cc9', 'ca61bd81-a22f-465c-ab32-a9b48c06e34f'),
+('0badc723-222f-47e1-a723-8ccd56363484', '10a32652-af43-4451-bd52-4980c5690cc9', 'f502205f-c320-462d-b4cf-f5449c019d24'),
+('7fabbbeb-74da-4853-af05-497eb59b17ac', '10a32652-af43-4451-bd52-4980c5690cc9', '053b6315-1b12-44a9-92c0-2713bb767de8'),
+('b11b1374-9353-4247-9366-b03ec33097bc', '10a32652-af43-4451-bd52-4980c5690cc9', 'c3d1d608-5b00-4190-847b-84268c3554dd'),
+('94945eaa-d3ac-4c69-8fe7-314607ef41b2', '10a32652-af43-4451-bd52-4980c5690cc9', 'a8af9bd7-0693-4c97-82ae-041ffe634b59'),
+('49a8d0e0-08c1-46ff-838f-51812f118415', '10a32652-af43-4451-bd52-4980c5690cc9', 'b240ca43-a0b1-4426-9ad3-6dc7c7c56c65'),
+('1afa8d2f-8d7e-4ca9-9b17-d49d11cdf84a', '10a32652-af43-4451-bd52-4980c5690cc9', '8c1d3029-2da0-48fb-a222-bb423ec3bef3'),
+('52fa325e-25ef-4d95-9253-a31bf613afd4', '10a32652-af43-4451-bd52-4980c5690cc9', 'e334c5dc-9771-4a61-be48-c301be4a3bcf'),
+('f8083600-9aca-4d24-a87e-1b290aaea940', '10a32652-af43-4451-bd52-4980c5690cc9', 'ce950194-4987-40cf-afaf-425911ad7649'),
+('dfe34baa-508b-4471-9ac1-b918021ae6a9', '10a32652-af43-4451-bd52-4980c5690cc9', '1173e986-77f5-4c1f-b0e6-cb87c1b32fe4'),
+('ee6d3280-490b-498e-ab9f-90e5698cd181', '10a32652-af43-4451-bd52-4980c5690cc9', '1359310a-2f31-404f-9167-09b676655294'),
+('e8d3b2e6-3b58-410f-96bb-6f8453529940', '10a32652-af43-4451-bd52-4980c5690cc9', '653aab93-d31f-4d24-8b1e-3c038e45db33'),
+('2a76c74a-aada-4995-8fa6-3722a521fd32', '10a32652-af43-4451-bd52-4980c5690cc9', '1e493638-4578-4876-b7ed-52c5af4d8838'),
+('a129aa7b-7ec4-4f2d-88ae-457caa2adec7', '10a32652-af43-4451-bd52-4980c5690cc9', 'e316cdff-6f06-4fed-8246-1c33a6d53c2d'),
+('04117943-7a09-4015-b476-cf3f5cd469ba', '10a32652-af43-4451-bd52-4980c5690cc9', '2b6c363c-8f20-4a87-977f-80440968a37d'),
+('67d97a3a-a3d5-4c8c-9aa2-7329065c902c', '10a32652-af43-4451-bd52-4980c5690cc9', '96df6a79-b543-43e7-893d-b3f98f3ef3c7'),
+('2bb2b7cf-5ad8-4158-a42b-9727f61a02a8', '10a32652-af43-4451-bd52-4980c5690cc9', '09807d0c-598b-484e-bd18-98cc73453b8e'),
+('07a61743-18ae-42ef-b47d-c4e20096b086', '10a32652-af43-4451-bd52-4980c5690cc9', 'e9fcc70d-d5dc-446b-86d7-90ff2800360e'),
+('32d49c6a-b02c-4d4d-ba52-9a528cd1c80f', '10a32652-af43-4451-bd52-4980c5690cc9', 'd3e42e99-043e-498c-824f-fd47677480bd'),
+('2a045b91-fdda-45d0-b264-6c21b9790e36', '10a32652-af43-4451-bd52-4980c5690cc9', 'dedc0459-2dd7-4f39-838c-194b5fcd08b2'),
+('1ff25fb7-8cb9-49b1-a83c-4917e1842b6e', '10a32652-af43-4451-bd52-4980c5690cc9', 'd313a475-6688-498e-bfbb-48de402034d1'),
+('89e3534d-b0a3-422a-82ca-58b3b0e0871a', '10a32652-af43-4451-bd52-4980c5690cc9', 'ffb12163-1ff2-4813-9658-0980a3fbb78e'),
+('3e55442c-b36a-493c-b2f8-6fec535fc2cc', '10a32652-af43-4451-bd52-4980c5690cc9', '1d38822b-3822-4cb4-b3a0-4a79cb6baadf'),
+('8714bb02-ecdf-4116-9f37-9bb8158d0a1d', '10a32652-af43-4451-bd52-4980c5690cc9', 'b09b4b40-ec4d-4546-a2a4-575f39b60220'),
+('f1a69f11-6790-4d16-92b0-7bf2907d4039', '10a32652-af43-4451-bd52-4980c5690cc9', 'b71906fa-5e25-435c-a132-c7cf86a06344'),
+('a5a15c22-bced-4ea0-8342-a56df99d753f', '10a32652-af43-4451-bd52-4980c5690cc9', 'd1e1f279-44ca-471d-adc8-fe708726b8f4'),
+('38f9a880-6c47-4b1c-9476-92daa6b8164b', '10a32652-af43-4451-bd52-4980c5690cc9', 'd7f4de65-812c-432c-ac2d-7eb58adbcec7'),
+('7d7e410b-ea8d-48a9-b09f-a6f7212b4ebe', '10a32652-af43-4451-bd52-4980c5690cc9', '3bd57717-c13c-44ba-9bc7-4ccb5ef452d2'),
+('e1508b90-1bcf-4608-acae-0ab4e1ef01d4', '10a32652-af43-4451-bd52-4980c5690cc9', '1062a370-b53a-4ec0-94f2-4ea3188030a8'),
+('6758f2d6-ac16-4a8d-8a89-676578f6a639', '10a32652-af43-4451-bd52-4980c5690cc9', 'e70541ff-0e32-4f9d-b83b-f675b425aef6'),
+('8d3041bc-ff78-4dca-8044-a904ec35321f', '10a32652-af43-4451-bd52-4980c5690cc9', '37de549a-ce15-4fba-9b28-b8898cf2a64c'),
+('e88f7b9e-772d-42a3-9d66-33dad5c6b3a8', '10a32652-af43-4451-bd52-4980c5690cc9', '65d5214c-b6c9-430f-85c5-96aa7237e5c5'),
+('bf472550-0dfc-4310-ab39-19160a8e073a', '10a32652-af43-4451-bd52-4980c5690cc9', 'a2a10554-7053-42b8-a791-7af2bc36104e'),
+('60804aad-a4c4-41a5-938c-989619315126', '10a32652-af43-4451-bd52-4980c5690cc9', '0ee48d85-d282-44f5-9e8d-665138beeedd'),
+('eebb0956-f1c8-4d76-a78a-e823509fce4d', '10a32652-af43-4451-bd52-4980c5690cc9', '4b528029-b2c1-4583-8d17-9d364a7f8c88'),
+('f017d31a-573e-4993-ba15-10d4224f08d9', '10a32652-af43-4451-bd52-4980c5690cc9', 'c52e2b7b-1db3-4301-a3cc-c70a7c23f691'),
+('81c785c7-365b-49d8-b06b-f85fcd3479e7', '10a32652-af43-4451-bd52-4980c5690cc9', '6213dad6-4319-4d6a-bbe1-e85f5374ca26'),
+('6a6ca44d-f9f0-4f0e-ab52-ac7af764c6ab', '10a32652-af43-4451-bd52-4980c5690cc9', '2a68f265-1508-467d-9616-1e76460ad1e8'),
+('f882e4e4-7aaa-422f-a7dd-4a59dfb0a41a', '10a32652-af43-4451-bd52-4980c5690cc9', 'e42149f7-db5d-4b29-930a-c3f7a86ddb27'),
+('b8c41a11-f7b0-4a01-8145-4f28fdbbfde9', '10a32652-af43-4451-bd52-4980c5690cc9', '1a30496d-0891-42b4-849d-96ad0e880753'),
+('103af248-70db-436b-9b98-882c6db5f95f', '10a32652-af43-4451-bd52-4980c5690cc9', '64ed6a4c-1502-414b-b2e5-5054a449fc01'),
+('884801ba-13ec-4638-8f8e-fda673a63fb2', '10a32652-af43-4451-bd52-4980c5690cc9', 'bd634999-9b1a-4aae-bb3b-fb8f95ef4ad2'),
+('51055b7d-d298-4971-ba98-08de16960b74', '10a32652-af43-4451-bd52-4980c5690cc9', '0ee1ba81-f683-4f55-97ad-aace902412c1'),
+('b1ae57c6-40dc-4fde-9852-e42bdabd4d2e', '10a32652-af43-4451-bd52-4980c5690cc9', 'd3e7062a-bcfb-47aa-889a-009e6fd1cc3e'),
+('13c24865-3fab-4a81-acd5-4bc84334cd2b', '10a32652-af43-4451-bd52-4980c5690cc9', '81621d3e-fbe0-4f2b-b88b-f0b9e4427530'),
+('cd2b9a42-0f5a-4660-9c53-10ebdc7d422f', '10a32652-af43-4451-bd52-4980c5690cc9', '982b3ab6-60ef-4470-9f2c-9a9d497b5990'),
+('2cba28f2-a50f-4ee4-9653-96d6dbaaa74c', '10a32652-af43-4451-bd52-4980c5690cc9', '1a4b3a83-3ca1-42d7-82f6-fd83c43c7e83'),
+('14e6dda0-c35e-4b77-8c38-7e126a43fa30', '10a32652-af43-4451-bd52-4980c5690cc9', 'f54d4386-8186-4d73-873f-eb87d9ae8653'),
+('69bad009-9c10-446a-a782-84b847554bbe', '10a32652-af43-4451-bd52-4980c5690cc9', '633f4bbd-d7dc-4151-b0cd-3b005124ff99'),
+('e6f235c0-acff-4145-af79-f80065678138', '10a32652-af43-4451-bd52-4980c5690cc9', '0e0cbd0c-1ca9-4f6a-96d0-1819f884f781'),
+('f5284c44-6b5c-407d-9e9d-04ce3b942b22', '10a32652-af43-4451-bd52-4980c5690cc9', '891663fd-aabe-4e8f-80aa-7751fd2ee318'),
+('fc5b94e8-5d1b-43b6-973a-acaa2cd1a4d2', '10a32652-af43-4451-bd52-4980c5690cc9', 'afdeae6e-43cc-4552-a22a-7aba2c8d7200'),
+('665586c1-2bbd-4218-8cb2-5515ec82faf8', '10a32652-af43-4451-bd52-4980c5690cc9', 'df908d63-ff7a-493a-8809-9b17e3cc9b9e'),
+('29b2ac8c-5ce0-4692-adf6-eab3c6dc33bc', '10a32652-af43-4451-bd52-4980c5690cc9', 'c0300856-7d36-421e-b94f-94a2c85ebdb2'),
+('03961c4b-8278-4159-a5d7-9d7dd11cae34', '10a32652-af43-4451-bd52-4980c5690cc9', 'ea7aa055-8e13-457b-b12f-3ae8138ab0d6'),
+('3c9d0224-ee9d-4738-91b5-8d407512d259', '10a32652-af43-4451-bd52-4980c5690cc9', '15589539-7c4f-45f8-b6b1-7418852b0283'),
+('3ee98fa5-5742-4161-908a-24d8053148ab', '10a32652-af43-4451-bd52-4980c5690cc9', 'f2a79a0c-e13a-44ab-bc01-6c617de8c201'),
+('2ede45f1-2a9f-44c9-a40e-1eda74eca784', '10a32652-af43-4451-bd52-4980c5690cc9', '6a1b93c7-586a-4610-b8bd-fd6c797261e9'),
+('0b6ee7cb-30b1-477a-94a0-cb0aaa2bb0f1', '10a32652-af43-4451-bd52-4980c5690cc9', 'e443f23a-0e8b-47b5-a61e-25c1c09a2ad1'),
+('e83479c4-637f-4cf9-80b5-37a891a72216', '10a32652-af43-4451-bd52-4980c5690cc9', 'a242339b-f347-47a1-abee-93b04a9d76ac'),
+('a10b6a71-84ad-4075-b7a9-94091f296ca8', '10a32652-af43-4451-bd52-4980c5690cc9', 'eaaed458-6566-4a03-9fba-2d193d904839'),
+('e03229c6-97ce-484b-9584-521189519f41', '10a32652-af43-4451-bd52-4980c5690cc9', 'c1db1ca2-856a-45cc-9456-e8457be3f66a'),
+('9cb955c5-93cb-4402-822b-12e99580abe3', '10a32652-af43-4451-bd52-4980c5690cc9', '035d86ff-9028-4e24-8f5b-19b819c45560'),
+('57b92e3d-19f6-4ce9-b711-d43f42fab3d9', '10a32652-af43-4451-bd52-4980c5690cc9', '9a960cde-b2ba-4d13-a2ae-b8e5a28dc4ae'),
+('5f01ad2c-67aa-4cae-b7b3-36fb7a1881ab', '10a32652-af43-4451-bd52-4980c5690cc9', '6bb07c21-753d-47a9-a35c-4f3ce05a71db'),
+('828ffaa0-cfbc-4545-bb0e-8bacad7945da', '10a32652-af43-4451-bd52-4980c5690cc9', 'fca5dd4e-1e43-4826-991f-40a8f0a69c56'),
+('dd724991-14c8-4899-8489-f6ace618a088', '10a32652-af43-4451-bd52-4980c5690cc9', '22ae9ff7-efd0-4b88-8951-200b675fd5ba'),
+('54f189a0-4f94-46ea-bdb5-616ccff04bad', '10a32652-af43-4451-bd52-4980c5690cc9', '53126b83-16c4-499c-9282-09f51049590d'),
+('42a6e80b-5767-4ffe-b302-692cf97da00b', '10a32652-af43-4451-bd52-4980c5690cc9', 'e6014362-3473-4925-93d3-4736b6e60c39'),
+('ffa13475-c097-4316-88e1-9a8ce6f67699', '10a32652-af43-4451-bd52-4980c5690cc9', '64636100-cf4e-42d0-9506-e2983b4d4769'),
+('e9c58cf6-2093-4359-bba1-3f8ad409d273', '10a32652-af43-4451-bd52-4980c5690cc9', 'ff4b664d-72fa-4a21-8ab6-36669c6e111d'),
+('f5dbba6e-7dc3-4c62-b833-c980f950ce9e', '10a32652-af43-4451-bd52-4980c5690cc9', 'c0261b63-4e07-4c51-8a68-fe885a93119e'),
+('a2fa2bde-b031-43d9-b00a-3302beb181c6', '10a32652-af43-4451-bd52-4980c5690cc9', '69a03738-3a8c-475c-858a-01997fdf6895'),
+('24924cc6-ac6d-49f3-bbc6-3a0fdf99323a', '10a32652-af43-4451-bd52-4980c5690cc9', '7c327a21-74a1-4589-8508-92e990a40cab'),
+('e0821f6a-a83e-4939-b7e5-e6214d6370f8', '10a32652-af43-4451-bd52-4980c5690cc9', '775dd4e2-0581-463a-89a5-8f1e028b13ff'),
+('afe26545-5c47-4c18-9d6c-bed4e5f42a8a', '10a32652-af43-4451-bd52-4980c5690cc9', 'b2673ccc-99fa-4725-a095-7c9e0873ee78'),
+('73f36663-edb9-4c1e-b3bd-7a56dd66695d', '10a32652-af43-4451-bd52-4980c5690cc9', '31e693d4-48d1-4f5f-b992-e440a40081eb'),
+('09247b70-5a7b-4830-ae49-28465698b875', '10a32652-af43-4451-bd52-4980c5690cc9', '8afca6c6-4717-4fd0-b96c-54523acba33f'),
+('e6bc7078-e633-45fd-95a6-f3b0b954d915', '10a32652-af43-4451-bd52-4980c5690cc9', 'b0f1971a-2dc8-42aa-8a46-2f6824aaf69b'),
+('02ae0b07-11c5-4599-bda0-1c3f8cc7492b', '10a32652-af43-4451-bd52-4980c5690cc9', 'ef534e9c-0558-4712-9cae-8e9f55ee8304'),
+('b81d3d17-3201-4611-aafc-1b594d8942f3', '10a32652-af43-4451-bd52-4980c5690cc9', '2ee3e647-65f5-4710-b985-ff0727d8da06'),
+('6c847545-5c33-4916-a837-6c4ff8cea45f', '10a32652-af43-4451-bd52-4980c5690cc9', '1943cc66-5b85-4314-a5f2-46b53dee8245'),
+('7b616286-586c-4a46-9573-b25cb76b8758', '10a32652-af43-4451-bd52-4980c5690cc9', '58fa18d9-df32-418e-b60d-f35e0dabf39e'),
+('46c63d47-8fb2-4279-b1a5-b9fad7e05a00', '10a32652-af43-4451-bd52-4980c5690cc9', '7eb73dbf-7b27-4af7-ad3d-ff3c811ed04a'),
+('27fd522f-a619-43a2-8011-6cda06261819', '10a32652-af43-4451-bd52-4980c5690cc9', 'fb3de460-a996-484c-9e9a-fbb0f7c1702a'),
+('f9a665ed-ed3e-4593-b02c-bfc852e742f4', '10a32652-af43-4451-bd52-4980c5690cc9', 'aa5b8ebb-354c-4912-a784-e6740aba30a0'),
+('b8a42122-b8f0-411d-9576-8d24f0091729', '10a32652-af43-4451-bd52-4980c5690cc9', '93d9b138-a1f1-4739-85fd-496a78dda66b'),
+('b0fd85c0-2c44-4081-b390-d50a804e729a', '10a32652-af43-4451-bd52-4980c5690cc9', 'dff776f4-7857-47b9-a9db-ae323d617211'),
+('6ac6c1fc-f21c-4780-ae21-b9c4ae7084cb', '10a32652-af43-4451-bd52-4980c5690cc9', '7a25adab-0664-45f7-81cb-b5cd0f9976f4'),
+('7816be03-2d3f-45fe-9390-6f194fa13821', '10a32652-af43-4451-bd52-4980c5690cc9', 'dec16421-3753-408a-9a28-d1523557c9b3'),
+('b9d0b218-08c9-4a91-9028-811f98542a54', '10a32652-af43-4451-bd52-4980c5690cc9', '1b8839c2-e536-44d9-ad6a-2141018ed138'),
+('43c6c79f-9c45-49b0-a8f0-bbbf81db0d51', '10a32652-af43-4451-bd52-4980c5690cc9', 'ba77a832-349f-4ec3-946f-0a5de0693dab'),
+('fc1a7d87-5598-49b0-beb9-3779829fc8d0', '10a32652-af43-4451-bd52-4980c5690cc9', '6cf7121b-3f0e-4b2e-a767-e2f3eef73af0'),
+('87126358-87ec-4974-90f3-a40f14c0d2b3', '10a32652-af43-4451-bd52-4980c5690cc9', 'c4b0da47-3491-4b92-99b4-8f735eec142d'),
+('6fcd34f0-dbc7-4ad2-bdbc-4eddd8277322', '10a32652-af43-4451-bd52-4980c5690cc9', 'f156d49d-518a-4930-aba8-0e5d5249d165'),
+('b172624d-0eab-4c0b-9e95-47438e1b4afd', '10a32652-af43-4451-bd52-4980c5690cc9', '52354fdd-0b4f-4fd2-a154-f5152af01055'),
+('6b20e874-02f0-40de-95ce-bb1f3e565d46', '10a32652-af43-4451-bd52-4980c5690cc9', 'd1442e2c-339a-46b8-8b0c-14c11b2749f9'),
+('cec009f7-5cd7-4194-980a-ebdc69995f0d', '10a32652-af43-4451-bd52-4980c5690cc9', 'dc5804c7-bce0-4835-9346-f4e62c8aa944'),
+('b1d3fc99-abaf-4055-b4e6-6ab0c9a60c3d', '10a32652-af43-4451-bd52-4980c5690cc9', '920b937e-876b-42aa-8881-fadfc8dd396a'),
+('9e569018-ce7e-4a89-8f8e-0fdf0aed9adf', '10a32652-af43-4451-bd52-4980c5690cc9', '84cfcef6-fdf5-48d2-b75b-664f33224195'),
+('9cda93fc-a495-4722-8834-7023a281b66a', '10a32652-af43-4451-bd52-4980c5690cc9', '25f9750f-3437-4224-95cd-c04ccc3a41a9'),
+('2a86face-8c5b-48c8-8c4f-def396a8489a', '10a32652-af43-4451-bd52-4980c5690cc9', '205d9c7b-f4e8-4a32-9374-7a90d5737765'),
+('554a7daa-b00f-4d14-a959-68c989ce5bda', '10a32652-af43-4451-bd52-4980c5690cc9', '9adf7159-7eea-467e-b509-ff05c80d02e7'),
+('7a40ac4f-904a-4068-9efb-ef41e81db0b7', '10a32652-af43-4451-bd52-4980c5690cc9', 'e2d5567a-4de2-4d18-a207-bd518e6a9a28'),
+('5a1b8894-1fb1-4289-b943-8f74b28d7f76', '10a32652-af43-4451-bd52-4980c5690cc9', '619d5098-9375-498c-ad68-e64c3c9429bf'),
+('aa0341b6-4bed-4683-bb50-7ccb5da4eff7', '10a32652-af43-4451-bd52-4980c5690cc9', '4598713c-56b1-4435-b73b-b4a11fbcb3f3'),
+('902be564-bff4-4495-bc2c-388ddcf998d4', '10a32652-af43-4451-bd52-4980c5690cc9', '8ae0c6ea-6bf6-40ef-a47a-96ff772c95a5'),
+('90d6254b-f8ff-47ff-b97a-981e710e7160', '10a32652-af43-4451-bd52-4980c5690cc9', '1ea115cd-6c1f-4117-be78-bf30718b65db'),
+('cc2b904b-d99f-4583-8fb7-056ba1ba320f', '10a32652-af43-4451-bd52-4980c5690cc9', '5ab90a19-2464-44fc-b978-e436d025fbab'),
+('b7abd272-ba0c-428b-88a4-a2dcc5bcda0e', '10a32652-af43-4451-bd52-4980c5690cc9', '2d30e782-c555-4676-833c-c1813dbc0b12'),
+('e7902c45-6800-4b84-a70e-b70e77d43bb1', '10a32652-af43-4451-bd52-4980c5690cc9', '6fd7bba0-0c37-4869-89b6-53e1342f1da7'),
+('ed9c351b-c5cd-411c-aa45-fbca9ac69d7d', '10a32652-af43-4451-bd52-4980c5690cc9', 'c93fccfb-bb0a-4530-90a3-d65a52f4445a'),
+('0929af2a-a93e-4aaa-a926-cfeeba57372b', '10a32652-af43-4451-bd52-4980c5690cc9', 'b413d900-bc79-4d94-9479-69662e48766b'),
+('8c48ae3d-4581-4aa5-8b81-592c907dd7a0', '10a32652-af43-4451-bd52-4980c5690cc9', '97112dd5-94d5-4d08-8c64-e47da8cd9498'),
+('b5a6d737-0f49-4d0a-9405-5fded7f886ea', '10a32652-af43-4451-bd52-4980c5690cc9', '3b838489-c9d6-4cf6-8413-2aae2d9afec7');
 
 --INSERT TIMESERIES--COUNT:176
 INSERT INTO public.timeseries(id, slug, name, instrument_id, parameter_id, unit_id) 
@@ -739,6 +810,7 @@ VALUES
 ('c763fe77-dd15-4d27-929d-7c2480b1d9f1','ph','ph','7c7f7d23-824b-4325-a64e-f12ce009530e', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('7da04d84-9496-468a-b3cf-1bf2948985de','turbidity','Turbidity','7c7f7d23-824b-4325-a64e-f12ce009530e', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('15bd340e-294d-4b32-836a-9aed1838a5cd','voltage','Voltage','7c7f7d23-824b-4325-a64e-f12ce009530e', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('4de4fd7b-47b1-4d5d-bd94-e7bf214ce33f','unknown-yf','Unknown YF','7c7f7d23-824b-4325-a64e-f12ce009530e', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('a7173db7-4bff-48e9-bee6-507f56d93577','stage','Stage','0459d406-5eca-4171-9af6-dfba3a7a45c6', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('36879ae1-f3b9-4929-b443-e9db423c671c','elevation','Elevation','0459d406-5eca-4171-9af6-dfba3a7a45c6', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('b7670d44-62b6-4ca1-a333-3c3d901c9a64','precipitation','Precipitation','0459d406-5eca-4171-9af6-dfba3a7a45c6', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -748,6 +820,7 @@ VALUES
 ('61ade4b2-1438-4606-95e6-8cc51f3f89a6','ph','ph','0459d406-5eca-4171-9af6-dfba3a7a45c6', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('67c264b4-291e-4b24-891b-441cfccb00a6','turbidity','Turbidity','0459d406-5eca-4171-9af6-dfba3a7a45c6', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('ba6e223a-ddfb-442a-9af5-29d6f672e2ea','voltage','Voltage','0459d406-5eca-4171-9af6-dfba3a7a45c6', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('37650560-632e-4a7a-bdb8-dec963a9ba9e','unknown-yf','Unknown YF','0459d406-5eca-4171-9af6-dfba3a7a45c6', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('51d392d7-633e-4f84-9142-3c57c66985e9','stage','Stage','76972f3b-4723-40c5-adb6-8c8fd05dbf86', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('d0b5d67c-0f73-441b-acad-1594f6579aba','elevation','Elevation','76972f3b-4723-40c5-adb6-8c8fd05dbf86', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('25513622-6a79-4965-8c45-c993e7cbbc5d','precipitation','Precipitation','76972f3b-4723-40c5-adb6-8c8fd05dbf86', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -757,6 +830,7 @@ VALUES
 ('7a5c9388-7341-456b-a7ac-d64798a01ae1','ph','ph','76972f3b-4723-40c5-adb6-8c8fd05dbf86', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('b55dcda4-5d85-44b4-ac8d-3380aa0fd391','turbidity','Turbidity','76972f3b-4723-40c5-adb6-8c8fd05dbf86', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('35d14506-6356-469a-a11f-9b84f9a67d7e','voltage','Voltage','76972f3b-4723-40c5-adb6-8c8fd05dbf86', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('a3238b97-5045-4a20-b95c-0f2e9fd10266','unknown-yf','Unknown YF','76972f3b-4723-40c5-adb6-8c8fd05dbf86', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('ac3b8308-1aaf-40aa-bd4b-6fa43106e2b5','stage','Stage','74b37f6e-51db-4daf-8c91-f6b4f2723de6', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('1679433f-68af-450c-aece-154f2e82d389','elevation','Elevation','74b37f6e-51db-4daf-8c91-f6b4f2723de6', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('d4be6469-e1ec-4e92-ab32-759d31e11fe9','precipitation','Precipitation','74b37f6e-51db-4daf-8c91-f6b4f2723de6', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -766,6 +840,7 @@ VALUES
 ('a4e4758d-d201-489e-a38a-fd38a90f40b2','ph','ph','74b37f6e-51db-4daf-8c91-f6b4f2723de6', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('21cf56ea-3014-4a3a-86f6-51ee862e8864','turbidity','Turbidity','74b37f6e-51db-4daf-8c91-f6b4f2723de6', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('4689d951-527a-4db4-b510-3218315bfdb7','voltage','Voltage','74b37f6e-51db-4daf-8c91-f6b4f2723de6', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('a224352f-aadf-4340-be41-dbc9c107555a','unknown-yf','Unknown YF','74b37f6e-51db-4daf-8c91-f6b4f2723de6', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('32ab8cee-7979-4396-bf89-71df36f07152','stage','Stage','127e78c0-dcb2-4a3e-a50a-f016f06ce941', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('5157675f-2f41-4821-87e0-8d2748abbdaa','elevation','Elevation','127e78c0-dcb2-4a3e-a50a-f016f06ce941', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('25293c0c-7ad3-4845-8320-dcaa318cbdcf','precipitation','Precipitation','127e78c0-dcb2-4a3e-a50a-f016f06ce941', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -775,6 +850,7 @@ VALUES
 ('0162c292-0a3a-4fdd-b956-a3e8fe382165','ph','ph','127e78c0-dcb2-4a3e-a50a-f016f06ce941', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('ca1c09bd-5073-4499-aa29-3a103b75c96e','turbidity','Turbidity','127e78c0-dcb2-4a3e-a50a-f016f06ce941', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('4ea06b2d-ecfc-496d-b389-06b8bc945a65','voltage','Voltage','127e78c0-dcb2-4a3e-a50a-f016f06ce941', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('34553236-74c4-479c-ac86-eb86c50cf385','unknown-yf','Unknown YF','127e78c0-dcb2-4a3e-a50a-f016f06ce941', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('96ab903d-8660-4afa-9595-1f74e3082a01','stage','Stage','cde9c93e-070e-4386-b6ce-66d539304ad4', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('d6542fd2-1ad8-48a0-903e-9e799014b600','elevation','Elevation','cde9c93e-070e-4386-b6ce-66d539304ad4', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('a2e50fa2-5d71-427e-91a3-d824e0443599','precipitation','Precipitation','cde9c93e-070e-4386-b6ce-66d539304ad4', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -784,6 +860,7 @@ VALUES
 ('4a57c4bc-23c5-4060-ad4c-4e1f4962b2b0','ph','ph','cde9c93e-070e-4386-b6ce-66d539304ad4', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('6b39b54b-1905-41fc-b1f1-e957d6741534','turbidity','Turbidity','cde9c93e-070e-4386-b6ce-66d539304ad4', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('06dd3fc0-b575-4732-8483-39b3432c2030','voltage','Voltage','cde9c93e-070e-4386-b6ce-66d539304ad4', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('151fc447-0557-4318-bbbd-9c451b84042e','unknown-yf','Unknown YF','cde9c93e-070e-4386-b6ce-66d539304ad4', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('0a38a4d8-876e-4035-9010-050474289b72','stage','Stage','8cdac320-0eed-41df-8983-5e71f1278b08', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('acb8d0a6-3275-4dfc-a068-c60c49a39eb6','elevation','Elevation','8cdac320-0eed-41df-8983-5e71f1278b08', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('095af3c4-bb10-42c2-93e0-8ac89eb1b4bd','precipitation','Precipitation','8cdac320-0eed-41df-8983-5e71f1278b08', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -793,6 +870,7 @@ VALUES
 ('8529a1f1-5978-44a2-9dd0-e8c73deb6d1e','ph','ph','8cdac320-0eed-41df-8983-5e71f1278b08', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('8d56fdee-922a-40c0-b2b3-d395baf0d0b8','turbidity','Turbidity','8cdac320-0eed-41df-8983-5e71f1278b08', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('a6d22cb4-f1ab-4691-8f7a-c8028b61c0c1','voltage','Voltage','8cdac320-0eed-41df-8983-5e71f1278b08', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('77db8ae7-baa0-421b-8a46-b5c25d0c5126','unknown-yf','Unknown YF','8cdac320-0eed-41df-8983-5e71f1278b08', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('162fa927-f6d8-429c-99ca-7306d8d430ab','stage','Stage','aeb9ed17-50fe-42bb-acd6-9a2cf808cbba', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('6ae57fea-f166-46e0-b42a-afe886e7b932','elevation','Elevation','aeb9ed17-50fe-42bb-acd6-9a2cf808cbba', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('5a649a9c-b271-4fbb-9226-575ac19c5fc1','precipitation','Precipitation','aeb9ed17-50fe-42bb-acd6-9a2cf808cbba', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -802,6 +880,7 @@ VALUES
 ('4e56efbc-ce5f-4d5c-9786-beeaeb08819a','ph','ph','aeb9ed17-50fe-42bb-acd6-9a2cf808cbba', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('bcb285e5-3bf1-448d-bfc6-c9eb21ff4744','turbidity','Turbidity','aeb9ed17-50fe-42bb-acd6-9a2cf808cbba', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('bcc92306-320d-46d8-8e7e-3222525cee79','voltage','Voltage','aeb9ed17-50fe-42bb-acd6-9a2cf808cbba', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('887acf44-d61b-4a9b-864d-c285e80ee709','unknown-yf','Unknown YF','aeb9ed17-50fe-42bb-acd6-9a2cf808cbba', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('5e35ec45-9f92-4824-ae86-a3561f870cb9','stage','Stage','cc3b9f84-b4f9-4916-96b0-fc73c44d6b0d', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('ba82e638-de8d-4951-92c7-dfc4537dc53d','elevation','Elevation','cc3b9f84-b4f9-4916-96b0-fc73c44d6b0d', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('528f9114-7d0f-49ee-a87f-0ce1864183ef','precipitation','Precipitation','cc3b9f84-b4f9-4916-96b0-fc73c44d6b0d', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -811,6 +890,7 @@ VALUES
 ('8d663581-fc47-4074-b695-3cc5779c703c','ph','ph','cc3b9f84-b4f9-4916-96b0-fc73c44d6b0d', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('059e5328-3f46-48d0-9712-f63d48333b7c','turbidity','Turbidity','cc3b9f84-b4f9-4916-96b0-fc73c44d6b0d', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('2a210d42-a3ff-4ea8-bf2c-7c8b1d9d3ee4','voltage','Voltage','cc3b9f84-b4f9-4916-96b0-fc73c44d6b0d', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('658e21b0-c871-48b6-8c9d-8ae13a19a30c','unknown-yf','Unknown YF','cc3b9f84-b4f9-4916-96b0-fc73c44d6b0d', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('697e0de4-4ab4-4de3-9415-6166db13e00c','stage','Stage','8c53aaa6-aad4-497c-9286-741291847fc3', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('d46938bd-c369-4c33-b5af-f39713334d8a','elevation','Elevation','8c53aaa6-aad4-497c-9286-741291847fc3', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('d4a21ec3-d2f0-40fb-a6c1-fea72619c3ff','precipitation','Precipitation','8c53aaa6-aad4-497c-9286-741291847fc3', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -820,6 +900,7 @@ VALUES
 ('943fff95-0cf7-4ed8-b612-08db2c143f97','ph','ph','8c53aaa6-aad4-497c-9286-741291847fc3', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('2a070ea4-8168-45be-8419-0108fce2d3e1','turbidity','Turbidity','8c53aaa6-aad4-497c-9286-741291847fc3', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('2cd6774d-a37f-4267-aba4-4e7cc2db8dc1','voltage','Voltage','8c53aaa6-aad4-497c-9286-741291847fc3', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('91ef3759-78f9-40c4-b45d-1acb535930cb','unknown-yf','Unknown YF','8c53aaa6-aad4-497c-9286-741291847fc3', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('fd203e82-e61d-4cc0-8712-e41d334f14d8','stage','Stage','6ba15fe7-dfcf-49c3-8230-599356d0c4b0', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('547b62ae-87ae-43d4-894d-4b5d01035533','elevation','Elevation','6ba15fe7-dfcf-49c3-8230-599356d0c4b0', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('50ac0740-8974-4fee-8603-7c77b81f8795','precipitation','Precipitation','6ba15fe7-dfcf-49c3-8230-599356d0c4b0', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -829,6 +910,7 @@ VALUES
 ('732616fd-c30c-4abd-b68a-420ae8089102','ph','ph','6ba15fe7-dfcf-49c3-8230-599356d0c4b0', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('680e836b-8ade-4273-beb6-91f939f167bf','turbidity','Turbidity','6ba15fe7-dfcf-49c3-8230-599356d0c4b0', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('28dd8282-06f0-476c-a633-ebe47f52379c','voltage','Voltage','6ba15fe7-dfcf-49c3-8230-599356d0c4b0', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('e8b0ea16-e187-4c36-8d8c-03bc7205cf88','unknown-yf','Unknown YF','6ba15fe7-dfcf-49c3-8230-599356d0c4b0', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('feb5ed96-5586-4e39-988d-4ef0e2437432','stage','Stage','9375532a-4fcb-4bfc-a80c-a9a8d10aa1f2', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('4ad3e3ad-dff1-4bdc-8b24-fb726ff03b08','elevation','Elevation','9375532a-4fcb-4bfc-a80c-a9a8d10aa1f2', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('591fa5d3-b605-4781-95da-7b27f56569dc','precipitation','Precipitation','9375532a-4fcb-4bfc-a80c-a9a8d10aa1f2', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -838,6 +920,7 @@ VALUES
 ('6beaff65-80c4-4ea9-8163-8765ccffc9b3','ph','ph','9375532a-4fcb-4bfc-a80c-a9a8d10aa1f2', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('c44874af-074f-4c3a-aff2-ec1d5c31c5ea','turbidity','Turbidity','9375532a-4fcb-4bfc-a80c-a9a8d10aa1f2', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('c3d26e56-0b47-492d-bd41-7f7b2bcc81d0','voltage','Voltage','9375532a-4fcb-4bfc-a80c-a9a8d10aa1f2', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('df4fa055-a223-45d6-86cc-3717f5a43fef','unknown-yf','Unknown YF','9375532a-4fcb-4bfc-a80c-a9a8d10aa1f2', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('3cf38d04-8756-42c7-922d-936c5eb6d9f2','stage','Stage','4955897d-c97b-4d36-bd40-d46623c798a2', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('a05cf0c2-cb27-4399-a9fd-9178a030ab9a','elevation','Elevation','4955897d-c97b-4d36-bd40-d46623c798a2', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('886f2f83-a6be-4e26-907c-1593e26a1a2d','precipitation','Precipitation','4955897d-c97b-4d36-bd40-d46623c798a2', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -847,6 +930,7 @@ VALUES
 ('20253227-cb7d-4302-ade4-546046299556','ph','ph','4955897d-c97b-4d36-bd40-d46623c798a2', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('5340454f-578b-455e-8752-6b2c08524dcd','turbidity','Turbidity','4955897d-c97b-4d36-bd40-d46623c798a2', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('b774d6e5-065a-4d54-bb78-42722fd60052','voltage','Voltage','4955897d-c97b-4d36-bd40-d46623c798a2', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('aa0adecc-26d3-4b50-b0e8-2405575477ed','unknown-yf','Unknown YF','4955897d-c97b-4d36-bd40-d46623c798a2', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('87716baa-0708-4e0c-920b-78f2d5b93599','stage','Stage','57d58971-a9a5-454b-bc24-07d5dc98ae5e', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('41f7b827-988e-43b6-a4a3-4b0b2c01e26a','elevation','Elevation','57d58971-a9a5-454b-bc24-07d5dc98ae5e', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('a2a6ffb9-9d44-4290-8da5-ccc8b63cf290','precipitation','Precipitation','57d58971-a9a5-454b-bc24-07d5dc98ae5e', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -856,6 +940,7 @@ VALUES
 ('7d6a06b6-9f24-4cb3-9ebf-e62b382cd421','ph','ph','57d58971-a9a5-454b-bc24-07d5dc98ae5e', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('15ebde6c-6bf8-4687-ab8b-7c95a4591047','turbidity','Turbidity','57d58971-a9a5-454b-bc24-07d5dc98ae5e', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('607e030f-d22f-4daf-a1c6-5ecb141e0f8c','voltage','Voltage','57d58971-a9a5-454b-bc24-07d5dc98ae5e', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('5d7a4bd6-0e6d-4b6f-a4cd-cab7a24324c3','unknown-yf','Unknown YF','57d58971-a9a5-454b-bc24-07d5dc98ae5e', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('f4656449-26f6-4091-b5b4-288c5c4e408a','stage','Stage','9c72d20a-7806-4b72-8753-a339dcf9955f', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('dde712ea-4d82-4f8d-903f-c608214daf52','elevation','Elevation','9c72d20a-7806-4b72-8753-a339dcf9955f', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('8da604e1-e623-4482-b38a-b3831ff216b3','precipitation','Precipitation','9c72d20a-7806-4b72-8753-a339dcf9955f', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -865,6 +950,7 @@ VALUES
 ('91d61e57-05ca-47e1-993c-cad3e66397e3','ph','ph','9c72d20a-7806-4b72-8753-a339dcf9955f', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('0e3cc856-5628-4711-b32f-1964d8299e82','turbidity','Turbidity','9c72d20a-7806-4b72-8753-a339dcf9955f', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('0dae7ce4-c6dc-478b-8ed1-b0bc4bef598f','voltage','Voltage','9c72d20a-7806-4b72-8753-a339dcf9955f', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('46880976-0765-40c7-a64f-c523dcaeb6cb','unknown-yf','Unknown YF','9c72d20a-7806-4b72-8753-a339dcf9955f', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('6bd55918-6eed-4562-a856-7a87c97916d9','stage','Stage','f9d084c4-0cef-4974-88b9-969ed553da51', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('0a68717c-57a1-4fba-9d1e-97e1ed9665c0','elevation','Elevation','f9d084c4-0cef-4974-88b9-969ed553da51', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('73479cc3-58e1-4652-a40b-388fe020ac59','precipitation','Precipitation','f9d084c4-0cef-4974-88b9-969ed553da51', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -874,6 +960,7 @@ VALUES
 ('1fcf0004-1c9d-4dec-a840-a16db856443a','ph','ph','f9d084c4-0cef-4974-88b9-969ed553da51', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('132d74e1-7d54-40d1-b9eb-a8b535ec4ac1','turbidity','Turbidity','f9d084c4-0cef-4974-88b9-969ed553da51', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('8fde1644-1afe-4f47-9ab8-b4b1d9714b34','voltage','Voltage','f9d084c4-0cef-4974-88b9-969ed553da51', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('4e939ce9-274a-4dfe-9f96-91c4f63716f2','unknown-yf','Unknown YF','f9d084c4-0cef-4974-88b9-969ed553da51', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('c0bf7ce7-4190-4bc7-8e54-b8946b167413','stage','Stage','b0035cd2-b103-4df1-8561-15a38d56dcc3', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('842905a9-5f57-45d2-977c-c6add9002023','elevation','Elevation','b0035cd2-b103-4df1-8561-15a38d56dcc3', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('c9838e02-a5e9-4dd0-b3be-282291de5142','precipitation','Precipitation','b0035cd2-b103-4df1-8561-15a38d56dcc3', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -883,6 +970,7 @@ VALUES
 ('cc52e42d-e281-4b97-8fde-ba831a07816c','ph','ph','b0035cd2-b103-4df1-8561-15a38d56dcc3', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('54be257a-a6da-4ff1-8488-dd0e57c5429b','turbidity','Turbidity','b0035cd2-b103-4df1-8561-15a38d56dcc3', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('154c369a-9f80-4a99-ab99-bc5b8871bfbe','voltage','Voltage','b0035cd2-b103-4df1-8561-15a38d56dcc3', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('b7577cc8-f4dd-48b9-a134-99a6b4dd1f64','unknown-yf','Unknown YF','b0035cd2-b103-4df1-8561-15a38d56dcc3', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('bae5749c-5d3b-4043-9ed8-23725eff4b82','stage','Stage','eaff91e3-8907-4aaa-96b5-24d011fd5c1f', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('78cea62e-0fde-4e12-bced-1f5a11a50529','elevation','Elevation','eaff91e3-8907-4aaa-96b5-24d011fd5c1f', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('49b9af03-df63-46c6-b595-a8083363731c','precipitation','Precipitation','eaff91e3-8907-4aaa-96b5-24d011fd5c1f', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -892,6 +980,7 @@ VALUES
 ('c8a7eb13-a9df-463d-bad7-99e0bb804d51','ph','ph','eaff91e3-8907-4aaa-96b5-24d011fd5c1f', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('26e064be-e77f-49a8-8af6-38539c10c932','turbidity','Turbidity','eaff91e3-8907-4aaa-96b5-24d011fd5c1f', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('865b639d-d493-4179-b49d-c342a7fcf19a','voltage','Voltage','eaff91e3-8907-4aaa-96b5-24d011fd5c1f', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('3314a6b8-250d-4d95-8ea2-aae03631a11f','unknown-yf','Unknown YF','eaff91e3-8907-4aaa-96b5-24d011fd5c1f', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('1cf0b030-860e-42fb-80c7-b9e05b0db241','stage','Stage','9ea8edb4-d7c8-4a40-96ea-f0997b66e16d', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('47463cba-df99-4244-bae3-64a502c75989','elevation','Elevation','9ea8edb4-d7c8-4a40-96ea-f0997b66e16d', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('8149013a-46c8-4036-be8e-737880dac0f0','precipitation','Precipitation','9ea8edb4-d7c8-4a40-96ea-f0997b66e16d', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -901,6 +990,7 @@ VALUES
 ('58ea55b0-cb8b-4c51-a87f-921a2f027b5f','ph','ph','9ea8edb4-d7c8-4a40-96ea-f0997b66e16d', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('01a2c8cc-6183-4f90-a4e4-01fe467b4a38','turbidity','Turbidity','9ea8edb4-d7c8-4a40-96ea-f0997b66e16d', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('6182cbc3-a86d-4fbc-ae3f-ce89305b6cea','voltage','Voltage','9ea8edb4-d7c8-4a40-96ea-f0997b66e16d', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('e138c462-4577-47bb-a196-f237c994b351','unknown-yf','Unknown YF','9ea8edb4-d7c8-4a40-96ea-f0997b66e16d', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('8fe1ff51-0863-4321-a0ea-0cec502a3599','stage','Stage','9ab06dac-707f-48de-bec4-8e0488918b0b', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('7f4976e3-37e0-428a-82d2-952672b9db56','elevation','Elevation','9ab06dac-707f-48de-bec4-8e0488918b0b', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('e8c6abed-4330-4116-a1bf-20904fc68b28','precipitation','Precipitation','9ab06dac-707f-48de-bec4-8e0488918b0b', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -910,6 +1000,7 @@ VALUES
 ('3357db07-3a1a-4d27-a9b9-95dc7fcf7392','ph','ph','9ab06dac-707f-48de-bec4-8e0488918b0b', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('dca7f445-7c67-440b-be2e-a220c1adcc8d','turbidity','Turbidity','9ab06dac-707f-48de-bec4-8e0488918b0b', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('47472fe3-2401-4697-933d-4d9eb5a07695','voltage','Voltage','9ab06dac-707f-48de-bec4-8e0488918b0b', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('a1b81940-98e4-405d-846d-8f6ab0487cec','unknown-yf','Unknown YF','9ab06dac-707f-48de-bec4-8e0488918b0b', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('a6693cb9-35b9-41f4-863c-e9fef468c487','stage','Stage','ded99a0f-330c-4cda-9417-c83bc7b24af3', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('f80139da-11fd-4ef3-8597-2b77d6625827','elevation','Elevation','ded99a0f-330c-4cda-9417-c83bc7b24af3', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('292e7ef8-a31a-47a7-9a2f-5dd4e98767a6','precipitation','Precipitation','ded99a0f-330c-4cda-9417-c83bc7b24af3', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -919,6 +1010,7 @@ VALUES
 ('d98e64dd-861e-4cb0-bb6c-3d325a4ddbb5','ph','ph','ded99a0f-330c-4cda-9417-c83bc7b24af3', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('7cf10471-b5e3-4259-8168-7cfc51af6dca','turbidity','Turbidity','ded99a0f-330c-4cda-9417-c83bc7b24af3', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('421fe563-414c-4bdf-acd2-784f77b9ef5d','voltage','Voltage','ded99a0f-330c-4cda-9417-c83bc7b24af3', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('052d7fea-ea1b-4965-a83c-e988a6be25dd','unknown-yf','Unknown YF','ded99a0f-330c-4cda-9417-c83bc7b24af3', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('b0afd17e-81d2-420a-8d80-e3ef0eb7226a','stage','Stage','0b464357-6d6b-4dc0-87ea-aa4f65aa8e9e', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('208c6050-b53a-494b-bf9b-7e4d43a5f571','elevation','Elevation','0b464357-6d6b-4dc0-87ea-aa4f65aa8e9e', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('bb9dced6-7c9d-473d-b0aa-4532c0cbe6f6','precipitation','Precipitation','0b464357-6d6b-4dc0-87ea-aa4f65aa8e9e', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -928,6 +1020,7 @@ VALUES
 ('9e77276f-b157-457f-9385-6ebe92070073','ph','ph','0b464357-6d6b-4dc0-87ea-aa4f65aa8e9e', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('2356697d-10e1-41fc-9077-9260b4438110','turbidity','Turbidity','0b464357-6d6b-4dc0-87ea-aa4f65aa8e9e', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('941027e4-be8c-4680-accd-28e06ccd85bb','voltage','Voltage','0b464357-6d6b-4dc0-87ea-aa4f65aa8e9e', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('543f636c-ad65-47ea-b462-e65abf1b76a0','unknown-yf','Unknown YF','0b464357-6d6b-4dc0-87ea-aa4f65aa8e9e', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('bc6c6a56-ad8f-4397-b8f9-eda00bfc5efe','stage','Stage','cd329248-0df2-4a36-aeac-8e18b54d98f5', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('557cf8b5-8543-400e-a939-e80e828af030','elevation','Elevation','cd329248-0df2-4a36-aeac-8e18b54d98f5', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('ef1432d5-a531-47c9-a7dd-15d1168ef21e','precipitation','Precipitation','cd329248-0df2-4a36-aeac-8e18b54d98f5', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -937,6 +1030,7 @@ VALUES
 ('a077042a-2b3e-4960-ab2a-d1f2be0a6258','ph','ph','cd329248-0df2-4a36-aeac-8e18b54d98f5', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('a16762b5-f299-416e-8df4-53ce5a631208','turbidity','Turbidity','cd329248-0df2-4a36-aeac-8e18b54d98f5', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('b4cfde1e-f074-4c85-8362-590e99f13909','voltage','Voltage','cd329248-0df2-4a36-aeac-8e18b54d98f5', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('d9dd474e-a5ad-490f-b469-10fb8a63bc0c','unknown-yf','Unknown YF','cd329248-0df2-4a36-aeac-8e18b54d98f5', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('30294387-dae7-474a-b1f2-b0f5f1f02ec5','stage','Stage','6961517e-7f6e-4a2e-a362-d2d85362c5c1', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('ac0f12e5-4ec9-4767-a012-df59a6116621','elevation','Elevation','6961517e-7f6e-4a2e-a362-d2d85362c5c1', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('5dec4bb4-c056-4684-b8dc-d6cba3552810','precipitation','Precipitation','6961517e-7f6e-4a2e-a362-d2d85362c5c1', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -946,6 +1040,7 @@ VALUES
 ('79e81498-3462-4286-9210-d6eca127d0a6','ph','ph','6961517e-7f6e-4a2e-a362-d2d85362c5c1', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('89422b27-6a35-4293-bcf8-9c1c75ddc1a9','turbidity','Turbidity','6961517e-7f6e-4a2e-a362-d2d85362c5c1', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('2d2f09ae-f1f5-4bab-bf37-da8057b4e245','voltage','Voltage','6961517e-7f6e-4a2e-a362-d2d85362c5c1', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('b6bbd71e-3675-421f-a67b-1ccba0e0d1df','unknown-yf','Unknown YF','6961517e-7f6e-4a2e-a362-d2d85362c5c1', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('c35a1d94-bc55-45b4-946a-3fa1af478daa','stage','Stage','3877d14f-4d39-4369-9a63-498851e9d8cd', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('708ba21d-ed48-42d5-8c89-30be2955ef84','elevation','Elevation','3877d14f-4d39-4369-9a63-498851e9d8cd', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('c65a5a6c-7105-4afc-83b7-4195a8268e86','precipitation','Precipitation','3877d14f-4d39-4369-9a63-498851e9d8cd', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -955,6 +1050,7 @@ VALUES
 ('5c626c61-efcc-4d1d-b7af-f241ed3c0aed','ph','ph','3877d14f-4d39-4369-9a63-498851e9d8cd', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('ced40f0d-af96-48a2-8c73-116cd52758d6','turbidity','Turbidity','3877d14f-4d39-4369-9a63-498851e9d8cd', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('a1389758-85cd-425d-b74b-e395e3ab565e','voltage','Voltage','3877d14f-4d39-4369-9a63-498851e9d8cd', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('2c943494-2ace-4509-a4e5-31f4a0d561f3','unknown-yf','Unknown YF','3877d14f-4d39-4369-9a63-498851e9d8cd', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('504cd44d-8c68-42e0-a615-c64b821c9022','stage','Stage','346fcc23-8ed0-4e80-99b7-75c2f2261525', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('e5c83f1f-9c02-4d31-bcfc-000925964dbc','elevation','Elevation','346fcc23-8ed0-4e80-99b7-75c2f2261525', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('720e8bb1-5516-451f-ad54-6e85f08fddc5','precipitation','Precipitation','346fcc23-8ed0-4e80-99b7-75c2f2261525', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -964,6 +1060,7 @@ VALUES
 ('2037182c-f28f-4446-8ed6-8457c305f11f','ph','ph','346fcc23-8ed0-4e80-99b7-75c2f2261525', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('16dc4f06-e7b3-479a-8b81-3a563ebf2e88','turbidity','Turbidity','346fcc23-8ed0-4e80-99b7-75c2f2261525', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('0d2ba1a4-1087-4ed6-a962-ff8ca00f6341','voltage','Voltage','346fcc23-8ed0-4e80-99b7-75c2f2261525', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('226adc61-f5a5-4680-8554-10944242f68f','unknown-yf','Unknown YF','346fcc23-8ed0-4e80-99b7-75c2f2261525', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('faeaadd1-0544-4914-b02a-9445d524a419','stage','Stage','58beadda-81ea-4950-b21a-18405d67583c', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('fc0f1000-70c7-4927-b5d6-5c304efb5950','elevation','Elevation','58beadda-81ea-4950-b21a-18405d67583c', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('7a2d8c87-be0e-49aa-9167-58feaf0ceee2','precipitation','Precipitation','58beadda-81ea-4950-b21a-18405d67583c', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -973,6 +1070,7 @@ VALUES
 ('406362d1-80d1-4895-bc53-a5058248f81d','ph','ph','58beadda-81ea-4950-b21a-18405d67583c', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('5f5181cf-d38f-4514-b2b5-b53edbb27c0f','turbidity','Turbidity','58beadda-81ea-4950-b21a-18405d67583c', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('2718e892-1fad-43b3-b829-4c746b029cbf','voltage','Voltage','58beadda-81ea-4950-b21a-18405d67583c', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('4e13170d-bb99-4383-9bbe-d1ecdeff80c1','unknown-yf','Unknown YF','58beadda-81ea-4950-b21a-18405d67583c', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('fa3c7c15-f6f7-4200-95a0-2732d5210389','stage','Stage','0d485c9a-928b-448f-9a13-814f14cefe0f', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('9787dc4f-9407-45ad-b080-70ce40e208c8','elevation','Elevation','0d485c9a-928b-448f-9a13-814f14cefe0f', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('9c732725-a6dc-4aeb-8764-538a657c6a49','precipitation','Precipitation','0d485c9a-928b-448f-9a13-814f14cefe0f', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -982,6 +1080,7 @@ VALUES
 ('d7b091d4-fc17-48bc-bf1e-a03cf8b5af93','ph','ph','0d485c9a-928b-448f-9a13-814f14cefe0f', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('dfdaff9c-6dc4-44f0-8fdc-4c47dc45d8e3','turbidity','Turbidity','0d485c9a-928b-448f-9a13-814f14cefe0f', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('1db11477-9123-4de4-89db-defbac5d53d8','voltage','Voltage','0d485c9a-928b-448f-9a13-814f14cefe0f', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('8b801006-712d-416b-9e14-12767b99e693','unknown-yf','Unknown YF','0d485c9a-928b-448f-9a13-814f14cefe0f', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('9b038c30-40de-4490-8f18-70d51cd4b6ee','stage','Stage','11332d06-0506-4a42-8698-c80f3aff861d', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('4a7eb673-3b16-44e0-802e-d81db4f4d545','elevation','Elevation','11332d06-0506-4a42-8698-c80f3aff861d', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('417c2d1f-60ed-4626-ab5e-24136779b6fa','precipitation','Precipitation','11332d06-0506-4a42-8698-c80f3aff861d', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -991,6 +1090,7 @@ VALUES
 ('f886e1a3-0844-4f39-8ea4-b7e53a8dabe6','ph','ph','11332d06-0506-4a42-8698-c80f3aff861d', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('73fc292a-6443-459f-a045-3ec589ce930a','turbidity','Turbidity','11332d06-0506-4a42-8698-c80f3aff861d', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('7a1634b9-7326-41bd-a951-adbd5a56af80','voltage','Voltage','11332d06-0506-4a42-8698-c80f3aff861d', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('a207b6f9-cd8d-45e2-8073-6209b230c73f','unknown-yf','Unknown YF','11332d06-0506-4a42-8698-c80f3aff861d', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('1df20456-7253-462b-9a36-cbf71fb6ebf1','stage','Stage','324034f3-e9fb-429c-b741-1d6d65ea7b4c', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('dbaa590a-dc0c-4ee0-8ea2-c10d08e239a8','elevation','Elevation','324034f3-e9fb-429c-b741-1d6d65ea7b4c', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('474d4173-b221-4426-b4f7-dbb62b1512ea','precipitation','Precipitation','324034f3-e9fb-429c-b741-1d6d65ea7b4c', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1000,6 +1100,7 @@ VALUES
 ('d17aabf8-ea37-4691-bcf8-5cba25e9ac7a','ph','ph','324034f3-e9fb-429c-b741-1d6d65ea7b4c', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('15a6f579-55c3-43b0-a91b-52a3f6095a7a','turbidity','Turbidity','324034f3-e9fb-429c-b741-1d6d65ea7b4c', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('1574c610-b760-43c7-a70b-37e5d75c1a11','voltage','Voltage','324034f3-e9fb-429c-b741-1d6d65ea7b4c', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('7a3cea93-b19f-4ac3-83e6-6c31e45da3be','unknown-yf','Unknown YF','324034f3-e9fb-429c-b741-1d6d65ea7b4c', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('fbbf41e9-9983-4453-b293-958c0a9dd0c5','stage','Stage','5ddae2ed-a0a9-4fef-a4da-864604996342', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('26c25d41-1363-4862-84a2-5577c3dc4efd','elevation','Elevation','5ddae2ed-a0a9-4fef-a4da-864604996342', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('718b6830-77df-49e3-be9b-455500378a16','precipitation','Precipitation','5ddae2ed-a0a9-4fef-a4da-864604996342', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1009,6 +1110,7 @@ VALUES
 ('5e5a49e6-aba1-4ce7-9d6b-1b948b5614f2','ph','ph','5ddae2ed-a0a9-4fef-a4da-864604996342', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('6068f84a-9854-4a68-bc17-afdb30a03a90','turbidity','Turbidity','5ddae2ed-a0a9-4fef-a4da-864604996342', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('0690718a-7028-4cd0-ab5d-52aada8218a8','voltage','Voltage','5ddae2ed-a0a9-4fef-a4da-864604996342', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('1496cad1-103f-4e3a-90e2-0d5272498f14','unknown-yf','Unknown YF','5ddae2ed-a0a9-4fef-a4da-864604996342', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('06341975-b392-4809-ac8a-7eec91ab19a1','stage','Stage','9a25e374-d27d-4f12-b228-7363f70a71f3', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('57ace970-6a86-4d2b-84b5-1d58fed636c5','elevation','Elevation','9a25e374-d27d-4f12-b228-7363f70a71f3', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('989cc1f0-018b-4ab2-9ad7-6e536ad9689d','precipitation','Precipitation','9a25e374-d27d-4f12-b228-7363f70a71f3', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1018,6 +1120,7 @@ VALUES
 ('bb905014-77b0-437b-a579-7b1d74b951c9','ph','ph','9a25e374-d27d-4f12-b228-7363f70a71f3', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('9dd5ea21-480a-42d3-9d1c-61d81343654c','turbidity','Turbidity','9a25e374-d27d-4f12-b228-7363f70a71f3', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('dd90e5e5-ab8b-452d-a0d4-0cb6e4831547','voltage','Voltage','9a25e374-d27d-4f12-b228-7363f70a71f3', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('3ac9a784-5520-449a-ae78-03cfe39d3e04','unknown-yf','Unknown YF','9a25e374-d27d-4f12-b228-7363f70a71f3', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('fc6f8d31-527d-46cc-b294-d89574029315','stage','Stage','b30e8722-5dfb-4677-b44f-45d49e81a925', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('7489f475-0d45-4ad2-9ae7-8885ef3360b6','elevation','Elevation','b30e8722-5dfb-4677-b44f-45d49e81a925', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('623f2a86-2edc-4658-9882-b7fba708c4b8','precipitation','Precipitation','b30e8722-5dfb-4677-b44f-45d49e81a925', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1027,6 +1130,7 @@ VALUES
 ('90d68319-5c2b-46eb-a9d5-825952dbacc5','ph','ph','b30e8722-5dfb-4677-b44f-45d49e81a925', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('24a11fa4-6003-456c-9ca6-b57b275cc6fd','turbidity','Turbidity','b30e8722-5dfb-4677-b44f-45d49e81a925', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('cefe9565-730e-45dd-9fd6-d92d11419b4c','voltage','Voltage','b30e8722-5dfb-4677-b44f-45d49e81a925', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('f007fe80-6018-4760-95a4-78ea9e35e5a2','unknown-yf','Unknown YF','b30e8722-5dfb-4677-b44f-45d49e81a925', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('40ebe160-ba0d-4d43-92a9-8150272b0ee6','stage','Stage','9ea21f67-c8cb-48ad-9f6f-b3fc729f7b9a', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('adb2ac3b-e9d3-46be-aaa8-681639c76193','elevation','Elevation','9ea21f67-c8cb-48ad-9f6f-b3fc729f7b9a', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('ba11939c-3748-423d-9a3a-da543661bec4','precipitation','Precipitation','9ea21f67-c8cb-48ad-9f6f-b3fc729f7b9a', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1036,6 +1140,7 @@ VALUES
 ('be176b7f-70b6-460c-b567-0fedd5dca109','ph','ph','9ea21f67-c8cb-48ad-9f6f-b3fc729f7b9a', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('9b8903d7-e335-48f9-9a8b-0fa7405b7320','turbidity','Turbidity','9ea21f67-c8cb-48ad-9f6f-b3fc729f7b9a', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('402854ac-2fa0-421c-ad2f-a7afab8b3af1','voltage','Voltage','9ea21f67-c8cb-48ad-9f6f-b3fc729f7b9a', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('708b1875-ef94-467d-a039-c18438cd13ae','unknown-yf','Unknown YF','9ea21f67-c8cb-48ad-9f6f-b3fc729f7b9a', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('c7d49152-e020-4690-8cf3-105af68faef1','stage','Stage','224d3ada-e83b-4d19-b152-05d8b099c056', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('1f3331ec-e992-4fa4-b39f-26b7b0629288','elevation','Elevation','224d3ada-e83b-4d19-b152-05d8b099c056', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('501d3e95-4480-4863-995e-5f5478740d60','precipitation','Precipitation','224d3ada-e83b-4d19-b152-05d8b099c056', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1045,6 +1150,7 @@ VALUES
 ('6ab57598-367d-4ac3-8836-f9ddfba56946','ph','ph','224d3ada-e83b-4d19-b152-05d8b099c056', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('c5da955b-f2c7-479f-ab48-631b0164f89e','turbidity','Turbidity','224d3ada-e83b-4d19-b152-05d8b099c056', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('47ea7451-fbcd-4bd9-8fa9-2aa270674a57','voltage','Voltage','224d3ada-e83b-4d19-b152-05d8b099c056', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('ab6abbed-4e35-46c4-9716-9c5b6bb7be7d','unknown-yf','Unknown YF','224d3ada-e83b-4d19-b152-05d8b099c056', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('ef80ef6b-cf30-4b49-b85e-99834b9c9f1b','stage','Stage','5b8a204e-bd38-40bd-b108-4118f962586b', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('9183d14a-b96b-4f01-bdc8-dc744fee957b','elevation','Elevation','5b8a204e-bd38-40bd-b108-4118f962586b', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('20ab40ac-c7c8-4e16-bbad-a425a94f689d','precipitation','Precipitation','5b8a204e-bd38-40bd-b108-4118f962586b', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1054,6 +1160,7 @@ VALUES
 ('3f1ee93b-0f56-41cc-a437-66bf4b17f94a','ph','ph','5b8a204e-bd38-40bd-b108-4118f962586b', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('96bf6a23-e60b-4527-a714-3d6dad2f34de','turbidity','Turbidity','5b8a204e-bd38-40bd-b108-4118f962586b', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('09cd6e40-e5c1-4182-8de4-d4fa3b403b8c','voltage','Voltage','5b8a204e-bd38-40bd-b108-4118f962586b', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('357340a5-b3b5-422c-b10a-91cd4cdd9ec7','unknown-yf','Unknown YF','5b8a204e-bd38-40bd-b108-4118f962586b', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('37a98039-8cba-485c-a174-5cb35ef0e0a5','stage','Stage','58278b8b-54d4-4b56-8969-e6a176b900f9', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('13e620c9-7473-480c-b3ec-9832b988b896','elevation','Elevation','58278b8b-54d4-4b56-8969-e6a176b900f9', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('bb17c5d1-e9c6-41b0-9575-1370a78da76f','precipitation','Precipitation','58278b8b-54d4-4b56-8969-e6a176b900f9', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1063,6 +1170,7 @@ VALUES
 ('c1dc109c-62e0-418b-935c-0eb9636cff84','ph','ph','58278b8b-54d4-4b56-8969-e6a176b900f9', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('39a5d264-87d6-40af-86f5-165a23838c92','turbidity','Turbidity','58278b8b-54d4-4b56-8969-e6a176b900f9', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('ff86064a-d5f5-48a1-b0e9-320e1db802d3','voltage','Voltage','58278b8b-54d4-4b56-8969-e6a176b900f9', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('400f3b4e-a75e-4300-9cee-4e12283e9888','unknown-yf','Unknown YF','58278b8b-54d4-4b56-8969-e6a176b900f9', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('b3573e14-3a35-4316-bcbc-6b44f7c3888a','stage','Stage','9c89f1b8-6c18-4a42-ae3d-470299b7194b', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('2cd93d05-121f-44ff-acf3-754971ac1f92','elevation','Elevation','9c89f1b8-6c18-4a42-ae3d-470299b7194b', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('d78b5d87-a245-4fc7-9da0-917e1b63d262','precipitation','Precipitation','9c89f1b8-6c18-4a42-ae3d-470299b7194b', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1072,6 +1180,7 @@ VALUES
 ('9e6e8727-0e57-437b-a73d-2e4296eb2da0','ph','ph','9c89f1b8-6c18-4a42-ae3d-470299b7194b', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('aa9b3402-3a58-4205-aac5-a51b6c556181','turbidity','Turbidity','9c89f1b8-6c18-4a42-ae3d-470299b7194b', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('b647c9eb-4e5f-4175-b685-f02c28966365','voltage','Voltage','9c89f1b8-6c18-4a42-ae3d-470299b7194b', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('6f891f36-e642-4ce1-b98f-ae1977c409a1','unknown-yf','Unknown YF','9c89f1b8-6c18-4a42-ae3d-470299b7194b', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('9be27e35-2b6f-4511-9244-42f91aed168c','stage','Stage','1cdebe4a-52d6-4356-8817-c5984ce4100f', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('a7b7b4fa-7950-4a74-b7d7-6182e69a8b35','elevation','Elevation','1cdebe4a-52d6-4356-8817-c5984ce4100f', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('4f7548a0-39db-4a5f-87bf-72cb76699b88','precipitation','Precipitation','1cdebe4a-52d6-4356-8817-c5984ce4100f', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1081,6 +1190,7 @@ VALUES
 ('e8a29e96-c161-49d0-b8d6-52a2f937e5ee','ph','ph','1cdebe4a-52d6-4356-8817-c5984ce4100f', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('3e1ada05-ee31-4bd1-8c37-2a2dc572ec13','turbidity','Turbidity','1cdebe4a-52d6-4356-8817-c5984ce4100f', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('9e8da045-872e-4397-88b2-2b33dcb14c9a','voltage','Voltage','1cdebe4a-52d6-4356-8817-c5984ce4100f', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('ff42803e-f180-46cd-b4e6-a43489be8464','unknown-yf','Unknown YF','1cdebe4a-52d6-4356-8817-c5984ce4100f', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('1fac3ac4-c769-4632-9ecd-7e8e699de022','stage','Stage','9a97a37b-e18f-4cca-9d7c-137a1d3af595', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('4ae4c635-404a-49cc-bcd1-37a15cf36b98','elevation','Elevation','9a97a37b-e18f-4cca-9d7c-137a1d3af595', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('f5135fd6-057a-444f-9b5c-21fcdbf40499','precipitation','Precipitation','9a97a37b-e18f-4cca-9d7c-137a1d3af595', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1090,6 +1200,7 @@ VALUES
 ('22295256-32bf-4182-acf2-fb19942500b1','ph','ph','9a97a37b-e18f-4cca-9d7c-137a1d3af595', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('81114484-ee36-4e13-bf69-225367a16ed4','turbidity','Turbidity','9a97a37b-e18f-4cca-9d7c-137a1d3af595', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('c64eb404-ad76-42c9-b2fc-0f6e0a3c38dd','voltage','Voltage','9a97a37b-e18f-4cca-9d7c-137a1d3af595', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('2918a1e8-4052-421c-999a-ff156195e281','unknown-yf','Unknown YF','9a97a37b-e18f-4cca-9d7c-137a1d3af595', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('58adb13d-11a3-41d6-b9bd-44474f95bdc2','stage','Stage','903d19ae-0f01-4bd9-b7ef-c72b6551739d', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('3763bbd4-70b4-4e94-9afb-fcc3667c2d38','elevation','Elevation','903d19ae-0f01-4bd9-b7ef-c72b6551739d', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('9eaffcba-aaec-4742-ab88-5d164524a368','precipitation','Precipitation','903d19ae-0f01-4bd9-b7ef-c72b6551739d', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1099,6 +1210,7 @@ VALUES
 ('4f61d29e-65ee-45bc-aff8-0df2b4267375','ph','ph','903d19ae-0f01-4bd9-b7ef-c72b6551739d', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('7bd14cf3-46b5-48ce-99a3-2e5f635549f4','turbidity','Turbidity','903d19ae-0f01-4bd9-b7ef-c72b6551739d', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('64c4d78f-93cb-4208-aa2b-43ed0c1702e4','voltage','Voltage','903d19ae-0f01-4bd9-b7ef-c72b6551739d', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('2c3afa12-8117-4c11-8ce5-c6a7c2c9eea7','unknown-yf','Unknown YF','903d19ae-0f01-4bd9-b7ef-c72b6551739d', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('8a4f5765-582a-46f1-b17a-f9b698888872','stage','Stage','652fcd72-0891-481d-9fa1-7aa96508d0a0', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('b8f347cf-d1e9-468f-868e-1707c8773b84','elevation','Elevation','652fcd72-0891-481d-9fa1-7aa96508d0a0', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('4211f4ae-fd04-4b6a-98d4-b2fbb615a8f8','precipitation','Precipitation','652fcd72-0891-481d-9fa1-7aa96508d0a0', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1108,6 +1220,7 @@ VALUES
 ('33dc1da5-3790-440e-b8fe-853b5721a5f9','ph','ph','652fcd72-0891-481d-9fa1-7aa96508d0a0', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('762260d2-ce83-45e9-9b99-4b79e95b6613','turbidity','Turbidity','652fcd72-0891-481d-9fa1-7aa96508d0a0', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('4c477771-d787-41e4-a8d9-fe9a988cdad8','voltage','Voltage','652fcd72-0891-481d-9fa1-7aa96508d0a0', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('c1cc92a5-f497-40fa-b7aa-48c8cd8c6bbb','unknown-yf','Unknown YF','652fcd72-0891-481d-9fa1-7aa96508d0a0', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('b9b2aeaa-2563-4e0a-8e6c-2fa520e4e03e','stage','Stage','64a28953-4f08-4eab-baf5-11b49dc7f957', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('3a9691d1-02c3-47c5-bbc1-0daab98c3338','elevation','Elevation','64a28953-4f08-4eab-baf5-11b49dc7f957', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('a5329f62-560e-49f3-bc53-05b1e112ed62','precipitation','Precipitation','64a28953-4f08-4eab-baf5-11b49dc7f957', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1117,6 +1230,7 @@ VALUES
 ('1ceaee67-8c17-42ff-9355-5f49e20d124a','ph','ph','64a28953-4f08-4eab-baf5-11b49dc7f957', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('c723c750-d6dc-42e1-b62a-59d78c26a6a3','turbidity','Turbidity','64a28953-4f08-4eab-baf5-11b49dc7f957', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('02572ebb-f25e-43ed-9e47-445b36eea649','voltage','Voltage','64a28953-4f08-4eab-baf5-11b49dc7f957', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('422e83c2-649f-4410-9266-6ea1cabee0da','unknown-yf','Unknown YF','64a28953-4f08-4eab-baf5-11b49dc7f957', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('2cba3b82-7815-4126-a5e7-2a3ff0f64a90','stage','Stage','f72eacc7-7a2d-4bf8-827c-a81d80952183', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('c446e8d0-41ad-47a5-80ba-89438d3f195a','elevation','Elevation','f72eacc7-7a2d-4bf8-827c-a81d80952183', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('492a1c9c-e342-4eb5-9d8b-003da150870f','precipitation','Precipitation','f72eacc7-7a2d-4bf8-827c-a81d80952183', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1126,6 +1240,7 @@ VALUES
 ('f8e02007-d7a9-4497-b4d5-79724c96c6d0','ph','ph','f72eacc7-7a2d-4bf8-827c-a81d80952183', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('42c8bdfe-1d62-42b4-9229-5f3afcf0ec3e','turbidity','Turbidity','f72eacc7-7a2d-4bf8-827c-a81d80952183', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('e097f9d7-10a6-4b4b-9024-42c73fc4c7fb','voltage','Voltage','f72eacc7-7a2d-4bf8-827c-a81d80952183', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('f6b0a8c0-12b3-40a6-88e9-de13bb90eeea','unknown-yf','Unknown YF','f72eacc7-7a2d-4bf8-827c-a81d80952183', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('86458983-4f89-4dd8-b0a1-cee709b4a691','stage','Stage','9a6682e4-92fd-4d67-87ea-59ffd0bec6ce', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('425053c0-89e7-4216-8e2d-74e5d36ca43c','elevation','Elevation','9a6682e4-92fd-4d67-87ea-59ffd0bec6ce', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('5338fb2f-4fdc-43bf-8401-a89799dc1896','precipitation','Precipitation','9a6682e4-92fd-4d67-87ea-59ffd0bec6ce', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1135,6 +1250,7 @@ VALUES
 ('d5f3580f-105c-4c85-bc1b-b5b72088ae2d','ph','ph','9a6682e4-92fd-4d67-87ea-59ffd0bec6ce', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('cfcb0132-df3b-4d9f-8bda-8b7cc8578ada','turbidity','Turbidity','9a6682e4-92fd-4d67-87ea-59ffd0bec6ce', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('d40f170b-aca5-4a06-8c96-02f28887635e','voltage','Voltage','9a6682e4-92fd-4d67-87ea-59ffd0bec6ce', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('86bbd4b0-5c5f-4754-8234-8ecc5e9786d1','unknown-yf','Unknown YF','9a6682e4-92fd-4d67-87ea-59ffd0bec6ce', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('dac68721-7509-459d-bde9-36c4c1ce5fb9','stage','Stage','f25498d3-d819-4a59-862d-769f2aba0e74', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('50c9cb12-7deb-4cef-adc6-6e84032e6077','elevation','Elevation','f25498d3-d819-4a59-862d-769f2aba0e74', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('0c1906f7-948f-4a26-91fc-a7e84ea6c826','precipitation','Precipitation','f25498d3-d819-4a59-862d-769f2aba0e74', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1144,6 +1260,7 @@ VALUES
 ('2c1c7db7-ff63-4020-97cd-d92cdf668796','ph','ph','f25498d3-d819-4a59-862d-769f2aba0e74', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('e264e97f-e5fa-4d35-8679-a5f0a5e26449','turbidity','Turbidity','f25498d3-d819-4a59-862d-769f2aba0e74', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('5340360f-17c4-47f6-8f96-89806b98fdd7','voltage','Voltage','f25498d3-d819-4a59-862d-769f2aba0e74', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('68bfdfce-2a18-4625-afba-66718589a44b','unknown-yf','Unknown YF','f25498d3-d819-4a59-862d-769f2aba0e74', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('1ce70293-1733-445b-9cf5-602bbe899d77','stage','Stage','e401d6d3-8111-4f04-8c90-6ccf2d269bc2', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('a3bc729e-6d98-4d49-8d06-9557e6a78097','elevation','Elevation','e401d6d3-8111-4f04-8c90-6ccf2d269bc2', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('6fdc633f-ce2b-4402-8b3f-6d48ba3e0593','precipitation','Precipitation','e401d6d3-8111-4f04-8c90-6ccf2d269bc2', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1153,6 +1270,7 @@ VALUES
 ('8c8cbabc-cf8c-4c15-aa94-423d79f577db','ph','ph','e401d6d3-8111-4f04-8c90-6ccf2d269bc2', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('62821578-41f7-4d1f-af19-7d14578d499e','turbidity','Turbidity','e401d6d3-8111-4f04-8c90-6ccf2d269bc2', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('689c7915-d2ff-4607-b68f-1a801b0e450f','voltage','Voltage','e401d6d3-8111-4f04-8c90-6ccf2d269bc2', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('4dd9236c-8bde-47ec-9b4c-8c471cc01921','unknown-yf','Unknown YF','e401d6d3-8111-4f04-8c90-6ccf2d269bc2', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('421a32bc-b85b-40b4-aab9-b9555ea14e6b','stage','Stage','7e2ef036-c14a-4e0a-9528-1bcfbaa84219', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('b652413a-a1c6-41e6-bbb5-837501a0d7c0','elevation','Elevation','7e2ef036-c14a-4e0a-9528-1bcfbaa84219', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('b8a67910-4564-4e8a-acda-0b632018fe36','precipitation','Precipitation','7e2ef036-c14a-4e0a-9528-1bcfbaa84219', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1162,6 +1280,7 @@ VALUES
 ('ce77df78-951f-445f-8654-4af4b19a8e5d','ph','ph','7e2ef036-c14a-4e0a-9528-1bcfbaa84219', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('d1717b24-f772-4947-99af-409ab629bfc2','turbidity','Turbidity','7e2ef036-c14a-4e0a-9528-1bcfbaa84219', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('ec730656-c090-4bd2-a8a5-63da89629040','voltage','Voltage','7e2ef036-c14a-4e0a-9528-1bcfbaa84219', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('c3a66d7b-2d74-4efe-aa15-db6b1a4f4b71','unknown-yf','Unknown YF','7e2ef036-c14a-4e0a-9528-1bcfbaa84219', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('94298fad-fa94-479b-a882-7b21ec67c992','stage','Stage','0a1c5198-b7bd-4090-bc0c-89f44635d8eb', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('b539c258-4135-467c-8595-73d0e6b5442b','elevation','Elevation','0a1c5198-b7bd-4090-bc0c-89f44635d8eb', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('a11142b3-0a03-47a7-bb4b-1f38ba999dfc','precipitation','Precipitation','0a1c5198-b7bd-4090-bc0c-89f44635d8eb', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1171,6 +1290,7 @@ VALUES
 ('db009437-4f5d-4f3c-ae03-e589a1ed8063','ph','ph','0a1c5198-b7bd-4090-bc0c-89f44635d8eb', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('13518914-0a4c-4e3a-b2f0-857abd942d5b','turbidity','Turbidity','0a1c5198-b7bd-4090-bc0c-89f44635d8eb', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('25b1bbea-aeef-40bf-9736-16726c2f9c2e','voltage','Voltage','0a1c5198-b7bd-4090-bc0c-89f44635d8eb', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('6895d91c-aa77-481c-859f-39ae7747e563','unknown-yf','Unknown YF','0a1c5198-b7bd-4090-bc0c-89f44635d8eb', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('3bfdcde9-9e79-4a13-8d31-e7efaf14f2d3','stage','Stage','c9d371d7-9933-484f-853b-cc7483011c0d', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('825346a6-0351-47f0-aa8d-cab2ae335bfd','elevation','Elevation','c9d371d7-9933-484f-853b-cc7483011c0d', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('52e3faad-8a91-4a21-9f79-f5ffc606741a','precipitation','Precipitation','c9d371d7-9933-484f-853b-cc7483011c0d', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1180,6 +1300,7 @@ VALUES
 ('0c48ebb3-3d88-476b-a1c6-e82b6de77ced','ph','ph','c9d371d7-9933-484f-853b-cc7483011c0d', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('f6c2e5bb-becf-4c06-8f65-f5733f226f62','turbidity','Turbidity','c9d371d7-9933-484f-853b-cc7483011c0d', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('4d729a08-d8ad-4a3e-8405-1a2c39554f02','voltage','Voltage','c9d371d7-9933-484f-853b-cc7483011c0d', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('c01c29d1-e3e4-407b-93c4-c3c14041994d','unknown-yf','Unknown YF','c9d371d7-9933-484f-853b-cc7483011c0d', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('25c5dffc-a6fd-4511-a460-d46e0c47579c','stage','Stage','c856ec08-c7f1-4d20-8804-481da266339d', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('1c5064b9-968b-41f9-b08c-3e39920ffddd','elevation','Elevation','c856ec08-c7f1-4d20-8804-481da266339d', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('2d8b419b-0e72-4063-b414-900dbb3b30bc','precipitation','Precipitation','c856ec08-c7f1-4d20-8804-481da266339d', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1189,6 +1310,7 @@ VALUES
 ('3d22cab6-3b41-4127-a930-20b1a42afcee','ph','ph','c856ec08-c7f1-4d20-8804-481da266339d', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('e57561a5-1abd-4489-b7b3-487e2b106b6d','turbidity','Turbidity','c856ec08-c7f1-4d20-8804-481da266339d', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('25fc3d14-de43-4869-b8c1-051717026e44','voltage','Voltage','c856ec08-c7f1-4d20-8804-481da266339d', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('4bdb091f-61ef-4341-9c30-34411fb097c3','unknown-yf','Unknown YF','c856ec08-c7f1-4d20-8804-481da266339d', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('5483f33a-359b-4b20-9dfd-c077cf3b1f48','stage','Stage','9b52884d-a446-4a1a-8db2-6d73aed87d66', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('acd37241-841c-4839-b808-1c2c87a7ec85','elevation','Elevation','9b52884d-a446-4a1a-8db2-6d73aed87d66', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('54b30186-8464-43d5-bbec-bcf33906d7c6','precipitation','Precipitation','9b52884d-a446-4a1a-8db2-6d73aed87d66', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1198,6 +1320,7 @@ VALUES
 ('12df24a3-d329-47ca-81c2-6f36cac005b1','ph','ph','9b52884d-a446-4a1a-8db2-6d73aed87d66', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('d3ea9a83-4de0-4c4d-9552-48767d6903cd','turbidity','Turbidity','9b52884d-a446-4a1a-8db2-6d73aed87d66', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('7ff95488-4896-410a-95f3-37bb969e3dd6','voltage','Voltage','9b52884d-a446-4a1a-8db2-6d73aed87d66', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('315dde46-ada9-4be9-aa81-ff7f4718ae01','unknown-yf','Unknown YF','9b52884d-a446-4a1a-8db2-6d73aed87d66', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('7aa16a01-b067-4da3-805c-63a6366d0541','stage','Stage','cb6708b0-9599-470a-8460-411c3969ab01', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('a4f1ef04-7764-4c86-a8eb-1a67f14b2140','elevation','Elevation','cb6708b0-9599-470a-8460-411c3969ab01', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('06fe7f79-9628-4785-adcb-a860d8a11037','precipitation','Precipitation','cb6708b0-9599-470a-8460-411c3969ab01', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1207,6 +1330,7 @@ VALUES
 ('11f78a35-4901-4eb2-8015-230f079e29be','ph','ph','cb6708b0-9599-470a-8460-411c3969ab01', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('86de76b5-a4c9-48da-94b9-7768af7ce5ae','turbidity','Turbidity','cb6708b0-9599-470a-8460-411c3969ab01', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('133bb8ab-bbfc-4fd1-bc17-9a55598d924e','voltage','Voltage','cb6708b0-9599-470a-8460-411c3969ab01', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('61dcaab3-d910-49a9-9470-c102cba59f87','unknown-yf','Unknown YF','cb6708b0-9599-470a-8460-411c3969ab01', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('4df9a922-8a02-411b-a4b9-5bca6739417e','stage','Stage','d40d94c2-4b9c-411f-82d2-e48ad6d1119b', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('c2879366-8157-4815-98b7-06ae00f0f269','elevation','Elevation','d40d94c2-4b9c-411f-82d2-e48ad6d1119b', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('7543fdca-6449-4a7d-8b8a-49c046d12348','precipitation','Precipitation','d40d94c2-4b9c-411f-82d2-e48ad6d1119b', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1216,6 +1340,7 @@ VALUES
 ('a72b48bb-6bbb-4d93-ae51-bf6abe9563bc','ph','ph','d40d94c2-4b9c-411f-82d2-e48ad6d1119b', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('441c8bd5-4e00-432a-96a7-aa25b6faad0f','turbidity','Turbidity','d40d94c2-4b9c-411f-82d2-e48ad6d1119b', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('8157b12b-77f3-4a3b-b1c8-92d9454a472e','voltage','Voltage','d40d94c2-4b9c-411f-82d2-e48ad6d1119b', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('28f7a1b1-d8cc-451b-8185-c7746422f584','unknown-yf','Unknown YF','d40d94c2-4b9c-411f-82d2-e48ad6d1119b', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('a8d0b08c-3d4c-4096-bfe7-873abe05a396','stage','Stage','0b5abf6f-d9e5-42fb-bf70-8965a8da9965', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('e022da69-8445-4d03-86ee-5ba151ad20ed','elevation','Elevation','0b5abf6f-d9e5-42fb-bf70-8965a8da9965', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('f789a5fe-9e70-4497-a69c-82bfe7fde80b','precipitation','Precipitation','0b5abf6f-d9e5-42fb-bf70-8965a8da9965', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1225,6 +1350,7 @@ VALUES
 ('44623280-a161-47f9-92a2-4b8e1d8e440b','ph','ph','0b5abf6f-d9e5-42fb-bf70-8965a8da9965', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('ad9c4ba5-803c-48d8-8085-aead73f7a38c','turbidity','Turbidity','0b5abf6f-d9e5-42fb-bf70-8965a8da9965', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('f80075f5-835f-44d5-847a-f86c1fe9e760','voltage','Voltage','0b5abf6f-d9e5-42fb-bf70-8965a8da9965', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('0ac4672f-a7f1-4ae9-8d1b-1f7539b7f689','unknown-yf','Unknown YF','0b5abf6f-d9e5-42fb-bf70-8965a8da9965', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('589b4a2e-375d-4719-8f1b-f72fe04f4f87','stage','Stage','2a5999e7-03b5-45e3-9161-215e4fdd8167', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('e53da73d-4ca8-49ef-8318-43b3ab379c6e','elevation','Elevation','2a5999e7-03b5-45e3-9161-215e4fdd8167', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('82a37921-941f-4dc8-b583-b658b01e96b9','precipitation','Precipitation','2a5999e7-03b5-45e3-9161-215e4fdd8167', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1234,6 +1360,7 @@ VALUES
 ('0d426914-85d1-4643-83a3-c3d4b8b9a41c','ph','ph','2a5999e7-03b5-45e3-9161-215e4fdd8167', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('16dd917d-1e57-4714-b24e-03d65fe815de','turbidity','Turbidity','2a5999e7-03b5-45e3-9161-215e4fdd8167', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('a9737754-ce7f-418b-9679-f921b38c9328','voltage','Voltage','2a5999e7-03b5-45e3-9161-215e4fdd8167', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('890a1457-3839-4c3d-b834-607b52697767','unknown-yf','Unknown YF','2a5999e7-03b5-45e3-9161-215e4fdd8167', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('1cec67dc-d21e-48e4-8398-54b6d1ff46cc','stage','Stage','f8acc6f8-9158-482d-9074-6f2c04f402a0', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('bc5ef900-0fc9-4655-ad81-89ae7ea68883','elevation','Elevation','f8acc6f8-9158-482d-9074-6f2c04f402a0', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('970631b6-f1fe-4bc2-b526-88aaa311708d','precipitation','Precipitation','f8acc6f8-9158-482d-9074-6f2c04f402a0', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1243,6 +1370,7 @@ VALUES
 ('c23fe5f6-f761-4673-87a3-c03df4a1c7ea','ph','ph','f8acc6f8-9158-482d-9074-6f2c04f402a0', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('ea4a1355-5074-406d-abcb-3af8f3b47a85','turbidity','Turbidity','f8acc6f8-9158-482d-9074-6f2c04f402a0', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('cd0d2dfb-9a12-49af-b48f-12b7f19a0a9e','voltage','Voltage','f8acc6f8-9158-482d-9074-6f2c04f402a0', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('9226accd-5347-4165-b47d-34ec8efea068','unknown-yf','Unknown YF','f8acc6f8-9158-482d-9074-6f2c04f402a0', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('08e2a0a1-2981-4033-9453-ee28c2c95008','stage','Stage','184e1fa0-dd7b-4ef3-a571-1708ca60874d', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('5098055b-8f44-42f1-b1e9-a547459d277b','elevation','Elevation','184e1fa0-dd7b-4ef3-a571-1708ca60874d', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('9371caf2-d5c7-47cf-a609-5c0f50c1cb37','precipitation','Precipitation','184e1fa0-dd7b-4ef3-a571-1708ca60874d', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1252,6 +1380,7 @@ VALUES
 ('948e967e-f177-4293-b514-e1da523f9621','ph','ph','184e1fa0-dd7b-4ef3-a571-1708ca60874d', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('19fe7fb7-f52a-4ccf-a996-9e683de14e31','turbidity','Turbidity','184e1fa0-dd7b-4ef3-a571-1708ca60874d', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('a5156758-5e09-4ece-95a0-2eb1b9480a05','voltage','Voltage','184e1fa0-dd7b-4ef3-a571-1708ca60874d', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('5baeadef-c854-4900-8875-69cc3675bc5c','unknown-yf','Unknown YF','184e1fa0-dd7b-4ef3-a571-1708ca60874d', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('c74197e9-6562-4237-8ec5-bcdb6b1b3a8e','stage','Stage','0badc723-222f-47e1-a723-8ccd56363484', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('39274a22-5bd8-4093-be42-a012c3560c59','elevation','Elevation','0badc723-222f-47e1-a723-8ccd56363484', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('79942d04-4eb7-4dce-a7e2-874ca60095c6','precipitation','Precipitation','0badc723-222f-47e1-a723-8ccd56363484', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1261,6 +1390,7 @@ VALUES
 ('1cacfcff-0951-44fa-bf99-08dcb4afcedd','ph','ph','0badc723-222f-47e1-a723-8ccd56363484', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('932c613e-67ff-4dc6-a5de-50d0b4435f25','turbidity','Turbidity','0badc723-222f-47e1-a723-8ccd56363484', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('60eb02b0-f2b1-44b4-9375-b3e2133998a7','voltage','Voltage','0badc723-222f-47e1-a723-8ccd56363484', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('0f22919d-be58-43fb-a5d7-4cb297602c23','unknown-yf','Unknown YF','0badc723-222f-47e1-a723-8ccd56363484', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('9fbf1aa5-08fc-4321-9b57-0e2b456f5df7','stage','Stage','7fabbbeb-74da-4853-af05-497eb59b17ac', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('d76cd9a5-f906-4b7b-bbf4-dc14f0c2a073','elevation','Elevation','7fabbbeb-74da-4853-af05-497eb59b17ac', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('7819918d-7f8e-4f20-b3ba-3eb86f92ead9','precipitation','Precipitation','7fabbbeb-74da-4853-af05-497eb59b17ac', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1270,6 +1400,7 @@ VALUES
 ('95b2c2a9-eaac-4580-83d3-f849f51e45bd','ph','ph','7fabbbeb-74da-4853-af05-497eb59b17ac', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('704c06ea-14d2-4cdf-8993-a221da177d9e','turbidity','Turbidity','7fabbbeb-74da-4853-af05-497eb59b17ac', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('8e856882-342c-49bc-aa8a-538238062db7','voltage','Voltage','7fabbbeb-74da-4853-af05-497eb59b17ac', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('cfeab0b2-6ca6-4ad7-ba8b-7d293d86b02b','unknown-yf','Unknown YF','7fabbbeb-74da-4853-af05-497eb59b17ac', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('ce085378-9579-4142-8d9b-b7da5a71bc81','stage','Stage','b11b1374-9353-4247-9366-b03ec33097bc', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('26deaea3-eb06-4436-b132-a062ff3aa756','elevation','Elevation','b11b1374-9353-4247-9366-b03ec33097bc', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('c70aba53-fac9-4a39-b318-69d70137785f','precipitation','Precipitation','b11b1374-9353-4247-9366-b03ec33097bc', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1279,6 +1410,7 @@ VALUES
 ('1761c0f0-845c-41ba-a15c-8496a9600e07','ph','ph','b11b1374-9353-4247-9366-b03ec33097bc', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('6ad37edf-7b9d-4ea0-b7da-272cbd56650f','turbidity','Turbidity','b11b1374-9353-4247-9366-b03ec33097bc', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('8e3aeb6e-07e3-4c91-a2a7-0fabcc304ba5','voltage','Voltage','b11b1374-9353-4247-9366-b03ec33097bc', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('77288ca4-46f2-429e-a22e-3ec44c994f4d','unknown-yf','Unknown YF','b11b1374-9353-4247-9366-b03ec33097bc', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('65583591-b8e6-44c2-8c04-32ca07e8f847','stage','Stage','94945eaa-d3ac-4c69-8fe7-314607ef41b2', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('b4786e25-f3b8-42ab-a55d-2a659449f791','elevation','Elevation','94945eaa-d3ac-4c69-8fe7-314607ef41b2', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('f3cee3b0-066f-419c-ad95-2d56eff4dfde','precipitation','Precipitation','94945eaa-d3ac-4c69-8fe7-314607ef41b2', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1288,6 +1420,7 @@ VALUES
 ('24be11d5-460f-4777-9be2-a5a7766181b2','ph','ph','94945eaa-d3ac-4c69-8fe7-314607ef41b2', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('6390071e-fbeb-40f4-ad04-1a3df8a4de51','turbidity','Turbidity','94945eaa-d3ac-4c69-8fe7-314607ef41b2', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('36c83d40-ebde-4132-9c50-226fb1a14a0c','voltage','Voltage','94945eaa-d3ac-4c69-8fe7-314607ef41b2', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('d40592f8-93d2-40af-9353-3579039d6132','unknown-yf','Unknown YF','94945eaa-d3ac-4c69-8fe7-314607ef41b2', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('d6933fc3-a0ff-43c2-b590-3aecabf8db09','stage','Stage','49a8d0e0-08c1-46ff-838f-51812f118415', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('f9873df1-3c50-41d8-b786-544c969af892','elevation','Elevation','49a8d0e0-08c1-46ff-838f-51812f118415', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('821575d7-d944-4820-9f7e-7547ddabd9fd','precipitation','Precipitation','49a8d0e0-08c1-46ff-838f-51812f118415', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1297,6 +1430,7 @@ VALUES
 ('2f1c2720-d38c-47f6-9a9f-4be73556ec3e','ph','ph','49a8d0e0-08c1-46ff-838f-51812f118415', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('5391dabf-05a9-4e04-9e1d-90990e418a0b','turbidity','Turbidity','49a8d0e0-08c1-46ff-838f-51812f118415', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('7e3edd67-c5a4-45dd-a199-f38a9c16282f','voltage','Voltage','49a8d0e0-08c1-46ff-838f-51812f118415', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('e272ded5-dc96-4c39-815f-5680f5a91142','unknown-yf','Unknown YF','49a8d0e0-08c1-46ff-838f-51812f118415', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('f2cb451c-f53e-499d-8a16-f3060d3daab1','stage','Stage','1afa8d2f-8d7e-4ca9-9b17-d49d11cdf84a', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('a865d8de-5e9f-41ba-b6cf-aedd305d0593','elevation','Elevation','1afa8d2f-8d7e-4ca9-9b17-d49d11cdf84a', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('947b3686-96cd-42d7-a778-547674a79c94','precipitation','Precipitation','1afa8d2f-8d7e-4ca9-9b17-d49d11cdf84a', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1306,6 +1440,7 @@ VALUES
 ('85076d3e-7917-421f-9b24-cca5827bc9d3','ph','ph','1afa8d2f-8d7e-4ca9-9b17-d49d11cdf84a', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('1e04cf86-600d-4d96-b642-d6c64c7bea3c','turbidity','Turbidity','1afa8d2f-8d7e-4ca9-9b17-d49d11cdf84a', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('3f6aa2ce-492c-46e3-8d49-dcff2368be6b','voltage','Voltage','1afa8d2f-8d7e-4ca9-9b17-d49d11cdf84a', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('54ee1ac0-d90a-4052-8c30-ed4a9e0c29ef','unknown-yf','Unknown YF','1afa8d2f-8d7e-4ca9-9b17-d49d11cdf84a', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('12523af1-9607-4f1b-9031-36d9b3d3d05f','stage','Stage','52fa325e-25ef-4d95-9253-a31bf613afd4', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('3048c87b-49f3-4d9c-8fee-df9ba9006562','elevation','Elevation','52fa325e-25ef-4d95-9253-a31bf613afd4', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('f7901daf-f869-426c-960c-c048fcca50d5','precipitation','Precipitation','52fa325e-25ef-4d95-9253-a31bf613afd4', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1315,6 +1450,7 @@ VALUES
 ('8e834dfe-6046-4e6a-8314-89d8298068c7','ph','ph','52fa325e-25ef-4d95-9253-a31bf613afd4', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('c34e0282-55f7-41f5-9f16-bb69f2081abe','turbidity','Turbidity','52fa325e-25ef-4d95-9253-a31bf613afd4', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('9ef7e069-ad36-474e-bdf4-702961b1af82','voltage','Voltage','52fa325e-25ef-4d95-9253-a31bf613afd4', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('abae1d64-2a77-4b4d-a13c-3198774e2e87','unknown-yf','Unknown YF','52fa325e-25ef-4d95-9253-a31bf613afd4', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('cfbfcb87-cac4-46bc-9210-3d5e9e9d8831','stage','Stage','f8083600-9aca-4d24-a87e-1b290aaea940', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('b0e0535f-d54b-4840-b788-9a836a25fcf1','elevation','Elevation','f8083600-9aca-4d24-a87e-1b290aaea940', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('257c04cf-4331-40cd-83d2-21eb7082f7ae','precipitation','Precipitation','f8083600-9aca-4d24-a87e-1b290aaea940', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1324,6 +1460,7 @@ VALUES
 ('05a887d2-0e17-41ae-9bca-331b1fdb6a33','ph','ph','f8083600-9aca-4d24-a87e-1b290aaea940', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('2a2f63fd-d322-4f0c-99c2-ac6967a51f1c','turbidity','Turbidity','f8083600-9aca-4d24-a87e-1b290aaea940', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('dfa01e48-29cb-483b-9388-b41e3c5f8f0d','voltage','Voltage','f8083600-9aca-4d24-a87e-1b290aaea940', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('08ffad3e-7338-41bd-a20a-049a5ccf6be5','unknown-yf','Unknown YF','f8083600-9aca-4d24-a87e-1b290aaea940', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('a334ddb9-7112-437a-b7eb-f67f7a4c0b26','stage','Stage','dfe34baa-508b-4471-9ac1-b918021ae6a9', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('ecc867b8-abb9-4636-83ac-dd02732e9f05','elevation','Elevation','dfe34baa-508b-4471-9ac1-b918021ae6a9', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('ccde83a9-712c-464a-86a6-53a40c5487a9','precipitation','Precipitation','dfe34baa-508b-4471-9ac1-b918021ae6a9', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1333,6 +1470,7 @@ VALUES
 ('61e66f2c-cd7d-47aa-8893-d630f45fb1c2','ph','ph','dfe34baa-508b-4471-9ac1-b918021ae6a9', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('ea256b58-d311-4870-bc39-1f0bbf3cfdc2','turbidity','Turbidity','dfe34baa-508b-4471-9ac1-b918021ae6a9', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('7a1fee48-7518-4a41-93c6-cc483ca46aef','voltage','Voltage','dfe34baa-508b-4471-9ac1-b918021ae6a9', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('456946ca-27ea-460a-991a-701d7a7b7536','unknown-yf','Unknown YF','dfe34baa-508b-4471-9ac1-b918021ae6a9', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('76fa7264-7c63-4cee-a69d-ee5a103e0adb','stage','Stage','ee6d3280-490b-498e-ab9f-90e5698cd181', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('c27c368a-f05b-4a35-91a0-e975756dea69','elevation','Elevation','ee6d3280-490b-498e-ab9f-90e5698cd181', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('6b2372be-ed5d-4026-a3b8-9e3788fb29ee','precipitation','Precipitation','ee6d3280-490b-498e-ab9f-90e5698cd181', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1342,6 +1480,7 @@ VALUES
 ('d1975cbc-89d2-4185-ab15-bfe4381f0b6f','ph','ph','ee6d3280-490b-498e-ab9f-90e5698cd181', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('fe4cb09b-730a-4d5d-88fb-1659e0764432','turbidity','Turbidity','ee6d3280-490b-498e-ab9f-90e5698cd181', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('179786f5-8b49-41db-97cd-db2d8b884245','voltage','Voltage','ee6d3280-490b-498e-ab9f-90e5698cd181', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('691b36d3-18a3-40b6-a073-72c2cabda5e4','unknown-yf','Unknown YF','ee6d3280-490b-498e-ab9f-90e5698cd181', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('10f51e38-b803-4c97-9ea9-39f3fb13904f','stage','Stage','e8d3b2e6-3b58-410f-96bb-6f8453529940', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('c51cd7f8-cf3d-4553-95f5-f2684d0ab179','elevation','Elevation','e8d3b2e6-3b58-410f-96bb-6f8453529940', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('8213bd75-f645-4ffc-8661-99f3ac53935d','precipitation','Precipitation','e8d3b2e6-3b58-410f-96bb-6f8453529940', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1351,6 +1490,7 @@ VALUES
 ('c78c1837-1327-4550-86e8-380f2dfb4abc','ph','ph','e8d3b2e6-3b58-410f-96bb-6f8453529940', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('a946c55f-27ca-4625-99b0-183b72507705','turbidity','Turbidity','e8d3b2e6-3b58-410f-96bb-6f8453529940', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('2cad0bc6-23dc-4e0e-a209-859dae71b689','voltage','Voltage','e8d3b2e6-3b58-410f-96bb-6f8453529940', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('d5ace08d-44d6-4790-b1cd-d586b4a65c82','unknown-yf','Unknown YF','e8d3b2e6-3b58-410f-96bb-6f8453529940', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('899916fe-66ea-4a9c-835d-1eb50f09c917','stage','Stage','2a76c74a-aada-4995-8fa6-3722a521fd32', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('e3878f62-a455-456e-a139-0e42eb72f6cc','elevation','Elevation','2a76c74a-aada-4995-8fa6-3722a521fd32', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('1754a2e9-0926-4c42-a3e2-36f6201e5210','precipitation','Precipitation','2a76c74a-aada-4995-8fa6-3722a521fd32', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1360,6 +1500,7 @@ VALUES
 ('5756baf7-4183-4f28-85cf-ac6640b0f534','ph','ph','2a76c74a-aada-4995-8fa6-3722a521fd32', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('5aaa5408-af4f-4f5d-aa51-e1fbdb21b1bb','turbidity','Turbidity','2a76c74a-aada-4995-8fa6-3722a521fd32', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('b009ded7-a9b7-4b18-ba98-3e56be2f6ee3','voltage','Voltage','2a76c74a-aada-4995-8fa6-3722a521fd32', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('86221df0-d9fd-4180-bbfa-3c6d3ffd2074','unknown-yf','Unknown YF','2a76c74a-aada-4995-8fa6-3722a521fd32', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('279db020-2208-4faa-a1e6-2a92530311ec','stage','Stage','a129aa7b-7ec4-4f2d-88ae-457caa2adec7', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('898bc7f7-3a93-4379-b089-c9ac2317d3ac','elevation','Elevation','a129aa7b-7ec4-4f2d-88ae-457caa2adec7', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('0d77b19b-f558-4650-809e-494324bf8c5d','precipitation','Precipitation','a129aa7b-7ec4-4f2d-88ae-457caa2adec7', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1369,6 +1510,7 @@ VALUES
 ('21d2205d-4b5f-4e00-b27b-3255cdeef3cd','ph','ph','a129aa7b-7ec4-4f2d-88ae-457caa2adec7', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('d87c5d54-8a09-4706-9e90-67212348d2f1','turbidity','Turbidity','a129aa7b-7ec4-4f2d-88ae-457caa2adec7', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('9d032b92-0cfc-46dd-ba1b-12f6ee89c32f','voltage','Voltage','a129aa7b-7ec4-4f2d-88ae-457caa2adec7', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('f1de2c93-b1ab-4254-9ac0-c58445660ca5','unknown-yf','Unknown YF','a129aa7b-7ec4-4f2d-88ae-457caa2adec7', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('bde8d32b-adfe-4c1b-b9d0-6e66ce01f87d','stage','Stage','04117943-7a09-4015-b476-cf3f5cd469ba', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('7c274670-7926-45cd-a55d-9adc52446a4d','elevation','Elevation','04117943-7a09-4015-b476-cf3f5cd469ba', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('5ced4b60-0bcb-40c7-8d62-57ce056c98da','precipitation','Precipitation','04117943-7a09-4015-b476-cf3f5cd469ba', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1378,6 +1520,7 @@ VALUES
 ('f6acfaac-c614-4aab-9a98-0e37b6c64a16','ph','ph','04117943-7a09-4015-b476-cf3f5cd469ba', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('a2232c41-59c8-4704-8bce-4f22aca0dfb9','turbidity','Turbidity','04117943-7a09-4015-b476-cf3f5cd469ba', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('5c9f4b78-3a92-44ff-a963-7c8066f3b1a5','voltage','Voltage','04117943-7a09-4015-b476-cf3f5cd469ba', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('83ee04de-006e-4901-a60a-761a299423b1','unknown-yf','Unknown YF','04117943-7a09-4015-b476-cf3f5cd469ba', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('09aabbe4-b3f4-488d-b9e4-035e820075ed','stage','Stage','67d97a3a-a3d5-4c8c-9aa2-7329065c902c', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('76762669-3418-4f51-8cf9-7bb75a5bcb94','elevation','Elevation','67d97a3a-a3d5-4c8c-9aa2-7329065c902c', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('67733a88-0936-42ac-bcde-1a16acd56db9','precipitation','Precipitation','67d97a3a-a3d5-4c8c-9aa2-7329065c902c', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1387,6 +1530,7 @@ VALUES
 ('110c1cbc-e6a5-43e3-acec-55ba6ae96dc4','ph','ph','67d97a3a-a3d5-4c8c-9aa2-7329065c902c', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('c08075a3-f681-4d62-9473-d0fdc310251a','turbidity','Turbidity','67d97a3a-a3d5-4c8c-9aa2-7329065c902c', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('7ffe0464-6597-42f5-bf47-84e8ba787fa6','voltage','Voltage','67d97a3a-a3d5-4c8c-9aa2-7329065c902c', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('64bccc67-33cf-4ef9-ae65-d5a2413ecbf3','unknown-yf','Unknown YF','67d97a3a-a3d5-4c8c-9aa2-7329065c902c', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('69e91014-ad48-4988-abb2-0b4f469cb004','stage','Stage','2bb2b7cf-5ad8-4158-a42b-9727f61a02a8', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('3232b00b-d7cd-4b02-9b52-e09ed03b156e','elevation','Elevation','2bb2b7cf-5ad8-4158-a42b-9727f61a02a8', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('e8e9387a-57f5-40e0-adb7-a12adede0f84','precipitation','Precipitation','2bb2b7cf-5ad8-4158-a42b-9727f61a02a8', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1396,6 +1540,7 @@ VALUES
 ('39ad68c5-c54c-4b70-8fd7-a3909244a5e8','ph','ph','2bb2b7cf-5ad8-4158-a42b-9727f61a02a8', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('d8542cb9-0d45-4d28-8b6e-8a1e18ae990f','turbidity','Turbidity','2bb2b7cf-5ad8-4158-a42b-9727f61a02a8', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('d0cbd97f-b2d5-42d0-b772-76ae753a252a','voltage','Voltage','2bb2b7cf-5ad8-4158-a42b-9727f61a02a8', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('dfffcb52-61aa-4b9c-86f5-247f27ad95a4','unknown-yf','Unknown YF','2bb2b7cf-5ad8-4158-a42b-9727f61a02a8', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('0d0f6383-f477-4c47-b6c8-222ec23242c6','stage','Stage','07a61743-18ae-42ef-b47d-c4e20096b086', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('13b3eb8b-c16f-41c4-b327-7aff7b161e81','elevation','Elevation','07a61743-18ae-42ef-b47d-c4e20096b086', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('c9bbd0aa-3a9b-4554-89d0-9884cc8017ce','precipitation','Precipitation','07a61743-18ae-42ef-b47d-c4e20096b086', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1405,6 +1550,7 @@ VALUES
 ('1635b607-370c-4b65-aa4d-b194eab385a7','ph','ph','07a61743-18ae-42ef-b47d-c4e20096b086', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('c1ce49a9-4569-4557-ae84-ce255394200d','turbidity','Turbidity','07a61743-18ae-42ef-b47d-c4e20096b086', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('bd71f7ca-41a4-4f33-82d9-28fa6bffb89a','voltage','Voltage','07a61743-18ae-42ef-b47d-c4e20096b086', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('9ffbf0e9-d401-4e4c-bfd2-8b4de97a274f','unknown-yf','Unknown YF','07a61743-18ae-42ef-b47d-c4e20096b086', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('110a9fa2-b714-42cd-8fea-864f984716dc','stage','Stage','32d49c6a-b02c-4d4d-ba52-9a528cd1c80f', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('11f8a7f8-0fbb-4ccd-aa74-66c23c87060f','elevation','Elevation','32d49c6a-b02c-4d4d-ba52-9a528cd1c80f', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('edc066ca-76ee-4f1e-9aa7-24ff99690a62','precipitation','Precipitation','32d49c6a-b02c-4d4d-ba52-9a528cd1c80f', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1414,6 +1560,7 @@ VALUES
 ('654d2ed1-7efe-41e2-970d-2d05575cfc87','ph','ph','32d49c6a-b02c-4d4d-ba52-9a528cd1c80f', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('61a69e70-a544-40bd-9dff-7c34835cbf1e','turbidity','Turbidity','32d49c6a-b02c-4d4d-ba52-9a528cd1c80f', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('c6a063a2-19f9-409f-a3c3-b9c3cfb149b2','voltage','Voltage','32d49c6a-b02c-4d4d-ba52-9a528cd1c80f', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('97fd474a-7056-46fd-bfa1-df4fafc49a08','unknown-yf','Unknown YF','32d49c6a-b02c-4d4d-ba52-9a528cd1c80f', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('9ce4a506-3657-43f3-8890-fb93e7374f9c','stage','Stage','2a045b91-fdda-45d0-b264-6c21b9790e36', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('50c0e1c2-287b-4f4e-83e2-dcdb97477453','elevation','Elevation','2a045b91-fdda-45d0-b264-6c21b9790e36', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('a279ea79-dcd7-4a26-b654-413499657646','precipitation','Precipitation','2a045b91-fdda-45d0-b264-6c21b9790e36', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1423,6 +1570,7 @@ VALUES
 ('b4587cc9-1c99-41de-bf34-049d99d8732a','ph','ph','2a045b91-fdda-45d0-b264-6c21b9790e36', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('9c2b3888-da63-49c4-9551-7e392e371f06','turbidity','Turbidity','2a045b91-fdda-45d0-b264-6c21b9790e36', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('b3ea2a7b-76cb-44a1-925a-e10d1f721ca7','voltage','Voltage','2a045b91-fdda-45d0-b264-6c21b9790e36', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('358350e4-507c-42b1-b28e-3563bd3237a1','unknown-yf','Unknown YF','2a045b91-fdda-45d0-b264-6c21b9790e36', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('028adf0c-d006-49ad-bcd7-6f1d517a0027','stage','Stage','1ff25fb7-8cb9-49b1-a83c-4917e1842b6e', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('c024c7ce-f28a-44a8-9bbb-9eeea3a0e5c6','elevation','Elevation','1ff25fb7-8cb9-49b1-a83c-4917e1842b6e', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('1d2ad227-ab23-4046-abc2-000411022ebd','precipitation','Precipitation','1ff25fb7-8cb9-49b1-a83c-4917e1842b6e', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1432,6 +1580,7 @@ VALUES
 ('096dd126-38b9-40ea-997d-055dabd78f6e','ph','ph','1ff25fb7-8cb9-49b1-a83c-4917e1842b6e', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('e4a382e9-9158-4cff-b534-51c61a033ba1','turbidity','Turbidity','1ff25fb7-8cb9-49b1-a83c-4917e1842b6e', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('35d7e3fb-40b2-4d8f-82d6-20bb4a3fb2bb','voltage','Voltage','1ff25fb7-8cb9-49b1-a83c-4917e1842b6e', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('3275a1b1-2f77-469a-badf-7250b5ffb5dd','unknown-yf','Unknown YF','1ff25fb7-8cb9-49b1-a83c-4917e1842b6e', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('79c1d0af-b444-4521-bd8d-01dff174d6f4','stage','Stage','89e3534d-b0a3-422a-82ca-58b3b0e0871a', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('4c96f98c-f8a6-4d0a-9309-71f7fba6ef3a','elevation','Elevation','89e3534d-b0a3-422a-82ca-58b3b0e0871a', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('56d5047d-abc4-456b-8b36-410ec173f98d','precipitation','Precipitation','89e3534d-b0a3-422a-82ca-58b3b0e0871a', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1441,6 +1590,7 @@ VALUES
 ('f69b39d3-87f1-4240-8c84-c33fddbdda84','ph','ph','89e3534d-b0a3-422a-82ca-58b3b0e0871a', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('483c9ff5-d24d-476b-9515-aacb0cef4066','turbidity','Turbidity','89e3534d-b0a3-422a-82ca-58b3b0e0871a', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('edd7427a-76cc-4740-8400-cb2e18b5b7b0','voltage','Voltage','89e3534d-b0a3-422a-82ca-58b3b0e0871a', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('cf100246-5337-4b94-a6bf-640d538a8f7a','unknown-yf','Unknown YF','89e3534d-b0a3-422a-82ca-58b3b0e0871a', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('7a520d39-2cfe-46db-bbd7-3d624409f0c9','stage','Stage','3e55442c-b36a-493c-b2f8-6fec535fc2cc', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('44c05329-db42-4ef9-8230-4c40a4aa171d','elevation','Elevation','3e55442c-b36a-493c-b2f8-6fec535fc2cc', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('11b79b57-a606-4ee4-b29e-7699dfd2481c','precipitation','Precipitation','3e55442c-b36a-493c-b2f8-6fec535fc2cc', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1450,6 +1600,7 @@ VALUES
 ('ec135aee-43d3-40c5-8c66-5b8e7a588cbf','ph','ph','3e55442c-b36a-493c-b2f8-6fec535fc2cc', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('824e4a87-070a-4ec2-9474-6353610b1656','turbidity','Turbidity','3e55442c-b36a-493c-b2f8-6fec535fc2cc', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('2847732d-a7df-45c4-a599-f3f914a4a32f','voltage','Voltage','3e55442c-b36a-493c-b2f8-6fec535fc2cc', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('a9864b4a-137a-46af-937a-080e5b9ad97a','unknown-yf','Unknown YF','3e55442c-b36a-493c-b2f8-6fec535fc2cc', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('d02c02c9-8410-4bee-9b99-463e2b2c0b56','stage','Stage','8714bb02-ecdf-4116-9f37-9bb8158d0a1d', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('f7bef68a-ac4a-44f1-9a96-c9881292d9a7','elevation','Elevation','8714bb02-ecdf-4116-9f37-9bb8158d0a1d', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('e36893a4-b44a-4059-9432-9d3d587aab05','precipitation','Precipitation','8714bb02-ecdf-4116-9f37-9bb8158d0a1d', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1459,6 +1610,7 @@ VALUES
 ('cabb0172-86e2-4f5a-967b-3e8262d5f64c','ph','ph','8714bb02-ecdf-4116-9f37-9bb8158d0a1d', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('f2a4d7b9-0c91-4e60-891e-cee3381c3ece','turbidity','Turbidity','8714bb02-ecdf-4116-9f37-9bb8158d0a1d', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('7080cc4a-486b-4945-81bc-badf6f94b179','voltage','Voltage','8714bb02-ecdf-4116-9f37-9bb8158d0a1d', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('a4aefac3-883b-4885-9f56-608cb4b77f08','unknown-yf','Unknown YF','8714bb02-ecdf-4116-9f37-9bb8158d0a1d', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('7e30d63d-ebb9-4f19-a51f-85812b1f91c3','stage','Stage','f1a69f11-6790-4d16-92b0-7bf2907d4039', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('f65758c5-13d7-4bb1-ab5b-1cd541fa8052','elevation','Elevation','f1a69f11-6790-4d16-92b0-7bf2907d4039', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('57d618f2-7d35-4d2d-9002-d8f8e068baad','precipitation','Precipitation','f1a69f11-6790-4d16-92b0-7bf2907d4039', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1468,6 +1620,7 @@ VALUES
 ('4bce2437-a3f4-4b57-868d-c15374feda11','ph','ph','f1a69f11-6790-4d16-92b0-7bf2907d4039', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('601f5f09-5879-42bb-9600-87024f661bb0','turbidity','Turbidity','f1a69f11-6790-4d16-92b0-7bf2907d4039', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('0d0e1587-e62b-4e13-bafc-8e6ac176d70a','voltage','Voltage','f1a69f11-6790-4d16-92b0-7bf2907d4039', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('f3decb0e-beab-46eb-a955-4cffc60c5763','unknown-yf','Unknown YF','f1a69f11-6790-4d16-92b0-7bf2907d4039', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('9ead056c-9a5f-4386-9004-1e2453a80c70','stage','Stage','a5a15c22-bced-4ea0-8342-a56df99d753f', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('509c3736-8456-471c-8fd0-9a1b946796c9','elevation','Elevation','a5a15c22-bced-4ea0-8342-a56df99d753f', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('73da6d11-4e15-4ef1-b600-e92790c9cb1d','precipitation','Precipitation','a5a15c22-bced-4ea0-8342-a56df99d753f', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1477,6 +1630,7 @@ VALUES
 ('8d7e6d99-e134-49d9-a2a7-46dad66849da','ph','ph','a5a15c22-bced-4ea0-8342-a56df99d753f', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('824bd638-ece6-430d-b4c6-db8b47a5e31e','turbidity','Turbidity','a5a15c22-bced-4ea0-8342-a56df99d753f', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('99f35ab5-9a13-4be9-837f-5c7dab983ac5','voltage','Voltage','a5a15c22-bced-4ea0-8342-a56df99d753f', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('409efc4e-81db-43f0-a21d-ddaab9615e7c','unknown-yf','Unknown YF','a5a15c22-bced-4ea0-8342-a56df99d753f', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('9d3f152b-7074-464a-8756-812ec3c7b32c','stage','Stage','38f9a880-6c47-4b1c-9476-92daa6b8164b', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('7f1d5764-b226-444e-bef3-b1d0b62d6695','elevation','Elevation','38f9a880-6c47-4b1c-9476-92daa6b8164b', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('9107ba28-5ebc-4d33-bf12-e223bc5c56ed','precipitation','Precipitation','38f9a880-6c47-4b1c-9476-92daa6b8164b', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1486,6 +1640,7 @@ VALUES
 ('50af85ab-f806-4a2b-982e-d41536f34a2c','ph','ph','38f9a880-6c47-4b1c-9476-92daa6b8164b', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('f4947832-0613-4ede-ba06-340a5d81df19','turbidity','Turbidity','38f9a880-6c47-4b1c-9476-92daa6b8164b', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('081dc85a-b1cc-4367-9000-89c0a3e2bd3f','voltage','Voltage','38f9a880-6c47-4b1c-9476-92daa6b8164b', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('993a15b8-5e1f-4e38-b000-eddca0d614bf','unknown-yf','Unknown YF','38f9a880-6c47-4b1c-9476-92daa6b8164b', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('77855fbe-40a7-4ca7-bedc-bbac3200c352','stage','Stage','7d7e410b-ea8d-48a9-b09f-a6f7212b4ebe', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('cc1cbf8b-f0cf-4d91-a566-f6165169fadd','elevation','Elevation','7d7e410b-ea8d-48a9-b09f-a6f7212b4ebe', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('3285b618-6712-4fb5-9748-a6e4292d9bfa','precipitation','Precipitation','7d7e410b-ea8d-48a9-b09f-a6f7212b4ebe', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1495,6 +1650,7 @@ VALUES
 ('77986855-1f18-4c0c-ab40-ab95b95f7257','ph','ph','7d7e410b-ea8d-48a9-b09f-a6f7212b4ebe', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('ab74355d-0fa8-483c-8296-4d8869fd8eb6','turbidity','Turbidity','7d7e410b-ea8d-48a9-b09f-a6f7212b4ebe', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('3d6589b5-2cad-4806-a888-4719e0486c45','voltage','Voltage','7d7e410b-ea8d-48a9-b09f-a6f7212b4ebe', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('e1f80aca-4022-4e17-9ca7-e1d139e1caf4','unknown-yf','Unknown YF','7d7e410b-ea8d-48a9-b09f-a6f7212b4ebe', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('2fc038bf-6763-4bf6-b71f-ff0e0241cafc','stage','Stage','e1508b90-1bcf-4608-acae-0ab4e1ef01d4', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('1122bdf5-93e3-48f4-b7e8-827a0ed1153d','elevation','Elevation','e1508b90-1bcf-4608-acae-0ab4e1ef01d4', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('e6f6aa44-61e9-41db-943d-cbebe0100671','precipitation','Precipitation','e1508b90-1bcf-4608-acae-0ab4e1ef01d4', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1504,6 +1660,7 @@ VALUES
 ('96462d85-749b-48a9-bebc-81d687214bc5','ph','ph','e1508b90-1bcf-4608-acae-0ab4e1ef01d4', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('e33cab3e-a285-411b-bd12-05951f962fc5','turbidity','Turbidity','e1508b90-1bcf-4608-acae-0ab4e1ef01d4', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('ff190062-7fc3-4b5b-bc4b-d2d48a5f7227','voltage','Voltage','e1508b90-1bcf-4608-acae-0ab4e1ef01d4', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('f24aa018-25ae-430d-9500-b6018fad98b6','unknown-yf','Unknown YF','e1508b90-1bcf-4608-acae-0ab4e1ef01d4', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('0c76e242-382b-4515-9c62-53df460e1e6d','stage','Stage','6758f2d6-ac16-4a8d-8a89-676578f6a639', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('94a8d895-dd90-488b-b8e2-c87819f08778','elevation','Elevation','6758f2d6-ac16-4a8d-8a89-676578f6a639', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('adadd1d3-093a-4366-880d-6270916d0688','precipitation','Precipitation','6758f2d6-ac16-4a8d-8a89-676578f6a639', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1513,6 +1670,7 @@ VALUES
 ('240a00ac-25e3-484d-8340-c28f555b50d2','ph','ph','6758f2d6-ac16-4a8d-8a89-676578f6a639', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('e3cbb93c-f8ec-4f9e-bf14-a1fef85ec339','turbidity','Turbidity','6758f2d6-ac16-4a8d-8a89-676578f6a639', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('f8c9a64d-462c-472d-a10b-0ce7128ad1cf','voltage','Voltage','6758f2d6-ac16-4a8d-8a89-676578f6a639', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('e1759692-bc6b-43a2-8966-00aae6f4cdc1','unknown-yf','Unknown YF','6758f2d6-ac16-4a8d-8a89-676578f6a639', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('220e89c2-6c83-4a1c-b42a-6bdc4b4c8981','stage','Stage','8d3041bc-ff78-4dca-8044-a904ec35321f', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('8aa05ab3-60e2-4361-8fcd-502bb6086fd4','elevation','Elevation','8d3041bc-ff78-4dca-8044-a904ec35321f', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('4aaf9bf4-4338-4737-989e-0cdfec111b9c','precipitation','Precipitation','8d3041bc-ff78-4dca-8044-a904ec35321f', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1522,6 +1680,7 @@ VALUES
 ('ced0fd66-d883-45b5-a008-aeaa4b1e7b68','ph','ph','8d3041bc-ff78-4dca-8044-a904ec35321f', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('fa3d12e3-1193-481c-a4c6-cbec9d666b91','turbidity','Turbidity','8d3041bc-ff78-4dca-8044-a904ec35321f', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('846d0c1d-d40a-48eb-b030-b838a84f8f69','voltage','Voltage','8d3041bc-ff78-4dca-8044-a904ec35321f', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('7cbed6a0-5949-48de-a860-96443541a331','unknown-yf','Unknown YF','8d3041bc-ff78-4dca-8044-a904ec35321f', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('88de94bc-d060-4c84-9fe9-7c9202f3ff95','stage','Stage','e88f7b9e-772d-42a3-9d66-33dad5c6b3a8', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('b43d50a1-bc22-4b7d-83c3-ee6ece58db51','elevation','Elevation','e88f7b9e-772d-42a3-9d66-33dad5c6b3a8', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('7fb11253-44fb-4550-bcc8-169e5c1fbfca','precipitation','Precipitation','e88f7b9e-772d-42a3-9d66-33dad5c6b3a8', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1531,6 +1690,7 @@ VALUES
 ('028dc354-a14f-43e0-a8bc-d02bf8725b03','ph','ph','e88f7b9e-772d-42a3-9d66-33dad5c6b3a8', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('8ed520a0-504b-42bb-89af-8ecd04eff11f','turbidity','Turbidity','e88f7b9e-772d-42a3-9d66-33dad5c6b3a8', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('0bd376bf-7ffc-4506-91d0-e7e194b03fca','voltage','Voltage','e88f7b9e-772d-42a3-9d66-33dad5c6b3a8', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('54ef1630-5ef0-434c-8133-f20fe2e6b89c','unknown-yf','Unknown YF','e88f7b9e-772d-42a3-9d66-33dad5c6b3a8', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('a352cf8a-986f-46e1-a69b-0b69644a60f4','stage','Stage','bf472550-0dfc-4310-ab39-19160a8e073a', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('2062da0e-a2f0-42ec-bdb0-dde1d1a0c700','elevation','Elevation','bf472550-0dfc-4310-ab39-19160a8e073a', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('f43b872b-fc04-439c-ae9d-fc0c20511f25','precipitation','Precipitation','bf472550-0dfc-4310-ab39-19160a8e073a', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1540,6 +1700,7 @@ VALUES
 ('fef640d5-3b5f-4cf8-9967-91a79d834e11','ph','ph','bf472550-0dfc-4310-ab39-19160a8e073a', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('8f69af06-7d15-4f64-8780-6850e101996b','turbidity','Turbidity','bf472550-0dfc-4310-ab39-19160a8e073a', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('c497845c-aa8f-4cfc-a30a-64450cf6641a','voltage','Voltage','bf472550-0dfc-4310-ab39-19160a8e073a', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('02c93956-14cf-4b55-b044-01d11a27f66f','unknown-yf','Unknown YF','bf472550-0dfc-4310-ab39-19160a8e073a', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('b44c07cb-314f-4f70-b79d-b17fb3b8487f','stage','Stage','60804aad-a4c4-41a5-938c-989619315126', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('037edd22-bc5b-4877-831b-d40107375b9a','elevation','Elevation','60804aad-a4c4-41a5-938c-989619315126', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('ad1c1820-edf3-469c-a456-2b1a0b30efcd','precipitation','Precipitation','60804aad-a4c4-41a5-938c-989619315126', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1549,6 +1710,7 @@ VALUES
 ('d52b68db-07da-42f3-beca-fc85a0bca7b9','ph','ph','60804aad-a4c4-41a5-938c-989619315126', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('47121129-a3da-42cc-b409-5cd88fb70136','turbidity','Turbidity','60804aad-a4c4-41a5-938c-989619315126', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('ea429f3a-278a-4921-8169-ff864da3f510','voltage','Voltage','60804aad-a4c4-41a5-938c-989619315126', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('30dac7ce-4e0c-42de-b141-3cb4cd669378','unknown-yf','Unknown YF','60804aad-a4c4-41a5-938c-989619315126', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('ba057acc-bd76-4088-a105-5036fca2f223','stage','Stage','eebb0956-f1c8-4d76-a78a-e823509fce4d', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('14371916-b10e-4c2e-aa0f-ce0112e5c329','elevation','Elevation','eebb0956-f1c8-4d76-a78a-e823509fce4d', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('c0dfdcf6-f991-4277-8978-42a6c6ecce5e','precipitation','Precipitation','eebb0956-f1c8-4d76-a78a-e823509fce4d', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1558,6 +1720,7 @@ VALUES
 ('929b8b9f-bd83-4d7b-b4b9-0a796a80b647','ph','ph','eebb0956-f1c8-4d76-a78a-e823509fce4d', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('2c2295a1-526c-4ecb-baa0-9ae02c78eafb','turbidity','Turbidity','eebb0956-f1c8-4d76-a78a-e823509fce4d', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('fe16d8c7-343a-4b04-bba7-f1d673780a6f','voltage','Voltage','eebb0956-f1c8-4d76-a78a-e823509fce4d', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('2763c7ca-8a71-40fc-be7d-9652c7488ce0','unknown-yf','Unknown YF','eebb0956-f1c8-4d76-a78a-e823509fce4d', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('d0d6d8e8-6eee-494b-9aa7-1f9371f1af5c','stage','Stage','f017d31a-573e-4993-ba15-10d4224f08d9', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('bb34c1b1-02cd-48e8-bd38-6939c8a96abb','elevation','Elevation','f017d31a-573e-4993-ba15-10d4224f08d9', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('6ea42cfc-f406-4e20-b9fe-fca43bd35f5d','precipitation','Precipitation','f017d31a-573e-4993-ba15-10d4224f08d9', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1567,6 +1730,7 @@ VALUES
 ('0bfc5e3c-049f-4850-b8a6-06ec7134a56c','ph','ph','f017d31a-573e-4993-ba15-10d4224f08d9', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('838f7879-341d-424a-a29f-6e02e41d841f','turbidity','Turbidity','f017d31a-573e-4993-ba15-10d4224f08d9', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('7f30dee6-9f98-4592-b0c2-3c08626b12bb','voltage','Voltage','f017d31a-573e-4993-ba15-10d4224f08d9', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('4f8fde7b-efe8-4461-823e-58f562d07f60','unknown-yf','Unknown YF','f017d31a-573e-4993-ba15-10d4224f08d9', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('27aec980-d25c-4927-b89c-911f53850099','stage','Stage','81c785c7-365b-49d8-b06b-f85fcd3479e7', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('593e464f-6646-45f2-9335-27cf6e8e05a0','elevation','Elevation','81c785c7-365b-49d8-b06b-f85fcd3479e7', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('15aa5bb3-5aa1-4d7f-9973-3b0e4fa60af3','precipitation','Precipitation','81c785c7-365b-49d8-b06b-f85fcd3479e7', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1576,6 +1740,7 @@ VALUES
 ('fe7235c1-642c-4d37-a913-fad01cb2433d','ph','ph','81c785c7-365b-49d8-b06b-f85fcd3479e7', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('8b7af08f-1621-47ee-a6b6-1b19c505432c','turbidity','Turbidity','81c785c7-365b-49d8-b06b-f85fcd3479e7', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('225d880b-06fd-4157-bc24-9ea9692ba843','voltage','Voltage','81c785c7-365b-49d8-b06b-f85fcd3479e7', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('32921675-beb7-40f4-9258-5c7ee94ef049','unknown-yf','Unknown YF','81c785c7-365b-49d8-b06b-f85fcd3479e7', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('9a4d478a-6527-42de-a0d7-c9027c2e101c','stage','Stage','6a6ca44d-f9f0-4f0e-ab52-ac7af764c6ab', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('cb485909-78e1-4689-9b15-00176e8abb58','elevation','Elevation','6a6ca44d-f9f0-4f0e-ab52-ac7af764c6ab', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('822c22a8-34da-4747-aafd-db6b43e9477b','precipitation','Precipitation','6a6ca44d-f9f0-4f0e-ab52-ac7af764c6ab', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1585,6 +1750,7 @@ VALUES
 ('d589d803-9f8c-40f2-bd3e-d943b4f9df9e','ph','ph','6a6ca44d-f9f0-4f0e-ab52-ac7af764c6ab', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('6532132e-30d1-48c1-84c3-bf85be73b967','turbidity','Turbidity','6a6ca44d-f9f0-4f0e-ab52-ac7af764c6ab', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('efa85e37-eda6-4675-9faf-770827365dd2','voltage','Voltage','6a6ca44d-f9f0-4f0e-ab52-ac7af764c6ab', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('243954ff-5d01-4bd5-a9cb-2a85b23befed','unknown-yf','Unknown YF','6a6ca44d-f9f0-4f0e-ab52-ac7af764c6ab', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('7c1b63f6-7dbe-4ee8-949f-0d7ba3ccc2fe','stage','Stage','f882e4e4-7aaa-422f-a7dd-4a59dfb0a41a', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('31094b2e-78ce-4b16-9016-c79e29f8e475','elevation','Elevation','f882e4e4-7aaa-422f-a7dd-4a59dfb0a41a', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('fa74fbbd-a2bf-4e9c-9dd8-fafe1596e392','precipitation','Precipitation','f882e4e4-7aaa-422f-a7dd-4a59dfb0a41a', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1594,6 +1760,7 @@ VALUES
 ('bc669eb2-4263-40aa-9713-f6efae011fe8','ph','ph','f882e4e4-7aaa-422f-a7dd-4a59dfb0a41a', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('f38e2fa9-9595-42cc-b227-74dcba69e335','turbidity','Turbidity','f882e4e4-7aaa-422f-a7dd-4a59dfb0a41a', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('2b36aa85-85a5-4d0f-8cb8-d7e842614ff5','voltage','Voltage','f882e4e4-7aaa-422f-a7dd-4a59dfb0a41a', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('88e2dd55-c53f-4cb5-a4cd-5d5741e59666','unknown-yf','Unknown YF','f882e4e4-7aaa-422f-a7dd-4a59dfb0a41a', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('aec968f3-cf99-49b7-87e0-2ba7310c71a7','stage','Stage','b8c41a11-f7b0-4a01-8145-4f28fdbbfde9', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('4d6666c1-e561-47a2-a769-bdbab04a8a35','elevation','Elevation','b8c41a11-f7b0-4a01-8145-4f28fdbbfde9', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('1b7e03de-2d12-434d-993e-b3db97485ab7','precipitation','Precipitation','b8c41a11-f7b0-4a01-8145-4f28fdbbfde9', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1603,6 +1770,7 @@ VALUES
 ('0b795736-727a-4840-9cbf-4899019a540f','ph','ph','b8c41a11-f7b0-4a01-8145-4f28fdbbfde9', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('8d69cc9b-4953-4599-870e-9041a3c89d91','turbidity','Turbidity','b8c41a11-f7b0-4a01-8145-4f28fdbbfde9', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('0c2bd379-7afc-4244-8314-0fe8d865c9b1','voltage','Voltage','b8c41a11-f7b0-4a01-8145-4f28fdbbfde9', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('18cc0a0c-10c9-4094-864a-81b3987b6b06','unknown-yf','Unknown YF','b8c41a11-f7b0-4a01-8145-4f28fdbbfde9', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('c762ce46-349c-477a-9125-bc692e97703c','stage','Stage','103af248-70db-436b-9b98-882c6db5f95f', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('d5bd3a83-90a0-4045-b363-6af1a82a09d0','elevation','Elevation','103af248-70db-436b-9b98-882c6db5f95f', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('3b0b880b-cbcc-4e62-92a7-cd7373b26596','precipitation','Precipitation','103af248-70db-436b-9b98-882c6db5f95f', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1612,6 +1780,7 @@ VALUES
 ('21030118-85a6-46d5-a3e6-44799dd81452','ph','ph','103af248-70db-436b-9b98-882c6db5f95f', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('fc6bf435-fcd8-40e6-a012-bddfc5afb497','turbidity','Turbidity','103af248-70db-436b-9b98-882c6db5f95f', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('be4ce419-c0df-4e3f-abdb-66f4d8fc1106','voltage','Voltage','103af248-70db-436b-9b98-882c6db5f95f', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('e484d5b4-f3ee-4385-bd95-fcbd3e95a0fd','unknown-yf','Unknown YF','103af248-70db-436b-9b98-882c6db5f95f', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('0eeb28fa-fd28-4c94-adce-b2e654eedbbe','stage','Stage','884801ba-13ec-4638-8f8e-fda673a63fb2', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('79397270-ef0f-4de4-9486-855c01ec6e99','elevation','Elevation','884801ba-13ec-4638-8f8e-fda673a63fb2', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('9314c8a6-e03d-42a3-ae57-6022ea418e0f','precipitation','Precipitation','884801ba-13ec-4638-8f8e-fda673a63fb2', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1621,6 +1790,7 @@ VALUES
 ('7ef15af1-74b5-4e42-acb0-29b712577c8c','ph','ph','884801ba-13ec-4638-8f8e-fda673a63fb2', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('3dc59bed-ac77-4d1d-a0e8-3a77864175ce','turbidity','Turbidity','884801ba-13ec-4638-8f8e-fda673a63fb2', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('dddef4e2-3e50-43be-8bcb-3966802e98b9','voltage','Voltage','884801ba-13ec-4638-8f8e-fda673a63fb2', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('50611800-d318-49e3-a6b8-fb0720eec223','unknown-yf','Unknown YF','884801ba-13ec-4638-8f8e-fda673a63fb2', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('a519d921-e3c1-4dcf-863d-8128bce0e8ac','stage','Stage','51055b7d-d298-4971-ba98-08de16960b74', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('1e26832e-c691-4d83-b7e3-45a633616d3f','elevation','Elevation','51055b7d-d298-4971-ba98-08de16960b74', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('75ee8382-a631-4007-b51a-0b2f861abe42','precipitation','Precipitation','51055b7d-d298-4971-ba98-08de16960b74', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1630,6 +1800,7 @@ VALUES
 ('1d09615a-7391-4920-a26e-152b5349c436','ph','ph','51055b7d-d298-4971-ba98-08de16960b74', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('d278ffba-f67d-4280-aaa9-9d8793192099','turbidity','Turbidity','51055b7d-d298-4971-ba98-08de16960b74', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('54694219-ce7f-4ee5-92ba-6c3391976bbf','voltage','Voltage','51055b7d-d298-4971-ba98-08de16960b74', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('a45d1e66-61d9-4020-88e6-c441513b8bb6','unknown-yf','Unknown YF','51055b7d-d298-4971-ba98-08de16960b74', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('42ebdee2-3de4-45cd-888e-eb79d1dd39ca','stage','Stage','b1ae57c6-40dc-4fde-9852-e42bdabd4d2e', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('ef7fcd87-3b46-47eb-901a-07d5f60fcfff','elevation','Elevation','b1ae57c6-40dc-4fde-9852-e42bdabd4d2e', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('a45e70bd-36a0-477f-9116-d3a8b2b725f7','precipitation','Precipitation','b1ae57c6-40dc-4fde-9852-e42bdabd4d2e', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1639,6 +1810,7 @@ VALUES
 ('85f22549-5228-4d75-bd5b-f71705c0d7d3','ph','ph','b1ae57c6-40dc-4fde-9852-e42bdabd4d2e', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('af30cc51-7f38-48bc-9ae3-3736447706e5','turbidity','Turbidity','b1ae57c6-40dc-4fde-9852-e42bdabd4d2e', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('b8a3b744-1219-4898-84e4-ec4414276b87','voltage','Voltage','b1ae57c6-40dc-4fde-9852-e42bdabd4d2e', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('a336705f-d763-4ea4-8e83-cfd72c7337cf','unknown-yf','Unknown YF','b1ae57c6-40dc-4fde-9852-e42bdabd4d2e', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('ec86fe37-0dcb-48c1-a914-ad10bc2c0772','stage','Stage','13c24865-3fab-4a81-acd5-4bc84334cd2b', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('a5fc7be2-4155-472a-929f-39740204a362','elevation','Elevation','13c24865-3fab-4a81-acd5-4bc84334cd2b', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('0f8d3deb-5c66-40c3-ba41-6d7920642b60','precipitation','Precipitation','13c24865-3fab-4a81-acd5-4bc84334cd2b', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1648,6 +1820,7 @@ VALUES
 ('910c431d-7d0b-4fb5-86cf-41f733fb66c0','ph','ph','13c24865-3fab-4a81-acd5-4bc84334cd2b', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('cdb420ad-bab1-446f-a056-35324a204122','turbidity','Turbidity','13c24865-3fab-4a81-acd5-4bc84334cd2b', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('e1661f23-2c07-4cf2-8dad-bc88f937cfe0','voltage','Voltage','13c24865-3fab-4a81-acd5-4bc84334cd2b', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('dc39a8ea-4fdd-443a-8f7d-a203751f08c8','unknown-yf','Unknown YF','13c24865-3fab-4a81-acd5-4bc84334cd2b', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('0cbd2204-9fa2-4ca5-aba2-b7b272cfccf1','stage','Stage','cd2b9a42-0f5a-4660-9c53-10ebdc7d422f', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('4977af9a-da41-4db6-ba63-997a54cca8dd','elevation','Elevation','cd2b9a42-0f5a-4660-9c53-10ebdc7d422f', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('0829e31d-6857-42c2-a244-9350abe0d794','precipitation','Precipitation','cd2b9a42-0f5a-4660-9c53-10ebdc7d422f', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1657,6 +1830,7 @@ VALUES
 ('33209607-8d1e-4d59-aa2c-b8fbf4273abd','ph','ph','cd2b9a42-0f5a-4660-9c53-10ebdc7d422f', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('78e40759-201f-4afb-a1d5-19ae6213ffca','turbidity','Turbidity','cd2b9a42-0f5a-4660-9c53-10ebdc7d422f', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('00c3f1de-23ba-4816-a158-c63366aefa4e','voltage','Voltage','cd2b9a42-0f5a-4660-9c53-10ebdc7d422f', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('8131bf11-f2c8-432e-889e-9ba88353a1b3','unknown-yf','Unknown YF','cd2b9a42-0f5a-4660-9c53-10ebdc7d422f', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('0200b87b-602c-4e6f-ba6a-5ec764769845','stage','Stage','2cba28f2-a50f-4ee4-9653-96d6dbaaa74c', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('99a40afc-cc42-4760-9ebc-28459a332184','elevation','Elevation','2cba28f2-a50f-4ee4-9653-96d6dbaaa74c', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('0e9cc166-8b6c-486b-8b50-f6d2f201f84f','precipitation','Precipitation','2cba28f2-a50f-4ee4-9653-96d6dbaaa74c', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1666,6 +1840,7 @@ VALUES
 ('59bb9d8e-5105-40fb-9fdf-3b7cfc8e54b6','ph','ph','2cba28f2-a50f-4ee4-9653-96d6dbaaa74c', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('399ee852-8951-41c0-b529-a8a70d805c19','turbidity','Turbidity','2cba28f2-a50f-4ee4-9653-96d6dbaaa74c', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('7440ff77-7c22-4cee-9aa4-b0a8192ddef9','voltage','Voltage','2cba28f2-a50f-4ee4-9653-96d6dbaaa74c', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('fd7774e5-78ad-40c7-aa58-05d4b2e4809a','unknown-yf','Unknown YF','2cba28f2-a50f-4ee4-9653-96d6dbaaa74c', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('197ff002-71f8-4b72-9d53-96cb59b68aa9','stage','Stage','14e6dda0-c35e-4b77-8c38-7e126a43fa30', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('30a2f8d5-fabd-4ed3-b008-d31a6012089f','elevation','Elevation','14e6dda0-c35e-4b77-8c38-7e126a43fa30', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('598df532-b74c-45d6-a6ee-6f770555b46d','precipitation','Precipitation','14e6dda0-c35e-4b77-8c38-7e126a43fa30', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1675,6 +1850,7 @@ VALUES
 ('65ef5b04-a814-47a6-be31-2a2f77fbae48','ph','ph','14e6dda0-c35e-4b77-8c38-7e126a43fa30', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('ae7d95ad-d237-4cb5-b7a0-2b90903d36e7','turbidity','Turbidity','14e6dda0-c35e-4b77-8c38-7e126a43fa30', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('5fe87bb9-6edb-4a10-8ac1-991be14fc2a6','voltage','Voltage','14e6dda0-c35e-4b77-8c38-7e126a43fa30', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('9cbe1669-810a-4866-8ed0-4180d0fb059a','unknown-yf','Unknown YF','14e6dda0-c35e-4b77-8c38-7e126a43fa30', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('0e093bdc-13ea-450d-b8f5-a5ae74d00a9b','stage','Stage','69bad009-9c10-446a-a782-84b847554bbe', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('19d02b89-a2cc-43c4-b7e6-b1c624b29c26','elevation','Elevation','69bad009-9c10-446a-a782-84b847554bbe', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('4c2fe96b-5e37-42df-b051-49a0955c3639','precipitation','Precipitation','69bad009-9c10-446a-a782-84b847554bbe', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1684,6 +1860,7 @@ VALUES
 ('b270f260-fd96-44dd-bb4f-374ed20365bf','ph','ph','69bad009-9c10-446a-a782-84b847554bbe', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('f5913b73-236e-4432-9b99-32d204262d2b','turbidity','Turbidity','69bad009-9c10-446a-a782-84b847554bbe', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('291afc0f-2486-4f2a-8cd2-b385b95f6aa3','voltage','Voltage','69bad009-9c10-446a-a782-84b847554bbe', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('f161a400-e2be-47cd-9c02-bae3b1dbfa52','unknown-yf','Unknown YF','69bad009-9c10-446a-a782-84b847554bbe', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('98b0bdf7-451f-4123-99d4-094f25db57d2','stage','Stage','e6f235c0-acff-4145-af79-f80065678138', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('61ef9ed1-3c19-4a8c-bfae-01c1cf6961e8','elevation','Elevation','e6f235c0-acff-4145-af79-f80065678138', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('280d7819-7a2b-4143-b4a4-74a584f64b1a','precipitation','Precipitation','e6f235c0-acff-4145-af79-f80065678138', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1693,6 +1870,7 @@ VALUES
 ('689d34f6-7107-474e-a097-568e8afa7f65','ph','ph','e6f235c0-acff-4145-af79-f80065678138', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('2c1bad9f-7618-4336-bf45-a3bb779b5b36','turbidity','Turbidity','e6f235c0-acff-4145-af79-f80065678138', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('8ae7f0a7-08cf-46ec-9998-30f3a581792e','voltage','Voltage','e6f235c0-acff-4145-af79-f80065678138', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('3659285d-bdf6-4bbd-8516-60b97bdef03d','unknown-yf','Unknown YF','e6f235c0-acff-4145-af79-f80065678138', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('197f03da-5364-4808-85f1-b2b2f2369e5e','stage','Stage','f5284c44-6b5c-407d-9e9d-04ce3b942b22', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('3d64ce4d-c0fd-4307-822a-2a3784d112d3','elevation','Elevation','f5284c44-6b5c-407d-9e9d-04ce3b942b22', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('17fb8c73-69d3-46b2-8689-d57a53e9cf66','precipitation','Precipitation','f5284c44-6b5c-407d-9e9d-04ce3b942b22', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1702,6 +1880,7 @@ VALUES
 ('ee126714-ff82-49ac-b485-4ce68e9bebfb','ph','ph','f5284c44-6b5c-407d-9e9d-04ce3b942b22', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('1a37ec36-03e4-45b8-aec2-b55d7f2cbc36','turbidity','Turbidity','f5284c44-6b5c-407d-9e9d-04ce3b942b22', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('da38fcac-b0b9-40db-8708-9b0710a270a3','voltage','Voltage','f5284c44-6b5c-407d-9e9d-04ce3b942b22', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('50885b56-644c-43f9-be7c-87ddec3e9858','unknown-yf','Unknown YF','f5284c44-6b5c-407d-9e9d-04ce3b942b22', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('2d9d72fc-6a06-440f-a178-100658b0bf37','stage','Stage','fc5b94e8-5d1b-43b6-973a-acaa2cd1a4d2', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('fbd7a8eb-4eec-43fd-81b6-bb6b2633f4e3','elevation','Elevation','fc5b94e8-5d1b-43b6-973a-acaa2cd1a4d2', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('ff448e9e-6a0b-4c50-b32b-f4108b730090','precipitation','Precipitation','fc5b94e8-5d1b-43b6-973a-acaa2cd1a4d2', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1711,6 +1890,7 @@ VALUES
 ('e1db1679-0fbd-40d4-8814-ba036e8f583e','ph','ph','fc5b94e8-5d1b-43b6-973a-acaa2cd1a4d2', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('44f16e9b-3267-4d4d-a1cd-f9d1cea60df3','turbidity','Turbidity','fc5b94e8-5d1b-43b6-973a-acaa2cd1a4d2', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('a1684af1-fa79-41e0-94e4-d273dd4a64b4','voltage','Voltage','fc5b94e8-5d1b-43b6-973a-acaa2cd1a4d2', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('d7299582-511c-44d1-83eb-02053a649f76','unknown-yf','Unknown YF','fc5b94e8-5d1b-43b6-973a-acaa2cd1a4d2', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('fb14840b-e1e2-47c5-913f-8693d96bceb3','stage','Stage','665586c1-2bbd-4218-8cb2-5515ec82faf8', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('ad9c7e17-8254-4ea9-ae9f-f7ccf48282eb','elevation','Elevation','665586c1-2bbd-4218-8cb2-5515ec82faf8', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('8ce8ad5e-9a4e-4c09-9d4e-43c4755f252d','precipitation','Precipitation','665586c1-2bbd-4218-8cb2-5515ec82faf8', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1720,6 +1900,7 @@ VALUES
 ('849cd8cc-e881-4fba-904e-636f7092c7bf','ph','ph','665586c1-2bbd-4218-8cb2-5515ec82faf8', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('9112e4eb-97bf-48ce-bcb0-9b16667b328d','turbidity','Turbidity','665586c1-2bbd-4218-8cb2-5515ec82faf8', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('fa4698e3-535a-425a-bfea-f4a3be4352ce','voltage','Voltage','665586c1-2bbd-4218-8cb2-5515ec82faf8', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('b9df6b9e-0174-4ed3-8c17-fad616b505d9','unknown-yf','Unknown YF','665586c1-2bbd-4218-8cb2-5515ec82faf8', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('8f366ba1-ef88-47a7-9c5c-348dfe381096','stage','Stage','29b2ac8c-5ce0-4692-adf6-eab3c6dc33bc', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('92246521-2f24-4d10-911d-892ba94f0109','elevation','Elevation','29b2ac8c-5ce0-4692-adf6-eab3c6dc33bc', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('b61526cf-cbaf-43d4-82b4-645b8a8b41a1','precipitation','Precipitation','29b2ac8c-5ce0-4692-adf6-eab3c6dc33bc', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1729,6 +1910,7 @@ VALUES
 ('d767622a-f109-4de6-b225-54d3967f0f86','ph','ph','29b2ac8c-5ce0-4692-adf6-eab3c6dc33bc', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('ddff2a11-0b91-4818-9b8f-bdafe05f6eb4','turbidity','Turbidity','29b2ac8c-5ce0-4692-adf6-eab3c6dc33bc', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('b29e570f-f776-4668-a87c-632742457372','voltage','Voltage','29b2ac8c-5ce0-4692-adf6-eab3c6dc33bc', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('7e75e59a-5e39-4ee0-b850-ab769dfb740d','unknown-yf','Unknown YF','29b2ac8c-5ce0-4692-adf6-eab3c6dc33bc', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('6ec44f72-e06d-45bf-a203-c11b3ecd2fdb','stage','Stage','03961c4b-8278-4159-a5d7-9d7dd11cae34', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('0809c4e6-928a-40cc-a410-e9edf055c7c4','elevation','Elevation','03961c4b-8278-4159-a5d7-9d7dd11cae34', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('73a7765f-6be1-4454-a48b-b46f45597259','precipitation','Precipitation','03961c4b-8278-4159-a5d7-9d7dd11cae34', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1738,6 +1920,7 @@ VALUES
 ('ee44024a-b753-4787-bb2e-7b50ee22204a','ph','ph','03961c4b-8278-4159-a5d7-9d7dd11cae34', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('f969ea16-dc1e-40ff-9283-2ce02124a5f6','turbidity','Turbidity','03961c4b-8278-4159-a5d7-9d7dd11cae34', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('5401792b-8b22-41fa-97c3-b381a4e9e765','voltage','Voltage','03961c4b-8278-4159-a5d7-9d7dd11cae34', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('f897992d-19c1-48d5-b2d8-0cfd7f1d70eb','unknown-yf','Unknown YF','03961c4b-8278-4159-a5d7-9d7dd11cae34', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('d8d1c89b-4a2b-498b-ae31-7290ef0829b5','stage','Stage','3c9d0224-ee9d-4738-91b5-8d407512d259', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('2a086064-8369-46fe-a156-9edc5aa7a49b','elevation','Elevation','3c9d0224-ee9d-4738-91b5-8d407512d259', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('cd3c2b84-0280-4a22-8c99-b1d006466ac8','precipitation','Precipitation','3c9d0224-ee9d-4738-91b5-8d407512d259', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1747,6 +1930,7 @@ VALUES
 ('51147033-df37-4e9b-bdf5-4f7263f48de3','ph','ph','3c9d0224-ee9d-4738-91b5-8d407512d259', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('01d391cb-e1b1-464d-8419-25dceb8d0d99','turbidity','Turbidity','3c9d0224-ee9d-4738-91b5-8d407512d259', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('635835b0-acb9-4eba-9596-2380a402bcb5','voltage','Voltage','3c9d0224-ee9d-4738-91b5-8d407512d259', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('ab94e03f-3167-4a99-985d-7571d58ccd7b','unknown-yf','Unknown YF','3c9d0224-ee9d-4738-91b5-8d407512d259', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('e6be79cd-7818-4311-9e2d-d517b584d671','stage','Stage','3ee98fa5-5742-4161-908a-24d8053148ab', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('2812ca1d-26d0-4fb0-b0cb-7b49dafb949a','elevation','Elevation','3ee98fa5-5742-4161-908a-24d8053148ab', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('c34f8e4b-6e6e-4133-976b-44e469a76b1c','precipitation','Precipitation','3ee98fa5-5742-4161-908a-24d8053148ab', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1756,9 +1940,11 @@ VALUES
 ('2a79f336-61de-4268-a9fd-fa0f438d4a85','ph','ph','3ee98fa5-5742-4161-908a-24d8053148ab', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('e8da90c1-0430-4e28-a1bc-27a00ecccaa5','turbidity','Turbidity','3ee98fa5-5742-4161-908a-24d8053148ab', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('1b78a316-ad56-4798-890a-b907e87386f3','voltage','Voltage','3ee98fa5-5742-4161-908a-24d8053148ab', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('402b1153-8ddf-41f8-b6a7-0546cef4f141','unknown-yf','Unknown YF','3ee98fa5-5742-4161-908a-24d8053148ab', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('9a99ac12-e637-4a4b-b778-b31149f3876b','stage','Stage','2ede45f1-2a9f-44c9-a40e-1eda74eca784', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('91e866f3-0cfa-4a75-817f-7d8e18efe822','precipitation','Precipitation','2ede45f1-2a9f-44c9-a40e-1eda74eca784', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
 ('3669ab6e-1582-4c4a-8e79-cadc187bfa1f','voltage','Voltage','2ede45f1-2a9f-44c9-a40e-1eda74eca784', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('8240a6f0-d8e6-4c7b-bd3c-d4fbab420dc1','unknown-yf','Unknown YF','2ede45f1-2a9f-44c9-a40e-1eda74eca784', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('4a34597c-ae1d-4a34-b33b-b65fe0c0014d','stage','Stage','0b6ee7cb-30b1-477a-94a0-cb0aaa2bb0f1', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('f7842d01-59b1-432e-841a-c9ee7b837389','elevation','Elevation','0b6ee7cb-30b1-477a-94a0-cb0aaa2bb0f1', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('5fd6f66a-9fea-4cf1-884d-71e0c5a270c1','precipitation','Precipitation','0b6ee7cb-30b1-477a-94a0-cb0aaa2bb0f1', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1768,6 +1954,7 @@ VALUES
 ('3d4619da-aac6-4700-bbbe-833facc3f72a','ph','ph','0b6ee7cb-30b1-477a-94a0-cb0aaa2bb0f1', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('a1f36663-8ed7-4eb1-9b7b-d4e9fc88bec2','turbidity','Turbidity','0b6ee7cb-30b1-477a-94a0-cb0aaa2bb0f1', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('493a1725-a6e5-4699-9427-23f31c4e0e41','voltage','Voltage','0b6ee7cb-30b1-477a-94a0-cb0aaa2bb0f1', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('565650a1-ee2e-4a41-84d7-2465428b38da','unknown-yf','Unknown YF','0b6ee7cb-30b1-477a-94a0-cb0aaa2bb0f1', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('bf62742a-bb91-4833-aff4-dd93e1189d12','stage','Stage','e83479c4-637f-4cf9-80b5-37a891a72216', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('dc0ef688-9d32-4797-b8e6-5f0e1fee7e68','elevation','Elevation','e83479c4-637f-4cf9-80b5-37a891a72216', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('27154703-eaa9-4a2a-a116-82cd5bbb80da','precipitation','Precipitation','e83479c4-637f-4cf9-80b5-37a891a72216', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1777,9 +1964,11 @@ VALUES
 ('8baf94c1-cbcc-4afd-90d2-31ffb2a7fe7d','ph','ph','e83479c4-637f-4cf9-80b5-37a891a72216', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('b5611348-563b-4946-b50f-97329cd3fa00','turbidity','Turbidity','e83479c4-637f-4cf9-80b5-37a891a72216', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('20c65ca0-5d64-48c7-bc2b-42aa0da2f375','voltage','Voltage','e83479c4-637f-4cf9-80b5-37a891a72216', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('f9430aac-56c8-49a5-8512-b24bdb76e9cf','unknown-yf','Unknown YF','e83479c4-637f-4cf9-80b5-37a891a72216', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('b0294509-51f3-4630-8292-e7b4b6927ae5','stage','Stage','a10b6a71-84ad-4075-b7a9-94091f296ca8', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('b1eed241-41cc-4253-9734-444c0a5fd1a5','precipitation','Precipitation','a10b6a71-84ad-4075-b7a9-94091f296ca8', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
 ('7c9a8a74-c38b-4fc8-b463-915cb8eb4d1b','voltage','Voltage','a10b6a71-84ad-4075-b7a9-94091f296ca8', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('32742a3f-c2f5-4afd-997b-8658b2215f04','unknown-yf','Unknown YF','a10b6a71-84ad-4075-b7a9-94091f296ca8', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('b37aa6ed-3988-464c-b27d-9b4c3c044861','stage','Stage','e03229c6-97ce-484b-9584-521189519f41', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('e4a46b36-dcfe-44b5-975f-6d5c1dc40a09','elevation','Elevation','e03229c6-97ce-484b-9584-521189519f41', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('d215502e-a931-4c10-918d-a931c26bfad5','precipitation','Precipitation','e03229c6-97ce-484b-9584-521189519f41', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1789,10 +1978,51 @@ VALUES
 ('add87c80-b1aa-46c2-ba5d-750ef335c259','ph','ph','e03229c6-97ce-484b-9584-521189519f41', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('e0037262-cdbc-4d02-a1d2-32fad5eb80c0','turbidity','Turbidity','e03229c6-97ce-484b-9584-521189519f41', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('a6a4607f-3586-4322-9610-203a3702d27c','voltage','Voltage','e03229c6-97ce-484b-9584-521189519f41', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('7ae27908-cdd8-45e4-95d2-42022dee02f2','unknown-yf','Unknown YF','e03229c6-97ce-484b-9584-521189519f41', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
+('9a9e1f1c-58dc-4123-9735-816cc6862235','unknown-g0','Unknown G0','9cb955c5-93cb-4402-822b-12e99580abe3', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
+('27bb8e5d-8bb6-4c85-a891-88f06e9544ae','unknown-g1','Unknown G1','9cb955c5-93cb-4402-822b-12e99580abe3', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
+('1e3af9a2-d673-461e-8b5e-c0a91418e589','unknown-g2','Unknown G2','9cb955c5-93cb-4402-822b-12e99580abe3', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
+('43ca6214-abe1-499f-a8cd-08ecf9ebd611','unknown-g3','Unknown G3','9cb955c5-93cb-4402-822b-12e99580abe3', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
+('25c068c7-cced-4a8c-be92-0c79fcf2c4f4','unknown-g4','Unknown G4','9cb955c5-93cb-4402-822b-12e99580abe3', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
+('a73e2a75-7491-4849-b8e5-a36ae2169cbb','unknown-g5','Unknown G5','9cb955c5-93cb-4402-822b-12e99580abe3', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
+('8240fac1-65b8-4f1d-aceb-7338282654f2','unknown-g6','Unknown G6','9cb955c5-93cb-4402-822b-12e99580abe3', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
+('bd255258-c673-49e7-8f6c-42338db9399f','unknown-g7','Unknown G7','9cb955c5-93cb-4402-822b-12e99580abe3', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
+('75f6e1d1-1bc1-45a5-8d22-ff04a404b278','unknown-g8','Unknown G8','9cb955c5-93cb-4402-822b-12e99580abe3', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
+('92435eb3-69f3-434f-92ba-df9d07c681db','unknown-g9','Unknown G9','9cb955c5-93cb-4402-822b-12e99580abe3', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('1aeb5280-1d4f-464d-b4b9-b3c5ff45aac3','voltage','Voltage','9cb955c5-93cb-4402-822b-12e99580abe3', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('78e06f9a-07ec-4bce-9261-e2956728d7c3','unknown-yf','Unknown YF','9cb955c5-93cb-4402-822b-12e99580abe3', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
+('b15e0d58-7a5a-48f7-a6d6-2dfa0ed86dd8','unknown-g1','Unknown G1','57b92e3d-19f6-4ce9-b711-d43f42fab3d9', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
+('a0067f30-0f8c-495b-ab4d-75cbf66c3b0a','unknown-g2','Unknown G2','57b92e3d-19f6-4ce9-b711-d43f42fab3d9', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
+('22059baf-432a-490e-843e-0df238d5b993','unknown-g3','Unknown G3','57b92e3d-19f6-4ce9-b711-d43f42fab3d9', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
+('e46b577a-fd70-4826-a270-edd3017e3094','unknown-g4','Unknown G4','57b92e3d-19f6-4ce9-b711-d43f42fab3d9', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
+('e3e9d369-3357-47f1-a121-90fe41667821','unknown-g5','Unknown G5','57b92e3d-19f6-4ce9-b711-d43f42fab3d9', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
+('8e1008db-bd46-41a4-8bd7-a49b392830da','unknown-g6','Unknown G6','57b92e3d-19f6-4ce9-b711-d43f42fab3d9', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('1d425e05-d713-4fa2-851a-30a82da87bbf','voltage','Voltage','57b92e3d-19f6-4ce9-b711-d43f42fab3d9', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('c43835c2-4ce8-44ad-9f66-9b4031e4bd38','unknown-yf','Unknown YF','57b92e3d-19f6-4ce9-b711-d43f42fab3d9', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
+('c7742b92-0d0c-454b-9703-b988739aa799','unknown-g0','Unknown G0','5f01ad2c-67aa-4cae-b7b3-36fb7a1881ab', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
+('50575dfa-8ee6-4c7d-93e0-9bd6aeeca214','unknown-g1','Unknown G1','5f01ad2c-67aa-4cae-b7b3-36fb7a1881ab', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
+('e1ce920f-30e8-4edf-85ae-ae2b57475aa7','unknown-g2','Unknown G2','5f01ad2c-67aa-4cae-b7b3-36fb7a1881ab', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
+('f5ce2689-5ba9-421d-a75f-153dc740e1df','unknown-g3','Unknown G3','5f01ad2c-67aa-4cae-b7b3-36fb7a1881ab', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
+('8a4bffca-2fd4-464f-93e7-516fa8a976cf','unknown-g4','Unknown G4','5f01ad2c-67aa-4cae-b7b3-36fb7a1881ab', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
+('e9e68fe7-7f2f-4b67-86e2-5ed31d36d48d','unknown-g5','Unknown G5','5f01ad2c-67aa-4cae-b7b3-36fb7a1881ab', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
+('ce20c17c-d17f-48e7-bb60-f3bf427e911a','unknown-g6','Unknown G6','5f01ad2c-67aa-4cae-b7b3-36fb7a1881ab', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
+('06126354-d3ec-4759-ab62-259a2c13a2b8','unknown-g7','Unknown G7','5f01ad2c-67aa-4cae-b7b3-36fb7a1881ab', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
+('e7323244-5b60-4ad0-af95-d3a42e00cad8','unknown-g8','Unknown G8','5f01ad2c-67aa-4cae-b7b3-36fb7a1881ab', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
+('641c5e86-d69c-4785-a405-964529cc408a','unknown-g9','Unknown G9','5f01ad2c-67aa-4cae-b7b3-36fb7a1881ab', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('0cf0f0ff-40d1-4d07-803a-829e6e83b90f','voltage','Voltage','5f01ad2c-67aa-4cae-b7b3-36fb7a1881ab', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('e288ff0e-8813-4660-9da4-7a31bdb5b3fa','unknown-yf','Unknown YF','5f01ad2c-67aa-4cae-b7b3-36fb7a1881ab', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
+('69fa3900-fcb2-40c8-b562-9ea2c26b4bd0','unknown-g0','Unknown G0','828ffaa0-cfbc-4545-bb0e-8bacad7945da', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
+('b977c9da-3b79-4fb8-aa2a-63387d570b37','unknown-g1','Unknown G1','828ffaa0-cfbc-4545-bb0e-8bacad7945da', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
+('af32a691-46ff-4cee-96f8-155021beb147','unknown-g2','Unknown G2','828ffaa0-cfbc-4545-bb0e-8bacad7945da', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
+('91c0840e-f29e-47df-9efb-30b7d9109c76','unknown-g3','Unknown G3','828ffaa0-cfbc-4545-bb0e-8bacad7945da', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
+('da24b1bb-4dfb-4810-8553-f0944e4de9a2','unknown-g4','Unknown G4','828ffaa0-cfbc-4545-bb0e-8bacad7945da', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
+('a1e3e994-f4b4-4a49-b36b-9d4c502ddfc5','unknown-g5','Unknown G5','828ffaa0-cfbc-4545-bb0e-8bacad7945da', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
+('cc11ebfe-56d6-41cc-8c06-de008ddceff2','unknown-g6','Unknown G6','828ffaa0-cfbc-4545-bb0e-8bacad7945da', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
+('71d5063b-c80d-4ec9-81d7-95ec1e772ea8','unknown-g7','Unknown G7','828ffaa0-cfbc-4545-bb0e-8bacad7945da', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
+('231f24c0-915e-40ae-8c56-c99dba3239d8','unknown-g8','Unknown G8','828ffaa0-cfbc-4545-bb0e-8bacad7945da', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
+('62a398f8-b606-495f-a21e-5e55e49c01b3','unknown-g9','Unknown G9','828ffaa0-cfbc-4545-bb0e-8bacad7945da', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('eb2312d7-e25b-4a76-91d0-c44ae740abe3','voltage','Voltage','828ffaa0-cfbc-4545-bb0e-8bacad7945da', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('66f6d37f-347e-4d2b-a102-fd36c18837cc','unknown-yf','Unknown YF','828ffaa0-cfbc-4545-bb0e-8bacad7945da', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('7d76f03c-7769-47d9-b08b-4739b4fa7a6c','stage','Stage','dd724991-14c8-4899-8489-f6ace618a088', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('1ad1487a-ca18-4338-bd12-325b6957ab13','elevation','Elevation','dd724991-14c8-4899-8489-f6ace618a088', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('e79de305-90c5-46fb-95ea-5825088368c3','precipitation','Precipitation','dd724991-14c8-4899-8489-f6ace618a088', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1802,6 +2032,7 @@ VALUES
 ('b4162301-4b0d-4442-967b-766bc3c1cf70','ph','ph','dd724991-14c8-4899-8489-f6ace618a088', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('7005c650-487f-49cb-a372-ee482aa8d3ac','turbidity','Turbidity','dd724991-14c8-4899-8489-f6ace618a088', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('3e7dc6ae-2780-4286-a74f-7a22378c3fa1','voltage','Voltage','dd724991-14c8-4899-8489-f6ace618a088', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('eab250a7-9bd9-4c07-afec-6d136d8dde16','unknown-yf','Unknown YF','dd724991-14c8-4899-8489-f6ace618a088', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('be62c106-7468-4b67-b563-4b08115458a4','stage','Stage','54f189a0-4f94-46ea-bdb5-616ccff04bad', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('d2072bfd-6717-42b6-a571-1577b1db47bf','elevation','Elevation','54f189a0-4f94-46ea-bdb5-616ccff04bad', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('ebd5ad33-f210-4365-b0ec-5f4a9ee443d1','precipitation','Precipitation','54f189a0-4f94-46ea-bdb5-616ccff04bad', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1811,6 +2042,7 @@ VALUES
 ('701ca340-e1fa-4779-86ea-a4ffff105097','ph','ph','54f189a0-4f94-46ea-bdb5-616ccff04bad', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('4938e870-fc40-4105-8fa0-720af7c830cf','turbidity','Turbidity','54f189a0-4f94-46ea-bdb5-616ccff04bad', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('3842aa89-601c-4b2c-b226-7bd8106b1498','voltage','Voltage','54f189a0-4f94-46ea-bdb5-616ccff04bad', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('0ade0176-bfa2-485e-b0c5-89ea9a1c49f8','unknown-yf','Unknown YF','54f189a0-4f94-46ea-bdb5-616ccff04bad', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('1d5336c6-10f6-45f4-931f-1b517e402b59','stage','Stage','42a6e80b-5767-4ffe-b302-692cf97da00b', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('bdcb2db5-d743-4f21-b9a0-6bf4e9514ec2','elevation','Elevation','42a6e80b-5767-4ffe-b302-692cf97da00b', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('0beb0528-2cbe-4754-b3bb-838d0c6ac690','precipitation','Precipitation','42a6e80b-5767-4ffe-b302-692cf97da00b', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1820,6 +2052,8 @@ VALUES
 ('109ad11f-a25c-429e-9973-162c28b87525','ph','ph','42a6e80b-5767-4ffe-b302-692cf97da00b', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('cd462290-63df-4308-bb9d-45bc1b088d5c','turbidity','Turbidity','42a6e80b-5767-4ffe-b302-692cf97da00b', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('409f7222-c026-4697-b7d7-d672a9985f35','voltage','Voltage','42a6e80b-5767-4ffe-b302-692cf97da00b', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('298943c3-9fdb-42ed-82e2-2b8cfb39da3a','unknown-yf','Unknown YF','42a6e80b-5767-4ffe-b302-692cf97da00b', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
+('c2b332da-39d1-4ac7-a438-d42d9da74d1d','unknown-wv','Unknown WV','ffa13475-c097-4316-88e1-9a8ce6f67699', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('5fa10034-fe58-452c-a822-0814c818d58e','stage','Stage','e9c58cf6-2093-4359-bba1-3f8ad409d273', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('5100d1a0-2830-4875-9732-8ff5267f8d64','elevation','Elevation','e9c58cf6-2093-4359-bba1-3f8ad409d273', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('d48f1413-8eee-490e-bf0a-c327c81a08d6','precipitation','Precipitation','e9c58cf6-2093-4359-bba1-3f8ad409d273', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1829,6 +2063,7 @@ VALUES
 ('66364332-39f3-4183-93e3-b30f3288bfe2','ph','ph','e9c58cf6-2093-4359-bba1-3f8ad409d273', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('db6e9578-35ce-4d2f-8e3b-3445da96827a','turbidity','Turbidity','e9c58cf6-2093-4359-bba1-3f8ad409d273', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('ed7bfe68-e9cc-4292-a482-dcca618434c8','voltage','Voltage','e9c58cf6-2093-4359-bba1-3f8ad409d273', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('d63691cd-394c-41f7-9c88-0030d8bffa07','unknown-yf','Unknown YF','e9c58cf6-2093-4359-bba1-3f8ad409d273', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('18f0840a-8e09-4aaa-9d11-a08468cac13c','stage','Stage','f5dbba6e-7dc3-4c62-b833-c980f950ce9e', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('1f03e3a8-b682-4495-ab22-41b0d0859ad0','elevation','Elevation','f5dbba6e-7dc3-4c62-b833-c980f950ce9e', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('2ee9d998-a539-4e61-a352-e8f8ff05e94a','precipitation','Precipitation','f5dbba6e-7dc3-4c62-b833-c980f950ce9e', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1838,6 +2073,7 @@ VALUES
 ('5e743e0e-5219-43d4-bf60-748d3ec98cf2','ph','ph','f5dbba6e-7dc3-4c62-b833-c980f950ce9e', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('67321730-8a1e-4071-a7ea-2227fa96b365','turbidity','Turbidity','f5dbba6e-7dc3-4c62-b833-c980f950ce9e', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('f268fcef-a894-4b34-a7f5-778c6ba6a228','voltage','Voltage','f5dbba6e-7dc3-4c62-b833-c980f950ce9e', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('7af9068d-3206-4042-9e15-36bb2a6b2e5f','unknown-yf','Unknown YF','f5dbba6e-7dc3-4c62-b833-c980f950ce9e', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('695da14b-fd6a-4408-81bb-e6e536357779','stage','Stage','a2fa2bde-b031-43d9-b00a-3302beb181c6', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('fbb27fe1-7b15-4e21-a501-2313355a9487','elevation','Elevation','a2fa2bde-b031-43d9-b00a-3302beb181c6', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('d9b4c31f-cbd9-4944-81dc-31bbeba23771','precipitation','Precipitation','a2fa2bde-b031-43d9-b00a-3302beb181c6', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1847,6 +2083,7 @@ VALUES
 ('c9c5acc3-39a7-4180-b1f6-623f23e0f177','ph','ph','a2fa2bde-b031-43d9-b00a-3302beb181c6', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('ad6c28fd-b095-4dd7-be34-cf26b28fc5f4','turbidity','Turbidity','a2fa2bde-b031-43d9-b00a-3302beb181c6', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('ef1e8d27-ca48-4e95-9351-ec82efd900b8','voltage','Voltage','a2fa2bde-b031-43d9-b00a-3302beb181c6', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('cf7d5a0e-d870-496a-91a1-eff6009f9f87','unknown-yf','Unknown YF','a2fa2bde-b031-43d9-b00a-3302beb181c6', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('dcb0a933-a21c-41d3-975b-9cb411be8134','stage','Stage','24924cc6-ac6d-49f3-bbc6-3a0fdf99323a', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('1c4a5a3e-c5cf-4c7a-9ea0-30ee80c79447','stage','Stage','e0821f6a-a83e-4939-b7e5-e6214d6370f8', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('18878d7a-bcb3-4bc5-8d07-efd4e7bd6ac8','stage','Stage','afe26545-5c47-4c18-9d6c-bed4e5f42a8a', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
@@ -1858,6 +2095,7 @@ VALUES
 ('8475606d-abc5-4806-a9ba-790a3868e0a1','ph','ph','afe26545-5c47-4c18-9d6c-bed4e5f42a8a', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('59d269e9-1865-47dd-aebb-dd8200055b44','turbidity','Turbidity','afe26545-5c47-4c18-9d6c-bed4e5f42a8a', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('14af1254-62ad-4dd4-ae44-2df2f046a93a','voltage','Voltage','afe26545-5c47-4c18-9d6c-bed4e5f42a8a', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('ee6b5da3-df60-4610-8e3a-0ff67a059dfb','unknown-yf','Unknown YF','afe26545-5c47-4c18-9d6c-bed4e5f42a8a', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('8b6fd32e-01e7-47ed-b778-6f1c7c2fbd44','stage','Stage','73f36663-edb9-4c1e-b3bd-7a56dd66695d', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('c6964578-bfc9-4719-a01c-a81d546644be','elevation','Elevation','73f36663-edb9-4c1e-b3bd-7a56dd66695d', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('755c14c3-670d-4ba9-85c7-5a21d1440c26','precipitation','Precipitation','73f36663-edb9-4c1e-b3bd-7a56dd66695d', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1867,6 +2105,7 @@ VALUES
 ('db9de3c9-100b-4b09-8c59-e0eb78192bf5','ph','ph','73f36663-edb9-4c1e-b3bd-7a56dd66695d', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('10e3d95a-4405-4f53-987c-07e477918736','turbidity','Turbidity','73f36663-edb9-4c1e-b3bd-7a56dd66695d', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('21c41e9d-34dd-4534-8b31-046198fd1a4e','voltage','Voltage','73f36663-edb9-4c1e-b3bd-7a56dd66695d', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('4f0cd48c-7c86-4228-9260-dceffaebc8c3','unknown-yf','Unknown YF','73f36663-edb9-4c1e-b3bd-7a56dd66695d', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('c67656d7-86b2-44ac-9c1c-dc2066b2de21','stage','Stage','09247b70-5a7b-4830-ae49-28465698b875', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('3de2493e-0d9c-4625-b88a-9527d30d649f','elevation','Elevation','09247b70-5a7b-4830-ae49-28465698b875', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('ef97b108-b5b8-43a2-aa6b-2a6f3941943a','precipitation','Precipitation','09247b70-5a7b-4830-ae49-28465698b875', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1876,6 +2115,7 @@ VALUES
 ('79ad2c3d-defc-4b06-be2f-828c6f863228','ph','ph','09247b70-5a7b-4830-ae49-28465698b875', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('b5dd5ed7-12a9-4b3a-bc39-a6aebad626d8','turbidity','Turbidity','09247b70-5a7b-4830-ae49-28465698b875', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('478c8fec-cf9b-4a71-ab00-18fd117e2dce','voltage','Voltage','09247b70-5a7b-4830-ae49-28465698b875', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('4b22296e-8fed-47b3-95ec-24ab6798496f','unknown-yf','Unknown YF','09247b70-5a7b-4830-ae49-28465698b875', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('13073526-8d7d-4544-af72-737eb1f1bab7','stage','Stage','e6bc7078-e633-45fd-95a6-f3b0b954d915', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('8e48872f-2d64-4238-be05-69c90d188dcd','elevation','Elevation','e6bc7078-e633-45fd-95a6-f3b0b954d915', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('ac02cd60-8503-4fec-9d7b-a71ea8807d34','precipitation','Precipitation','e6bc7078-e633-45fd-95a6-f3b0b954d915', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1885,6 +2125,7 @@ VALUES
 ('5a786124-fde9-4be9-918e-85cac28fcdb1','ph','ph','e6bc7078-e633-45fd-95a6-f3b0b954d915', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('13e96a28-e044-418b-b812-fd2a661249f0','turbidity','Turbidity','e6bc7078-e633-45fd-95a6-f3b0b954d915', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('45c3f3f5-7c52-48fc-b8bd-bd01985fd562','voltage','Voltage','e6bc7078-e633-45fd-95a6-f3b0b954d915', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('ff4dba06-3b6b-43d6-838e-51d2489f7756','unknown-yf','Unknown YF','e6bc7078-e633-45fd-95a6-f3b0b954d915', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('4395bb7b-f2d0-46dd-81da-e24aacfcbd8f','stage','Stage','02ae0b07-11c5-4599-bda0-1c3f8cc7492b', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('94f23840-0b82-401a-8561-df199300de9b','elevation','Elevation','02ae0b07-11c5-4599-bda0-1c3f8cc7492b', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('1d284e10-04f1-4e3b-9e15-e9484ecd0784','precipitation','Precipitation','02ae0b07-11c5-4599-bda0-1c3f8cc7492b', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1894,6 +2135,7 @@ VALUES
 ('15bc883c-761c-456f-8f6e-a4ac1e8e274e','ph','ph','02ae0b07-11c5-4599-bda0-1c3f8cc7492b', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('fbf77021-bcc4-439f-aa54-aad764c85b16','turbidity','Turbidity','02ae0b07-11c5-4599-bda0-1c3f8cc7492b', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('6e76cbbf-ee82-4b0c-a313-69055ca89883','voltage','Voltage','02ae0b07-11c5-4599-bda0-1c3f8cc7492b', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('1b0d28ed-3519-433e-9cd9-c7a3ad6c283d','unknown-yf','Unknown YF','02ae0b07-11c5-4599-bda0-1c3f8cc7492b', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('c264ff40-745d-4756-9d67-ed58fc45bc79','stage','Stage','b81d3d17-3201-4611-aafc-1b594d8942f3', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('0672cdea-8480-4295-8014-8ba49971005c','elevation','Elevation','b81d3d17-3201-4611-aafc-1b594d8942f3', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('6a43b678-10c6-4abf-a89c-b47cb278bfc0','precipitation','Precipitation','b81d3d17-3201-4611-aafc-1b594d8942f3', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1903,6 +2145,7 @@ VALUES
 ('17bfe3d7-6736-4921-a598-1f3a8f6c8333','ph','ph','b81d3d17-3201-4611-aafc-1b594d8942f3', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('26c0dbf8-9573-441c-959b-17242c9e46c4','turbidity','Turbidity','b81d3d17-3201-4611-aafc-1b594d8942f3', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('eb6378de-e97e-4ddf-99d3-72ce199cb6d8','voltage','Voltage','b81d3d17-3201-4611-aafc-1b594d8942f3', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('66571210-10d2-471d-a35a-f687568116d5','unknown-yf','Unknown YF','b81d3d17-3201-4611-aafc-1b594d8942f3', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('88c78a10-ab17-438d-84ed-1592bdd057d2','stage','Stage','6c847545-5c33-4916-a837-6c4ff8cea45f', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('a7ee8b1f-dac0-4a9d-93c1-2c078d209bea','elevation','Elevation','6c847545-5c33-4916-a837-6c4ff8cea45f', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('bf816c7d-11be-4338-b428-224999b34ea7','precipitation','Precipitation','6c847545-5c33-4916-a837-6c4ff8cea45f', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1912,6 +2155,7 @@ VALUES
 ('2e156444-009d-44f3-8e15-3cc672279980','ph','ph','6c847545-5c33-4916-a837-6c4ff8cea45f', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('09ac5eae-512c-4e9a-8781-41a34f86097d','turbidity','Turbidity','6c847545-5c33-4916-a837-6c4ff8cea45f', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('e5338843-35f5-41e9-9ec6-fd4e6fa5d015','voltage','Voltage','6c847545-5c33-4916-a837-6c4ff8cea45f', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('3e3f136d-c855-412f-922b-8632fff3679d','unknown-yf','Unknown YF','6c847545-5c33-4916-a837-6c4ff8cea45f', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('ab1fe418-5520-40a3-b675-46d042118e1a','stage','Stage','7b616286-586c-4a46-9573-b25cb76b8758', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('15fe741d-33cf-4c56-890c-8b1c2b79c864','elevation','Elevation','7b616286-586c-4a46-9573-b25cb76b8758', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('6377592e-7311-48a7-b6bb-01b3fdaaaef3','precipitation','Precipitation','7b616286-586c-4a46-9573-b25cb76b8758', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1921,6 +2165,7 @@ VALUES
 ('277712ce-dc76-4520-a32f-edb333cab468','ph','ph','7b616286-586c-4a46-9573-b25cb76b8758', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('3432b2f8-143f-4095-88a0-1dacf4bf8d4c','turbidity','Turbidity','7b616286-586c-4a46-9573-b25cb76b8758', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('5388da67-5f8f-40d0-8284-f6fb4389a157','voltage','Voltage','7b616286-586c-4a46-9573-b25cb76b8758', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('c3b7a020-5599-4a0c-9ddd-f090356c8345','unknown-yf','Unknown YF','7b616286-586c-4a46-9573-b25cb76b8758', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('96f402a9-c74b-4b6d-9e50-4034f709964c','stage','Stage','46c63d47-8fb2-4279-b1a5-b9fad7e05a00', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('954765aa-b2d8-4ae4-a35a-b38e7827a274','elevation','Elevation','46c63d47-8fb2-4279-b1a5-b9fad7e05a00', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('23cc8dbf-22ee-4b3b-9ba9-d693294027c5','precipitation','Precipitation','46c63d47-8fb2-4279-b1a5-b9fad7e05a00', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1930,6 +2175,7 @@ VALUES
 ('65f4ff69-7479-41a4-a9d1-c384df5ade5a','ph','ph','46c63d47-8fb2-4279-b1a5-b9fad7e05a00', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('eb2884e2-4a5a-45be-b973-efdcbe9feab5','turbidity','Turbidity','46c63d47-8fb2-4279-b1a5-b9fad7e05a00', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('a470bdb8-62dc-48d3-bde4-b296f1d90db6','voltage','Voltage','46c63d47-8fb2-4279-b1a5-b9fad7e05a00', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('5091b1ce-039e-42f7-b0f6-ed0aadbf6cc2','unknown-yf','Unknown YF','46c63d47-8fb2-4279-b1a5-b9fad7e05a00', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('c8ab4c81-4387-4042-8e1c-58276bec0a69','stage','Stage','27fd522f-a619-43a2-8011-6cda06261819', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('d9b7a43b-7a30-4dc2-90a1-460f6905c713','elevation','Elevation','27fd522f-a619-43a2-8011-6cda06261819', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('43999777-4cfc-497f-a41d-4c9feae6edca','precipitation','Precipitation','27fd522f-a619-43a2-8011-6cda06261819', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1939,6 +2185,7 @@ VALUES
 ('12b0119e-7c10-44f0-812c-aad30db49e76','ph','ph','27fd522f-a619-43a2-8011-6cda06261819', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('818913df-1048-4d22-b03a-470abd118b01','turbidity','Turbidity','27fd522f-a619-43a2-8011-6cda06261819', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('493728af-d14c-44a2-b436-6886f6a90a7c','voltage','Voltage','27fd522f-a619-43a2-8011-6cda06261819', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('825ce91a-e09e-4663-a8fc-9ff196e21e5b','unknown-yf','Unknown YF','27fd522f-a619-43a2-8011-6cda06261819', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('8991046e-34b3-4481-a725-ce0d2a430663','stage','Stage','f9a665ed-ed3e-4593-b02c-bfc852e742f4', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('b3715ca1-4202-4be2-9d14-69e7a19af714','elevation','Elevation','f9a665ed-ed3e-4593-b02c-bfc852e742f4', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('5adf9c73-8218-414d-a323-cdc962f963de','precipitation','Precipitation','f9a665ed-ed3e-4593-b02c-bfc852e742f4', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1948,6 +2195,7 @@ VALUES
 ('a2e18c2a-9a80-4b3f-a6e4-21fe9f193107','ph','ph','f9a665ed-ed3e-4593-b02c-bfc852e742f4', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('6a337ccc-1b6c-43d5-8b7f-6ed72a3dbfb2','turbidity','Turbidity','f9a665ed-ed3e-4593-b02c-bfc852e742f4', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('912242e9-45d0-4bd8-8856-08a022b5728b','voltage','Voltage','f9a665ed-ed3e-4593-b02c-bfc852e742f4', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('68598560-a929-4f9b-9126-c2a2e53cd5f6','unknown-yf','Unknown YF','f9a665ed-ed3e-4593-b02c-bfc852e742f4', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('87b3099c-2862-4517-85bc-a77d38cc9765','stage','Stage','b8a42122-b8f0-411d-9576-8d24f0091729', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('a33625f4-23ca-471f-ae29-2e69556cec34','elevation','Elevation','b8a42122-b8f0-411d-9576-8d24f0091729', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('cffcd623-3439-41ec-a2c3-6c0e64fcccad','precipitation','Precipitation','b8a42122-b8f0-411d-9576-8d24f0091729', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1957,6 +2205,7 @@ VALUES
 ('f957837c-9055-4e42-b51d-dfc78e4b63a1','ph','ph','b8a42122-b8f0-411d-9576-8d24f0091729', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('279336fc-3e79-4372-b016-d496d87b9048','turbidity','Turbidity','b8a42122-b8f0-411d-9576-8d24f0091729', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('9b0b83e1-b1ec-4cd9-ab2a-d12e802d86d0','voltage','Voltage','b8a42122-b8f0-411d-9576-8d24f0091729', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('02fd69db-352c-45d9-ae28-0597f7a436e6','unknown-yf','Unknown YF','b8a42122-b8f0-411d-9576-8d24f0091729', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('acbe15e1-f741-4caa-89d1-28a3eaad5f57','stage','Stage','b0fd85c0-2c44-4081-b390-d50a804e729a', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('da6f1339-bae5-48e9-9aaf-47d2efc3700d','elevation','Elevation','b0fd85c0-2c44-4081-b390-d50a804e729a', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('027f08f9-7d91-4490-927b-cde9310c62f0','precipitation','Precipitation','b0fd85c0-2c44-4081-b390-d50a804e729a', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1966,6 +2215,7 @@ VALUES
 ('d494554d-7e0d-4aac-a96b-484c11f7427c','ph','ph','b0fd85c0-2c44-4081-b390-d50a804e729a', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('10e4a7eb-fa7d-4fc4-abbb-d14fb99b1e1b','turbidity','Turbidity','b0fd85c0-2c44-4081-b390-d50a804e729a', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('4695acec-a6b2-43a6-9546-211c98ee491f','voltage','Voltage','b0fd85c0-2c44-4081-b390-d50a804e729a', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('439fbfdf-7f5a-40f5-9d0d-f5ec3a83adb1','unknown-yf','Unknown YF','b0fd85c0-2c44-4081-b390-d50a804e729a', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('5cf19def-125c-44e2-913b-bfc42f19a880','stage','Stage','6ac6c1fc-f21c-4780-ae21-b9c4ae7084cb', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('3cf3207b-8c6e-4569-9ad6-82f49e88bb83','elevation','Elevation','6ac6c1fc-f21c-4780-ae21-b9c4ae7084cb', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('0c6a516a-c9b7-498a-b7eb-f4c4908025db','precipitation','Precipitation','6ac6c1fc-f21c-4780-ae21-b9c4ae7084cb', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1975,6 +2225,7 @@ VALUES
 ('419f69b6-d7f4-4c3e-84d7-65cc7ba72957','ph','ph','6ac6c1fc-f21c-4780-ae21-b9c4ae7084cb', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('6bda2fe0-d236-4c95-b88b-65fe412c0405','turbidity','Turbidity','6ac6c1fc-f21c-4780-ae21-b9c4ae7084cb', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('1277e51d-7dcc-4cbc-a12a-17829be6f33f','voltage','Voltage','6ac6c1fc-f21c-4780-ae21-b9c4ae7084cb', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('16fb62aa-ea4e-452a-bfcf-6fa881b708a6','unknown-yf','Unknown YF','6ac6c1fc-f21c-4780-ae21-b9c4ae7084cb', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('523603ed-0612-4736-86fc-c18f6cdac9dc','stage','Stage','7816be03-2d3f-45fe-9390-6f194fa13821', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('7abcf59c-7e58-476b-bec3-6ad0196f7de1','elevation','Elevation','7816be03-2d3f-45fe-9390-6f194fa13821', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('4f829a7d-5f63-4dfb-a288-b7afa6f0e21a','precipitation','Precipitation','7816be03-2d3f-45fe-9390-6f194fa13821', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1984,6 +2235,7 @@ VALUES
 ('e2fe57b2-e410-4a8d-8dc0-59cbccb0e674','ph','ph','7816be03-2d3f-45fe-9390-6f194fa13821', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('d783d5ba-968b-43b5-910b-86f56d984501','turbidity','Turbidity','7816be03-2d3f-45fe-9390-6f194fa13821', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('7e5bf24f-cc13-4303-bd28-41cebd4db447','voltage','Voltage','7816be03-2d3f-45fe-9390-6f194fa13821', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('25dae7de-23be-487b-950d-74d2551e1922','unknown-yf','Unknown YF','7816be03-2d3f-45fe-9390-6f194fa13821', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('9f03b6ab-1b9d-4ecc-a936-7a2005e1e512','stage','Stage','b9d0b218-08c9-4a91-9028-811f98542a54', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('03d2647f-a6db-4bf3-b5b3-94f211a73fda','elevation','Elevation','b9d0b218-08c9-4a91-9028-811f98542a54', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('d6a28bb1-781f-4294-952d-93221a2674c8','precipitation','Precipitation','b9d0b218-08c9-4a91-9028-811f98542a54', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -1993,6 +2245,7 @@ VALUES
 ('0d4cb1c1-ffe3-4188-a089-5cb376e07459','ph','ph','b9d0b218-08c9-4a91-9028-811f98542a54', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('781ac4a0-0dc9-4181-8b78-d3e9eb7ad463','turbidity','Turbidity','b9d0b218-08c9-4a91-9028-811f98542a54', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('b2444701-20a2-4f44-a9ac-63516f7f3ddd','voltage','Voltage','b9d0b218-08c9-4a91-9028-811f98542a54', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('bffb7094-7c32-4fe7-96d2-ce3e2557c6c1','unknown-yf','Unknown YF','b9d0b218-08c9-4a91-9028-811f98542a54', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('0737f5b1-cd5b-4964-a64c-ab42e66b8039','stage','Stage','43c6c79f-9c45-49b0-a8f0-bbbf81db0d51', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('091685cf-b107-4ed6-84fc-f9028e4c734e','elevation','Elevation','43c6c79f-9c45-49b0-a8f0-bbbf81db0d51', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('33e8b870-23e6-4ffc-9fce-421d55ba437e','precipitation','Precipitation','43c6c79f-9c45-49b0-a8f0-bbbf81db0d51', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -2002,6 +2255,7 @@ VALUES
 ('af7259e8-fc78-4890-a432-6f5ba444f75e','ph','ph','43c6c79f-9c45-49b0-a8f0-bbbf81db0d51', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('395ab44e-a557-45dc-95f0-5077317658f0','turbidity','Turbidity','43c6c79f-9c45-49b0-a8f0-bbbf81db0d51', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('7cf5c6db-e470-4a3b-9e14-ba8a0c5b24a8','voltage','Voltage','43c6c79f-9c45-49b0-a8f0-bbbf81db0d51', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('8f7a601d-daa5-49f6-bdbf-b7b40d9afe8d','unknown-yf','Unknown YF','43c6c79f-9c45-49b0-a8f0-bbbf81db0d51', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('0c8dab17-1fbc-4db4-8aad-bf6fac5f75b2','precipitation','Precipitation','fc1a7d87-5598-49b0-beb9-3779829fc8d0', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
 ('cb676365-b761-4df4-abba-363774e0b116','voltage','Voltage','fc1a7d87-5598-49b0-beb9-3779829fc8d0', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
 ('1a517b41-4fec-4441-911a-8739f20f6687','stage','Stage','87126358-87ec-4974-90f3-a40f14c0d2b3', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
@@ -2013,12 +2267,17 @@ VALUES
 ('5284c269-733c-4e16-b16a-07ea7c1eaab6','ph','ph','87126358-87ec-4974-90f3-a40f14c0d2b3', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('e1c5f961-34bc-4c1a-b373-9c78161ada79','turbidity','Turbidity','87126358-87ec-4974-90f3-a40f14c0d2b3', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('0fe32dca-6db7-42ab-82de-d438670fedb4','voltage','Voltage','87126358-87ec-4974-90f3-a40f14c0d2b3', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('033bc916-dfd8-4090-8434-9420ff921542','unknown-yf','Unknown YF','87126358-87ec-4974-90f3-a40f14c0d2b3', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('74ef0cfc-1aee-419f-a850-0d1b7ac5321e','stage','Stage','b24fc5a4-962c-4a0b-a1b4-d2f08a55989b', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('5f946aea-47e3-47f8-ad47-9a9f53a285c2','precipitation','Precipitation','b24fc5a4-962c-4a0b-a1b4-d2f08a55989b', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
 ('fdf5dd4d-a492-42be-a72c-0aa22b3253b1','stage','Stage','6fcd34f0-dbc7-4ad2-bdbc-4eddd8277322', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('081c995e-bcf6-4511-b67b-bc937619defa','precipitation','Precipitation','6fcd34f0-dbc7-4ad2-bdbc-4eddd8277322', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
 ('61cebb41-ca50-47bb-a470-245ecbab1aee','voltage','Voltage','6fcd34f0-dbc7-4ad2-bdbc-4eddd8277322', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('c0b7a12f-c20d-47f0-8098-e00f013eb74a','unknown-99968','Unknown 99968','b172624d-0eab-4c0b-9e95-47438e1b4afd', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('b9889b42-486e-4192-bc42-2837539e9aa6','water-temperature','Water-Temperature','b172624d-0eab-4c0b-9e95-47438e1b4afd', 'de6112da-8489-4286-ae56-ec72aa09974d', 'daeee256-c762-43a2-8369-2d295525023c'),
+('a4d4ed34-0cdc-44f4-92c1-af9016cafffd','unknown-99238','Unknown 99238','b172624d-0eab-4c0b-9e95-47438e1b4afd', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
+('a337c7ca-15a1-4715-8ed7-af11a96af920','unknown-81904','Unknown 81904','b172624d-0eab-4c0b-9e95-47438e1b4afd', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
+('7743fa9f-8599-43b8-b3ca-88f9c7a15fc1','unknown-wv','Unknown WV','b172624d-0eab-4c0b-9e95-47438e1b4afd', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('370f7878-91a9-4075-86bd-0aece33bd8bf','voltage','Voltage','b172624d-0eab-4c0b-9e95-47438e1b4afd', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
 ('0000fe8b-6ee1-4ea1-89d2-d3f7ba965611','stage','Stage','b172624d-0eab-4c0b-9e95-47438e1b4afd', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('e3a9c970-5ac9-4ad6-afd4-1cfc94a633fb','stage','Stage','6b20e874-02f0-40de-95ce-bb1f3e565d46', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
@@ -2030,6 +2289,7 @@ VALUES
 ('c7095afb-a744-4505-96b4-e6dcd633c968','ph','ph','6b20e874-02f0-40de-95ce-bb1f3e565d46', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('6130cc47-9853-47ce-930b-b0077f987fd2','turbidity','Turbidity','6b20e874-02f0-40de-95ce-bb1f3e565d46', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('ac5a511f-b3ea-456b-ae02-de3fdb026f12','voltage','Voltage','6b20e874-02f0-40de-95ce-bb1f3e565d46', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('285432fb-6d33-4414-b160-a7653a2aebc2','unknown-yf','Unknown YF','6b20e874-02f0-40de-95ce-bb1f3e565d46', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('c23db1f2-4bcc-425e-ad64-22b8c906f627','stage','Stage','cec009f7-5cd7-4194-980a-ebdc69995f0d', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('5ebe8a77-ddbb-4d98-a5cb-63055c6a37c5','elevation','Elevation','cec009f7-5cd7-4194-980a-ebdc69995f0d', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('7816a413-9120-4861-bb45-8e8d35ba30f8','precipitation','Precipitation','cec009f7-5cd7-4194-980a-ebdc69995f0d', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -2039,6 +2299,7 @@ VALUES
 ('0386bfc5-2032-4bc7-a398-049a00ba3cca','ph','ph','cec009f7-5cd7-4194-980a-ebdc69995f0d', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('b6a4a6c7-7224-4afd-afbd-4976766cafb3','turbidity','Turbidity','cec009f7-5cd7-4194-980a-ebdc69995f0d', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('0142e249-1001-4001-9a63-94afe4bbe01c','voltage','Voltage','cec009f7-5cd7-4194-980a-ebdc69995f0d', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('e829a28d-4b80-41f1-a123-673fd4897123','unknown-yf','Unknown YF','cec009f7-5cd7-4194-980a-ebdc69995f0d', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('a35025fb-6c1b-49d6-a446-cbdb83e88828','stage','Stage','b1d3fc99-abaf-4055-b4e6-6ab0c9a60c3d', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('51bc7301-1766-47ec-8832-8df94983091e','elevation','Elevation','b1d3fc99-abaf-4055-b4e6-6ab0c9a60c3d', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('0abe2fe9-d94a-43ea-9624-e823870dbe41','precipitation','Precipitation','b1d3fc99-abaf-4055-b4e6-6ab0c9a60c3d', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -2048,6 +2309,7 @@ VALUES
 ('7eb88ed3-51af-45d7-a868-571bcfda7c01','ph','ph','b1d3fc99-abaf-4055-b4e6-6ab0c9a60c3d', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('ba9383ff-a54e-4f3a-a875-344e0e6f448b','turbidity','Turbidity','b1d3fc99-abaf-4055-b4e6-6ab0c9a60c3d', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('0aa10d78-fb03-467e-b421-98779825dd9a','voltage','Voltage','b1d3fc99-abaf-4055-b4e6-6ab0c9a60c3d', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('d7691820-d7bd-4024-8458-4f501e91b14d','unknown-yf','Unknown YF','b1d3fc99-abaf-4055-b4e6-6ab0c9a60c3d', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('ad569354-aaff-4977-a9c1-f96cdbc6b0d7','stage','Stage','9e569018-ce7e-4a89-8f8e-0fdf0aed9adf', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('9a6dc095-f5a6-4f5d-baf7-db2befd74d67','elevation','Elevation','9e569018-ce7e-4a89-8f8e-0fdf0aed9adf', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('1a8b7dde-b455-476e-89c1-83bf6d4a47ef','precipitation','Precipitation','9e569018-ce7e-4a89-8f8e-0fdf0aed9adf', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -2057,6 +2319,7 @@ VALUES
 ('d79a903a-3a19-4bab-8d05-3bea9793f04b','ph','ph','9e569018-ce7e-4a89-8f8e-0fdf0aed9adf', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('6821fc91-feb4-41e2-80aa-ba4eafb93238','turbidity','Turbidity','9e569018-ce7e-4a89-8f8e-0fdf0aed9adf', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('07def34b-5383-4b1d-b0e8-648553475afd','voltage','Voltage','9e569018-ce7e-4a89-8f8e-0fdf0aed9adf', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('1c940a31-9c48-4184-a50c-7bea251a7633','unknown-yf','Unknown YF','9e569018-ce7e-4a89-8f8e-0fdf0aed9adf', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('64615a60-9e67-43cf-ac7c-722fd2d6c0be','stage','Stage','9cda93fc-a495-4722-8834-7023a281b66a', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('1206d7aa-2dc6-439f-bb7f-2363be2a5edb','stage','Stage','2a86face-8c5b-48c8-8c4f-def396a8489a', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('b1fb7b99-6008-41f8-ab03-f625fa14d8b8','elevation','Elevation','2a86face-8c5b-48c8-8c4f-def396a8489a', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
@@ -2067,6 +2330,7 @@ VALUES
 ('cb5ae215-2fa1-41a2-80d6-c5f6521c8cda','ph','ph','2a86face-8c5b-48c8-8c4f-def396a8489a', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('71cc029d-affe-4fcf-b1fd-47ece74e5bfb','turbidity','Turbidity','2a86face-8c5b-48c8-8c4f-def396a8489a', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('944198f5-7baa-44bd-a64b-cdc6921b742c','voltage','Voltage','2a86face-8c5b-48c8-8c4f-def396a8489a', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('849ee4ea-e9ce-4345-93b2-f825ad130449','unknown-yf','Unknown YF','2a86face-8c5b-48c8-8c4f-def396a8489a', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('0a7fa8ea-7885-451d-b212-a047363d6a45','stage','Stage','554a7daa-b00f-4d14-a959-68c989ce5bda', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('2003ee22-5e46-4b22-835c-7bb0a67ce234','elevation','Elevation','554a7daa-b00f-4d14-a959-68c989ce5bda', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('80b0454a-acfe-4017-ab68-853e8af96d7c','precipitation','Precipitation','554a7daa-b00f-4d14-a959-68c989ce5bda', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -2076,6 +2340,7 @@ VALUES
 ('ab99aa54-9dc4-4b58-9211-73b7c913fffa','ph','ph','554a7daa-b00f-4d14-a959-68c989ce5bda', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('a8237a80-4f0b-4597-a5e2-b6d08cf96e61','turbidity','Turbidity','554a7daa-b00f-4d14-a959-68c989ce5bda', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('df3f9872-7947-44d1-8067-d2b61c9a531e','voltage','Voltage','554a7daa-b00f-4d14-a959-68c989ce5bda', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('7795cb99-b5b5-4833-8062-2baa723a2aa6','unknown-yf','Unknown YF','554a7daa-b00f-4d14-a959-68c989ce5bda', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('adf5fcba-716c-463e-b099-9625b73a8191','stage','Stage','7a40ac4f-904a-4068-9efb-ef41e81db0b7', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('bebabb1f-8dc6-4678-83aa-d8523e074e19','voltage','Voltage','7a40ac4f-904a-4068-9efb-ef41e81db0b7', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
 ('d356a8ca-3a46-4856-9265-955d143190ee','stage','Stage','5a1b8894-1fb1-4289-b943-8f74b28d7f76', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
@@ -2087,6 +2352,7 @@ VALUES
 ('4067fbcc-3758-4ac3-b14b-2f779e39f100','ph','ph','5a1b8894-1fb1-4289-b943-8f74b28d7f76', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('7500b84b-02fd-4029-ab21-b83725f928b5','turbidity','Turbidity','5a1b8894-1fb1-4289-b943-8f74b28d7f76', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('31f6edc1-ddf1-4dbc-a81e-ee1e761e9b85','voltage','Voltage','5a1b8894-1fb1-4289-b943-8f74b28d7f76', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('1cad792e-c77e-4548-93b9-f562938ece0b','unknown-yf','Unknown YF','5a1b8894-1fb1-4289-b943-8f74b28d7f76', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('297ad87c-63e4-45d2-8b77-41917babd1a0','stage','Stage','aa0341b6-4bed-4683-bb50-7ccb5da4eff7', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('0d93ef15-bc6a-4bea-a8ea-4ee2091ad0da','elevation','Elevation','aa0341b6-4bed-4683-bb50-7ccb5da4eff7', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('eb4bc19d-413c-4862-9b10-cae74579dff2','precipitation','Precipitation','aa0341b6-4bed-4683-bb50-7ccb5da4eff7', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -2096,6 +2362,7 @@ VALUES
 ('e30cc013-78a9-45d8-810a-8accd65dbd23','ph','ph','aa0341b6-4bed-4683-bb50-7ccb5da4eff7', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('39c9a4f5-ceec-4309-ab2a-ae91cdecdc99','turbidity','Turbidity','aa0341b6-4bed-4683-bb50-7ccb5da4eff7', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('3dc71334-c363-4d2f-8ae8-7470b717eadd','voltage','Voltage','aa0341b6-4bed-4683-bb50-7ccb5da4eff7', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('52c77173-2b34-4ef4-a70b-187cbd6ae146','unknown-yf','Unknown YF','aa0341b6-4bed-4683-bb50-7ccb5da4eff7', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('93b65d27-e3f0-4ce1-83a0-d29d8e048e6d','stage','Stage','902be564-bff4-4495-bc2c-388ddcf998d4', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('644991c0-8101-44bb-9800-7fd9007d4f49','precipitation','Precipitation','902be564-bff4-4495-bc2c-388ddcf998d4', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
 ('8427313d-96d1-4eaf-811f-3ebb07bf75fd','voltage','Voltage','902be564-bff4-4495-bc2c-388ddcf998d4', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
@@ -2108,6 +2375,7 @@ VALUES
 ('3c10559a-d74a-4b82-9326-bf1c0655bada','ph','ph','90d6254b-f8ff-47ff-b97a-981e710e7160', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('92d0be19-d0b5-420a-802d-bc789c976258','turbidity','Turbidity','90d6254b-f8ff-47ff-b97a-981e710e7160', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('c00e1b0c-8f20-47c2-8ad5-6f7a69926fb8','voltage','Voltage','90d6254b-f8ff-47ff-b97a-981e710e7160', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('a30d0166-b5e7-464b-bc6a-e70caeb8db89','unknown-yf','Unknown YF','90d6254b-f8ff-47ff-b97a-981e710e7160', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('08021757-e404-4a2d-b726-a4f19e058673','stage','Stage','cc2b904b-d99f-4583-8fb7-056ba1ba320f', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('61e96a32-fb53-45a9-90fd-7272885755d6','elevation','Elevation','cc2b904b-d99f-4583-8fb7-056ba1ba320f', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('de45bd35-eaef-429f-b645-468e0b3ddd80','precipitation','Precipitation','cc2b904b-d99f-4583-8fb7-056ba1ba320f', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -2117,6 +2385,7 @@ VALUES
 ('3760c705-6b2e-4c18-b11a-001d8ee60544','ph','ph','cc2b904b-d99f-4583-8fb7-056ba1ba320f', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('33e20303-ee4e-4758-abd8-9be7c084fed2','turbidity','Turbidity','cc2b904b-d99f-4583-8fb7-056ba1ba320f', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('821ac2b3-dc0c-468a-9375-12c8f01839ea','voltage','Voltage','cc2b904b-d99f-4583-8fb7-056ba1ba320f', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('87dcfd16-262c-4132-9f01-53760032c3f3','unknown-yf','Unknown YF','cc2b904b-d99f-4583-8fb7-056ba1ba320f', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('67c7149b-b094-4c52-9cc2-c974debf4320','stage','Stage','b7abd272-ba0c-428b-88a4-a2dcc5bcda0e', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('f68cb9d4-87e5-45d6-a43f-3d3da39cedcb','elevation','Elevation','b7abd272-ba0c-428b-88a4-a2dcc5bcda0e', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('ce30144f-7c88-4848-9374-8e5744dd3bc3','precipitation','Precipitation','b7abd272-ba0c-428b-88a4-a2dcc5bcda0e', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -2126,6 +2395,7 @@ VALUES
 ('5958efae-6d79-44ea-9ac9-473533feefcb','ph','ph','b7abd272-ba0c-428b-88a4-a2dcc5bcda0e', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('dae3f25a-d808-4ff6-a8ad-b71b4894ec85','turbidity','Turbidity','b7abd272-ba0c-428b-88a4-a2dcc5bcda0e', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('ae4dea83-c4f9-4174-bb54-974be0e79a14','voltage','Voltage','b7abd272-ba0c-428b-88a4-a2dcc5bcda0e', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('a39e631f-f60c-456b-a3ac-cea656954107','unknown-yf','Unknown YF','b7abd272-ba0c-428b-88a4-a2dcc5bcda0e', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('43c5c680-e796-45f3-83e1-7f098bf89fba','stage','Stage','e7902c45-6800-4b84-a70e-b70e77d43bb1', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('138bd192-6de2-4abf-ad47-0a9c916c4ca3','elevation','Elevation','e7902c45-6800-4b84-a70e-b70e77d43bb1', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('832e749b-33ec-4535-9863-007c2714b8a7','precipitation','Precipitation','e7902c45-6800-4b84-a70e-b70e77d43bb1', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -2135,6 +2405,7 @@ VALUES
 ('19d09e37-310e-40f3-a75e-2c29d28ecd33','ph','ph','e7902c45-6800-4b84-a70e-b70e77d43bb1', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('ebae63c5-6dd5-4412-ab1f-8de7cb8a273b','turbidity','Turbidity','e7902c45-6800-4b84-a70e-b70e77d43bb1', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('be7a42fb-ffb6-43c7-a296-543f09b4f322','voltage','Voltage','e7902c45-6800-4b84-a70e-b70e77d43bb1', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('b37c6c0c-d3d3-4aaf-b96a-ec6e5dd1de63','unknown-yf','Unknown YF','e7902c45-6800-4b84-a70e-b70e77d43bb1', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('f995ecab-f8cc-4989-ac6c-a146a7863db5','stage','Stage','ed9c351b-c5cd-411c-aa45-fbca9ac69d7d', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('f3cc511d-296b-4843-8e1b-96a8b383c2d3','elevation','Elevation','ed9c351b-c5cd-411c-aa45-fbca9ac69d7d', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('0d17daa6-85cb-4dcf-b9a6-6e7e4a7bd830','precipitation','Precipitation','ed9c351b-c5cd-411c-aa45-fbca9ac69d7d', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -2144,6 +2415,7 @@ VALUES
 ('1804ac07-7bb9-4530-8ef7-2999e201774b','ph','ph','ed9c351b-c5cd-411c-aa45-fbca9ac69d7d', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('64ed0a92-8a6b-4a33-b1ea-d307d6168b1a','turbidity','Turbidity','ed9c351b-c5cd-411c-aa45-fbca9ac69d7d', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('95b89d71-6507-4f3b-9b00-d3f3f7f4d1a9','voltage','Voltage','ed9c351b-c5cd-411c-aa45-fbca9ac69d7d', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('809af917-fd26-409d-939d-d9bd8da89a32','unknown-yf','Unknown YF','ed9c351b-c5cd-411c-aa45-fbca9ac69d7d', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('5f6edf48-1c89-43f3-a8fe-9c0312169b41','stage','Stage','0929af2a-a93e-4aaa-a926-cfeeba57372b', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('3f25bedf-9609-472d-b5ea-39e5e9858289','elevation','Elevation','0929af2a-a93e-4aaa-a926-cfeeba57372b', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('8ebc0c07-28ed-4b24-a5ff-a9428b37df64','precipitation','Precipitation','0929af2a-a93e-4aaa-a926-cfeeba57372b', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -2153,6 +2425,7 @@ VALUES
 ('b1f87836-0a0b-483c-bf69-4c117c1ccbca','ph','ph','0929af2a-a93e-4aaa-a926-cfeeba57372b', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('76a1a4d0-7e72-494a-aa60-33e4325d8186','turbidity','Turbidity','0929af2a-a93e-4aaa-a926-cfeeba57372b', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('e7595e8a-9ea5-4c53-bb02-90133a6ef3c9','voltage','Voltage','0929af2a-a93e-4aaa-a926-cfeeba57372b', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('4edc2f96-044d-4199-9b23-9328637a0c4d','unknown-yf','Unknown YF','0929af2a-a93e-4aaa-a926-cfeeba57372b', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('08dc366e-31ad-4475-957f-d6110231af6c','stage','Stage','8c48ae3d-4581-4aa5-8b81-592c907dd7a0', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('542b5f3a-33fd-4e8f-abd7-fe7f8276b67c','elevation','Elevation','8c48ae3d-4581-4aa5-8b81-592c907dd7a0', '83b5a1f7-948b-4373-a47c-d73ff622aafd', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
 ('00dd21b3-9b27-4974-bad4-ade5adeb4630','precipitation','Precipitation','8c48ae3d-4581-4aa5-8b81-592c907dd7a0', '0ce77a5a-8283-47cd-9126-c440bcec4ef6', '4ee79a3d-a053-41b8-85b5-bb2eea3c9d1a'),
@@ -2162,5 +2435,7 @@ VALUES
 ('9e77dc7c-9b1a-48b6-8ae8-9ab2a2e9b2d2','ph','ph','8c48ae3d-4581-4aa5-8b81-592c907dd7a0', '5d0b2c85-6a4c-4d82-aed3-193b066349f1', '5939c8bb-f924-45f0-9ec9-5673ae7f862c'),
 ('5c8269bd-0dd7-45a0-80ce-1981d8eb4588','turbidity','Turbidity','8c48ae3d-4581-4aa5-8b81-592c907dd7a0', '3676df6a-37c2-4a81-9072-ddcd4ab93702', 'e65274a5-3d42-4b96-8db6-696d65d92a8d'),
 ('de440b23-4bec-4259-86ce-3c37523f98b5','voltage','Voltage','8c48ae3d-4581-4aa5-8b81-592c907dd7a0', '430e5edb-e2b5-4f86-b19f-cda26a27e151', '6b5bd788-8c78-43bb-b5a3-ad544b858a64'),
+('1363bb2d-a2bc-487d-9cd2-9852e92a3982','unknown-yf','Unknown YF','8c48ae3d-4581-4aa5-8b81-592c907dd7a0', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('387e3fb9-8e85-444b-ad28-2c7d6226d2cc','stage','Stage','b5a6d737-0f49-4d0a-9405-5fded7f886ea', 'b49f214e-f69f-43da-9ce3-ad96042268d0', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce'),
-('1f94aba9-89ff-42c5-8917-34ec2be32641','water-temperature','Water-Temperature','b5a6d737-0f49-4d0a-9405-5fded7f886ea', 'de6112da-8489-4286-ae56-ec72aa09974d', 'daeee256-c762-43a2-8369-2d295525023c');
+('1f94aba9-89ff-42c5-8917-34ec2be32641','water-temperature','Water-Temperature','b5a6d737-0f49-4d0a-9405-5fded7f886ea', 'de6112da-8489-4286-ae56-ec72aa09974d', 'daeee256-c762-43a2-8369-2d295525023c'),
+('419ef6a3-b2f5-411f-bc7d-c352652c0202','unknown-wv','Unknown WV','b5a6d737-0f49-4d0a-9405-5fded7f886ea', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8');
