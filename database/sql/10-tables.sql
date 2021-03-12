@@ -442,7 +442,7 @@ INSERT INTO measure (id, name) VALUES
     ('955f207d-9a48-45c5-9697-60a4ad7c9ca4','temperature'),
     ('b85b9367-f034-4783-bf5b-9220e32d4e6a','time'),
     ('631347f1-b12e-4d09-8d1c-9359148d8b22','turbidity'),
-    ('43fefa8b-10e9-4b27-8ed4-36e36174fbeb','undefined'),
+    ('43fefa8b-10e9-4b27-8ed4-36e36174fbeb','unknown'),
     ('c70e7392-0108-4a17-a99f-244895f12558','velocity'),
     ('a08f3cd5-233d-43f4-8f21-633a6aa63f0c','voltage'),
     ('4f18ff01-aeba-46bd-b5c8-05eec8cd8b43','volume'),
@@ -621,7 +621,8 @@ INSERT INTO unit (id, unit_family_id, measure_id, name, abbreviation) VALUES
 ('c0a116ef-058d-41b0-a845-557226ce557c', '19ad5455-4d6a-47d3-a28a-87bdfac2d75c', '513bafdb-48e3-44ff-8189-54e8130ec76a', 'watts', 'W'),
 ('5fa61c67-38e6-46ae-ac1f-114278706261', 'c9f3b6d2-3136-4330-a330-66e402b4ee04', 'b85b9367-f034-4783-bf5b-9220e32d4e6a', 'weeks', 'week'),
 ('cc83a42b-16a7-46a8-b3a6-966bad7ae2d7', 'c4eccc63-4bfb-4dd2-9f73-920ec7b385a0', '2c2b39d2-186d-46e9-8dc7-aca36f03aa23', 'yards', 'yd'),
-('1292b2a5-b78e-4a7a-80e3-978d44cbff2b', 'c4eccc63-4bfb-4dd2-9f73-920ec7b385a0', 'c70e7392-0108-4a17-a99f-244895f12558', 'yards per second', 'yd/s');
+('1292b2a5-b78e-4a7a-80e3-978d44cbff2b', 'c4eccc63-4bfb-4dd2-9f73-920ec7b385a0', 'c70e7392-0108-4a17-a99f-244895f12558', 'yards per second', 'yd/s'),
+('4a999277-4cf5-4282-93ce-23b33c65e2c8', 'c9f3b6d2-3136-4330-a330-66e402b4ee04', '43fefa8b-10e9-4b27-8ed4-36e36174fbeb', 'unknown', 'unknown');
 
 -- parameter
 INSERT INTO parameter (id, name) VALUES
@@ -638,6 +639,7 @@ INSERT INTO parameter (id, name) VALUES
     ('e46deb1d-e7e4-4d49-a874-18306991ecfe', 'speed'),
     ('b49f214e-f69f-43da-9ce3-ad96042268d0', 'stage'),   
     ('3676df6a-37c2-4a81-9072-ddcd4ab93702', 'turbidity'),
+    ('2b7f96e1-820f-4f61-ba8f-861640af6232', 'unknown'),
     ('06189199-a25f-4101-b8bd-991c6a5a7ab3', 'velocity'),  
     ('430e5edb-e2b5-4f86-b19f-cda26a27e151', 'voltage'),
     ('de6112da-8489-4286-ae56-ec72aa09974d', 'water-temperature');
