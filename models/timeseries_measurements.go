@@ -51,7 +51,7 @@ func ListTimeseriesMeasurements(db *sqlx.DB, timeseriesID *uuid.UUID, tw *ts.Tim
 	// Get Timeseries Measurements
 	if err := db.Select(
 		&mc.Items,
-		listTimeseriesMeasurementsSQL()+" WHERE T.id = $1 AND M.time > $2 AND M.time < $3",
+		listTimeseriesMeasurementsSQL()+" WHERE T.id = $1 AND M.time > $2 AND M.time < $3 ORDER BY M.time DESC",
 		timeseriesID, tw.After, tw.Before,
 	); err != nil {
 		return nil, err
