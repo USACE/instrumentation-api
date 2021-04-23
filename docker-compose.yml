@@ -81,15 +81,16 @@ services:
     volumes:
       - ./_utils/seed_measurements:/app
     environment:
-      - INSTRUMENTATION_API_HOST=instrumentation-api_api_1
+      - INSTRUMENTATION_API_HOST=api
       - INSTRUMENTATION_DBUSER=instrumentation_user
       - INSTRUMENTATION_DBPASS=password
       - INSTRUMENTATION_DBNAME=postgres
-      - INSTRUMENTATION_DBHOST=instrumentation-api_postgres_1
+      - INSTRUMENTATION_DBHOST=postgres
       - INSTRUMENTATION_ROUTE_PREFIX=
     entrypoint: >
       /bin/sh -c "
       pip3 install requests psycopg2;
+      sleep 10;
       python3 /app/generate_seed_measurements.py
       exit 0;
       "

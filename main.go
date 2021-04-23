@@ -148,7 +148,6 @@ func main() {
 	// Routes do not have /project/:project_id context and are typically authorized
 	app.POST("/timeseries_measurements", handlers.CreateOrUpdateTimeseriesMeasurements(db))
 	app.POST("/heartbeat", handlers.DoHeartbeat(db))
-	app.PUT("/projects/:project_id/instruments/:instrument_id/geometry", handlers.UpdateInstrumentGeometry(db))
 
 	// Heartbeat
 	public.GET("/heartbeats", handlers.ListHeartbeats(db))
@@ -208,6 +207,7 @@ func main() {
 	// TODO: Remove endpoint (no project context)
 	private.PUT("/instruments/:instrument_id", handlers.UpdateInstrument(db))
 	private.PUT("/projects/:project_id/instruments/:instrument_id", handlers.UpdateInstrument(db))
+	private.PUT("/projects/:project_id/instruments/:instrument_id/geometry", handlers.UpdateInstrumentGeometry(db))
 	// TODO: Remove endpoint (no project context)
 	private.DELETE("/instruments/:instrument_id", handlers.DeleteFlagInstrument(db))
 
