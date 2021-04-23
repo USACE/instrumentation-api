@@ -206,8 +206,8 @@ func main() {
 	private.POST("/instruments", handlers.CreateInstruments(db))
 	// TODO: Remove endpoint (no project context)
 	private.PUT("/instruments/:instrument_id", handlers.UpdateInstrument(db))
-	private.PUT("/projects/:project_id/instruments/:instrument_id/geometry", handlers.UpdateInstrumentGeometry(db))
 	private.PUT("/projects/:project_id/instruments/:instrument_id", handlers.UpdateInstrument(db))
+	private.PUT("/projects/:project_id/instruments/:instrument_id/geometry", handlers.UpdateInstrumentGeometry(db))
 	// TODO: Remove endpoint (no project context)
 	private.DELETE("/instruments/:instrument_id", handlers.DeleteFlagInstrument(db))
 

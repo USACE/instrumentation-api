@@ -644,9 +644,13 @@ INSERT INTO parameter (id, name) VALUES
     ('430e5edb-e2b5-4f86-b19f-cda26a27e151', 'voltage'),
     ('de6112da-8489-4286-ae56-ec72aa09974d', 'water-temperature');
 
+-- Profile (MIDAS Automation Account)
+INSERT INTO profile (edipi, username, email) VALUES (79, 'MIDAS Automation', 'midas@rsgis.dev');
+
 -- -------------------------------------------------
 -- basic seed data to demo the app and run API tests
 -- -------------------------------------------------
+
 -- Profile (Faked with: https://homepage.net/name_generator/)
 -- NOTE: EDIPI 1 should not be used; test user with EDIPI = 1 created by integration tests
 INSERT INTO profile (id, edipi, username, email) VALUES

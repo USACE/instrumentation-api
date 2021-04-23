@@ -50,7 +50,7 @@ def generate_measurements(timeseries_id, param, measurements_sql):
 ########################################################################
 
 API_HOST = f"http://{os.getenv('INSTRUMENTATION_API_HOST', default='http://instrumentation-api_api_1')}"
-INSTRUMENTATION_ROUTE_PREFIX = os.getenv('INSTRUMENTATION_ROUTE_PREFIX', default='/instrumentation')
+INSTRUMENTATION_ROUTE_PREFIX = os.getenv('INSTRUMENTATION_ROUTE_PREFIX', default='')
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
 measurements_sql = 'INSERT INTO timeseries_measurement (timeseries_id, time, value) VALUES\n'
