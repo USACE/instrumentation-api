@@ -193,6 +193,14 @@ func main() {
 	private.PUT("/projects/:project_id", handlers.UpdateProject(db))
 	private.DELETE("/projects/:project_id", handlers.DeleteFlagProject(db))
 
+	// Project Roles
+	// // list members with a particular role
+	// private.GET("/projects/:project_id/roles/:role_id/members", handlers.ListProjectRoleMembers(db))
+	// // add role to a user
+	// private.POST("/projects/:project_id/roles/:role_id/members/:profile_id", handlers.AddProjectRoleMember(db))
+	// // remove role from a user
+	// private.DELETE("/projects/:project_id/roles/:role_id/members/:profile_id", handlers.RemoveProjectRoleMember(db))
+
 	// Project Timeseries
 	private.POST("/projects/:project_id/timeseries/:timeseries_id", handlers.CreateProjectTimeseries(db))
 	private.DELETE("/projects/:project_id/timeseries/:timeseries_id", handlers.DeleteProjectTimeseries(db))
