@@ -214,4 +214,4 @@ var listInstrumentGroupsSQL = `SELECT id,
 				                      project_id,
 									  instrument_count,
 									  timeseries_count 
-	                            FROM  v_instrument_groups`
+	                            FROM  v_instrument_group`

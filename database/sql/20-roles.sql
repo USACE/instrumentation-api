@@ -49,7 +49,7 @@ GRANT SELECT ON
     unit,
     unit_family,
     v_instrument,
-    v_instrument_groups,
+    v_instrument_group,
     v_plot_configuration,
     v_project,
     v_timeseries,

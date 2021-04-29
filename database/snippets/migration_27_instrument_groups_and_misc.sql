@@ -3,8 +3,8 @@
 ALTER TABLE timeseries_measurement ADD PRIMARY KEY (timeseries_id, time);
 
 --add new view for instrument_groups
--- v_instrument_groups
-CREATE OR REPLACE VIEW v_instrument_groups AS (
+-- v_instrument_group
+CREATE OR REPLACE VIEW v_instrument_group AS (
     WITH instrument_count AS (
         SELECT 
         igi.instrument_group_id,
@@ -45,4 +45,4 @@ CREATE OR REPLACE VIEW v_instrument_groups AS (
 
 -- grant select on new view
 
-GRANT SELECT ON v_instrument_groups TO instrumentation_reader;
+GRANT SELECT ON v_instrument_group TO instrumentation_reader;
