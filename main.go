@@ -195,11 +195,11 @@ func main() {
 
 	// Project Roles
 	// // list members with a particular role
-	// private.GET("/projects/:project_id/roles/:role_id/members", handlers.ListProjectRoleMembers(db))
+	public.GET("/projects/:project_id/members", handlers.ListProjectMembers(db))
 	// // add role to a user
-	// private.POST("/projects/:project_id/roles/:role_id/members/:profile_id", handlers.AddProjectRoleMember(db))
+	private.POST("/projects/:project_id/members/:profile_id/roles/:role_id", handlers.AddProjectMemberRole(db))
 	// // remove role from a user
-	// private.DELETE("/projects/:project_id/roles/:role_id/members/:profile_id", handlers.RemoveProjectRoleMember(db))
+	private.DELETE("/projects/:project_id/members/:profile_id/roles/:role_id", handlers.RemoveProjectMemberRole(db))
 
 	// Project Timeseries
 	private.POST("/projects/:project_id/timeseries/:timeseries_id", handlers.CreateProjectTimeseries(db))

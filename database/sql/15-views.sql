@@ -245,8 +245,10 @@ CREATE OR REPLACE VIEW v_profile_project_roles AS (
            b.username,
            b.email,
            b.is_admin,
-           a.id AS project_id,
-           UPPER(c.slug || '.' || r.name) AS role
+           c.id AS project_id,
+           r.id   AS role_id,
+           r.name AS role,
+           UPPER(c.slug || '.' || r.name) AS rolename
     FROM profile_project_roles a
     INNER JOIN profile b ON b.id = a.profile_id
     INNER JOIN project c ON c.id = a.project_id
