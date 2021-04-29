@@ -239,7 +239,7 @@ CREATE OR REPLACE VIEW v_plot_configuration AS (
 );
 
 -- v_instrument_groups
-CREATE OR REPLACE VIEW v_instrument_groups AS (
+CREATE OR REPLACE VIEW v_instrument_group AS (
     WITH instrument_count AS (
         SELECT 
         igi.instrument_group_id,
