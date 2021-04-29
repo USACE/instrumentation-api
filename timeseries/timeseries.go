@@ -27,7 +27,6 @@ type Timeseries struct {
 
 // Measurement is a time and value associated with a timeseries
 type Measurement struct {
-	ID           string    `json:"id,omitempty"`
 	TimeseriesID uuid.UUID `json:"-" db:"timeseries_id"`
 	Time         time.Time `json:"time"`
 	Value        float32   `json:"value"`

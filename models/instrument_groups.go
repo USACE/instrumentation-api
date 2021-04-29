@@ -16,6 +16,8 @@ type InstrumentGroup struct {
 	Name        string     `json:"name"`
 	Description string     `json:"description"`
 	ProjectID   *uuid.UUID `json:"project_id" db:"project_id"`
+	InstrumentCount int    `json:"instrument_count" db:"instrument_count"`
+	TimeseriesCount int    `json:"timeseries_count" db:"timeseries_count"`
 	AuditInfo
 }
 
@@ -209,5 +211,7 @@ var listInstrumentGroupsSQL = `SELECT id,
 				                      create_date,
 				                      updater,
 				                      update_date,
-				                      project_id
-	                            FROM   instrument_group`
+				                      project_id,
+									  instrument_count,
+									  timeseries_count 
+	                            FROM  v_instrument_group`
