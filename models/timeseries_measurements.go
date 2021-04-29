@@ -101,8 +101,7 @@ func CreateOrUpdateTimeseriesMeasurements(db *sqlx.DB, mc []ts.MeasurementCollec
 }
 
 func listTimeseriesMeasurementsSQL() string {
-	return `SELECT  M.id,
-	                M.timeseries_id,
+	return `SELECT  M.timeseries_id,
 			        M.time,
 					M.value
 			FROM timeseries_measurement M
