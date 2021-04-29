@@ -42,6 +42,12 @@ func GetDomains(db *sqlx.DB) ([]Domain, error) {
 				   name                AS value,
 				   description
 			FROM   status
+			UNION
+			SELECT id,
+			       'role' AS group,
+				   name   AS value,
+				   null   AS description
+			FROM   role
 			order by "group", value
 	`
 	if err := db.Select(&dd, sql); err != nil {
