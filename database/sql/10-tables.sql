@@ -4,6 +4,8 @@ CREATE extension IF NOT EXISTS "uuid-ossp";
 
 -- drop tables if they already exist
 drop table if exists 
+    public.profile_project_roles,
+    public.role,
     public.timeseries_measurement,
     public.timeseries,
     public.instrument_telemetry,
@@ -46,12 +48,20 @@ CREATE TABLE IF NOT EXISTS public.config (
     static_prefix VARCHAR NOT NULL DEFAULT '/instrumentation'
 );
 
+-- role
+CREATE TABLE IF NOT EXISTS public.role (
+    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+    name VARCHAR NOT NULL,
+    deleted boolean NOT NULL DEFAULT false
+);
+
 -- profile
 CREATE TABLE IF NOT EXISTS public.profile (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     edipi BIGINT UNIQUE NOT NULL,
     username VARCHAR(240) UNIQUE NOT NULL,
-    email VARCHAR(240) UNIQUE NOT NULL
+    email VARCHAR(240) UNIQUE NOT NULL,
+    is_admin boolean NOT NULL DEFAULT false
 );
 
 -- profile_token
@@ -81,6 +91,17 @@ CREATE TABLE IF NOT EXISTS public.project (
     create_date TIMESTAMPTZ NOT NULL DEFAULT now(),
     updater UUID,
     update_date TIMESTAMPTZ
+);
+
+-- profile_project_roles
+CREATE TABLE IF NOT EXISTS public.profile_project_roles (
+    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+    profile_id UUID NOT NULL REFERENCES profile(id),
+    role_id UUID NOT NULL REFERENCES role(id),
+    project_id UUID NOT NULL REFERENCES project(id),
+    granted_by UUID REFERENCES profile(id),
+    granted_date TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT unique_profile_project_role UNIQUE(profile_id,project_id,role_id)
 );
 
 -- heartbeat
@@ -357,6 +378,11 @@ CREATE TABLE IF NOT EXISTS public.telemetry_iridium (
 -- Config for Local Development (minio replicating S3 Storage)
 INSERT INTO config (static_host, static_prefix) VALUES
     ('http://localhost', '/instrumentation');
+
+
+INSERT INTO role (id, name) VALUES
+    ('37f14863-8f3b-44ca-8deb-4b74ce8a8a69', 'ADMIN'),
+    ('2962bdde-7007-4ba0-943f-cb8e72e90704', 'MEMBER');
 
 -- -------
 -- Domains
@@ -654,21 +680,27 @@ INSERT INTO profile (edipi, username, email) VALUES (79, 'MIDAS Automation', 'mi
 
 -- Profile (Faked with: https://homepage.net/name_generator/)
 -- NOTE: EDIPI 1 should not be used; test user with EDIPI = 1 created by integration tests
-INSERT INTO profile (id, edipi, username, email) VALUES
-    ('57329df6-9f7a-4dad-9383-4633b452efab',2,'AnthonyLambert','anthony.lambert@fake.usace.army.mil'),
-    ('f320df83-e2ea-4fe9-969a-4e0239b8da51',3,'MollyRutherford','molly.rutherford@fake.usace.army.mil'),
-    ('89aa1e13-041a-4d15-9e45-f76eba3b0551',4,'DominicGlover','dominic.glover@fake.usace.army.mil'),
-    ('405ab7e1-20fc-4d26-a074-eccad88bf0a9',5,'JoeQuinn','joe.quinn@fake.usace.army.mil'),
-    ('81c77210-6244-46fe-bdf6-35da4f00934b',6,'TrevorDavidson','trevor.davidson@fake.usace.army.mil'),
-    ('f056201a-ffec-4f5b-aec5-14b34bb5e3d8',7,'ClaireButler','claire.butler@fake.usace.army.mil'),
-    ('9effda27-49f7-4745-8e55-fa819f550b09',8,'SophieBower','sophie.bower@fake.usace.army.mil'),
-    ('37407aba-904a-42fa-af73-6ab748ee1f98',9,'NeilMcLean','neil.mclean@fake.usace.army.mil'),
-    ('c0fd72ae-cccc-45c9-ba1d-4353170c352d',10,'JakeBurgess','jake.burgess@fake.usace.army.mil'),
-    ('be549c16-3f65-4af4-afb6-e18c814c44dc',11,'DanQuinn','dan.quinn@fake.usace.army.mil');
+INSERT INTO profile (id, edipi, is_admin, username, email) VALUES
+    ('57329df6-9f7a-4dad-9383-4633b452efab',2,true,'AnthonyLambert','anthony.lambert@fake.usace.army.mil'),
+    ('f320df83-e2ea-4fe9-969a-4e0239b8da51',3,false,'MollyRutherford','molly.rutherford@fake.usace.army.mil'),
+    ('89aa1e13-041a-4d15-9e45-f76eba3b0551',4,false,'DominicGlover','dominic.glover@fake.usace.army.mil'),
+    ('405ab7e1-20fc-4d26-a074-eccad88bf0a9',5,false,'JoeQuinn','joe.quinn@fake.usace.army.mil'),
+    ('81c77210-6244-46fe-bdf6-35da4f00934b',6,false,'TrevorDavidson','trevor.davidson@fake.usace.army.mil'),
+    ('f056201a-ffec-4f5b-aec5-14b34bb5e3d8',7,false,'ClaireButler','claire.butler@fake.usace.army.mil'),
+    ('9effda27-49f7-4745-8e55-fa819f550b09',8,false,'SophieBower','sophie.bower@fake.usace.army.mil'),
+    ('37407aba-904a-42fa-af73-6ab748ee1f98',9,false,'NeilMcLean','neil.mclean@fake.usace.army.mil'),
+    ('c0fd72ae-cccc-45c9-ba1d-4353170c352d',10,false,'JakeBurgess','jake.burgess@fake.usace.army.mil'),
+    ('be549c16-3f65-4af4-afb6-e18c814c44dc',11,false,'DanQuinn','dan.quinn@fake.usace.army.mil');
 
 -- project
 INSERT INTO project (id, slug, name, image) VALUES
     ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'blue-water-dam-example-project', 'Blue Water Dam Example Project', 'site_photo.jpg');
+
+-- profile_project_role
+INSERT INTO profile_project_roles (profile_id, role_id, project_id) VALUES
+    ('57329df6-9f7a-4dad-9383-4633b452efab', '37f14863-8f3b-44ca-8deb-4b74ce8a8a69', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984'),
+    ('f320df83-e2ea-4fe9-969a-4e0239b8da51', '37f14863-8f3b-44ca-8deb-4b74ce8a8a69', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984'),
+    ('f320df83-e2ea-4fe9-969a-4e0239b8da51', '2962bdde-7007-4ba0-943f-cb8e72e90704', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984');
 
 -- instrument_group
 INSERT INTO instrument_group (project_id, id, slug, name, description) VALUES

@@ -28,7 +28,9 @@ GRANT SELECT ON
     collection_group_timeseries,
     config,
     profile,
+    profile_project_roles,
     profile_token,
+    role,
     email,
     heartbeat,
     instrument_constants,
@@ -58,7 +60,9 @@ GRANT SELECT ON
     v_timeseries_latest,
     v_timeseries_project_map,
     v_instrument_telemetry,
-    v_unit
+    v_unit,
+    v_profile,
+    v_profile_project_roles
 TO instrumentation_reader;
 
 -- Role instrumentation_writer
@@ -77,6 +81,7 @@ GRANT INSERT,UPDATE,DELETE ON
     plot_configuration,
     plot_configuration_timeseries,
     profile,
+    profile_project_roles,
     profile_token,
     email,
     heartbeat,
@@ -90,6 +95,7 @@ GRANT INSERT,UPDATE,DELETE ON
     parameter,
     project,
     project_timeseries,
+    role,
     status,
     telemetry_goes,
     telemetry_iridium,

@@ -314,3 +314,4 @@ CREATE OR REPLACE VIEW v_profile AS (
            COALESCE(r.roles,'{}') AS roles
     FROM profile p
     LEFT JOIN roles_by_profile r ON r.profile_id = p.id
+);

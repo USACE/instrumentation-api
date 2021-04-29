@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "832f9ce2-d5e3-4258-a338-dae4c4820d25",
+		"_postman_id": "20c8204e-a78d-4167-ba8a-204f20abb7c0",
 		"name": "instrumentation-regression",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -122,6 +122,148 @@
 							],
 							"path": [
 								"my_tokens"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "ProjectMembership",
+			"item": [
+				{
+					"name": "ListProjectMembers",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// validate JSON schema",
+									"var obj_schema = {",
+									"    \"type\": \"object\",",
+									"    \"properties\": {",
+									"        \"profile_id\": { \"type\": \"string\" },",
+									"        \"username\": { \"type\": [\"string\"] },",
+									"        \"email\": { \"type\": [\"string\"] },",
+									"        \"role_id\": { \"type\": [\"string\"] },",
+									"        \"role\": { \"type\": [\"string\"] }",
+									"    },",
+									"    \"required\": [\"profile_id\", \"username\", \"email\", \"role_id\", \"role\"],",
+									"    \"additionalProperties\": false",
+									"}",
+									"",
+									"// schema validator",
+									"var array_schema = {",
+									"    \"type\": \"array\",",
+									"    \"items\": obj_schema",
+									"}",
+									"",
+									"pm.globals.set('PROJECT_MEMBERSHIP_OBJECT_SCHEMA', JSON.stringify(obj_schema));",
+									"pm.globals.set('PROJECT_MEMBERSHIP_ARRAY_SCHEMA', JSON.stringify(array_schema));",
+									"",
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// validate schema",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(array_schema)",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/members",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"projects",
+								"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+								"members"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "RemoveProjectMemberRole",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/members/57329df6-9f7a-4dad-9383-4633b452efab/roles/37f14863-8f3b-44ca-8deb-4b74ce8a8a69",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"projects",
+								"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+								"members",
+								"57329df6-9f7a-4dad-9383-4633b452efab",
+								"roles",
+								"37f14863-8f3b-44ca-8deb-4b74ce8a8a69"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "AddProjectMemberRole",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// schema validation",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(JSON.parse(pm.globals.get(\"PROJECT_MEMBERSHIP_OBJECT_SCHEMA\")))",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/members/57329df6-9f7a-4dad-9383-4633b452efab/roles/37f14863-8f3b-44ca-8deb-4b74ce8a8a69",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"projects",
+								"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+								"members",
+								"57329df6-9f7a-4dad-9383-4633b452efab",
+								"roles",
+								"37f14863-8f3b-44ca-8deb-4b74ce8a8a69"
 							]
 						}
 					},
