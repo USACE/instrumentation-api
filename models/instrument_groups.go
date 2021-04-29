@@ -16,6 +16,7 @@ type InstrumentGroup struct {
 	Name        string     `json:"name"`
 	Description string     `json:"description"`
 	ProjectID   *uuid.UUID `json:"project_id" db:"project_id"`
+	InstrumentCount int    `json:"instrument_count" db:"instrument_count"`
 	AuditInfo
 }
 
@@ -209,5 +210,10 @@ var listInstrumentGroupsSQL = `SELECT id,
 				                      create_date,
 				                      updater,
 				                      update_date,
-				                      project_id
+				                      project_id,
+									  (select count(id) from instrument i
+									  	join instrument_group_instruments gi on gi.instrument_id = i.id
+									  	where gi.instrument_group_id = instrument_group.id
+									  	and i.deleted is false) 
+									  as instrument_count
 	                            FROM   instrument_group`
