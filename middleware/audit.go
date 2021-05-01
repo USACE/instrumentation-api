@@ -1,11 +1,14 @@
 package middleware
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/USACE/instrumentation-api/models"
 	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
 )
@@ -75,9 +78,78 @@ func AttachProfileMiddleware(db *sqlx.DB) echo.MiddlewareFunc {
 				return c.JSON(http.StatusForbidden, models.DefaultMessageUnauthorized)
 			}
 			c.Set("profile", p)
-			// userRoles := claims["roles"].([]interface{})
-			// c.Set("actor_roles", userRoles)
+
 			return next(c)
+		}
+	}
+}
+
+func IsApplicationAdmin(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		p, ok := c.Get("profile").(*models.Profile)
+		if !ok {
+			return c.JSON(http.StatusForbidden, models.DefaultMessageUnauthorized)
+		}
+		if !p.IsAdmin {
+			return c.JSON(http.StatusForbidden, models.DefaultMessageUnauthorized)
+		}
+		return next(c)
+	}
+}
+
+func IsProjectAdminMiddleware(db *sqlx.DB) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			p, ok := c.Get("profile").(*models.Profile)
+			if !ok {
+				return c.JSON(http.StatusForbidden, models.DefaultMessageUnauthorized)
+			}
+			// Application Admins Automatic Admin Status for All Projects
+			if p.IsAdmin {
+				return next(c)
+			}
+			// Lookup project from URL Route Parameter
+			projectID, err := uuid.Parse(c.Param("project_id"))
+			if err != nil {
+				return c.JSON(http.StatusForbidden, models.DefaultMessageUnauthorized)
+			}
+			project, err := models.GetProject(db, projectID)
+			if err != nil {
+				return c.JSON(http.StatusForbidden, models.DefaultMessageUnauthorized)
+			}
+			grantingRole := fmt.Sprintf("%s.ADMIN", strings.ToUpper(project.Slug))
+			for _, r := range p.Roles {
+				if r == grantingRole {
+					return next(c)
+				}
+			}
+			return c.JSON(http.StatusForbidden, models.DefaultMessageUnauthorized)
+		}
+	}
+}
+
+func IsProjectMemberMiddleware(db *sqlx.DB) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			p, ok := c.Get("profile").(*models.Profile)
+			if !ok {
+				return c.JSON(http.StatusForbidden, models.DefaultMessageUnauthorized)
+			}
+			projectID, err := uuid.Parse(c.Param("project_id"))
+			if err != nil {
+				return c.JSON(http.StatusForbidden, models.DefaultMessageUnauthorized)
+			}
+			project, err := models.GetProject(db, projectID)
+			if err != nil {
+				return c.JSON(http.StatusForbidden, models.DefaultMessageUnauthorized)
+			}
+			grantingRole := fmt.Sprintf("%s.MEMBER", strings.ToUpper(project.Slug))
+			for _, r := range p.Roles {
+				if r == grantingRole {
+					return next(c)
+				}
+			}
+			return c.JSON(http.StatusForbidden, models.DefaultMessageUnauthorized)
 		}
 	}
 }
