@@ -315,3 +315,26 @@ CREATE OR REPLACE VIEW v_profile AS (
     FROM profile p
     LEFT JOIN roles_by_profile r ON r.profile_id = p.id
 );
+
+
+-- Only Includes Computed Timeseries
+-- Note: timeseries_id in this table is the formula_id for a given instrument
+CREATE OR REPLACE VIEW v_timeseries_dependency AS (
+    WITH variable_tsid_map AS (
+	    SELECT a.id AS timeseries_id,
+               b.slug || '.' || a.slug AS variable
+	    FROM timeseries a
+	    LEFT JOIN instrument b ON b.id = a.instrument_id
+    )
+    SELECT i.instrument_id   AS instrument_id,
+           i.formula_id      AS timeseries_id,
+           i.parsed_variable AS parsed_variable,
+           m.timeseries_id   AS dependency_timeseries_id
+    FROM (
+        SELECT id AS instrument_id,
+            formula_id,
+            (regexp_matches(formula, '\[(.*?)\]', 'g'))[1] AS parsed_variable
+        FROM instrument
+    ) i
+    LEFT JOIN variable_tsid_map m ON m.variable = i.parsed_variable
+);
