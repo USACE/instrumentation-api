@@ -1,6 +1,9 @@
+-- drop the id column from timeseries_measurement
+ALTER TABLE timeseries_measurement DROP COLUMN id;
 
 -- timeseries_measurements - add primary key which should also index
 ALTER TABLE timeseries_measurement ADD PRIMARY KEY (timeseries_id, time);
+
 
 --add new view for instrument_groups
 -- v_instrument_group
@@ -33,7 +36,7 @@ CREATE OR REPLACE VIEW v_instrument_group AS (
                 COALESCE(ic.i_count,0) as instrument_count,
                 COALESCE(count(ti.id),0) as timeseries_count
                 --,
-                --COALESCE(count(tm.id),0) as timeseries_measurements_count
+                --COALESCE(count(tm.timeseries_id),0) as timeseries_measurements_count
                 
         FROM instrument_group ig
         LEFT JOIN instrument_count ic on ic.instrument_group_id = ig.id
