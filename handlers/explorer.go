@@ -26,6 +26,7 @@ type ExplorerRow struct {
 type Filter struct {
 	InstrumentID []uuid.UUID
 	ParameterID  []uuid.UUID
+	TimeWindow   ts.TimeWindow
 }
 
 // PostExplorer retrieves timeseries information for the explorer app component
@@ -38,6 +39,26 @@ func PostExplorer(db *sqlx.DB) echo.HandlerFunc {
 		// Instrument IDs from POST
 		if err := c.Bind(&f.InstrumentID); err != nil {
 			return c.String(http.StatusBadRequest, err.Error())
+		}
+		// Time Window From POST
+		a, b := c.QueryParam("after"), c.QueryParam("before")
+		// If after or before are not provided; Return last 7 days of data from current time
+		if a == "" || b == "" {
+			f.TimeWindow.Before = time.Now()
+			f.TimeWindow.After = f.TimeWindow.Before.AddDate(0, 0, -7)
+		} else {
+			// Attempt to parse query param "after"
+			tA, err := time.Parse(time.RFC3339, a)
+			if err != nil {
+				return c.JSON(http.StatusBadRequest, err)
+			}
+			f.TimeWindow.After = tA
+			// Attempt to parse query param "before"
+			tB, err := time.Parse(time.RFC3339, b)
+			if err != nil {
+				return c.JSON(http.StatusBadRequest, err)
+			}
+			f.TimeWindow.Before = tB
 		}
 
 		// Get Rows from the Database
@@ -78,23 +99,17 @@ func explorerRows(db *sqlx.DB, f *Filter) ([]ExplorerRow, error) {
 
 	sqlxInResult := func() (string, []interface{}, error) {
 		switch {
-		// Filter by Instrument IDs and Parameter IDs
+		// Filter by Instrument IDs, Parameter IDs, Time Window
 		case len(f.InstrumentID) > 0 && len(f.ParameterID) > 0:
 			return sqlx.In(
-				sql("AND i.id IN (?) AND t.parameter_id IN (?)"),
-				f.InstrumentID, f.ParameterID,
+				sql("AND i.id IN (?) AND t.parameter_id IN (?) AND m.time <= ? AND m.time >= ?"),
+				f.InstrumentID, f.ParameterID, f.TimeWindow.Before, f.TimeWindow.After,
 			)
-		// Filter by Instrument IDs Only
+		// Filter by Instrument IDs, Time Window Only
 		case len(f.InstrumentID) > 0:
 			return sqlx.In(
-				sql("AND i.id IN (?)"),
-				f.InstrumentID,
-			)
-		// Filter by Parameter IDs Only
-		case len(f.ParameterID) > 0:
-			return sqlx.In(
-				sql("AND t.parameter_id IN (?)"),
-				f.ParameterID,
+				sql("AND i.id IN (?) AND m.time <= ? AND m.time >= ?"),
+				f.InstrumentID, f.TimeWindow.Before, f.TimeWindow.After,
 			)
 		default:
 			return sql(""), make([]interface{}, 0), nil

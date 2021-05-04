@@ -238,6 +238,47 @@ CREATE OR REPLACE VIEW v_plot_configuration AS (
     ) as t ON pc.id = t.plot_configuration_id
 );
 
+-- v_instrument_groups
+CREATE OR REPLACE VIEW v_instrument_group AS (
+    WITH instrument_count AS (
+        SELECT 
+        igi.instrument_group_id,
+        count(igi.instrument_group_id) as i_count 
+        FROM instrument_group_instruments igi
+        JOIN instrument i on igi.instrument_id = i.id and not i.deleted
+        GROUP BY igi.instrument_group_id
+        )
+        ,
+        timeseries_instruments as (
+            SELECT t.id, t.instrument_id, igi.instrument_group_id from timeseries t 
+            JOIN instrument i on i.id = t.instrument_id and not i.deleted
+            JOIN instrument_group_instruments igi on igi.instrument_id = i.id
+        )
+
+        SELECT  ig.id,
+                ig.slug,
+                ig.name,
+                ig.description,
+                ig.creator,
+                ig.create_date,
+                ig.updater,
+                ig.update_date,
+                ig.project_id,
+                ig.deleted,
+                COALESCE(ic.i_count,0) as instrument_count,
+                COALESCE(count(ti.id),0) as timeseries_count
+                --,
+                --COALESCE(count(tm.timeseries_id),0) as timeseries_measurements_count
+                
+        FROM instrument_group ig
+        LEFT JOIN instrument_count ic on ic.instrument_group_id = ig.id
+        LEFT JOIN timeseries_instruments ti on ig.id = ti.instrument_group_id
+        --left join timeseries_measurement tm on tm.timeseries_id = ti.id
+        GROUP BY ig.id, ic.i_count
+        ORDER BY ig.name
+);
+
+-- v_profile_project_roles
 CREATE OR REPLACE VIEW v_profile_project_roles AS (
     SELECT a.id,
            a.profile_id,
@@ -273,4 +314,27 @@ CREATE OR REPLACE VIEW v_profile AS (
            COALESCE(r.roles,'{}') AS roles
     FROM profile p
     LEFT JOIN roles_by_profile r ON r.profile_id = p.id
+);
+
+
+-- Only Includes Computed Timeseries
+-- Note: timeseries_id in this table is the formula_id for a given instrument
+CREATE OR REPLACE VIEW v_timeseries_dependency AS (
+    WITH variable_tsid_map AS (
+	    SELECT a.id AS timeseries_id,
+               b.slug || '.' || a.slug AS variable
+	    FROM timeseries a
+	    LEFT JOIN instrument b ON b.id = a.instrument_id
+    )
+    SELECT i.instrument_id   AS instrument_id,
+           i.formula_id      AS timeseries_id,
+           i.parsed_variable AS parsed_variable,
+           m.timeseries_id   AS dependency_timeseries_id
+    FROM (
+        SELECT id AS instrument_id,
+            formula_id,
+            (regexp_matches(formula, '\[(.*?)\]', 'g'))[1] AS parsed_variable
+        FROM instrument
+    ) i
+    LEFT JOIN variable_tsid_map m ON m.variable = i.parsed_variable
 );

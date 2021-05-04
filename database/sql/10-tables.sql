@@ -170,7 +170,10 @@ CREATE TABLE IF NOT EXISTS public.instrument (
     deleted BOOLEAN NOT NULL DEFAULT false,
     slug VARCHAR UNIQUE NOT NULL,
     name VARCHAR(360) NOT NULL,
+    formula_id UUID NOT NULL DEFAULT uuid_generate_v4(),
     formula VARCHAR,
+    formula_parameter_id UUID REFERENCES parameter (id),
+    formula_unit_id UUID REFERENCES unit (id),
     geometry geometry,
     station int,
     station_offset int,
@@ -275,11 +278,12 @@ CREATE TABLE IF NOT EXISTS public.timeseries (
 
 -- timeseries_measurement
 CREATE TABLE IF NOT EXISTS public.timeseries_measurement (
-    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+    --id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     time TIMESTAMPTZ NOT NULL,
     value REAL NOT NULL,
     timeseries_id UUID NOT NULL REFERENCES timeseries (id) ON DELETE CASCADE,
-    CONSTRAINT timeseries_unique_time UNIQUE(timeseries_id,time)
+    CONSTRAINT timeseries_unique_time UNIQUE(timeseries_id,time),
+    PRIMARY KEY (timeseries_id, time)
 );
 
 -- instrument_constants

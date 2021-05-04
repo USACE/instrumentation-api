@@ -45,11 +45,10 @@ func ListTimeseriesMeasurements(db *sqlx.DB) echo.HandlerFunc {
 		// Time Window
 		var tw timeseries.TimeWindow
 		a, b := c.QueryParam("after"), c.QueryParam("before")
-		// If after or before are not provided
-		// Return last 14 days of data from current time
+		// If after or before are not provided return last 7 days of data from current time
 		if a == "" || b == "" {
 			tw.Before = time.Now()
-			tw.After = tw.Before.AddDate(0, 0, -14)
+			tw.After = tw.Before.AddDate(0, 0, -7)
 		} else {
 			// Attempt to parse query param "after"
 			tA, err := time.Parse(time.RFC3339, a)

@@ -3,6 +3,7 @@ begin;
 \i '/sql/10-tables.sql'
 \i '/sql/11-tables_aware.sql'
 \i '/sql/15-views.sql'
+\i '/sql/16-functions-triggers.sql'
 \i '/sql/20-roles.sql'
 \i '/sql/21-roles_aware.sql'
 \i '/sql/29-data_usace_projects.sql'

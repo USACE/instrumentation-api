@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "20c8204e-a78d-4167-ba8a-204f20abb7c0",
+		"_postman_id": "c2aa1833-3872-40b2-8d0e-fb8fdee06b9e",
 		"name": "instrumentation-regression",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -1409,7 +1409,9 @@
 									"        \"create_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
 									"        \"updater\": {  \"type\": [\"string\", \"null\"] },",
 									"        \"update_date\": { \"type\": [\"string\", \"null\"], \"format\": \"date-time\" },",
-									"        \"project_id\": { \"type\": [\"string\", \"null\"] }",
+									"        \"project_id\": { \"type\": [\"string\", \"null\"] },",
+									"        \"instrument_count\": { \"type\": \"number\" },",
+									"        \"timeseries_count\": { \"type\": \"number\" }",
 									"    },",
 									"    \"required\": [\"id\", \"slug\", \"name\", \"description\", \"creator\", \"create_date\", \"updater\", \"update_date\", \"project_id\"],",
 									"    \"additionalProperties\": false",

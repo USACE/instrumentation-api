@@ -51,6 +51,7 @@ GRANT SELECT ON
     unit,
     unit_family,
     v_instrument,
+    v_instrument_group,
     v_plot_configuration,
     v_project,
     v_timeseries,
@@ -61,7 +62,8 @@ GRANT SELECT ON
     v_instrument_telemetry,
     v_unit,
     v_profile,
-    v_profile_project_roles
+    v_profile_project_roles,
+    v_timeseries_dependency
 TO instrumentation_reader;
 
 -- Role instrumentation_writer

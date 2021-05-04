@@ -105,10 +105,10 @@ func createTableTimeseries(db *sqlx.DB) {
 func createTableTimeseriesMeasurement(db *sqlx.DB) {
 	sql := `
 	CREATE TABLE IF NOT EXISTS public.timeseries_measurement (
-		id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
 		time TIMESTAMPTZ NOT NULL,
 		value REAL NOT NULL,
-		timeseries_id UUID NOT NULL REFERENCES unit (id)
+		timeseries_id UUID NOT NULL REFERENCES unit (id),
+		PRIMARY KEY (timeseries_id, time)
 	);
 	`
 	_, err := db.Exec(sql)
