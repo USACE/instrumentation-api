@@ -29,12 +29,12 @@ type Timeseries struct {
 type Measurement struct {
 	TimeseriesID uuid.UUID `json:"-" db:"timeseries_id"`
 	Time         time.Time `json:"time"`
-	Value        float32   `json:"value"`
+	Value        float64   `json:"value"`
 }
 
 // MeasurementLean is the minimalist representation of a timeseries measurement
 // a key value pair where key is the timestamp, value is the measurement { <time.Time>: <float32> }
-type MeasurementLean map[time.Time]float32
+type MeasurementLean map[time.Time]float64
 
 // MeasurementCollection is a collection of timeseries measurements
 type MeasurementCollection struct {
