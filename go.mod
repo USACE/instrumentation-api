@@ -3,6 +3,7 @@ module github.com/USACE/instrumentation-api
 go 1.15
 
 require (
+	github.com/Knetic/govaluate v3.0.0+incompatible
 	github.com/apex/gateway v1.1.2
 	github.com/aws/aws-sdk-go v1.37.2
 	github.com/btcsuite/btcutil v1.0.2
