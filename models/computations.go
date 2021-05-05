@@ -284,8 +284,10 @@ func ComputedTimeseries(db *sqlx.DB, instrumentIDs []uuid.UUID, tw *TimeWindow, 
 		// It is known that all stored timeseries have been added to the Map and computations
 		// can now be run because alculated timeseries (identified by .IsComputed)
 		// are returned from the database last in the query using ORDER BY is_computed
-		if err := ts.Calculate(variableMap); err != nil {
-			return nil, err
+		err = ts.Calculate(variableMap)
+		if err != nil {
+			log.Printf("Error Computing Formula for Timeseries %s\n", ts.TimeseriesID)
+			continue
 		}
 		tt3 = append(tt3, ts)
 	}
