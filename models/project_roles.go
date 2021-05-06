@@ -7,6 +7,7 @@ import (
 
 // ProjectMembership holds
 type ProjectMembership struct {
+	ID        uuid.UUID `json:"id" db:"id"`
 	ProfileID uuid.UUID `json:"profile_id" db:"profile_id"`
 	Username  *string   `json:"username"`
 	Email     string    `json:"email"`
@@ -20,7 +21,7 @@ func ListProjectMembers(db *sqlx.DB, projectID *uuid.UUID) ([]ProjectMembership,
 	rr := make([]ProjectMembership, 0)
 	if err := db.Select(
 		&rr,
-		`SELECT profile_id, username, email, role_id, role
+		`SELECT id, profile_id, username, email, role_id, role
 		 FROM v_profile_project_roles
 		 WHERE project_id = $1
 		 ORDER BY email`,
@@ -51,7 +52,7 @@ func AddProjectMemberRole(db *sqlx.DB, projectID, profileID, roleID, grantedBy *
 	var pm ProjectMembership
 	if err := db.Get(
 		&pm,
-		`SELECT profile_id, username, email, role_id, role
+		`SELECT id, profile_id, username, email, role_id, role
 		 FROM v_profile_project_roles
 		 WHERE id = $1`,
 		id,
