@@ -9,6 +9,10 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+var listTimeseriesSQL = `SELECT id, slug, name, variable, project_id, project_slug, project,
+                                  instrument_id, instrument_slug, instrument, parameter_id, parameter, unit_id, unit
+						   FROM v_timeseries`
+
 // TimeseriesCollection is a collection of Timeseries items
 type TimeseriesCollection struct {
 	Items []ts.Timeseries
@@ -85,7 +89,16 @@ func ListTimeseriesSlugsForInstrument(db *sqlx.DB, id *uuid.UUID) ([]string, err
 func ListTimeseries(db *sqlx.DB) ([]ts.Timeseries, error) {
 
 	tt := make([]ts.Timeseries, 0)
-	if err := db.Select(&tt, "SELECT * FROM v_timeseries"); err != nil {
+	if err := db.Select(&tt, listTimeseriesSQL); err != nil {
+		return make([]ts.Timeseries, 0), err
+	}
+	return tt, nil
+}
+
+// ListProjectTimeseries lists all timeseries for a given project
+func ListProjectTimeseries(db *sqlx.DB, projectID *uuid.UUID) ([]ts.Timeseries, error) {
+	tt := make([]ts.Timeseries, 0)
+	if err := db.Select(&tt, listTimeseriesSQL+" WHERE project_id = $1", projectID); err != nil {
 		return make([]ts.Timeseries, 0), err
 	}
 	return tt, nil
@@ -94,7 +107,7 @@ func ListTimeseries(db *sqlx.DB) ([]ts.Timeseries, error) {
 // ListInstrumentTimeseries returns an array of timeseries for an instrument
 func ListInstrumentTimeseries(db *sqlx.DB, projectID *uuid.UUID, instrumentID *uuid.UUID) ([]ts.Timeseries, error) {
 	tt := make([]ts.Timeseries, 0)
-	if err := db.Select(&tt, "SELECT * FROM v_timeseries WHERE project_id = $1 AND instrument_id = $2", projectID, instrumentID); err != nil {
+	if err := db.Select(&tt, listTimeseriesSQL+" WHERE project_id = $1 AND instrument_id = $2", projectID, instrumentID); err != nil {
 		return make([]ts.Timeseries, 0), err
 	}
 	return tt, nil
@@ -106,9 +119,7 @@ func ListInstrumentGroupTimeseries(db *sqlx.DB, instrumentGroupID *uuid.UUID) ([
 	var tt []ts.Timeseries
 	if err := db.Select(
 		&tt,
-		`SELECT *
-		 FROM   v_timeseries
-		 WHERE  instrument_id IN (
+		listTimeseriesSQL+` WHERE  instrument_id IN (
 			SELECT instrument_id
 			FROM   instrument_group_instruments
 			WHERE  instrument_group_id = $1
@@ -123,7 +134,7 @@ func ListInstrumentGroupTimeseries(db *sqlx.DB, instrumentGroupID *uuid.UUID) ([
 func GetTimeseries(db *sqlx.DB, id *uuid.UUID) (*ts.Timeseries, error) {
 
 	var t ts.Timeseries
-	if err := db.Get(&t, "SELECT * FROM v_timeseries WHERE id = $1", id); err != nil {
+	if err := db.Get(&t, listTimeseriesSQL+" WHERE id = $1", id); err != nil {
 		return nil, err
 	}
 	return &t, nil
@@ -169,21 +180,15 @@ func CreateTimeseries(db *sqlx.DB, tt []ts.Timeseries) ([]ts.Timeseries, error) 
 // UpdateTimeseries updates a timeseries
 func UpdateTimeseries(db *sqlx.DB, t *ts.Timeseries) (*ts.Timeseries, error) {
 
-	var tUpdated ts.Timeseries
-	if err := db.QueryRowx(
-		`UPDATE timeseries
-		 SET    name = $2,
-			    instrument_id = $3,
-			    parameter_id = $4,
-			    unit_id = $5
-		 WHERE id = $1
-		 RETURNING *
-		`, t.ID, t.Name, t.InstrumentID, t.ParameterID, t.UnitID,
-	).StructScan(&tUpdated); err != nil {
+	var tID uuid.UUID
+	if err := db.Get(&tID, `UPDATE timeseries
+		                   SET name = $2, instrument_id = $3, parameter_id = $4, unit_id = $5
+						   WHERE id = $1
+						   RETURNING id`, t.ID, t.Name, t.InstrumentID, t.ParameterID, t.UnitID,
+	); err != nil {
 		return nil, err
 	}
-
-	return &tUpdated, nil
+	return GetTimeseries(db, &tID)
 }
 
 // DeleteTimeseries deletes a timeseries and cascade deletes all measurements
