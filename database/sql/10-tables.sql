@@ -684,8 +684,11 @@ INSERT INTO profile (edipi, username, email) VALUES (79, 'MIDAS Automation', 'mi
 -- Profile (Faked with: https://homepage.net/name_generator/)
 -- NOTE: EDIPI 1 should not be used; test user with EDIPI = 1 created by integration tests
 INSERT INTO profile (id, edipi, is_admin, username, email) VALUES
+    -- Application Admin
     ('57329df6-9f7a-4dad-9383-4633b452efab',2,true,'AnthonyLambert','anthony.lambert@fake.usace.army.mil'),
+    -- Blue Water Dam Project Admin
     ('f320df83-e2ea-4fe9-969a-4e0239b8da51',3,false,'MollyRutherford','molly.rutherford@fake.usace.army.mil'),
+    -- Blue Water Dam Project Member
     ('89aa1e13-041a-4d15-9e45-f76eba3b0551',4,false,'DominicGlover','dominic.glover@fake.usace.army.mil'),
     ('405ab7e1-20fc-4d26-a074-eccad88bf0a9',5,false,'JoeQuinn','joe.quinn@fake.usace.army.mil'),
     ('81c77210-6244-46fe-bdf6-35da4f00934b',6,false,'TrevorDavidson','trevor.davidson@fake.usace.army.mil'),
@@ -701,9 +704,10 @@ INSERT INTO project (id, slug, name, image) VALUES
 
 -- profile_project_role
 INSERT INTO profile_project_roles (profile_id, role_id, project_id) VALUES
-    ('57329df6-9f7a-4dad-9383-4633b452efab', '37f14863-8f3b-44ca-8deb-4b74ce8a8a69', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984'),
+    -- Blue Water Dam Project Admin
     ('f320df83-e2ea-4fe9-969a-4e0239b8da51', '37f14863-8f3b-44ca-8deb-4b74ce8a8a69', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984'),
-    ('f320df83-e2ea-4fe9-969a-4e0239b8da51', '2962bdde-7007-4ba0-943f-cb8e72e90704', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984');
+    -- Blue Water dam Project Member
+    ('89aa1e13-041a-4d15-9e45-f76eba3b0551', '2962bdde-7007-4ba0-943f-cb8e72e90704', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984');
 
 -- instrument_group
 INSERT INTO instrument_group (project_id, id, slug, name, description) VALUES
