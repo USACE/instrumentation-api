@@ -141,6 +141,7 @@ func main() {
 	// Profile and Tokens
 	CACOnly.POST("/profiles", handlers.CreateProfile(db))
 	CACOnly.GET("/my_profile", handlers.GetMyProfile(db))
+	CACOnly.GET("/my_projects", handlers.ListMyProjects(db))
 	CACOnly.POST("/my_tokens", handlers.CreateToken(db))
 	CACOnly.DELETE("/my_tokens/:token_id", handlers.DeleteToken(db))
 
@@ -254,13 +255,14 @@ func main() {
 	private.DELETE("/instruments/:instrument_id/status/:status_id", handlers.DeleteInstrumentStatus(db))
 
 	// Timeseries
+	public.GET("/projects/:project_id/timeseries", handlers.ListProjectTimeseries(db))
 	public.GET("/projects/:project_id/instruments/:instrument_id/timeseries", handlers.ListInstrumentTimeseries(db))
 	public.GET("/timeseries", handlers.ListTimeseries(db))
 	public.GET("/timeseries/:timeseries_id", handlers.GetTimeseries(db))
 	public.GET("/instruments/:instrument_id/timeseries/:timeseries_id", handlers.GetTimeseries(db))
 	public.GET("/timeseries/:timeseries_id/measurements", handlers.ListTimeseriesMeasurements(db))
 	public.GET("/instruments/:instrument_id/timeseries/:timeseries_id/measurements", handlers.ListTimeseriesMeasurements(db))
-
+	// TODO: Delete timeseries endpoints without project context in URL
 	private.POST("/timeseries", handlers.CreateTimeseries(db))
 	private.PUT("/timeseries/:timeseries_id", handlers.UpdateTimeseries(db))
 	private.DELETE("/timeseries/:timeseries_id", handlers.DeleteTimeseries(db))

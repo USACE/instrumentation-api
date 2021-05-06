@@ -2774,6 +2774,52 @@
 					"response": []
 				},
 				{
+					"name": "ListProjectTimeseries",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// validate JSON schema",
+									"var schema = {",
+									"    \"type\": \"array\",",
+									"    \"items\": JSON.parse(pm.globals.get('TIMESERIES_OBJ_SCHEMA'))",
+									"}",
+									"",
+									"pm.globals.set('TIMESERIES_ARRAY_SCHEMA', JSON.stringify(schema))",
+									"",
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// schema validation",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(schema)",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/timeseries",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"projects",
+								"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+								"timeseries"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "ListInstrumentGroupTimeseries",
 					"event": [
 						{

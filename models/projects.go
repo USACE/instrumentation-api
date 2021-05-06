@@ -88,6 +88,22 @@ func ListProjects(db *sqlx.DB) ([]Project, error) {
 	return ProjectFactory(rows)
 }
 
+func ListMyProjects(db *sqlx.DB, profileID *uuid.UUID) ([]Project, error) {
+
+	rows, err := db.Queryx(
+		`SELECT DISTINCT p.id, p.image, p.office_id, p.deleted, p.slug, p.name, p.creator, p.create_date,
+						 p.updater, p.update_date, p.instrument_count, p.instrument_group_count, p.timeseries
+	     FROM profile_project_roles ppr
+	     INNER JOIN v_project p on p.id = ppr.project_id
+	     WHERE ppr.profile_id = $1 AND NOT p.deleted
+	     ORDER BY p.name`, profileID,
+	)
+	if err != nil {
+		return make([]Project, 0), err
+	}
+	return ProjectFactory(rows)
+}
+
 // ListProjectInstruments returns a slice of instruments for a project
 func ListProjectInstruments(db *sqlx.DB, id uuid.UUID) ([]Instrument, error) {
 
