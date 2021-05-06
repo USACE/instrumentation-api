@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "c2aa1833-3872-40b2-8d0e-fb8fdee06b9e",
+		"_postman_id": "b2f4b0f2-39c8-40ed-a001-6c0de5a2884e",
 		"name": "instrumentation-regression",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -143,13 +143,14 @@
 									"var obj_schema = {",
 									"    \"type\": \"object\",",
 									"    \"properties\": {",
+									"        \"id\": { \"type\": \"string\" },",
 									"        \"profile_id\": { \"type\": \"string\" },",
 									"        \"username\": { \"type\": [\"string\"] },",
 									"        \"email\": { \"type\": [\"string\"] },",
 									"        \"role_id\": { \"type\": [\"string\"] },",
 									"        \"role\": { \"type\": [\"string\"] }",
 									"    },",
-									"    \"required\": [\"profile_id\", \"username\", \"email\", \"role_id\", \"role\"],",
+									"    \"required\": [\"id\", \"profile_id\", \"username\", \"email\", \"role_id\", \"role\"],",
 									"    \"additionalProperties\": false",
 									"}",
 									"",
