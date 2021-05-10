@@ -157,6 +157,9 @@ func main() {
 		return c.String(http.StatusOK, "OK")
 	})
 
+	// Search
+	public.GET("/search/:entity", handlers.Search(db))
+
 	// Aware
 	public.GET("/aware/parameters", handlers.ListAwareParameters(db))
 	public.GET("/aware/data_acquisition_config", handlers.ListAwarePlatformParameterConfig(db))
