@@ -211,14 +211,11 @@ func main() {
 	public.GET("/instruments/count", handlers.GetInstrumentCount(db))
 	public.GET("/instruments/:instrument_id", handlers.GetInstrument(db))
 	private.POST("/projects/:project_id/instruments", handlers.CreateInstruments(db))
-	// TODO: Remove endpoint /instruments (no project context)
+	// TODO: Remove endpoint POST /instruments (no project context)
 	private.POST("/instruments", handlers.CreateInstruments(db))
-	// TODO: Remove endpoint (no project context)
-	private.PUT("/instruments/:instrument_id", handlers.UpdateInstrument(db))
 	private.PUT("/projects/:project_id/instruments/:instrument_id", handlers.UpdateInstrument(db))
 	private.PUT("/projects/:project_id/instruments/:instrument_id/geometry", handlers.UpdateInstrumentGeometry(db))
-	// TODO: Remove endpoint (no project context)
-	private.DELETE("/instruments/:instrument_id", handlers.DeleteFlagInstrument(db))
+	private.DELETE("/projects/:project_id/instruments/:instrument_id", handlers.DeleteFlagInstrument(db))
 
 	// Instrument Groups
 	public.GET("/instrument_groups", handlers.ListInstrumentGroups(db))
