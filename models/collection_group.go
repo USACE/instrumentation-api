@@ -66,10 +66,15 @@ func GetCollectionGroupDetails(db *sqlx.DB, projectID *uuid.UUID, collectionGrou
 	d.Timeseries = make([]cgdTsItem, 0)
 	if err := db.Select(
 		&d.Timeseries,
-		`SELECT t.*
-		 FROM collection_group_timeseries gt
-	     INNER JOIN v_timeseries_latest t ON t.id = gt.timeseries_id
-		 WHERE t.project_id = $1 AND gt.collection_group_id = $2
+		`SELECT t.*, tm.time as latest_time, tm.value as latest_value 
+		FROM collection_group_timeseries cgt 
+		INNER JOIN collection_group cg on cg.id = cgt.collection_group_id 
+		INNER JOIN v_timeseries t on t.id = cgt.timeseries_id 
+		INNER JOIN timeseries_measurement tm on tm.timeseries_id = t.id and tm.time = (
+			select time from timeseries_measurement 
+			where timeseries_id = t.id 
+			order by time desc limit 1) 
+		WHERE cgt.collection_group_id = $2 and t.project_id = $1
 		 `, projectID, collectionGroupID,
 	); err != nil {
 		return nil, err
