@@ -130,21 +130,33 @@ func CreateInstruments(db *sqlx.DB) echo.HandlerFunc {
 func UpdateInstrument(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 
-		// id from url params
-		id, err := uuid.Parse(c.Param("instrument_id"))
+		// instrument_id from url params
+		iID, err := uuid.Parse(c.Param("instrument_id"))
 		if err != nil {
 			return c.String(http.StatusBadRequest, "Malformed ID")
 		}
-		// id from request
-		i := &models.Instrument{ID: id}
-		if err := c.Bind(i); err != nil {
+		// project_id from url params
+		pID, err := uuid.Parse(c.Param("project_id"))
+		if err != nil {
+			return c.String(http.StatusBadRequest, "Malformed ID")
+		}
+		// instrument from request payload
+		i := models.Instrument{ID: iID, ProjectID: &pID}
+		if err := c.Bind(&i); err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
-		// check :id in url params matches id in request body
-		if id != i.ID {
+		// check project_id in url params matches project_id in request body
+		if pID != *i.ProjectID {
 			return c.String(
 				http.StatusBadRequest,
-				"url parameter id does not match object id in body",
+				"url parameter project_id does not match project_id in request body",
+			)
+		}
+		// check instrument_id in url params matches instrument_id in request body
+		if iID != i.ID {
+			return c.String(
+				http.StatusBadRequest,
+				"url parameter instrument_id does not match instrument_id in request body",
 			)
 		}
 
@@ -156,7 +168,7 @@ func UpdateInstrument(db *sqlx.DB) echo.HandlerFunc {
 		i.Updater, i.UpdateDate = &p.ID, &t
 
 		// update
-		iUpdated, err := models.UpdateInstrument(db, i)
+		iUpdated, err := models.UpdateInstrument(db, &i)
 		if err != nil {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
@@ -193,12 +205,17 @@ func UpdateInstrumentGeometry(db *sqlx.DB) echo.HandlerFunc {
 // DeleteFlagInstrument changes deleted flag true for an instrument
 func DeleteFlagInstrument(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		id, err := uuid.Parse(c.Param("instrument_id"))
+		pID, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
 			return c.String(http.StatusBadRequest, "Malformed ID")
 		}
 
-		if err := models.DeleteFlagInstrument(db, &id); err != nil {
+		iID, err := uuid.Parse(c.Param("instrument_id"))
+		if err != nil {
+			return c.String(http.StatusBadRequest, "Malformed ID")
+		}
+
+		if err := models.DeleteFlagInstrument(db, &pID, &iID); err != nil {
 			return c.JSON(http.StatusBadRequest, models.DefaultMessageBadRequest)
 		}
 
