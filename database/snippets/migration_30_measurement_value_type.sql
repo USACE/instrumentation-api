@@ -1,7 +1,13 @@
 
     			    
 -- Drop the depedant view
-drop view v_timeseries_latest;  			    
+drop view v_timeseries_latest;  
+
+-- Drop index on timeseries_measurement table for faster processing
+--
+-- WARNING: This may or may not be the name of the index
+--
+DROP INDEX  timeseries_measurement_pkey;
 
 -- Add temp column to store value
 ALTER TABLE timeseries_measurement
@@ -20,6 +26,9 @@ update timeseries_measurement set value = temp_val;
 -- remove temp field
 ALTER TABLE timeseries_measurement
   DROP COLUMN temp_val;
+
+-- Restore index to timeseries_measurement table
+CREATE INDEX timeseries_measurement_pkey ON timeseries_measurement(timeseries_id, time);
 
 
 -- add the view back
