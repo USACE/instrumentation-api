@@ -4,6 +4,9 @@
 drop view v_timeseries_latest;  
 
 -- Drop index on timeseries_measurement table for faster processing
+--
+-- WARNING: This may or may not be the name of the index
+--
 DROP INDEX  timeseries_measurement_pkey;
 
 -- Add temp column to store value
