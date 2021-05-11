@@ -280,7 +280,7 @@ CREATE TABLE IF NOT EXISTS public.timeseries (
 CREATE TABLE IF NOT EXISTS public.timeseries_measurement (
     --id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     time TIMESTAMPTZ NOT NULL,
-    value REAL NOT NULL,
+    value DOUBLE PRECISION NOT NULL,
     timeseries_id UUID NOT NULL REFERENCES timeseries (id) ON DELETE CASCADE,
     CONSTRAINT timeseries_unique_time UNIQUE(timeseries_id,time),
     PRIMARY KEY (timeseries_id, time)
