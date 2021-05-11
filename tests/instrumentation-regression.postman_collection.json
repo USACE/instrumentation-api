@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "30e91622-8123-4d28-b2ac-94db8926c2bd",
+		"_postman_id": "f5daf276-7ce2-4826-99bc-fa302a42d4c6",
 		"name": "instrumentation-regression",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -2738,9 +2738,10 @@
 									"        \"parameter_id\": { \"type\": \"string\" },",
 									"        \"parameter\": { \"type\": \"string\"  },",
 									"        \"unit_id\": { \"type\": \"string\" },",
-									"        \"unit\": { \"type\": \"string\"  }",
+									"        \"unit\": { \"type\": \"string\"  },",
+									"        \"is_computed\": { \"type\": \"boolean\" }",
 									"    },",
-									"    \"required\": [\"id\", \"slug\", \"name\", \"variable\", \"instrument_id\", \"parameter_id\", \"unit_id\"],",
+									"    \"required\": [\"id\", \"slug\", \"name\", \"variable\", \"instrument_id\", \"parameter_id\", \"unit_id\", \"is_computed\"],",
 									"    \"additionalProperties\": false",
 									"};",
 									"",
