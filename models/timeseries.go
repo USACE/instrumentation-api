@@ -10,7 +10,7 @@ import (
 )
 
 var listTimeseriesSQL = `SELECT id, slug, name, variable, project_id, project_slug, project,
-                                  instrument_id, instrument_slug, instrument, parameter_id, parameter, unit_id, unit
+                                instrument_id, instrument_slug, instrument, parameter_id, parameter, unit_id, unit, is_computed
 						   FROM v_timeseries`
 
 // TimeseriesCollection is a collection of Timeseries items

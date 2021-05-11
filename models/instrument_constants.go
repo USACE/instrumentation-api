@@ -12,8 +12,7 @@ func ListInstrumentConstants(db *sqlx.DB, id *uuid.UUID) ([]ts.Timeseries, error
 	// ListInstrumentTimeseries returns an array of timeseries for an instrument
 	tt := make([]ts.Timeseries, 0)
 	if err := db.Select(&tt,
-		`SELECT * FROM v_timeseries
-		 WHERE instrument_id = $1 AND id IN (
+		listTimeseriesSQL+` WHERE instrument_id = $1 AND id IN (
 			SELECT timeseries_id
 			FROM instrument_constants
 			WHERE instrument_id = $1
