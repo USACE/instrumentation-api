@@ -23,6 +23,7 @@ type Timeseries struct {
 	UnitID         uuid.UUID     `json:"unit_id" db:"unit_id"`
 	Unit           string        `json:"unit,omitempty"`
 	Values         []Measurement `json:"values,omitempty"`
+	IsComputed     bool          `json:"is_computed" db:"is_computed"`
 }
 
 // Measurement is a time and value associated with a timeseries
