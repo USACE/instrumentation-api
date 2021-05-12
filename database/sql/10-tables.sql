@@ -280,7 +280,7 @@ CREATE TABLE IF NOT EXISTS public.timeseries (
 CREATE TABLE IF NOT EXISTS public.timeseries_measurement (
     --id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     time TIMESTAMPTZ NOT NULL,
-    value REAL NOT NULL,
+    value DOUBLE PRECISION NOT NULL,
     timeseries_id UUID NOT NULL REFERENCES timeseries (id) ON DELETE CASCADE,
     CONSTRAINT timeseries_unique_time UNIQUE(timeseries_id,time),
     PRIMARY KEY (timeseries_id, time)
@@ -684,8 +684,11 @@ INSERT INTO profile (edipi, username, email) VALUES (79, 'MIDAS Automation', 'mi
 -- Profile (Faked with: https://homepage.net/name_generator/)
 -- NOTE: EDIPI 1 should not be used; test user with EDIPI = 1 created by integration tests
 INSERT INTO profile (id, edipi, is_admin, username, email) VALUES
+    -- Application Admin
     ('57329df6-9f7a-4dad-9383-4633b452efab',2,true,'AnthonyLambert','anthony.lambert@fake.usace.army.mil'),
+    -- Blue Water Dam Project Admin
     ('f320df83-e2ea-4fe9-969a-4e0239b8da51',3,false,'MollyRutherford','molly.rutherford@fake.usace.army.mil'),
+    -- Blue Water Dam Project Member
     ('89aa1e13-041a-4d15-9e45-f76eba3b0551',4,false,'DominicGlover','dominic.glover@fake.usace.army.mil'),
     ('405ab7e1-20fc-4d26-a074-eccad88bf0a9',5,false,'JoeQuinn','joe.quinn@fake.usace.army.mil'),
     ('81c77210-6244-46fe-bdf6-35da4f00934b',6,false,'TrevorDavidson','trevor.davidson@fake.usace.army.mil'),
@@ -701,18 +704,19 @@ INSERT INTO project (id, slug, name, image) VALUES
 
 -- profile_project_role
 INSERT INTO profile_project_roles (profile_id, role_id, project_id) VALUES
-    ('57329df6-9f7a-4dad-9383-4633b452efab', '37f14863-8f3b-44ca-8deb-4b74ce8a8a69', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984'),
+    -- Blue Water Dam Project Admin
     ('f320df83-e2ea-4fe9-969a-4e0239b8da51', '37f14863-8f3b-44ca-8deb-4b74ce8a8a69', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984'),
-    ('f320df83-e2ea-4fe9-969a-4e0239b8da51', '2962bdde-7007-4ba0-943f-cb8e72e90704', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984');
+    -- Blue Water dam Project Member
+    ('89aa1e13-041a-4d15-9e45-f76eba3b0551', '2962bdde-7007-4ba0-943f-cb8e72e90704', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984');
 
 -- instrument_group
 INSERT INTO instrument_group (project_id, id, slug, name, description) VALUES
     ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'd0916e8a-39a6-4f2f-bd31-879881f8b40c', 'sample-instrument-group', 'Sample Instrument Group 1', 'This is an example instrument group');
 
 -- instrument
-INSERT INTO instrument (project_id, id, slug, name, formula, geometry, type_id) VALUES
-    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'a7540f69-c41e-43b3-b655-6e44097edb7e', 'demo-piezometer-1', 'Demo Piezometer 1', '[demo-piezometer-1.top-of-riser] - [demo-piezometer-1.distance-to-water]', ST_GeomFromText('POINT(-80.8 26.7)',4326),'1bb4bf7c-f5f8-44eb-9805-43b07ffadbef'),
-    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', '9e8f2ca4-4037-45a4-aaca-d9e598877439', 'demo-staffgage-1', 'Demo Staffgage 1', null, ST_GeomFromText('POINT(-80.85 26.75)',4326),'0fd1f9ba-2731-4ff9-96dd-3c03215ab06f');
+INSERT INTO instrument (project_id, id, slug, name, formula, formula_parameter_id, formula_unit_id, geometry, type_id) VALUES
+    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'a7540f69-c41e-43b3-b655-6e44097edb7e', 'demo-piezometer-1', 'Demo Piezometer 1', '[demo-piezometer-1.top-of-riser] - [demo-piezometer-1.distance-to-water]', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8', ST_GeomFromText('POINT(-80.8 26.7)',4326),'1bb4bf7c-f5f8-44eb-9805-43b07ffadbef'),
+    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', '9e8f2ca4-4037-45a4-aaca-d9e598877439', 'demo-staffgage-1', 'Demo Staffgage 1', null, null, null, ST_GeomFromText('POINT(-80.85 26.75)',4326),'0fd1f9ba-2731-4ff9-96dd-3c03215ab06f');
 
 -- instrument_group_instruments
 INSERT INTO instrument_group_instruments (instrument_id, instrument_group_id) VALUES

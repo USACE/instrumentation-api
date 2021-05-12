@@ -37,7 +37,7 @@ type Instrument struct {
 	StationOffset *int             `json:"offset" db:"station_offset"`
 	ProjectID     *uuid.UUID       `json:"project_id" db:"project_id"`
 	NIDID         *string          `json:"nid_id" db:"nid_id"`
-	USGSID		  *string		   `json:"usgs_id" db:"usgs_id"`
+	USGSID        *string          `json:"usgs_id" db:"usgs_id"`
 	AuditInfo
 }
 
@@ -238,24 +238,24 @@ func UpdateInstrument(db *sqlx.DB, i *Instrument) (*Instrument, error) {
 	// Instrument
 	stmt1, err := txn.Prepare(
 		`UPDATE instrument
-		 SET    name = $2,
-			    type_id = $3,
-			    geometry = ST_GeomFromWKB($4),
-			    updater = $5,
-				update_date = $6,
-				project_id = $7,
-				station = $8,
-				station_offset = $9,
-				formula = $10,
-				nid_id = $11,
-				usgs_id = $12
-		 WHERE id = $1
+		 SET    name = $3,
+			    type_id = $4,
+			    geometry = ST_GeomFromWKB($5),
+			    updater = $6,
+				update_date = $7,
+				project_id = $8,
+				station = $9,
+				station_offset = $10,
+				formula = $11,
+				nid_id = $12,
+				usgs_id = $13
+		 WHERE project_id = $1 AND id = $2
 		 RETURNING id`,
 	)
 	// Update Instrument
 	var updatedID uuid.UUID
 	if err := stmt1.QueryRow(
-		i.ID, i.Name, i.TypeID, wkb.Value(i.Geometry.Geometry()),
+		i.ProjectID, i.ID, i.Name, i.TypeID, wkb.Value(i.Geometry.Geometry()),
 		i.Updater, i.UpdateDate, i.ProjectID, i.Station, i.StationOffset, i.Formula, i.NIDID, i.USGSID,
 	).Scan(&updatedID); err != nil {
 		return nil, err
@@ -298,12 +298,14 @@ func UpdateInstrumentGeometry(db *sqlx.DB, projectID *uuid.UUID, instrumentID *u
 }
 
 // DeleteFlagInstrument changes delete flag to true
-func DeleteFlagInstrument(db *sqlx.DB, id *uuid.UUID) error {
+func DeleteFlagInstrument(db *sqlx.DB, projectID, instrumentID *uuid.UUID) error {
 
-	if _, err := db.Exec(`UPDATE instrument SET deleted = true WHERE id = $1`, id); err != nil {
+	if _, err := db.Exec(
+		`UPDATE instrument SET deleted = true WHERE project_id = $1 AND id = $2`,
+		projectID, instrumentID,
+	); err != nil {
 		return err
 	}
-
 	return nil
 }
 
@@ -316,7 +318,7 @@ func InstrumentsFactory(rows *sqlx.Rows) ([]Instrument, error) {
 		var p orb.Point
 		err := rows.Scan(
 			&i.ID, &i.Deleted, &i.StatusID, &i.Status, &i.StatusTime, &i.Slug, &i.Name, &i.TypeID, &i.Type, wkb.Scanner(&p), &i.Station, &i.StationOffset,
-			&i.Creator, &i.CreateDate, &i.Updater, &i.UpdateDate, &i.ProjectID, pq.Array(&i.Constants), pq.Array(&i.Groups), pq.Array(&i.AlertConfigs), 
+			&i.Creator, &i.CreateDate, &i.Updater, &i.UpdateDate, &i.ProjectID, pq.Array(&i.Constants), pq.Array(&i.Groups), pq.Array(&i.AlertConfigs),
 			&i.Formula, &i.NIDID, &i.USGSID,
 		)
 		if err != nil {

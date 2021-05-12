@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "c2aa1833-3872-40b2-8d0e-fb8fdee06b9e",
+		"_postman_id": "a8dc2631-9ecb-4364-bdf0-8d5e8011c3d1",
 		"name": "instrumentation-regression",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -143,13 +143,14 @@
 									"var obj_schema = {",
 									"    \"type\": \"object\",",
 									"    \"properties\": {",
+									"        \"id\": { \"type\": \"string\" },",
 									"        \"profile_id\": { \"type\": \"string\" },",
 									"        \"username\": { \"type\": [\"string\"] },",
 									"        \"email\": { \"type\": [\"string\"] },",
 									"        \"role_id\": { \"type\": [\"string\"] },",
 									"        \"role\": { \"type\": [\"string\"] }",
 									"    },",
-									"    \"required\": [\"profile_id\", \"username\", \"email\", \"role_id\", \"role\"],",
+									"    \"required\": [\"id\", \"profile_id\", \"username\", \"email\", \"role_id\", \"role\"],",
 									"    \"additionalProperties\": false",
 									"}",
 									"",
@@ -475,11 +476,13 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url}}/instruments/a7540f69-c41e-43b3-b655-6e44097edb7e",
+							"raw": "{{base_url}}/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/instruments/a7540f69-c41e-43b3-b655-6e44097edb7e",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
+								"projects",
+								"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
 								"instruments",
 								"a7540f69-c41e-43b3-b655-6e44097edb7e"
 							]
@@ -1013,6 +1016,50 @@
 								"a7540f69-c41e-43b3-b655-6e44097edb7e",
 								"status",
 								"4ed5e9ac-40dc-4bca-b44f-7b837ec1b0fc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteInstrument",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/instruments/a7540f69-c41e-43b3-b655-6e44097edb7e",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"projects",
+								"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+								"instruments",
+								"a7540f69-c41e-43b3-b655-6e44097edb7e"
 							]
 						}
 					},
@@ -2691,9 +2738,10 @@
 									"        \"parameter_id\": { \"type\": \"string\" },",
 									"        \"parameter\": { \"type\": \"string\"  },",
 									"        \"unit_id\": { \"type\": \"string\" },",
-									"        \"unit\": { \"type\": \"string\"  }",
+									"        \"unit\": { \"type\": \"string\"  },",
+									"        \"is_computed\": { \"type\": \"boolean\" }",
 									"    },",
-									"    \"required\": [\"id\", \"slug\", \"name\", \"variable\", \"instrument_id\", \"parameter_id\", \"unit_id\"],",
+									"    \"required\": [\"id\", \"slug\", \"name\", \"variable\", \"instrument_id\", \"parameter_id\", \"unit_id\", \"is_computed\"],",
 									"    \"additionalProperties\": false",
 									"};",
 									"",
@@ -2766,6 +2814,52 @@
 								"{{base_url}}"
 							],
 							"path": [
+								"timeseries"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ListProjectTimeseries",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// validate JSON schema",
+									"var schema = {",
+									"    \"type\": \"array\",",
+									"    \"items\": JSON.parse(pm.globals.get('TIMESERIES_OBJ_SCHEMA'))",
+									"}",
+									"",
+									"pm.globals.set('TIMESERIES_ARRAY_SCHEMA', JSON.stringify(schema))",
+									"",
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// schema validation",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(schema)",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/projects/5b6f4f37-7755-4cf9-bd02-94f1e9bc5984/timeseries",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"projects",
+								"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
 								"timeseries"
 							]
 						}
@@ -4401,9 +4495,10 @@
 									"                    \"unit_id\": { \"type\": \"string\" },",
 									"                    \"unit\": { \"type\": \"string\"  },",
 									"                    \"latest_time\": {\"type\": \"string\", \"format\": \"date-time\"},",
-									"                    \"latest_value\": {\"type\": \"number\"}",
+									"                    \"latest_value\": {\"type\": \"number\"},",
+									"                    \"is_computed\": {\"type\": \"boolean\"},",
 									"                },",
-									"                \"required\": [\"id\", \"slug\", \"name\", \"variable\", \"project_id\", \"project\", \"project_slug\", \"instrument_id\", \"instrument\", \"instrument_slug\", \"parameter_id\", \"parameter\", \"unit_id\", \"unit\", \"latest_time\", \"latest_value\"],",
+									"                \"required\": [\"id\", \"slug\", \"name\", \"variable\", \"project_id\", \"project\", \"project_slug\", \"instrument_id\", \"instrument\", \"instrument_slug\", \"parameter_id\", \"parameter\", \"unit_id\", \"unit\", \"latest_time\", \"latest_value\", \"is_computed\"],",
 									"                \"additionalProperties\": false",
 									"            },",
 									"        },",

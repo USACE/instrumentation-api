@@ -23,6 +23,18 @@ func ListProjects(db *sqlx.DB) echo.HandlerFunc {
 	}
 }
 
+func ListMyProjects(db *sqlx.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		p := c.Get("profile").(*models.Profile)
+		profileID := p.ID
+		projects, err := models.ListMyProjects(db, &profileID)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+		return c.JSON(http.StatusOK, projects)
+	}
+}
+
 // ListProjectInstruments returns instruments associated with a project
 func ListProjectInstruments(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {

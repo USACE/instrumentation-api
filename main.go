@@ -141,6 +141,7 @@ func main() {
 	// Profile and Tokens
 	CACOnly.POST("/profiles", handlers.CreateProfile(db))
 	CACOnly.GET("/my_profile", handlers.GetMyProfile(db))
+	CACOnly.GET("/my_projects", handlers.ListMyProjects(db))
 	CACOnly.POST("/my_tokens", handlers.CreateToken(db))
 	CACOnly.DELETE("/my_tokens/:token_id", handlers.DeleteToken(db))
 
@@ -155,6 +156,9 @@ func main() {
 	public.GET("/health", func(c echo.Context) error {
 		return c.String(http.StatusOK, "OK")
 	})
+
+	// Search
+	public.GET("/search/:entity", handlers.Search(db))
 
 	// Aware
 	public.GET("/aware/parameters", handlers.ListAwareParameters(db))
@@ -210,14 +214,11 @@ func main() {
 	public.GET("/instruments/count", handlers.GetInstrumentCount(db))
 	public.GET("/instruments/:instrument_id", handlers.GetInstrument(db))
 	private.POST("/projects/:project_id/instruments", handlers.CreateInstruments(db))
-	// TODO: Remove endpoint /instruments (no project context)
+	// TODO: Remove endpoint POST /instruments (no project context)
 	private.POST("/instruments", handlers.CreateInstruments(db))
-	// TODO: Remove endpoint (no project context)
-	private.PUT("/instruments/:instrument_id", handlers.UpdateInstrument(db))
 	private.PUT("/projects/:project_id/instruments/:instrument_id", handlers.UpdateInstrument(db))
 	private.PUT("/projects/:project_id/instruments/:instrument_id/geometry", handlers.UpdateInstrumentGeometry(db))
-	// TODO: Remove endpoint (no project context)
-	private.DELETE("/instruments/:instrument_id", handlers.DeleteFlagInstrument(db))
+	private.DELETE("/projects/:project_id/instruments/:instrument_id", handlers.DeleteFlagInstrument(db))
 
 	// Instrument Groups
 	public.GET("/instrument_groups", handlers.ListInstrumentGroups(db))
@@ -254,13 +255,14 @@ func main() {
 	private.DELETE("/instruments/:instrument_id/status/:status_id", handlers.DeleteInstrumentStatus(db))
 
 	// Timeseries
+	public.GET("/projects/:project_id/timeseries", handlers.ListProjectTimeseries(db))
 	public.GET("/projects/:project_id/instruments/:instrument_id/timeseries", handlers.ListInstrumentTimeseries(db))
 	public.GET("/timeseries", handlers.ListTimeseries(db))
 	public.GET("/timeseries/:timeseries_id", handlers.GetTimeseries(db))
 	public.GET("/instruments/:instrument_id/timeseries/:timeseries_id", handlers.GetTimeseries(db))
 	public.GET("/timeseries/:timeseries_id/measurements", handlers.ListTimeseriesMeasurements(db))
 	public.GET("/instruments/:instrument_id/timeseries/:timeseries_id/measurements", handlers.ListTimeseriesMeasurements(db))
-
+	// TODO: Delete timeseries endpoints without project context in URL
 	private.POST("/timeseries", handlers.CreateTimeseries(db))
 	private.PUT("/timeseries/:timeseries_id", handlers.UpdateTimeseries(db))
 	private.DELETE("/timeseries/:timeseries_id", handlers.DeleteTimeseries(db))
