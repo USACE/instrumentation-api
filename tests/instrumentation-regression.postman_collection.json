@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "f5daf276-7ce2-4826-99bc-fa302a42d4c6",
+		"_postman_id": "a8dc2631-9ecb-4364-bdf0-8d5e8011c3d1",
 		"name": "instrumentation-regression",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -4495,9 +4495,10 @@
 									"                    \"unit_id\": { \"type\": \"string\" },",
 									"                    \"unit\": { \"type\": \"string\"  },",
 									"                    \"latest_time\": {\"type\": \"string\", \"format\": \"date-time\"},",
-									"                    \"latest_value\": {\"type\": \"number\"}",
+									"                    \"latest_value\": {\"type\": \"number\"},",
+									"                    \"is_computed\": {\"type\": \"boolean\"},",
 									"                },",
-									"                \"required\": [\"id\", \"slug\", \"name\", \"variable\", \"project_id\", \"project\", \"project_slug\", \"instrument_id\", \"instrument\", \"instrument_slug\", \"parameter_id\", \"parameter\", \"unit_id\", \"unit\", \"latest_time\", \"latest_value\"],",
+									"                \"required\": [\"id\", \"slug\", \"name\", \"variable\", \"project_id\", \"project\", \"project_slug\", \"instrument_id\", \"instrument\", \"instrument_slug\", \"parameter_id\", \"parameter\", \"unit_id\", \"unit\", \"latest_time\", \"latest_value\", \"is_computed\"],",
 									"                \"additionalProperties\": false",
 									"            },",
 									"        },",

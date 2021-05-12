@@ -165,7 +165,7 @@ CREATE OR REPLACE VIEW v_timeseries AS (
         u.id                    AS unit_id,
         u.name                  AS unit
     FROM ts_stored_and_computed t
-    INNER JOIN instrument i ON i.id = t.instrument_id AND NOT i.deleted AND i.formula IS NOT NULL
+    INNER JOIN instrument i ON i.id = t.instrument_id
     INNER JOIN project j ON j.id = i.project_id
     INNER JOIN parameter p ON p.id = t.parameter_id
     INNER JOIN unit U ON u.id = t.unit_id
