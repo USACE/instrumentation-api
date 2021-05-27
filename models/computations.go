@@ -15,8 +15,8 @@ import (
 
 // TimeWindow is a bounding box for time
 type TimeWindow struct {
-	After  time.Time `json:"after"`
-	Before time.Time `json:"before"`
+	After  time.Time `json:"after" query:"after"`
+	Before time.Time `json:"before" query:"before"`
 }
 
 type TimeseriesInfo struct {
