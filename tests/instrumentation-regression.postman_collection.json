@@ -14,18 +14,28 @@
 						{
 							"listen": "test",
 							"script": {
+								"id": "3eb1838c-822a-4065-98b0-5e3f766037f8",
 								"exec": [
 									"// status code is 201",
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
 									"});"
 								],
-								"type": "text/javascript",
-								"id": "3eb1838c-822a-4065-98b0-5e3f766037f8"
+								"type": "text/javascript"
 							}
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_new_user}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [],
 						"body": {
@@ -2473,6 +2483,7 @@
 						{
 							"listen": "test",
 							"script": {
+								"id": "7406bcc1-2ffa-452c-b9c7-6525a9abc22e",
 								"exec": [
 									"// status code is 200",
 									"pm.test(\"Status code is 201\", function () {",
@@ -2480,12 +2491,21 @@
 									"});",
 									""
 								],
-								"type": "text/javascript",
-								"id": "7406bcc1-2ffa-452c-b9c7-6525a9abc22e"
+								"type": "text/javascript"
 							}
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_existing_admin}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [],
 						"body": {
@@ -2515,18 +2535,28 @@
 						{
 							"listen": "test",
 							"script": {
+								"id": "a1f1e6d5-499f-4aa0-b478-49feafdd0fde",
 								"exec": [
 									"// status code is 200",
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
 									"});"
 								],
-								"type": "text/javascript",
-								"id": "a1f1e6d5-499f-4aa0-b478-49feafdd0fde"
+								"type": "text/javascript"
 							}
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_existing_admin}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [],
 						"body": {
@@ -4739,7 +4769,7 @@
 		"bearer": [
 			{
 				"key": "token",
-				"value": "{{jwt}}",
+				"value": "{{jwt_existing_admin}}",
 				"type": "string"
 			}
 		]
@@ -4748,21 +4778,21 @@
 		{
 			"listen": "prerequest",
 			"script": {
+				"id": "06c2a212-d078-44e5-8dc0-3470776c93b7",
 				"type": "text/javascript",
 				"exec": [
 					""
-				],
-				"id": "06c2a212-d078-44e5-8dc0-3470776c93b7"
+				]
 			}
 		},
 		{
 			"listen": "test",
 			"script": {
+				"id": "065c13d2-37a7-4499-a0d3-a77109e1b025",
 				"type": "text/javascript",
 				"exec": [
 					""
-				],
-				"id": "065c13d2-37a7-4499-a0d3-a77109e1b025"
+				]
 			}
 		}
 	],
