@@ -37,28 +37,18 @@ func PostExplorer(db *sqlx.DB) echo.HandlerFunc {
 		var f Filter
 
 		// Instrument IDs from POST
-		if err := c.Bind(&f.InstrumentID); err != nil {
+		if err := (&echo.DefaultBinder{}).BindBody(c, &f.InstrumentID); err != nil {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
+
 		// Time Window From POST
-		a, b := c.QueryParam("after"), c.QueryParam("before")
-		// If after or before are not provided; Return last 7 days of data from current time
-		if a == "" || b == "" {
+		if err := (&echo.DefaultBinder{}).BindQueryParams(c, &f.TimeWindow); err != nil {
+			return c.String(http.StatusBadRequest, err.Error())
+		}
+		// If after and before are not provided; Return last 7 days of data from current time
+		if (f.TimeWindow.Before == time.Time{} && f.TimeWindow.After == time.Time{}) {
 			f.TimeWindow.Before = time.Now()
 			f.TimeWindow.After = f.TimeWindow.Before.AddDate(0, 0, -7)
-		} else {
-			// Attempt to parse query param "after"
-			tA, err := time.Parse(time.RFC3339, a)
-			if err != nil {
-				return c.JSON(http.StatusBadRequest, err)
-			}
-			f.TimeWindow.After = tA
-			// Attempt to parse query param "before"
-			tB, err := time.Parse(time.RFC3339, b)
-			if err != nil {
-				return c.JSON(http.StatusBadRequest, err)
-			}
-			f.TimeWindow.Before = tB
 		}
 
 		// Get Stored And Computed Timeseries With Measurements

@@ -193,7 +193,7 @@ func main() {
 	public.GET("/projects/:project_id/instruments", handlers.ListProjectInstruments(db))
 	public.GET("/projects/:project_id/instruments/names", handlers.ListProjectInstrumentNames(db))
 	public.GET("/projects/:project_id/instrument_groups", handlers.ListProjectInstrumentGroups(db))
-	private.POST("/projects", handlers.CreateProjectBulk(db))
+	private.POST("/projects", handlers.CreateProjectBulk(db), middleware.IsApplicationAdmin)
 	private.PUT("/projects/:project_id", handlers.UpdateProject(db))
 	private.DELETE("/projects/:project_id", handlers.DeleteFlagProject(db))
 
