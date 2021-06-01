@@ -7,6 +7,12 @@ CREATE ROLE instrumentation_reader;
 CREATE ROLE instrumentation_writer;
 CREATE ROLE postgis_reader;
 
+-- Set Search Path
+ALTER ROLE instrumentation_user SET search_path TO midas,topology,public;
+
+-- Grant Schema Usage to instrumentation_user
+GRANT USAGE ON SCHEMA midas TO instrumentation_user;
+
 --------------------------------------------------------------------------
 -- NOTE: IF USERS ALREADY EXIST ON DATABASE, JUST RUN FROM THIS POINT DOWN
 --------------------------------------------------------------------------

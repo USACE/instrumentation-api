@@ -105,7 +105,7 @@ where i.project_id = '7601b4d7-a2f2-45cc-99c8-55f61b35e6f3';
 --Ignoring ING site/instrument, already in instruments unique list
 
 --INSERT INSTRUMENTS--COUNT:153
-INSERT INTO public.instrument(id, deleted, slug, name, formula, geometry, station, station_offset, create_date, update_date, type_id, project_id, creator, updater, usgs_id)
+INSERT INTO instrument(id, deleted, slug, name, formula, geometry, station, station_offset, create_date, update_date, type_id, project_id, creator, updater, usgs_id)
  VALUES 
 ('3b4e1f2c-381e-44bd-9945-3c7cc3e6def4', False, 'hub', 'HUB', null, ST_GeomFromText('POINT(-139.4864 59.9944)',4326), null, null, '2021-03-12T16:33:30.244166Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '7601b4d7-a2f2-45cc-99c8-55f61b35e6f3', '00000000-0000-0000-0000-000000000000', null, null),
 ('2f525323-e8d1-4e94-a9ee-d06731c29568', False, 'peg', 'PEG', null, ST_GeomFromText('POINT(166.3611 -78.0911)',4326), null, null, '2021-03-12T16:33:30.244852Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '7601b4d7-a2f2-45cc-99c8-55f61b35e6f3', '00000000-0000-0000-0000-000000000000', null, null),
@@ -262,7 +262,7 @@ INSERT INTO public.instrument(id, deleted, slug, name, formula, geometry, statio
 ('9eea0cba-d470-4d37-8cb8-3f4f12f001b6', False, 'thl', 'THL', null, ST_GeomFromText('POINT(-69.2285 77.467)',4326), null, null, '2021-03-12T16:33:30.369842Z', null, '98a61f29-18a8-430a-9d02-0f53486e0984', '7601b4d7-a2f2-45cc-99c8-55f61b35e6f3', '00000000-0000-0000-0000-000000000000', null, null);
 
 --INSERT INSTRUMENT STATUS--
-INSERT INTO public.instrument_status(id, instrument_id, status_id, "time")
+INSERT INTO instrument_status(id, instrument_id, status_id, "time")
  VALUES 
 ('4aa0b0a3-2522-4f30-82c8-468dd6060b5e', '3b4e1f2c-381e-44bd-9945-3c7cc3e6def4', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:33:30.244166Z'),
 ('489eac6d-2f90-4862-8f8c-dbad79b844c3', '2f525323-e8d1-4e94-a9ee-d06731c29568', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:33:30.244852Z'),
@@ -419,65 +419,65 @@ INSERT INTO public.instrument_status(id, instrument_id, status_id, "time")
 ('e6ea729a-b2ca-471b-ad5c-cbd4f985e765', '9eea0cba-d470-4d37-8cb8-3f4f12f001b6', 'e26ba2ef-9b52-4c71-97df-9e4b6cf4174d', '2021-03-12T16:33:30.369842Z');
 
 --INSERT TELEMETRY_GOES--COUNT:37
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '88d93063-2d76-4f25-84a3-1d95830c1507', 'CE393764' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE393764');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '94286a1e-36d5-4828-9d84-0871930affac', '17B546E8' where not exists (select 1 from telemetry_goes where nesdis_id = '17B546E8');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'c600a611-40f7-4520-b819-5c3b9c59ecee', 'DE18930C' where not exists (select 1 from telemetry_goes where nesdis_id = 'DE18930C');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'a5e41900-2dfe-4a1a-a09a-9dad65333be0', 'CE7AEB0C' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE7AEB0C');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '21e119fd-bbf3-44af-800d-c168946aca67', 'D1162346' where not exists (select 1 from telemetry_goes where nesdis_id = 'D1162346');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '45dd15c4-b95a-4a1e-b60a-4858b8fdcf23', '1655C4D4' where not exists (select 1 from telemetry_goes where nesdis_id = '1655C4D4');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '368bda7d-602a-4093-90ff-13e8e3d82621', 'DF02517C' where not exists (select 1 from telemetry_goes where nesdis_id = 'DF02517C');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'ec1a3fa0-6f89-4695-bca0-131ab62759b1', 'DDB615C0' where not exists (select 1 from telemetry_goes where nesdis_id = 'DDB615C0');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '9eb768cd-bb89-4d16-b215-0029534bb5ef', '17F2A4F2' where not exists (select 1 from telemetry_goes where nesdis_id = '17F2A4F2');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '456be856-aa9d-4c91-90ca-22fdbe28731c', '15C2C420' where not exists (select 1 from telemetry_goes where nesdis_id = '15C2C420');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '4bce4ad3-7b33-42de-8a89-af261a3d501c', '1173478E' where not exists (select 1 from telemetry_goes where nesdis_id = '1173478E');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '544a87ff-1eb6-4d40-aa81-5248677dbea0', '1668724C' where not exists (select 1 from telemetry_goes where nesdis_id = '1668724C');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'a93fcfb4-6c00-4f7a-951d-f5625d294136', 'CE4D695C' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE4D695C');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '3445f175-4269-4329-888a-0843a498e26a', '17330294' where not exists (select 1 from telemetry_goes where nesdis_id = '17330294');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'fdd742b3-a3a7-4485-9919-65e6fd297e6b', '177AC20A' where not exists (select 1 from telemetry_goes where nesdis_id = '177AC20A');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '247ed025-0888-4cf9-9017-2fe2a52b5bde', '17C8A3D0' where not exists (select 1 from telemetry_goes where nesdis_id = '17C8A3D0');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '0919ae32-fa25-433c-931c-7d397bbf3ddd', 'DE22A1B4' where not exists (select 1 from telemetry_goes where nesdis_id = 'DE22A1B4');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'd01d4c67-9399-47dc-bc20-970e2e1b5ff8', '17CA2030' where not exists (select 1 from telemetry_goes where nesdis_id = '17CA2030');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '4d9d3adb-ebb7-4025-a13a-ffe95282416f', '17D2307E' where not exists (select 1 from telemetry_goes where nesdis_id = '17D2307E');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '9d685510-370b-41e1-909a-538ccc4b2851', '17D07680' where not exists (select 1 from telemetry_goes where nesdis_id = '17D07680');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '5fa39f84-e831-4d54-a0dc-6d5ed4c6d81e', 'DDB9D64C' where not exists (select 1 from telemetry_goes where nesdis_id = 'DDB9D64C');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '6b34eaa4-0e10-4998-870a-89e3d4df22a9', '16213A14' where not exists (select 1 from telemetry_goes where nesdis_id = '16213A14');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'fcef822f-df18-4499-ba15-e0ec0095b39c', '17D613A8' where not exists (select 1 from telemetry_goes where nesdis_id = '17D613A8');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'e43170a2-5ab9-4037-bb67-b8ea28519b5d', '17C5B3C0' where not exists (select 1 from telemetry_goes where nesdis_id = '17C5B3C0');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '22ac9ea8-a096-467e-b73f-7cb0b938901c', 'DE1221D0' where not exists (select 1 from telemetry_goes where nesdis_id = 'DE1221D0');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'f03cdaa6-ca1f-411d-acbe-2d8ccef41b3e', 'DE22942E' where not exists (select 1 from telemetry_goes where nesdis_id = 'DE22942E');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'd4016fcb-5d08-49b6-bf5d-8b5728bb6ca2', '17B56004' where not exists (select 1 from telemetry_goes where nesdis_id = '17B56004');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'a8ec221a-91fb-4dd6-bac3-2bd09b665874', '1733370E' where not exists (select 1 from telemetry_goes where nesdis_id = '1733370E');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'd5edac1c-91ae-442e-898c-8604b738b29c', '1732F0EA' where not exists (select 1 from telemetry_goes where nesdis_id = '1732F0EA');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select 'd4b1bd57-cf6c-41b4-97b1-8f32ff1b762f', '1732E39C' where not exists (select 1 from telemetry_goes where nesdis_id = '1732E39C');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '6c26c29f-ce77-46d3-95ea-b60cf587ef1f', '0330C188' where not exists (select 1 from telemetry_goes where nesdis_id = '0330C188');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '5809d65e-951a-49e0-8547-6d715a69078e', '17CE03E6' where not exists (select 1 from telemetry_goes where nesdis_id = '17CE03E6');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '139250d0-3162-4f81-aade-8e6f4735798f', '172B42A6' where not exists (select 1 from telemetry_goes where nesdis_id = '172B42A6');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '080276e8-0217-4415-b468-f76b7865f067', '165475A0' where not exists (select 1 from telemetry_goes where nesdis_id = '165475A0');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '70a6afd8-1c54-4676-b524-3a5c507062f5', 'DF01060E' where not exists (select 1 from telemetry_goes where nesdis_id = 'DF01060E');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '2c5ccac6-4807-4c0e-81a1-24144b86bacf', '1170A372' where not exists (select 1 from telemetry_goes where nesdis_id = '1170A372');
-INSERT INTO public.telemetry_goes (id, nesdis_id) select '004f1e20-6138-48bb-92e9-de2df77bb30a', '166891BE' where not exists (select 1 from telemetry_goes where nesdis_id = '166891BE');
+INSERT INTO telemetry_goes (id, nesdis_id) select '88d93063-2d76-4f25-84a3-1d95830c1507', 'CE393764' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE393764');
+INSERT INTO telemetry_goes (id, nesdis_id) select '94286a1e-36d5-4828-9d84-0871930affac', '17B546E8' where not exists (select 1 from telemetry_goes where nesdis_id = '17B546E8');
+INSERT INTO telemetry_goes (id, nesdis_id) select 'c600a611-40f7-4520-b819-5c3b9c59ecee', 'DE18930C' where not exists (select 1 from telemetry_goes where nesdis_id = 'DE18930C');
+INSERT INTO telemetry_goes (id, nesdis_id) select 'a5e41900-2dfe-4a1a-a09a-9dad65333be0', 'CE7AEB0C' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE7AEB0C');
+INSERT INTO telemetry_goes (id, nesdis_id) select '21e119fd-bbf3-44af-800d-c168946aca67', 'D1162346' where not exists (select 1 from telemetry_goes where nesdis_id = 'D1162346');
+INSERT INTO telemetry_goes (id, nesdis_id) select '45dd15c4-b95a-4a1e-b60a-4858b8fdcf23', '1655C4D4' where not exists (select 1 from telemetry_goes where nesdis_id = '1655C4D4');
+INSERT INTO telemetry_goes (id, nesdis_id) select '368bda7d-602a-4093-90ff-13e8e3d82621', 'DF02517C' where not exists (select 1 from telemetry_goes where nesdis_id = 'DF02517C');
+INSERT INTO telemetry_goes (id, nesdis_id) select 'ec1a3fa0-6f89-4695-bca0-131ab62759b1', 'DDB615C0' where not exists (select 1 from telemetry_goes where nesdis_id = 'DDB615C0');
+INSERT INTO telemetry_goes (id, nesdis_id) select '9eb768cd-bb89-4d16-b215-0029534bb5ef', '17F2A4F2' where not exists (select 1 from telemetry_goes where nesdis_id = '17F2A4F2');
+INSERT INTO telemetry_goes (id, nesdis_id) select '456be856-aa9d-4c91-90ca-22fdbe28731c', '15C2C420' where not exists (select 1 from telemetry_goes where nesdis_id = '15C2C420');
+INSERT INTO telemetry_goes (id, nesdis_id) select '4bce4ad3-7b33-42de-8a89-af261a3d501c', '1173478E' where not exists (select 1 from telemetry_goes where nesdis_id = '1173478E');
+INSERT INTO telemetry_goes (id, nesdis_id) select '544a87ff-1eb6-4d40-aa81-5248677dbea0', '1668724C' where not exists (select 1 from telemetry_goes where nesdis_id = '1668724C');
+INSERT INTO telemetry_goes (id, nesdis_id) select 'a93fcfb4-6c00-4f7a-951d-f5625d294136', 'CE4D695C' where not exists (select 1 from telemetry_goes where nesdis_id = 'CE4D695C');
+INSERT INTO telemetry_goes (id, nesdis_id) select '3445f175-4269-4329-888a-0843a498e26a', '17330294' where not exists (select 1 from telemetry_goes where nesdis_id = '17330294');
+INSERT INTO telemetry_goes (id, nesdis_id) select 'fdd742b3-a3a7-4485-9919-65e6fd297e6b', '177AC20A' where not exists (select 1 from telemetry_goes where nesdis_id = '177AC20A');
+INSERT INTO telemetry_goes (id, nesdis_id) select '247ed025-0888-4cf9-9017-2fe2a52b5bde', '17C8A3D0' where not exists (select 1 from telemetry_goes where nesdis_id = '17C8A3D0');
+INSERT INTO telemetry_goes (id, nesdis_id) select '0919ae32-fa25-433c-931c-7d397bbf3ddd', 'DE22A1B4' where not exists (select 1 from telemetry_goes where nesdis_id = 'DE22A1B4');
+INSERT INTO telemetry_goes (id, nesdis_id) select 'd01d4c67-9399-47dc-bc20-970e2e1b5ff8', '17CA2030' where not exists (select 1 from telemetry_goes where nesdis_id = '17CA2030');
+INSERT INTO telemetry_goes (id, nesdis_id) select '4d9d3adb-ebb7-4025-a13a-ffe95282416f', '17D2307E' where not exists (select 1 from telemetry_goes where nesdis_id = '17D2307E');
+INSERT INTO telemetry_goes (id, nesdis_id) select '9d685510-370b-41e1-909a-538ccc4b2851', '17D07680' where not exists (select 1 from telemetry_goes where nesdis_id = '17D07680');
+INSERT INTO telemetry_goes (id, nesdis_id) select '5fa39f84-e831-4d54-a0dc-6d5ed4c6d81e', 'DDB9D64C' where not exists (select 1 from telemetry_goes where nesdis_id = 'DDB9D64C');
+INSERT INTO telemetry_goes (id, nesdis_id) select '6b34eaa4-0e10-4998-870a-89e3d4df22a9', '16213A14' where not exists (select 1 from telemetry_goes where nesdis_id = '16213A14');
+INSERT INTO telemetry_goes (id, nesdis_id) select 'fcef822f-df18-4499-ba15-e0ec0095b39c', '17D613A8' where not exists (select 1 from telemetry_goes where nesdis_id = '17D613A8');
+INSERT INTO telemetry_goes (id, nesdis_id) select 'e43170a2-5ab9-4037-bb67-b8ea28519b5d', '17C5B3C0' where not exists (select 1 from telemetry_goes where nesdis_id = '17C5B3C0');
+INSERT INTO telemetry_goes (id, nesdis_id) select '22ac9ea8-a096-467e-b73f-7cb0b938901c', 'DE1221D0' where not exists (select 1 from telemetry_goes where nesdis_id = 'DE1221D0');
+INSERT INTO telemetry_goes (id, nesdis_id) select 'f03cdaa6-ca1f-411d-acbe-2d8ccef41b3e', 'DE22942E' where not exists (select 1 from telemetry_goes where nesdis_id = 'DE22942E');
+INSERT INTO telemetry_goes (id, nesdis_id) select 'd4016fcb-5d08-49b6-bf5d-8b5728bb6ca2', '17B56004' where not exists (select 1 from telemetry_goes where nesdis_id = '17B56004');
+INSERT INTO telemetry_goes (id, nesdis_id) select 'a8ec221a-91fb-4dd6-bac3-2bd09b665874', '1733370E' where not exists (select 1 from telemetry_goes where nesdis_id = '1733370E');
+INSERT INTO telemetry_goes (id, nesdis_id) select 'd5edac1c-91ae-442e-898c-8604b738b29c', '1732F0EA' where not exists (select 1 from telemetry_goes where nesdis_id = '1732F0EA');
+INSERT INTO telemetry_goes (id, nesdis_id) select 'd4b1bd57-cf6c-41b4-97b1-8f32ff1b762f', '1732E39C' where not exists (select 1 from telemetry_goes where nesdis_id = '1732E39C');
+INSERT INTO telemetry_goes (id, nesdis_id) select '6c26c29f-ce77-46d3-95ea-b60cf587ef1f', '0330C188' where not exists (select 1 from telemetry_goes where nesdis_id = '0330C188');
+INSERT INTO telemetry_goes (id, nesdis_id) select '5809d65e-951a-49e0-8547-6d715a69078e', '17CE03E6' where not exists (select 1 from telemetry_goes where nesdis_id = '17CE03E6');
+INSERT INTO telemetry_goes (id, nesdis_id) select '139250d0-3162-4f81-aade-8e6f4735798f', '172B42A6' where not exists (select 1 from telemetry_goes where nesdis_id = '172B42A6');
+INSERT INTO telemetry_goes (id, nesdis_id) select '080276e8-0217-4415-b468-f76b7865f067', '165475A0' where not exists (select 1 from telemetry_goes where nesdis_id = '165475A0');
+INSERT INTO telemetry_goes (id, nesdis_id) select '70a6afd8-1c54-4676-b524-3a5c507062f5', 'DF01060E' where not exists (select 1 from telemetry_goes where nesdis_id = 'DF01060E');
+INSERT INTO telemetry_goes (id, nesdis_id) select '2c5ccac6-4807-4c0e-81a1-24144b86bacf', '1170A372' where not exists (select 1 from telemetry_goes where nesdis_id = '1170A372');
+INSERT INTO telemetry_goes (id, nesdis_id) select '004f1e20-6138-48bb-92e9-de2df77bb30a', '166891BE' where not exists (select 1 from telemetry_goes where nesdis_id = '166891BE');
 
 --INSERT TELEMETRY_IRIDIUM--COUNT:17
-INSERT INTO public.telemetry_iridium (id, imei) select '4a9b142a-84e4-4616-97bc-21723d656399', '300234060554500' where not exists (select 1 from telemetry_iridium where imei = '300234060554500');
-INSERT INTO public.telemetry_iridium (id, imei) select 'f97d9613-4063-4134-8cfd-60a2ce9fa483', '300234011651780' where not exists (select 1 from telemetry_iridium where imei = '300234011651780');
-INSERT INTO public.telemetry_iridium (id, imei) select '7a226d5b-08dc-4461-8484-f3b6b8905448', '300234061764220' where not exists (select 1 from telemetry_iridium where imei = '300234061764220');
-INSERT INTO public.telemetry_iridium (id, imei) select 'da349dfa-363e-4e28-8eb7-aa02438602fd', '300034012635570' where not exists (select 1 from telemetry_iridium where imei = '300034012635570');
-INSERT INTO public.telemetry_iridium (id, imei) select 'e076611f-c062-4544-a032-6ec1e49e80cd', '30003401286XXXX' where not exists (select 1 from telemetry_iridium where imei = '30003401286XXXX');
-INSERT INTO public.telemetry_iridium (id, imei) select '67341b7e-1da8-49c4-932d-e0ae089c06d5', '300034012797940' where not exists (select 1 from telemetry_iridium where imei = '300034012797940');
-INSERT INTO public.telemetry_iridium (id, imei) select 'de3bf4bd-4011-4994-bfeb-6115b335d1a3', '3000340127XXXXX' where not exists (select 1 from telemetry_iridium where imei = '3000340127XXXXX');
-INSERT INTO public.telemetry_iridium (id, imei) select '7fe18e12-6f35-467a-99db-919684eae62a', '300234063554810' where not exists (select 1 from telemetry_iridium where imei = '300234063554810');
-INSERT INTO public.telemetry_iridium (id, imei) select '92297a80-f662-463e-b76b-1b4367b71574', '300034012728020' where not exists (select 1 from telemetry_iridium where imei = '300034012728020');
-INSERT INTO public.telemetry_iridium (id, imei) select '4353c919-a1ec-4ccc-a876-648e59bd1fed', '300034012724030' where not exists (select 1 from telemetry_iridium where imei = '300034012724030');
-INSERT INTO public.telemetry_iridium (id, imei) select '81b139b5-8786-46b9-8d31-ad5e3599950d', '300234010498510' where not exists (select 1 from telemetry_iridium where imei = '300234010498510');
-INSERT INTO public.telemetry_iridium (id, imei) select 'a9780870-76a1-4ef0-b125-4df3f4adc861', '300234060555480' where not exists (select 1 from telemetry_iridium where imei = '300234060555480');
-INSERT INTO public.telemetry_iridium (id, imei) select '5a9e2591-2a1b-4e99-8047-9aca450de009', '300234063554840' where not exists (select 1 from telemetry_iridium where imei = '300234063554840');
-INSERT INTO public.telemetry_iridium (id, imei) select 'f19bacff-8e2a-4ccb-9c74-5718a64b9183', '300234063553790' where not exists (select 1 from telemetry_iridium where imei = '300234063553790');
-INSERT INTO public.telemetry_iridium (id, imei) select 'f0cd4538-2777-44e9-9d76-35406ea4a880', '300234063554800' where not exists (select 1 from telemetry_iridium where imei = '300234063554800');
-INSERT INTO public.telemetry_iridium (id, imei) select '7d8fb120-ba26-4125-8b80-46a90d19fa53', '30053061805110' where not exists (select 1 from telemetry_iridium where imei = '30053061805110');
-INSERT INTO public.telemetry_iridium (id, imei) select '93c72e18-14f2-4426-9cac-6797a31873db', '300234068620520' where not exists (select 1 from telemetry_iridium where imei = '300234068620520');
+INSERT INTO telemetry_iridium (id, imei) select '4a9b142a-84e4-4616-97bc-21723d656399', '300234060554500' where not exists (select 1 from telemetry_iridium where imei = '300234060554500');
+INSERT INTO telemetry_iridium (id, imei) select 'f97d9613-4063-4134-8cfd-60a2ce9fa483', '300234011651780' where not exists (select 1 from telemetry_iridium where imei = '300234011651780');
+INSERT INTO telemetry_iridium (id, imei) select '7a226d5b-08dc-4461-8484-f3b6b8905448', '300234061764220' where not exists (select 1 from telemetry_iridium where imei = '300234061764220');
+INSERT INTO telemetry_iridium (id, imei) select 'da349dfa-363e-4e28-8eb7-aa02438602fd', '300034012635570' where not exists (select 1 from telemetry_iridium where imei = '300034012635570');
+INSERT INTO telemetry_iridium (id, imei) select 'e076611f-c062-4544-a032-6ec1e49e80cd', '30003401286XXXX' where not exists (select 1 from telemetry_iridium where imei = '30003401286XXXX');
+INSERT INTO telemetry_iridium (id, imei) select '67341b7e-1da8-49c4-932d-e0ae089c06d5', '300034012797940' where not exists (select 1 from telemetry_iridium where imei = '300034012797940');
+INSERT INTO telemetry_iridium (id, imei) select 'de3bf4bd-4011-4994-bfeb-6115b335d1a3', '3000340127XXXXX' where not exists (select 1 from telemetry_iridium where imei = '3000340127XXXXX');
+INSERT INTO telemetry_iridium (id, imei) select '7fe18e12-6f35-467a-99db-919684eae62a', '300234063554810' where not exists (select 1 from telemetry_iridium where imei = '300234063554810');
+INSERT INTO telemetry_iridium (id, imei) select '92297a80-f662-463e-b76b-1b4367b71574', '300034012728020' where not exists (select 1 from telemetry_iridium where imei = '300034012728020');
+INSERT INTO telemetry_iridium (id, imei) select '4353c919-a1ec-4ccc-a876-648e59bd1fed', '300034012724030' where not exists (select 1 from telemetry_iridium where imei = '300034012724030');
+INSERT INTO telemetry_iridium (id, imei) select '81b139b5-8786-46b9-8d31-ad5e3599950d', '300234010498510' where not exists (select 1 from telemetry_iridium where imei = '300234010498510');
+INSERT INTO telemetry_iridium (id, imei) select 'a9780870-76a1-4ef0-b125-4df3f4adc861', '300234060555480' where not exists (select 1 from telemetry_iridium where imei = '300234060555480');
+INSERT INTO telemetry_iridium (id, imei) select '5a9e2591-2a1b-4e99-8047-9aca450de009', '300234063554840' where not exists (select 1 from telemetry_iridium where imei = '300234063554840');
+INSERT INTO telemetry_iridium (id, imei) select 'f19bacff-8e2a-4ccb-9c74-5718a64b9183', '300234063553790' where not exists (select 1 from telemetry_iridium where imei = '300234063553790');
+INSERT INTO telemetry_iridium (id, imei) select 'f0cd4538-2777-44e9-9d76-35406ea4a880', '300234063554800' where not exists (select 1 from telemetry_iridium where imei = '300234063554800');
+INSERT INTO telemetry_iridium (id, imei) select '7d8fb120-ba26-4125-8b80-46a90d19fa53', '30053061805110' where not exists (select 1 from telemetry_iridium where imei = '30053061805110');
+INSERT INTO telemetry_iridium (id, imei) select '93c72e18-14f2-4426-9cac-6797a31873db', '300234068620520' where not exists (select 1 from telemetry_iridium where imei = '300234068620520');
 
 --INSERT INSTRUMENT_TELEMETRY--COUNT:54
-INSERT INTO public.instrument_telemetry (instrument_id, telemetry_type_id, telemetry_id) 
+INSERT INTO instrument_telemetry (instrument_id, telemetry_type_id, telemetry_id) 
 VALUES
 ('3b4e1f2c-381e-44bd-9945-3c7cc3e6def4', 'c0b03b0d-bfce-453a-b5a9-636118940449', '4a9b142a-84e4-4616-97bc-21723d656399'),
 ('2f525323-e8d1-4e94-a9ee-d06731c29568', 'c0b03b0d-bfce-453a-b5a9-636118940449', 'f97d9613-4063-4134-8cfd-60a2ce9fa483'),
@@ -535,7 +535,7 @@ VALUES
 ('9eea0cba-d470-4d37-8cb8-3f4f12f001b6', 'c0b03b0d-bfce-453a-b5a9-636118940449', '93c72e18-14f2-4426-9cac-6797a31873db');
 
 --INSERT TIMESERIES--COUNT:153
-INSERT INTO public.timeseries(id, slug, name, instrument_id, parameter_id, unit_id) 
+INSERT INTO timeseries(id, slug, name, instrument_id, parameter_id, unit_id) 
 VALUES
 ('2384a647-1450-48b9-b340-63eae828c82b','unknown-temp-air1','Unknown Temp-AIR1','3b4e1f2c-381e-44bd-9945-3c7cc3e6def4', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
 ('d2174852-12b6-4f33-a106-6b2e9d6ea50d','unknown-temp-air2','Unknown Temp-AIR2','3b4e1f2c-381e-44bd-9945-3c7cc3e6def4', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),

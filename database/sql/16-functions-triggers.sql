@@ -5,7 +5,7 @@ Trigger to create group when instrument is inserted/updated if:
 2) Federal ID group doesn't already exist for the project
 3) Instrument is not already assigned to the Federal ID group
 */
-CREATE OR REPLACE FUNCTION public.create_federal_id_instrument_group()
+CREATE OR REPLACE FUNCTION create_federal_id_instrument_group()
     RETURNS TRIGGER
     LANGUAGE PLPGSQL
     AS $$
@@ -93,9 +93,9 @@ CREATE OR REPLACE FUNCTION public.create_federal_id_instrument_group()
 
 -- Trigger; Create instrument_group when
 CREATE TRIGGER create_federal_id_instrument_group
-AFTER insert or UPDATE ON public.instrument
+AFTER insert or UPDATE ON instrument
 FOR EACH ROW
-EXECUTE PROCEDURE public.create_federal_id_instrument_group();
+EXECUTE PROCEDURE create_federal_id_instrument_group();
 /*
 ######################################################################
 */
