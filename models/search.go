@@ -16,7 +16,7 @@ type SearchResult struct {
 func ProjectSearch(db *sqlx.DB, str *string, limit *int) ([]SearchResult, error) {
 
 	rows, err := db.Queryx(
-		listProjectsSQL+` WHERE NOT deleted AND name ILIKE '%' || $1 || '%' LIMIT $2`, str, limit,
+		listProjectsSQL+` WHERE NOT deleted AND name ILIKE '%' || $1 || '%' LIMIT $2 ORDER BY name`, str, limit,
 	)
 	if err != nil {
 		return make([]SearchResult, 0), err

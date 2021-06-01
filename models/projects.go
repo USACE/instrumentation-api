@@ -11,8 +11,7 @@ import (
 
 const listProjectsSQL = `SELECT id, federal_id, image, office_id, deleted, slug, name, creator, create_date,
      updater, update_date, instrument_count, instrument_group_count, timeseries
-	 FROM v_project
-	 ORDER BY name`
+	 FROM v_project`
 
 // Project is a project data structure
 type Project struct {
@@ -83,7 +82,7 @@ func ListProjectSlugs(db *sqlx.DB) ([]string, error) {
 
 // ListProjects returns a slice of projects
 func ListProjects(db *sqlx.DB) ([]Project, error) {
-	rows, err := db.Queryx(listProjectsSQL + " WHERE NOT deleted")
+	rows, err := db.Queryx(listProjectsSQL + " WHERE NOT deleted ORDER BY name")
 	if err != nil {
 		return make([]Project, 0), err
 	}
