@@ -9,13 +9,14 @@ import (
 	"github.com/lib/pq"
 )
 
-const listProjectsSQL = `SELECT id, image, office_id, deleted, slug, name, creator, create_date,
+const listProjectsSQL = `SELECT id, federal_id, image, office_id, deleted, slug, name, creator, create_date,
      updater, update_date, instrument_count, instrument_group_count, timeseries
 	 FROM v_project`
 
 // Project is a project data structure
 type Project struct {
 	ID                   uuid.UUID   `json:"id"`
+	FederalID            *string     `json:"federal_id" db:"federal_id"`
 	OfficeID             *uuid.UUID  `json:"office_id" db:"office_id"`
 	Image                *string     `json:"image" db:"image"`
 	Deleted              bool        `json:"-"`
@@ -59,7 +60,7 @@ func ProjectFactory(rows *sqlx.Rows) ([]Project, error) {
 	var p Project
 	for rows.Next() {
 		err := rows.Scan(
-			&p.ID, &p.Image, &p.OfficeID, &p.Deleted, &p.Slug, &p.Name, &p.Creator, &p.CreateDate,
+			&p.ID, &p.FederalID, &p.Image, &p.OfficeID, &p.Deleted, &p.Slug, &p.Name, &p.Creator, &p.CreateDate,
 			&p.Updater, &p.UpdateDate, &p.InstrumentCount, &p.InstrumentGroupCount, pq.Array(&p.Timeseries),
 		)
 		if err != nil {
@@ -91,7 +92,7 @@ func ListProjects(db *sqlx.DB) ([]Project, error) {
 func ListMyProjects(db *sqlx.DB, profileID *uuid.UUID) ([]Project, error) {
 
 	rows, err := db.Queryx(
-		`SELECT DISTINCT p.id, p.image, p.office_id, p.deleted, p.slug, p.name, p.creator, p.create_date,
+		`SELECT DISTINCT p.id, p.federal_id, p.image, p.office_id, p.deleted, p.slug, p.name, p.creator, p.create_date,
 						 p.updater, p.update_date, p.instrument_count, p.instrument_group_count, p.timeseries
 	     FROM profile_project_roles ppr
 	     INNER JOIN v_project p on p.id = ppr.project_id
@@ -172,8 +173,8 @@ func CreateProjectBulk(db *sqlx.DB, projects []Project) ([]IDAndSlug, error) {
 
 	// Instrument
 	stmt1, err := txn.Preparex(
-		`INSERT INTO project (slug, name, creator, create_date)
-		 VALUES ($1, $2, $3, $4)
+		`INSERT INTO project (federal_id, slug, name, creator, create_date)
+		 VALUES ($1, $2, $3, $4, $5)
 		 RETURNING id, slug`,
 	)
 	if err != nil {
@@ -183,7 +184,7 @@ func CreateProjectBulk(db *sqlx.DB, projects []Project) ([]IDAndSlug, error) {
 	pp := make([]IDAndSlug, len(projects))
 	for idx, p := range projects {
 		if err := stmt1.Get(
-			&pp[idx], p.Slug, p.Name, p.Creator, p.CreateDate,
+			&pp[idx], p.FederalID, p.Slug, p.Name, p.Creator, p.CreateDate,
 		); err != nil {
 			return make([]IDAndSlug, 0), err
 		}
@@ -201,8 +202,8 @@ func CreateProjectBulk(db *sqlx.DB, projects []Project) ([]IDAndSlug, error) {
 func UpdateProject(db *sqlx.DB, p *Project) (*Project, error) {
 
 	_, err := db.Exec(
-		"UPDATE project SET name=$2, updater=$3, update_date=$4, office_id=$5 WHERE id=$1 RETURNING id",
-		p.ID, p.Name, p.Updater, p.UpdateDate, p.OfficeID,
+		"UPDATE project SET name=$2, updater=$3, update_date=$4, office_id=$5, federal_id=$6 WHERE id=$1 RETURNING id",
+		p.ID, p.Name, p.Updater, p.UpdateDate, p.OfficeID, p.FederalID,
 	)
 	if err != nil {
 		return nil, err

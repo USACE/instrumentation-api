@@ -1,15 +1,15 @@
 drop table if exists 
-    public.aware_platform_parameter_enabled,
-    public.aware_platform,
-    public.aware_parameter;
+    aware_platform_parameter_enabled,
+    aware_platform,
+    aware_parameter;
 
-CREATE TABLE IF NOT EXISTS public.aware_platform (
+CREATE TABLE IF NOT EXISTS aware_platform (
     id UUID UNIQUE NOT NULL DEFAULT uuid_generate_v4(),
     aware_id UUID NOT NULL,
     instrument_id UUID REFERENCES instrument(id)
 );
 
-CREATE TABLE IF NOT EXISTS public.aware_parameter (
+CREATE TABLE IF NOT EXISTS aware_parameter (
     id UUID UNIQUE NOT NULL DEFAULT uuid_generate_v4(),
     key VARCHAR NOT NULL,
     parameter_id UUID NOT NULL REFERENCES parameter(id),
@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS public.aware_parameter (
     timeseries_name VARCHAR NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS public.aware_platform_parameter_enabled (
+CREATE TABLE IF NOT EXISTS aware_platform_parameter_enabled (
     aware_platform_id UUID NOT NULL REFERENCES aware_platform(id),
     aware_parameter_id UUID NOT NULL REFERENCES aware_parameter(id),
     CONSTRAINT aware_platform_unique_parameter UNIQUE(aware_platform_id, aware_parameter_id)
@@ -48,7 +48,7 @@ INSERT INTO aware_parameter (id, key, parameter_id, unit_id, timeseries_slug, ti
     ('3ca7c1da-7124-42c0-b92c-f76b5c318b0c', 'rssi', 'b23b141d-ce7b-4e0d-82ab-c8beb39c8325', 'be854f6e-e36e-4bba-9e06-6d5aa09485be', 'signal-strength', 'Signal Strength');
 
 -- Trigger Function; Create Timeseries when aware_platform_parameter_enabled
-CREATE OR REPLACE FUNCTION public.aware_create_timeseries()
+CREATE OR REPLACE FUNCTION aware_create_timeseries()
     RETURNS TRIGGER
     LANGUAGE PLPGSQL
     AS $$
@@ -71,13 +71,13 @@ $$;
 
 -- Trigger; Create Timeseries when aware_platform_parameter_enabled
 CREATE TRIGGER aware_create_timeseries
-AFTER INSERT ON public.aware_platform_parameter_enabled
+AFTER INSERT ON aware_platform_parameter_enabled
 FOR EACH ROW
-EXECUTE PROCEDURE public.aware_create_timeseries();
+EXECUTE PROCEDURE aware_create_timeseries();
 
 
 -- Trigger Function; Enable all AWARE parameters when new record insert into aware_platform
-CREATE OR REPLACE FUNCTION public.aware_enable_params()
+CREATE OR REPLACE FUNCTION aware_enable_params()
     RETURNS TRIGGER
     LANGUAGE PLPGSQL
     AS $$
@@ -99,9 +99,9 @@ $$;
 
 -- Trigger; Enable all AWARE parameters when new record insert into aware_platform
 CREATE TRIGGER aware_enable_params
-AFTER INSERT ON public.aware_platform
+AFTER INSERT ON aware_platform
 FOR EACH ROW 
-EXECUTE PROCEDURE public.aware_enable_params();
+EXECUTE PROCEDURE aware_enable_params();
 
 
 
