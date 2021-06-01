@@ -83,7 +83,7 @@ func ListProjectSlugs(db *sqlx.DB) ([]string, error) {
 
 // ListProjects returns a slice of projects
 func ListProjects(db *sqlx.DB) ([]Project, error) {
-	rows, err := db.Queryx(listProjectsSQL + " WHERE NOT deleted")
+	rows, err := db.Queryx(listProjectsSQL + " WHERE NOT deleted ORDER BY name")
 	if err != nil {
 		return make([]Project, 0), err
 	}
