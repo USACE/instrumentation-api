@@ -11,7 +11,8 @@ import (
 
 const listProjectsSQL = `SELECT id, federal_id, image, office_id, deleted, slug, name, creator, create_date,
      updater, update_date, instrument_count, instrument_group_count, timeseries
-	 FROM v_project`
+	 FROM v_project
+	 ORDER BY name`
 
 // Project is a project data structure
 type Project struct {
