@@ -1,62 +1,65 @@
 -- extensions
 CREATE extension IF NOT EXISTS "uuid-ossp";
 
+-- Create MIDAS Schema
+SET search_path TO midas,topology,public;
+CREATE SCHEMA midas;
 
 -- drop tables if they already exist
 drop table if exists 
-    public.profile_project_roles,
-    public.role,
-    public.timeseries_measurement,
-    public.timeseries,
-    public.instrument_telemetry,
-    public.telemetry_goes,
-    public.telemetry_iridium,
-    public.telemetry_type,
-    public.instrument_group_instruments,
-    public.instrument_status,
-    public.instrument_note,
-    public.instrument,
-    public.instrument_group,
-    public.instrument_constants,
-    public.parameter,
-    public.unit_family,
-    public.measure,
-    public.unit,
-    public.instrument_type,
-    public.project_timeseries,
-    public.project,
-    public.status,
-    public.profile,
-    public.profile_token,
-    public.email,
-    public.alert,
-    public.alert_read,
-    public.alert_config,
-    public.alert_profile_subscription,
-    public.alert_email_subscription,
-    public.heartbeat,
-    public.collection_group_timeseries,
-    public.collection_group,
-    public.plot_configuration,
-    public.plot_configuration_timeseries,
-    public.config
+    profile_project_roles,
+    role,
+    timeseries_measurement,
+    timeseries,
+    instrument_telemetry,
+    telemetry_goes,
+    telemetry_iridium,
+    telemetry_type,
+    instrument_group_instruments,
+    instrument_status,
+    instrument_note,
+    instrument,
+    instrument_group,
+    instrument_constants,
+    parameter,
+    unit_family,
+    measure,
+    unit,
+    instrument_type,
+    project_timeseries,
+    project,
+    status,
+    profile,
+    profile_token,
+    email,
+    alert,
+    alert_read,
+    alert_config,
+    alert_profile_subscription,
+    alert_email_subscription,
+    heartbeat,
+    collection_group_timeseries,
+    collection_group,
+    plot_configuration,
+    plot_configuration_timeseries,
+    config
 	CASCADE;
 
 -- config (application config variables)
-CREATE TABLE IF NOT EXISTS public.config (
+CREATE TABLE IF NOT EXISTS config (
     static_host VARCHAR NOT NULL DEFAULT 'http://minio:9000',
     static_prefix VARCHAR NOT NULL DEFAULT '/instrumentation'
 );
 
 -- role
-CREATE TABLE IF NOT EXISTS public.role (
+CREATE TABLE IF NOT EXISTS role (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     name VARCHAR NOT NULL,
     deleted boolean NOT NULL DEFAULT false
 );
 
 -- profile
-CREATE TABLE IF NOT EXISTS public.profile (
+CREATE TABLE IF NOT EXISTS profile (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     edipi BIGINT UNIQUE NOT NULL,
     username VARCHAR(240) UNIQUE NOT NULL,
@@ -65,7 +68,7 @@ CREATE TABLE IF NOT EXISTS public.profile (
 );
 
 -- profile_token
-CREATE TABLE IF NOT EXISTS public.profile_token (
+CREATE TABLE IF NOT EXISTS profile_token (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     token_id VARCHAR NOT NULL,
     profile_id UUID NOT NULL REFERENCES profile(id),
@@ -74,16 +77,17 @@ CREATE TABLE IF NOT EXISTS public.profile_token (
 );
 
 -- email (user that will never login but still needs alerts; i.e. just an email)
-CREATE TABLE IF NOT EXISTS public.email (
+CREATE TABLE IF NOT EXISTS email (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     email VARCHAR(240) UNIQUE NOT NULL
 );
 
 -- project
-CREATE TABLE IF NOT EXISTS public.project (
+CREATE TABLE IF NOT EXISTS project (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     image VARCHAR,
     office_id UUID,
+    federal_id VARCHAR,
     deleted boolean NOT NULL DEFAULT false,
     slug VARCHAR(240) UNIQUE NOT NULL,
     name VARCHAR(240) UNIQUE NOT NULL,
@@ -94,7 +98,7 @@ CREATE TABLE IF NOT EXISTS public.project (
 );
 
 -- profile_project_roles
-CREATE TABLE IF NOT EXISTS public.profile_project_roles (
+CREATE TABLE IF NOT EXISTS profile_project_roles (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     profile_id UUID NOT NULL REFERENCES profile(id),
     role_id UUID NOT NULL REFERENCES role(id),
@@ -105,37 +109,37 @@ CREATE TABLE IF NOT EXISTS public.profile_project_roles (
 );
 
 -- heartbeat
-CREATE TABLE IF NOT EXISTS public.heartbeat (
+CREATE TABLE IF NOT EXISTS heartbeat (
     time TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- instrument_type
-CREATE TABLE IF NOT EXISTS public.instrument_type (
+CREATE TABLE IF NOT EXISTS instrument_type (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     name VARCHAR(120) UNIQUE NOT NULL
 );
 
 -- domain status
-CREATE TABLE IF NOT EXISTS public.status (
+CREATE TABLE IF NOT EXISTS status (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     name VARCHAR(20) UNIQUE NOT NULL,
     description VARCHAR(480)
 );
 
 -- measure
-CREATE TABLE IF NOT EXISTS public.measure (
+CREATE TABLE IF NOT EXISTS measure (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     name VARCHAR(240) UNIQUE NOT NULL
 );
 
 -- unit_family
-CREATE TABLE IF NOT EXISTS public.unit_family (
+CREATE TABLE IF NOT EXISTS unit_family (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     name VARCHAR(120) UNIQUE NOT NULL
 );
 
 -- unit
-CREATE TABLE IF NOT EXISTS public.unit (
+CREATE TABLE IF NOT EXISTS unit (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     name VARCHAR(120) UNIQUE NOT NULL,
     abbreviation VARCHAR(120) UNIQUE NOT NULL,
@@ -144,13 +148,13 @@ CREATE TABLE IF NOT EXISTS public.unit (
 );
 
 -- parameter
-CREATE TABLE IF NOT EXISTS public.parameter (
+CREATE TABLE IF NOT EXISTS parameter (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     name VARCHAR(120) UNIQUE NOT NULL
 );
 
 -- instrument_group
-CREATE TABLE IF NOT EXISTS public.instrument_group (
+CREATE TABLE IF NOT EXISTS instrument_group (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     deleted BOOLEAN NOT NULL DEFAULT false,
     slug VARCHAR(240) UNIQUE NOT NULL,
@@ -165,7 +169,7 @@ CREATE TABLE IF NOT EXISTS public.instrument_group (
 	);
 
 -- instrument
-CREATE TABLE IF NOT EXISTS public.instrument (
+CREATE TABLE IF NOT EXISTS instrument (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     deleted BOOLEAN NOT NULL DEFAULT false,
     slug VARCHAR UNIQUE NOT NULL,
@@ -188,7 +192,7 @@ CREATE TABLE IF NOT EXISTS public.instrument (
 );
 
 -- alert_config
-CREATE TABLE IF NOT EXISTS public.alert_config (
+CREATE TABLE IF NOT EXISTS alert_config (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     instrument_id UUID NOT NULL REFERENCES instrument (id),
     name VARCHAR(480),
@@ -203,21 +207,21 @@ CREATE TABLE IF NOT EXISTS public.alert_config (
 );
 
 -- alert
-CREATE TABLE IF NOT EXISTS public.alert (
+CREATE TABLE IF NOT EXISTS alert (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     alert_config_id UUID NOT NULL REFERENCES alert_config (id),
     create_date TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- alert_read
-CREATE TABLE IF NOT EXISTS public.alert_read (
+CREATE TABLE IF NOT EXISTS alert_read (
     alert_id UUID NOT NULL REFERENCES alert (id),
     profile_id UUID NOT NULL REFERENCES profile (id),
     CONSTRAINT profile_unique_alert_read UNIQUE(alert_id, profile_id)
 );
 
 -- profile alerts (subscribe profiles to alerts)
-CREATE TABLE IF NOT EXISTS public.alert_profile_subscription (
+CREATE TABLE IF NOT EXISTS alert_profile_subscription (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     alert_config_id UUID NOT NULL REFERENCES alert_config (id),
     profile_id UUID NOT NULL REFERENCES profile (id),
@@ -227,7 +231,7 @@ CREATE TABLE IF NOT EXISTS public.alert_profile_subscription (
 );
 
 -- email alerts (subscribe emails to alerts)
-CREATE TABLE IF NOT EXISTS public.alert_email_subscription (
+CREATE TABLE IF NOT EXISTS alert_email_subscription (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     alert_config_id UUID NOT NULL REFERENCES alert_config (id),
     email_id UUID NOT NULL REFERENCES email (id),
@@ -236,7 +240,7 @@ CREATE TABLE IF NOT EXISTS public.alert_email_subscription (
 );
 
 -- instrument_note
-CREATE TABLE IF NOT EXISTS public.instrument_note (
+CREATE TABLE IF NOT EXISTS instrument_note (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     instrument_id UUID NOT NULL REFERENCES instrument (id),
     title VARCHAR(240) NOT NULL,
@@ -249,14 +253,14 @@ CREATE TABLE IF NOT EXISTS public.instrument_note (
 );
 
 -- instrument_group_instruments
-CREATE TABLE IF NOT EXISTS public.instrument_group_instruments (
+CREATE TABLE IF NOT EXISTS instrument_group_instruments (
     instrument_id UUID NOT NULL REFERENCES instrument (id),
     instrument_group_id UUID NOT NULL REFERENCES instrument_group (id),
     UNIQUE (instrument_id, instrument_group_id)
 );
 
 -- instrument_status
-CREATE TABLE IF NOT EXISTS public.instrument_status (
+CREATE TABLE IF NOT EXISTS instrument_status (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     instrument_id UUID NOT NULL REFERENCES instrument (id),
     status_id UUID NOT NULL REFERENCES status (id),
@@ -265,7 +269,7 @@ CREATE TABLE IF NOT EXISTS public.instrument_status (
 );
 
 -- timeseries
-CREATE TABLE IF NOT EXISTS public.timeseries (
+CREATE TABLE IF NOT EXISTS timeseries (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     slug VARCHAR(240) NOT NULL,
     name VARCHAR(240) NOT NULL,
@@ -277,7 +281,7 @@ CREATE TABLE IF NOT EXISTS public.timeseries (
 );
 
 -- timeseries_measurement
-CREATE TABLE IF NOT EXISTS public.timeseries_measurement (
+CREATE TABLE IF NOT EXISTS timeseries_measurement (
     --id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     time TIMESTAMPTZ NOT NULL,
     value DOUBLE PRECISION NOT NULL,
@@ -287,21 +291,21 @@ CREATE TABLE IF NOT EXISTS public.timeseries_measurement (
 );
 
 -- instrument_constants
-CREATE TABLE IF NOT EXISTS public.instrument_constants (
+CREATE TABLE IF NOT EXISTS instrument_constants (
     timeseries_id UUID NOT NULL REFERENCES timeseries(id) ON DELETE CASCADE,
     instrument_id UUID NOT NULL REFERENCES instrument(id) ON DELETE CASCADE,
     CONSTRAINT instrument_unique_timeseries UNIQUE(instrument_id, timeseries_id)
 );
 
 -- project_timeseries
-CREATE TABLE IF NOT EXISTS public.project_timeseries (
+CREATE TABLE IF NOT EXISTS project_timeseries (
     timeseries_id UUID NOT NULL REFERENCES timeseries(id) ON DELETE CASCADE,
     project_id UUID NOT NULL REFERENCES project(id) ON DELETE CASCADE,
     CONSTRAINT project_unique_timeseries UNIQUE(project_id, timeseries_id)
 );
 
 -- collection_group
-CREATE TABLE IF NOT EXISTS public.collection_group (
+CREATE TABLE IF NOT EXISTS collection_group (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     project_id UUID NOT NULL REFERENCES project(id) ON DELETE CASCADE,
     name VARCHAR NOT NULL,
@@ -314,14 +318,14 @@ CREATE TABLE IF NOT EXISTS public.collection_group (
     CONSTRAINT project_unique_collection_group_slug UNIQUE(project_id, slug)
 );
 
-CREATE TABLE IF NOT EXISTS public.collection_group_timeseries (
+CREATE TABLE IF NOT EXISTS collection_group_timeseries (
     collection_group_id UUID NOT NULL REFERENCES collection_group(id) ON DELETE CASCADE,
     timeseries_id UUID NOT NULL REFERENCES timeseries(id) ON DELETE CASCADE,
     CONSTRAINT collection_group_unique_timeseries UNIQUE(collection_group_id, timeseries_id)
 );
 
 -- plot_configuration
-CREATE TABLE IF NOT EXISTS public.plot_configuration (
+CREATE TABLE IF NOT EXISTS plot_configuration (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     slug VARCHAR NOT NULL,
     name VARCHAR NOT NULL,
@@ -335,7 +339,7 @@ CREATE TABLE IF NOT EXISTS public.plot_configuration (
 );
 
 
-CREATE TABLE IF NOT EXISTS public.plot_configuration_timeseries (
+CREATE TABLE IF NOT EXISTS plot_configuration_timeseries (
     plot_configuration_id UUID NOT NULL REFERENCES plot_configuration(id) ON DELETE CASCADE,
     timeseries_id UUID NOT NULL REFERENCES timeseries(id) ON DELETE CASCADE,
     CONSTRAINT plot_configuration_unique_timeseries UNIQUE(plot_configuration_id, timeseries_id)
@@ -347,14 +351,14 @@ CREATE TABLE IF NOT EXISTS public.plot_configuration_timeseries (
 -- ---------
 
 -- telemetry_type
-CREATE TABLE IF NOT EXISTS public.telemetry_type (
+CREATE TABLE IF NOT EXISTS telemetry_type (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     slug VARCHAR UNIQUE NOT NULL,
     name VARCHAR UNIQUE NOT NULL
 );
 
 -- instrument_telemetry
-CREATE TABLE IF NOT EXISTS public.instrument_telemetry (
+CREATE TABLE IF NOT EXISTS instrument_telemetry (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     instrument_id UUID NOT NULL REFERENCES instrument(id),
     telemetry_type_id UUID NOT NULL REFERENCES telemetry_type(id),
@@ -363,13 +367,13 @@ CREATE TABLE IF NOT EXISTS public.instrument_telemetry (
 );
 
 -- GOES
-CREATE TABLE IF NOT EXISTS public.telemetry_goes (
+CREATE TABLE IF NOT EXISTS telemetry_goes (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     nesdis_id VARCHAR UNIQUE NOT NULL
 );
 
 -- IRIDIUM
-CREATE TABLE IF NOT EXISTS public.telemetry_iridium (
+CREATE TABLE IF NOT EXISTS telemetry_iridium (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     imei VARCHAR(15) UNIQUE NOT NULL
 );
@@ -850,34 +854,34 @@ INSERT INTO collection_group_timeseries (collection_group_id, timeseries_id) VAL
     ('30b32cb1-0936-42c4-95d1-63a7832a57db', '9a3864a8-8766-4bfa-bad1-0328b166f6a8');
 
 -- plot_configuration
-INSERT INTO public.plot_configuration (project_id, id, slug, name) VALUES
+INSERT INTO plot_configuration (project_id, id, slug, name) VALUES
     ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'cc28ca81-f125-46c6-a5cd-cc055a003c19', 'all-plots', 'All Plots'),
     ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', '64879f68-6a2c-4d78-8e8b-5e9b9d2e0d6a', 'pz-1a-plot', 'PZ-1A PLOT');
 
 
 -- plot_configuration_timeseries
-INSERT INTO public.plot_configuration_timeseries (plot_configuration_id, timeseries_id) VALUES
+INSERT INTO plot_configuration_timeseries (plot_configuration_id, timeseries_id) VALUES
     ('cc28ca81-f125-46c6-a5cd-cc055a003c19', '8f4ca3a3-5971-4597-bd6f-332d1cf5af7c'),
     ('cc28ca81-f125-46c6-a5cd-cc055a003c19', '9a3864a8-8766-4bfa-bad1-0328b166f6a8'),
     ('64879f68-6a2c-4d78-8e8b-5e9b9d2e0d6a', '8f4ca3a3-5971-4597-bd6f-332d1cf5af7c'),
     ('64879f68-6a2c-4d78-8e8b-5e9b9d2e0d6a', '9a3864a8-8766-4bfa-bad1-0328b166f6a8');
 
 -- telemetry_type
-INSERT INTO public.telemetry_type (id, slug, name) VALUES
+INSERT INTO telemetry_type (id, slug, name) VALUES
     ('10a32652-af43-4451-bd52-4980c5690cc9', 'goes-self-timed', 'GOES Self Timed'),
     ('c0b03b0d-bfce-453a-b5a9-636118940449', 'iridium', 'Iridium');
 
 
 -- THE FOLLOWING IS A 100% SAMPLE TELEMETRY CONFIGURATION;
 -- THIS REPRESENTS A SINGLE INSTRUMENT WITH GOES AND IRIDIUM DATA TRANSMISSION
-INSERT INTO public.telemetry_goes (id, nesdis_id) VALUES
+INSERT INTO telemetry_goes (id, nesdis_id) VALUES
     ('52fb5fbc-af7d-4a60-9fe3-3d1237091e6d', 'TEST123'),
     ('c6b18827-5841-49dd-a7f8-bfafc681e158', 'TEST456');
 
-INSERT INTO public.telemetry_iridium (id, imei) VALUES
+INSERT INTO telemetry_iridium (id, imei) VALUES
     ('a5e8df6c-554f-4312-a84a-3876c41b4b1a', '123456789098765'),
     ('1bda5844-1065-4bdb-8f49-d35c7a75b1de', '098765432123456');
 
-INSERT INTO public.instrument_telemetry (id, instrument_id, telemetry_type_id, telemetry_id) VALUES
+INSERT INTO instrument_telemetry (id, instrument_id, telemetry_type_id, telemetry_id) VALUES
     ('8bb7c44f-7c72-4715-8337-457643b1a0d5', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '10a32652-af43-4451-bd52-4980c5690cc9', '52fb5fbc-af7d-4a60-9fe3-3d1237091e6d'),
     ('a7cab13d-f6d2-44ba-8e08-8550ac690427', 'a7540f69-c41e-43b3-b655-6e44097edb7e', 'c0b03b0d-bfce-453a-b5a9-636118940449', 'a5e8df6c-554f-4312-a84a-3876c41b4b1a');

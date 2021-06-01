@@ -88,6 +88,7 @@ CREATE OR REPLACE VIEW v_instrument AS (
 -- v_project
 CREATE OR REPLACE VIEW v_project AS (
     SELECT  p.id,
+            p.federal_id,
             CASE WHEN p.image IS NOT NULL
                 THEN cfg.static_host || '/projects/' || p.slug || '/images/' || p.image
                 ELSE NULL
