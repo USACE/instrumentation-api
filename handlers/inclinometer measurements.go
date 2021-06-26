@@ -98,9 +98,21 @@ func CreateOrUpdateProjectInclinometerMeasurements(db *sqlx.DB) echo.HandlerFunc
 			return c.JSON(http.StatusBadRequest, err)
 		}
 
+		// Check :project_id from route against each timeseries' project_id in the database
+		pID, err := uuid.Parse(c.Param("project_id"))
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, err)
+		}
+		isTrue, err := allInclinometerTimeseriesBelongToProject(db, &mcc, &pID)
+		if err != nil {
+			return c.String(http.StatusBadRequest, err.Error())
+		}
+		if !isTrue {
+			return c.String(http.StatusBadRequest, "all timeseries posted do not belong to project")
+		}
+
 		// Post inclinometers
-		//p := c.Get("profile").(*models.Profile)
-		p, err := models.GetProfileFromEDIPI(db, 79)
+		p := c.Get("profile").(*models.Profile)
 		stored, err := models.CreateOrUpdateInclinometerMeasurements(db, mcc.Items, p, time.Now())
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err)

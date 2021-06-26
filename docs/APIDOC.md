@@ -130,7 +130,7 @@ Table of Contents
 - Get Timeseries Measurements (for Demo Pz #1) \
   [https://api.rsgis.dev/development/instrumentation/timeseries/869465fc-dc1e-445e-81f4-9979b5fadda9/measurements?after=1900-01-01T00:00:00.00Z&before=2021-01-01T00:00:00.00Z](https://api.rsgis.dev/development/instrumentation/timeseries/869465fc-dc1e-445e-81f4-9979b5fadda9/measurements?after=1900-01-01T00:00:00.00Z&before=2021-01-01T00:00:00.00Z)
 - Delete Timeseries Measurements \
-  [https://api.rsgis.dev/development/instrumentation/timeseries/869465fc-dc1e-445e-81f4-9979b5fadda9/measurements?time=1900-01-01T00:00:00.00Z](https://api.rsgis.dev/development/instrumentation/timeseries/869465fc-dc1e-445e-81f4-9979b5fadda9/measurements??time=1900-01-01T00:00:00.00Z)
+  [https://api.rsgis.dev/development/instrumentation/timeseries/869465fc-dc1e-445e-81f4-9979b5fadda9/measurements?time=1900-01-01T00:00:00.00Z](https://api.rsgis.dev/development/instrumentation/timeseries/869465fc-dc1e-445e-81f4-9979b5fadda9/measurements?time=1900-01-01T00:00:00.00Z)
 - Create Timeseries Measurement(s) for **Single Timeseries** \
   [https://api.rsgis.dev/development/instrumentation/timeseries/measurements](https://api.rsgis.dev/development/instrumentation/timeseries/measurements)
     - Example `POST` body
@@ -186,9 +186,9 @@ Table of Contents
 ---
 ### Inclinometer Measurements
 - Get Inclinometer Measurements (for Demo Pz #1) \
-  [https://api.rsgis.dev/development/instrumentation/timeseries/869465fc-dc1e-445e-81f4-9979b5fadda9/inclinometer_measurements?after=1900-01-01T00:00:00.00Z&before=2021-01-01T00:00:00.00Z](https://api.rsgis.dev/development/instrumentation/timeseries/869465fc-dc1e-445e-81f4-9979b5fadda9/measurements?after=1900-01-01T00:00:00.00Z&before=2021-01-01T00:00:00.00Z)
+  [https://api.rsgis.dev/development/instrumentation/timeseries/869465fc-dc1e-445e-81f4-9979b5fadda9/inclinometer_measurements?after=1900-01-01T00:00:00.00Z&before=2021-01-01T00:00:00.00Z](https://api.rsgis.dev/development/instrumentation/timeseries/869465fc-dc1e-445e-81f4-9979b5fadda9/inclinometer_measurements?after=1900-01-01T00:00:00.00Z&before=2021-01-01T00:00:00.00Z)
 - Delete Inclinometer Measurements \
-  [https://api.rsgis.dev/development/instrumentation/timeseries/869465fc-dc1e-445e-81f4-9979b5fadda9/inclinometer_measurements?time=1900-01-01T00:00:00.00Z](https://api.rsgis.dev/development/instrumentation/timeseries/869465fc-dc1e-445e-81f4-9979b5fadda9/measurements??time=1900-01-01T00:00:00.00Z)
+  [https://api.rsgis.dev/development/instrumentation/timeseries/869465fc-dc1e-445e-81f4-9979b5fadda9/inclinometer_measurements?time=1900-01-01T00:00:00.00Z](https://api.rsgis.dev/development/instrumentation/timeseries/869465fc-dc1e-445e-81f4-9979b5fadda9/inclinometer_measurements?time=1900-01-01T00:00:00.00Z)
   - Create Inclinometer Measurement(s) for **Multiple Inclinometers** \
   [https://api.rsgis.dev/development/instrumentation/timeseries/measurements](https://api.rsgis.dev/development/instrumentation/timeseries/measurements)
     - Example `POST` body

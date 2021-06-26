@@ -31,7 +31,7 @@ type Timeseries struct {
 type Measurement struct {
 	TimeseriesID uuid.UUID `json:"-" db:"timeseries_id"`
 	Time         time.Time `json:"time"`
-	Value        float32   `json:"value"`
+	Value        float64   `json:"value"`
 }
 
 // Inclinometer Measurement is a time and values associated with a timeseries
