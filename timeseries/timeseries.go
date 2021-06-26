@@ -54,12 +54,12 @@ type InclinometerMeasurementValues struct {
 	AComb      float32 `json:"aComb" db:"a_comb"`
 	AIncrement float32 `json:"aIncrement" db:"a_increment"`
 	ACumDev    float32 `json:"aCumDev" db:"a_cum_dev"`
-	ACumD      float32 `json:"aCumD" db:"a_cum_d"`
+	//ACumD      float32 `json:"aCumD" db:"a_cum_d"`
 	BChecksum  float32 `json:"bChecksum" db:"b_checksum"`
 	BComb      float32 `json:"bComb" db:"b_comb"`
 	BIncrement float32 `json:"bIncrement" db:"b_increment"`
 	BCumDev    float32 `json:"bCumDev" db:"b_cum_dev"`
-	BCumD      float32 `json:"bCumD" db:"b_cum_d"`
+	//BCumD      float32 `json:"bCumD" db:"b_cum_d"`
 }
 
 // MeasurementLean is the minimalist representation of a timeseries measurement
