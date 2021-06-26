@@ -78,7 +78,7 @@ type MeasurementCollectionLean struct {
 	Items        []MeasurementLean `json:"items"`
 }
 
-// MeasurementCollection is a collection of timeseries measurements
+// InclinometerMeasurementCollection is a collection of Inclinometer measurements
 type InclinometerMeasurementCollection struct {
 	TimeseriesID  uuid.UUID                 `json:"timeseries_id" db:"timeseries_id"`
 	Inclinometers []InclinometerMeasurement `json:"inclinometers"`
