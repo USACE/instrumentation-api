@@ -261,12 +261,16 @@ func main() {
 	public.GET("/timeseries/:timeseries_id", handlers.GetTimeseries(db))
 	public.GET("/instruments/:instrument_id/timeseries/:timeseries_id", handlers.GetTimeseries(db))
 	public.GET("/timeseries/:timeseries_id/measurements", handlers.ListTimeseriesMeasurements(db))
+	private.DELETE("/timeseries/:timeseries_id/measurements", handlers.DeleteTimeserieMeasurements(db))
+	private.GET("/timeseries/:timeseries_id/inclinometer_measurements", handlers.ListInclinometerMeasurements(db))
+	private.DELETE("/timeseries/:timeseries_id/inclinometer_measurements", handlers.DeleteInclinometerMeasurements(db))
 	public.GET("/instruments/:instrument_id/timeseries/:timeseries_id/measurements", handlers.ListTimeseriesMeasurements(db))
 	// TODO: Delete timeseries endpoints without project context in URL
 	private.POST("/timeseries", handlers.CreateTimeseries(db))
 	private.PUT("/timeseries/:timeseries_id", handlers.UpdateTimeseries(db))
 	private.DELETE("/timeseries/:timeseries_id", handlers.DeleteTimeseries(db))
 	private.POST("/projects/:project_id/timeseries_measurements", handlers.CreateOrUpdateProjectTimeseriesMeasurements(db))
+	private.POST("/projects/:project_id/inclinometer_measurements", handlers.CreateOrUpdateProjectInclinometerMeasurements(db))
 
 	// Collection Groups
 	public.GET("/projects/:project_id/collection_groups", handlers.ListCollectionGroups(db))
@@ -300,6 +304,6 @@ func main() {
 		log.Fatal(gateway.ListenAndServe("localhost:3030", e))
 	} else {
 		log.Print("starting server")
-		log.Fatal(http.ListenAndServe(":80", e))
+		log.Fatal(http.ListenAndServe(":8080", e))
 	}
 }
