@@ -69,7 +69,7 @@ func ListInclinometerMeasurementValues(db *sqlx.DB, timeseriesID *uuid.UUID, tim
 	// Get Inclinometer Measurement values
 	if err := db.Select(
 		&v,
-		inometerMeasurementsValuesSQL(instrumentConstant)+" WHERE timeseries_id = $1 AND time = $2 ORDER BY depth",
+		inclinometerMeasurementsValuesSQL(instrumentConstant)+" WHERE timeseries_id = $1 AND time = $2 ORDER BY depth",
 		timeseriesID, time,
 	); err != nil {
 		return nil, err
@@ -139,7 +139,7 @@ func listInclinometerMeasurementsSQL() string {
 	`
 }
 
-func inometerMeasurementsValuesSQL(instrumentConstant string) string {
+func inclinometerMeasurementsValuesSQL(instrumentConstant string) string {
 	return `select items.depth, 
 					items.a0, 
 					items.a180, 
