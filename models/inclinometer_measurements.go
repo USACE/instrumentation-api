@@ -140,19 +140,18 @@ func listInclinometerMeasurementsSQL() string {
 }
 
 func inclinometerMeasurementsValuesSQL(instrumentConstant string) string {
-	return `select items.depth, 
+	return fmt.Sprintf(`select items.depth, 
 					items.a0, 
 					items.a180, 
 					items.b0,
 					items.b180,
 					(items.a0 + items.a180) AS a_checksum,
-					(items.a0 - items.a180)/2 AS a_comb,` +
-		fmt.Sprintf("(items.a0 - items.a180) / 2 / %s * 24 AS a_increment,", instrumentConstant) +
-		fmt.Sprintf("SUM((items.a0 - items.a180) / 2 / %s * 24) OVER (ORDER BY depth desc) AS a_cum_dev,", instrumentConstant) +
-		`(items.b0 + items.b180) AS b_checksum,
+					(items.a0 - items.a180)/2 AS a_comb,
+					(items.a0 - items.a180) / 2 / %s * 24 AS a_increment,
+					SUM((items.a0 - items.a180) / 2 / %s * 24) OVER (ORDER BY depth desc) AS a_cum_dev,
+					(items.b0 + items.b180) AS b_checksum,
 					(items.b0 - items.b180)/2 AS b_comb,
-					(items.b0 - items.b180) / 2 / 2000 * 24 AS b_increment,
-					SUM((items.b0 - items.b180) / 2 / 20000 * 24) OVER (ORDER BY depth desc) AS b_cum_dev
-		from inclinometer_measurement, jsonb_to_recordset(inclinometer_measurement.values) as items(depth int, a0 real, a180 real, b0 real, b180 real) 
-	`
+					(items.b0 - items.b180) / 2 / %s * 24 AS b_increment,
+					SUM((items.b0 - items.b180) / 2 / %s * 24) OVER (ORDER BY depth desc) AS b_cum_dev
+		from inclinometer_measurement, jsonb_to_recordset(inclinometer_measurement.values) as items(depth int, a0 real, a180 real, b0 real, b180 real)`, instrumentConstant, instrumentConstant, instrumentConstant, instrumentConstant)
 }
