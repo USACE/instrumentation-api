@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"net/http"
 	"time"
 
@@ -12,10 +13,10 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// allTimeseriesBelongToProject is a helper function to determine if all timeseries IDs belong to a given project ID
-func allTimeseriesBelongToProject(db *sqlx.DB, mcc *models.TimeseriesMeasurementCollectionCollection, projectID *uuid.UUID) (bool, error) {
+// allInclinometerTimeseriesBelongToProject is a helper function to determine if all timeseries IDs belong to a given project ID
+func allInclinometerTimeseriesBelongToProject(db *sqlx.DB, mcc *models.InclinometerMeasurementCollectionCollection, projectID *uuid.UUID) (bool, error) {
 	// timeseries IDs
-	dd := mcc.TimeseriesIDs()
+	dd := mcc.InclinometerTimeseriesIDs()
 	m, err := models.GetTimeseriesProjectMap(db, dd)
 	if err != nil {
 		return false, err
@@ -34,8 +35,8 @@ func allTimeseriesBelongToProject(db *sqlx.DB, mcc *models.TimeseriesMeasurement
 	return true, nil
 }
 
-// ListTimeseriesMeasurements returns a timeseries with measurements
-func ListTimeseriesMeasurements(db *sqlx.DB) echo.HandlerFunc {
+// ListInclinometerMeasurements returns a timeseries with inclinometer measurements
+func ListInclinometerMeasurements(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		tsID, err := uuid.Parse(c.Param("timeseries_id"))
 		if err != nil {
@@ -64,21 +65,35 @@ func ListTimeseriesMeasurements(db *sqlx.DB) echo.HandlerFunc {
 			tw.Before = tB
 		}
 
-		mc, err := models.ListTimeseriesMeasurements(db, &tsID, &tw)
+		im, err := models.ListInclinometerMeasurements(db, &tsID, &tw)
 
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err)
 		}
-		return c.JSON(http.StatusOK, mc)
+
+		for idx, _ := range im.Inclinometers {
+			values, err := models.ListInclinometerMeasurementValues(db, &tsID, im.Inclinometers[idx].Time)
+			if err != nil {
+				return c.JSON(http.StatusInternalServerError, err)
+			}
+
+			jsonValues, err := json.Marshal(values)
+			if err != nil {
+				return c.JSON(http.StatusInternalServerError, err)
+			}
+			im.Inclinometers[idx].Values = jsonValues
+		}
+
+		return c.JSON(http.StatusOK, im)
 	}
 }
 
-// CreateOrUpdateProjectTimeseriesMeasurements Creates or Updates a TimeseriesMeasurement object or array of objects
+// CreateOrUpdateProjectInclinometerMeasurements Creates or Updates a InclinometerMeasurement object or array of objects
 // All timeseries must belong to the same project
-func CreateOrUpdateProjectTimeseriesMeasurements(db *sqlx.DB) echo.HandlerFunc {
+func CreateOrUpdateProjectInclinometerMeasurements(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 
-		var mcc models.TimeseriesMeasurementCollectionCollection
+		var mcc models.InclinometerMeasurementCollectionCollection
 		if err := c.Bind(&mcc); err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
@@ -88,15 +103,17 @@ func CreateOrUpdateProjectTimeseriesMeasurements(db *sqlx.DB) echo.HandlerFunc {
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
-		isTrue, err := allTimeseriesBelongToProject(db, &mcc, &pID)
+		isTrue, err := allInclinometerTimeseriesBelongToProject(db, &mcc, &pID)
 		if err != nil {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
 		if !isTrue {
 			return c.String(http.StatusBadRequest, "all timeseries posted do not belong to project")
 		}
-		// Post timeseries
-		stored, err := models.CreateOrUpdateTimeseriesMeasurements(db, mcc.Items)
+
+		// Post inclinometers
+		p := c.Get("profile").(*models.Profile)
+		stored, err := models.CreateOrUpdateInclinometerMeasurements(db, mcc.Items, p, time.Now())
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
@@ -104,26 +121,8 @@ func CreateOrUpdateProjectTimeseriesMeasurements(db *sqlx.DB) echo.HandlerFunc {
 	}
 }
 
-// CreateOrUpdateTimeseriesMeasurements Creates or Updates a TimeseriesMeasurement object or array of objects
-// Timeseries may belong to one or more projects
-func CreateOrUpdateTimeseriesMeasurements(db *sqlx.DB) echo.HandlerFunc {
-	return func(c echo.Context) error {
-
-		var mcc models.TimeseriesMeasurementCollectionCollection
-		if err := c.Bind(&mcc); err != nil {
-			return c.JSON(http.StatusBadRequest, err)
-		}
-		// Post timeseries
-		stored, err := models.CreateOrUpdateTimeseriesMeasurements(db, mcc.Items)
-		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
-		}
-		return c.JSON(http.StatusCreated, stored)
-	}
-}
-
-// DeleteTimeserieMeasurements deletes a single timeseries measurement
-func DeleteTimeserieMeasurements(db *sqlx.DB) echo.HandlerFunc {
+// DeleteInclinometerMeasurements deletes a single inclinometer measurement
+func DeleteInclinometerMeasurements(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		// id from url params
 		id, err := uuid.Parse(c.Param("timeseries_id"))
@@ -138,7 +137,7 @@ func DeleteTimeserieMeasurements(db *sqlx.DB) echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 
-		if err := models.DeleteTimeserieMeasurements(db, &id, t); err != nil {
+		if err := models.DeleteInclinometerMeasurements(db, &id, t); err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 		return c.JSON(http.StatusOK, make(map[string]interface{}))

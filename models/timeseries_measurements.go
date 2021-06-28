@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+	"time"
 
 	ts "github.com/USACE/instrumentation-api/timeseries"
 
@@ -58,6 +59,14 @@ func ListTimeseriesMeasurements(db *sqlx.DB, timeseriesID *uuid.UUID, tw *ts.Tim
 	}
 
 	return &mc, nil
+}
+
+// DeleteTimeserieMeasurements deletes a timeseries Measurement
+func DeleteTimeserieMeasurements(db *sqlx.DB, id *uuid.UUID, time time.Time) error {
+	if _, err := db.Exec("DELETE FROM timeseries_measurement WHERE timeseries_id = $1 and time = $2", id, time); err != nil {
+		return err
+	}
+	return nil
 }
 
 // CreateOrUpdateTimeseriesMeasurements creates many timeseries from an array of timeseries
