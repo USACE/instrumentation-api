@@ -290,6 +290,17 @@ CREATE TABLE IF NOT EXISTS timeseries_measurement (
     PRIMARY KEY (timeseries_id, time)
 );
 
+-- inclinometer_measurement
+CREATE TABLE IF NOT EXISTS inclinometer_measurement (
+    time TIMESTAMPTZ NOT NULL,
+    values JSONB NOT NULL,
+    creator UUID NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
+    create_date TIMESTAMPTZ NOT NULL DEFAULT now(),
+    timeseries_id UUID NOT NULL REFERENCES timeseries (id) ON DELETE CASCADE,
+    CONSTRAINT inclinometer_unique_time UNIQUE(timeseries_id,time),
+    PRIMARY KEY (timeseries_id, time)
+);
+
 -- instrument_constants
 CREATE TABLE IF NOT EXISTS instrument_constants (
     timeseries_id UUID NOT NULL REFERENCES timeseries(id) ON DELETE CASCADE,
@@ -720,7 +731,8 @@ INSERT INTO instrument_group (project_id, id, slug, name, description) VALUES
 -- instrument
 INSERT INTO instrument (project_id, id, slug, name, formula, formula_parameter_id, formula_unit_id, geometry, type_id) VALUES
     ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'a7540f69-c41e-43b3-b655-6e44097edb7e', 'demo-piezometer-1', 'Demo Piezometer 1', '[demo-piezometer-1.top-of-riser] - [demo-piezometer-1.distance-to-water]', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8', ST_GeomFromText('POINT(-80.8 26.7)',4326),'1bb4bf7c-f5f8-44eb-9805-43b07ffadbef'),
-    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', '9e8f2ca4-4037-45a4-aaca-d9e598877439', 'demo-staffgage-1', 'Demo Staffgage 1', null, null, null, ST_GeomFromText('POINT(-80.85 26.75)',4326),'0fd1f9ba-2731-4ff9-96dd-3c03215ab06f');
+    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', '9e8f2ca4-4037-45a4-aaca-d9e598877439', 'demo-staffgage-1', 'Demo Staffgage 1', null, null, null, ST_GeomFromText('POINT(-80.85 26.75)',4326),'0fd1f9ba-2731-4ff9-96dd-3c03215ab06f'),
+    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'd8c66ef9-06f0-4d52-9233-f3778e0624f0', 'inclinometer-1', 'inclinometer-1', null, '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', '4a999277-4cf5-4282-93ce-23b33c65e2c8', ST_GeomFromText('POINT(-80.8 26.7)',4326),'98a61f29-18a8-430a-9d02-0f53486e0984');
 
 -- instrument_group_instruments
 INSERT INTO instrument_group_instruments (instrument_id, instrument_group_id) VALUES
@@ -768,7 +780,8 @@ INSERT INTO timeseries (id, instrument_id, parameter_id, unit_id, slug, name) VA
 ('8f4ca3a3-5971-4597-bd6f-332d1cf5af7c', '9e8f2ca4-4037-45a4-aaca-d9e598877439', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce', 'height', 'Height'),
 ('d9697351-3a38-4194-9ac4-41541927e475', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce', 'top-of-riser', 'Top of Riser'),
 ('22a734d6-dc24-451d-a462-43a32f335ae8', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce', 'tip-depth', 'Tip Depth'),
-('14247bc8-b264-4857-836f-182d47ebb39d', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce', 'constant-to-test-delete', 'Constant to Test Delete');
+('14247bc8-b264-4857-836f-182d47ebb39d', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce', 'constant-to-test-delete', 'Constant to Test Delete'),
+('5985f20a-1e37-4add-823c-545cdca49b5e', 'd8c66ef9-06f0-4d52-9233-f3778e0624f0', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', '4a999277-4cf5-4282-93ce-23b33c65e2c8', 'inclinometer-1', 'Inclinometer-1');
 
 -- instrument_constants
 INSERT INTO instrument_constants (instrument_id, timeseries_id) VALUES
@@ -834,6 +847,54 @@ INSERT INTO timeseries_measurement (timeseries_id, time, value) VALUES
 ('d9697351-3a38-4194-9ac4-41541927e475', '3/10/2020', 39.50),
 ('22a734d6-dc24-451d-a462-43a32f335ae8', '3/10/2015', 10.0);
 
+-- inclinometers
+INSERT INTO inclinometer_measurement (timeseries_id, time, creator, create_date, values) VALUES 
+('5985f20a-1e37-4add-823c-545cdca49b5e', '6/21/2021', '176704ad-829f-44fa-b71b-c112e80261fa', '6/1/2020', 
+'[
+                            {
+                              "depth": 106, 
+                              "a0": 590,
+                              "a180": -562,
+                              "b0": -142,
+                              "b180": 176
+                            },
+                            {
+                              "depth": 108, 
+                              "a0": 614,
+                              "a180": -586,
+                              "b0": 107,
+                              "b180": -149
+                            },
+                            {
+                              "depth": 110, 
+                              "a0": 622,
+                              "a180": -592,
+                              "b0": -67,
+                              "b180": 107
+                            },
+                            {
+                              "depth": 112, 
+                              "a0": 623,
+                              "a180": -598,
+                              "b0": 8,
+                              "b180": -48
+                            },
+                            {
+                              "depth": 114, 
+                              "a0": 606,
+                              "a180": -577,
+                              "b0": 124,
+                              "b180": -72
+                            },
+                            {
+                              "depth": 116, 
+                              "a0": 0,
+                              "a180": 0,
+                              "b0": 0,
+                              "b180": 0
+                            }
+                      ]');
+                      
 -- alert_config
 INSERT INTO alert_config (id, instrument_id, name, body, formula, schedule) VALUES
     ('1efd2d85-d3ee-4388-85a0-f824a761ff8b', '9e8f2ca4-4037-45a4-aaca-d9e598877439','Above Target Height', 'The demo staff gage has exceeded the target height. Sincerely, Midas', '[stage] >= 10', '0,10,20,30,40,50 * * * *'),
