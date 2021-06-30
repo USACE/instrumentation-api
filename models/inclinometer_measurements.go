@@ -62,14 +62,13 @@ func ListInclinometerMeasurements(db *sqlx.DB, timeseriesID *uuid.UUID, tw *ts.T
 	return &mc, nil
 }
 
-func ListInclinometerMeasurementValues(db *sqlx.DB, timeseriesID *uuid.UUID, time time.Time) ([]*ts.InclinometerMeasurementValues, error) {
-	instrumentConstant := "20000"
-
+func ListInclinometerMeasurementValues(db *sqlx.DB, timeseriesID *uuid.UUID, time time.Time, inclinometerConstant float64) ([]*ts.InclinometerMeasurementValues, error) {
+	constnat := fmt.Sprintf("%.0f", inclinometerConstant)
 	v := []*ts.InclinometerMeasurementValues{}
 	// Get Inclinometer Measurement values
 	if err := db.Select(
 		&v,
-		inclinometerMeasurementsValuesSQL(instrumentConstant)+" WHERE timeseries_id = $1 AND time = $2 ORDER BY depth",
+		inclinometerMeasurementsValuesSQL(constnat)+" WHERE timeseries_id = $1 AND time = $2 ORDER BY depth",
 		timeseriesID, time,
 	); err != nil {
 		return nil, err
@@ -139,7 +138,7 @@ func listInclinometerMeasurementsSQL() string {
 	`
 }
 
-func inclinometerMeasurementsValuesSQL(instrumentConstant string) string {
+func inclinometerMeasurementsValuesSQL(inclinometerConstant string) string {
 	return fmt.Sprintf(`select items.depth, 
 					items.a0, 
 					items.a180, 
@@ -153,5 +152,5 @@ func inclinometerMeasurementsValuesSQL(instrumentConstant string) string {
 					(items.b0 - items.b180)/2 AS b_comb,
 					(items.b0 - items.b180) / 2 / %s * 24 AS b_increment,
 					SUM((items.b0 - items.b180) / 2 / %s * 24) OVER (ORDER BY depth desc) AS b_cum_dev
-		from inclinometer_measurement, jsonb_to_recordset(inclinometer_measurement.values) as items(depth int, a0 real, a180 real, b0 real, b180 real)`, instrumentConstant, instrumentConstant, instrumentConstant, instrumentConstant)
+		from inclinometer_measurement, jsonb_to_recordset(inclinometer_measurement.values) as items(depth int, a0 real, a180 real, b0 real, b180 real)`, inclinometerConstant, inclinometerConstant, inclinometerConstant, inclinometerConstant)
 }

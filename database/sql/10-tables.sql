@@ -687,7 +687,8 @@ INSERT INTO parameter (id, name) VALUES
     ('2b7f96e1-820f-4f61-ba8f-861640af6232', 'unknown'),
     ('06189199-a25f-4101-b8bd-991c6a5a7ab3', 'velocity'),  
     ('430e5edb-e2b5-4f86-b19f-cda26a27e151', 'voltage'),
-    ('de6112da-8489-4286-ae56-ec72aa09974d', 'water-temperature');
+    ('de6112da-8489-4286-ae56-ec72aa09974d', 'water-temperature'),
+    ('3ea5ed77-c926-4696-a580-a3fde0f9a556', 'inclinometer-constant');
 
 -- Profile (MIDAS Automation Account)
 INSERT INTO profile (edipi, username, email) VALUES (79, 'MIDAS Automation', 'midas@rsgis.dev');
@@ -781,7 +782,8 @@ INSERT INTO timeseries (id, instrument_id, parameter_id, unit_id, slug, name) VA
 ('d9697351-3a38-4194-9ac4-41541927e475', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce', 'top-of-riser', 'Top of Riser'),
 ('22a734d6-dc24-451d-a462-43a32f335ae8', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce', 'tip-depth', 'Tip Depth'),
 ('14247bc8-b264-4857-836f-182d47ebb39d', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce', 'constant-to-test-delete', 'Constant to Test Delete'),
-('5985f20a-1e37-4add-823c-545cdca49b5e', 'd8c66ef9-06f0-4d52-9233-f3778e0624f0', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', '4a999277-4cf5-4282-93ce-23b33c65e2c8', 'inclinometer-1', 'Inclinometer-1');
+('5985f20a-1e37-4add-823c-545cdca49b5e', 'd8c66ef9-06f0-4d52-9233-f3778e0624f0', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', '4a999277-4cf5-4282-93ce-23b33c65e2c8', 'inclinometer-1', 'Inclinometer-1'),
+('479d90eb-3454-4f39-be9a-bfd23099a552', 'd8c66ef9-06f0-4d52-9233-f3778e0624f0', '3ea5ed77-c926-4696-a580-a3fde0f9a556', 'ae06a7db-1e18-4994-be41-9d5a408d6cad', 'inclinometer-constant', 'inclinometer-constant');
 
 -- instrument_constants
 INSERT INTO instrument_constants (instrument_id, timeseries_id) VALUES
@@ -845,7 +847,8 @@ INSERT INTO timeseries_measurement (timeseries_id, time, value) VALUES
 ('d9697351-3a38-4194-9ac4-41541927e475', '3/10/2015', 40.50),
 ('d9697351-3a38-4194-9ac4-41541927e475', '6/10/2020', 40.00),
 ('d9697351-3a38-4194-9ac4-41541927e475', '3/10/2020', 39.50),
-('22a734d6-dc24-451d-a462-43a32f335ae8', '3/10/2015', 10.0);
+('22a734d6-dc24-451d-a462-43a32f335ae8', '3/10/2015', 10.0),
+('479d90eb-3454-4f39-be9a-bfd23099a552', '6/21/2021', 20000.0);
 
 -- inclinometers
 INSERT INTO inclinometer_measurement (timeseries_id, time, creator, create_date, values) VALUES 
