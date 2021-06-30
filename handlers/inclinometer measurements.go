@@ -119,8 +119,7 @@ func CreateOrUpdateProjectInclinometerMeasurements(db *sqlx.DB) echo.HandlerFunc
 		}
 
 		// Post inclinometers
-		//p := c.Get("profile").(*models.Profile)
-		p, err := models.GetProfileFromEDIPI(db, 79)
+		p := c.Get("profile").(*models.Profile)
 		stored, err := models.CreateOrUpdateInclinometerMeasurements(db, mcc.Items, p, time.Now())
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err)
