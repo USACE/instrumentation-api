@@ -262,7 +262,7 @@ func main() {
 	public.GET("/instruments/:instrument_id/timeseries/:timeseries_id", handlers.GetTimeseries(db))
 	public.GET("/timeseries/:timeseries_id/measurements", handlers.ListTimeseriesMeasurements(db))
 	private.DELETE("/timeseries/:timeseries_id/measurements", handlers.DeleteTimeserieMeasurements(db))
-	private.GET("/timeseries/:timeseries_id/inclinometer_measurements", handlers.ListInclinometerMeasurements(db))
+	public.GET("/timeseries/:timeseries_id/inclinometer_measurements", handlers.ListInclinometerMeasurements(db))
 	private.DELETE("/timeseries/:timeseries_id/inclinometer_measurements", handlers.DeleteInclinometerMeasurements(db))
 	public.GET("/instruments/:instrument_id/timeseries/:timeseries_id/measurements", handlers.ListTimeseriesMeasurements(db))
 	// TODO: Delete timeseries endpoints without project context in URL
