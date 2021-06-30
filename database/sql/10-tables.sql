@@ -789,7 +789,8 @@ INSERT INTO timeseries (id, instrument_id, parameter_id, unit_id, slug, name) VA
 INSERT INTO instrument_constants (instrument_id, timeseries_id) VALUES
 ('a7540f69-c41e-43b3-b655-6e44097edb7e', 'd9697351-3a38-4194-9ac4-41541927e475'),
 ('a7540f69-c41e-43b3-b655-6e44097edb7e', '22a734d6-dc24-451d-a462-43a32f335ae8'),
-('a7540f69-c41e-43b3-b655-6e44097edb7e', '14247bc8-b264-4857-836f-182d47ebb39d');
+('a7540f69-c41e-43b3-b655-6e44097edb7e', '14247bc8-b264-4857-836f-182d47ebb39d'),
+('d8c66ef9-06f0-4d52-9233-f3778e0624f0', '479d90eb-3454-4f39-be9a-bfd23099a552');
 
 -- Time Series Measurements
 INSERT INTO timeseries_measurement (timeseries_id, time, value) VALUES
