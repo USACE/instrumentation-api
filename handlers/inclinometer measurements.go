@@ -38,6 +38,7 @@ func allInclinometerTimeseriesBelongToProject(db *sqlx.DB, mcc *models.Inclinome
 // ListInclinometerMeasurements returns a timeseries with inclinometer measurements
 func ListInclinometerMeasurements(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
+
 		tsID, err := uuid.Parse(c.Param("timeseries_id"))
 		if err != nil {
 			return c.String(http.StatusBadRequest, "Malformed ID")
@@ -71,8 +72,14 @@ func ListInclinometerMeasurements(db *sqlx.DB) echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, err)
 		}
 
+		cm, err := models.ConstantMeasurement(db, &tsID, "inclinometer-constant")
+
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, err)
+		}
+
 		for idx, _ := range im.Inclinometers {
-			values, err := models.ListInclinometerMeasurementValues(db, &tsID, im.Inclinometers[idx].Time)
+			values, err := models.ListInclinometerMeasurementValues(db, &tsID, im.Inclinometers[idx].Time, cm.Value)
 			if err != nil {
 				return c.JSON(http.StatusInternalServerError, err)
 			}
