@@ -72,17 +72,22 @@ func DeleteTimeserieMeasurements(db *sqlx.DB, id *uuid.UUID, time time.Time) err
 // ConstantMeasurement returns a constant timeseries measurement for the same instrument by constant name
 func ConstantMeasurement(db *sqlx.DB, tsID *uuid.UUID, constantName string) (*ts.Measurement, error) {
 
-	m := []ts.Measurement{}
+	ms := []ts.Measurement{}
 
 	if err := db.Select(
-		&m,
+		&ms,
 		constantMeasurementSQL()+" and P.name = $2",
 		tsID, constantName,
 	); err != nil {
 		return nil, err
 	}
 
-	return &m[0], nil
+	m := ts.Measurement{}
+	if len(ms) > 0 {
+		m = ms[0]
+	}
+
+	return &m, nil
 }
 
 // CreateOrUpdateTimeseriesMeasurements creates many timeseries from an array of timeseries
