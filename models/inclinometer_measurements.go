@@ -127,6 +127,74 @@ func CreateOrUpdateInclinometerMeasurements(db *sqlx.DB, im []ts.InclinometerMea
 	return im, nil
 }
 
+// CreateTimeseriesConstant creates timeseries constant
+func CreateTimeseriesConstant(db *sqlx.DB, tsID *uuid.UUID, parameterName string, unitName string, value float64) error {
+
+	var err error
+
+	var instrumentId []uuid.UUID
+	if err := db.Select(&instrumentId,
+		`SELECT instrument_id
+		FROM timeseries T
+		WHERE t.id= $1`, tsID,
+	); err != nil {
+		return err
+	}
+
+	var parameterId []uuid.UUID
+	if err := db.Select(&parameterId,
+		`SELECT id
+		FROM parameter P
+		WHERE P.name= $1`, parameterName,
+	); err != nil {
+		return err
+	}
+
+	var unitId []uuid.UUID
+	if err := db.Select(&unitId,
+		`SELECT id
+		FROM unit U
+		WHERE U.name= $1`, unitName,
+	); err != nil {
+		return err
+	}
+
+	if len(instrumentId) > 0 && len(parameterId) > 0 && len(unitId) > 0 {
+		t := ts.Timeseries{}
+		measurement := ts.Measurement{}
+		measurements := []ts.Measurement{}
+		mc := ts.MeasurementCollection{}
+		mcs := []ts.MeasurementCollection{}
+		ts := []ts.Timeseries{}
+
+		t.InstrumentID = instrumentId[0]
+		t.Slug = parameterName
+		t.Name = parameterName
+		t.ParameterID = parameterId[0]
+		t.UnitID = unitId[0]
+		ts = append(ts, t)
+
+		ic, err := CreateInstrumentConstants(db, ts)
+		if err != nil {
+			return err
+		}
+		if len(ic) > 0 {
+			measurement.Time = time.Now()
+			measurement.Value = value
+			measurements = append(measurements, measurement)
+			mc.TimeseriesID = ic[0].ID
+			mc.Items = measurements
+			mcs = append(mcs, mc)
+			_, err = CreateOrUpdateTimeseriesMeasurements(db, mcs)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return err
+}
+
 func listInclinometerMeasurementsSQL() string {
 	return `SELECT  M.timeseries_id,
 			        M.time,
@@ -139,7 +207,23 @@ func listInclinometerMeasurementsSQL() string {
 }
 
 func inclinometerMeasurementsValuesSQL(inclinometerConstant string) string {
-	return fmt.Sprintf(`select items.depth, 
+	if inclinometerConstant == "0" {
+		return `select items.depth, 
+				items.a0, 
+				items.a180, 
+				items.b0,
+				items.b180,
+				(items.a0 + items.a180) AS a_checksum,
+				(items.a0 - items.a180)/2 AS a_comb,
+				0 AS a_increment,
+				0 AS a_cum_dev,
+				(items.b0 + items.b180) AS b_checksum,
+				(items.b0 - items.b180)/2 AS b_comb,
+				0 AS b_increment,
+				0 AS b_cum_dev
+		from inclinometer_measurement, jsonb_to_recordset(inclinometer_measurement.values) as items(depth int, a0 real, a180 real, b0 real, b180 real)`
+	} else {
+		return fmt.Sprintf(`select items.depth, 
 					items.a0, 
 					items.a180, 
 					items.b0,
@@ -153,4 +237,5 @@ func inclinometerMeasurementsValuesSQL(inclinometerConstant string) string {
 					(items.b0 - items.b180) / 2 / %s * 24 AS b_increment,
 					SUM((items.b0 - items.b180) / 2 / %s * 24) OVER (ORDER BY depth desc) AS b_cum_dev
 		from inclinometer_measurement, jsonb_to_recordset(inclinometer_measurement.values) as items(depth int, a0 real, a180 real, b0 real, b180 real)`, inclinometerConstant, inclinometerConstant, inclinometerConstant, inclinometerConstant)
+	}
 }

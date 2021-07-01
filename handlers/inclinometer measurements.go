@@ -73,7 +73,6 @@ func ListInclinometerMeasurements(db *sqlx.DB) echo.HandlerFunc {
 		}
 
 		cm, err := models.ConstantMeasurement(db, &tsID, "inclinometer-constant")
-
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
@@ -124,6 +123,23 @@ func CreateOrUpdateProjectInclinometerMeasurements(db *sqlx.DB) echo.HandlerFunc
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
+
+		//create inclinometer constant if doesn't exist
+		if len(mcc.Items) > 0 {
+			cm, err := models.ConstantMeasurement(db, &mcc.Items[0].TimeseriesID, "inclinometer-constant")
+			if err != nil {
+				return c.JSON(http.StatusBadRequest, err)
+			}
+
+			if cm.TimeseriesID == uuid.Nil {
+				err := models.CreateTimeseriesConstant(db, &mcc.Items[0].TimeseriesID, "inclinometer-constant", "Meters", 20000)
+				if err != nil {
+					return c.JSON(http.StatusBadRequest, err)
+				}
+			}
+
+		}
+
 		return c.JSON(http.StatusCreated, stored)
 	}
 }
