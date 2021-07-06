@@ -293,6 +293,7 @@ func main() {
 	// Misc
 	public.GET("/domains", handlers.GetDomains(db))
 	public.POST("/explorer", handlers.PostExplorer(db))
+	public.POST("/inclinometer_explorer", handlers.PostInclinometerExplorer(db))
 	public.GET("/home", handlers.GetHome(db))
 	public.GET("/units", handlers.ListUnits(db))
 
