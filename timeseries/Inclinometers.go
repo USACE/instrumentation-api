@@ -35,8 +35,18 @@ type InclinometerMeasurementValues struct {
 	//BCumD      float64 `json:"bCumD" db:"b_cum_d"`
 }
 
+// InclinometerMeasurementLean is the minimalist representation of a timeseries measurement
+// a key value pair where key is the timestamp, value is the measurement { <time.Time>: <types.JSONText> }
+type InclinometerMeasurementLean map[time.Time]types.JSONText
+
 // InclinometerMeasurementCollection is a collection of Inclinometer measurements
 type InclinometerMeasurementCollection struct {
 	TimeseriesID  uuid.UUID                 `json:"timeseries_id" db:"timeseries_id"`
 	Inclinometers []InclinometerMeasurement `json:"inclinometers"`
+}
+
+// InclinometerMeasurementCollectionLean uses a minimalist representation of a Inclinometer timeseries measurement
+type InclinometerMeasurementCollectionLean struct {
+	TimeseriesID uuid.UUID                     `json:"timeseries_id" db:"timeseries_id"`
+	Items        []InclinometerMeasurementLean `json:"items"`
 }

@@ -11,6 +11,7 @@ import (
 	"github.com/Knetic/govaluate"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"github.com/jmoiron/sqlx/types"
 )
 
 // TimeWindow is a bounding box for time
@@ -49,8 +50,25 @@ type Measurement struct {
 	Value float64   `json:"value"`
 }
 
+type InclinometerTimeseries struct {
+	TimeseriesInfo
+	Measurements        []InclinometerMeasurement `json:"measurements" db:"measurements"`
+	NextMeasurementLow  *Measurement              `json:"next_measurement_low" db:"next_measurement_low"`
+	NextMeasurementHigh *Measurement              `json:"next_measurement_high" db:"next_measurement_high"`
+	TimeWindow          TimeWindow                `json:"time_window"`
+}
+
+type InclinometerMeasurement struct {
+	Time   time.Time      `json:"time"`
+	Values types.JSONText `json:"values"`
+}
+
 func (m Measurement) Lean() map[time.Time]float64 {
 	return map[time.Time]float64{m.Time: m.Value}
+}
+
+func (m InclinometerMeasurement) InclinometerLean() map[time.Time]types.JSONText {
+	return map[time.Time]types.JSONText{m.Time: m.Values}
 }
 
 // RegularizeCarryForward converts potentially irregular timeseries measurements into a regular
@@ -293,4 +311,81 @@ func ComputedTimeseries(db *sqlx.DB, instrumentIDs []uuid.UUID, tw *TimeWindow, 
 	}
 
 	return tt3, nil
+}
+
+// ComputedInclinometerTimeseries returns computed and stored inclinometer timeseries for a specified array of instrument IDs
+func ComputedInclinometerTimeseries(db *sqlx.DB, instrumentIDs []uuid.UUID, tw *TimeWindow, interval *time.Duration) ([]InclinometerTimeseries, error) {
+
+	tt := make([]DBTimeseries, 0)
+	sql := `
+	-- Get Timeseries and Dependencies for Computations
+	-- timeseries required based on requested instrument
+	WITH requested_instruments AS (
+		SELECT id
+		FROM instrument
+		WHERE id IN (?)
+	), required_timeseries AS (
+	-- 	Timeseries for Instrument
+		SELECT id FROM timeseries WHERE instrument_id IN (SELECT id FROM requested_instruments)
+		UNION
+	-- Dependencies for Instrument Timeseries
+		SELECT dependency_timeseries_id AS id
+		FROM v_timeseries_dependency
+		WHERE instrument_id IN (SELECT id from requested_instruments)
+	),
+	-- Measurements Within Time Window by timeseries_id;
+	measurements AS (
+		SELECT timeseries_id,
+			   json_agg(json_build_object('time', time, 'values', values) ORDER BY time ASC)::text AS measurements
+		FROM inclinometer_measurement
+		WHERE timeseries_id IN (SELECT id FROM required_timeseries) AND time >= ? AND time <= ?
+		GROUP BY timeseries_id
+	)
+	-- Stored Timeseries
+	SELECT r.id                     AS timeseries_id,
+		   ts.instrument_id         AS instrument_id,
+		   i.slug || '.' || ts.slug AS variable,
+		   false                    AS is_computed,
+		   null                     AS formula,
+		   COALESCE(m.measurements, '[]') AS measurements
+	FROM required_timeseries r
+	INNER JOIN timeseries ts ON ts.id = r.id
+	INNER JOIN instrument i ON i.id = ts.instrument_id AND i.id IN (SELECT id FROM requested_instruments)
+	LEFT JOIN measurements m ON m.timeseries_id = r.id
+	UNION
+	-- Computed Timeseries
+	SELECT i.formula_id            AS timeseries_id,
+		   i.id                    AS instrument_id,
+		   i.slug || '.formula'    AS variable,
+		   true                    AS is_computed,
+		   i.formula               AS formula,
+		   '[]'::text              AS measurements
+	FROM instrument i
+	WHERE i.formula IS NOT NULL AND i.id IN (SELECT id FROM requested_instruments)
+	ORDER BY is_computed
+	`
+
+	query, args, err := sqlx.In(sql, instrumentIDs, tw.After, tw.Before)
+	if err != nil {
+		return make([]InclinometerTimeseries, 0), err
+	}
+	query = db.Rebind(query)
+	if err := db.Select(&tt, query, args...); err != nil {
+		return make([]InclinometerTimeseries, 0), err
+	}
+
+	// Unmarshal JSON Strings
+	tt2 := make([]InclinometerTimeseries, len(tt))
+	for idx, t := range tt {
+		tt2[idx] = InclinometerTimeseries{
+			TimeseriesInfo: t.TimeseriesInfo,
+			Measurements:   make([]InclinometerMeasurement, 0),
+			TimeWindow:     *tw,
+		}
+		if err := json.Unmarshal([]byte(t.Measurements), &tt2[idx].Measurements); err != nil {
+			log.Println(err)
+		}
+	}
+
+	return tt2, nil
 }
