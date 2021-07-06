@@ -382,8 +382,27 @@ func ComputedInclinometerTimeseries(db *sqlx.DB, instrumentIDs []uuid.UUID, tw *
 			Measurements:   make([]InclinometerMeasurement, 0),
 			TimeWindow:     *tw,
 		}
+
+		cm, err := ConstantMeasurement(db, &t.TimeseriesID, "inclinometer-constant")
+		if err != nil {
+			return nil, err
+		}
+
 		if err := json.Unmarshal([]byte(t.Measurements), &tt2[idx].Measurements); err != nil {
 			log.Println(err)
+		}
+
+		for i, _ := range tt2[idx].Measurements {
+			values, err := ListInclinometerMeasurementValues(db, &t.TimeseriesID, tt2[idx].Measurements[i].Time, cm.Value)
+			if err != nil {
+				return nil, err
+			}
+
+			jsonValues, err := json.Marshal(values)
+			if err != nil {
+				return nil, err
+			}
+			tt2[idx].Measurements[i].Values = jsonValues
 		}
 	}
 
