@@ -129,6 +129,8 @@ Table of Contents
 ### Timeseries Measurements
 - Get Timeseries Measurements (for Demo Pz #1) \
   [https://api.rsgis.dev/development/instrumentation/timeseries/869465fc-dc1e-445e-81f4-9979b5fadda9/measurements?after=1900-01-01T00:00:00.00Z&before=2021-01-01T00:00:00.00Z](https://api.rsgis.dev/development/instrumentation/timeseries/869465fc-dc1e-445e-81f4-9979b5fadda9/measurements?after=1900-01-01T00:00:00.00Z&before=2021-01-01T00:00:00.00Z)
+- Delete Timeseries Measurements \
+  [https://api.rsgis.dev/development/instrumentation/timeseries/869465fc-dc1e-445e-81f4-9979b5fadda9/measurements?time=1900-01-01T00:00:00.00Z](https://api.rsgis.dev/development/instrumentation/timeseries/869465fc-dc1e-445e-81f4-9979b5fadda9/measurements?time=1900-01-01T00:00:00.00Z)
 - Create Timeseries Measurement(s) for **Single Timeseries** \
   [https://api.rsgis.dev/development/instrumentation/timeseries/measurements](https://api.rsgis.dev/development/instrumentation/timeseries/measurements)
     - Example `POST` body
@@ -178,6 +180,71 @@ Table of Contents
                     {"time": "2020-06-04T03:00:00Z", "value": 10.30},
                     {"time": "2020-06-05T04:00:00Z", "value": 10.40}
             ]
+            }
+        ]
+        ```
+---
+### Inclinometer Measurements
+- Get Inclinometer Measurements (for Demo Pz #1) \
+  [https://api.rsgis.dev/development/instrumentation/timeseries/869465fc-dc1e-445e-81f4-9979b5fadda9/inclinometer_measurements?after=1900-01-01T00:00:00.00Z&before=2021-01-01T00:00:00.00Z](https://api.rsgis.dev/development/instrumentation/timeseries/869465fc-dc1e-445e-81f4-9979b5fadda9/inclinometer_measurements?after=1900-01-01T00:00:00.00Z&before=2021-01-01T00:00:00.00Z)
+- Delete Inclinometer Measurements \
+  [https://api.rsgis.dev/development/instrumentation/timeseries/869465fc-dc1e-445e-81f4-9979b5fadda9/inclinometer_measurements?time=1900-01-01T00:00:00.00Z](https://api.rsgis.dev/development/instrumentation/timeseries/869465fc-dc1e-445e-81f4-9979b5fadda9/inclinometer_measurements?time=1900-01-01T00:00:00.00Z)
+  - Create Inclinometer Measurement(s) for **Multiple Inclinometers** \
+  [https://api.rsgis.dev/development/instrumentation/timeseries/measurements](https://api.rsgis.dev/development/instrumentation/timeseries/measurements)
+    - Example `POST` body
+        ```
+        [
+            {
+                "timeseries_id": "869465fc-dc1e-445e-81f4-9979b5fadda9",
+                "inclinometers": [
+                    {
+                      "time": "2021-06-17T00:00:00Z", 
+                      "values": [
+                            {
+                              "depth": 106, 
+                              "a0": 590,
+                              "a180": -562,
+                              "b0": -142,
+                              "b180": 176
+                            },
+                            {
+                              "depth": 108, 
+                              "a0": 614,
+                              "a180": -586,
+                              "b0": 107,
+                              "b180": -149
+                            },
+                            {
+                              "depth": 110, 
+                              "a0": 622,
+                              "a180": -592,
+                              "b0": -67,
+                              "b180": 107
+                            },
+                            {
+                              "depth": 112, 
+                              "a0": 623,
+                              "a180": -598,
+                              "b0": 8,
+                              "b180": -48
+                            },
+                            {
+                              "depth": 114, 
+                              "a0": 606,
+                              "a180": -577,
+                              "b0": 124,
+                              "b180": -72
+                            },
+                            {
+                              "depth": 116, 
+                              "a0": 0,
+                              "a180": 0,
+                              "b0": 0,
+                              "b180": 0
+                            }
+                      ]
+                    }
+                ]
             }
         ]
         ```

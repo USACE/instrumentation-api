@@ -69,7 +69,8 @@ GRANT SELECT ON
     v_unit,
     v_profile,
     v_profile_project_roles,
-    v_timeseries_dependency
+    v_timeseries_dependency,
+    inclinometer_measurement
 TO instrumentation_reader;
 
 -- Role instrumentation_writer
@@ -110,7 +111,8 @@ GRANT INSERT,UPDATE,DELETE ON
     timeseries,
     timeseries_measurement,
     unit,
-    unit_family
+    unit_family,
+    inclinometer_measurement
 TO instrumentation_writer;
 
 -- Role postgis_reader
