@@ -1,4 +1,5 @@
 INSERT INTO project (id, slug, name, image) VALUES
+    ('6c56c7b0-2d9f-4a1b-9173-b969942dacb5','c-44','C-44', 'midas-project-default.jpg'),
     ('04d0a9a7-c170-4aba-a819-6f0b1e772a9d','alaska-district','Alaska District', 'midas-project-default.jpg'),
     ('f714ccdd-9695-4284-ab98-ace2daba2545','albuquerque-district','Albuquerque District', 'midas-project-default.jpg'),
     ('d559abfd-7ec7-4d0d-97bd-a04018f01e4c','baltimore-district','Baltimore District', 'midas-project-default.jpg'),
