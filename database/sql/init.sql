@@ -13,6 +13,7 @@ begin;
 \i '/sql/34-data_poa.sql'
 \i '/sql/35-data_lrc_images.sql'
 \i '/sql/36-data_c44.sql'
+\i '/sql/37-data_projects_feb2022.sql'
 -- New district streamgages should be appended below and not in 
 -- alphabetical order due to script that ensures slugs are unique.
 \i '/sql/district_streamgages/lrh.sql'
