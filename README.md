@@ -14,7 +14,7 @@ An Application Programming Interface (API) to manage instrumentation data, built
 
    2. pgadmin4 (a user interface to interact with the database) using the Docker image [dpage/pgadmin4](https://hub.docker.com/r/dpage/pgadmin4/)
 
-   To modify the database using pgadmin4, open a web browser and go to `localhost:8080`.
+   To modify the database using pgadmin4, open a web browser and go to `http://localhost:8080`.
 
    Login with `Email:postgres@postgres.com` and `Password:postgres` respectively.
 
@@ -35,9 +35,9 @@ An Application Programming Interface (API) to manage instrumentation data, built
    | Username          | postgres       |
    | Password          | postgres       |
 
-3. Initialize the database and seed it with some data
+3. Initialize the database and seed it with some data (docker-compose runs this for you)
 
-   Use the Query Tool in pgadmin4 and the .sql files in the database/ directory in this repository. You can find the query tool by expanding the left menu tree to `Servers --> Databases --> postgres`. Right click `postgres --> Query Tool`. From here, copy [tables.sql](database/tables.sql) into the Query Tool and run it by pressing `f5`. Note: to only run a portion of the SQL you've copied, you can highlight the section you want to run before hitting `f5`.
+   Use the Query Tool in pgadmin4 and the .sql files in the database/ directory in this repository. You can find the query tool by expanding the left menu tree to `Servers --> Databases --> postgres`. Right click `postgres --> Query Tool`. From here, copy [tables.sql](database/sql/10-tables.sql) into the Query Tool and run it by pressing `f5`. Note: to only run a portion of the SQL you've copied, you can highlight the section you want to run before hitting `f5`.
 
 ## Running the GO API for Local Development
 
@@ -45,17 +45,17 @@ Either of these options starts the API at `localhost:3030`. The API uses JSON We
 
 **With Visual Studio Code Debugger**
 
-You can use the launch.json file in this repository in lieu of `go run root/main.go` to run the API in the VSCode debugger.  This takes care of the required environment variables to connect to the database.
+You can use the launch.json file in this repository in lieu of `go run main.go` to run the API in the VSCode debugger.  This takes care of the required environment variables to connect to the database.
 
 **Without Visual Studio Code Debugger**
 
-Set the following environment variables and type `go run root/main.go` from the top level of this repository.
+Set the following environment variables and type `go run main.go` from the top level of this repository.
 
-    * DB_USER=postgres
-    * DB_PASS=postgres
-    * DB_NAME=postgres
-    * DB_HOST=localhost
-    * DB_SSLMODE=disable
+    * INSTRUMENTATION_DB_USER=postgres
+    * INSTRUMENTATION_DB_PASS=postgres
+    * INSTRUMENTATION_DB_NAME=postgres
+    * INSTRUMENTATION_DB_HOST=localhost
+    * INSTRUMENTATION_DB_SSLMODE=disable
     * LAMBDA=FALSE
     * JWT_DISABLED=FALSE
 
