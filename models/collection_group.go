@@ -56,7 +56,6 @@ func ListCollectionGroupSlugs(db *sqlx.DB, projectID *uuid.UUID) ([]string, erro
 }
 
 // GetCollectionGroupDetails returns details for a single CollectionGroup
-// GetCollectionGroupDetails returns details for a single CollectionGroup
 func GetCollectionGroupDetails(db *sqlx.DB, projectID *uuid.UUID, collectionGroupID *uuid.UUID) (*CollectionGroupDetails, error) {
 	var d CollectionGroupDetails
 	// Query 1
