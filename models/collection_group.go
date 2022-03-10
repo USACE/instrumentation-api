@@ -70,7 +70,7 @@ func GetCollectionGroupDetails(db *sqlx.DB, projectID *uuid.UUID, collectionGrou
 		FROM collection_group_timeseries cgt 
 		INNER JOIN collection_group cg on cg.id = cgt.collection_group_id 
 		INNER JOIN v_timeseries t on t.id = cgt.timeseries_id 
-		INNER JOIN timeseries_measurement tm on tm.timeseries_id = t.id and tm.time = (
+		LEFT JOIN timeseries_measurement tm on tm.timeseries_id = t.id and tm.time = (
 			select time from timeseries_measurement 
 			where timeseries_id = t.id 
 			order by time desc limit 1) 
@@ -79,7 +79,7 @@ func GetCollectionGroupDetails(db *sqlx.DB, projectID *uuid.UUID, collectionGrou
 	); err != nil {
 		return nil, err
 	}
-
+	
 	return &d, nil
 }
 
