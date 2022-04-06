@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 	"time"
+	"log"
 
 	"github.com/USACE/instrumentation-api/models"
 	"github.com/USACE/instrumentation-api/timeseries"
@@ -67,6 +68,8 @@ func ListTimeseriesMeasurements(db *sqlx.DB) echo.HandlerFunc {
 		mc, err := models.ListTimeseriesMeasurements(db, &tsID, &tw)
 
 		if err != nil {
+			log.Printf(err.Error())
+			log.Printf("jasdfk;lj????")
 			return c.JSON(http.StatusInternalServerError, err)
 		}
 		return c.JSON(http.StatusOK, mc)

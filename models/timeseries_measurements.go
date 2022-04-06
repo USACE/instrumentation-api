@@ -8,6 +8,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+
+	"fmt"
 )
 
 // TimeseriesMeasurementCollectionCollection is a collection of timeseries measurement collections
@@ -55,6 +57,7 @@ func ListTimeseriesMeasurements(db *sqlx.DB, timeseriesID *uuid.UUID, tw *ts.Tim
 		listTimeseriesMeasurementsSQL()+" WHERE T.id = $1 AND M.time > $2 AND M.time < $3 ORDER BY M.time DESC",
 		timeseriesID, tw.After, tw.Before,
 	); err != nil {
+		fmt.Print(err)
 		return nil, err
 	}
 
@@ -100,8 +103,8 @@ func CreateOrUpdateTimeseriesMeasurements(db *sqlx.DB, mc []ts.MeasurementCollec
 	}
 
 	stmt, err := txn.Prepare(
-		`INSERT INTO timeseries_measurement (timeseries_id, time, value) VALUES ($1, $2, $3)
-		 ON CONFLICT ON CONSTRAINT timeseries_unique_time DO UPDATE SET value = EXCLUDED.value; 
+		`INSERT INTO timeseries_measurement (timeseries_id, time, value, masked, validated, annotation) VALUES ($1, $2, $3, $4, $5, $6)
+		 ON CONFLICT ON CONSTRAINT timeseries_unique_time DO UPDATE SET value = EXCLUDED.value, masked = EXCLUDED.masked, validated = EXCLUDED.validated, annotation = EXCLUDED.annotation; 
 		`,
 	)
 	if err != nil {
@@ -112,7 +115,7 @@ func CreateOrUpdateTimeseriesMeasurements(db *sqlx.DB, mc []ts.MeasurementCollec
 	// Iterate All Timeseries Measurements
 	for _, c := range mc {
 		for _, m := range c.Items {
-			if _, err := stmt.Exec(c.TimeseriesID, m.Time, m.Value); err != nil {
+			if _, err := stmt.Exec(c.TimeseriesID, m.Time, m.Value, m.Masked, m.Validated, m.Annotation); err != nil {
 				txn.Rollback()
 				return nil, err
 			}
@@ -133,7 +136,10 @@ func CreateOrUpdateTimeseriesMeasurements(db *sqlx.DB, mc []ts.MeasurementCollec
 func listTimeseriesMeasurementsSQL() string {
 	return `SELECT  M.timeseries_id,
 			        M.time,
-					M.value
+					M.value,
+					M.masked,
+					M.validated,
+					M.annotation
 			FROM timeseries_measurement M
 			INNER JOIN timeseries T
     			    ON T.id = M.timeseries_id

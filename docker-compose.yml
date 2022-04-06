@@ -36,7 +36,7 @@ services:
       - INSTRUMENTATION_HEARTBEATKEY=password
       - INSTRUMENTATION_ROUTE_PREFIX=
     ports:
-      - '80:80'
+      - '8082:80'
   minio:
     image: minio/minio
     environment:
