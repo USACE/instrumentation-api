@@ -8,8 +8,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-
-	"fmt"
 )
 
 // TimeseriesMeasurementCollectionCollection is a collection of timeseries measurement collections
@@ -57,7 +55,6 @@ func ListTimeseriesMeasurements(db *sqlx.DB, timeseriesID *uuid.UUID, tw *ts.Tim
 		listTimeseriesMeasurementsSQL()+" WHERE T.id = $1 AND M.time > $2 AND M.time < $3 ORDER BY M.time DESC",
 		timeseriesID, tw.After, tw.Before,
 	); err != nil {
-		fmt.Print(err)
 		return nil, err
 	}
 
