@@ -134,10 +134,12 @@ func listTimeseriesMeasurementsSQL() string {
 	return `SELECT  M.timeseries_id,
 			        M.time,
 					M.value,
-					M.masked,
-					M.validated,
-					M.annotation
+					N.masked,
+					N.validated,
+					N.annotation
 			FROM timeseries_measurement M
+			INNER JOIN timeseries_notes N
+					ON N.timeseries_id = M.timeseries_id
 			INNER JOIN timeseries T
     			    ON T.id = M.timeseries_id
 	`
