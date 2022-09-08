@@ -295,9 +295,9 @@ CREATE TABLE IF NOT EXISTS timeseries_notes (
     masked boolean NOT NULL DEFAULT false,
     validated boolean NOT NULL DEFAULT false,
     annotation varchar(400) NOT NULL DEFAULT '',
-    timeseries_id UUID NOT NULL REFERENCES timeseries_measurement (id) ON DELETE CASCADE,
-    time TIMESTAMPTZ NOT NULL REFERENCES timeseries_measurement (time) ON DELETE CASCADE,
-    CONSTRAINT timeseries_unique_time UNIQUE(timeseries_id,time),
+    timeseries_id UUID NOT NULL REFERENCES timeseries (id) ON DELETE CASCADE,
+    time TIMESTAMPTZ NOT NULL,
+    CONSTRAINT notes_unique_time UNIQUE(timeseries_id, time),
     PRIMARY KEY (timeseries_id, time)
 );
 

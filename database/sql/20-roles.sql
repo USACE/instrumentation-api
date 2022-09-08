@@ -54,6 +54,7 @@ GRANT SELECT ON
     status,
     timeseries,
     timeseries_measurement,
+    timeseries_notes,
     unit,
     unit_family,
     v_instrument,
@@ -110,6 +111,7 @@ GRANT INSERT,UPDATE,DELETE ON
     telemetry_type,
     timeseries,
     timeseries_measurement,
+    timeseries_notes,
     unit,
     unit_family,
     inclinometer_measurement
