@@ -285,11 +285,19 @@ CREATE TABLE IF NOT EXISTS timeseries_measurement (
     --id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     time TIMESTAMPTZ NOT NULL,
     value DOUBLE PRECISION NOT NULL,
+    timeseries_id UUID NOT NULL REFERENCES timeseries (id) ON DELETE CASCADE,
+    CONSTRAINT timeseries_unique_time UNIQUE(timeseries_id,time),
+    PRIMARY KEY (timeseries_id, time)
+);
+
+-- timeseries_notes
+CREATE TABLE IF NOT EXISTS timeseries_notes (
     masked boolean NOT NULL DEFAULT false,
     validated boolean NOT NULL DEFAULT false,
     annotation varchar(400) NOT NULL DEFAULT '',
     timeseries_id UUID NOT NULL REFERENCES timeseries (id) ON DELETE CASCADE,
-    CONSTRAINT timeseries_unique_time UNIQUE(timeseries_id,time),
+    time TIMESTAMPTZ NOT NULL,
+    CONSTRAINT notes_unique_time UNIQUE(timeseries_id, time),
     PRIMARY KEY (timeseries_id, time)
 );
 
