@@ -79,7 +79,7 @@ func GetCollectionGroupDetails(db *sqlx.DB, projectID *uuid.UUID, collectionGrou
 	); err != nil {
 		return nil, err
 	}
-	
+
 	return &d, nil
 }
 

@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS timeseries_notes (
     validated boolean NOT NULL DEFAULT false,
     annotation varchar(400) NOT NULL DEFAULT '',
     timeseries_id UUID NOT NULL REFERENCES timeseries (id) ON DELETE CASCADE,
-    time TIMESTAMPTZ NOT NULL REFERENCES timeseries (time) ON DELETE CASCADE,
+    time TIMESTAMPTZ NOT NULL,
     CONSTRAINT notes_unique_time UNIQUE(timeseries_id, time),
     PRIMARY KEY (timeseries_id, time)
 );
