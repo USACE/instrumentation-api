@@ -290,6 +290,17 @@ CREATE TABLE IF NOT EXISTS timeseries_measurement (
     PRIMARY KEY (timeseries_id, time)
 );
 
+-- timeseries_notes
+CREATE TABLE IF NOT EXISTS timeseries_notes (
+    masked boolean NOT NULL DEFAULT false,
+    validated boolean NOT NULL DEFAULT false,
+    annotation varchar(400) NOT NULL DEFAULT '',
+    timeseries_id UUID NOT NULL REFERENCES timeseries (id) ON DELETE CASCADE,
+    time TIMESTAMPTZ NOT NULL REFERENCES timeseries (time) ON DELETE CASCADE,
+    CONSTRAINT notes_unique_time UNIQUE(timeseries_id, time),
+    PRIMARY KEY (timeseries_id, time)
+);
+
 -- inclinometer_measurement
 CREATE TABLE IF NOT EXISTS inclinometer_measurement (
     time TIMESTAMPTZ NOT NULL,
