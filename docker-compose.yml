@@ -74,6 +74,7 @@ services:
     depends_on:
       - api
       - postgres
+      - midas-flyway
     volumes:
       - ./_utils/seed_measurements:/app
     environment:
@@ -90,3 +91,15 @@ services:
       python3 /app/generate_seed_measurements.py
       exit 0;
       "
+  midas-flyway:
+    image: flyway/flyway
+    container_name: midas-flyway
+    restart: on-failure
+    command: -url=jdbc:postgresql://postgres:5432/postgres -schemas=midas -user=postgres -password=postgres -connectRetries=60 -baselineVersion=0.5 migrate
+    environment:
+      - FLYWAY_EDITION=community
+      - FLYWAY_LOCATIONS=filesystem:/flyway/sql/common,filesystem:/flyway/sql/local
+    volumes:
+      - ./sql:/flyway/sql
+    depends_on:
+      - postgres
