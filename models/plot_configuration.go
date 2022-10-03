@@ -6,6 +6,15 @@ import (
 	"github.com/lib/pq"
 )
 
+// PlotConfigurationSettings describes options for displaying the plot consistently.
+// Specifically, whether to ignore data entries in a timeseries that have been masked,
+// or whether to display user comments.
+type PlotConfigurationSettings struct {
+	ShowMasked       bool `json:"show_masked" db:"show_masked"`
+	ShowNonValidated bool `json:"show_nonvalidated" db:"show_nonvalidated"`
+	ShowComments     bool `json:"show_comments" db:"show_comments"`
+}
+
 // PlotConfiguration holds information for entity PlotConfiguration
 type PlotConfiguration struct {
 	ID           uuid.UUID   `json:"id"`
@@ -14,6 +23,7 @@ type PlotConfiguration struct {
 	ProjectID    uuid.UUID   `json:"project_id" db:"project_id"`
 	TimeseriesID []uuid.UUID `json:"timeseries_id" db:"timeseries_id"`
 	AuditInfo
+	PlotConfigurationSettings
 }
 
 // ListPlotConfigurationsSQL is the base SQL statement for above functions
