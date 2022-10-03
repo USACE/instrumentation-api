@@ -253,7 +253,7 @@ CREATE OR REPLACE VIEW v_plot_configuration AS (
            pc.update_date   AS update_date,
            k.show_masked    AS show_masked,
            k.show_nonvalidated AS show_nonvalidated,
-           k.show_comments  AS show_comments,
+           k.show_comments  AS show_comments
     FROM plot_configuration pc
     LEFT JOIN (
         SELECT plot_configuration_id    as plot_configuration_id,
@@ -262,7 +262,8 @@ CREATE OR REPLACE VIEW v_plot_configuration AS (
         GROUP BY plot_configuration_id
     ) as t ON pc.id = t.plot_configuration_id
     LEFT JOIN (
-        SELECT show_masked       AS show_masked,
+        SELECT id                AS id,
+               show_masked       AS show_masked,
                show_nonvalidated AS show_nonvalidated,
                show_comments     AS show_comments
         FROM plot_configuration_settings
