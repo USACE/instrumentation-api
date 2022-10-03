@@ -17,7 +17,12 @@ type PlotConfiguration struct {
 }
 
 // ListPlotConfigurationsSQL is the base SQL statement for above functions
-var ListPlotConfigurationsSQL = `SELECT id, slug, name, project_id, timeseries_id, creator, create_date, updater, update_date
+var ListPlotConfigurationsSQL = `SELECT
+								 id, slug, name, project_id,
+								 timeseries_id, creator,
+								 create_date, updater, update_date,
+								 show_masked, show_nonvalidated,
+								 show_comments
 								 FROM v_plot_configuration`
 
 // PlotConfigFactory converts database rows to PlotConfiguration objects
