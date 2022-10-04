@@ -44,6 +44,7 @@ func PlotConfigFactory(rows *sqlx.Rows) ([]PlotConfiguration, error) {
 		err := rows.Scan(
 			&p.ID, &p.Slug, &p.Name, &p.ProjectID, pq.Array(&p.TimeseriesID),
 			&p.Creator, &p.CreateDate, &p.Updater, &p.UpdateDate,
+			&p.ShowMasked, &p.ShowNonValidated, &p.ShowComments,
 		)
 		if err != nil {
 			return make([]PlotConfiguration, 0), err
@@ -80,6 +81,12 @@ func GetPlotConfiguration(db *sqlx.DB, projectID *uuid.UUID, plotconfigID *uuid.
 		return nil, err
 	}
 	pp, err := PlotConfigFactory(rows)
+	if err != nil {
+		return nil, err
+	}
+	if len(pp) == 0 {
+		return nil, nil
+	}
 
 	return &pp[0], nil
 }
