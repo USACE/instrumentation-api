@@ -108,6 +108,9 @@ func CreatePlotConfiguration(db *sqlx.DB, pc *PlotConfiguration) (*PlotConfigura
 	stmt2, err := tx.Preparex(
 		`INSERT INTO plot_configuration_timeseries (plot_configuration_id, timeseries_id) VALUES ($1, $2)`,
 	)
+	stmt3, err := tx.Preparex(
+		`INSERT INTO plot_configuration_settings (id, show_masked, show_nonvalidated, show_comments) VALUES ($1, $2, $3)`,
+	)
 
 	// ID of newly created plot configuration
 	var pcID uuid.UUID
@@ -121,6 +124,11 @@ func CreatePlotConfiguration(db *sqlx.DB, pc *PlotConfiguration) (*PlotConfigura
 			tx.Rollback()
 			return nil, err
 		}
+	}
+	// Create settings.
+	if _, err := stmt3.Exec(&pcID, pc.ShowMasked, pc.ShowNonValidated, pc.ShowComments); err != nil {
+		tx.Rollback()
+		return nil, err
 	}
 
 	if err := stmt1.Close(); err != nil {
@@ -151,6 +159,13 @@ func UpdatePlotConfiguration(db *sqlx.DB, pc *PlotConfiguration) (*PlotConfigura
 
 	// Prepared Statement; Update Existing Plot Configuration
 	stmt1, err := tx.Preparex(`UPDATE plot_configuration SET name = $3, updater = $4, update_date = $5 WHERE project_id = $1 AND id = $2`)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	// Prepared Statement; Update exiting plot configuration settings
+	stmt4, err := tx.Preparex(`UPDATE plot_configuration_settings SET show_masked = $2, show_nonvalidated = $3, show_comments = $4 WHERE id = $1`)
 	if err != nil {
 		tx.Rollback()
 		return nil, err
@@ -191,6 +206,10 @@ func UpdatePlotConfiguration(db *sqlx.DB, pc *PlotConfiguration) (*PlotConfigura
 		tx.Rollback()
 		return nil, err
 	}
+	if _, err := stmt4.Exec(pc.ID, pc.ShowMasked, pc.ShowNonValidated, pc.ShowComments); err != nil {
+		tx.Rollback()
+		return nil, err
+	}
 
 	for _, tsid := range pc.TimeseriesID {
 		if _, err := stmt3.Exec(pc.ID, tsid); err != nil {
@@ -206,6 +225,9 @@ func UpdatePlotConfiguration(db *sqlx.DB, pc *PlotConfiguration) (*PlotConfigura
 		return nil, err
 	}
 	if err := stmt3.Close(); err != nil {
+		return nil, err
+	}
+	if err := stmt4.Close(); err != nil {
 		return nil, err
 	}
 
