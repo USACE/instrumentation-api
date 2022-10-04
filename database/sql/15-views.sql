@@ -251,9 +251,9 @@ CREATE OR REPLACE VIEW v_plot_configuration AS (
            pc.create_date   AS create_date,
            pc.updater       AS updater,
            pc.update_date   AS update_date,
-           k.show_masked    AS show_masked,
-           k.show_nonvalidated AS show_nonvalidated,
-           k.show_comments  AS show_comments
+           COALESCE(k.show_masked, 'true')    AS show_masked,
+           COALESCE(k.show_nonvalidated, 'true') AS show_nonvalidated,
+           COALESCE(k.show_comments, 'true')  AS show_comments
     FROM plot_configuration pc
     LEFT JOIN (
         SELECT plot_configuration_id    as plot_configuration_id,
