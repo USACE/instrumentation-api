@@ -95,10 +95,10 @@ services:
     image: flyway/flyway
     container_name: midas-flyway
     restart: on-failure
-    command: -url=jdbc:postgresql://postgres:5432/postgres -schemas=midas -user=postgres -password=postgres -connectRetries=60 -baselineVersion=0.5 migrate
     environment:
       - FLYWAY_EDITION=community
       - FLYWAY_LOCATIONS=filesystem:/flyway/sql/common,filesystem:/flyway/sql/local
+    command: -url=jdbc:postgresql://postgres:5432/postgres -schemas=midas -user=postgres -password=postgres -connectRetries=60 -baselineVersion=3.3 -baselineOnMigrate=true migrate
     volumes:
       - ./sql:/flyway/sql
     depends_on:
