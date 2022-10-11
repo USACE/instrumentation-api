@@ -1,4 +1,4 @@
-# Instrumentation API  ![Build API and Lambda Package](https://github.com/rsgis-dev/instrumentation-api/workflows/Build%20API%20and%20Lambda%20Package/badge.svg)
+# Instrumentation API  ![Build API and Lambda Package](https://github.com/usace/instrumentation-api/workflows/Build%20API%20and%20Lambda%20Package/badge.svg)
 
 An Application Programming Interface (API) to manage instrumentation data, built with Golang and Deployed on AWS Lambda.
 
@@ -6,19 +6,21 @@ An Application Programming Interface (API) to manage instrumentation data, built
 
 ## Running a Database for Local Development
 
-1. Install Docker and Docker Compose
+1. Install, at a minimum, [Docker Engine](https://docs.docker.com/engine/install/) and [Docker Compose](https://docs.docker.com/compose/install/). In place of these two, one can install [Docker Desktop](https://docs.docker.com/desktop/).
 
-2. Change to the /database directory in this repository and type `docker-compose up`. This brings up two services on `localhost`
+2. Copy the `.env.example` file to `.env` (e.g., `cp .env.example .env`). This provides configuration options to Docker Compose.
+
+3. Change to the /database directory in this repository and type `docker-compose up`. This brings up two services on `localhost`
 
    1. A postgres database with postgis schema installed using the Docker image [mdillon/postgis](https://hub.docker.com/r/mdillon/postgis/)
 
    2. pgadmin4 (a user interface to interact with the database) using the Docker image [dpage/pgadmin4](https://hub.docker.com/r/dpage/pgadmin4/)
 
-   To modify the database using pgadmin4, open a web browser and go to `localhost:8080`.
+   To modify the database using pgadmin4, open a web browser and go to `http://localhost:8080`, or whichever port is set in `.env`.
 
    Login with `Email:postgres@postgres.com` and `Password:postgres` respectively.
 
-   Create a database connection to the postgres database by right-clicking `servers --> create --> server` in the left menu tree. Enter the following information and click `save`.
+   Create a database connection to the postgres database by right-clicking `servers --> register --> server` in the left menu tree. Enter the following information and click `save`.
 
    **General Tab**
 
@@ -35,9 +37,9 @@ An Application Programming Interface (API) to manage instrumentation data, built
    | Username          | postgres       |
    | Password          | postgres       |
 
-3. Initialize the database and seed it with some data
+4. Initialize the database and seed it with some data (docker-compose runs this for you)
 
-   Use the Query Tool in pgadmin4 and the .sql files in the database/ directory in this repository. You can find the query tool by expanding the left menu tree to `Servers --> Databases --> postgres`. Right click `postgres --> Query Tool`. From here, copy [tables.sql](database/tables.sql) into the Query Tool and run it by pressing `f5`. Note: to only run a portion of the SQL you've copied, you can highlight the section you want to run before hitting `f5`.
+   Use the Query Tool in pgadmin4 and the .sql files in the database/ directory in this repository. You can find the query tool by expanding the left menu tree to `Servers --> Databases --> postgres`. Right click `postgres --> Query Tool`. From here, copy [tables.sql](database/sql/10-tables.sql) into the Query Tool and run it by pressing `f5`. Note: to only run a portion of the SQL you've copied, you can highlight the section you want to run before hitting `f5`.
 
 ## Running the GO API for Local Development
 
@@ -45,17 +47,17 @@ Either of these options starts the API at `localhost:3030`. The API uses JSON We
 
 **With Visual Studio Code Debugger**
 
-You can use the launch.json file in this repository in lieu of `go run root/main.go` to run the API in the VSCode debugger.  This takes care of the required environment variables to connect to the database.
+You can use the launch.json file in this repository in lieu of `go run main.go` to run the API in the VSCode debugger.  This takes care of the required environment variables to connect to the database.
 
 **Without Visual Studio Code Debugger**
 
-Set the following environment variables and type `go run root/main.go` from the top level of this repository.
+Set the following environment variables and type `go run main.go` from the top level of this repository.
 
-    * DB_USER=postgres
-    * DB_PASS=postgres
-    * DB_NAME=postgres
-    * DB_HOST=localhost
-    * DB_SSLMODE=disable
+    * INSTRUMENTATION_DB_USER=postgres
+    * INSTRUMENTATION_DB_PASS=postgres
+    * INSTRUMENTATION_DB_NAME=postgres
+    * INSTRUMENTATION_DB_HOST=localhost
+    * INSTRUMENTATION_DB_SSLMODE=disable
     * LAMBDA=FALSE
     * JWT_DISABLED=FALSE
 

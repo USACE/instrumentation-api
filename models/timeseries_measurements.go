@@ -99,9 +99,18 @@ func CreateOrUpdateTimeseriesMeasurements(db *sqlx.DB, mc []ts.MeasurementCollec
 		return nil, err
 	}
 
-	stmt, err := txn.Prepare(
+	stmt_measurement, err := txn.Prepare(
 		`INSERT INTO timeseries_measurement (timeseries_id, time, value) VALUES ($1, $2, $3)
 		 ON CONFLICT ON CONSTRAINT timeseries_unique_time DO UPDATE SET value = EXCLUDED.value; 
+		`,
+	)
+	if err != nil {
+		txn.Rollback()
+		return nil, err
+	}
+	stmt_notes, err := txn.Prepare(
+		`INSERT INTO timeseries_notes (timeseries_id, time, masked, validated, annotation) VALUES ($1, $2, $3, $4, $5)
+		ON CONFLICT ON CONSTRAINT notes_unique_time DO UPDATE SET masked = EXCLUDED.masked, validated = EXCLUDED.validated, annotation = EXCLUDED.annotation;
 		`,
 	)
 	if err != nil {
@@ -112,13 +121,21 @@ func CreateOrUpdateTimeseriesMeasurements(db *sqlx.DB, mc []ts.MeasurementCollec
 	// Iterate All Timeseries Measurements
 	for _, c := range mc {
 		for _, m := range c.Items {
-			if _, err := stmt.Exec(c.TimeseriesID, m.Time, m.Value); err != nil {
+			if _, err := stmt_measurement.Exec(c.TimeseriesID, m.Time, m.Value); err != nil {
+				txn.Rollback()
+				return nil, err
+			}
+			if _, err := stmt_notes.Exec(c.TimeseriesID, m.Time, m.Masked, m.Validated, m.Annotation); err != nil {
 				txn.Rollback()
 				return nil, err
 			}
 		}
 	}
-	if err := stmt.Close(); err != nil {
+	if err := stmt_measurement.Close(); err != nil {
+		txn.Rollback()
+		return nil, err
+	}
+	if err := stmt_notes.Close(); err != nil {
 		txn.Rollback()
 		return nil, err
 	}
@@ -133,8 +150,14 @@ func CreateOrUpdateTimeseriesMeasurements(db *sqlx.DB, mc []ts.MeasurementCollec
 func listTimeseriesMeasurementsSQL() string {
 	return `SELECT  M.timeseries_id,
 			        M.time,
-					M.value
+					M.value,
+					COALESCE(N.masked, 'false') AS masked,
+					COALESCE(N.validated, 'false') AS validated,
+					COALESCE(N.annotation, '') AS annotation
 			FROM timeseries_measurement M
+			LEFT JOIN timeseries_notes N
+					ON M.timeseries_id = N.timeseries_id
+					AND M.time = N.time
 			INNER JOIN timeseries T
     			    ON T.id = M.timeseries_id
 	`

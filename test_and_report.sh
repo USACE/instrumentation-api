@@ -1,7 +1,9 @@
 docker run \
     -v $(pwd)/tests:/etc/newman --network=instrumentation-api_default \
-    --entrypoint /bin/bash -t postman/newman:ubuntu \
-    -c "npm i -g newman-reporter-htmlextra;
+    --rm \
+    --entrypoint /bin/sh \
+    -t postman/newman \
+    -c "npm i -g newman newman-reporter-htmlextra; \
         newman run /etc/newman/instrumentation-regression.postman_collection.json \
         --environment=/etc/newman/postman_environment.docker-compose.json \
         --reporter-htmlextra-browserTitle 'Instrumentation' \
