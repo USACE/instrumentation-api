@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/USACE/instrumentation-api/models"
-	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"

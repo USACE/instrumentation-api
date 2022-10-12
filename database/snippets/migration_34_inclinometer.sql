@@ -9,12 +9,7 @@ CREATE TABLE IF NOT EXISTS timeseries_notes (
     PRIMARY KEY (timeseries_id, time)
 );
 
--- A new column, timeseries_id, was added.
-ALTER TABLE timeseries_measurement ADD COLUMN timeseries_id UUID;
-ALTER TABLE timeseries_measurement ADD CONSTRAINT timeseries_unique_time UNIQUE(timeseries_id, time);
-
 -- Primary key was changed from just "timeseries_id" to "(timeseries_id, time)".
-ALTER TABLE timeseries_measurement DROP CONSTRAINT timeseries_measurement_pkey;
 ALTER TABLE timeseries_measurement ADD PRIMARY KEY (timeseries_id, time);
 
 -- Permissions
