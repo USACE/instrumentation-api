@@ -9,9 +9,6 @@ CREATE TABLE IF NOT EXISTS timeseries_notes (
     PRIMARY KEY (timeseries_id, time)
 );
 
--- Primary key was changed from just "timeseries_id" to "(timeseries_id, time)".
-ALTER TABLE timeseries_measurement ADD PRIMARY KEY (timeseries_id, time);
-
 -- Permissions
 GRANT SELECT ON timeseries_notes TO instrumentation_reader;
 GRANT INSERT,UPDATE,DELETE ON timeseries_notes TO instrumentation_writer;
