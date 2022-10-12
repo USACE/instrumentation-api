@@ -242,22 +242,22 @@ CREATE OR REPLACE VIEW v_unit AS (
 );
 
 CREATE OR REPLACE VIEW v_plot_configuration AS (
-    SELECT pc.id            AS id,
-           pc.slug          AS slug,
-           pc.name          AS name,
-           pc.project_id    AS project_id,
-           t.timeseries_id     AS timeseries_id,
-           pc.creator       AS creator,
-           pc.create_date   AS create_date,
-           pc.updater       AS updater,
-           pc.update_date   AS update_date,
-           COALESCE(k.show_masked, 'true')    AS show_masked,
-           COALESCE(k.show_nonvalidated, 'true') AS show_nonvalidated,
-           COALESCE(k.show_comments, 'true')  AS show_comments
+    SELECT pc.id                                  AS id,
+           pc.slug                                AS slug,
+           pc.name                                AS name,
+           pc.project_id                          AS project_id,
+           t.timeseries_id                        AS timeseries_id,
+           pc.creator                             AS creator,
+           pc.create_date                         AS create_date,
+           pc.updater                             AS updater,
+           pc.update_date                         AS update_date,
+           COALESCE(k.show_masked, 'true')        AS show_masked,
+           COALESCE(k.show_nonvalidated, 'true')  AS show_nonvalidated,
+           COALESCE(k.show_comments, 'true')      AS show_comments
     FROM plot_configuration pc
     LEFT JOIN (
-        SELECT plot_configuration_id    as plot_configuration_id,
-               array_agg(timeseries_id) as timeseries_id
+        SELECT plot_configuration_id    AS plot_configuration_id,
+               array_agg(timeseries_id) AS timeseries_id
         FROM plot_configuration_timeseries
         GROUP BY plot_configuration_id
     ) as t ON pc.id = t.plot_configuration_id
