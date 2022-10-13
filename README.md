@@ -2,6 +2,10 @@
 
 An Application Programming Interface (API) to manage instrumentation data, built with Golang and Deployed on AWS Lambda.
 
+# Documentation
+
+Documentation for the API is maintained in a Markdown file held at [`docs/APIDOC.md`](./docs/APIDOC.md). A [Postman](https://www.postman.com/api-documentation-tool/) documentation and testing environment is also maintained at [`tests/postman_environment.local`](./tests/postman_environment.local.json).
+
 # How to Develop
 
 ## Running a Database for Local Development
@@ -63,10 +67,11 @@ Set the following environment variables and type `go run main.go` from the top l
 
 Note: When running the API locally, make sure environment variable `LAMBDA` is either **not set** or is set to `LAMBDA=FALSE`.
 
-## Running API Docs Locally
+## Running Tests
 
-From the top level of this repository, type `make docs`. This starts a container that serves content based on "apidoc.yml" in this repository.
-Open a browser and navigate to `https://localhost:4000` to view the content.
+Regression tests are maintained for the project in the [aforementioned](#documentation) [Postman](https://www.postman.com/api-documentation-tool/) environments. They are run automatically by GitHub Actions through two scripts:
+1. `test_and_report.sh`: Runs Postman regression tests and outputs a report of successes/failures to an HTML file.
+2. `test.sh`: Runs Postman regression tests and outputs their results to the command line's stdout.
 
 # How To Deploy
 

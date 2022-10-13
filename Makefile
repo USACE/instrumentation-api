@@ -1,6 +1,6 @@
 packagename = instrumentation-api.zip
 
-.PHONY: build clean docs
+.PHONY: build clean
 
 build:
 	env GOOS=linux go build -ldflags="-s -w" -o bin/api main.go
@@ -16,6 +16,3 @@ deploy-dev: package
 
 deploy-test: package
 	aws s3 cp $(packagename) s3://rsgis-lambda-zips/$(packagename)
-
-docs:
-	npx @redocly/cli serve -p 4000 apidoc.yaml
