@@ -81,3 +81,9 @@ Database should be initialized with the following SQL files in the order listed:
 1. roles.sql (database roles, grants, etc.)
 
    Note: Change 'password' in roles.sql to a real password for the `instrumentation_user` account.
+
+# How to Update
+
+Updating an instance of `instrumentation-api` is trivially completed by rebuilding the Docker container used by it, then restarting the service.
+
+If a postgres database has already been created and is in use, updates are less trivial. Before rebuilding and restarting the aforementioned API instance, database migrations must be carried out **manually**. Snippets for doing so are supplied in [`database/snippets`](./database/snippets).
