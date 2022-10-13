@@ -69,9 +69,9 @@ Note: When running the API locally, make sure environment variable `LAMBDA` is e
 
 ## Running Tests
 
-Regression tests are maintained for the project in the [aforementioned](#documentation) [Postman](https://www.postman.com/api-documentation-tool/) environments. They are run automatically by GitHub Actions through two scripts:
-1. `test_and_report.sh`: Runs Postman regression tests and outputs a report of successes/failures to an HTML file.
-2. `test.sh`: Runs Postman regression tests and outputs their results to the command line's stdout.
+Regression tests are maintained for the project in the [aforementioned](#documentation) [Postman](https://www.postman.com/api-documentation-tool/) environments. They are run automatically by GitHub Actions through the script `test.sh`.
+
+In both cases, the Postman environment regression tests are run, then output. If the environment variable `REPORT` is set to `true`, then this output is sent to an HTML file. Otherwise, it is printed to the caller's stdout.
 
 # How To Deploy
 
