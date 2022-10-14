@@ -10,6 +10,7 @@ drop table if exists
     profile_project_roles,
     role,
     timeseries_measurement,
+    timeseries_notes,
     timeseries,
     instrument_telemetry,
     telemetry_goes,
@@ -365,6 +366,14 @@ CREATE TABLE IF NOT EXISTS plot_configuration_timeseries (
     plot_configuration_id UUID NOT NULL REFERENCES plot_configuration(id) ON DELETE CASCADE,
     timeseries_id UUID NOT NULL REFERENCES timeseries(id) ON DELETE CASCADE,
     CONSTRAINT plot_configuration_unique_timeseries UNIQUE(plot_configuration_id, timeseries_id)
+);
+
+
+CREATE TABLE IF NOT EXISTS plot_configuration_settings (
+    id UUID PRIMARY KEY NOT NULL REFERENCES timeseries(id) ON DELETE CASCADE,
+    show_masked BOOLEAN DEFAULT 'true',
+    show_nonvalidated BOOLEAN DEFAULT 'true',
+    show_comments BOOLEAN DEFAULT 'true'
 );
 
 
