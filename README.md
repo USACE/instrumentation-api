@@ -2,6 +2,10 @@
 
 An Application Programming Interface (API) to manage instrumentation data, built with Golang and Deployed on AWS Lambda.
 
+# Documentation
+
+Documentation for the API is maintained in a Markdown file held at [`docs/APIDOC.md`](./docs/APIDOC.md). A [Postman](https://www.postman.com/api-documentation-tool/) documentation and testing environment is also maintained at [`tests/postman_environment.local`](./tests/postman_environment.local.json).
+
 # How to Develop
 
 ## Running a Database for Local Development
@@ -63,10 +67,11 @@ Set the following environment variables and type `go run main.go` from the top l
 
 Note: When running the API locally, make sure environment variable `LAMBDA` is either **not set** or is set to `LAMBDA=FALSE`.
 
-## Running API Docs Locally
+## Running Tests
 
-From the top level of this repository, type `make docs`. This starts a container that serves content based on "apidoc.yml" in this repository.
-Open a browser and navigate to `https://localhost:4000` to view the content.
+Regression tests are maintained for the project in the [aforementioned](#documentation) [Postman](https://www.postman.com/api-documentation-tool/) environments. They are run automatically by GitHub Actions through the script `test.sh`.
+
+In both cases, the Postman environment regression tests are run, then output. If the environment variable `REPORT` is set to `true`, then this output is sent to an HTML file. Otherwise, it is printed to the caller's stdout.
 
 # How To Deploy
 
@@ -81,3 +86,9 @@ Database should be initialized with the following SQL files in the order listed:
 1. roles.sql (database roles, grants, etc.)
 
    Note: Change 'password' in roles.sql to a real password for the `instrumentation_user` account.
+
+# How to Update
+
+Updating an instance of `instrumentation-api` is trivially completed by rebuilding the Docker container used by it, then restarting the service.
+
+If a postgres database has already been created and is in use, updates are less trivial. Before rebuilding and restarting the aforementioned API instance, database migrations must be carried out **manually**. Snippets for doing so are supplied in [`database/snippets`](./database/snippets).
