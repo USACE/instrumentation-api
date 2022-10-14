@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS plot_configuration_settings (
     show_nonvalidated BOOLEAN DEFAULT 'false',
     show_comments BOOLEAN DEFAULT 'false',
 
-    FOREIGN KEY id REFERENCES plot_configuration (id)
+    FOREIGN KEY (id) REFERENCES plot_configuration (id)
 );
 
 CREATE OR REPLACE VIEW v_plot_configuration AS (
