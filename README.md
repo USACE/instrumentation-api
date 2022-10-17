@@ -62,10 +62,10 @@ Set the following environment variables and type `go run main.go` from the top l
     * INSTRUMENTATION_DB_NAME=postgres
     * INSTRUMENTATION_DB_HOST=localhost
     * INSTRUMENTATION_DB_SSLMODE=disable
-    * LAMBDA=FALSE
+    * INSTRUMENTATION_LAMBDACONTEXT=FALSE
     * JWT_DISABLED=FALSE
 
-Note: When running the API locally, make sure environment variable `LAMBDA` is either **not set** or is set to `LAMBDA=FALSE`.
+Note: When running the API locally, make sure environment variable `INSTRUMENTATION_LAMBDACONTEXT` is either **not set** or is set to `INSTRUMENTATION_LAMBDACONTEXT=FALSE`. `_LAMBDA_SERVER_PORT` and `AWS_LAMBDA_RUNTIME_API` should also be set if running under an AWS Lambda context.
 
 ## Running Tests
 
