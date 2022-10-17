@@ -16,10 +16,11 @@ import (
 func ComputedTimeseries(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		// Instrument ID
-		instrumentID, err := uuid.Parse("a7540f69-c41e-43b3-b655-6e44097edb7e")
+		instrumentID, err := uuid.Parse(c.Param("instrument_id"))
 		if err != nil {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
+
 		instrumentIDs := make([]uuid.UUID, 1)
 		instrumentIDs[0] = instrumentID
 		// Time Window
