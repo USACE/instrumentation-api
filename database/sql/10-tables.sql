@@ -177,6 +177,7 @@ CREATE TABLE IF NOT EXISTS instrument (
     name VARCHAR(360) NOT NULL,
     formula_id UUID NOT NULL DEFAULT uuid_generate_v4(),
     formula VARCHAR,
+    formula_name VARCHAR,
     formula_parameter_id UUID REFERENCES parameter (id),
     formula_unit_id UUID REFERENCES unit (id),
     geometry geometry,
