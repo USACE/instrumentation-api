@@ -92,3 +92,10 @@ Database should be initialized with the following SQL files in the order listed:
 Updating an instance of `instrumentation-api` is trivially completed by rebuilding the Docker container used by it, then restarting the service.
 
 If a postgres database has already been created and is in use, updates are less trivial. Before rebuilding and restarting the aforementioned API instance, database migrations must be carried out **manually**. Snippets for doing so are supplied in [`database/snippets`](./database/snippets).
+
+# Release Guide
+
+- [ ] Ensure that the database version is correctly set in `docker-compose.yml` and in the `.env.example`.
+- [ ] Ensure that migrations are correct.
+- [ ] Migrate the database.
+- [ ] Merge `develop`.

@@ -98,7 +98,7 @@ services:
     environment:
       - FLYWAY_EDITION=community
       - FLYWAY_LOCATIONS=filesystem:/flyway/sql/common,filesystem:/flyway/sql/local
-    command: -url=jdbc:postgresql://postgres:5432/postgres -schemas=midas -user=postgres -password=postgres -connectRetries=60 -baselineVersion=1.3.7 -baselineOnMigrate=true migrate
+    command: -url=jdbc:postgresql://postgres:5432/postgres -schemas=midas -user=postgres -password=postgres -connectRetries=60 -baselineVersion=${DB_VERSION:-1.3.7} -baselineOnMigrate=true migrate
     volumes:
       - ./sql:/flyway/sql
     depends_on:
