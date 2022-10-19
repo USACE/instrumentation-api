@@ -4,4 +4,19 @@
 -- batch-plotted.
 --
 
-ALTER TABLE instrument ADD COLUMN formula_name VARCHAR;
+ALTER TABLE instrument
+    DROP COLUMN IF EXISTS formula_id
+    DROP COLUMN IF EXISTS formula
+    DROP COLUMN IF EXISTS formula_parameter_id
+    DROP COLUMN IF EXISTS formula_unit_id;
+
+CREATE TABLE IF NOT EXISTS calculation (
+    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+
+    instrument_id UUID NOT NULL REFERENCES instrument (id),
+    parameter_id UUID REFERENCES parameter (id),
+    unit_id UUID REFERENCES unit (id),
+
+    name VARCHAR(255),
+    contents VARCHAR
+);

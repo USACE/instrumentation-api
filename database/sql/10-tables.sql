@@ -175,11 +175,6 @@ CREATE TABLE IF NOT EXISTS instrument (
     deleted BOOLEAN NOT NULL DEFAULT false,
     slug VARCHAR UNIQUE NOT NULL,
     name VARCHAR(360) NOT NULL,
-    formula_id UUID NOT NULL DEFAULT uuid_generate_v4(),
-    formula VARCHAR,
-    formula_name VARCHAR,
-    formula_parameter_id UUID REFERENCES parameter (id),
-    formula_unit_id UUID REFERENCES unit (id),
     geometry geometry,
     station int,
     station_offset int,
@@ -191,6 +186,18 @@ CREATE TABLE IF NOT EXISTS instrument (
     project_id UUID REFERENCES project (id),
     nid_id VARCHAR,
     usgs_id VARCHAR
+);
+
+-- calculation
+CREATE TABLE IF NOT EXISTS calculation (
+    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+
+    instrument_id UUID NOT NULL REFERENCES instrument (id),
+    parameter_id UUID REFERENCES parameter (id),
+    unit_id UUID REFERENCES unit (id),
+
+    name VARCHAR(255),
+    contents VARCHAR
 );
 
 -- alert_config

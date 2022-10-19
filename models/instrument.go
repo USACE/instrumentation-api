@@ -23,8 +23,7 @@ type Instrument struct {
 	Groups        []uuid.UUID      `json:"groups"`
 	Constants     []uuid.UUID      `json:"constants"`
 	AlertConfigs  []uuid.UUID      `json:"alert_configs"`
-	Formula       string           `json:"formula"`
-	FormulaName   string           `json:"formula_name"`
+	Formulas      []Formula        `json:"formulas"`
 	StatusID      uuid.UUID        `json:"status_id" db:"status_id"`
 	Status        string           `json:"status"`
 	StatusTime    time.Time        `json:"status_time" db:"status_time"`
