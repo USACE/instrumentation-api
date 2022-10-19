@@ -23,7 +23,6 @@ type Instrument struct {
 	Groups        []uuid.UUID      `json:"groups"`
 	Constants     []uuid.UUID      `json:"constants"`
 	AlertConfigs  []uuid.UUID      `json:"alert_configs"`
-	Formulas      []Formula        `json:"formulas"`
 	StatusID      uuid.UUID        `json:"status_id" db:"status_id"`
 	Status        string           `json:"status"`
 	StatusTime    time.Time        `json:"status_time" db:"status_time"`
@@ -139,9 +138,9 @@ func CreateInstruments(db *sqlx.DB, instruments []Instrument) ([]IDAndSlug, erro
 	// Instrument
 	stmt1, err := txn.Preparex(
 		`INSERT INTO instrument
-			(slug, name, type_id, geometry, station, station_offset, creator, create_date, project_id, formula, formula_name, nid_id, usgs_id)
+			(slug, name, type_id, geometry, station, station_offset, creator, create_date, project_id, nid_id, usgs_id)
 		 VALUES
-			 ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+			 ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
 		 RETURNING id, slug`,
 	)
 	if err != nil {
@@ -246,10 +245,8 @@ func UpdateInstrument(db *sqlx.DB, i *Instrument) (*Instrument, error) {
 				project_id = $8,
 				station = $9,
 				station_offset = $10,
-				formula = $11,
-				formula_name = $12,
-				nid_id = $13,
-				usgs_id = $14
+				nid_id = $11,
+				usgs_id = $12
 		 WHERE project_id = $1 AND id = $2
 		 RETURNING id`,
 	)
@@ -337,6 +334,6 @@ func InstrumentsFactory(rows *sqlx.Rows) ([]Instrument, error) {
 // ListInstrumentsSQL is the base SQL to retrieve all instrumentsJSON
 var listInstrumentsSQL = `SELECT id, deleted, status_id, status, status_time, slug,
 	name, type_id, type, geometry, station, station_offset, creator, create_date,
-	updater, update_date, project_id, constants, groups, alert_configs, formula, nid_id,
+	updater, update_date, project_id, constants, groups, alert_configs, nid_id,
 	usgs_id FROM v_instrument
 	`

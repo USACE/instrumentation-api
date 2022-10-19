@@ -6,11 +6,17 @@ import (
 )
 
 type Formula struct {
+	// Associated instrument.
 	InstrumentID uuid.UUID
-	ParameterID  uuid.UUID
-	Unit         uuid.UUID `json:"unit_name"`
-	FormulaName  string    `json:"formula_name"`
-	Formula      string    `json:"formula"`
+
+	// Parameter that this formula should be outputting.
+	ParameterID uuid.UUID
+
+	// Unit that this formula should be outputting.
+	Unit uuid.UUID `json:"unit_name"`
+
+	FormulaName string `json:"formula_name"`
+	Formula     string `json:"formula"`
 }
 
 const listFormulasSQL string = `
