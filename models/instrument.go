@@ -165,7 +165,7 @@ func CreateInstruments(db *sqlx.DB, instruments []Instrument) ([]IDAndSlug, erro
 		if err := stmt1.Get(
 			&ii[idx],
 			i.Slug, i.Name, i.TypeID, wkt.MarshalString(i.Geometry.Geometry()),
-			i.Station, i.StationOffset, i.Creator, i.CreateDate, i.ProjectID, i.Formula, i.FormulaName, i.NIDID, i.USGSID,
+			i.Station, i.StationOffset, i.Creator, i.CreateDate, i.ProjectID, i.NIDID, i.USGSID,
 		); err != nil {
 			return make([]IDAndSlug, 0), err
 		}
@@ -257,7 +257,7 @@ func UpdateInstrument(db *sqlx.DB, i *Instrument) (*Instrument, error) {
 	var updatedID uuid.UUID
 	if err := stmt1.QueryRow(
 		i.ProjectID, i.ID, i.Name, i.TypeID, wkb.Value(i.Geometry.Geometry()),
-		i.Updater, i.UpdateDate, i.ProjectID, i.Station, i.StationOffset, i.Formula, i.FormulaName, i.NIDID, i.USGSID,
+		i.Updater, i.UpdateDate, i.ProjectID, i.Station, i.StationOffset, i.NIDID, i.USGSID,
 	).Scan(&updatedID); err != nil {
 		return nil, err
 	}
@@ -320,7 +320,7 @@ func InstrumentsFactory(rows *sqlx.Rows) ([]Instrument, error) {
 		err := rows.Scan(
 			&i.ID, &i.Deleted, &i.StatusID, &i.Status, &i.StatusTime, &i.Slug, &i.Name, &i.TypeID, &i.Type, wkb.Scanner(&p), &i.Station, &i.StationOffset,
 			&i.Creator, &i.CreateDate, &i.Updater, &i.UpdateDate, &i.ProjectID, pq.Array(&i.Constants), pq.Array(&i.Groups), pq.Array(&i.AlertConfigs),
-			&i.Formula, &i.FormulaName, &i.NIDID, &i.USGSID,
+			&i.NIDID, &i.USGSID,
 		)
 		if err != nil {
 			return make([]Instrument, 0), err
