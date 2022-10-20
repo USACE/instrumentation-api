@@ -354,14 +354,19 @@ func ComputedInclinometerTimeseries(db *sqlx.DB, instrumentIDs []uuid.UUID, tw *
 	LEFT JOIN measurements m ON m.timeseries_id = r.id
 	UNION
 	-- Computed Timeseries
-	SELECT i.formula_id            AS timeseries_id,
-		   i.id                    AS instrument_id,
-		   i.slug || '.formula'    AS variable,
+	SELECT i.id                    AS timeseries_id,
+		   i.instrument_id         AS instrument_id,
+		   
+		   -- TODO: make this component of the query a 'slug'-type.
+		   i.name			       AS variable,
+		   
 		   true                    AS is_computed,
-		   i.formula               AS formula,
-		   '[]'::text              AS measurements
-	FROM instrument i
-	WHERE i.formula IS NOT NULL AND i.id IN (SELECT id FROM requested_instruments)
+		   i.contents              AS formula,
+		   '[]'::text              AS measurements,
+		   null                    AS next_measurement_low,
+		   null                    AS next_measurement_high
+	FROM calculation i
+	WHERE i.contents IS NOT NULL AND i.instrument_id IN (SELECT id FROM requested_instruments)
 	ORDER BY is_computed
 	`
 

@@ -196,6 +196,9 @@ CREATE TABLE IF NOT EXISTS calculation (
     parameter_id UUID REFERENCES parameter (id),
     unit_id UUID REFERENCES unit (id),
 
+    -- TODO
+    -- slug VARCHAR(255),
+
     name VARCHAR(255),
     contents VARCHAR
 );
