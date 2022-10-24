@@ -18,6 +18,9 @@ CREATE TABLE IF NOT EXISTS calculation (
     contents VARCHAR
 );
 
+GRANT SELECT ON calculation TO instrumentation_reader;
+GRANT INSERT,UPDATE,DELETE ON calculation TO instrumentation_writer;
+
 INSERT INTO calculation (id, instrument_id, parameter_id, unit_id, name, contents)
 SELECT
     I.formula_id,
