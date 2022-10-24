@@ -220,6 +220,9 @@ func main() {
 	private.PUT("/projects/:project_id/instruments/:instrument_id/geometry", handlers.UpdateInstrumentGeometry(db))
 	private.DELETE("/projects/:project_id/instruments/:instrument_id", handlers.DeleteFlagInstrument(db))
 
+	// Instrument Formulas
+	public.GET("/instruments/:instrument_id/calculations", handlers.GetComputations(db))
+
 	// Instrument Groups
 	public.GET("/instrument_groups", handlers.ListInstrumentGroups(db))
 	public.GET("/instrument_groups/:instrument_group_id", handlers.GetInstrumentGroup(db))
@@ -289,6 +292,11 @@ func main() {
 	private.POST("/projects/:project_id/plot_configurations", handlers.CreatePlotConfiguration(db))
 	private.PUT("/projects/:project_id/plot_configurations/:plot_configuration_id", handlers.UpdatePlotConfiguration(db))
 	private.DELETE("/projects/:project_id/plot_configurations/:plot_configuration_id", handlers.DeletePlotConfiguration(db))
+
+	// Formulas and calculations
+	private.POST("/calculations", handlers.CreateComputation(db))
+	public.GET("/calculations/:calculation_id", handlers.GetComputations(db))
+	public.DELETE("/calculations/:calculation_id", handlers.DeleteComputation(db))
 
 	// Misc
 	public.GET("/domains", handlers.GetDomains(db))

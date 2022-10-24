@@ -9,16 +9,16 @@ import (
 
 type Formula struct {
 	// ID of the Formula, to be used in future requests.
-	ID uuid.UUID
+	ID uuid.UUID `json:"id"`
 
 	// Associated instrument.
-	InstrumentID uuid.UUID
+	InstrumentID uuid.UUID `json:"instrument_id"`
 
 	// Parameter that this formula should be outputting.
-	ParameterID uuid.UUID
+	ParameterID uuid.UUID `json:"parameter_id"`
 
 	// Unit that this formula should be outputting.
-	Unit uuid.UUID `json:"unit_name"`
+	UnitID uuid.UUID `json:"unit_name"`
 
 	FormulaName string `json:"formula_name"`
 	Formula     string `json:"formula"`
@@ -37,7 +37,7 @@ func FormulasFactory(rows *sqlx.Rows) ([]Formula, error) {
 	for rows.Next() {
 		var f Formula
 		err := rows.Scan(
-			&f.InstrumentID, &f.ParameterID, &f.Unit, &f.FormulaName, &f.Formula,
+			&f.InstrumentID, &f.ParameterID, &f.UnitID, &f.FormulaName, &f.Formula,
 		)
 		if err != nil {
 			return make([]Formula, 0), err
@@ -63,13 +63,6 @@ func GetFormulas(db *sqlx.DB, instrument *Instrument) ([]Formula, error) {
 	return ff, nil
 }
 
-// GetFormulasAsTimeseries returns all Formulas associated to a given Instrument
-// in their computed timeseries form. If a Timeseries is not yet computed,
-// this function has the side-effect of computing it.
-func GetFormulasAsTimeseries(db *sqlx.DB, instrument *Instrument) ([]Timeseries, error) {
-	return nil, nil
-}
-
 // CreateFormula accepts a single Formula instance and attempts to create it in
 // the database, returning an error if anything goes wrong.
 //
@@ -93,7 +86,7 @@ func CreateFormula(db *sqlx.DB, formula *Formula) error {
 	RETURNING id
 	`
 
-	rows, err := db.Query(stmt, formula.ID, formula.InstrumentID, formula.ParameterID, formula.Unit.ID, formula.FormulaName, formula.Formula)
+	rows, err := db.Query(stmt, formula.ID, formula.InstrumentID, formula.ParameterID, formula.UnitID, formula.FormulaName, formula.Formula)
 	if err != nil {
 		return err
 	}
@@ -102,6 +95,54 @@ func CreateFormula(db *sqlx.DB, formula *Formula) error {
 	}
 	if !rows.Next() {
 		return errors.New("rows should be empty")
+	}
+	return nil
+}
+
+func UpdateFormula(db *sqlx.DB, formula *Formula) error {
+	stmt, err := db.Prepare(
+		`
+		INSERT INTO inclinometer_measurement
+			(id,
+			 instrument_id,
+			 parameter_id,
+			 unit_id,
+			 name,
+			 contents
+			)
+		VALUES
+			($1, $2, $3, $4, $5)
+		RETURNING *
+		ON CONFLICT DO UPDATE SET values = EXCLUDED.values
+		`)
+	if err != nil {
+		return err
+	}
+	stmt.Query(
+		&formula.ID,
+		&formula.InstrumentID,
+		&formula.ParameterID,
+		&formula.UnitID,
+		&formula.FormulaName,
+		&formula.Formula,
+	)
+
+	return nil
+}
+
+// DeleteFormula removes the `Formula` with ID `formulaID` from the database,
+// effectively dissociating it from the instrument in question.
+func DeleteFormula(db *sqlx.DB, formulaID uuid.UUID) error {
+	result, err := db.Exec("DELETE FROM calculation WHERE id = ?", formulaID)
+	if err != nil {
+		return err
+	}
+	count, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if count == 0 {
+		return errors.New("formula did not exist")
 	}
 	return nil
 }

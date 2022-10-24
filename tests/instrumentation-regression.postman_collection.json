@@ -4765,6 +4765,76 @@
 				}
 			],
 			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Computations",
+			"item": [
+				{
+					"name": "DeleteComputation",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/calculations/:calculation_id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"calculations",
+								":calculation_id"
+							],
+							"variable": [
+								{
+									"key": "calculation_id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CreateComputation",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/calculations",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"calculations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetComputation",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/calculations/:calculation_id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"calculations",
+								":calculation_id"
+							],
+							"variable": [
+								{
+									"key": "calculation_id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	],
 	"auth": {
