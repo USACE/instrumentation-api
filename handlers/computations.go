@@ -65,14 +65,16 @@ func GetComputations(db *sqlx.DB) echo.HandlerFunc {
 func CreateComputation(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var formula models.Formula
-		if err := c.Bind(formula); err != nil {
+		if err := c.Bind(&formula); err != nil {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
 
 		if err := models.CreateFormula(db, &formula); err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
-		return c.NoContent(http.StatusOK)
+		return c.JSON(http.StatusOK, echo.Map{
+			"id": formula.ID,
+		})
 	}
 }
 

@@ -74,23 +74,22 @@ func GetFormulas(db *sqlx.DB, instrument *Instrument) ([]Formula, error) {
 func CreateFormula(db *sqlx.DB, formula *Formula) error {
 	stmt := `
 	INSERT INTO calculation
-		(id,
-		instrument_id,
+		(instrument_id,
 		parameter_id,
 		unit_id,
 		name,
 		contents
 		)
 	VALUES
-		($1, $2, $3, $4, $5, $6)
+		($1, $2, $3, $4, $5)
 	RETURNING id
 	`
 
-	rows, err := db.Query(stmt, formula.ID, formula.InstrumentID, formula.ParameterID, formula.UnitID, formula.FormulaName, formula.Formula)
+	rows, err := db.Query(stmt, &formula.InstrumentID, &formula.ParameterID, &formula.UnitID, &formula.FormulaName, &formula.Formula)
 	if err != nil {
 		return err
 	}
-	if err := rows.Scan(formula.ID); err != nil {
+	if err := rows.Scan(&formula.ID); err != nil {
 		return err
 	}
 	if !rows.Next() {
