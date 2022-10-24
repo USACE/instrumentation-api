@@ -1,0 +1,16 @@
+name: Pull Request CI
+
+on:
+  pull_request:
+    branches: [develop]
+
+jobs:
+  PullRequestCI:
+    name: Pull Request CI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Docker Compose
+        run: docker-compose up -d
+      - name: Run Tests
+        run: ./test.sh
