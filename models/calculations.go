@@ -37,7 +37,7 @@ func FormulasFactory(rows *sqlx.Rows) ([]Formula, error) {
 	for rows.Next() {
 		var f Formula
 		err := rows.Scan(
-			&f.InstrumentID, &f.ParameterID, &f.UnitID, &f.FormulaName, &f.Formula,
+			&f.ID, &f.InstrumentID, &f.ParameterID, &f.UnitID, &f.FormulaName, &f.Formula,
 		)
 		if err != nil {
 			return make([]Formula, 0), err
@@ -111,13 +111,19 @@ func UpdateFormula(db *sqlx.DB, formula *Formula) error {
 			)
 		VALUES
 			($1, $2, $3, $4, $5)
-		RETURNING *
+		RETURNING
+			id,
+			instrument_id,
+			parameter_id,
+			unit_id,
+			name,
+			contents
 		ON CONFLICT DO UPDATE SET values = EXCLUDED.values
 		`)
 	if err != nil {
 		return err
 	}
-	stmt.Query(
+	rows, err := stmt.Query(
 		&formula.ID,
 		&formula.InstrumentID,
 		&formula.ParameterID,
@@ -125,14 +131,29 @@ func UpdateFormula(db *sqlx.DB, formula *Formula) error {
 		&formula.FormulaName,
 		&formula.Formula,
 	)
-
+	if err != nil {
+		return err
+	}
+	if !rows.Next() {
+		return errors.New("no results")
+	}
+	if err := rows.Scan(
+		&formula.ID,
+		&formula.InstrumentID,
+		&formula.ParameterID,
+		&formula.UnitID,
+		&formula.FormulaName,
+		&formula.Formula,
+	); err != nil {
+		return err
+	}
 	return nil
 }
 
 // DeleteFormula removes the `Formula` with ID `formulaID` from the database,
 // effectively dissociating it from the instrument in question.
 func DeleteFormula(db *sqlx.DB, formulaID uuid.UUID) error {
-	result, err := db.Exec("DELETE FROM calculation WHERE id = ?", formulaID)
+	result, err := db.Exec("DELETE FROM calculation WHERE id = $1", formulaID)
 	if err != nil {
 		return err
 	}

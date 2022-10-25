@@ -295,8 +295,8 @@ func main() {
 
 	// Formulas and calculations
 	private.POST("/calculations", handlers.CreateComputation(db))
-	public.GET("/calculations/:calculation_id", handlers.GetComputations(db))
-	private.DELETE("/calculations/:calculation_id", handlers.DeleteComputation(db))
+	public.GET("/calculations/:instrument_id", handlers.GetComputations(db))
+	private.DELETE("/calculations/:computation_id", handlers.DeleteComputation(db))
 
 	// Misc
 	public.GET("/domains", handlers.GetDomains(db))

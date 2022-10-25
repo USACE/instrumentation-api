@@ -4770,7 +4770,135 @@
 			"name": "Computations",
 			"item": [
 				{
+					"name": "CreateComputation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// status code is 200\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"calculation id exists\", () => {\r",
+									"    pm.response.to.have.jsonSchema({\r",
+									"        \"type\": \"object\",\r",
+									"        \"properties\": {\r",
+									"            \"id\": { \"type\": \"string\" },\r",
+									"        },\r",
+									"        \"required\": [\"id\"]\r",
+									"    });\r",
+									"});\r",
+									"var calculation_id = pm.response.json().calculation_id;\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"instrument_id\": \"a7540f69-c41e-43b3-b655-6e44097edb7e\",\r\n    \"parameter_id\": \"068b59b0-aafb-4c98-ae4b-ed0365a6fbac\",\r\n    \"unit_id\": \"f777f2e2-5e32-424e-a1ca-19d16cd8abce\",\r\n    \"name\": \"test calculation\",\r\n    \"contents\": \"a + b\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/calculations",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"calculations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetComputation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"calculation schema matches\", () => {\r",
+									"    pm.response.to.have.jsonSchema({\r",
+									"        \"type\": \"array\",\r",
+									"        \"properties\": {\r",
+									"            \"id\": { \"type\": \"string\" },\r",
+									"            \"instrument_id\": { \"type\": \"string\" },\r",
+									"            \"parameter_id\": { \"type\": \"string\" },\r",
+									"            \"unit_id\": { \"type\": \"string\" },\r",
+									"            \"name\": { \"type\": \"string\" },\r",
+									"            \"contents\": { \"type\": \"string\" },\r",
+									"        },\r",
+									"        \"required\": [\r",
+									"            \"id\",\r",
+									"                \"instrument_id\",\r",
+									"                \"parameter_id\",\r",
+									"                \"unit_id\",\r",
+									"                \"name\",\r",
+									"                \"contents\",\r",
+									"        ]\r",
+									"    });\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/calculations/:instrument_id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"calculations",
+								":instrument_id"
+							],
+							"variable": [
+								{
+									"key": "instrument_id",
+									"value": "a7540f69-c41e-43b3-b655-6e44097edb7e",
+									"description": "Instrument to fetch calculation formulas for."
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "DeleteComputation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// status code is 200\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "DELETE",
 						"header": [],
@@ -4786,48 +4914,8 @@
 							"variable": [
 								{
 									"key": "calculation_id",
-									"value": ""
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "CreateComputation",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/calculations",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"calculations"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "GetComputation",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/calculations/:calculation_id",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"calculations",
-								":calculation_id"
-							],
-							"variable": [
-								{
-									"key": "calculation_id",
-									"value": ""
+									"value": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+									"description": "Calculation to remove."
 								}
 							]
 						}

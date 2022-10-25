@@ -78,6 +78,20 @@ func CreateComputation(db *sqlx.DB) echo.HandlerFunc {
 	}
 }
 
+// UpdateComputation for a given instrument.
+func UpdateComputation(db *sqlx.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		var formula models.Formula
+		if err := c.Bind(&formula); err != nil {
+			return c.String(http.StatusBadRequest, err.Error())
+		}
+		if err := models.UpdateFormula(db, &formula); err != nil {
+			return c.String(http.StatusInternalServerError, err.Error())
+		}
+		return c.JSON(http.StatusOK, &formula)
+	}
+}
+
 // DeleteComputation for a given instrument.
 //
 // Parameters:
