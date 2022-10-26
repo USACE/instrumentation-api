@@ -11,6 +11,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Docker Compose
-        run: docker-compose up -d
+        run: |
+          docker-compose up -d
+          # Give it time to start up our API image
+          sleep 5
       - name: Run Tests
         run: ./test.sh
