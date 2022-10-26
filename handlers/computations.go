@@ -38,7 +38,7 @@ func ComputedTimeseries(db *sqlx.DB) echo.HandlerFunc {
 	}
 }
 
-// GetComputations retrieves an array of `Formula`s associated with a particular
+// GetComputations retrieves an array of `Computation`s associated with a particular
 // instrument ID.
 //
 // Parameters:
@@ -50,7 +50,7 @@ func GetComputations(db *sqlx.DB) echo.HandlerFunc {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
 
-		formulas, err := models.GetFormulas(db, &models.Instrument{ID: instrumentID})
+		formulas, err := models.GetComputations(db, &models.Instrument{ID: instrumentID})
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
@@ -64,12 +64,12 @@ func GetComputations(db *sqlx.DB) echo.HandlerFunc {
 // - Body should be a computation model in the database.
 func CreateComputation(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		var formula models.Formula
+		var formula models.Computation
 		if err := c.Bind(&formula); err != nil {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
 
-		if err := models.CreateFormula(db, &formula); err != nil {
+		if err := models.CreateComputation(db, &formula); err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, echo.Map{
@@ -81,11 +81,11 @@ func CreateComputation(db *sqlx.DB) echo.HandlerFunc {
 // UpdateComputation for a given instrument.
 func UpdateComputation(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		var formula models.Formula
+		var formula models.Computation
 		if err := c.Bind(&formula); err != nil {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
-		if err := models.UpdateFormula(db, &formula); err != nil {
+		if err := models.UpdateComputation(db, &formula); err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, &formula)
@@ -103,7 +103,7 @@ func DeleteComputation(db *sqlx.DB) echo.HandlerFunc {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
 
-		if err := models.DeleteFormula(db, computationID); err != nil {
+		if err := models.DeleteComputation(db, computationID); err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 		return c.NoContent(http.StatusOK)

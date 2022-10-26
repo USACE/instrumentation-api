@@ -188,17 +188,14 @@ CREATE TABLE IF NOT EXISTS instrument (
     usgs_id VARCHAR
 );
 
--- calculation
-CREATE TABLE IF NOT EXISTS calculation (
+-- computation
+CREATE TABLE IF NOT EXISTS computation (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
 
     instrument_id UUID NOT NULL REFERENCES instrument (id) ON DELETE CASCADE,
     parameter_id UUID REFERENCES parameter (id),
     unit_id UUID REFERENCES unit (id),
-
-    -- TODO
-    -- slug VARCHAR(255),
-
+    slug VARCHAR(255),
     name VARCHAR(255),
     contents VARCHAR
 );
