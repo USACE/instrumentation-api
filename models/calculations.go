@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	"reflect"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -18,7 +19,7 @@ type Formula struct {
 	ParameterID uuid.UUID `json:"parameter_id"`
 
 	// Unit that this formula should be outputting.
-	UnitID uuid.UUID `json:"unit_name"`
+	UnitID uuid.UUID `json:"unit_id"`
 
 	FormulaName string `json:"formula_name"`
 	Formula     string `json:"formula"`
@@ -89,20 +90,61 @@ func CreateFormula(db *sqlx.DB, formula *Formula) error {
 	if err != nil {
 		return err
 	}
+	if !rows.Next() {
+		return errors.New("rows should be non-empty")
+	}
 	if err := rows.Scan(&formula.ID); err != nil {
 		return err
 	}
-	if !rows.Next() {
-		return errors.New("rows should be empty")
+	if rows.Next() {
+		return errors.New("rows should be exactly one")
 	}
 	return nil
 }
 
 func UpdateFormula(db *sqlx.DB, formula *Formula) error {
-	stmt, err := db.Prepare(
+	tx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+
+	var defaults Formula
+	row := tx.QueryRow("SELECT instrument_id, parameter_id, unit_id, name, contents FROM calculation WHERE id = $1", &formula.ID)
+	if err := row.Scan(
+		&defaults.InstrumentID,
+		&defaults.ParameterID,
+		&defaults.UnitID,
+		&defaults.FormulaName,
+		&defaults.Formula,
+	); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// TODO: there is a better way of doing this using Golang's
+	// [reflect](https://pkg.go.dev/reflect) package (other than
+	// the way we are currently doing it).
+	if reflect.ValueOf(formula.InstrumentID).IsZero() {
+		formula.InstrumentID = defaults.InstrumentID
+	}
+	if reflect.ValueOf(formula.ParameterID).IsZero() {
+		formula.ParameterID = defaults.ParameterID
+	}
+	if reflect.ValueOf(formula.UnitID).IsZero() {
+		formula.UnitID = defaults.UnitID
+	}
+	if reflect.ValueOf(formula.FormulaName).IsZero() {
+		formula.FormulaName = defaults.FormulaName
+	}
+	if reflect.ValueOf(formula.Formula).IsZero() {
+		formula.Formula = defaults.Formula
+	}
+
+	stmt, err := tx.Prepare(
 		`
-		INSERT INTO inclinometer_measurement
-			(id,
+		INSERT INTO calculation
+			(
+			 id,
 			 instrument_id,
 			 parameter_id,
 			 unit_id,
@@ -110,7 +152,13 @@ func UpdateFormula(db *sqlx.DB, formula *Formula) error {
 			 contents
 			)
 		VALUES
-			($1, $2, $3, $4, $5)
+			($1, $2, $3, $4, $5, $6)
+		ON CONFLICT (id) DO UPDATE SET
+			instrument_id = COALESCE(EXCLUDED.instrument_id, $7),
+			parameter_id = COALESCE(EXCLUDED.parameter_id, $8),
+			unit_id = COALESCE(EXCLUDED.unit_id, $9),
+			name = COALESCE(EXCLUDED.name, $10),
+			contents = COALESCE(EXCLUDED.contents, $11)
 		RETURNING
 			id,
 			instrument_id,
@@ -118,9 +166,9 @@ func UpdateFormula(db *sqlx.DB, formula *Formula) error {
 			unit_id,
 			name,
 			contents
-		ON CONFLICT DO UPDATE SET values = EXCLUDED.values
 		`)
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
 	rows, err := stmt.Query(
@@ -130,8 +178,14 @@ func UpdateFormula(db *sqlx.DB, formula *Formula) error {
 		&formula.UnitID,
 		&formula.FormulaName,
 		&formula.Formula,
+		&defaults.InstrumentID,
+		&defaults.ParameterID,
+		&defaults.UnitID,
+		&defaults.FormulaName,
+		&defaults.Formula,
 	)
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
 	if !rows.Next() {
@@ -147,6 +201,10 @@ func UpdateFormula(db *sqlx.DB, formula *Formula) error {
 	); err != nil {
 		return err
 	}
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+
 	return nil
 }
 

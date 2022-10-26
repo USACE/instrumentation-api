@@ -4883,6 +4883,57 @@
 					"response": []
 				},
 				{
+					"name": "UpdateComputation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// status code is 200\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"calculation id exists\", () => {\r",
+									"    pm.response.to.have.jsonSchema({\r",
+									"        \"type\": \"object\",\r",
+									"        \"properties\": {\r",
+									"            \"id\": { \"type\": \"string\" },\r",
+									"        },\r",
+									"        \"required\": [\"id\"]\r",
+									"    });\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\",\r\n    \"formula_name\": \"NEW NAME\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/calculations",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"calculations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "DeleteComputation",
 					"event": [
 						{
