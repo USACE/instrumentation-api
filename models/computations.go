@@ -72,7 +72,7 @@ func (m InclinometerMeasurement) InclinometerLean() map[time.Time]types.JSONText
 	return map[time.Time]types.JSONText{m.Time: m.Values}
 }
 
-type Computation struct {
+type Calculation struct {
 	// ID of the Formula, to be used in future requests.
 	ID uuid.UUID `json:"id"`
 
@@ -85,27 +85,28 @@ type Computation struct {
 	// Unit that this formula should be outputting.
 	UnitID uuid.UUID `json:"unit_id"`
 
+	Slug        string `json:"slug"`
 	FormulaName string `json:"formula_name"`
 	Formula     string `json:"formula"`
 }
 
-const listComputationsSQL string = `
+const listCalculationsSQL string = `
 	SELECT *
 	FROM calculation
 `
 
-// ComputationsFactory converts database rows to Computation objects
-func ComputationsFactory(rows *sqlx.Rows) ([]Computation, error) {
+// CalculationsFactory converts database rows to Calculation objects
+func CalculationsFactory(rows *sqlx.Rows) ([]Calculation, error) {
 	defer rows.Close()
 
-	formulas := make([]Computation, 0)
+	formulas := make([]Calculation, 0)
 	for rows.Next() {
-		var f Computation
+		var f Calculation
 		err := rows.Scan(
-			&f.ID, &f.InstrumentID, &f.ParameterID, &f.UnitID, &f.FormulaName, &f.Formula,
+			&f.ID, &f.InstrumentID, &f.ParameterID, &f.UnitID, &f.Slug, &f.FormulaName, &f.Formula,
 		)
 		if err != nil {
-			return make([]Computation, 0), err
+			return make([]Calculation, 0), err
 		}
 		formulas = append(formulas, f)
 	}
@@ -113,14 +114,14 @@ func ComputationsFactory(rows *sqlx.Rows) ([]Computation, error) {
 	return formulas, nil
 }
 
-// GetComputations returns all formulas associated to a given instrument ID.
-func GetComputations(db *sqlx.DB, instrument *Instrument) ([]Computation, error) {
+// GetCalculations returns all formulas associated to a given instrument ID.
+func GetCalculations(db *sqlx.DB, instrument *Instrument) ([]Calculation, error) {
 
-	rows, err := db.Queryx(listComputationsSQL+" WHERE instrument_id = $1", instrument.ID)
+	rows, err := db.Queryx(listCalculationsSQL+" WHERE instrument_id = $1", instrument.ID)
 	if err != nil {
 		return nil, err
 	}
-	ff, err := ComputationsFactory(rows)
+	ff, err := CalculationsFactory(rows)
 	if err != nil {
 		return nil, err
 	}
@@ -128,29 +129,30 @@ func GetComputations(db *sqlx.DB, instrument *Instrument) ([]Computation, error)
 	return ff, nil
 }
 
-// CreateComputation accepts a single Computation instance and attempts to create it in
+// CreateCalculation accepts a single Calculation instance and attempts to create it in
 // the database, returning an error if anything goes wrong.
 //
-// Generating a UUID for the Computation is not required. In the case that a Computation
+// Generating a UUID for the Calculation is not required. In the case that a Calculation
 // is passed to this function **without** a set UUID field (i.e., `nil`), this function
 // will set the UUID field to the one given to it by the database if the operation
 // completes successfully. In the event that the function returns an error, the UUID
 // field will remain unchanged.
-func CreateComputation(db *sqlx.DB, formula *Computation) error {
+func CreateCalculation(db *sqlx.DB, formula *Calculation) error {
 	stmt := `
 	INSERT INTO calculation
 		(instrument_id,
 		parameter_id,
 		unit_id,
+		slug,
 		name,
 		contents
 		)
 	VALUES
-		($1, $2, $3, $4, $5)
+		($1, $2, $3, $4, $5, $6)
 	RETURNING id
 	`
 
-	rows, err := db.Query(stmt, &formula.InstrumentID, &formula.ParameterID, &formula.UnitID, &formula.FormulaName, &formula.Formula)
+	rows, err := db.Query(stmt, &formula.InstrumentID, &formula.ParameterID, &formula.UnitID, &formula.Slug, &formula.FormulaName, &formula.Formula)
 	if err != nil {
 		return err
 	}
@@ -166,18 +168,19 @@ func CreateComputation(db *sqlx.DB, formula *Computation) error {
 	return nil
 }
 
-func UpdateComputation(db *sqlx.DB, formula *Computation) error {
+func UpdateCalculation(db *sqlx.DB, formula *Calculation) error {
 	tx, err := db.Begin()
 	if err != nil {
 		return err
 	}
 
-	var defaults Computation
-	row := tx.QueryRow("SELECT instrument_id, parameter_id, unit_id, name, contents FROM calculation WHERE id = $1", &formula.ID)
+	var defaults Calculation
+	row := tx.QueryRow("SELECT instrument_id, parameter_id, unit_id, slug, name, contents FROM calculation WHERE id = $1", &formula.ID)
 	if err := row.Scan(
 		&defaults.InstrumentID,
 		&defaults.ParameterID,
 		&defaults.UnitID,
+		&defaults.Slug,
 		&defaults.FormulaName,
 		&defaults.Formula,
 	); err != nil {
@@ -197,6 +200,9 @@ func UpdateComputation(db *sqlx.DB, formula *Computation) error {
 	if reflect.ValueOf(formula.UnitID).IsZero() {
 		formula.UnitID = defaults.UnitID
 	}
+	if reflect.ValueOf(formula.Slug).IsZero() {
+		formula.Slug = defaults.Slug
+	}
 	if reflect.ValueOf(formula.FormulaName).IsZero() {
 		formula.FormulaName = defaults.FormulaName
 	}
@@ -212,22 +218,25 @@ func UpdateComputation(db *sqlx.DB, formula *Computation) error {
 			 instrument_id,
 			 parameter_id,
 			 unit_id,
+			 slug,
 			 name,
 			 contents
 			)
 		VALUES
-			($1, $2, $3, $4, $5, $6)
+			($1, $2, $3, $4, $5, $6, $7)
 		ON CONFLICT (id) DO UPDATE SET
-			instrument_id = COALESCE(EXCLUDED.instrument_id, $7),
-			parameter_id = COALESCE(EXCLUDED.parameter_id, $8),
-			unit_id = COALESCE(EXCLUDED.unit_id, $9),
-			name = COALESCE(EXCLUDED.name, $10),
-			contents = COALESCE(EXCLUDED.contents, $11)
+			instrument_id = COALESCE(EXCLUDED.instrument_id, $8),
+			parameter_id = COALESCE(EXCLUDED.parameter_id, $9),
+			unit_id = COALESCE(EXCLUDED.unit_id, $10),
+			slug = COALESCE(EXCLUDED.slug, $11),
+			name = COALESCE(EXCLUDED.name, $12),
+			contents = COALESCE(EXCLUDED.contents, $13)
 		RETURNING
 			id,
 			instrument_id,
 			parameter_id,
 			unit_id,
+			slug,
 			name,
 			contents
 		`)
@@ -240,11 +249,13 @@ func UpdateComputation(db *sqlx.DB, formula *Computation) error {
 		&formula.InstrumentID,
 		&formula.ParameterID,
 		&formula.UnitID,
+		&formula.Slug,
 		&formula.FormulaName,
 		&formula.Formula,
 		&defaults.InstrumentID,
 		&defaults.ParameterID,
 		&defaults.UnitID,
+		&defaults.Slug,
 		&defaults.FormulaName,
 		&defaults.Formula,
 	)
@@ -260,6 +271,7 @@ func UpdateComputation(db *sqlx.DB, formula *Computation) error {
 		&formula.InstrumentID,
 		&formula.ParameterID,
 		&formula.UnitID,
+		&formula.Slug,
 		&formula.FormulaName,
 		&formula.Formula,
 	); err != nil {
@@ -272,9 +284,9 @@ func UpdateComputation(db *sqlx.DB, formula *Computation) error {
 	return nil
 }
 
-// DeleteComputation removes the `Computation` with ID `formulaID` from the database,
+// DeleteCalculation removes the `Calculation` with ID `formulaID` from the database,
 // effectively dissociating it from the instrument in question.
-func DeleteComputation(db *sqlx.DB, formulaID uuid.UUID) error {
+func DeleteCalculation(db *sqlx.DB, formulaID uuid.UUID) error {
 	result, err := db.Exec("DELETE FROM calculation WHERE id = $1", formulaID)
 	if err != nil {
 		return err
@@ -447,10 +459,7 @@ func ComputedTimeseries(db *sqlx.DB, instrumentIDs []uuid.UUID, tw *TimeWindow, 
 	-- Computed Timeseries
 	SELECT i.id                 AS timeseries_id,
 		i.instrument_id         AS instrument_id,
-		
-		-- TODO: make this component of the query a 'slug'-type.
-		i.name			        AS variable,
-		
+		i.slug			        AS variable,
 		true                    AS is_computed,
 		i.contents              AS formula,
 		'[]'::text              AS measurements,

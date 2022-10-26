@@ -38,19 +38,19 @@ func ComputedTimeseries(db *sqlx.DB) echo.HandlerFunc {
 	}
 }
 
-// GetComputations retrieves an array of `Computation`s associated with a particular
+// GetCalculations retrieves an array of `Calculation`s associated with a particular
 // instrument ID.
 //
 // Parameters:
 // - `instrument_id`: string
-func GetComputations(db *sqlx.DB) echo.HandlerFunc {
+func GetCalculations(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		instrumentID, err := uuid.Parse(c.Param("instrument_id"))
 		if err != nil {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
 
-		formulas, err := models.GetComputations(db, &models.Instrument{ID: instrumentID})
+		formulas, err := models.GetCalculations(db, &models.Instrument{ID: instrumentID})
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
@@ -58,18 +58,18 @@ func GetComputations(db *sqlx.DB) echo.HandlerFunc {
 	}
 }
 
-// CreateComputation for a given instrument.
+// CreateCalculation for a given instrument.
 //
 // Parameters:
 // - Body should be a computation model in the database.
-func CreateComputation(db *sqlx.DB) echo.HandlerFunc {
+func CreateCalculation(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		var formula models.Computation
+		var formula models.Calculation
 		if err := c.Bind(&formula); err != nil {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
 
-		if err := models.CreateComputation(db, &formula); err != nil {
+		if err := models.CreateCalculation(db, &formula); err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, echo.Map{
@@ -78,32 +78,32 @@ func CreateComputation(db *sqlx.DB) echo.HandlerFunc {
 	}
 }
 
-// UpdateComputation for a given instrument.
-func UpdateComputation(db *sqlx.DB) echo.HandlerFunc {
+// UpdateCalculation for a given instrument.
+func UpdateCalculation(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		var formula models.Computation
+		var formula models.Calculation
 		if err := c.Bind(&formula); err != nil {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
-		if err := models.UpdateComputation(db, &formula); err != nil {
+		if err := models.UpdateCalculation(db, &formula); err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, &formula)
 	}
 }
 
-// DeleteComputation for a given instrument.
+// DeleteCalculation for a given instrument.
 //
 // Parameters:
 // - `computation_id` should refer to the ID of a computation in the database.
-func DeleteComputation(db *sqlx.DB) echo.HandlerFunc {
+func DeleteCalculation(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		computationID, err := uuid.Parse(c.Param("computation_id"))
 		if err != nil {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
 
-		if err := models.DeleteComputation(db, computationID); err != nil {
+		if err := models.DeleteCalculation(db, computationID); err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 		return c.NoContent(http.StatusOK)
