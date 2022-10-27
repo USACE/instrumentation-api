@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"reflect"
 	"strconv"
 	"time"
 
@@ -69,6 +70,235 @@ func (m Measurement) Lean() map[time.Time]float64 {
 
 func (m InclinometerMeasurement) InclinometerLean() map[time.Time]types.JSONText {
 	return map[time.Time]types.JSONText{m.Time: m.Values}
+}
+
+type Calculation struct {
+	// ID of the Formula, to be used in future requests.
+	ID uuid.UUID `json:"id"`
+
+	// Associated instrument.
+	InstrumentID uuid.UUID `json:"instrument_id"`
+
+	// Parameter that this formula should be outputting.
+	ParameterID uuid.UUID `json:"parameter_id"`
+
+	// Unit that this formula should be outputting.
+	UnitID uuid.UUID `json:"unit_id"`
+
+	Slug        string `json:"slug"`
+	FormulaName string `json:"formula_name"`
+	Formula     string `json:"formula"`
+}
+
+const listCalculationsSQL string = `
+	SELECT *
+	FROM calculation
+`
+
+// CalculationsFactory converts database rows to Calculation objects
+func CalculationsFactory(rows *sqlx.Rows) ([]Calculation, error) {
+	defer rows.Close()
+
+	formulas := make([]Calculation, 0)
+	for rows.Next() {
+		var f Calculation
+		err := rows.Scan(
+			&f.ID, &f.InstrumentID, &f.ParameterID, &f.UnitID, &f.Slug, &f.FormulaName, &f.Formula,
+		)
+		if err != nil {
+			return make([]Calculation, 0), err
+		}
+		formulas = append(formulas, f)
+	}
+
+	return formulas, nil
+}
+
+// GetCalculations returns all formulas associated to a given instrument ID.
+func GetCalculations(db *sqlx.DB, instrument *Instrument) ([]Calculation, error) {
+
+	rows, err := db.Queryx(listCalculationsSQL+" WHERE instrument_id = $1", instrument.ID)
+	if err != nil {
+		return nil, err
+	}
+	ff, err := CalculationsFactory(rows)
+	if err != nil {
+		return nil, err
+	}
+
+	return ff, nil
+}
+
+// CreateCalculation accepts a single Calculation instance and attempts to create it in
+// the database, returning an error if anything goes wrong.
+//
+// Generating a UUID for the Calculation is not required. In the case that a Calculation
+// is passed to this function **without** a set UUID field (i.e., `nil`), this function
+// will set the UUID field to the one given to it by the database if the operation
+// completes successfully. In the event that the function returns an error, the UUID
+// field will remain unchanged.
+func CreateCalculation(db *sqlx.DB, formula *Calculation) error {
+	stmt := `
+	INSERT INTO calculation
+		(instrument_id,
+		parameter_id,
+		unit_id,
+		slug,
+		name,
+		contents
+		)
+	VALUES
+		($1, $2, $3, $4, $5, $6)
+	RETURNING id
+	`
+
+	rows, err := db.Query(stmt, &formula.InstrumentID, &formula.ParameterID, &formula.UnitID, &formula.Slug, &formula.FormulaName, &formula.Formula)
+	if err != nil {
+		return err
+	}
+	if !rows.Next() {
+		return errors.New("rows should be non-empty")
+	}
+	if err := rows.Scan(&formula.ID); err != nil {
+		return err
+	}
+	if rows.Next() {
+		return errors.New("rows should be exactly one")
+	}
+	return nil
+}
+
+func UpdateCalculation(db *sqlx.DB, formula *Calculation) error {
+	tx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+
+	var defaults Calculation
+	row := tx.QueryRow("SELECT instrument_id, parameter_id, unit_id, slug, name, contents FROM calculation WHERE id = $1", &formula.ID)
+	if err := row.Scan(
+		&defaults.InstrumentID,
+		&defaults.ParameterID,
+		&defaults.UnitID,
+		&defaults.Slug,
+		&defaults.FormulaName,
+		&defaults.Formula,
+	); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// TODO: there is a better way of doing this using Golang's
+	// [reflect](https://pkg.go.dev/reflect) package (other than
+	// the way we are currently doing it).
+	if reflect.ValueOf(formula.InstrumentID).IsZero() {
+		formula.InstrumentID = defaults.InstrumentID
+	}
+	if reflect.ValueOf(formula.ParameterID).IsZero() {
+		formula.ParameterID = defaults.ParameterID
+	}
+	if reflect.ValueOf(formula.UnitID).IsZero() {
+		formula.UnitID = defaults.UnitID
+	}
+	if reflect.ValueOf(formula.Slug).IsZero() {
+		formula.Slug = defaults.Slug
+	}
+	if reflect.ValueOf(formula.FormulaName).IsZero() {
+		formula.FormulaName = defaults.FormulaName
+	}
+	if reflect.ValueOf(formula.Formula).IsZero() {
+		formula.Formula = defaults.Formula
+	}
+
+	stmt, err := tx.Prepare(
+		`
+		INSERT INTO calculation
+			(
+			 id,
+			 instrument_id,
+			 parameter_id,
+			 unit_id,
+			 slug,
+			 name,
+			 contents
+			)
+		VALUES
+			($1, $2, $3, $4, $5, $6, $7)
+		ON CONFLICT (id) DO UPDATE SET
+			instrument_id = COALESCE(EXCLUDED.instrument_id, $8),
+			parameter_id = COALESCE(EXCLUDED.parameter_id, $9),
+			unit_id = COALESCE(EXCLUDED.unit_id, $10),
+			slug = COALESCE(EXCLUDED.slug, $11),
+			name = COALESCE(EXCLUDED.name, $12),
+			contents = COALESCE(EXCLUDED.contents, $13)
+		RETURNING
+			id,
+			instrument_id,
+			parameter_id,
+			unit_id,
+			slug,
+			name,
+			contents
+		`)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	rows, err := stmt.Query(
+		&formula.ID,
+		&formula.InstrumentID,
+		&formula.ParameterID,
+		&formula.UnitID,
+		&formula.Slug,
+		&formula.FormulaName,
+		&formula.Formula,
+		&defaults.InstrumentID,
+		&defaults.ParameterID,
+		&defaults.UnitID,
+		&defaults.Slug,
+		&defaults.FormulaName,
+		&defaults.Formula,
+	)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	if !rows.Next() {
+		return errors.New("no results")
+	}
+	if err := rows.Scan(
+		&formula.ID,
+		&formula.InstrumentID,
+		&formula.ParameterID,
+		&formula.UnitID,
+		&formula.Slug,
+		&formula.FormulaName,
+		&formula.Formula,
+	); err != nil {
+		return err
+	}
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// DeleteCalculation removes the `Calculation` with ID `formulaID` from the database,
+// effectively dissociating it from the instrument in question.
+func DeleteCalculation(db *sqlx.DB, formulaID uuid.UUID) error {
+	result, err := db.Exec("DELETE FROM calculation WHERE id = $1", formulaID)
+	if err != nil {
+		return err
+	}
+	count, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if count == 0 {
+		return errors.New("formula did not exist")
+	}
+	return nil
 }
 
 // RegularizeCarryForward converts potentially irregular timeseries measurements into a regular
@@ -227,16 +457,16 @@ func ComputedTimeseries(db *sqlx.DB, instrumentIDs []uuid.UUID, tw *TimeWindow, 
 	LEFT JOIN next_high nh ON nh.timeseries_id = r.id
 	UNION
 	-- Computed Timeseries
-	SELECT i.formula_id            AS timeseries_id,
-		   i.id                    AS instrument_id,
-		   i.slug || '.formula'    AS variable,
-		   true                    AS is_computed,
-		   i.formula               AS formula,
-		   '[]'::text              AS measurements,
-		   null                    AS next_measurement_low,
-		   null                    AS next_measurement_high
-	FROM instrument i
-	WHERE i.formula IS NOT NULL AND i.id IN (SELECT id FROM requested_instruments)
+	SELECT i.id                 AS timeseries_id,
+		i.instrument_id         AS instrument_id,
+		i.slug			        AS variable,
+		true                    AS is_computed,
+		i.contents              AS formula,
+		'[]'::text              AS measurements,
+		null                    AS next_measurement_low,
+		null                    AS next_measurement_high
+	FROM calculation i
+	WHERE i.contents IS NOT NULL AND i.id IN (SELECT id FROM requested_instruments)
 	ORDER BY is_computed
 	`
 
@@ -354,14 +584,19 @@ func ComputedInclinometerTimeseries(db *sqlx.DB, instrumentIDs []uuid.UUID, tw *
 	LEFT JOIN measurements m ON m.timeseries_id = r.id
 	UNION
 	-- Computed Timeseries
-	SELECT i.formula_id            AS timeseries_id,
-		   i.id                    AS instrument_id,
-		   i.slug || '.formula'    AS variable,
+	SELECT i.id                    AS timeseries_id,
+		   i.instrument_id         AS instrument_id,
+		   
+		   -- TODO: make this component of the query a 'slug'-type.
+		   i.name			       AS variable,
+		   
 		   true                    AS is_computed,
-		   i.formula               AS formula,
-		   '[]'::text              AS measurements
-	FROM instrument i
-	WHERE i.formula IS NOT NULL AND i.id IN (SELECT id FROM requested_instruments)
+		   i.contents              AS formula,
+		   '[]'::text              AS measurements,
+		   null                    AS next_measurement_low,
+		   null                    AS next_measurement_high
+	FROM calculation i
+	WHERE i.contents IS NOT NULL AND i.instrument_id IN (SELECT id FROM requested_instruments)
 	ORDER BY is_computed
 	`
 

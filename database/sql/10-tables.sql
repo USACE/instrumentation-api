@@ -175,10 +175,6 @@ CREATE TABLE IF NOT EXISTS instrument (
     deleted BOOLEAN NOT NULL DEFAULT false,
     slug VARCHAR UNIQUE NOT NULL,
     name VARCHAR(360) NOT NULL,
-    formula_id UUID NOT NULL DEFAULT uuid_generate_v4(),
-    formula VARCHAR,
-    formula_parameter_id UUID REFERENCES parameter (id),
-    formula_unit_id UUID REFERENCES unit (id),
     geometry geometry,
     station int,
     station_offset int,
@@ -190,6 +186,18 @@ CREATE TABLE IF NOT EXISTS instrument (
     project_id UUID REFERENCES project (id),
     nid_id VARCHAR,
     usgs_id VARCHAR
+);
+
+-- calculation
+CREATE TABLE IF NOT EXISTS calculation (
+    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+
+    instrument_id UUID NOT NULL REFERENCES instrument (id) ON DELETE CASCADE,
+    parameter_id UUID REFERENCES parameter (id),
+    unit_id UUID REFERENCES unit (id),
+    slug VARCHAR(255) UNIQUE NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    contents VARCHAR
 );
 
 -- alert_config
@@ -752,10 +760,15 @@ INSERT INTO instrument_group (project_id, id, slug, name, description) VALUES
     ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'd0916e8a-39a6-4f2f-bd31-879881f8b40c', 'sample-instrument-group', 'Sample Instrument Group 1', 'This is an example instrument group');
 
 -- instrument
-INSERT INTO instrument (project_id, id, slug, name, formula, formula_parameter_id, formula_unit_id, geometry, type_id) VALUES
-    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'a7540f69-c41e-43b3-b655-6e44097edb7e', 'demo-piezometer-1', 'Demo Piezometer 1', '[demo-piezometer-1.top-of-riser] - [demo-piezometer-1.distance-to-water]', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8', ST_GeomFromText('POINT(-80.8 26.7)',4326),'1bb4bf7c-f5f8-44eb-9805-43b07ffadbef'),
-    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', '9e8f2ca4-4037-45a4-aaca-d9e598877439', 'demo-staffgage-1', 'Demo Staffgage 1', null, null, null, ST_GeomFromText('POINT(-80.85 26.75)',4326),'0fd1f9ba-2731-4ff9-96dd-3c03215ab06f'),
-    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'd8c66ef9-06f0-4d52-9233-f3778e0624f0', 'inclinometer-1', 'inclinometer-1', null, '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', '4a999277-4cf5-4282-93ce-23b33c65e2c8', ST_GeomFromText('POINT(-80.8 26.7)',4326),'98a61f29-18a8-430a-9d02-0f53486e0984');
+INSERT INTO instrument (project_id, id, slug, name, geometry, type_id) VALUES
+    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'a7540f69-c41e-43b3-b655-6e44097edb7e', 'demo-piezometer-1', 'Demo Piezometer 1', ST_GeomFromText('POINT(-80.8 26.7)',4326),'1bb4bf7c-f5f8-44eb-9805-43b07ffadbef'),
+    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', '9e8f2ca4-4037-45a4-aaca-d9e598877439', 'demo-staffgage-1', 'Demo Staffgage 1', ST_GeomFromText('POINT(-80.85 26.75)',4326),'0fd1f9ba-2731-4ff9-96dd-3c03215ab06f'),
+    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'd8c66ef9-06f0-4d52-9233-f3778e0624f0', 'inclinometer-1', 'inclinometer-1', ST_GeomFromText('POINT(-80.8 26.7)',4326),'98a61f29-18a8-430a-9d02-0f53486e0984');
+
+INSERT INTO calculation (id, instrument_id, slug, name, contents, parameter_id, unit_id) VALUES
+    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'a7540f69-c41e-43b3-b655-6e44097edb7e', 'demo-piezometer-1.formula', 'demo-piezometer-1', '[demo-piezometer-1.top-of-riser] - [demo-piezometer-1.distance-to-water]', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
+    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5985', '9e8f2ca4-4037-45a4-aaca-d9e598877439', 'demo-staffgage-1.formula', 'demo-staffgage-1', null, null, null),
+    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5986', 'd8c66ef9-06f0-4d52-9233-f3778e0624f0', 'inclinometer-1.formula', 'inclinometer-1', null, '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', '4a999277-4cf5-4282-93ce-23b33c65e2c8');
 
 -- instrument_group_instruments
 INSERT INTO instrument_group_instruments (instrument_id, instrument_group_id) VALUES
