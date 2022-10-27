@@ -195,8 +195,8 @@ CREATE TABLE IF NOT EXISTS calculation (
     instrument_id UUID NOT NULL REFERENCES instrument (id) ON DELETE CASCADE,
     parameter_id UUID REFERENCES parameter (id),
     unit_id UUID REFERENCES unit (id),
-    slug VARCHAR(255),
-    name VARCHAR(255),
+    slug VARCHAR(255) UNIQUE NOT NULL,
+    name VARCHAR(255) NOT NULL,
     contents VARCHAR
 );
 
