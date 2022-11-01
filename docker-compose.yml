@@ -35,6 +35,15 @@ services:
       - INSTRUMENTATION_ROUTE_PREFIX=${INSTRUMENTATION_ROUTE_PREFIX:-}
     ports:
       - '${API_PORT:-80}:80'
+  swagger:
+    image: swaggerapi/swagger-ui
+    container_name: swagger-ui
+    environment:
+      - API_URL=swagger/apidoc.json
+    ports:
+      - '${INSTRUMENTATION_SWAGGER_PORT:-8002}:8080'
+    volumes:
+      - ${INSTRUMENTATION_SWAGGER_VOLUME:-./docs/swagger}:/usr/share/nginx/html/swagger
   minio:
     image: minio/minio
     environment:
