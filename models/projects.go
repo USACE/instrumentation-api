@@ -224,6 +224,7 @@ func projectInstrumentNamesMap(db *sqlx.DB, projectIDs []uuid.UUID) (map[uuid.UU
 	sql := `SELECT project_id, name
 			FROM instrument
 			WHERE project_id IN (?)
+			AND NOT deleted
 			ORDER BY project_id
 			`
 	query, args, err := sqlx.In(sql, projectIDs)
