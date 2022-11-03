@@ -191,4 +191,11 @@ ALTER TABLE instrument
     DROP COLUMN IF EXISTS formula_parameter_id,
     DROP COLUMN IF EXISTS formula_unit_id;
 
+GRANT SELECT ON
+    v_instrument,
+    v_timeseries,
+    v_timeseries_latest,
+    v_timeseries_dependency
+TO instrumentation_reader;
+
 COMMIT;
