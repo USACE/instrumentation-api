@@ -86,7 +86,7 @@ Note:
 
 - This service will need to be restarted if any changes are made to the Postman Collection file (i.e. when it is manually exported and overwritten).
 
-- Unlike the postman collection, the `.env.json` file supplied to the migration script is **NOT**  automatically generated. If you make any changes or additions to the Postman environment used [tests/postman_environment.docker-compose.json](./tests/postman_environment.docker-compose.json), these changes must also be made to the configuration supplied to the apidoc generation script, [docs/swagger/postman-compose.env.json](./docs/swagger/postman-compose.env.json)
+- Unlike the postman collection, the `.env.json` file supplied to the migration script is **NOT**  automatically generated. If you make any changes or additions to the Postman environment used [tests/postman_environment.docker-compose.json](./tests/postman_environment.docker-compose.json), these changes must also be made to the configuration supplied to the apidoc generation script, [docs/swagger/postman-compose.env.json](./docs/swagger/postman-compose.env.json).
 
 # How To Deploy
 
