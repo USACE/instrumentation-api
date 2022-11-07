@@ -1,0 +1,3083 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Instrumentation API",
+        "description": "Instrumentation API for MiDAS web application",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8080",
+            "description": "API Server"
+        }
+    ],
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "security": [
+        {
+            "bearerAuth": []
+        }
+    ],
+    "tags": [
+        {
+            "name": "Profiles"
+        },
+        {
+            "name": "ProjectMembership"
+        },
+        {
+            "name": "Instruments"
+        },
+        {
+            "name": "Instrument Notes"
+        },
+        {
+            "name": "Instrument Groups"
+        },
+        {
+            "name": "Plot Configurations"
+        },
+        {
+            "name": "Projects",
+            "description": "Project Endpoint Tests"
+        },
+        {
+            "name": "Timeseries"
+        },
+        {
+            "name": "Instrument Constants"
+        },
+        {
+            "name": "Misc"
+        },
+        {
+            "name": "Units"
+        },
+        {
+            "name": "explorer",
+            "description": "Tests for explorer endpoints"
+        },
+        {
+            "name": "Alert Configs"
+        },
+        {
+            "name": "Alert Subscriptions"
+        },
+        {
+            "name": "Collection Groups"
+        },
+        {
+            "name": "Calculations"
+        }
+    ],
+    "paths": {
+        "/profiles": {
+            "post": {
+                "tags": [
+                    "Profiles"
+                ],
+                "summary": "CreateProfile",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": {
+                                    "username": "testuser",
+                                    "email": "test.user@gmail.com"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/my_profile": {
+            "get": {
+                "tags": [
+                    "Profiles"
+                ],
+                "summary": "GetMyProfile",
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/my_tokens": {
+            "post": {
+                "tags": [
+                    "Profiles"
+                ],
+                "summary": "CreateToken",
+                "requestBody": {
+                    "content": {}
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/members": {
+            "get": {
+                "tags": [
+                    "ProjectMembership"
+                ],
+                "summary": "ListProjectMembers",
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/members/{member_id}/roles/{role_id}": {
+            "delete": {
+                "tags": [
+                    "ProjectMembership"
+                ],
+                "summary": "RemoveProjectMemberRole",
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    },
+                    {
+                        "name": "member_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Member uuid",
+                        "example": "57329df6-9f7a-4dad-9383-4633b452efab"
+                    },
+                    {
+                        "name": "role_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Role uuid",
+                        "example": "37f14863-8f3b-44ca-8deb-4b74ce8a8a69"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "ProjectMembership"
+                ],
+                "summary": "AddProjectMemberRole",
+                "requestBody": {
+                    "content": {}
+                },
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    },
+                    {
+                        "name": "member_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Member uuid",
+                        "example": "57329df6-9f7a-4dad-9383-4633b452efab"
+                    },
+                    {
+                        "name": "role_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Role uuid",
+                        "example": "37f14863-8f3b-44ca-8deb-4b74ce8a8a69"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/instruments/{instrument_id}": {
+            "get": {
+                "tags": [
+                    "Instruments"
+                ],
+                "summary": "GetInstrument",
+                "parameters": [
+                    {
+                        "name": "instrument_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Instrument uuid",
+                        "example": "a7540f69-c41e-43b3-b655-6e44097edb7e"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/instruments/count": {
+            "get": {
+                "tags": [
+                    "Instruments"
+                ],
+                "summary": "GetInstrumentCount",
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/instruments/{instrument_id}": {
+            "put": {
+                "tags": [
+                    "Instruments"
+                ],
+                "summary": "UpdateInstrument",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": {
+                                    "id": "a7540f69-c41e-43b3-b655-6e44097edb7e",
+                                    "status_id": "94578354-ffdf-4119-9663-6bd4323e58f5",
+                                    "status": "destroyed",
+                                    "status_time": "2001-01-01T00:00:00Z",
+                                    "slug": "demo-piezometer-1",
+                                    "name": "Demo Piezometer 1 Updated Name",
+                                    "type_id": "1bb4bf7c-f5f8-44eb-9805-43b07ffadbef",
+                                    "type": "Piezometer",
+                                    "geometry": {
+                                        "type": "Point",
+                                        "coordinates": [
+                                            -80.8,
+                                            26.7
+                                        ]
+                                    },
+                                    "station": null,
+                                    "offset": null,
+                                    "project_id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+                                    "zreference": 44.5,
+                                    "zreference_datum_id": "72113f9a-982d-44e5-8fc1-8e595dafd344",
+                                    "zreference_datum": "North American Vertical Datum of 1988 (NAVD 88)",
+                                    "zreference_time": "2006-06-01T00:00:00Z"
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    },
+                    {
+                        "name": "instrument_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Instrument uuid",
+                        "example": "a7540f69-c41e-43b3-b655-6e44097edb7e"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Instruments"
+                ],
+                "summary": "DeleteInstrument",
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    },
+                    {
+                        "name": "instrument_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Instrument uuid",
+                        "example": "a7540f69-c41e-43b3-b655-6e44097edb7e"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/instruments/{instrument_id}/geometry": {
+            "put": {
+                "tags": [
+                    "Instruments"
+                ],
+                "summary": "UpdateInstrumentGeometry",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": {
+                                    "type": "Point",
+                                    "coordinates": [
+                                        -78,
+                                        25
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    },
+                    {
+                        "name": "instrument_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Instrument uuid",
+                        "example": "a7540f69-c41e-43b3-b655-6e44097edb7e"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/instruments": {
+            "get": {
+                "tags": [
+                    "Instruments"
+                ],
+                "summary": "ListInstruments",
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/instruments": {
+            "post": {
+                "tags": [
+                    "Instruments"
+                ],
+                "summary": "ValidateCreateInstrument_Object",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": {
+                                    "status_id": "94578354-ffdf-4119-9663-6bd4323e58f5",
+                                    "status": "destroyed",
+                                    "status_time": "2001-01-01T00:00:00Z",
+                                    "slug": "demo-piezometer-5",
+                                    "name": "Demo Piezometer 5",
+                                    "type_id": "1bb4bf7c-f5f8-44eb-9805-43b07ffadbef",
+                                    "type": "Piezometer",
+                                    "geometry": {
+                                        "type": "Point",
+                                        "coordinates": [
+                                            -80.8,
+                                            26.7
+                                        ]
+                                    },
+                                    "station": null,
+                                    "offset": null,
+                                    "project_id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+                                    "zreference": 44.5,
+                                    "zreference_datum_id": "72113f9a-982d-44e5-8fc1-8e595dafd344",
+                                    "zreference_datum": "North American Vertical Datum of 1988 (NAVD 88)",
+                                    "zreference_time": "2006-06-01T00:00:00Z"
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "dry_run",
+                        "in": "query",
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "example": "true"
+                    },
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "get": {
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "ListProjectInstruments",
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/instruments/{instrument_id}/status/{status_id}": {
+            "get": {
+                "tags": [
+                    "Instruments"
+                ],
+                "summary": "GetInstrumentStatus",
+                "parameters": [
+                    {
+                        "name": "instrument_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Instrument uuid",
+                        "example": "a7540f69-c41e-43b3-b655-6e44097edb7e"
+                    },
+                    {
+                        "name": "status_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Status uuid",
+                        "example": "4ed5e9ac-40dc-4bca-b44f-7b837ec1b0fc"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Instruments"
+                ],
+                "summary": "DeleteInstrumentStatus",
+                "parameters": [
+                    {
+                        "name": "instrument_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Instrument uuid",
+                        "example": "a7540f69-c41e-43b3-b655-6e44097edb7e"
+                    },
+                    {
+                        "name": "status_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Status uuid",
+                        "example": "4ed5e9ac-40dc-4bca-b44f-7b837ec1b0fc"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/instruments/{instrument_id}/status": {
+            "get": {
+                "tags": [
+                    "Instruments"
+                ],
+                "summary": "ListInstrumentStatus",
+                "parameters": [
+                    {
+                        "name": "instrument_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Instrument uuid",
+                        "example": "a7540f69-c41e-43b3-b655-6e44097edb7e"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Instruments"
+                ],
+                "summary": "CreateInstrumentStatus_Object",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": {
+                                    "time": "2018-01-01T00:00:00Z",
+                                    "status_id": "03a2bf9a-bbd8-4031-8f4e-13e8c77807f1"
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "instrument_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Instrument uuid",
+                        "example": "a7540f69-c41e-43b3-b655-6e44097edb7e"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/instruments/{instrument_id}/notes/{note_id}": {
+            "get": {
+                "tags": [
+                    "Instrument Notes"
+                ],
+                "summary": "GetInstrumentNote",
+                "parameters": [
+                    {
+                        "name": "instrument_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Instrument uuid",
+                        "example": "a7540f69-c41e-43b3-b655-6e44097edb7e"
+                    },
+                    {
+                        "name": "note_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Note uuid",
+                        "example": "90a3f8de-de65-48a7-8286-024c13162958"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Instrument Notes"
+                ],
+                "summary": "PutInstrumentNote",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": {
+                                    "id": "90a3f8de-de65-48a7-8286-024c13162958",
+                                    "instrument_id": "a7540f69-c41e-43b3-b655-6e44097edb7e",
+                                    "title": "Instrument Test Note 1",
+                                    "body": "Updated instrument note body text.  This is example updated text.",
+                                    "time": "2020-06-09T01:49:48.505713Z"
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "instrument_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Instrument uuid",
+                        "example": "9048e7c1-eba2-4888-9048-db63e71e85ef"
+                    },
+                    {
+                        "name": "note_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Note uuid",
+                        "example": "90a3f8de-de65-48a7-8286-024c13162958"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/instruments/notes": {
+            "get": {
+                "tags": [
+                    "Instrument Notes"
+                ],
+                "summary": "ListInstrumentNotes",
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Instrument Notes"
+                ],
+                "summary": "CreateInstrumentNote_Object",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": {
+                                    "instrument_id": "a7540f69-c41e-43b3-b655-6e44097edb7e",
+                                    "title": "Instrument Note from Object Upload",
+                                    "body": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut\n labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris\n nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse\n cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui\n officia deserunt mollit anim id est laborum.\n",
+                                    "time": "2020-06-09T01:49:48.505713Z"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/instruments/{instrument_id}/notes": {
+            "get": {
+                "tags": [
+                    "Instrument Notes"
+                ],
+                "summary": "ListInstrumentInstrumentNotes",
+                "parameters": [
+                    {
+                        "name": "instrument_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Instrument uuid",
+                        "example": "a7540f69-c41e-43b3-b655-6e44097edb7e"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/instruments/notes/{note_id}": {
+            "delete": {
+                "tags": [
+                    "Instrument Notes"
+                ],
+                "summary": "DeleteInstrumentNote",
+                "parameters": [
+                    {
+                        "name": "note_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Note uuid",
+                        "example": "90a3f8de-de65-48a7-8286-024c13162958"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/instrument_groups/{instrument_group_id}": {
+            "get": {
+                "tags": [
+                    "Instrument Groups"
+                ],
+                "summary": "GetInstrumentGroup",
+                "parameters": [
+                    {
+                        "name": "instrument_group_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Instrument Group uuid",
+                        "example": "d0916e8a-39a6-4f2f-bd31-879881f8b40c"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Instrument Groups"
+                ],
+                "summary": "UpdateInstrumentGroup",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": {
+                                    "id": "d0916e8a-39a6-4f2f-bd31-879881f8b40c",
+                                    "name": "Updated Name for Instrument Group 1",
+                                    "description": "A sample instrument group created by integration tests",
+                                    "project_id": null
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "instrument_group_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Instrument Group uuid",
+                        "example": "d0916e8a-39a6-4f2f-bd31-879881f8b40c"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Instrument Groups"
+                ],
+                "summary": "DeleteInstrumentGroup",
+                "parameters": [
+                    {
+                        "name": "instrument_group_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Instrument Group uuid",
+                        "example": "d0916e8a-39a6-4f2f-bd31-879881f8b40c"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/instrument_groups": {
+            "get": {
+                "tags": [
+                    "Instrument Groups"
+                ],
+                "summary": "ListInstrumentGroups",
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Instrument Groups"
+                ],
+                "summary": "CreateInstrumentGroupBulk_Object",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": {
+                                    "name": "Test Instrument Group 500",
+                                    "project_id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+                                    "description": "This is a sample instrument group created by integration tests"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/instrument_groups/{instrument_group_id}/instruments": {
+            "get": {
+                "tags": [
+                    "Instrument Groups"
+                ],
+                "summary": "ListInstrumentGroupInstruments",
+                "parameters": [
+                    {
+                        "name": "instrument_group_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Instrument Group uuid",
+                        "example": "d0916e8a-39a6-4f2f-bd31-879881f8b40c"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Instrument Groups"
+                ],
+                "summary": "Add Instrument to InstrumentGroup",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": {
+                                    "id": "9e8f2ca4-4037-45a4-aaca-d9e598877439"
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "instrument_group_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Instrument Group uuid",
+                        "example": "d0916e8a-39a6-4f2f-bd31-879881f8b40c"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/instrument_groups/{instrument_group_id}/instruments/{instrument_id}": {
+            "delete": {
+                "tags": [
+                    "Instrument Groups"
+                ],
+                "summary": "Remove Instrument from InstrumentGroup",
+                "parameters": [
+                    {
+                        "name": "instrument_group_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Instrument Group uuid",
+                        "example": "d0916e8a-39a6-4f2f-bd31-879881f8b40c"
+                    },
+                    {
+                        "name": "instrument_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Instrument uuid",
+                        "example": "9e8f2ca4-4037-45a4-aaca-d9e598877439"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/plot_configurations/{plot_configuration_id}": {
+            "get": {
+                "tags": [
+                    "Plot Configurations"
+                ],
+                "summary": "GetPlotConfiguration",
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    },
+                    {
+                        "name": "plot_configuration_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Plot Configuration uuid",
+                        "example": "64879f68-6a2c-4d78-8e8b-5e9b9d2e0d6a"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Plot Configurations"
+                ],
+                "summary": "UpdatePlotConfiguration - Add Many Timeseries",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": {
+                                    "id": "64879f68-6a2c-4d78-8e8b-5e9b9d2e0d6a",
+                                    "name": "PZ-1A PLOT",
+                                    "slug": "pz-1a-plot",
+                                    "project_id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+                                    "timeseries_id": [
+                                        "8f4ca3a3-5971-4597-bd6f-332d1cf5af7c",
+                                        "869465fc-dc1e-445e-81f4-9979b5fadda9",
+                                        "9a3864a8-8766-4bfa-bad1-0328b166f6a8",
+                                        "7ee902a3-56d0-4acf-8956-67ac82c03a96",
+                                        "d9697351-3a38-4194-9ac4-41541927e475",
+                                        "22a734d6-dc24-451d-a462-43a32f335ae8",
+                                        "14247bc8-b264-4857-836f-182d47ebb39d"
+                                    ],
+                                    "creator": "00000000-0000-0000-0000-000000000000",
+                                    "create_date": "2021-02-26T16:21:07.925124Z",
+                                    "updater": null,
+                                    "update_date": null
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    },
+                    {
+                        "name": "plot_configuration_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Plot configuration uuid",
+                        "example": "64879f68-6a2c-4d78-8e8b-5e9b9d2e0d6a"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Plot Configurations"
+                ],
+                "summary": "DeletePlotConfiguration",
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    },
+                    {
+                        "name": "plot_configuration_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Plot Configuration uuid",
+                        "example": "64879f68-6a2c-4d78-8e8b-5e9b9d2e0d6a"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/plot_configurations": {
+            "get": {
+                "tags": [
+                    "Plot Configurations"
+                ],
+                "summary": "ListPlotConfigurations",
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Plot Configurations"
+                ],
+                "summary": "CreatePlotConfiguration",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": {
+                                    "name": "Test Create Plot Configuration",
+                                    "project_id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+                                    "timeseries_id": [
+                                        "8f4ca3a3-5971-4597-bd6f-332d1cf5af7c",
+                                        "869465fc-dc1e-445e-81f4-9979b5fadda9",
+                                        "9a3864a8-8766-4bfa-bad1-0328b166f6a8",
+                                        "7ee902a3-56d0-4acf-8956-67ac82c03a96",
+                                        "d9697351-3a38-4194-9ac4-41541927e475",
+                                        "22a734d6-dc24-451d-a462-43a32f335ae8",
+                                        "14247bc8-b264-4857-836f-182d47ebb39d"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}": {
+            "get": {
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "GetProject",
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project Id",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "UpdateProject",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": {
+                                    "id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+                                    "federal_id": null,
+                                    "name": "Blue Water Reservoir"
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "DeleteProject",
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/timeseries/{timeseries_id}": {
+            "post": {
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "CreateProjectTimeseries",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": ""
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    },
+                    {
+                        "name": "timeseries_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Timeseries uuid",
+                        "example": "8f4ca3a3-5971-4597-bd6f-332d1cf5af7c"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "DeleteProjectTimeseries",
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    },
+                    {
+                        "name": "timeseries_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Timeseries uuid",
+                        "example": "8f4ca3a3-5971-4597-bd6f-332d1cf5af7c"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/count": {
+            "get": {
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "GetProjectCount",
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/projects": {
+            "get": {
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "ListProjects",
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "CreateProjectBulk_Object",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": {
+                                    "name": "Test Project 500000",
+                                    "federal_id": null
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/instrument_groups": {
+            "get": {
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "ListProjectInstrumentGroups",
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/instruments/names": {
+            "get": {
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "ListProjectInstrumentNames",
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/timeseries/{timeseries_id}": {
+            "get": {
+                "tags": [
+                    "Timeseries"
+                ],
+                "summary": "GetTimeseries",
+                "parameters": [
+                    {
+                        "name": "timeseries_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Timeseries uuid",
+                        "example": "869465fc-dc1e-445e-81f4-9979b5fadda9"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Timeseries"
+                ],
+                "summary": "UpdateTimeseries",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": {
+                                    "id": "869465fc-dc1e-445e-81f4-9979b5fadda9",
+                                    "slug": "test-timeseries-1",
+                                    "name": "New Name for Test Timeseries 1",
+                                    "instrument_id": "a7540f69-c41e-43b3-b655-6e44097edb7e",
+                                    "instrument": "Demo Piezometer 1",
+                                    "parameter_id": "068b59b0-aafb-4c98-ae4b-ed0365a6fbac",
+                                    "parameter": "stage",
+                                    "unit_id": "f777f2e2-5e32-424e-a1ca-19d16cd8abce",
+                                    "unit": "feet"
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "timeseries_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Timeseries uuid",
+                        "example": "869465fc-dc1e-445e-81f4-9979b5fadda9"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Timeseries"
+                ],
+                "summary": "DeleteTimeseries",
+                "parameters": [
+                    {
+                        "name": "timeseries_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Timeseries uuid",
+                        "example": "869465fc-dc1e-445e-81f4-9979b5fadda9"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/timeseries": {
+            "get": {
+                "tags": [
+                    "Timeseries"
+                ],
+                "summary": "ListTimeseries",
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Timeseries"
+                ],
+                "summary": "CreateTimeseries_Array",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": [
+                                    {
+                                        "name": "Test Timeseries 5",
+                                        "instrument_id": "a7540f69-c41e-43b3-b655-6e44097edb7e",
+                                        "parameter_id": "068b59b0-aafb-4c98-ae4b-ed0365a6fbac",
+                                        "unit_id": "f777f2e2-5e32-424e-a1ca-19d16cd8abce"
+                                    },
+                                    {
+                                        "name": "Test Timeseries 6",
+                                        "instrument_id": "a7540f69-c41e-43b3-b655-6e44097edb7e",
+                                        "parameter_id": "068b59b0-aafb-4c98-ae4b-ed0365a6fbac",
+                                        "unit_id": "f777f2e2-5e32-424e-a1ca-19d16cd8abce"
+                                    },
+                                    {
+                                        "name": "Test Timeseries 7",
+                                        "instrument_id": "a7540f69-c41e-43b3-b655-6e44097edb7e",
+                                        "parameter_id": "068b59b0-aafb-4c98-ae4b-ed0365a6fbac",
+                                        "unit_id": "f777f2e2-5e32-424e-a1ca-19d16cd8abce"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/timeseries": {
+            "get": {
+                "tags": [
+                    "Timeseries"
+                ],
+                "summary": "ListProjectTimeseries",
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/instrument_groups/{instrument_group_id}/timeseries": {
+            "get": {
+                "tags": [
+                    "Timeseries"
+                ],
+                "summary": "ListInstrumentGroupTimeseries",
+                "parameters": [
+                    {
+                        "name": "instrument_group_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Instrument Group uuid",
+                        "example": "d0916e8a-39a6-4f2f-bd31-879881f8b40c"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/timeseries/{timeseries_id}/measurements": {
+            "get": {
+                "tags": [
+                    "Timeseries"
+                ],
+                "summary": "ListTimeseriesMeasurements",
+                "parameters": [
+                    {
+                        "name": "after",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "1900-01-01T00:00:00.00Z"
+                    },
+                    {
+                        "name": "before",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2021-01-01T00:00:00.00Z"
+                    },
+                    {
+                        "name": "timeseries_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Timeseries uuid",
+                        "example": "869465fc-dc1e-445e-81f4-9979b5fadda9"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/timeseries_measurements": {
+            "post": {
+                "tags": [
+                    "Timeseries"
+                ],
+                "summary": "CreateTimeseriesMeasurements_Array",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": [
+                                    {
+                                        "timeseries_id": "869465fc-dc1e-445e-81f4-9979b5fadda9",
+                                        "items": [
+                                            {
+                                                "time": "2020-06-01T00:00:00Z",
+                                                "value": 10
+                                            },
+                                            {
+                                                "time": "2020-06-02T01:00:00Z",
+                                                "value": 11.1
+                                            },
+                                            {
+                                                "time": "2020-06-03T02:00:00Z",
+                                                "value": 10.2
+                                            },
+                                            {
+                                                "time": "2020-06-04T03:00:00Z",
+                                                "value": 10.3
+                                            },
+                                            {
+                                                "time": "2020-06-05T04:00:00Z",
+                                                "value": 10.4
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "timeseries_id": "9a3864a8-8766-4bfa-bad1-0328b166f6a8",
+                                        "items": [
+                                            {
+                                                "time": "2020-06-01T00:00:00Z",
+                                                "value": 10
+                                            },
+                                            {
+                                                "time": "2020-06-02T01:00:00Z",
+                                                "value": 11.1
+                                            },
+                                            {
+                                                "time": "2020-06-03T02:00:00Z",
+                                                "value": 10.2
+                                            },
+                                            {
+                                                "time": "2020-06-04T03:00:00Z",
+                                                "value": 10.3
+                                            },
+                                            {
+                                                "time": "2020-06-05T04:00:00Z",
+                                                "value": 10.4
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "timeseries_id": "7ee902a3-56d0-4acf-8956-67ac82c03a96",
+                                        "items": [
+                                            {
+                                                "time": "2020-06-01T00:00:00Z",
+                                                "value": 10
+                                            },
+                                            {
+                                                "time": "2020-06-02T01:00:00Z",
+                                                "value": 11.1
+                                            },
+                                            {
+                                                "time": "2020-06-03T02:00:00Z",
+                                                "value": 10.2
+                                            },
+                                            {
+                                                "time": "2020-06-04T03:00:00Z",
+                                                "value": 10.3
+                                            },
+                                            {
+                                                "time": "2020-06-05T04:00:00Z",
+                                                "value": 10.4
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/instruments/{instrument_id}/constants": {
+            "get": {
+                "tags": [
+                    "Instrument Constants"
+                ],
+                "summary": "ListInstrumentConstants",
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    },
+                    {
+                        "name": "instrument_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Instrument uuid",
+                        "example": "a7540f69-c41e-43b3-b655-6e44097edb7e"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Instrument Constants"
+                ],
+                "summary": "CreateInstrumentConstant",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": {
+                                    "name": "Test Instrument Constant",
+                                    "instrument_id": "a7540f69-c41e-43b3-b655-6e44097edb7e",
+                                    "parameter_id": "068b59b0-aafb-4c98-ae4b-ed0365a6fbac",
+                                    "unit_id": "f777f2e2-5e32-424e-a1ca-19d16cd8abce"
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    },
+                    {
+                        "name": "instrument_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Instrument uuid",
+                        "example": "a7540f69-c41e-43b3-b655-6e44097edb7e"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/instruments/{instrument_id}/constants/{timeseries_id}": {
+            "delete": {
+                "tags": [
+                    "Instrument Constants"
+                ],
+                "summary": "DeleteInstrumentConstant",
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    },
+                    {
+                        "name": "instrument_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Instrument uuid",
+                        "example": "a7540f69-c41e-43b3-b655-6e44097edb7e"
+                    },
+                    {
+                        "name": "timeseries_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Timeseries uuid",
+                        "example": "14247bc8-b264-4857-836f-182d47ebb39d"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/domains": {
+            "get": {
+                "tags": [
+                    "Misc"
+                ],
+                "summary": "GetDomains",
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/home": {
+            "get": {
+                "tags": [
+                    "Misc"
+                ],
+                "summary": "GetHome",
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/heartbeat": {
+            "post": {
+                "tags": [
+                    "Misc"
+                ],
+                "summary": "DoHeartbeat",
+                "requestBody": {
+                    "content": {}
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/heartbeats/latest": {
+            "get": {
+                "tags": [
+                    "Misc"
+                ],
+                "summary": "GetLatestHeartbeat",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/units": {
+            "get": {
+                "tags": [
+                    "Units"
+                ],
+                "summary": "ListUnits",
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/explorer": {
+            "post": {
+                "tags": [
+                    "explorer"
+                ],
+                "summary": "PostExplorer Query By InstrumetID With Date Filters",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": [
+                                    "9e8f2ca4-4037-45a4-aaca-d9e598877439",
+                                    "a7540f69-c41e-43b3-b655-6e44097edb7e"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "after",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2020-03-03T00:00:00Z"
+                    },
+                    {
+                        "name": "before",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2021-05-27T00:32:45Z"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/instruments/{instrument_id}/alert_configs/{alert_config_id}": {
+            "get": {
+                "tags": [
+                    "Alert Configs"
+                ],
+                "summary": "GetAlertConfig",
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    },
+                    {
+                        "name": "instrument_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Instrument uuid",
+                        "example": "a7540f69-c41e-43b3-b655-6e44097edb7e"
+                    },
+                    {
+                        "name": "alert_config_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Alert Config uuid",
+                        "example": "243e9d32-2cba-4f12-9abe-63adc09fc5dd"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Alert Configs"
+                ],
+                "summary": "UpdateAlertConfig",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": {
+                                    "id": "243e9d32-2cba-4f12-9abe-63adc09fc5dd",
+                                    "name": "Test Alert Condition BRAVO",
+                                    "body": "Alert Condition BRAVO Has Occurred!  Sincerely, Midas",
+                                    "formula": "[distance-to-water] <= 0",
+                                    "schedule": "0,10,20,30,40,50 * * * *"
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    },
+                    {
+                        "name": "instrument_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Instrument uuid",
+                        "example": "a7540f69-c41e-43b3-b655-6e44097edb7e"
+                    },
+                    {
+                        "name": "alert_config_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Alert Config uuid",
+                        "example": "243e9d32-2cba-4f12-9abe-63adc09fc5dd"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Alert Configs"
+                ],
+                "summary": "DeleteAlertConfig",
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    },
+                    {
+                        "name": "instrument_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Instrument uuid",
+                        "example": "9e8f2ca4-4037-45a4-aaca-d9e598877439"
+                    },
+                    {
+                        "name": "alert_config_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Alert Config uuid",
+                        "example": "1efd2d85-d3ee-4388-85a0-f824a761ff8b"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/instruments/{instrument_id}/alert_configs": {
+            "get": {
+                "tags": [
+                    "Alert Configs"
+                ],
+                "summary": "ListInstrumentAlertConfigs",
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    },
+                    {
+                        "name": "instrument_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Instrument uuid",
+                        "example": "a7540f69-c41e-43b3-b655-6e44097edb7e"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Alert Configs"
+                ],
+                "summary": "CreateAlertConfig_Object",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": {
+                                    "instrument_id": "a7540f69-c41e-43b3-b655-6e44097edb7e",
+                                    "name": "Test Alert Condition 1",
+                                    "body": "Alert Condition 1!  Sincerely, Midas",
+                                    "formula": "[distance-to-water] <= 2",
+                                    "schedule": "0,10,20,30,40,50 * * * *"
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    },
+                    {
+                        "name": "instrument_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Instrument uuid",
+                        "example": "a7540f69-c41e-43b3-b655-6e44097edb7e"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/instruments/{instrument_id}/alert_configs/{alert_config_id}/subscribe": {
+            "post": {
+                "tags": [
+                    "Alert Subscriptions"
+                ],
+                "summary": "SubscribeProfileToInstrumentAlert",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": ""
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    },
+                    {
+                        "name": "instrument_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Instrument uuid",
+                        "example": "a7540f69-c41e-43b3-b655-6e44097edb7e"
+                    },
+                    {
+                        "name": "alert_config_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Alert Config uuid",
+                        "example": "6f3dfe9f-4664-4c78-931f-32ffac6d2d43"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/my_alert_subscriptions": {
+            "get": {
+                "tags": [
+                    "Alert Subscriptions"
+                ],
+                "summary": "ListMyInstrumentAlertSubscriptions",
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/alert_subscriptions/{alert_subscription_id}": {
+            "put": {
+                "tags": [
+                    "Alert Subscriptions"
+                ],
+                "summary": "UpdateInstrumentAlertSubscription",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": {
+                                    "id": "197d6140-f273-4c50-a87f-dec3f809663b",
+                                    "alert_config_id": "243e9d32-2cba-4f12-9abe-63adc09fc5dd",
+                                    "profile_id": "96c01ff3-edc9-44f0-8690-191cc2281a12",
+                                    "mute_ui": false,
+                                    "mute_notify": true
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "alert_subscription_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Alert Subscription uuid",
+                        "example": "197d6140-f273-4c50-a87f-dec3f809663b"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/instruments/{instrument_id}/alerts": {
+            "get": {
+                "tags": [
+                    "Alert Subscriptions"
+                ],
+                "summary": "ListAlertsForInstrument",
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    },
+                    {
+                        "name": "instrument_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Instrument uuid",
+                        "example": "a7540f69-c41e-43b3-b655-6e44097edb7e"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/my_alerts": {
+            "get": {
+                "tags": [
+                    "Alert Subscriptions"
+                ],
+                "summary": "ListMyAlerts",
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/my_alerts/{alert_id}/read": {
+            "post": {
+                "tags": [
+                    "Alert Subscriptions"
+                ],
+                "summary": "DoAlertRead",
+                "requestBody": {
+                    "content": {}
+                },
+                "parameters": [
+                    {
+                        "name": "alert_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Alert uuid",
+                        "example": "e070be13-ef17-40f3-99c8-fef3ee1b9fb5"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/my_alerts/{alert_id}/unread": {
+            "post": {
+                "tags": [
+                    "Alert Subscriptions"
+                ],
+                "summary": "DoAlertUnread",
+                "requestBody": {
+                    "content": {}
+                },
+                "parameters": [
+                    {
+                        "name": "alert_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Alert uuid",
+                        "example": "e070be13-ef17-40f3-99c8-fef3ee1b9fb5"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/instruments/{instrument_id}/alert_configs/{alert_config_id}/unsubscribe": {
+            "post": {
+                "tags": [
+                    "Alert Subscriptions"
+                ],
+                "summary": "UnsubscribeProfileToInstrumentAlert",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": ""
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    },
+                    {
+                        "name": "instrument_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Instrument uuid",
+                        "example": "a7540f69-c41e-43b3-b655-6e44097edb7e"
+                    },
+                    {
+                        "name": "alert_config_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Alert Config uuid",
+                        "example": "6f3dfe9f-4664-4c78-931f-32ffac6d2d43"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/collection_groups": {
+            "get": {
+                "tags": [
+                    "Collection Groups"
+                ],
+                "summary": "ListCollectionGroups",
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/collection_groups/{collection_group_id}": {
+            "get": {
+                "tags": [
+                    "Collection Groups"
+                ],
+                "summary": "GetCollectionGroupDetails",
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    },
+                    {
+                        "name": "collection_group_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Collection Group uuid",
+                        "example": "30b32cb1-0936-42c4-95d1-63a7832a57db"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Collection Groups"
+                ],
+                "summary": "DeleteCollectionGroup",
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    },
+                    {
+                        "name": "collection_group_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Collection Group uuid",
+                        "example": "1519eaea-1799-4375-aa37-0e35aa654643"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/calculations/{instrument_id}": {
+            "get": {
+                "tags": [
+                    "Calculations"
+                ],
+                "summary": "GetCalculation",
+                "parameters": [
+                    {
+                        "name": "instrument_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Instrument to fetch calculation formulas for.",
+                        "example": "a7540f69-c41e-43b3-b655-6e44097edb7e"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/calculations": {
+            "post": {
+                "tags": [
+                    "Calculations"
+                ],
+                "summary": "CreateCalculation",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": {
+                                    "instrument_id": "a7540f69-c41e-43b3-b655-6e44097edb7e",
+                                    "parameter_id": "068b59b0-aafb-4c98-ae4b-ed0365a6fbac",
+                                    "unit_id": "f777f2e2-5e32-424e-a1ca-19d16cd8abce",
+                                    "slug": "test_calculation",
+                                    "name": "test calculation",
+                                    "contents": "a + b"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Calculations"
+                ],
+                "summary": "UpdateCalculation",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": {
+                                    "id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+                                    "formula_name": "NEW NAME"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/calculations/{calculation_id}": {
+            "delete": {
+                "tags": [
+                    "Calculations"
+                ],
+                "summary": "DeleteCalculation",
+                "parameters": [
+                    {
+                        "name": "calculation_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Calculation to remove.",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

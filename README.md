@@ -73,6 +73,21 @@ Regression tests are maintained for the project in the [aforementioned](#documen
 
 In both cases, the Postman environment regression tests are run, then output. If the environment variable `REPORT` is set to `true`, then this output is sent to an HTML file. Otherwise, it is printed to the caller's stdout.
 
+## Running the Swagger UI to access API documetation locally
+
+An API Document conforming to the OpenAPI 3.0.0 specification is generated from the most recent Postman Collection saved to [`tests/instrumentation-regression.postman_collection.json`](./tests/instrumentation-regression.postman_collection.json). When the collection file is modified and overwritten, an updated apidoc.json will be automatically created by a `swagger_init` docker service at [docs/swagger/apidoc.json](./docs/swagger/apidoc.json).
+
+To start the Swagger UI server and sync the apidoc.json with the Postman Collection, run:
+```sh
+docker compose -f docker-compose.swagger.yml up -d
+```
+
+Note:
+
+- This service will need to be restarted if any changes are made to the Postman Collection file (i.e. when it is manually exported and overwritten).
+
+- Unlike the postman collection, the `.env.json` file supplied to the migration script is **NOT**  automatically generated. If you make any changes or additions to the Postman environment used [tests/postman_environment.docker-compose.json](./tests/postman_environment.docker-compose.json), these changes must also be made to the configuration supplied to the apidoc generation script, [docs/swagger/postman-compose.env.json](./docs/swagger/postman-compose.env.json).
+
 # How To Deploy
 
 ## Postgres Database on AWS Relational Database Service (RDS)
