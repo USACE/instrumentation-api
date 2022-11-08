@@ -60,7 +60,7 @@
             "name": "Units"
         },
         {
-            "name": "explorer",
+            "name": "Explorer",
             "description": "Tests for explorer endpoints"
         },
         {
@@ -2279,7 +2279,7 @@
         "/explorer": {
             "post": {
                 "tags": [
-                    "explorer"
+                    "Explorer"
                 ],
                 "summary": "PostExplorer Query By InstrumetID With Date Filters",
                 "requestBody": {

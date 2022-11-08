@@ -16,6 +16,7 @@ services:
     container_name: swagger-ui
     environment:
       - API_URL=swagger/apidoc.json
+      - CONFIG_URL=swagger/swagger-config.json
     ports:
       - '${INSTRUMENTATION_SWAGGER_PORT:-8002}:8080'
     volumes:
