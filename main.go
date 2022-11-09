@@ -290,11 +290,11 @@ func main() {
 	private.PUT("/projects/:project_id/plot_configurations/:plot_configuration_id", handlers.UpdatePlotConfiguration(db))
 	private.DELETE("/projects/:project_id/plot_configurations/:plot_configuration_id", handlers.DeletePlotConfiguration(db))
 
-	// Formulas and calculations
-	private.POST("/calculations", handlers.CreateCalculation(db))
-	private.PUT("/calculations", handlers.UpdateCalculation(db))
-	public.GET("/calculations/:instrument_id", handlers.GetCalculations(db))
-	private.DELETE("/calculations/:computation_id", handlers.DeleteCalculation(db))
+	// Formulas == Calculations
+	public.GET("/formulas", handlers.GetInstrumentCalculations(db))
+	private.POST("/formulas", handlers.CreateCalculation(db))
+	private.PUT("/formulas/:formula_id", handlers.UpdateCalculation(db))
+	private.DELETE("/formulas/:formula_id", handlers.DeleteCalculation(db))
 
 	// Misc
 	public.GET("/domains", handlers.GetDomains(db))

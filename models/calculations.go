@@ -114,8 +114,8 @@ func CalculationsFactory(rows *sqlx.Rows) ([]Calculation, error) {
 	return formulas, nil
 }
 
-// GetCalculations returns all formulas associated to a given instrument ID.
-func GetCalculations(db *sqlx.DB, instrument *Instrument) ([]Calculation, error) {
+// GetInstrumentCalculations returns all formulas associated to a given instrument ID.
+func GetInstrumentCalculations(db *sqlx.DB, instrument *Instrument) ([]Calculation, error) {
 
 	rows, err := db.Queryx(listCalculationsSQL+" WHERE instrument_id = $1", instrument.ID)
 	if err != nil {
@@ -395,7 +395,7 @@ func ComputedTimeseries(db *sqlx.DB, instrumentIDs []uuid.UUID, tw *TimeWindow, 
 
 	tt := make([]DBTimeseries, 0)
 	sql := `
-	-- Get Timeseries and Dependencies for Computations
+	-- Get Timeseries and Dependencies for Calculations
 	-- timeseries required based on requested instrument
 	WITH requested_instruments AS (
 		SELECT id
@@ -509,7 +509,7 @@ func ComputedTimeseries(db *sqlx.DB, instrumentIDs []uuid.UUID, tw *TimeWindow, 
 	variableMap := make(map[time.Time]map[string]interface{})
 
 	// todo: Optimization - do not need to regularize all timeseries
-	// only need to regularize those that will be used as computation dependencies
+	// only need to regularize those that will be used as calculation dependencies
 	for _, ts := range tt2 {
 		tsReg, err := ts.RegularizeCarryForward(*tw, *interval)
 		if err != nil {
@@ -528,8 +528,8 @@ func ComputedTimeseries(db *sqlx.DB, instrumentIDs []uuid.UUID, tw *TimeWindow, 
 			continue
 		}
 
-		// Computations
-		// It is known that all stored timeseries have been added to the Map and computations
+		// Calculations
+		// It is known that all stored timeseries have been added to the Map and calculations
 		// can now be run because alculated timeseries (identified by .IsComputed)
 		// are returned from the database last in the query using ORDER BY is_computed
 		err = ts.Calculate(variableMap)
@@ -548,7 +548,7 @@ func ComputedInclinometerTimeseries(db *sqlx.DB, instrumentIDs []uuid.UUID, tw *
 
 	tt := make([]DBTimeseries, 0)
 	sql := `
-	-- Get Timeseries and Dependencies for Computations
+	-- Get Timeseries and Dependencies for Calculations
 	-- timeseries required based on requested instrument
 	WITH requested_instruments AS (
 		SELECT id
