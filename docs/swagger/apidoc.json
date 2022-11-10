@@ -29,7 +29,7 @@
             "name": "Profiles"
         },
         {
-            "name": "ProjectMembership"
+            "name": "Project Membership"
         },
         {
             "name": "Instruments"
@@ -149,7 +149,7 @@
         "/projects/{project_id}/members": {
             "get": {
                 "tags": [
-                    "ProjectMembership"
+                    "Project Membership"
                 ],
                 "summary": "ListProjectMembers",
                 "parameters": [
@@ -177,7 +177,7 @@
         "/projects/{project_id}/members/{member_id}/roles/{role_id}": {
             "delete": {
                 "tags": [
-                    "ProjectMembership"
+                    "Project Membership"
                 ],
                 "summary": "RemoveProjectMemberRole",
                 "parameters": [
@@ -223,7 +223,7 @@
             },
             "post": {
                 "tags": [
-                    "ProjectMembership"
+                    "Project Membership"
                 ],
                 "summary": "AddProjectMemberRole",
                 "requestBody": {

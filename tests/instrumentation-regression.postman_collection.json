@@ -140,7 +140,7 @@
 			]
 		},
 		{
-			"name": "ProjectMembership",
+			"name": "Project Membership",
 			"item": [
 				{
 					"name": "ListProjectMembers",
