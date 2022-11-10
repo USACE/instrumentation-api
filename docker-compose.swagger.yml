@@ -1,5 +1,9 @@
 version: '3'
 
+networks:
+  default:
+    name: ecw-api_default
+    
 services:
   swagger_init:
     image: node:current-alpine
