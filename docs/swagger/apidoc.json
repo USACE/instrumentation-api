@@ -44,8 +44,7 @@
             "name": "Plot Configurations"
         },
         {
-            "name": "Projects",
-            "description": "Project Endpoint Tests"
+            "name": "Projects"
         },
         {
             "name": "Timeseries"

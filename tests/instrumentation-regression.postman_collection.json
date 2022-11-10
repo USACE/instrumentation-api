@@ -3113,7 +3113,6 @@
 					"response": []
 				}
 			],
-			"description": "Project Endpoint Tests"
 		},
 		{
 			"name": "Timeseries",
