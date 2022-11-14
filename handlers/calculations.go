@@ -8,6 +8,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
 
+	"github.com/USACE/instrumentation-api/dbutils"
 	"github.com/USACE/instrumentation-api/models"
 )
 
@@ -78,6 +79,17 @@ func CreateCalculation(db *sqlx.DB) echo.HandlerFunc {
 		if err := c.Bind(&formula); err != nil {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
+
+		slugsTaken, err := models.ListCalculationSlugs(db)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, err.Error())
+		}
+		calculationSlug, err := dbutils.NextUniqueSlug(formula.FormulaName, slugsTaken)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, err.Error())
+		} 
+
+		formula.Slug = calculationSlug
 
 		if err := models.CreateCalculation(db, &formula); err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
