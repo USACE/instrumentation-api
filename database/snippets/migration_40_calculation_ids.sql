@@ -191,6 +191,10 @@ ALTER TABLE instrument
     DROP COLUMN IF EXISTS formula_parameter_id,
     DROP COLUMN IF EXISTS formula_unit_id;
 
+ALTER TABLE calculation
+    ALTER COLUMN parameter_id SET DEFAULT '2b7f96e1-820f-4f61-ba8f-861640af6232',
+    ALTER COLUMN unit_id SET DEFAULT '4a999277-4cf5-4282-93ce-23b33c65e2c8';
+
 GRANT SELECT ON
     v_instrument,
     v_timeseries,

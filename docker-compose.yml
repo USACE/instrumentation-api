@@ -11,6 +11,8 @@ services:
   api:
     build:
       context: ./
+      labels:
+        - com.host.description=instrumentation-api
     restart: always
     environment:
       # NOTE: AWS_ Variables provided by execution role in deployed version

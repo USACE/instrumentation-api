@@ -114,8 +114,8 @@ func CalculationsFactory(rows *sqlx.Rows) ([]Calculation, error) {
 	return formulas, nil
 }
 
-// GetCalculations returns all formulas associated to a given instrument ID.
-func GetCalculations(db *sqlx.DB, instrument *Instrument) ([]Calculation, error) {
+// GetInstrumentCalculations returns all formulas associated to a given instrument ID.
+func GetInstrumentCalculations(db *sqlx.DB, instrument *Instrument) ([]Calculation, error) {
 
 	rows, err := db.Queryx(listCalculationsSQL+" WHERE instrument_id = $1", instrument.ID)
 	if err != nil {
@@ -129,6 +129,30 @@ func GetCalculations(db *sqlx.DB, instrument *Instrument) ([]Calculation, error)
 	return ff, nil
 }
 
+func ListCalculationSlugs(db *sqlx.DB) ([]string, error) {
+
+	rows, err := db.Queryx("SELECT slug from calculation")
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	slugs := make([]string, 0)
+	for rows.Next() {
+		var slug string
+		err := rows.Scan(
+			&slug,
+		)
+		if err != nil {
+			return make([]string, 0), err
+		}
+		slugs = append(slugs, slug)
+	}
+
+	return slugs, nil
+}
+
 // CreateCalculation accepts a single Calculation instance and attempts to create it in
 // the database, returning an error if anything goes wrong.
 //
@@ -138,15 +162,22 @@ func GetCalculations(db *sqlx.DB, instrument *Instrument) ([]Calculation, error)
 // completes successfully. In the event that the function returns an error, the UUID
 // field will remain unchanged.
 func CreateCalculation(db *sqlx.DB, formula *Calculation) error {
+	if reflect.ValueOf(formula.ParameterID).IsZero() {
+		formula.ParameterID = uuid.Must(uuid.Parse("2b7f96e1-820f-4f61-ba8f-861640af6232"))
+	}
+	if reflect.ValueOf(formula.UnitID).IsZero() {
+		formula.UnitID = uuid.Must(uuid.Parse("4a999277-4cf5-4282-93ce-23b33c65e2c8"))
+	}
+
 	stmt := `
-	INSERT INTO calculation
-		(instrument_id,
+	INSERT INTO calculation (
+		instrument_id,
 		parameter_id,
 		unit_id,
 		slug,
 		name,
 		contents
-		)
+	)
 	VALUES
 		($1, $2, $3, $4, $5, $6)
 	RETURNING id
@@ -395,7 +426,7 @@ func ComputedTimeseries(db *sqlx.DB, instrumentIDs []uuid.UUID, tw *TimeWindow, 
 
 	tt := make([]DBTimeseries, 0)
 	sql := `
-	-- Get Timeseries and Dependencies for Computations
+	-- Get Timeseries and Dependencies for Calculations
 	-- timeseries required based on requested instrument
 	WITH requested_instruments AS (
 		SELECT id
@@ -509,7 +540,7 @@ func ComputedTimeseries(db *sqlx.DB, instrumentIDs []uuid.UUID, tw *TimeWindow, 
 	variableMap := make(map[time.Time]map[string]interface{})
 
 	// todo: Optimization - do not need to regularize all timeseries
-	// only need to regularize those that will be used as computation dependencies
+	// only need to regularize those that will be used as calculation dependencies
 	for _, ts := range tt2 {
 		tsReg, err := ts.RegularizeCarryForward(*tw, *interval)
 		if err != nil {
@@ -528,8 +559,8 @@ func ComputedTimeseries(db *sqlx.DB, instrumentIDs []uuid.UUID, tw *TimeWindow, 
 			continue
 		}
 
-		// Computations
-		// It is known that all stored timeseries have been added to the Map and computations
+		// Calculations
+		// It is known that all stored timeseries have been added to the Map and calculations
 		// can now be run because alculated timeseries (identified by .IsComputed)
 		// are returned from the database last in the query using ORDER BY is_computed
 		err = ts.Calculate(variableMap)
@@ -548,7 +579,7 @@ func ComputedInclinometerTimeseries(db *sqlx.DB, instrumentIDs []uuid.UUID, tw *
 
 	tt := make([]DBTimeseries, 0)
 	sql := `
-	-- Get Timeseries and Dependencies for Computations
+	-- Get Timeseries and Dependencies for Calculations
 	-- timeseries required based on requested instrument
 	WITH requested_instruments AS (
 		SELECT id

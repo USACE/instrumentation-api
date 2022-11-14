@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "9c819887-188d-4cfe-999d-970febc97fea",
+		"_postman_id": "e47472c2-8049-4b8d-a9be-c17f6911b242",
 		"name": "instrumentation-regression",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -140,7 +140,7 @@
 			]
 		},
 		{
-			"name": "ProjectMembership",
+			"name": "Project Membership",
 			"item": [
 				{
 					"name": "ListProjectMembers",
@@ -3112,8 +3112,7 @@
 					},
 					"response": []
 				}
-			],
-			"description": "Project Endpoint Tests"
+			]
 		},
 		{
 			"name": "Timeseries",
@@ -5314,10 +5313,10 @@
 			]
 		},
 		{
-			"name": "Calculations",
+			"name": "Formulas",
 			"item": [
 				{
-					"name": "GetCalculation",
+					"name": "GetInstrumentFormulas",
 					"event": [
 						{
 							"listen": "test",
@@ -5336,8 +5335,8 @@
 									"            \"parameter_id\": { \"type\": \"string\" },\r",
 									"            \"unit_id\": { \"type\": \"string\" },\r",
 									"            \"slug\": { \"type\": \"string\" },\r",
-									"            \"name\": { \"type\": \"string\" },\r",
-									"            \"contents\": { \"type\": \"string\" },\r",
+									"            \"formula_name\": { \"type\": \"string\" },\r",
+									"            \"formula\": { \"type\": \"string\" },\r",
 									"        },\r",
 									"        \"required\": [\r",
 									"            \"id\",\r",
@@ -5345,8 +5344,8 @@
 									"            \"parameter_id\",\r",
 									"            \"unit_id\",\r",
 									"            \"slug\",\r",
-									"            \"name\",\r",
-									"            \"contents\",\r",
+									"            \"formula_name\",\r",
+									"            \"formula\",\r",
 									"        ]\r",
 									"    });\r",
 									"});\r",
@@ -5360,19 +5359,18 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/calculations/:instrument_id",
+							"raw": "{{base_url}}/formulas?instrument_id=a7540f69-c41e-43b3-b655-6e44097edb7e",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
-								"calculations",
-								":instrument_id"
+								"formulas"
 							],
-							"variable": [
+							"query": [
 								{
 									"key": "instrument_id",
 									"value": "a7540f69-c41e-43b3-b655-6e44097edb7e",
-									"description": "Instrument to fetch calculation formulas for."
+									"description": "Instrument uuid"
 								}
 							]
 						}
@@ -5380,7 +5378,7 @@
 					"response": []
 				},
 				{
-					"name": "CreateCalculation",
+					"name": "CreateFormula",
 					"event": [
 						{
 							"listen": "test",
@@ -5412,7 +5410,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"instrument_id\": \"a7540f69-c41e-43b3-b655-6e44097edb7e\",\r\n    \"parameter_id\": \"068b59b0-aafb-4c98-ae4b-ed0365a6fbac\",\r\n    \"unit_id\": \"f777f2e2-5e32-424e-a1ca-19d16cd8abce\",\r\n    \"slug\": \"test_calculation\",\r\n    \"name\": \"test calculation\",\r\n    \"contents\": \"a + b\"\r\n}",
+							"raw": "{\r\n    \"instrument_id\": \"a7540f69-c41e-43b3-b655-6e44097edb7e\",\r\n    \"parameter_id\": \"068b59b0-aafb-4c98-ae4b-ed0365a6fbac\",\r\n    \"unit_id\": \"f777f2e2-5e32-424e-a1ca-19d16cd8abce\",\r\n    \"slug\": \"test_calculation\",\r\n    \"formula_name\": \"test calculation\",\r\n    \"formula\": \"a + b\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -5420,19 +5418,19 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url}}/calculations",
+							"raw": "{{base_url}}/formulas",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
-								"calculations"
+								"formulas"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "UpdateCalculation",
+					"name": "UpdateFormula",
 					"event": [
 						{
 							"listen": "test",
@@ -5463,7 +5461,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\",\r\n    \"formula_name\": \"NEW NAME\"\r\n}",
+							"raw": "{\r\n    \"id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\",\r\n    \"formula_name\": \"NEW NAME\",\r\n    \"formula\": \"c + d\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -5471,19 +5469,27 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url}}/calculations",
+							"raw": "{{base_url}}/formulas/:formula_id",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
-								"calculations"
+								"formulas",
+								":formula_id"
+							],
+							"variable": [
+								{
+									"key": "formula_id",
+									"value": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+									"description": "Formula uuid"
+								}
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "DeleteCalculation",
+					"name": "DeleteFormula",
 					"event": [
 						{
 							"listen": "test",
@@ -5503,19 +5509,19 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/calculations/:calculation_id",
+							"raw": "{{base_url}}/formulas/:formula_id",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
-								"calculations",
-								":calculation_id"
+								"formulas",
+								":formula_id"
 							],
 							"variable": [
 								{
-									"key": "calculation_id",
+									"key": "formula_id",
 									"value": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
-									"description": "Calculation to remove."
+									"description": "Formula uuid"
 								}
 							]
 						}
