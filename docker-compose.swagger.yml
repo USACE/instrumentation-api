@@ -2,7 +2,7 @@ version: '3'
 
 networks:
   default:
-    name: ecw-api_default
+    name: instrumentation-api_default
     
 services:
   swagger_init:
