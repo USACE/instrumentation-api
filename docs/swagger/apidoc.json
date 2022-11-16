@@ -2135,6 +2135,65 @@
             }
         },
         "/projects/{project_id}/instruments/{instrument_id}/constants/{timeseries_id}": {
+            "put": {
+                "tags": [
+                    "Instrument Constants"
+                ],
+                "summary": "UpdateInstrumentContant",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": {
+                                    "id": "22a734d6-dc24-451d-a462-43a32f335ae8",
+                                    "name": "Tip Depth Updated Name",
+                                    "instrument_id": "a7540f69-c41e-43b3-b655-6e44097edb7e",
+                                    "parameter_id": "068b59b0-aafb-4c98-ae4b-ed0365a6fbac",
+                                    "unit_id": "f777f2e2-5e32-424e-a1ca-19d16cd8abce"
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    },
+                    {
+                        "name": "instrument_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "example": "a7540f69-c41e-43b3-b655-6e44097edb7e"
+                    },
+                    {
+                        "name": "timeseries_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "example": "22a734d6-dc24-451d-a462-43a32f335ae8"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
             "delete": {
                 "tags": [
                     "Instrument Constants"

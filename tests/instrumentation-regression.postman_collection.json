@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "e47472c2-8049-4b8d-a9be-c17f6911b242",
+		"_postman_id": "29ee1504-7afc-47fb-9e9f-d1582cb64fa3",
 		"name": "instrumentation-regression",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -3843,6 +3843,51 @@
 									"key": "instrument_id",
 									"value": "a7540f69-c41e-43b3-b655-6e44097edb7e",
 									"description": "Instrument uuid"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateInstrumentContant",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"22a734d6-dc24-451d-a462-43a32f335ae8\",\n    \"name\": \"Tip Depth Updated Name\",\n    \"instrument_id\": \"a7540f69-c41e-43b3-b655-6e44097edb7e\",\n    \"parameter_id\": \"068b59b0-aafb-4c98-ae4b-ed0365a6fbac\",\n    \"unit_id\": \"f777f2e2-5e32-424e-a1ca-19d16cd8abce\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/projects/:project_id/instruments/:instrument_id/constants/:timeseries_id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"projects",
+								":project_id",
+								"instruments",
+								":instrument_id",
+								"constants",
+								":timeseries_id"
+							],
+							"variable": [
+								{
+									"key": "project_id",
+									"value": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+								},
+								{
+									"key": "instrument_id",
+									"value": "a7540f69-c41e-43b3-b655-6e44097edb7e"
+								},
+								{
+									"key": "timeseries_id",
+									"value": "22a734d6-dc24-451d-a462-43a32f335ae8"
 								}
 							]
 						}
