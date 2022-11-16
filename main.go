@@ -235,6 +235,7 @@ func main() {
 	// Instrument Constants (same as a timeseries in structure/payload)
 	public.GET("/projects/:project_id/instruments/:instrument_id/constants", handlers.ListInstrumentConstants(db))
 	private.POST("/projects/:project_id/instruments/:instrument_id/constants", handlers.CreateInstrumentConstants(db))
+	private.PUT("/projects/:project_id/instruments/:instrument_id/constants/:timeseries_id", handlers.UpdateTimeseries(db), middleware.IsApplicationAdmin)
 	private.DELETE("/projects/:project_id/instruments/:instrument_id/constants/:timeseries_id", handlers.DeleteInstrumentConstant(db))
 
 	// Instrument Notes(GET, PUT, DELETE work with or without instrument context in URL)
