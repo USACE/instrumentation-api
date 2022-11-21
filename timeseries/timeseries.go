@@ -33,7 +33,7 @@ type Measurement struct {
 	Value        float64   `json:"value"`
 	Masked       bool      `json:"masked"`
 	Validated    bool      `json:"validated"`
-	Annotation	 string    `json:"annotation"`
+	Annotation   string    `json:"annotation"`
 }
 
 // MeasurementLean is the minimalist representation of a timeseries measurement

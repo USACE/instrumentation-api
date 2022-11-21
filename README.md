@@ -1,55 +1,63 @@
-# Instrumentation API  ![Build API and Lambda Package](https://github.com/usace/instrumentation-api/workflows/Build%20API%20and%20Lambda%20Package/badge.svg)
+# Instrumentation API - Build API and Lambda Package
 
-An Application Programming Interface (API) to manage instrumentation data, built with Golang and Deployed on AWS Lambda.
+An Application Programming Interface (API) to manage instrumentation data, built with Golang and deployed on AWS Lambda.
 
-# How to Develop
+## Documentation
 
-## Running a Database for Local Development
+Documentation for the API is maintained in a Markdown file held at [`docs/APIDOC.md`](./docs/APIDOC.md). A [Postman](https://www.postman.com/api-documentation-tool/) documentation and testing environment is also maintained at [`tests/postman_environment.local`](./tests/postman_environment.local.json).
+
+## How to Develop
+
+### Quickstart - Running the API Stack Locally with Docker Compose
 
 1. Install, at a minimum, [Docker Engine](https://docs.docker.com/engine/install/) and [Docker Compose](https://docs.docker.com/compose/install/). In place of these two, one can install [Docker Desktop](https://docs.docker.com/desktop/).
 
 2. Copy the `.env.example` file to `.env` (e.g., `cp .env.example .env`). This provides configuration options to Docker Compose.
 
-3. Change to the /database directory in this repository and type `docker-compose up`. This brings up two services on `localhost`
+3. Run the [./startup.sh](./startup.sh) shell script to pull the most recent changes from the current upstream branch, build, and (re)start the Docker Compose services. You can now access the application locally through Docker.
 
-   1. A postgres database with postgis schema installed using the Docker image [mdillon/postgis](https://hub.docker.com/r/mdillon/postgis/)
+### Running a Database for Local Development
 
-   2. pgadmin4 (a user interface to interact with the database) using the Docker image [dpage/pgadmin4](https://hub.docker.com/r/dpage/pgadmin4/)
+After starting up Docker Compose, you will find these two services (among others) on `localhost`
 
-   To modify the database using pgadmin4, open a web browser and go to `http://localhost:8080`, or whichever port is set in `.env`.
+   1. A Postgres database with postgis schema installed using the Docker image [mdillon/postgis](https://hub.docker.com/r/mdillon/postgis/)
 
-   Login with `Email:postgres@postgres.com` and `Password:postgres` respectively.
+   2. [pgAdmin4](https://www.pgadmin.org/) using the Docker image [dpage/pgadmin4](https://hub.docker.com/r/dpage/pgadmin4/)
 
-   Create a database connection to the postgres database by right-clicking `servers --> register --> server` in the left menu tree. Enter the following information and click `save`.
+To modify the database using pgAdmin4, open a web browser and go to `http://localhost:8081`, or whichever port number is the value set to variable `PGADMIN_PORT` in `.env`.
 
-   **General Tab**
+Login with `Email:postgres@postgres.com` and `Password:postgres` respectively.
 
-   | Field | Value                               |
-   | ----- | ----------------------------------- |
-   | Name  | localhost (or other preferred name) |
+Create a database connection to the Postgres database by right-clicking `servers --> register --> server` in the left menu tree. Enter the following information and click `save`.
 
-   **Connection Tab**
+#### General Tab
 
-   | Field             | Value          |
-   | ----------------- | -------------- |
-   | Host name/address | postgres       |
-   | Port              | 5432 (default) |
-   | Username          | postgres       |
-   | Password          | postgres       |
+| Field | Value                               |
+| ----- | ----------------------------------- |
+| Name  | localhost (or other preferred name) |
 
-4. Initialize the database and seed it with some data (docker-compose runs this for you)
+#### Connection Tab
+
+| Field             | Value          |
+| ----------------- | -------------- |
+| Host name/address | postgres       |
+| Port              | 5432 (default) |
+| Username          | postgres       |
+| Password          | postgres       |
+
+Initialize the database and seed it with some data (docker-compose runs this for you)
 
    Use the Query Tool in pgadmin4 and the .sql files in the database/ directory in this repository. You can find the query tool by expanding the left menu tree to `Servers --> Databases --> postgres`. Right click `postgres --> Query Tool`. From here, copy [tables.sql](database/sql/10-tables.sql) into the Query Tool and run it by pressing `f5`. Note: to only run a portion of the SQL you've copied, you can highlight the section you want to run before hitting `f5`.
 
-## Running the GO API for Local Development
+### Running the GO API for Local Development
 
-Either of these options starts the API at `localhost:3030`. The API uses JSON Web tokens (JWT) for authorization by default.  To disable JWT for testing or development, you can set the environment variable `JWT_DISABLED=TRUE`.
+Either of these options starts the API at `localhost:$API_PORT`, where `$API_PORT` is the variable set in your project's `.env` file. The API uses JSON Web tokens (JWT) for authorization by default.  To disable JWT for testing or development, you can set the environment variable `JWT_DISABLED=TRUE`.
 
-**With Visual Studio Code Debugger**
+### With Visual Studio Code Debugger
 
 You can use the launch.json file in this repository in lieu of `go run main.go` to run the API in the VSCode debugger.  This takes care of the required environment variables to connect to the database.
 
-**Without Visual Studio Code Debugger**
+### Without Visual Studio Code Debugger
 
 Set the following environment variables and type `go run main.go` from the top level of this repository.
 
@@ -58,19 +66,32 @@ Set the following environment variables and type `go run main.go` from the top l
     * INSTRUMENTATION_DB_NAME=postgres
     * INSTRUMENTATION_DB_HOST=localhost
     * INSTRUMENTATION_DB_SSLMODE=disable
-    * LAMBDA=FALSE
+    * INSTRUMENTATION_LAMBDACONTEXT=FALSE
     * JWT_DISABLED=FALSE
 
-Note: When running the API locally, make sure environment variable `LAMBDA` is either **not set** or is set to `LAMBDA=FALSE`.
+Note: When running the API locally, make sure environment variable `INSTRUMENTATION_LAMBDACONTEXT` is either **not set** or is set to `INSTRUMENTATION_LAMBDACONTEXT=FALSE`. `_LAMBDA_SERVER_PORT` and `AWS_LAMBDA_RUNTIME_API` should also be set if running under an AWS Lambda context.
 
-## Running API Docs Locally
+## Running Tests
 
-From the top level of this repository, type `make docs`. This starts a container that serves content based on "apidoc.yml" in this repository.
-Open a browser and navigate to `https://localhost:4000` to view the content.
+Regression tests are maintained for the project in the [aforementioned](#documentation) [Postman](https://www.postman.com/api-documentation-tool/) environments. They are run automatically by GitHub Actions through the script `test.sh`.
 
-# How To Deploy
+In both cases, the Postman environment regression tests are run, then output. If the environment variable `REPORT` is set to `true`, then this output is sent to an HTML file. Otherwise, it is printed to the caller's stdout.
 
-## Postgres Database on AWS Relational Database Service (RDS)
+## Running the Swagger UI to access API documentation locally
+
+An API Document conforming to the OpenAPI 3.0.0 specification is generated from the most recent Postman Collection saved to [`tests/instrumentation-regression.postman_collection.json`](./tests/instrumentation-regression.postman_collection.json). When the collection file is modified and overwritten, an updated apidoc.json will be automatically created by a `swagger_init` docker service at [docs/swagger/apidoc.json](./docs/swagger/apidoc.json). To start the Swagger UI server and sync the apidoc.json with the Postman Collection, run `docker compose -f docker-compose.swagger.yml up -d`. This command is also executed in [./startup.sh](./startup.sh).
+
+Note:
+
+- This service will need to be restarted if any changes are made to the Postman Collection file (i.e. when it is manually exported and overwritten).
+
+- Unlike the postman collection, the `.env.json` file supplied to the migration script is **NOT**  automatically generated. If you make any changes or additions to the Postman environment used [tests/postman_environment.docker-compose.json](./tests/postman_environment.docker-compose.json), these changes must also be made to the configuration supplied to the apidoc generation script, [docs/swagger/postman-compose.env.json](./docs/swagger/postman-compose.env.json).
+
+- Swagger UI configuration can be adjusted with [docs/swagger/swagger-config.json](./docs/swagger/swagger-config.json). See [swagger-ui/docs/usage/configuration.md](https://github.com/swagger-api/swagger-ui/blob/0b8de2c1796e67602bcbbc6d35c99cb167acf388/docs/usage/configuration.md) for the full list of configuration options.
+
+## How To Deploy
+
+### Postgres Database on AWS Relational Database Service (RDS)
 
 Database should be initialized with the following SQL files in the order listed:
 
@@ -81,3 +102,9 @@ Database should be initialized with the following SQL files in the order listed:
 1. roles.sql (database roles, grants, etc.)
 
    Note: Change 'password' in roles.sql to a real password for the `instrumentation_user` account.
+
+## How to Update
+
+Updating an instance of `instrumentation-api` is trivially completed by rebuilding the Docker container used by it, then restarting the service.
+
+If a postgres database has already been created and is in use, updates are less trivial. Before rebuilding and restarting the aforementioned API instance, database migrations must be carried out **manually**. Snippets for doing so are supplied in [`database/snippets`](./database/snippets).

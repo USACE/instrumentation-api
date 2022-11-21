@@ -1,0 +1,28 @@
+version: '3'
+
+networks:
+  default:
+    name: instrumentation-api_default
+    
+services:
+  swagger_init:
+    image: node:current-alpine
+    container_name: swagger_init
+    ports:
+      - '${INSTRUMENTATION_SWAGGER_INIT_PORT:-8003}:8080'
+    volumes:
+      - ${INSTRUMENTATION_SWAGGER_APIDOC_VOLUME:-./docs/swagger}:/docs/swagger
+      - ${INSTRUMENTATION_SWAGGER_TESTS_VOLUME:-./tests}:/tests
+    entrypoint: ["/bin/sh", "/docs/swagger/postman2apidoc.sh"]
+
+  swagger:
+    image: swaggerapi/swagger-ui
+    container_name: swagger-ui
+    environment:
+      - API_URL=swagger/apidoc.json
+      - CONFIG_URL=swagger/swagger-config.json
+    ports:
+      - '${INSTRUMENTATION_SWAGGER_PORT:-8002}:8080'
+    volumes:
+      - ${INSTRUMENTATION_SWAGGER_APIDOC_VOLUME:-./docs/swagger}:/usr/share/nginx/html/swagger
+    restart: always

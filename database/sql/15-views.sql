@@ -25,7 +25,6 @@ CREATE OR REPLACE VIEW v_instrument AS (
         I.slug,
         I.name,
         I.type_id,
-        I.formula,
         T.name AS type,
         ST_AsBinary(I.geometry) AS geometry,
         I.station,
@@ -140,15 +139,17 @@ CREATE OR REPLACE VIEW v_timeseries AS (
             false                AS is_computed
         FROM timeseries
         UNION
-        SELECT formula_id        AS id,
-            'formula'            AS slug,
-            'Formula'            AS name,
-            id                   AS instrument_id,
-            formula_parameter_id AS parameter_id,
-            formula_unit_id      AS unit_id,
-            true                 AS is_computed
-        FROM instrument
-        WHERE NOT deleted AND formula IS NOT NULL
+        SELECT CC.id,
+            'formula_' || CC.name AS slug,
+            CC.name,
+            CC.instrument_id,
+            CC.parameter_id,
+            CC.unit_id,
+            'true'                AS is_computed
+        FROM instrument II
+        LEFT JOIN calculation CC
+        ON CC.instrument_id = II.id
+        WHERE NOT II.deleted
     )
     SELECT t.id                 AS id,
         t.slug                  AS slug,
@@ -242,22 +243,33 @@ CREATE OR REPLACE VIEW v_unit AS (
 );
 
 CREATE OR REPLACE VIEW v_plot_configuration AS (
-    SELECT pc.id            AS id,
-           pc.slug          AS slug,
-           pc.name          AS name,
-           pc.project_id    AS project_id,
-           t.timeseries_id     AS timeseries_id,
-           pc.creator       AS creator,
-           pc.create_date   AS create_date,
-           pc.updater       AS updater,
-           pc.update_date   AS update_date
+    SELECT pc.id                                  AS id,
+           pc.slug                                AS slug,
+           pc.name                                AS name,
+           pc.project_id                          AS project_id,
+           t.timeseries_id                        AS timeseries_id,
+           pc.creator                             AS creator,
+           pc.create_date                         AS create_date,
+           pc.updater                             AS updater,
+           pc.update_date                         AS update_date,
+           COALESCE(k.show_masked, 'true')        AS show_masked,
+           COALESCE(k.show_nonvalidated, 'true')  AS show_nonvalidated,
+           COALESCE(k.show_comments, 'true')      AS show_comments
     FROM plot_configuration pc
     LEFT JOIN (
-        SELECT plot_configuration_id    as plot_configuration_id,
-               array_agg(timeseries_id) as timeseries_id
+        SELECT plot_configuration_id    AS plot_configuration_id,
+               array_agg(timeseries_id) AS timeseries_id
         FROM plot_configuration_timeseries
         GROUP BY plot_configuration_id
     ) as t ON pc.id = t.plot_configuration_id
+    LEFT JOIN (
+        SELECT id                AS id,
+               show_masked       AS show_masked,
+               show_nonvalidated AS show_nonvalidated,
+               show_comments     AS show_comments
+        FROM plot_configuration_settings
+        GROUP BY id
+    ) as k ON pc.id = k.id
 );
 
 -- v_instrument_groups
@@ -353,10 +365,10 @@ CREATE OR REPLACE VIEW v_timeseries_dependency AS (
            i.parsed_variable AS parsed_variable,
            m.timeseries_id   AS dependency_timeseries_id
     FROM (
-        SELECT id AS instrument_id,
-            formula_id,
-            (regexp_matches(formula, '\[(.*?)\]', 'g'))[1] AS parsed_variable
-        FROM instrument
+        SELECT instrument_id,
+            id AS formula_id,
+            (regexp_matches(contents, '\[(.*?)\]', 'g'))[1] AS parsed_variable
+        FROM calculation
     ) i
     LEFT JOIN variable_tsid_map m ON m.variable = i.parsed_variable
 );

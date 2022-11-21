@@ -6,6 +6,15 @@ import (
 	"github.com/lib/pq"
 )
 
+// PlotConfigurationSettings describes options for displaying the plot consistently.
+// Specifically, whether to ignore data entries in a timeseries that have been masked,
+// or whether to display user comments.
+type PlotConfigurationSettings struct {
+	ShowMasked       bool `json:"show_masked" db:"show_masked"`
+	ShowNonValidated bool `json:"show_nonvalidated" db:"show_nonvalidated"`
+	ShowComments     bool `json:"show_comments" db:"show_comments"`
+}
+
 // PlotConfiguration holds information for entity PlotConfiguration
 type PlotConfiguration struct {
 	ID           uuid.UUID   `json:"id"`
@@ -14,10 +23,16 @@ type PlotConfiguration struct {
 	ProjectID    uuid.UUID   `json:"project_id" db:"project_id"`
 	TimeseriesID []uuid.UUID `json:"timeseries_id" db:"timeseries_id"`
 	AuditInfo
+	PlotConfigurationSettings
 }
 
 // ListPlotConfigurationsSQL is the base SQL statement for above functions
-var ListPlotConfigurationsSQL = `SELECT id, slug, name, project_id, timeseries_id, creator, create_date, updater, update_date
+var ListPlotConfigurationsSQL = `SELECT
+								 id, slug, name, project_id,
+								 timeseries_id, creator,
+								 create_date, updater, update_date,
+								 show_masked, show_nonvalidated,
+								 show_comments
 								 FROM v_plot_configuration`
 
 // PlotConfigFactory converts database rows to PlotConfiguration objects
@@ -29,6 +44,7 @@ func PlotConfigFactory(rows *sqlx.Rows) ([]PlotConfiguration, error) {
 		err := rows.Scan(
 			&p.ID, &p.Slug, &p.Name, &p.ProjectID, pq.Array(&p.TimeseriesID),
 			&p.Creator, &p.CreateDate, &p.Updater, &p.UpdateDate,
+			&p.ShowMasked, &p.ShowNonValidated, &p.ShowComments,
 		)
 		if err != nil {
 			return make([]PlotConfiguration, 0), err
@@ -65,6 +81,12 @@ func GetPlotConfiguration(db *sqlx.DB, projectID *uuid.UUID, plotconfigID *uuid.
 		return nil, err
 	}
 	pp, err := PlotConfigFactory(rows)
+	if err != nil {
+		return nil, err
+	}
+	if len(pp) == 0 {
+		return nil, nil
+	}
 
 	return &pp[0], nil
 }
@@ -86,6 +108,9 @@ func CreatePlotConfiguration(db *sqlx.DB, pc *PlotConfiguration) (*PlotConfigura
 	stmt2, err := tx.Preparex(
 		`INSERT INTO plot_configuration_timeseries (plot_configuration_id, timeseries_id) VALUES ($1, $2)`,
 	)
+	stmt3, err := tx.Preparex(
+		`INSERT INTO plot_configuration_settings (id, show_masked, show_nonvalidated, show_comments) VALUES ($1, $2, $3, $4)`,
+	)
 
 	// ID of newly created plot configuration
 	var pcID uuid.UUID
@@ -99,6 +124,11 @@ func CreatePlotConfiguration(db *sqlx.DB, pc *PlotConfiguration) (*PlotConfigura
 			tx.Rollback()
 			return nil, err
 		}
+	}
+	// Create settings.
+	if _, err := stmt3.Exec(&pcID, pc.ShowMasked, pc.ShowNonValidated, pc.ShowComments); err != nil {
+		tx.Rollback()
+		return nil, err
 	}
 
 	if err := stmt1.Close(); err != nil {
@@ -129,6 +159,13 @@ func UpdatePlotConfiguration(db *sqlx.DB, pc *PlotConfiguration) (*PlotConfigura
 
 	// Prepared Statement; Update Existing Plot Configuration
 	stmt1, err := tx.Preparex(`UPDATE plot_configuration SET name = $3, updater = $4, update_date = $5 WHERE project_id = $1 AND id = $2`)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	// Prepared Statement; Update exiting plot configuration settings
+	stmt4, err := tx.Preparex(`UPDATE plot_configuration_settings SET show_masked = $2, show_nonvalidated = $3, show_comments = $4 WHERE id = $1`)
 	if err != nil {
 		tx.Rollback()
 		return nil, err
@@ -169,6 +206,10 @@ func UpdatePlotConfiguration(db *sqlx.DB, pc *PlotConfiguration) (*PlotConfigura
 		tx.Rollback()
 		return nil, err
 	}
+	if _, err := stmt4.Exec(pc.ID, pc.ShowMasked, pc.ShowNonValidated, pc.ShowComments); err != nil {
+		tx.Rollback()
+		return nil, err
+	}
 
 	for _, tsid := range pc.TimeseriesID {
 		if _, err := stmt3.Exec(pc.ID, tsid); err != nil {
@@ -184,6 +225,9 @@ func UpdatePlotConfiguration(db *sqlx.DB, pc *PlotConfiguration) (*PlotConfigura
 		return nil, err
 	}
 	if err := stmt3.Close(); err != nil {
+		return nil, err
+	}
+	if err := stmt4.Close(); err != nil {
 		return nil, err
 	}
 

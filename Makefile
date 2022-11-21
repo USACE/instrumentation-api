@@ -16,6 +16,3 @@ deploy-dev: package
 
 deploy-test: package
 	aws s3 cp $(packagename) s3://rsgis-lambda-zips/$(packagename)
-
-docs:
-	redoc-cli serve -p 4000 apidoc.yaml

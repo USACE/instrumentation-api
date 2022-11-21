@@ -16,10 +16,12 @@ jobs:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
-      - name: docker compose
+      - name: Docker Compose
         run: docker-compose up -d
-      - name: test and report
-        run: ./test_and_report.sh
+      - name: Run Tests
+        env:
+          REPORT: true
+        run: ./test.sh
         
       - name: Configure AWS credentials
         if: ${{ always() }}
