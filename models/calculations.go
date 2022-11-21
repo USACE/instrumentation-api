@@ -91,7 +91,14 @@ type Calculation struct {
 }
 
 const listCalculationsSQL string = `
-	SELECT *
+	SELECT
+		id,
+		instrument_id,
+		parameter_id,
+		unit_id,
+		slug,
+		name,
+		COALESCE(contents, '') AS contents
 	FROM calculation
 `
 
