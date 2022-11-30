@@ -156,7 +156,7 @@ func UpdateTimeseriesMeasurements(db *sqlx.DB) echo.HandlerFunc {
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
-		return c.JSON(http.StatusCreated, stored)
+		return c.JSON(http.StatusOK, stored)
 	}
 }
 
