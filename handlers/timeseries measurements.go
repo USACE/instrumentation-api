@@ -122,6 +122,45 @@ func CreateOrUpdateTimeseriesMeasurements(db *sqlx.DB) echo.HandlerFunc {
 	}
 }
 
+// UpdateTimeseriesMeasurements Overwrites measurements with the supplied payload
+// within a TimeWindow (> after, < before)
+func UpdateTimeseriesMeasurements(db *sqlx.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		// Time Window
+		var tw timeseries.TimeWindow
+		a, b := c.QueryParam("after"), c.QueryParam("before")
+		// If after or before are not provided return last 7 days of data from current time
+		if a == "" || b == "" {
+			tw.Before = time.Now()
+			tw.After = tw.Before.AddDate(0, 0, -7)
+		} else {
+			// Attempt to parse query param "after"
+			tA, err := time.Parse(time.RFC3339, a)
+			if err != nil {
+				return c.JSON(http.StatusBadRequest, err)
+			}
+			tw.After = tA
+			// Attempt to parse query param "before"
+			tB, err := time.Parse(time.RFC3339, b)
+			if err != nil {
+				return c.JSON(http.StatusBadRequest, err)
+			}
+			tw.Before = tB
+		}
+
+		var mcc models.TimeseriesMeasurementCollectionCollection
+		if err := c.Bind(&mcc); err != nil {
+			return c.JSON(http.StatusBadRequest, err)
+		}
+		// Put timeseries measurments
+		stored, err := models.UpdateTimeseriesMeasurements(db, mcc.Items, &tw)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, err)
+		}
+		return c.JSON(http.StatusOK, stored)
+	}
+}
+
 // DeleteTimeserieMeasurements deletes a single timeseries measurement
 func DeleteTimeserieMeasurements(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {

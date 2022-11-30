@@ -147,6 +147,64 @@ func CreateOrUpdateTimeseriesMeasurements(db *sqlx.DB, mc []ts.MeasurementCollec
 	return mc, nil
 }
 
+// UpdateTimeseriesMeasurements updates many timeseries measurements, "overwriting" time and values to match paylaod
+func UpdateTimeseriesMeasurements(db *sqlx.DB, mc []ts.MeasurementCollection, tw *ts.TimeWindow) ([]ts.MeasurementCollection, error) {
+
+	txn, err := db.Begin()
+	if err != nil {
+		return nil, err
+	}
+
+	stmt_measurement, err := txn.Prepare(
+		`DELETE FROM timeseries_measurement WHERE timeseries_id = $1 AND time > $2 AND time < $3; 
+		`,
+	)
+	if err != nil {
+		txn.Rollback()
+		return nil, err
+	}
+	stmt_notes, err := txn.Prepare(
+		`DELETE FROM timeseries_notes WHERE timeseries_id = $1 AND time > $2 AND time < $3; 
+		`,
+	)
+	if err != nil {
+		txn.Rollback()
+		return nil, err
+	}
+
+	for _, c := range mc {
+		if _, err := stmt_measurement.Exec(c.TimeseriesID, tw.After, tw.Before); err != nil {
+			txn.Rollback()
+			return nil, err
+		}
+		if _, err := stmt_notes.Exec(c.TimeseriesID, tw.After, tw.Before); err != nil {
+			txn.Rollback()
+			return nil, err
+		}
+	}
+
+	if err := stmt_measurement.Close(); err != nil {
+		txn.Rollback()
+		return nil, err
+	}
+	if err := stmt_notes.Close(); err != nil {
+		txn.Rollback()
+		return nil, err
+	}
+	if err := txn.Commit(); err != nil {
+		txn.Rollback()
+		return nil, err
+	}
+
+	mc, err = CreateOrUpdateTimeseriesMeasurements(db, mc)
+	if err != nil {
+		txn.Rollback()
+		return nil, err
+	}
+
+	return mc, nil
+}
+
 func listTimeseriesMeasurementsSQL() string {
 	return `SELECT  M.timeseries_id,
 			        M.time,
