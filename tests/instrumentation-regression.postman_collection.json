@@ -3670,11 +3670,13 @@
 							"query": [
 								{
 									"key": "after",
-									"value": "1900-01-01T00:00:00.00Z"
+									"value": "1900-01-01T00:00:00.00Z",
+									"description": "Default timestamp 7 days prior to now"
 								},
 								{
 									"key": "before",
-									"value": "2021-01-01T00:00:00.00Z"
+									"value": "2021-01-01T00:00:00.00Z",
+									"description": "Default timestamp now"
 								}
 							],
 							"variable": [

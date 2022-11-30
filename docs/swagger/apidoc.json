@@ -2083,6 +2083,7 @@
                         "schema": {
                             "type": "string"
                         },
+                        "description": "Default timestamp 7 days prior to now",
                         "example": "1900-01-01T00:00:00.00Z"
                     },
                     {
@@ -2091,6 +2092,7 @@
                         "schema": {
                             "type": "string"
                         },
+                        "description": "Default timestamp now",
                         "example": "2021-01-01T00:00:00.00Z"
                     },
                     {
