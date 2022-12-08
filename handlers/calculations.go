@@ -10,6 +10,7 @@ import (
 
 	"github.com/USACE/instrumentation-api/dbutils"
 	"github.com/USACE/instrumentation-api/models"
+	"github.com/USACE/instrumentation-api/timeseries"
 )
 
 // This is an endpoint for debugging at this time
@@ -24,7 +25,7 @@ func ComputedTimeseries(db *sqlx.DB) echo.HandlerFunc {
 		instrumentIDs := make([]uuid.UUID, 1)
 		instrumentIDs[0] = instrumentID
 		// Time Window
-		timeWindow := models.TimeWindow{
+		timeWindow := timeseries.TimeWindow{
 			After:  time.Date(2020, 1, 3, 0, 0, 0, 0, time.UTC),
 			Before: time.Date(2021, 1, 5, 0, 0, 0, 0, time.UTC),
 		}

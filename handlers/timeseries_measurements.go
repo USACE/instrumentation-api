@@ -42,6 +42,12 @@ func ListTimeseriesMeasurements(db *sqlx.DB) echo.HandlerFunc {
 			return c.String(http.StatusBadRequest, "Malformed ID")
 		}
 
+		// Bind Timeseries id to struct
+		ts, err := models.GetTimeseries(db, &tsID)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+
 		// Time Window
 		var tw timeseries.TimeWindow
 		a, b := c.QueryParam("after"), c.QueryParam("before")
@@ -64,10 +70,43 @@ func ListTimeseriesMeasurements(db *sqlx.DB) echo.HandlerFunc {
 			tw.Before = tB
 		}
 
-		mc, err := models.ListTimeseriesMeasurements(db, &tsID, &tw)
+		// Possible optimization - pull from a seperate query or view and filter by
+		// timeseries id, rather than reusing models.ComputedTimeseries function to perform
+		// the query on the database and parse the response.
+		if ts.IsComputed {
+			// If timeseries IS computed, calulate measurements
+			interval := time.Hour // Set to 1 Hour; TODO - do not hard-code interval
+			ct, err := models.ComputedTimeseries(db, []uuid.UUID{ts.InstrumentID}, &tw, &interval)
+			if err != nil {
+				return c.String(http.StatusInternalServerError, err.Error())
+			}
 
+			tsms := make([]models.Measurement, 0)
+
+			for _, t := range ct {
+				if t.TimeseriesInfo.TimeseriesID == tsID {
+					for _, m := range t.Measurements {
+						// Trim “masked”, “validated”, and “annotation” fields
+						// as they only apply to stored timeseries
+						tsms = append(tsms, models.Measurement{
+								Time: m.Time,
+								Value: m.Value,
+						})
+					}
+					break
+				}
+			}
+			mc := models.MeasurementCollection{
+				TimeseriesID: tsID,
+				Items: tsms,
+			}
+			return c.JSON(http.StatusOK, mc)
+		}
+
+		// If timeseries NOT computed, query stored measurements
+		mc, err := models.ListTimeseriesMeasurements(db, &ts.ID, &tw)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return c.JSON(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, mc)
 	}

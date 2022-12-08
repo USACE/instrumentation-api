@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/USACE/instrumentation-api/models"
+	"github.com/USACE/instrumentation-api/timeseries"
 	ts "github.com/USACE/instrumentation-api/timeseries"
 
 	"github.com/google/uuid"
@@ -26,7 +27,7 @@ type ExplorerRow struct {
 type Filter struct {
 	InstrumentID []uuid.UUID
 	ParameterID  []uuid.UUID
-	TimeWindow   models.TimeWindow
+	TimeWindow   timeseries.TimeWindow
 }
 
 // PostExplorer retrieves timeseries information for the explorer app component

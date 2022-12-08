@@ -10,16 +10,11 @@ import (
 	"time"
 
 	"github.com/Knetic/govaluate"
+	"github.com/USACE/instrumentation-api/timeseries"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/jmoiron/sqlx/types"
 )
-
-// TimeWindow is a bounding box for time
-type TimeWindow struct {
-	After  time.Time `json:"after" query:"after"`
-	Before time.Time `json:"before" query:"before"`
-}
 
 type TimeseriesInfo struct {
 	TimeseriesID uuid.UUID `json:"timeseries_id" db:"timeseries_id"`
@@ -40,10 +35,15 @@ type DBTimeseries struct {
 
 type Timeseries struct {
 	TimeseriesInfo
-	Measurements        []Measurement `json:"measurements" db:"measurements"`
-	NextMeasurementLow  *Measurement  `json:"next_measurement_low" db:"next_measurement_low"`
-	NextMeasurementHigh *Measurement  `json:"next_measurement_high" db:"next_measurement_high"`
-	TimeWindow          TimeWindow    `json:"time_window"`
+	Measurements        []Measurement 		  `json:"measurements" db:"measurements"`
+	NextMeasurementLow  *Measurement  		  `json:"next_measurement_low" db:"next_measurement_low"`
+	NextMeasurementHigh *Measurement  		  `json:"next_measurement_high" db:"next_measurement_high"`
+	TimeWindow          timeseries.TimeWindow `json:"time_window"`
+}
+
+type MeasurementCollection struct {
+	TimeseriesID uuid.UUID     `json:"timeseries_id" db:"timeseries_id"`
+	Items        []Measurement `json:"items"`
 }
 
 type Measurement struct {
@@ -56,7 +56,7 @@ type InclinometerTimeseries struct {
 	Measurements        []InclinometerMeasurement `json:"measurements" db:"measurements"`
 	NextMeasurementLow  *Measurement              `json:"next_measurement_low" db:"next_measurement_low"`
 	NextMeasurementHigh *Measurement              `json:"next_measurement_high" db:"next_measurement_high"`
-	TimeWindow          TimeWindow                `json:"time_window"`
+	TimeWindow          timeseries.TimeWindow     `json:"time_window"`
 }
 
 type InclinometerMeasurement struct {
@@ -342,7 +342,7 @@ func DeleteCalculation(db *sqlx.DB, formulaID uuid.UUID) error {
 // RegularizeCarryForward converts potentially irregular timeseries measurements into a regular
 // interval timeseries over the time window w with measurements spaced at interval d
 // Missing values are filled-in using a carry forward algorithm (use previous known value in time for missing values)
-func (ts Timeseries) RegularizeCarryForward(w TimeWindow, d time.Duration) (Timeseries, error) {
+func (ts Timeseries) RegularizeCarryForward(w timeseries.TimeWindow, d time.Duration) (Timeseries, error) {
 
 	regularized := make([]Measurement, 0)
 
@@ -398,9 +398,9 @@ func (ts Timeseries) RegularizeCarryForward(w TimeWindow, d time.Duration) (Time
 	}, nil
 }
 
-func (ts Timeseries) RegularizeInterpolate(w TimeWindow, d time.Duration) (Timeseries, error) {
+func (ts Timeseries) RegularizeInterpolate(w timeseries.TimeWindow, d time.Duration) (Timeseries, error) {
 	log.Println("Not Implemented")
-	return Timeseries{}, errors.New("Method Not Implemented")
+	return Timeseries{}, errors.New("method not implemented")
 }
 
 func (ts *Timeseries) Calculate(variableMap map[time.Time]map[string]interface{}) error {
@@ -429,7 +429,7 @@ func (ts *Timeseries) Calculate(variableMap map[time.Time]map[string]interface{}
 }
 
 // ComputedTimeseries returns computed and stored timeseries for a specified array of instrument IDs
-func ComputedTimeseries(db *sqlx.DB, instrumentIDs []uuid.UUID, tw *TimeWindow, interval *time.Duration) ([]Timeseries, error) {
+func ComputedTimeseries(db *sqlx.DB, instrumentIDs []uuid.UUID, tw *timeseries.TimeWindow, interval *time.Duration) ([]Timeseries, error) {
 
 	tt := make([]DBTimeseries, 0)
 	sql := `
@@ -479,32 +479,32 @@ func ComputedTimeseries(db *sqlx.DB, instrumentIDs []uuid.UUID, tw *TimeWindow, 
 		GROUP BY timeseries_id
 	)
 	-- Stored Timeseries
-	SELECT r.id                     AS timeseries_id,
-		   ts.instrument_id         AS instrument_id,
-		   i.slug || '.' || ts.slug AS variable,
-		   false                    AS is_computed,
-		   null                     AS formula,
+	SELECT rt.id                          AS timeseries_id,
+		   ts.instrument_id               AS instrument_id,
+		   i.slug || '.' || ts.slug       AS variable,
+		   false                          AS is_computed,
+		   null                           AS formula,
 		   COALESCE(m.measurements, '[]') AS measurements,
-		   nl.measurement::text     AS next_measurement_low,
-		   nh.measurement::text     AS next_measurement_high
-	FROM required_timeseries r
-	INNER JOIN timeseries ts ON ts.id = r.id
+		   nl.measurement::text           AS next_measurement_low,
+		   nh.measurement::text           AS next_measurement_high
+	FROM required_timeseries rt
+	INNER JOIN timeseries ts ON ts.id = rt.id
 	INNER JOIN instrument i ON i.id = ts.instrument_id AND i.id IN (SELECT id FROM requested_instruments)
-	LEFT JOIN measurements m ON m.timeseries_id = r.id
-	LEFT JOIN next_low nl ON nl.timeseries_id = r.id
-	LEFT JOIN next_high nh ON nh.timeseries_id = r.id
+	LEFT JOIN measurements m ON m.timeseries_id = rt.id
+	LEFT JOIN next_low nl ON nl.timeseries_id = rt.id
+	LEFT JOIN next_high nh ON nh.timeseries_id = rt.id
 	UNION
 	-- Computed Timeseries
-	SELECT i.id                 AS timeseries_id,
-		i.instrument_id         AS instrument_id,
-		i.slug			        AS variable,
+	SELECT cc.id                AS timeseries_id,
+		cc.instrument_id        AS instrument_id,
+		cc.slug			        AS variable,
 		true                    AS is_computed,
-		i.contents              AS formula,
+		cc.contents             AS formula,
 		'[]'::text              AS measurements,
 		null                    AS next_measurement_low,
 		null                    AS next_measurement_high
-	FROM calculation i
-	WHERE i.contents IS NOT NULL AND i.id IN (SELECT id FROM requested_instruments)
+	FROM calculation cc
+	WHERE cc.contents IS NOT NULL AND cc.instrument_id IN (SELECT id FROM requested_instruments)
 	ORDER BY is_computed
 	`
 
@@ -568,7 +568,7 @@ func ComputedTimeseries(db *sqlx.DB, instrumentIDs []uuid.UUID, tw *TimeWindow, 
 
 		// Calculations
 		// It is known that all stored timeseries have been added to the Map and calculations
-		// can now be run because alculated timeseries (identified by .IsComputed)
+		// can now be run because calculated timeseries (identified by .IsComputed)
 		// are returned from the database last in the query using ORDER BY is_computed
 		err = ts.Calculate(variableMap)
 		if err != nil {
@@ -582,7 +582,7 @@ func ComputedTimeseries(db *sqlx.DB, instrumentIDs []uuid.UUID, tw *TimeWindow, 
 }
 
 // ComputedInclinometerTimeseries returns computed and stored inclinometer timeseries for a specified array of instrument IDs
-func ComputedInclinometerTimeseries(db *sqlx.DB, instrumentIDs []uuid.UUID, tw *TimeWindow, interval *time.Duration) ([]InclinometerTimeseries, error) {
+func ComputedInclinometerTimeseries(db *sqlx.DB, instrumentIDs []uuid.UUID, tw *timeseries.TimeWindow, interval *time.Duration) ([]InclinometerTimeseries, error) {
 
 	tt := make([]DBTimeseries, 0)
 	sql := `
@@ -610,31 +610,31 @@ func ComputedInclinometerTimeseries(db *sqlx.DB, instrumentIDs []uuid.UUID, tw *
 		GROUP BY timeseries_id
 	)
 	-- Stored Timeseries
-	SELECT r.id                     AS timeseries_id,
-		   ts.instrument_id         AS instrument_id,
-		   i.slug || '.' || ts.slug AS variable,
-		   false                    AS is_computed,
-		   null                     AS formula,
+	SELECT rt.id                          AS timeseries_id,
+		   ts.instrument_id               AS instrument_id,
+		   i.slug || '.' || ts.slug       AS variable,
+		   false                          AS is_computed,
+		   null                           AS formula,
 		   COALESCE(m.measurements, '[]') AS measurements
-	FROM required_timeseries r
-	INNER JOIN timeseries ts ON ts.id = r.id
+	FROM required_timeseries rt
+	INNER JOIN timeseries ts ON ts.id = rt.id
 	INNER JOIN instrument i ON i.id = ts.instrument_id AND i.id IN (SELECT id FROM requested_instruments)
-	LEFT JOIN measurements m ON m.timeseries_id = r.id
+	LEFT JOIN measurements m ON m.timeseries_id = rt.id
 	UNION
 	-- Computed Timeseries
-	SELECT i.id                    AS timeseries_id,
-		   i.instrument_id         AS instrument_id,
+	SELECT cc.id                   AS timeseries_id,
+		   cc.instrument_id        AS instrument_id,
 		   
 		   -- TODO: make this component of the query a 'slug'-type.
-		   i.name			       AS variable,
+		   cc.name			       AS variable,
 		   
 		   true                    AS is_computed,
-		   i.contents              AS formula,
+		   cc.contents             AS formula,
 		   '[]'::text              AS measurements,
 		   null                    AS next_measurement_low,
 		   null                    AS next_measurement_high
-	FROM calculation i
-	WHERE i.contents IS NOT NULL AND i.instrument_id IN (SELECT id FROM requested_instruments)
+	FROM calculation cc
+	WHERE cc.contents IS NOT NULL AND cc.instrument_id IN (SELECT id FROM requested_instruments)
 	ORDER BY is_computed
 	`
 
@@ -665,7 +665,7 @@ func ComputedInclinometerTimeseries(db *sqlx.DB, instrumentIDs []uuid.UUID, tw *
 			log.Println(err)
 		}
 
-		for i, _ := range tt2[idx].Measurements {
+		for i := range tt2[idx].Measurements {
 			values, err := ListInclinometerMeasurementValues(db, &t.TimeseriesID, tt2[idx].Measurements[i].Time, cm.Value)
 			if err != nil {
 				return nil, err
