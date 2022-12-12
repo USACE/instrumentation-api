@@ -87,6 +87,9 @@ func CreateOrUpdateInstrumentStatus(db *sqlx.DB, instrumentID *uuid.UUID, ss []I
 		return err
 	}
 	stmt2, err := txn.Prepare(createInstrumentStatusSQL())
+	if err != nil {
+		return err
+	}
 	for _, s := range ss {
 		if _, err := stmt2.Exec(instrumentID, s.StatusID, s.Time); err != nil {
 			return err

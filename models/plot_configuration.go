@@ -104,13 +104,22 @@ func CreatePlotConfiguration(db *sqlx.DB, pc *PlotConfiguration) (*PlotConfigura
 		`INSERT INTO plot_configuration (slug, name, project_id, creator, create_date) VALUES ($1, $2, $3, $4, $5)
 		 RETURNING id`,
 	)
+	if err != nil {
+		return nil, err
+	}
 	// Insert any timeseries_id in payload, not in table
 	stmt2, err := tx.Preparex(
 		`INSERT INTO plot_configuration_timeseries (plot_configuration_id, timeseries_id) VALUES ($1, $2)`,
 	)
+	if err != nil {
+		return nil, err
+	}
 	stmt3, err := tx.Preparex(
 		`INSERT INTO plot_configuration_settings (id, show_masked, show_nonvalidated, show_comments) VALUES ($1, $2, $3, $4)`,
 	)
+	if err != nil {
+		return nil, err
+	}
 
 	// ID of newly created plot configuration
 	var pcID uuid.UUID

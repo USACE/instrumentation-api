@@ -105,8 +105,8 @@ func CreateOrUpdateInclinometerMeasurements(db *sqlx.DB, im []ts.InclinometerMea
 	}
 
 	// Iterate All inclinometer Measurements
-	for idx, _ := range im {
-		for i, _ := range im[idx].Inclinometers {
+	for idx := range im {
+		for i := range im[idx].Inclinometers {
 			im[idx].Inclinometers[i].Creator = p.ID
 			im[idx].Inclinometers[i].CreateDate = createDate
 			if _, err := stmt.Exec(im[idx].TimeseriesID, im[idx].Inclinometers[i].Time, im[idx].Inclinometers[i].Values, p.ID, createDate); err != nil {

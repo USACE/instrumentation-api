@@ -213,7 +213,7 @@ func ValidateCreateInstruments(db *sqlx.DB, instruments []Instrument) (CreateIns
 	// Check that instrument names are unique name within project
 	validationResult.IsValid = true // Start with assumption that POST is valid
 	for _, n := range instruments {
-		if namesMap[*n.ProjectID][strings.ToUpper(n.Name)] != true {
+		if !namesMap[*n.ProjectID][strings.ToUpper(n.Name)] {
 			continue
 		}
 		// Add message to Errors and make sure isValid is false
@@ -250,6 +250,10 @@ func UpdateInstrument(db *sqlx.DB, i *Instrument) (*Instrument, error) {
 		 WHERE project_id = $1 AND id = $2
 		 RETURNING id`,
 	)
+	if err != nil {
+		return nil, err
+	}
+
 	// Update Instrument
 	var updatedID uuid.UUID
 	if err := stmt1.QueryRow(
