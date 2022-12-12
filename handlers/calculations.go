@@ -14,7 +14,7 @@ import (
 )
 
 // This is an endpoint for debugging at this time
-func ComputedTimeseries(db *sqlx.DB) echo.HandlerFunc {
+func AllTimeseriesWithMeasurements(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		// Instrument ID
 		instrumentID, err := uuid.Parse(c.Param("instrument_id"))
@@ -32,7 +32,7 @@ func ComputedTimeseries(db *sqlx.DB) echo.HandlerFunc {
 		// Interval - Hard Code at 1 Hour
 		interval := time.Hour
 
-		tt, err := models.ComputedTimeseries(db, instrumentIDs, &timeWindow, &interval)
+		tt, err := models.AllTimeseriesWithMeasurements(db, instrumentIDs, &timeWindow, &interval)
 		if err != nil {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
@@ -88,7 +88,7 @@ func CreateCalculation(db *sqlx.DB) echo.HandlerFunc {
 		calculationSlug, err := dbutils.NextUniqueSlug(formula.FormulaName, slugsTaken)
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
-		} 
+		}
 
 		formula.Slug = calculationSlug
 
