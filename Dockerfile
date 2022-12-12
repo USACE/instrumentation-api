@@ -3,13 +3,16 @@ FROM golang:1.19-alpine AS builder
 RUN apk update && apk add --no-cache git
 # Copy In Source Code
 WORKDIR /go/src/app
-COPY . .
 
-# Install Dependencies
-RUN go get -d -v
+# Install dependencies
+ENV CGO_ENABLED=0
+COPY go.* .
+RUN go mod download
+
 # Build
-RUN go get -d -v \
-  && GOOS=linux GOARCH=amd64 CGO_ENABLED=0 \
+COPY . .
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    GOOS=linux GOARCH=amd64 \
     go build -ldflags="-w -s" -o /go/bin/instrumentation-api
 
 # SCRATCH IMAGE
