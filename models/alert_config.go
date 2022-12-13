@@ -78,6 +78,7 @@ func CreateInstrumentAlertConfigs(db *sqlx.DB, instrumentID *uuid.UUID, alertCon
 	if err != nil {
 		return make([]AlertConfig, 0), err
 	}
+	defer txn.Rollback()
 
 	// Instrument
 	stmt1, err := txn.Preparex(

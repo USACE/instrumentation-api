@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"path/filepath"
@@ -44,7 +44,11 @@ func GetMedia(awsCfg *aws.Config, bucket *string, bucketPrefix string, routePref
 		//          S3 Key = (1) Start with URL of request (2) remove /develop (3) prepend /instrumentation
 		key := aws.String(bucketPrefix + strings.TrimPrefix(path, *routePrefix))
 
-		newSession := session.New(awsCfg)
+		newSession, err := session.NewSession(awsCfg)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, err.Error())
+		}
+
 		s3c := s3.New(newSession)
 
 		output, err := s3c.GetObject(&s3.GetObjectInput{Bucket: bucket, Key: key})
@@ -53,7 +57,7 @@ func GetMedia(awsCfg *aws.Config, bucket *string, bucketPrefix string, routePref
 		}
 
 		// S3 Output Body to Buffer
-		buff, buffErr := ioutil.ReadAll(output.Body)
+		buff, buffErr := io.ReadAll(output.Body)
 		if buffErr != nil {
 			return c.String(500, err.Error())
 		}

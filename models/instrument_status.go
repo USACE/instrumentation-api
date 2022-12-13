@@ -82,11 +82,16 @@ func GetInstrumentStatus(db *sqlx.DB, id *uuid.UUID) (*InstrumentStatus, error) 
 // CreateOrUpdateInstrumentStatus creates a Instrument Status, updates value on conflict
 func CreateOrUpdateInstrumentStatus(db *sqlx.DB, instrumentID *uuid.UUID, ss []InstrumentStatus) error {
 
-	txn, err := db.Begin()
+	txn, err := db.Beginx()
 	if err != nil {
 		return err
 	}
-	stmt2, err := txn.Prepare(createInstrumentStatusSQL())
+	defer txn.Rollback()
+
+	stmt2, err := txn.Preparex(createInstrumentStatusSQL())
+	if err != nil {
+		return err
+	}
 	for _, s := range ss {
 		if _, err := stmt2.Exec(instrumentID, s.StatusID, s.Time); err != nil {
 			return err

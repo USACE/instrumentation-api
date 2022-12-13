@@ -10,10 +10,11 @@ import (
 
 	"github.com/USACE/instrumentation-api/dbutils"
 	"github.com/USACE/instrumentation-api/models"
+	"github.com/USACE/instrumentation-api/timeseries"
 )
 
 // This is an endpoint for debugging at this time
-func ComputedTimeseries(db *sqlx.DB) echo.HandlerFunc {
+func AllTimeseriesWithMeasurements(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		// Instrument ID
 		instrumentID, err := uuid.Parse(c.Param("instrument_id"))
@@ -24,14 +25,14 @@ func ComputedTimeseries(db *sqlx.DB) echo.HandlerFunc {
 		instrumentIDs := make([]uuid.UUID, 1)
 		instrumentIDs[0] = instrumentID
 		// Time Window
-		timeWindow := models.TimeWindow{
+		timeWindow := timeseries.TimeWindow{
 			After:  time.Date(2020, 1, 3, 0, 0, 0, 0, time.UTC),
 			Before: time.Date(2021, 1, 5, 0, 0, 0, 0, time.UTC),
 		}
 		// Interval - Hard Code at 1 Hour
 		interval := time.Hour
 
-		tt, err := models.ComputedTimeseries(db, instrumentIDs, &timeWindow, &interval)
+		tt, err := models.AllTimeseriesWithMeasurements(db, instrumentIDs, &timeWindow, &interval)
 		if err != nil {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
@@ -87,7 +88,7 @@ func CreateCalculation(db *sqlx.DB) echo.HandlerFunc {
 		calculationSlug, err := dbutils.NextUniqueSlug(formula.FormulaName, slugsTaken)
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
-		} 
+		}
 
 		formula.Slug = calculationSlug
 

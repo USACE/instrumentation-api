@@ -127,29 +127,18 @@ CREATE OR REPLACE VIEW v_project AS (
 			CROSS JOIN config cfg
 );
 
--- v_timeseries
+-- stored and computed timeseries
 CREATE OR REPLACE VIEW v_timeseries AS (
     WITH ts_stored_and_computed AS (
-        SELECT id,
+        SELECT
+            id,
             slug,
             name,
             instrument_id,
             parameter_id,
             unit_id,
-            false                AS is_computed
+            (SELECT id IN (SELECT timeseries_id FROM calculation)) AS is_computed
         FROM timeseries
-        UNION
-        SELECT CC.id,
-            'formula_' || CC.name AS slug,
-            CC.name,
-            CC.instrument_id,
-            CC.parameter_id,
-            CC.unit_id,
-            'true'                AS is_computed
-        FROM instrument II
-        LEFT JOIN calculation CC
-        ON CC.instrument_id = II.id
-        WHERE NOT II.deleted
     )
     SELECT t.id                 AS id,
         t.slug                  AS slug,
@@ -173,16 +162,7 @@ CREATE OR REPLACE VIEW v_timeseries AS (
     INNER JOIN unit U ON u.id = t.unit_id
 );
 
--- v_timeseries_project_map
-CREATE OR REPLACE VIEW v_timeseries_project_map AS (
-    SELECT t.id AS timeseries_id,
-           p.id AS project_id
-    FROM timeseries t
-    LEFT JOIN instrument n ON t.instrument_id = n.id
-    LEFT JOIN project p ON p.id = n.project_id
-);
-
--- v_timeseries_latest; same as v_timeseries, joined with latest times and values
+-- stored timeseries only
 CREATE OR REPLACE VIEW v_timeseries_latest AS (
     SELECT t.*,
        m.time AS latest_time,
@@ -193,6 +173,52 @@ CREATE OR REPLACE VIEW v_timeseries_latest AS (
 	    FROM timeseries_measurement
 	    ORDER BY timeseries_id, time DESC
     ) m ON t.id = m.timeseries_id
+    WHERE NOT t.is_computed
+);
+
+-- computed timeseries and stored dependency timeseries
+CREATE OR REPLACE VIEW v_timeseries_dependency AS (
+    WITH variable_tsid_map AS (
+	    SELECT a.id AS timeseries_id,
+               b.slug || '.' || a.slug AS variable
+	    FROM timeseries a
+	    LEFT JOIN instrument b ON b.id = a.instrument_id
+        WHERE a.id NOT IN (SELECT timeseries_id FROM calculation)
+    )
+    SELECT i.instrument_id   AS instrument_id,
+           i.formula_id      AS timeseries_id,
+           i.parsed_variable AS parsed_variable,
+           m.timeseries_id   AS dependency_timeseries_id
+    FROM (
+        SELECT instrument_id,
+            id AS formula_id,
+            (regexp_matches(contents, '\[(.*?)\]', 'g'))[1] AS parsed_variable
+        FROM timeseries t
+        INNER JOIN calculation cc ON cc.timeseries_id = t.id
+    ) i
+    LEFT JOIN variable_tsid_map m ON m.variable = i.parsed_variable
+);
+
+-- v_timeseries_project_map
+CREATE OR REPLACE VIEW v_timeseries_project_map AS (
+    SELECT t.id AS timeseries_id,
+           p.id AS project_id
+    FROM timeseries t
+    LEFT JOIN instrument n ON t.instrument_id = n.id
+    LEFT JOIN project p ON p.id = n.project_id
+);
+
+CREATE OR REPLACE VIEW v_timeseries_stored AS (
+    SELECT * FROM timeseries WHERE id NOT IN (SELECT timeseries_id FROM calculation)
+);
+
+CREATE OR REPLACE VIEW v_timeseries_computed AS (
+    SELECT
+        ts.*,
+        cc.contents AS contents
+    FROM timeseries ts
+    LEFT JOIN calculation cc ON ts.id = cc.timeseries_id
+    WHERE id IN (SELECT timeseries_id FROM calculation)
 );
 
 -- v_email_autocomplete
@@ -348,27 +374,4 @@ CREATE OR REPLACE VIEW v_profile AS (
            COALESCE(r.roles,'{}') AS roles
     FROM profile p
     LEFT JOIN roles_by_profile r ON r.profile_id = p.id
-);
-
-
--- Only Includes Computed Timeseries
--- Note: timeseries_id in this table is the formula_id for a given instrument
-CREATE OR REPLACE VIEW v_timeseries_dependency AS (
-    WITH variable_tsid_map AS (
-	    SELECT a.id AS timeseries_id,
-               b.slug || '.' || a.slug AS variable
-	    FROM timeseries a
-	    LEFT JOIN instrument b ON b.id = a.instrument_id
-    )
-    SELECT i.instrument_id   AS instrument_id,
-           i.formula_id      AS timeseries_id,
-           i.parsed_variable AS parsed_variable,
-           m.timeseries_id   AS dependency_timeseries_id
-    FROM (
-        SELECT instrument_id,
-            id AS formula_id,
-            (regexp_matches(contents, '\[(.*?)\]', 'g'))[1] AS parsed_variable
-        FROM calculation
-    ) i
-    LEFT JOIN variable_tsid_map m ON m.variable = i.parsed_variable
 );

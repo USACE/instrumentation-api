@@ -2043,6 +2043,77 @@
                         }
                     }
                 }
+            },
+            "put": {
+                "tags": [
+                    "Timeseries"
+                ],
+                "summary": "UpdateTimeseriesMeasurements",
+                "description": "Overwrites measurements with the supplied payload within a time window (> after, < before)",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": {
+                                    "timeseries_id": "869465fc-dc1e-445e-81f4-9979b5fadda9",
+                                    "items": [
+                                        {
+                                            "time": "2020-01-23T00:00:00Z",
+                                            "value": 130.05,
+                                            "masked": true,
+                                            "validated": true,
+                                            "annotation": "test"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "after",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Default timestamp 7 days prior to now",
+                        "example": "1900-01-01T00:00:00.00Z"
+                    },
+                    {
+                        "name": "before",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Default timestamp now",
+                        "example": "2021-01-01T00:00:00.00Z"
+                    },
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
             }
         },
         "/projects/{project_id}/instruments/{instrument_id}/constants": {
