@@ -94,13 +94,14 @@ func GetPlotConfiguration(db *sqlx.DB, projectID *uuid.UUID, plotconfigID *uuid.
 // CreatePlotConfiguration add plot configuration for a project
 func CreatePlotConfiguration(db *sqlx.DB, pc *PlotConfiguration) (*PlotConfiguration, error) {
 
-	tx, err := db.Beginx()
+	txn, err := db.Beginx()
 	if err != nil {
 		return nil, err
 	}
+	defer txn.Rollback()
 
 	// Create Batch Plot
-	stmt1, err := tx.Preparex(
+	stmt1, err := txn.Preparex(
 		`INSERT INTO plot_configuration (slug, name, project_id, creator, create_date) VALUES ($1, $2, $3, $4, $5)
 		 RETURNING id`,
 	)
@@ -108,13 +109,13 @@ func CreatePlotConfiguration(db *sqlx.DB, pc *PlotConfiguration) (*PlotConfigura
 		return nil, err
 	}
 	// Insert any timeseries_id in payload, not in table
-	stmt2, err := tx.Preparex(
+	stmt2, err := txn.Preparex(
 		`INSERT INTO plot_configuration_timeseries (plot_configuration_id, timeseries_id) VALUES ($1, $2)`,
 	)
 	if err != nil {
 		return nil, err
 	}
-	stmt3, err := tx.Preparex(
+	stmt3, err := txn.Preparex(
 		`INSERT INTO plot_configuration_settings (id, show_masked, show_nonvalidated, show_comments) VALUES ($1, $2, $3, $4)`,
 	)
 	if err != nil {
@@ -124,34 +125,25 @@ func CreatePlotConfiguration(db *sqlx.DB, pc *PlotConfiguration) (*PlotConfigura
 	// ID of newly created plot configuration
 	var pcID uuid.UUID
 	if err := stmt1.Get(&pcID, pc.Slug, pc.Name, pc.ProjectID, pc.Creator, pc.CreateDate); err != nil {
-		tx.Rollback()
 		return nil, err
 	}
 	// Create associated plot_configuration_timeseries records
 	for _, tsid := range pc.TimeseriesID {
 		if _, err := stmt2.Exec(&pcID, &tsid); err != nil {
-			tx.Rollback()
 			return nil, err
 		}
 	}
 	// Create settings.
 	if _, err := stmt3.Exec(&pcID, pc.ShowMasked, pc.ShowNonValidated, pc.ShowComments); err != nil {
-		tx.Rollback()
 		return nil, err
 	}
-
 	if err := stmt1.Close(); err != nil {
-		tx.Rollback()
 		return nil, err
 	}
-
 	if err := stmt2.Close(); err != nil {
-		tx.Rollback()
 		return nil, err
 	}
-
-	if err := tx.Commit(); err != nil {
-		tx.Rollback()
+	if err := txn.Commit(); err != nil {
 		return nil, err
 	}
 
@@ -161,22 +153,21 @@ func CreatePlotConfiguration(db *sqlx.DB, pc *PlotConfiguration) (*PlotConfigura
 // UpdatePlotConfiguration update plot configuration for a project
 func UpdatePlotConfiguration(db *sqlx.DB, pc *PlotConfiguration) (*PlotConfiguration, error) {
 
-	tx, err := db.Beginx()
+	txn, err := db.Beginx()
 	if err != nil {
 		return nil, err
 	}
+	defer txn.Rollback()
 
 	// Prepared Statement; Update Existing Plot Configuration
-	stmt1, err := tx.Preparex(`UPDATE plot_configuration SET name = $3, updater = $4, update_date = $5 WHERE project_id = $1 AND id = $2`)
+	stmt1, err := txn.Preparex(`UPDATE plot_configuration SET name = $3, updater = $4, update_date = $5 WHERE project_id = $1 AND id = $2`)
 	if err != nil {
-		tx.Rollback()
 		return nil, err
 	}
 
 	// Prepared Statement; Update exiting plot configuration settings
-	stmt4, err := tx.Preparex(`UPDATE plot_configuration_settings SET show_masked = $2, show_nonvalidated = $3, show_comments = $4 WHERE id = $1`)
+	stmt4, err := txn.Preparex(`UPDATE plot_configuration_settings SET show_masked = $2, show_nonvalidated = $3, show_comments = $4 WHERE id = $1`)
 	if err != nil {
-		tx.Rollback()
 		return nil, err
 	}
 
@@ -187,18 +178,16 @@ func UpdatePlotConfiguration(db *sqlx.DB, pc *PlotConfiguration) (*PlotConfigura
 		pc.ID, pc.TimeseriesID,
 	)
 	if err != nil {
-		tx.Rollback()
 		return nil, err
 	}
-	stmt2, err := tx.Preparex(tx.Rebind(query))
+	stmt2, err := txn.Preparex(txn.Rebind(query))
 	if err != nil {
-		tx.Rollback()
 		return nil, err
 	}
 
 	// Prepared Statement; Insert plot_configuration_timeseries from updated plot config
 	// DO NOTHING if record already exists for given timeseries_id
-	stmt3, err := tx.Preparex(
+	stmt3, err := txn.Preparex(
 		`INSERT INTO plot_configuration_timeseries (plot_configuration_id, timeseries_id) VALUES ($1, $2)
 		 ON CONFLICT ON CONSTRAINT plot_configuration_unique_timeseries DO NOTHING`,
 	)
@@ -207,22 +196,18 @@ func UpdatePlotConfiguration(db *sqlx.DB, pc *PlotConfiguration) (*PlotConfigura
 	}
 
 	if _, err := stmt1.Exec(pc.ProjectID, pc.ID, pc.Name, pc.Updater, pc.UpdateDate); err != nil {
-		tx.Rollback()
 		return nil, err
 	}
 
 	if _, err := stmt2.Exec(args...); err != nil {
-		tx.Rollback()
 		return nil, err
 	}
 	if _, err := stmt4.Exec(pc.ID, pc.ShowMasked, pc.ShowNonValidated, pc.ShowComments); err != nil {
-		tx.Rollback()
 		return nil, err
 	}
 
 	for _, tsid := range pc.TimeseriesID {
 		if _, err := stmt3.Exec(pc.ID, tsid); err != nil {
-			tx.Rollback()
 			return nil, err
 		}
 	}
@@ -240,8 +225,7 @@ func UpdatePlotConfiguration(db *sqlx.DB, pc *PlotConfiguration) (*PlotConfigura
 		return nil, err
 	}
 
-	if err := tx.Commit(); err != nil {
-		tx.Rollback()
+	if err := txn.Commit(); err != nil {
 		return nil, err
 	}
 

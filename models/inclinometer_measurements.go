@@ -89,18 +89,18 @@ func DeleteInclinometerMeasurements(db *sqlx.DB, id *uuid.UUID, time time.Time) 
 // If a inclinometer measurement already exists for a given timeseries_id and time, the values is updated
 func CreateOrUpdateInclinometerMeasurements(db *sqlx.DB, im []ts.InclinometerMeasurementCollection, p *Profile, createDate time.Time) ([]ts.InclinometerMeasurementCollection, error) {
 
-	txn, err := db.Begin()
+	txn, err := db.Beginx()
 	if err != nil {
 		return nil, err
 	}
+	defer txn.Rollback()
 
-	stmt, err := txn.Prepare(
+	stmt, err := txn.Preparex(
 		`INSERT INTO inclinometer_measurement (timeseries_id, time, values, creator, create_date) VALUES ($1, $2, $3, $4, $5)
 		 ON CONFLICT ON CONSTRAINT inclinometer_unique_time DO UPDATE SET values = EXCLUDED.values; 
 		`,
 	)
 	if err != nil {
-		txn.Rollback()
 		return nil, err
 	}
 
@@ -110,17 +110,14 @@ func CreateOrUpdateInclinometerMeasurements(db *sqlx.DB, im []ts.InclinometerMea
 			im[idx].Inclinometers[i].Creator = p.ID
 			im[idx].Inclinometers[i].CreateDate = createDate
 			if _, err := stmt.Exec(im[idx].TimeseriesID, im[idx].Inclinometers[i].Time, im[idx].Inclinometers[i].Values, p.ID, createDate); err != nil {
-				txn.Rollback()
 				return nil, err
 			}
 		}
 	}
 	if err := stmt.Close(); err != nil {
-		txn.Rollback()
 		return nil, err
 	}
 	if err := txn.Commit(); err != nil {
-		txn.Rollback()
 		return nil, err
 	}
 
@@ -135,7 +132,7 @@ func CreateTimeseriesConstant(db *sqlx.DB, tsID *uuid.UUID, parameterName string
 	var instrumentId []uuid.UUID
 	if err := db.Select(&instrumentId,
 		`SELECT instrument_id
-		FROM timeseries T
+		FROM v_timeseries_stored T
 		WHERE t.id= $1`, tsID,
 	); err != nil {
 		return err

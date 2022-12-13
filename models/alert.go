@@ -27,6 +27,8 @@ func CreateAlerts(db *sqlx.DB, alertConfigIDS []uuid.UUID) error {
 	if err != nil {
 		return err
 	}
+	defer txn.Rollback()
+
 	// Create Alert (CreateDate is a default now() in the database)
 	stmt1, err := txn.Preparex(`INSERT INTO alert (alert_config_id) VALUES ($1)`)
 	if err != nil {

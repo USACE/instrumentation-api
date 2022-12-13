@@ -134,6 +134,7 @@ func CreateInstruments(db *sqlx.DB, instruments []Instrument) ([]IDAndSlug, erro
 	if err != nil {
 		return make([]IDAndSlug, 0), err
 	}
+	defer txn.Rollback()
 
 	// Instrument
 	stmt1, err := txn.Preparex(
@@ -228,14 +229,14 @@ func ValidateCreateInstruments(db *sqlx.DB, instruments []Instrument) (CreateIns
 
 // UpdateInstrument updates a single instrument
 func UpdateInstrument(db *sqlx.DB, i *Instrument) (*Instrument, error) {
-
-	txn, err := db.Begin()
+	txn, err := db.Beginx()
 	if err != nil {
 		return nil, err
 	}
+	defer txn.Rollback()
 
 	// Instrument
-	stmt1, err := txn.Prepare(
+	stmt1, err := txn.Preparex(
 		`UPDATE instrument
 		 SET    name = $3,
 			    type_id = $4,
@@ -256,7 +257,7 @@ func UpdateInstrument(db *sqlx.DB, i *Instrument) (*Instrument, error) {
 
 	// Update Instrument
 	var updatedID uuid.UUID
-	if err := stmt1.QueryRow(
+	if err := stmt1.QueryRowx(
 		i.ProjectID, i.ID, i.Name, i.TypeID, wkb.Value(i.Geometry.Geometry()),
 		i.Updater, i.UpdateDate, i.ProjectID, i.Station, i.StationOffset, i.NIDID, i.USGSID,
 	).Scan(&updatedID); err != nil {
@@ -267,7 +268,7 @@ func UpdateInstrument(db *sqlx.DB, i *Instrument) (*Instrument, error) {
 	}
 
 	// Instrument Status
-	stmt2, err := txn.Prepare(createInstrumentStatusSQL())
+	stmt2, err := txn.Preparex(createInstrumentStatusSQL())
 	if err != nil {
 		return nil, err
 	}

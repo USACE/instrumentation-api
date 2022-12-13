@@ -85,6 +85,7 @@ func CreateInstrumentNote(db *sqlx.DB, notes []InstrumentNote) ([]InstrumentNote
 	if err != nil {
 		return nil, err
 	}
+	defer txn.Rollback()
 
 	stmt, err := txn.Preparex(
 		`INSERT INTO instrument_note (instrument_id, title, body, time, creator, create_date)

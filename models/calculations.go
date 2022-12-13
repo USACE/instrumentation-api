@@ -94,7 +94,7 @@ const listCalculationsSQL string = `
 		slug,
 		name,
 		COALESCE(contents, '') AS contents
-	FROM calculation
+	FROM v_timeseries_computed
 `
 
 // CalculationsFactory converts database rows to Calculation objects
@@ -133,7 +133,7 @@ func GetInstrumentCalculations(db *sqlx.DB, instrument *Instrument) ([]Calculati
 
 func ListCalculationSlugs(db *sqlx.DB) ([]string, error) {
 
-	rows, err := db.Queryx("SELECT slug from calculation")
+	rows, err := db.Queryx("SELECT slug from v_timeseries_computed")
 	if err != nil {
 		return nil, err
 	}
@@ -170,22 +170,29 @@ func CreateCalculation(db *sqlx.DB, formula *Calculation) error {
 	if reflect.ValueOf(formula.UnitID).IsZero() {
 		formula.UnitID = uuid.Must(uuid.Parse("4a999277-4cf5-4282-93ce-23b33c65e2c8"))
 	}
+	txn, err := db.Beginx()
+	if err != nil {
+		return err
+	}
+	defer txn.Rollback()
 
-	stmt := `
-	INSERT INTO calculation (
-		instrument_id,
-		parameter_id,
-		unit_id,
-		slug,
-		name,
-		contents
-	)
-	VALUES
-		($1, $2, $3, $4, $5, $6)
-	RETURNING id
-	`
+	stmt1, err := txn.Preparex(`
+		INSERT INTO timeseries (
+			instrument_id,
+			parameter_id,
+			unit_id,
+			slug,
+			name
+		)
+		VALUES
+			($1, $2, $3, $4, $5)
+		RETURNING id
+	`)
+	if err != nil {
+		return err
+	}
 
-	rows, err := db.Query(stmt, &formula.InstrumentID, &formula.ParameterID, &formula.UnitID, &formula.Slug, &formula.FormulaName, &formula.Formula)
+	rows, err := stmt1.Queryx(&formula.InstrumentID, &formula.ParameterID, &formula.UnitID, &formula.Slug, &formula.FormulaName)
 	if err != nil {
 		return err
 	}
@@ -198,17 +205,46 @@ func CreateCalculation(db *sqlx.DB, formula *Calculation) error {
 	if rows.Next() {
 		return errors.New("rows should be exactly one")
 	}
-	return nil
-}
 
-func UpdateCalculation(db *sqlx.DB, formula *Calculation) error {
-	tx, err := db.Begin()
+	stmt2, err := txn.Preparex(`
+		INSERT INTO calculation (timeseries_id, contents)
+		VALUES ($1, $2)
+		RETURNING timeseries_id
+	`)
 	if err != nil {
 		return err
 	}
 
+	rows2, err := stmt2.Queryx(&formula.ID, &formula.Formula)
+	if err != nil {
+		return err
+	}
+	if !rows2.Next() {
+		return errors.New("rows should be non-empty")
+	}
+	if err := rows2.Scan(&formula.ID); err != nil {
+		return err
+	}
+	if rows2.Next() {
+		return errors.New("rows should be exactly one")
+	}
+
+	if err := txn.Commit(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func UpdateCalculation(db *sqlx.DB, formula *Calculation) error {
+	txn, err := db.Beginx()
+	if err != nil {
+		return err
+	}
+	defer txn.Rollback()
+
 	var defaults Calculation
-	row := tx.QueryRow("SELECT instrument_id, parameter_id, unit_id, slug, name, contents FROM calculation WHERE id = $1", &formula.ID)
+	row := txn.QueryRowx("SELECT instrument_id, parameter_id, unit_id, slug, name, contents FROM v_timeseries_computed WHERE id = $1", &formula.ID)
 	if err := row.Scan(
 		&defaults.InstrumentID,
 		&defaults.ParameterID,
@@ -217,7 +253,6 @@ func UpdateCalculation(db *sqlx.DB, formula *Calculation) error {
 		&defaults.FormulaName,
 		&defaults.Formula,
 	); err != nil {
-		tx.Rollback()
 		return err
 	}
 
@@ -243,57 +278,49 @@ func UpdateCalculation(db *sqlx.DB, formula *Calculation) error {
 		formula.Formula = defaults.Formula
 	}
 
-	stmt, err := tx.Prepare(
-		`
-		INSERT INTO calculation
+	stmt, err := txn.Preparex(`
+		INSERT INTO timeseries
 			(
 			 id,
 			 instrument_id,
 			 parameter_id,
 			 unit_id,
 			 slug,
-			 name,
-			 contents
+			 name
 			)
 		VALUES
-			($1, $2, $3, $4, $5, $6, $7)
+			($1, $2, $3, $4, $5, $6)
 		ON CONFLICT (id) DO UPDATE SET
-			instrument_id = COALESCE(EXCLUDED.instrument_id, $8),
-			parameter_id = COALESCE(EXCLUDED.parameter_id, $9),
-			unit_id = COALESCE(EXCLUDED.unit_id, $10),
-			slug = COALESCE(EXCLUDED.slug, $11),
-			name = COALESCE(EXCLUDED.name, $12),
-			contents = COALESCE(EXCLUDED.contents, $13)
+			instrument_id = COALESCE(EXCLUDED.instrument_id, $7),
+			parameter_id = COALESCE(EXCLUDED.parameter_id, $8),
+			unit_id = COALESCE(EXCLUDED.unit_id, $9),
+			slug = COALESCE(EXCLUDED.slug, $10),
+			name = COALESCE(EXCLUDED.name, $11)
 		RETURNING
 			id,
 			instrument_id,
 			parameter_id,
 			unit_id,
 			slug,
-			name,
-			contents
-		`)
+			name
+	`)
 	if err != nil {
-		tx.Rollback()
 		return err
 	}
-	rows, err := stmt.Query(
+	rows, err := stmt.Queryx(
 		&formula.ID,
 		&formula.InstrumentID,
 		&formula.ParameterID,
 		&formula.UnitID,
 		&formula.Slug,
 		&formula.FormulaName,
-		&formula.Formula,
 		&defaults.InstrumentID,
 		&defaults.ParameterID,
 		&defaults.UnitID,
 		&defaults.Slug,
 		&defaults.FormulaName,
-		&defaults.Formula,
 	)
 	if err != nil {
-		tx.Rollback()
 		return err
 	}
 	if !rows.Next() {
@@ -306,11 +333,43 @@ func UpdateCalculation(db *sqlx.DB, formula *Calculation) error {
 		&formula.UnitID,
 		&formula.Slug,
 		&formula.FormulaName,
+	); err != nil {
+		return err
+	}
+	if err := rows.Close(); err != nil {
+		return err
+	}
+
+	stmt2, err := txn.Preparex(`
+		INSERT INTO calculation (timeseries_id, contents) VALUES ($1, $2)
+		ON CONFLICT (timeseries_id) DO UPDATE SET
+			contents = COALESCE(EXCLUDED.contents, $3)
+		RETURNING contents
+	`)
+	if err != nil {
+		return err
+	}
+	rows2, err := stmt2.Queryx(
+		&formula.ID,
+		&formula.Formula,
+		&defaults.Formula,
+	)
+	if err != nil {
+		return err
+	}
+	if !rows2.Next() {
+		return errors.New("no results")
+	}
+	if err := rows2.Scan(
 		&formula.Formula,
 	); err != nil {
 		return err
 	}
-	if err := tx.Commit(); err != nil {
+	if err := rows2.Close(); err != nil {
+		return err
+	}
+
+	if err := txn.Commit(); err != nil {
 		return err
 	}
 
@@ -320,7 +379,7 @@ func UpdateCalculation(db *sqlx.DB, formula *Calculation) error {
 // DeleteCalculation removes the `Calculation` with ID `formulaID` from the database,
 // effectively dissociating it from the instrument in question.
 func DeleteCalculation(db *sqlx.DB, formulaID uuid.UUID) error {
-	result, err := db.Exec("DELETE FROM calculation WHERE id = $1", formulaID)
+	result, err := db.Exec("DELETE FROM timeseries WHERE id = $1 AND id IN (SELECT timeseries_id FROM calculation)", formulaID)
 	if err != nil {
 		return err
 	}

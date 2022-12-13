@@ -509,7 +509,7 @@ func queryAllTimeseriesForInstruments(db *sqlx.DB, instrumentIDs []uuid.UUID, tw
 		WHERE id IN (?)
 	), required_timeseries AS (
 	-- 	Timeseries for Instrument
-		SELECT id FROM timeseries WHERE instrument_id IN (SELECT id FROM requested_instruments)
+		SELECT id FROM v_timeseries_stored WHERE instrument_id IN (SELECT id FROM requested_instruments)
 		UNION
 	-- Dependencies for Instrument Timeseries
 		SELECT dependency_timeseries_id AS id
@@ -571,7 +571,7 @@ func queryAllTimeseriesForInstruments(db *sqlx.DB, instrumentIDs []uuid.UUID, tw
 		'[]'::text              AS measurements,
 		null                    AS next_measurement_low,
 		null                    AS next_measurement_high
-	FROM calculation cc
+	FROM v_timeseries_computed cc
 	WHERE cc.contents IS NOT NULL AND cc.instrument_id IN (SELECT id FROM requested_instruments)
 	ORDER BY is_computed
 	`
@@ -682,7 +682,7 @@ func queryComputedTimeseries(db *sqlx.DB, timeseriesID *uuid.UUID, instrumentID 
 		'[]'::text              AS measurements,
 		null                    AS next_measurement_low,
 		null                    AS next_measurement_high
-	FROM calculation cc
+	FROM v_timeseries_computed cc
 	WHERE cc.contents IS NOT NULL
 	AND cc.instrument_id IN (SELECT id FROM requested_instruments)
 	AND cc.id = ?
@@ -737,7 +737,7 @@ func ComputedInclinometerTimeseries(db *sqlx.DB, instrumentIDs []uuid.UUID, tw *
 		WHERE id IN (?)
 	), required_timeseries AS (
 	-- 	Timeseries for Instrument
-		SELECT id FROM timeseries WHERE instrument_id IN (SELECT id FROM requested_instruments)
+		SELECT id FROM v_timeseries_stored WHERE instrument_id IN (SELECT id FROM requested_instruments)
 		UNION
 	-- Dependencies for Instrument Timeseries
 		SELECT dependency_timeseries_id AS id
@@ -772,7 +772,7 @@ func ComputedInclinometerTimeseries(db *sqlx.DB, instrumentIDs []uuid.UUID, tw *
 		   true                    AS is_computed,
 		   cc.contents             AS formula,
 		   '[]'::text              AS measurements
-	FROM calculation cc
+	FROM v_timeseries_computed cc
 	WHERE cc.contents IS NOT NULL AND cc.instrument_id IN (SELECT id FROM requested_instruments)
 	ORDER BY is_computed
 	`

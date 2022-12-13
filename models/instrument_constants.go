@@ -30,6 +30,8 @@ func CreateInstrumentConstants(db *sqlx.DB, tt []ts.Timeseries) ([]ts.Timeseries
 	if err != nil {
 		return nil, err
 	}
+	defer txn.Rollback()
+
 	// Create Timeseries
 	stmt1, err := txn.Preparex(
 		`INSERT INTO timeseries (instrument_id, slug, name, parameter_id, unit_id)
