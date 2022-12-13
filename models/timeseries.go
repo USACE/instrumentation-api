@@ -147,6 +147,7 @@ func CreateTimeseries(db *sqlx.DB, tt []ts.Timeseries) ([]ts.Timeseries, error) 
 	if err != nil {
 		return nil, err
 	}
+	defer txn.Rollback()
 
 	// Insert Timeseries
 	stmt, err := txn.Preparex(

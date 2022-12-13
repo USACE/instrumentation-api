@@ -170,6 +170,7 @@ func CreateProjectBulk(db *sqlx.DB, projects []Project) ([]IDAndSlug, error) {
 	if err != nil {
 		return make([]IDAndSlug, 0), err
 	}
+	defer txn.Rollback()
 
 	// Instrument
 	stmt1, err := txn.Preparex(

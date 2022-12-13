@@ -93,28 +93,26 @@ func ConstantMeasurement(db *sqlx.DB, tsID *uuid.UUID, constantName string) (*ts
 // CreateOrUpdateTimeseriesMeasurements creates many timeseries from an array of timeseries
 // If a timeseries measurement already exists for a given timeseries_id and time, the value is updated
 func CreateOrUpdateTimeseriesMeasurements(db *sqlx.DB, mc []ts.MeasurementCollection) ([]ts.MeasurementCollection, error) {
-
-	txn, err := db.Begin()
+	txn, err := db.Beginx()
 	if err != nil {
 		return nil, err
 	}
+	defer txn.Rollback()
 
-	stmt_measurement, err := txn.Prepare(
+	stmt_measurement, err := txn.Preparex(
 		`INSERT INTO timeseries_measurement (timeseries_id, time, value) VALUES ($1, $2, $3)
 		 ON CONFLICT ON CONSTRAINT timeseries_unique_time DO UPDATE SET value = EXCLUDED.value; 
 		`,
 	)
 	if err != nil {
-		txn.Rollback()
 		return nil, err
 	}
-	stmt_notes, err := txn.Prepare(
+	stmt_notes, err := txn.Preparex(
 		`INSERT INTO timeseries_notes (timeseries_id, time, masked, validated, annotation) VALUES ($1, $2, $3, $4, $5)
 		ON CONFLICT ON CONSTRAINT notes_unique_time DO UPDATE SET masked = EXCLUDED.masked, validated = EXCLUDED.validated, annotation = EXCLUDED.annotation;
 		`,
 	)
 	if err != nil {
-		txn.Rollback()
 		return nil, err
 	}
 
@@ -122,25 +120,20 @@ func CreateOrUpdateTimeseriesMeasurements(db *sqlx.DB, mc []ts.MeasurementCollec
 	for _, c := range mc {
 		for _, m := range c.Items {
 			if _, err := stmt_measurement.Exec(c.TimeseriesID, m.Time, m.Value); err != nil {
-				txn.Rollback()
 				return nil, err
 			}
 			if _, err := stmt_notes.Exec(c.TimeseriesID, m.Time, m.Masked, m.Validated, m.Annotation); err != nil {
-				txn.Rollback()
 				return nil, err
 			}
 		}
 	}
 	if err := stmt_measurement.Close(); err != nil {
-		txn.Rollback()
 		return nil, err
 	}
 	if err := stmt_notes.Close(); err != nil {
-		txn.Rollback()
 		return nil, err
 	}
 	if err := txn.Commit(); err != nil {
-		txn.Rollback()
 		return nil, err
 	}
 
@@ -150,55 +143,49 @@ func CreateOrUpdateTimeseriesMeasurements(db *sqlx.DB, mc []ts.MeasurementCollec
 // UpdateTimeseriesMeasurements updates many timeseries measurements, "overwriting" time and values to match paylaod
 func UpdateTimeseriesMeasurements(db *sqlx.DB, mc []ts.MeasurementCollection, tw *ts.TimeWindow) ([]ts.MeasurementCollection, error) {
 
-	txn, err := db.Begin()
+	txn, err := db.Beginx()
 	if err != nil {
 		return nil, err
 	}
+	defer txn.Rollback()
 
-	stmt_measurement, err := txn.Prepare(
+	stmt_measurement, err := txn.Preparex(
 		`DELETE FROM timeseries_measurement WHERE timeseries_id = $1 AND time > $2 AND time < $3; 
 		`,
 	)
 	if err != nil {
-		txn.Rollback()
 		return nil, err
 	}
-	stmt_notes, err := txn.Prepare(
+	stmt_notes, err := txn.Preparex(
 		`DELETE FROM timeseries_notes WHERE timeseries_id = $1 AND time > $2 AND time < $3; 
 		`,
 	)
 	if err != nil {
-		txn.Rollback()
 		return nil, err
 	}
 
 	for _, c := range mc {
 		if _, err := stmt_measurement.Exec(c.TimeseriesID, tw.After, tw.Before); err != nil {
-			txn.Rollback()
 			return nil, err
 		}
 		if _, err := stmt_notes.Exec(c.TimeseriesID, tw.After, tw.Before); err != nil {
-			txn.Rollback()
 			return nil, err
 		}
 	}
 
 	if err := stmt_measurement.Close(); err != nil {
-		txn.Rollback()
 		return nil, err
 	}
 	if err := stmt_notes.Close(); err != nil {
-		txn.Rollback()
-		return nil, err
-	}
-	if err := txn.Commit(); err != nil {
-		txn.Rollback()
 		return nil, err
 	}
 
 	mc, err = CreateOrUpdateTimeseriesMeasurements(db, mc)
 	if err != nil {
-		txn.Rollback()
+		return nil, err
+	}
+
+	if err := txn.Commit(); err != nil {
 		return nil, err
 	}
 
@@ -226,12 +213,14 @@ func constantMeasurementSQL() string {
 				M.time,
 				M.value
 			FROM timeseries_measurement M
-			INNER JOIN timeseries T
+			INNER JOIN v_timeseries_stored T
 				ON T.id = M.timeseries_id
 			INNER JOIN parameter P
 				ON P.id = T.parameter_id
-			WHERE T.instrument_id in (SELECT  instrument_id
-			FROM timeseries T
-			WHERE t.id= $1)
+			WHERE T.instrument_id in (
+				SELECT  instrument_id
+				FROM v_timeseries_stored T
+				WHERE t.id= $1
+			)
 	`
 }

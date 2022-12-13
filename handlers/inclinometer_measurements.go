@@ -77,7 +77,7 @@ func ListInclinometerMeasurements(db *sqlx.DB) echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 
-		for idx, _ := range im.Inclinometers {
+		for idx := range im.Inclinometers {
 			values, err := models.ListInclinometerMeasurementValues(db, &tsID, im.Inclinometers[idx].Time, cm.Value)
 			if err != nil {
 				return c.JSON(http.StatusInternalServerError, err)

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"sort"
 	"time"
 
 	"github.com/USACE/instrumentation-api/models"
@@ -34,6 +35,30 @@ func allTimeseriesBelongToProject(db *sqlx.DB, mcc *models.TimeseriesMeasurement
 	return true, nil
 }
 
+
+// ListTimeseriesMeasurements TODO (possible optimization):
+// Due to the amount of repeated data for each time entry (and the inherent size of those payloads)
+// it is possible to decreate repetition for some data points for regularized computed intervals,
+// the value can be omitted only if the measurement:
+//
+// 		- IS the same as the previous value
+// 		- IS NOT the first measurement
+// 		- IS NOT the last measurement
+// 		- IS NOT the same as the value directly ahead
+//
+// A downside to this approach is that it may be harder to have distinction between measurements
+// that are not present in the timeseries vs repeating measurements.
+//
+// E.g.
+//
+// if i != 0
+// 		&& i-1 != len(measurements)
+// 		&& measurements[i-1] == measurements[i]
+// 		&& measurements[i+1] == measurements[i] {
+//	continue
+// }
+//
+
 // ListTimeseriesMeasurements returns a timeseries with measurements
 func ListTimeseriesMeasurements(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
@@ -64,10 +89,60 @@ func ListTimeseriesMeasurements(db *sqlx.DB) echo.HandlerFunc {
 			tw.Before = tB
 		}
 
-		mc, err := models.ListTimeseriesMeasurements(db, &tsID, &tw)
+		// "interval" query parameter
+		// If parameter is omitted or 0, resampling not applied
+		p := c.QueryParam("interval")
+		interval, err := time.ParseDuration(p)
+		if p != "" && err != nil {
+			return c.String(
+				http.StatusBadRequest,
+				"Invalid interval. Valid time units are \"ns\", \"us\", \"ms\", \"s\", \"m\", \"h\" E.g. \"5h30m5s\"",
+			)
+		}
 
+		// Bind Timeseries id to struct
+		ts, err := models.GetTimeseries(db, &tsID)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err)
+		}
+
+		// If timeseries NOT computed, query stored measurements
+		if !ts.IsComputed {
+			mc, err := models.ListTimeseriesMeasurements(db, &ts.ID, &tw)
+			if err != nil {
+				return c.JSON(http.StatusInternalServerError, err.Error())
+			}
+			sort.Slice(mc.Items, func(i, j int) bool {
+				return mc.Items[i].Time.Before(mc.Items[j].Time)
+			})
+
+			return c.JSON(http.StatusOK, mc)
+		}
+
+		// If timeseries IS computed, calulate measurements
+		ct, err := models.ComputedTimeseriesWithMeasurements(db, &ts.ID, &ts.InstrumentID, &tw, &interval)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, err.Error())
+		}
+
+		tsms := make([]models.Measurement, 0)
+
+		// Trim “masked”, “validated”, and “annotation” fields as they only apply to stored timeseries
+		for _, t := range ct {
+			// Sort by time
+			sort.Slice(t.Measurements, func(i, j int) bool {
+				return t.Measurements[i].Time.Before(t.Measurements[j].Time)
+			})
+			for _, m := range t.Measurements {
+				tsms = append(tsms, models.Measurement{
+					Time:  m.Time,
+					Value: m.Value,
+				})
+			}
+		}
+		mc := models.MeasurementCollection{
+			TimeseriesID: tsID,
+			Items:        tsms,
 		}
 		return c.JSON(http.StatusOK, mc)
 	}

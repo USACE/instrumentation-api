@@ -10,14 +10,14 @@ import (
 
 // InstrumentGroup holds information for entity instrument_group
 type InstrumentGroup struct {
-	ID          uuid.UUID  `json:"id"`
-	Deleted     bool       `json:"-"`
-	Slug        string     `json:"slug"`
-	Name        string     `json:"name"`
-	Description string     `json:"description"`
-	ProjectID   *uuid.UUID `json:"project_id" db:"project_id"`
-	InstrumentCount int    `json:"instrument_count" db:"instrument_count"`
-	TimeseriesCount int    `json:"timeseries_count" db:"timeseries_count"`
+	ID              uuid.UUID  `json:"id"`
+	Deleted         bool       `json:"-"`
+	Slug            string     `json:"slug"`
+	Name            string     `json:"name"`
+	Description     string     `json:"description"`
+	ProjectID       *uuid.UUID `json:"project_id" db:"project_id"`
+	InstrumentCount int        `json:"instrument_count" db:"instrument_count"`
+	TimeseriesCount int        `json:"timeseries_count" db:"timeseries_count"`
 	AuditInfo
 }
 
@@ -101,6 +101,7 @@ func CreateInstrumentGroup(db *sqlx.DB, groups []InstrumentGroup) ([]InstrumentG
 	if err != nil {
 		return nil, err
 	}
+	defer txn.Rollback()
 
 	stmt, err := txn.Preparex(
 		`INSERT INTO instrument_group (slug, name, description, creator, create_date, project_id)

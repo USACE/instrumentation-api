@@ -73,6 +73,8 @@ GRANT SELECT ON
     v_profile,
     v_profile_project_roles,
     v_timeseries_dependency,
+    v_timeseries_stored,
+    v_timeseries_computed,
     inclinometer_measurement
 TO instrumentation_reader;
 
