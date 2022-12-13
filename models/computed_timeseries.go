@@ -767,15 +767,11 @@ func ComputedInclinometerTimeseries(db *sqlx.DB, instrumentIDs []uuid.UUID, tw *
 	-- Computed Timeseries
 	SELECT cc.id                   AS timeseries_id,
 		   cc.instrument_id        AS instrument_id,
-		   
 		   -- TODO: make this component of the query a 'slug'-type.
 		   cc.name			       AS variable,
-		   
 		   true                    AS is_computed,
 		   cc.contents             AS formula,
-		   '[]'::text              AS measurements,
-		   null                    AS next_measurement_low,
-		   null                    AS next_measurement_high
+		   '[]'::text              AS measurements
 	FROM calculation cc
 	WHERE cc.contents IS NOT NULL AND cc.instrument_id IN (SELECT id FROM requested_instruments)
 	ORDER BY is_computed
