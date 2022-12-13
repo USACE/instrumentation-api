@@ -6,7 +6,7 @@ WORKDIR /go/src/app
 
 # Install dependencies
 ENV CGO_ENABLED=0
-COPY go.* .
+COPY go.* ./
 RUN go mod download
 
 # Build
