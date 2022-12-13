@@ -11,8 +11,7 @@ RUN go mod download
 
 # Build
 COPY . .
-RUN --mount=type=cache,target=/root/.cache/go-build \
-    GOOS=linux GOARCH=amd64 \
+RUN GOOS=linux GOARCH=amd64 \
     go build -ldflags="-w -s" -o /go/bin/instrumentation-api
 
 # SCRATCH IMAGE
