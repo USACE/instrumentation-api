@@ -188,18 +188,6 @@ CREATE TABLE IF NOT EXISTS instrument (
     usgs_id VARCHAR
 );
 
--- calculation
-CREATE TABLE IF NOT EXISTS calculation (
-    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
-
-    instrument_id UUID NOT NULL REFERENCES instrument (id) ON DELETE CASCADE,
-    parameter_id UUID REFERENCES parameter (id),
-    unit_id UUID REFERENCES unit (id),
-    slug VARCHAR(255) UNIQUE NOT NULL,
-    name VARCHAR(255) NOT NULL,
-    contents VARCHAR
-);
-
 -- alert_config
 CREATE TABLE IF NOT EXISTS alert_config (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
@@ -287,6 +275,13 @@ CREATE TABLE IF NOT EXISTS timeseries (
     unit_id UUID NOT NULL REFERENCES unit (id),
     CONSTRAINT instrument_unique_timeseries_name UNIQUE(instrument_id, name),
     CONSTRAINT instrument_unique_timeseries_slug UNIQUE(instrument_id, slug)
+);
+
+
+-- calculation
+CREATE TABLE IF NOT EXISTS calculation (
+	timeseries_id UUID UNIQUE NOT NULL REFERENCES timeseries (id) ON DELETE CASCADE,
+	contents VARCHAR
 );
 
 -- timeseries_measurement
@@ -765,11 +760,6 @@ INSERT INTO instrument (project_id, id, slug, name, geometry, type_id) VALUES
     ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', '9e8f2ca4-4037-45a4-aaca-d9e598877439', 'demo-staffgage-1', 'Demo Staffgage 1', ST_GeomFromText('POINT(-80.85 26.75)',4326),'0fd1f9ba-2731-4ff9-96dd-3c03215ab06f'),
     ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'd8c66ef9-06f0-4d52-9233-f3778e0624f0', 'inclinometer-1', 'inclinometer-1', ST_GeomFromText('POINT(-80.8 26.7)',4326),'98a61f29-18a8-430a-9d02-0f53486e0984');
 
-INSERT INTO calculation (id, instrument_id, slug, name, contents, parameter_id, unit_id) VALUES
-    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'a7540f69-c41e-43b3-b655-6e44097edb7e', 'demo-piezometer-1.formula', 'demo-piezometer-1', '[demo-piezometer-1.top-of-riser] - [demo-piezometer-1.distance-to-water]', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8'),
-    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5985', '9e8f2ca4-4037-45a4-aaca-d9e598877439', 'demo-staffgage-1.formula', 'demo-staffgage-1', null, null, null),
-    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5986', 'd8c66ef9-06f0-4d52-9233-f3778e0624f0', 'inclinometer-1.formula', 'inclinometer-1', null, '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', '4a999277-4cf5-4282-93ce-23b33c65e2c8');
-
 -- instrument_group_instruments
 INSERT INTO instrument_group_instruments (instrument_id, instrument_group_id) VALUES
     ('a7540f69-c41e-43b3-b655-6e44097edb7e', 'd0916e8a-39a6-4f2f-bd31-879881f8b40c');
@@ -818,7 +808,15 @@ INSERT INTO timeseries (id, instrument_id, parameter_id, unit_id, slug, name) VA
 ('22a734d6-dc24-451d-a462-43a32f335ae8', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce', 'tip-depth', 'Tip Depth'),
 ('14247bc8-b264-4857-836f-182d47ebb39d', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', 'f777f2e2-5e32-424e-a1ca-19d16cd8abce', 'constant-to-test-delete', 'Constant to Test Delete'),
 ('5985f20a-1e37-4add-823c-545cdca49b5e', 'd8c66ef9-06f0-4d52-9233-f3778e0624f0', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', '4a999277-4cf5-4282-93ce-23b33c65e2c8', 'inclinometer-1', 'Inclinometer-1'),
-('479d90eb-3454-4f39-be9a-bfd23099a552', 'd8c66ef9-06f0-4d52-9233-f3778e0624f0', '3ea5ed77-c926-4696-a580-a3fde0f9a556', 'ae06a7db-1e18-4994-be41-9d5a408d6cad', 'inclinometer-constant', 'inclinometer-constant');
+('479d90eb-3454-4f39-be9a-bfd23099a552', 'd8c66ef9-06f0-4d52-9233-f3778e0624f0', '3ea5ed77-c926-4696-a580-a3fde0f9a556', 'ae06a7db-1e18-4994-be41-9d5a408d6cad', 'inclinometer-constant', 'inclinometer-constant'),
+('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8', 'demo-piezometer-1.formula', 'demo-piezometer-1'),
+('5b6f4f37-7755-4cf9-bd02-94f1e9bc5985', '9e8f2ca4-4037-45a4-aaca-d9e598877439', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8', 'demo-staffgage-1.formula', 'demo-staffgage-1'),
+('5b6f4f37-7755-4cf9-bd02-94f1e9bc5986', 'd8c66ef9-06f0-4d52-9233-f3778e0624f0', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', '4a999277-4cf5-4282-93ce-23b33c65e2c8', 'inclinometer-1.formula', 'inclinometer-1');
+
+INSERT INTO calculation (timeseries_id, contents) VALUES
+('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', '[demo-piezometer-1.top-of-riser] - [demo-piezometer-1.distance-to-water]'),
+('5b6f4f37-7755-4cf9-bd02-94f1e9bc5985', null),
+('5b6f4f37-7755-4cf9-bd02-94f1e9bc5986', null);
 
 -- instrument_constants
 INSERT INTO instrument_constants (instrument_id, timeseries_id) VALUES
