@@ -244,8 +244,9 @@ func UpdateCalculation(db *sqlx.DB, formula *Calculation) error {
 	defer txn.Rollback()
 
 	var defaults Calculation
-	row := txn.QueryRowx("SELECT instrument_id, parameter_id, unit_id, slug, name, contents FROM v_timeseries_computed WHERE id = $1", &formula.ID)
+	row := txn.QueryRowx(listCalculationsSQL+` WHERE id = $1`, &formula.ID)
 	if err := row.Scan(
+		&defaults.ID,
 		&defaults.InstrumentID,
 		&defaults.ParameterID,
 		&defaults.UnitID,
