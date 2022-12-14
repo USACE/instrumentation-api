@@ -35,7 +35,6 @@ func allTimeseriesBelongToProject(db *sqlx.DB, mcc *models.TimeseriesMeasurement
 	return true, nil
 }
 
-
 // ListTimeseriesMeasurements TODO (possible optimization):
 // Due to the amount of repeated data for each time entry (and the inherent size of those payloads)
 // it is possible to decreate repetition for some data points for regularized computed intervals,
