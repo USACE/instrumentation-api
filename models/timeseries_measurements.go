@@ -45,7 +45,7 @@ func (cc *TimeseriesMeasurementCollectionCollection) UnmarshalJSON(b []byte) err
 	return nil
 }
 
-// ListTimeseriesMeasurements returns a timeseries with slice of timeseries measurements populated
+// ListTimeseriesMeasurements returns a stored timeseries with slice of timeseries measurements populated
 func ListTimeseriesMeasurements(db *sqlx.DB, timeseriesID *uuid.UUID, tw *ts.TimeWindow) (*ts.MeasurementCollection, error) {
 
 	mc := ts.MeasurementCollection{TimeseriesID: *timeseriesID}
@@ -56,6 +56,9 @@ func ListTimeseriesMeasurements(db *sqlx.DB, timeseriesID *uuid.UUID, tw *ts.Tim
 		timeseriesID, tw.After, tw.Before,
 	); err != nil {
 		return nil, err
+	}
+	if mc.Items == nil {
+		mc.Items = make([]ts.Measurement, 0)
 	}
 
 	return &mc, nil
@@ -192,6 +195,7 @@ func UpdateTimeseriesMeasurements(db *sqlx.DB, mc []ts.MeasurementCollection, tw
 	return mc, nil
 }
 
+// Stored timeseries
 func listTimeseriesMeasurementsSQL() string {
 	return `SELECT  M.timeseries_id,
 			        M.time,

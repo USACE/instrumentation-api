@@ -81,15 +81,22 @@ func CreateCalculation(db *sqlx.DB) echo.HandlerFunc {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
 
+		// Create unique slug
+		var calculationSlug string = ""
 		slugsTaken, err := models.ListCalculationSlugs(db)
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
-		calculationSlug, err := dbutils.NextUniqueSlug(formula.FormulaName, slugsTaken)
+
+		if formula.FormulaName == "" {
+			calculationSlug, err = dbutils.NextUniqueSlug("New Formula", slugsTaken)
+			formula.FormulaName = calculationSlug
+		} else {
+			calculationSlug, err = dbutils.NextUniqueSlug(formula.FormulaName, slugsTaken)
+		}
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
-
 		formula.Slug = calculationSlug
 
 		if err := models.CreateCalculation(db, &formula); err != nil {
@@ -107,25 +114,44 @@ func CreateCalculation(db *sqlx.DB) echo.HandlerFunc {
 // - `formula_id` should refer to the ID of a calculation in the database.
 func UpdateCalculation(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		calculationID, err := uuid.Parse(c.Param("formula_id"))
+		formulaID, err := uuid.Parse(c.Param("formula_id"))
 		if err != nil {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
 
-		var calculation models.Calculation
-		if err := c.Bind(&calculation); err != nil {
+		var formula models.Calculation
+		if err := c.Bind(&formula); err != nil {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
 
-		// Compare Calculation ID from Route Params to Calculation ID from Payload
-		if calculationID != calculation.ID {
+		// Compare formula ID from Route Params to Calculation ID from Payload
+		if formulaID != formula.ID {
 			return c.JSON(http.StatusBadRequest, models.DefaultMessageBadRequest)
 		}
 
-		if err := models.UpdateCalculation(db, &calculation); err != nil {
+		// Update slug when name is updated
+		var calculationSlug string = ""
+		slugsTaken, err := models.ListCalculationSlugs(db)
+		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
-		return c.JSON(http.StatusOK, &calculation)
+
+		if formula.FormulaName == "" {
+			calculationSlug, err = dbutils.NextUniqueSlug("New Formula", slugsTaken)
+			formula.FormulaName = calculationSlug
+		} else {
+			calculationSlug, err = dbutils.NextUniqueSlug(formula.FormulaName, slugsTaken)
+		}
+		if err != nil {
+			return c.String(http.StatusInternalServerError, err.Error())
+		}
+		formula.Slug = calculationSlug
+
+		// Update in database
+		if err := models.UpdateCalculation(db, &formula); err != nil {
+			return c.String(http.StatusInternalServerError, err.Error())
+		}
+		return c.JSON(http.StatusOK, &formula)
 	}
 }
 
