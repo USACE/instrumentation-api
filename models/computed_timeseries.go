@@ -199,12 +199,12 @@ func (ts Timeseries) AggregateInterpolate(w timeseries.TimeWindow, allTimes []ti
 
 	for _, tm := range allTimes {
 		// Time out of range, cannot compute
-		if tm.Before(a[0].Time) || tm.Before(tStart) || tm.After(tEnd) || wkIdx == lastIdx {
+		if tm.Before(a[0].Time) || tm.Before(tStart) || tm.After(tEnd) || wkIdx > lastIdx {
 			continue
 		}
 
 		// Time allTimes buffer caught up with working array index, add measurement and advance working index
-		if tm == a[wkIdx].Time {
+		if tm == a[wkIdx].Time || wkIdx == lastIdx {
 			interpolated = append(interpolated, Measurement{tm, a[wkIdx].Value})
 			wkIdx += 1
 			continue
