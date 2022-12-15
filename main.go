@@ -87,6 +87,14 @@ func main() {
 
 	db := dbutils.Connection(cfg.dbConnStr())
 
+	hashExtractor := func(keyID string) (string, error) {
+		k, err := models.GetTokenInfoByTokenID(db, &keyID)
+		if err != nil {
+			return "", err
+		}
+		return k.Hash, nil
+	}
+
 	e := echo.New()
 	e.Use(middleware.CORS, middleware.GZIP)
 	public := e.Group(cfg.RoutePrefix) // TODO: /instrumentation/v1/
@@ -108,13 +116,7 @@ func main() {
 	private.Use(middleware.KeyAuth(
 		cfg.AuthDisabled,
 		cfg.ApplicationKey,
-		func(keyID string) (string, error) {
-			k, err := models.GetTokenInfoByTokenID(db, &keyID)
-			if err != nil {
-				return "", err
-			}
-			return k.Hash, nil
-		},
+		hashExtractor,
 	))
 
 	// keyAuth not allowed on these routes
@@ -307,6 +309,15 @@ func main() {
 
 	// OpenDCS Configuration
 	public.GET("/opendcs/sites", handlers.ListOpendcsSites(db))
+
+	// Telemetry
+	telemetry := e.Group(cfg.RoutePrefix)
+	// telemetry.Use(middleware.KeyAuth(
+	// 	cfg.AuthDisabled,
+	// 	cfg.ApplicationKey,
+	// 	hashExtractor,
+	// ))
+	telemetry.POST("/telemetry/measurements", handlers.CreateOrUpdateDataLoggerMeasurements(db))
 
 	if cfg.LambdaContext {
 		log.Print("starting server; Running On AWS LAMBDA")
