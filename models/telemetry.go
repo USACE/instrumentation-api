@@ -16,25 +16,39 @@ type Telemetry struct {
 	TypeName string
 }
 
-// Adding new data loggers through UI Admin console
-type DataLogger struct {
-	ID           uuid.UUID
-	ProjectID    uuid.UUID
-	SerialNumber int
-	ProgramName  string
-	Model        string
-	Name         string
-	Slug         string
-	AuditInfo
+type DataLoggerFile struct {
+	Head Head    `json:"head"`
+	Data []Datum `json:"data"`
 }
 
-// Files parsed from data logger endpoint
-type TOA5File struct {
-	Header1 []string
-	Header2 []string
-	Header3 []string
-	Header4 []string
-	Data    [][]string
+type Datum struct {
+	Time string    `json:"time"`
+	No   int64     `json:"no"`
+	Vals []float64 `json:"vals"`
+}
+
+type Head struct {
+	Transaction int64       `json:"transaction"`
+	Signature   int64       `json:"signature"`
+	Environment Environment `json:"environment"`
+	Fields      []Field     `json:"fields"`
+}
+
+type Environment struct {
+	StationName string `json:"station_name"`
+	TableName   string `json:"table_name"`
+	Model       string `json:"model"`
+	SerialNo    string `json:"serial_no"`
+	OSVersion   string `json:"os_version"`
+	ProgName    string `json:"prog_name"`
+}
+
+type Field struct {
+	Name     string `json:"name"`
+	Type     string `json:"type"`
+	Units    string `json:"units"`
+	Process  string `json:"process"`
+	Settable bool   `json:"settable"`
 }
 
 // ParseTOA5 parses a Campbell Scientific TOA5 data file that is simlar to a csv.
