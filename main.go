@@ -312,11 +312,11 @@ func main() {
 
 	// Telemetry
 	telemetry := e.Group(cfg.RoutePrefix)
-	telemetry.Use(middleware.KeyAuth(
-		cfg.AuthDisabled,
-		cfg.ApplicationKey,
-		hashExtractor,
-	))
+	// telemetry.Use(middleware.KeyAuth(
+	// 	cfg.AuthDisabled,
+	// 	cfg.ApplicationKey,
+	// 	hashExtractor,
+	// ))
 	telemetry.POST("/telemetry/measurements", handlers.CreateOrUpdateDataLoggerMeasurements(db))
 
 	if cfg.LambdaContext {
