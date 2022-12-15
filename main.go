@@ -311,13 +311,13 @@ func main() {
 	public.GET("/opendcs/sites", handlers.ListOpendcsSites(db))
 
 	// Telemetry
-	telemetry := e.Group(cfg.RoutePrefix)
+	// telemetry := e.Group(cfg.RoutePrefix)
 	// telemetry.Use(middleware.KeyAuth(
 	// 	cfg.AuthDisabled,
 	// 	cfg.ApplicationKey,
 	// 	hashExtractor,
 	// ))
-	telemetry.POST("/telemetry/measurements", handlers.CreateOrUpdateDataLoggerMeasurements(db))
+	// telemetry.POST("/telemetry/measurements", handlers.CreateOrUpdateDataLoggerMeasurements(db))
 
 	if cfg.LambdaContext {
 		log.Print("starting server; Running On AWS LAMBDA")

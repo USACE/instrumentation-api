@@ -23,6 +23,7 @@ func CreateOrUpdateDataLoggerMeasurements(db *sqlx.DB) echo.HandlerFunc {
 		// 	return c.JSON(http.StatusBadRequest, err)
 		// }
 		// log.Printf("Datafile: %+v\n", df)
-		return c.JSON(http.StatusOK, c.Request())
+		// return c.JSON(http.StatusOK, df)
+		return c.JSON(http.StatusAccepted, make(map[string]interface{}))
 	}
 }
