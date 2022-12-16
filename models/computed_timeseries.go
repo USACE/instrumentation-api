@@ -127,7 +127,8 @@ func (ts Timeseries) AggregateCarryForward(w timeseries.TimeWindow, allTimes []t
 	}, nil
 }
 
-// Interpolate takes two arrays for the corresponding x and y of each point and performs linear interpolation
+// Interpolate takes two arrays for the corresponding x and y of each point, returning the
+// predicted value of y at the position of x using linear interpolation
 func Interpolate(xs, ys []float64, x float64) (float64, error) {
 	xsLen := len(xs)
 	if len(ys) != xsLen {
@@ -196,7 +197,7 @@ func (ts Timeseries) AggregateInterpolate(w timeseries.TimeWindow, allTimes []ti
 
 		currentX := float64(tm.Unix())
 
-		// allTimes buffer is behind the working array index, add measurement
+		// allTimes buffer is behind the working array index, add interpolated measurement
 		currentY, err := Interpolate([]float64{prevX, nextX}, []float64{prevY, nextY}, currentX)
 		if err != nil {
 			log.Println(err)
