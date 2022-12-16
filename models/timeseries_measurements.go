@@ -93,15 +93,7 @@ func ConstantMeasurement(db *sqlx.DB, tsID *uuid.UUID, constantName string) (*ts
 	return &m, nil
 }
 
-// CreateOrUpdateTimeseriesMeasurements creates many timeseries from an array of timeseries
-// If a timeseries measurement already exists for a given timeseries_id and time, the value is updated
-func CreateOrUpdateTimeseriesMeasurements(db *sqlx.DB, mc []ts.MeasurementCollection) ([]ts.MeasurementCollection, error) {
-	txn, err := db.Beginx()
-	if err != nil {
-		return nil, err
-	}
-	defer txn.Rollback()
-
+func CreateOrUpdateTimeseriesMeasurementsTxn(txn *sqlx.Tx, mc []ts.MeasurementCollection) (*sqlx.Tx, error) {
 	stmt_measurement, err := txn.Preparex(
 		`INSERT INTO timeseries_measurement (timeseries_id, time, value) VALUES ($1, $2, $3)
 		 ON CONFLICT ON CONSTRAINT timeseries_unique_time DO UPDATE SET value = EXCLUDED.value; 
@@ -136,6 +128,24 @@ func CreateOrUpdateTimeseriesMeasurements(db *sqlx.DB, mc []ts.MeasurementCollec
 	if err := stmt_notes.Close(); err != nil {
 		return nil, err
 	}
+
+	return txn, nil
+}
+
+// CreateOrUpdateTimeseriesMeasurements creates many timeseries from an array of timeseries
+// If a timeseries measurement already exists for a given timeseries_id and time, the value is updated
+func CreateOrUpdateTimeseriesMeasurements(db *sqlx.DB, mc []ts.MeasurementCollection) ([]ts.MeasurementCollection, error) {
+	txn, err := db.Beginx()
+	if err != nil {
+		return nil, err
+	}
+	defer txn.Rollback()
+
+	txn, err = CreateOrUpdateTimeseriesMeasurementsTxn(txn, mc)
+	if err != nil {
+		return nil, err
+	}
+
 	if err := txn.Commit(); err != nil {
 		return nil, err
 	}
@@ -183,7 +193,7 @@ func UpdateTimeseriesMeasurements(db *sqlx.DB, mc []ts.MeasurementCollection, tw
 		return nil, err
 	}
 
-	mc, err = CreateOrUpdateTimeseriesMeasurements(db, mc)
+	txn, err = CreateOrUpdateTimeseriesMeasurementsTxn(txn, mc)
 	if err != nil {
 		return nil, err
 	}
