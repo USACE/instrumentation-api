@@ -127,47 +127,22 @@ func (ts Timeseries) AggregateCarryForward(w timeseries.TimeWindow, allTimes []t
 	}, nil
 }
 
-// PointwiseInterpolate takes two arrays for the corresponding x and y of each point and performs pointwise interpolation
-func PointwiseInterpolate(xs, ys []float64, x float64) (float64, error) {
-	// Calculate slope
-	n := len(xs)
-	if len(ys) != n {
+// Interpolate takes two arrays for the corresponding x and y of each point, returning the
+// predicted value of y at the position of x using linear interpolation
+func Interpolate(xs, ys []float64, x float64) (float64, error) {
+	xsLen := len(xs)
+	if len(ys) != xsLen {
 		return 0, errors.New("xs and ys slices must be same length")
 	}
-	if n < 2 {
+	if xsLen < 2 {
 		return 0, errors.New("xs length must be greater than 2")
 	}
-	m := n - 1
-	slopes := make([]float64, m)
-	prevX := xs[0]
-	prevY := ys[0]
-
-	for i := 0; i < m; i++ {
-		x := xs[i+1]
-		y := ys[i+1]
-		dx := x - prevX
-		if dx <= 0 {
-			return 0, errors.New("xs array values must be increasing")
-		}
-		slopes[i] = (y - prevY) / dx
-		prevX = x
-		prevY = y
+	if xs[0] > xs[1] {
+		return 0, errors.New("xs array values must be increasing")
 	}
 
-	// Predict y (measurement value) from intersecting x (time) position
-	i := sort.Search(len(xs), func(p int) bool { return xs[p] > x }) - 1
-	if i < 0 {
-		return ys[0], nil
-	}
-	xI := xs[i]
-	if x == xI {
-		return ys[i], nil
-	}
-	n = len(xs)
-	if i == n-1 {
-		return ys[n-1], nil
-	}
-	return ys[i] + slopes[i]*(x-xI), nil
+	// y = y1 + ((x - x1) / (x2 - x1)) * (y2 - y1)
+	return ys[0] + ((x-xs[0])/(xs[1]-xs[0]))*(ys[1]-ys[0]), nil
 }
 
 // AggregateInterpolate creates an array of Measurments for a timeseries given an aggregate array of times.
@@ -195,6 +170,8 @@ func (ts Timeseries) AggregateInterpolate(w timeseries.TimeWindow, allTimes []ti
 		}, nil
 	}
 
+	sort.Slice(a, func(i, j int) bool { return a[i].Time.Before(a[j].Time) })
+
 	tStart, tEnd, wkIdx, lastIdx := w.After, w.Before, 0, len(a)-1
 
 	for _, tm := range allTimes {
@@ -204,7 +181,7 @@ func (ts Timeseries) AggregateInterpolate(w timeseries.TimeWindow, allTimes []ti
 		}
 
 		// Time allTimes buffer caught up with working array index, add measurement and advance working index
-		if tm == a[wkIdx].Time || wkIdx == lastIdx {
+		if tm == a[wkIdx].Time {
 			interpolated = append(interpolated, Measurement{tm, a[wkIdx].Value})
 			wkIdx += 1
 			continue
@@ -212,16 +189,16 @@ func (ts Timeseries) AggregateInterpolate(w timeseries.TimeWindow, allTimes []ti
 
 		// At this point, the current index i should be at least i > 0 and at most i < len(a)-1
 		// Fill in interpolated values
-		prevX := float64(a[wkIdx].Time.Unix())
-		nextX := float64(a[wkIdx+1].Time.Unix())
+		prevX := float64(a[wkIdx-1].Time.Unix())
+		nextX := float64(a[wkIdx].Time.Unix())
 
-		prevY := a[wkIdx].Value
-		nextY := a[wkIdx+1].Value
+		prevY := a[wkIdx-1].Value
+		nextY := a[wkIdx].Value
 
 		currentX := float64(tm.Unix())
 
-		// allTimes buffer is behind the working array index, add measurement
-		currentY, err := PointwiseInterpolate([]float64{prevX, nextX}, []float64{prevY, nextY}, currentX)
+		// allTimes buffer is behind the working array index, add interpolated measurement
+		currentY, err := Interpolate([]float64{prevX, nextX}, []float64{prevY, nextY}, currentX)
 		if err != nil {
 			log.Println(err)
 			continue
@@ -351,7 +328,7 @@ func (ts *Timeseries) ResampleTimeseriesMeasurements(w *timeseries.TimeWindow, d
 		nextY := a[wkIdx].Value
 		currentX := float64(t.Unix())
 
-		currentY, err := PointwiseInterpolate([]float64{prevX, nextX}, []float64{prevY, nextY}, currentX)
+		currentY, err := Interpolate([]float64{prevX, nextX}, []float64{prevY, nextY}, currentX)
 		if err != nil {
 			log.Println(err)
 			continue
