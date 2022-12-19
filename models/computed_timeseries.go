@@ -181,7 +181,7 @@ func (ts Timeseries) AggregateInterpolate(w timeseries.TimeWindow, allTimes []ti
 		}
 
 		// Time allTimes buffer caught up with working array index, add measurement and advance working index
-		if tm == a[wkIdx].Time || wkIdx == lastIdx {
+		if tm == a[wkIdx].Time {
 			interpolated = append(interpolated, Measurement{tm, a[wkIdx].Value})
 			wkIdx += 1
 			continue
