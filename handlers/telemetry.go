@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/jmoiron/sqlx"
@@ -24,6 +26,16 @@ func CreateOrUpdateDataLoggerMeasurements(db *sqlx.DB) echo.HandlerFunc {
 		// }
 		// log.Printf("Datafile: %+v\n", df)
 		// return c.JSON(http.StatusOK, df)
+
+		log.Printf("request header: %v", c.Request().Header)
+
+		body := make(map[string]interface{})
+		err := json.NewDecoder(c.Request().Body).Decode(&body)
+		if err != nil {
+			return err
+		}
+		log.Printf("request body: %v", body)
+
 		return c.JSON(http.StatusAccepted, make(map[string]interface{}))
 	}
 }
