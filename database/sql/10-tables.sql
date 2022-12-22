@@ -374,11 +374,11 @@ CREATE TABLE IF NOT EXISTS plot_configuration_timeseries (
 
 CREATE TABLE IF NOT EXISTS plot_configuration_settings (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
-    show_masked BOOLEAN DEFAULT 'true',
-    show_nonvalidated BOOLEAN DEFAULT 'true',
-    show_comments BOOLEAN DEFAULT 'true',
-    auto_range BOOLEAN DEFAULT 'true',
-    date_range VARCHAR(23) DEFAULT '1 year',
+    show_masked BOOLEAN NOT NULL DEFAULT true,
+    show_nonvalidated BOOLEAN NOT NULL DEFAULT true,
+    show_comments BOOLEAN NOT NULL DEFAULT true,
+    auto_range BOOLEAN NOT NULL DEFAULT true,
+    date_range VARCHAR NOT NULL DEFAULT '1 year',
     FOREIGN KEY (id) REFERENCES plot_configuration (id) ON DELETE CASCADE
 );
 
