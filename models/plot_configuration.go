@@ -33,7 +33,7 @@ type PlotConfiguration struct {
 }
 
 func (pc *PlotConfiguration) ValidateDateRange() error {
-	dr := strings.ToLower(pc.PlotConfigurationSettings.DateRange)
+	dr := strings.ToLower(pc.DateRange)
 	// Check for standard settings
 	if dr == "lifetime" {
 		return nil

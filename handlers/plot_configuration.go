@@ -58,6 +58,10 @@ func CreatePlotConfiguration(db *sqlx.DB) echo.HandlerFunc {
 		if err := c.Bind(&pc); err != nil {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
+		// Default to 1 year if no date range provided
+		if pc.DateRange == "" {
+			pc.DateRange = "1 year"
+		}
 		if err := pc.ValidateDateRange(); err != nil {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
@@ -102,6 +106,10 @@ func UpdatePlotConfiguration(db *sqlx.DB) echo.HandlerFunc {
 		// Bind Information Provided in Request Body
 		if err := c.Bind(&pc); err != nil {
 			return c.String(http.StatusBadRequest, err.Error())
+		}
+		// Default to 1 year if no date range provided
+		if pc.DateRange == "" {
+			pc.DateRange = "1 year"
 		}
 		if err := pc.ValidateDateRange(); err != nil {
 			return c.String(http.StatusBadRequest, err.Error())
