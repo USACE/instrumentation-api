@@ -35,21 +35,21 @@ func allTimeseriesBelongToProject(db *sqlx.DB, mcc *models.TimeseriesMeasurement
 	return true, nil
 }
 
-// ListInstrumentsMeasurements returns a map of timeseries with measurements for an array of instruments
-func ListInstrumentsMeasurements(db *sqlx.DB) echo.HandlerFunc {
+// ListInstrumentGroupMeasurements returns a map of timeseries with measurements for an instrument group
+func ListInstrumentGroupMeasurements(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		// Filters used in SQL Query
 		var f Filter
 
-		// Instrument IDs from POST
-		if err := (&echo.DefaultBinder{}).BindBody(c, &f.InstrumentID); err != nil {
-			return c.String(http.StatusBadRequest, err.Error())
+		igID, err := uuid.Parse(c.Param("instrument_group_id"))
+		if err != nil {
+			return c.String(http.StatusBadRequest, "Malformed ID")
 		}
 
 		// Get timeWindow from query params
 		var tw timeseries.TimeWindow
 		a, b := c.QueryParam("after"), c.QueryParam("before")
-		err := tw.SetWindow(a, b)
+		err = tw.SetWindow(a, b)
 		if err != nil {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
@@ -66,7 +66,19 @@ func ListInstrumentsMeasurements(db *sqlx.DB) echo.HandlerFunc {
 			)
 		}
 
-		imc, err := models.AllTimeseriesWithMeasurements(db, f.InstrumentID, &tw, interval)
+		// Get instrument ids from group
+		instruments, err := models.ListInstrumentGroupInstruments(db, igID)
+		if err != nil {
+			return c.String(http.StatusNotFound, "Unknown ID")
+		}
+
+		iIDs := make([]uuid.UUID, len(instruments))
+		for i, inst := range instruments {
+			iIDs[i] = inst.ID
+		}
+		f.InstrumentID = iIDs
+
+		imc, err := models.ListInstrumentsMeasurements(db, f.InstrumentID, &tw, interval)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err.Error())
 		}

@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -10,35 +9,7 @@ import (
 
 	"github.com/USACE/instrumentation-api/dbutils"
 	"github.com/USACE/instrumentation-api/models"
-	"github.com/USACE/instrumentation-api/timeseries"
 )
-
-// This is an endpoint for debugging at this time
-func AllTimeseriesWithMeasurements(db *sqlx.DB) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		// Instrument ID
-		instrumentID, err := uuid.Parse(c.Param("instrument_id"))
-		if err != nil {
-			return c.String(http.StatusBadRequest, err.Error())
-		}
-
-		instrumentIDs := make([]uuid.UUID, 1)
-		instrumentIDs[0] = instrumentID
-		// Time Window
-		timeWindow := timeseries.TimeWindow{
-			After:  time.Date(2020, 1, 3, 0, 0, 0, 0, time.UTC),
-			Before: time.Date(2021, 1, 5, 0, 0, 0, 0, time.UTC),
-		}
-		// Interval - Hard Code at 1 Hour
-		interval := time.Hour
-
-		tt, err := models.AllTimeseriesWithMeasurements(db, instrumentIDs, &timeWindow, interval)
-		if err != nil {
-			return c.String(http.StatusBadRequest, err.Error())
-		}
-		return c.JSON(http.StatusOK, &tt)
-	}
-}
 
 // GetInstrumentCalculations retrieves an array of `Calculation`s associated with a particular
 // instrument ID.

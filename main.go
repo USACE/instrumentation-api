@@ -227,7 +227,7 @@ func main() {
 	public.GET("/instrument_groups/:instrument_group_id", handlers.GetInstrumentGroup(db))
 	public.GET("/instrument_groups/:instrument_group_id/instruments", handlers.ListInstrumentGroupInstruments(db))
 	public.GET("/instrument_groups/:instrument_group_id/timeseries", handlers.ListInstrumentGroupTimeseries(db))
-	public.POST("instrument_groups/:instrument_group_id/timeseries/measurements", handlers.PostExplorer(db))
+	public.GET("/instrument_groups/:instrument_group_id/timeseries_measurements", handlers.ListInstrumentGroupMeasurements(db))
 	private.POST("/instrument_groups", handlers.CreateInstrumentGroup(db))
 	private.PUT("/instrument_groups/:instrument_group_id", handlers.UpdateInstrumentGroup(db))
 	private.DELETE("/instrument_groups/:instrument_group_id", handlers.DeleteFlagInstrumentGroup(db))
@@ -303,7 +303,7 @@ func main() {
 
 	// Misc
 	public.GET("/domains", handlers.GetDomains(db))
-	public.POST("/explorer", handlers.ListInstrumentsMeasurements(db))
+	public.POST("/explorer", handlers.PostExplorer(db))
 	public.POST("/inclinometer_explorer", handlers.PostInclinometerExplorer(db))
 	public.GET("/home", handlers.GetHome(db))
 	public.GET("/units", handlers.ListUnits(db))

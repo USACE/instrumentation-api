@@ -1122,6 +1122,57 @@
                 }
             }
         },
+        "/instrument_groups/{instrument_group_id}/timeseries_measurements": {
+            "get": {
+                "tags": [
+                    "Instrument Groups"
+                ],
+                "summary": "ListInstrumentGroupMeasurements",
+                "parameters": [
+                    {
+                        "name": "after",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "1900-01-01T00:00:00.00Z"
+                    },
+                    {
+                        "name": "before",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2025-12-31T00:00:00.00Z"
+                    },
+                    {
+                        "name": "interval",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "instrument_group_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "instrument group uuid",
+                        "example": "d0916e8a-39a6-4f2f-bd31-879881f8b40c"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
         "/instrument_groups/{instrument_group_id}/instruments/{instrument_id}": {
             "delete": {
                 "tags": [

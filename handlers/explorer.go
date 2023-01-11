@@ -53,7 +53,7 @@ func PostExplorer(db *sqlx.DB) echo.HandlerFunc {
 		// Get Stored And Computed Timeseries With Measurements
 		// interval, _ := time.ParseDuration("")
 		interval := time.Hour
-		tt, err := models.AllTimeseriesWithMeasurements(db, f.InstrumentID, &f.TimeWindow, interval)
+		tt, err := models.ListInstrumentsMeasurements(db, f.InstrumentID, &f.TimeWindow, interval)
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
