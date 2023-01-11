@@ -32,7 +32,7 @@ func AllTimeseriesWithMeasurements(db *sqlx.DB) echo.HandlerFunc {
 		// Interval - Hard Code at 1 Hour
 		interval := time.Hour
 
-		tt, err := models.AllTimeseriesWithMeasurements(db, instrumentIDs, &timeWindow, &interval)
+		tt, err := models.AllTimeseriesWithMeasurements(db, instrumentIDs, &timeWindow, interval)
 		if err != nil {
 			return c.String(http.StatusBadRequest, err.Error())
 		}

@@ -41,25 +41,25 @@ func PostExplorer(db *sqlx.DB) echo.HandlerFunc {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
 
-		// Time Window From POST
-		if err := (&echo.DefaultBinder{}).BindQueryParams(c, &f.TimeWindow); err != nil {
+		// Get timeWindow from query params
+		var tw timeseries.TimeWindow
+		a, b := c.QueryParam("after"), c.QueryParam("before")
+		err := tw.SetWindow(a, b)
+		if err != nil {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
-		// If after and before are not provided; Return last 7 days of data from current time
-		if (f.TimeWindow.Before == time.Time{} && f.TimeWindow.After == time.Time{}) {
-			f.TimeWindow.Before = time.Now()
-			f.TimeWindow.After = f.TimeWindow.Before.AddDate(0, 0, -7)
-		}
+		f.TimeWindow = tw
 
 		// Get Stored And Computed Timeseries With Measurements
-		interval := time.Hour // Set to 1 Hour; TODO - do not hard-code interval
-		tt, err := models.AllTimeseriesWithMeasurements(db, f.InstrumentID, &f.TimeWindow, &interval)
+		// interval, _ := time.ParseDuration("")
+		interval := time.Hour
+		tt, err := models.AllTimeseriesWithMeasurements(db, f.InstrumentID, &f.TimeWindow, interval)
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 
 		// Convert Rows to Response
-		response, err := explorerResponseFactory(tt)
+		response, err := ExplorerResponseFactory(tt)
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
@@ -79,15 +79,14 @@ func PostInclinometerExplorer(db *sqlx.DB) echo.HandlerFunc {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
 
-		// Time Window From POST
-		if err := (&echo.DefaultBinder{}).BindQueryParams(c, &f.TimeWindow); err != nil {
+		// Get timeWindow from query params
+		var tw timeseries.TimeWindow
+		a, b := c.QueryParam("after"), c.QueryParam("before")
+		err := tw.SetWindow(a, b)
+		if err != nil {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
-		// If after and before are not provided; Return last 7 days of data from current time
-		if (f.TimeWindow.Before == time.Time{} && f.TimeWindow.After == time.Time{}) {
-			f.TimeWindow.Before = time.Now()
-			f.TimeWindow.After = f.TimeWindow.Before.AddDate(0, 0, -7)
-		}
+		f.TimeWindow = tw
 
 		// Get Stored And Computed Timeseries With Measurements
 		interval := time.Hour // Set to 1 Hour; TODO - do not hard-code interval
@@ -107,7 +106,7 @@ func PostInclinometerExplorer(db *sqlx.DB) echo.HandlerFunc {
 }
 
 // explorerResponseFactory returns the explorer-specific JSON response format
-func explorerResponseFactory(tt []models.Timeseries) (map[uuid.UUID][]timeseries.MeasurementCollectionLean, error) {
+func ExplorerResponseFactory(tt []models.Timeseries) (map[uuid.UUID][]timeseries.MeasurementCollectionLean, error) {
 
 	response := make(map[uuid.UUID][]timeseries.MeasurementCollectionLean)
 
