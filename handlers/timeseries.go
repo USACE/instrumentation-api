@@ -41,15 +41,11 @@ func GetTimeseries(db *sqlx.DB) echo.HandlerFunc {
 // ListInstrumentTimeseries lists timeseries for an instrument
 func ListInstrumentTimeseries(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		pID, err := uuid.Parse(c.Param("project_id"))
-		if err != nil {
-			return c.String(http.StatusBadRequest, "Malformed ID")
-		}
 		nID, err := uuid.Parse(c.Param("instrument_id"))
 		if err != nil {
 			return c.String(http.StatusBadRequest, "Malformed ID")
 		}
-		tt, err := models.ListInstrumentTimeseries(db, &pID, &nID)
+		tt, err := models.ListInstrumentTimeseries(db, &nID)
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}

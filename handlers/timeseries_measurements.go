@@ -35,28 +35,62 @@ func allTimeseriesBelongToProject(db *sqlx.DB, mcc *models.TimeseriesMeasurement
 	return true, nil
 }
 
-// ListTimeseriesMeasurements TODO (possible optimization):
-// Due to the amount of repeated data for each time entry (and the inherent size of those payloads)
-// it is possible to decreate repetition for some data points for regularized computed intervals,
-// the value can be omitted only if the measurement:
-//
-// 		- IS the same as the previous value
-// 		- IS NOT the first measurement
-// 		- IS NOT the last measurement
-// 		- IS NOT the same as the value directly ahead
-//
-// A downside to this approach is that it may be harder to have distinction between measurements
-// that are not present in the timeseries vs repeating measurements.
-//
-// E.g.
-//
-// if i != 0
-// 		&& i-1 != len(measurements)
-// 		&& measurements[i-1] == measurements[i]
-// 		&& measurements[i+1] == measurements[i] {
-//	continue
-// }
-//
+// ListInstrumentGroupMeasurements returns a map of timeseries with measurements for an instrument group
+func ListInstrumentGroupMeasurements(db *sqlx.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		// Filters used in SQL Query
+		var f Filter
+
+		igID, err := uuid.Parse(c.Param("instrument_group_id"))
+		if err != nil {
+			return c.String(http.StatusBadRequest, "Malformed ID")
+		}
+
+		// Get timeWindow from query params
+		var tw timeseries.TimeWindow
+		a, b := c.QueryParam("after"), c.QueryParam("before")
+		err = tw.SetWindow(a, b)
+		if err != nil {
+			return c.String(http.StatusBadRequest, err.Error())
+		}
+		f.TimeWindow = tw
+
+		// "interval" query parameter
+		// If parameter is omitted or 0, resampling not applied
+		p := c.QueryParam("interval")
+		interval, err := time.ParseDuration(p)
+		if p != "" && err != nil {
+			return c.String(
+				http.StatusBadRequest,
+				"Invalid interval. Valid time units are \"ns\", \"us\", \"ms\", \"s\", \"m\", \"h\" E.g. \"5h30m5s\"",
+			)
+		}
+
+		// Get instrument ids from group
+		instruments, err := models.ListInstrumentGroupInstruments(db, igID)
+		if err != nil {
+			return c.String(http.StatusNotFound, "Unknown ID")
+		}
+
+		iIDs := make([]uuid.UUID, len(instruments))
+		for i, inst := range instruments {
+			iIDs[i] = inst.ID
+		}
+		f.InstrumentID = iIDs
+
+		imc, err := models.ListInstrumentsMeasurements(db, f.InstrumentID, &tw, interval)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err.Error())
+		}
+
+		response, err := ExplorerResponseFactory(imc)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, err.Error())
+		}
+
+		return c.JSON(http.StatusOK, response)
+	}
+}
 
 // ListTimeseriesMeasurements returns a timeseries with measurements
 func ListTimeseriesMeasurements(db *sqlx.DB) echo.HandlerFunc {
@@ -69,23 +103,9 @@ func ListTimeseriesMeasurements(db *sqlx.DB) echo.HandlerFunc {
 		// Time Window
 		var tw timeseries.TimeWindow
 		a, b := c.QueryParam("after"), c.QueryParam("before")
-		// If after or before are not provided return last 7 days of data from current time
-		if a == "" || b == "" {
-			tw.Before = time.Now()
-			tw.After = tw.Before.AddDate(0, 0, -7)
-		} else {
-			// Attempt to parse query param "after"
-			tA, err := time.Parse(time.RFC3339, a)
-			if err != nil {
-				return c.JSON(http.StatusBadRequest, err)
-			}
-			tw.After = tA
-			// Attempt to parse query param "before"
-			tB, err := time.Parse(time.RFC3339, b)
-			if err != nil {
-				return c.JSON(http.StatusBadRequest, err)
-			}
-			tw.Before = tB
+		err = tw.SetWindow(a, b)
+		if err != nil {
+			return c.String(http.StatusBadRequest, err.Error())
 		}
 
 		// "interval" query parameter
@@ -119,7 +139,7 @@ func ListTimeseriesMeasurements(db *sqlx.DB) echo.HandlerFunc {
 		}
 
 		// If timeseries IS computed, calulate measurements
-		ct, err := models.ComputedTimeseriesWithMeasurements(db, &ts.ID, &ts.InstrumentID, &tw, &interval)
+		ct, err := models.ComputedTimeseriesWithMeasurements(db, &ts.ID, &ts.InstrumentID, &tw, interval)
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
@@ -203,23 +223,9 @@ func UpdateTimeseriesMeasurements(db *sqlx.DB) echo.HandlerFunc {
 		// Time Window
 		var tw timeseries.TimeWindow
 		a, b := c.QueryParam("after"), c.QueryParam("before")
-		// If after or before are not provided return last 7 days of data from current time
-		if a == "" || b == "" {
-			tw.Before = time.Now()
-			tw.After = tw.Before.AddDate(0, 0, -7)
-		} else {
-			// Attempt to parse query param "after"
-			tA, err := time.Parse(time.RFC3339, a)
-			if err != nil {
-				return c.JSON(http.StatusBadRequest, err)
-			}
-			tw.After = tA
-			// Attempt to parse query param "before"
-			tB, err := time.Parse(time.RFC3339, b)
-			if err != nil {
-				return c.JSON(http.StatusBadRequest, err)
-			}
-			tw.Before = tB
+		err := tw.SetWindow(a, b)
+		if err != nil {
+			return c.String(http.StatusBadRequest, err.Error())
 		}
 
 		var mcc models.TimeseriesMeasurementCollectionCollection

@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "29ee1504-7afc-47fb-9e9f-d1582cb64fa3",
+		"_postman_id": "51d89327-5896-4fe4-82b8-ccd27573c248",
 		"name": "instrumentation-regression",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -1993,6 +1993,61 @@
 					"response": []
 				},
 				{
+					"name": "ListInstrumentGroupMeasurements",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/instrument_groups/:instrument_group_id/timeseries_measurements?after=1900-01-01T00:00:00.00Z&before=2025-12-31T00:00:00.00Z&interval=",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instrument_groups",
+								":instrument_group_id",
+								"timeseries_measurements"
+							],
+							"query": [
+								{
+									"key": "after",
+									"value": "1900-01-01T00:00:00.00Z"
+								},
+								{
+									"key": "before",
+									"value": "2025-12-31T00:00:00.00Z"
+								},
+								{
+									"key": "interval",
+									"value": ""
+								}
+							],
+							"variable": [
+								{
+									"key": "instrument_group_id",
+									"value": "d0916e8a-39a6-4f2f-bd31-879881f8b40c",
+									"description": "instrument group uuid"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Add Instrument to InstrumentGroup",
 					"event": [
 						{
@@ -2124,9 +2179,11 @@
 									"        \"updater\": {  \"type\": [\"string\", \"null\"] },",
 									"        \"update_date\": { \"type\": [\"string\", \"null\"], \"format\": \"date-time\" },",
 									"        \"project_id\": { \"type\": [\"string\", \"null\"] },",
-									"        \"show_masked\": { \"type\": [\"boolean\", \"null\"] },",
-									"        \"show_nonvalidated\": { \"type\": [\"boolean\", \"null\"] },",
-									"        \"show_comments\": { \"type\": [\"boolean\", \"null\"] },",
+									"        \"show_masked\": { \"type\": \"boolean\" },",
+									"        \"show_nonvalidated\": { \"type\": \"boolean\" },",
+									"        \"show_comments\": { \"type\": \"boolean\" },",
+									"        \"auto_range\": { \"type\": \"boolean\" },",
+									"        \"date_range\": { \"type\": \"string\" },",
 									"    },",
 									"    \"required\": [\"id\", \"slug\", \"name\", \"creator\", \"create_date\", \"updater\", \"update_date\", \"project_id\", \"timeseries_id\"],",
 									"    \"additionalProperties\": false",

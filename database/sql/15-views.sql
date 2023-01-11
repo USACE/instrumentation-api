@@ -280,7 +280,9 @@ CREATE OR REPLACE VIEW v_plot_configuration AS (
            pc.update_date                         AS update_date,
            COALESCE(k.show_masked, 'true')        AS show_masked,
            COALESCE(k.show_nonvalidated, 'true')  AS show_nonvalidated,
-           COALESCE(k.show_comments, 'true')      AS show_comments
+           COALESCE(k.show_comments, 'true')      AS show_comments,
+           COALESCE(k.auto_range, 'true')         AS auto_range,
+           COALESCE(k.date_range, '1 year')       AS date_range
     FROM plot_configuration pc
     LEFT JOIN (
         SELECT plot_configuration_id    AS plot_configuration_id,
@@ -292,7 +294,9 @@ CREATE OR REPLACE VIEW v_plot_configuration AS (
         SELECT id                AS id,
                show_masked       AS show_masked,
                show_nonvalidated AS show_nonvalidated,
-               show_comments     AS show_comments
+               show_comments     AS show_comments,
+               auto_range        AS auto_range,
+               date_range        AS date_range
         FROM plot_configuration_settings
         GROUP BY id
     ) as k ON pc.id = k.id
