@@ -58,6 +58,13 @@ func CreatePlotConfiguration(db *sqlx.DB) echo.HandlerFunc {
 		if err := c.Bind(&pc); err != nil {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
+		// Default to 1 year if no date range provided
+		if pc.DateRange == "" {
+			pc.DateRange = "1 year"
+		}
+		if err := pc.ValidateDateRange(); err != nil {
+			return c.String(http.StatusBadRequest, err.Error())
+		}
 		// Project ID from Route Params
 		pID, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
@@ -98,6 +105,13 @@ func UpdatePlotConfiguration(db *sqlx.DB) echo.HandlerFunc {
 		var pc models.PlotConfiguration
 		// Bind Information Provided in Request Body
 		if err := c.Bind(&pc); err != nil {
+			return c.String(http.StatusBadRequest, err.Error())
+		}
+		// Default to 1 year if no date range provided
+		if pc.DateRange == "" {
+			pc.DateRange = "1 year"
+		}
+		if err := pc.ValidateDateRange(); err != nil {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
 		// Project ID from Route Params

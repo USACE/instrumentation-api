@@ -1,6 +1,10 @@
 package models
 
 import (
+	"errors"
+	"strings"
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
@@ -10,9 +14,11 @@ import (
 // Specifically, whether to ignore data entries in a timeseries that have been masked,
 // or whether to display user comments.
 type PlotConfigurationSettings struct {
-	ShowMasked       bool `json:"show_masked" db:"show_masked"`
-	ShowNonValidated bool `json:"show_nonvalidated" db:"show_nonvalidated"`
-	ShowComments     bool `json:"show_comments" db:"show_comments"`
+	ShowMasked       bool   `json:"show_masked" db:"show_masked"`
+	ShowNonValidated bool   `json:"show_nonvalidated" db:"show_nonvalidated"`
+	ShowComments     bool   `json:"show_comments" db:"show_comments"`
+	AutoRange        bool   `json:"auto_range" db:"auto_range"`
+	DateRange        string `json:"date_range" db:"date_range"`
 }
 
 // PlotConfiguration holds information for entity PlotConfiguration
@@ -26,13 +32,41 @@ type PlotConfiguration struct {
 	PlotConfigurationSettings
 }
 
+func (pc *PlotConfiguration) ValidateDateRange() error {
+	dr := strings.ToLower(pc.DateRange)
+	// Check for standard settings
+	if dr == "lifetime" {
+		return nil
+	}
+	if dr == "5 years" {
+		return nil
+	}
+	if dr == "1 year" {
+		return nil
+	}
+
+	// Check for custom date range
+	cdr := strings.Split(dr, " - ")
+	if len(cdr) == 2 {
+		for _, v := range cdr {
+			if _, err := time.Parse("01/02/2006", v); err != nil {
+				return errors.New("custom date values must be in format \"MM/DD/YYYY - MM/DD/YYYY\"")
+			}
+		}
+		return nil
+	}
+
+	// No match found
+	return errors.New("invalid date range provided")
+}
+
 // ListPlotConfigurationsSQL is the base SQL statement for above functions
 var ListPlotConfigurationsSQL = `SELECT
 								 id, slug, name, project_id,
 								 timeseries_id, creator,
 								 create_date, updater, update_date,
-								 show_masked, show_nonvalidated,
-								 show_comments
+								 show_masked, show_nonvalidated, show_comments,
+								 auto_range, date_range
 								 FROM v_plot_configuration`
 
 // PlotConfigFactory converts database rows to PlotConfiguration objects
@@ -45,6 +79,7 @@ func PlotConfigFactory(rows *sqlx.Rows) ([]PlotConfiguration, error) {
 			&p.ID, &p.Slug, &p.Name, &p.ProjectID, pq.Array(&p.TimeseriesID),
 			&p.Creator, &p.CreateDate, &p.Updater, &p.UpdateDate,
 			&p.ShowMasked, &p.ShowNonValidated, &p.ShowComments,
+			&p.AutoRange, &p.DateRange,
 		)
 		if err != nil {
 			return make([]PlotConfiguration, 0), err
@@ -116,7 +151,9 @@ func CreatePlotConfiguration(db *sqlx.DB, pc *PlotConfiguration) (*PlotConfigura
 		return nil, err
 	}
 	stmt3, err := txn.Preparex(
-		`INSERT INTO plot_configuration_settings (id, show_masked, show_nonvalidated, show_comments) VALUES ($1, $2, $3, $4)`,
+		`INSERT INTO plot_configuration_settings
+			(id, show_masked, show_nonvalidated, show_comments, auto_range, date_range) 
+			VALUES ($1, $2, $3, $4, $5, $6)`,
 	)
 	if err != nil {
 		return nil, err
@@ -134,7 +171,7 @@ func CreatePlotConfiguration(db *sqlx.DB, pc *PlotConfiguration) (*PlotConfigura
 		}
 	}
 	// Create settings.
-	if _, err := stmt3.Exec(&pcID, pc.ShowMasked, pc.ShowNonValidated, pc.ShowComments); err != nil {
+	if _, err := stmt3.Exec(&pcID, pc.ShowMasked, pc.ShowNonValidated, pc.ShowComments, pc.AutoRange, pc.DateRange); err != nil {
 		return nil, err
 	}
 	if err := stmt1.Close(); err != nil {
@@ -166,7 +203,11 @@ func UpdatePlotConfiguration(db *sqlx.DB, pc *PlotConfiguration) (*PlotConfigura
 	}
 
 	// Prepared Statement; Update exiting plot configuration settings
-	stmt4, err := txn.Preparex(`UPDATE plot_configuration_settings SET show_masked = $2, show_nonvalidated = $3, show_comments = $4 WHERE id = $1`)
+	stmt4, err := txn.Preparex(`
+		UPDATE plot_configuration_settings SET
+			show_masked = $2, show_nonvalidated = $3, show_comments = $4,
+			auto_range = $5, date_range = $6
+		WHERE id = $1`)
 	if err != nil {
 		return nil, err
 	}
@@ -202,7 +243,7 @@ func UpdatePlotConfiguration(db *sqlx.DB, pc *PlotConfiguration) (*PlotConfigura
 	if _, err := stmt2.Exec(args...); err != nil {
 		return nil, err
 	}
-	if _, err := stmt4.Exec(pc.ID, pc.ShowMasked, pc.ShowNonValidated, pc.ShowComments); err != nil {
+	if _, err := stmt4.Exec(pc.ID, pc.ShowMasked, pc.ShowNonValidated, pc.ShowComments, pc.AutoRange, pc.DateRange); err != nil {
 		return nil, err
 	}
 

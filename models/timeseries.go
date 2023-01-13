@@ -105,9 +105,9 @@ func ListProjectTimeseries(db *sqlx.DB, projectID *uuid.UUID) ([]ts.Timeseries, 
 }
 
 // ListInstrumentTimeseries returns an array of timeseries for an instrument
-func ListInstrumentTimeseries(db *sqlx.DB, projectID *uuid.UUID, instrumentID *uuid.UUID) ([]ts.Timeseries, error) {
+func ListInstrumentTimeseries(db *sqlx.DB, instrumentID *uuid.UUID) ([]ts.Timeseries, error) {
 	tt := make([]ts.Timeseries, 0)
-	if err := db.Select(&tt, listTimeseriesSQL+" WHERE project_id = $1 AND instrument_id = $2", projectID, instrumentID); err != nil {
+	if err := db.Select(&tt, listTimeseriesSQL+" WHERE instrument_id = $1", instrumentID); err != nil {
 		return make([]ts.Timeseries, 0), err
 	}
 	return tt, nil
