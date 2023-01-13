@@ -16,4 +16,3 @@ INSERT INTO project (name, slug, image) VALUES
     ('Thomas J. O''brien Lock and Controlling Works', 'thomas-j-obrien-lock-and-controlling-works', 'thomas-j-obrien-lock-and-controlling-works.jpg'),
     ('Upper Appleton Locks and Dam', 'upper-appleton-locks-and-dam', 'upper-appleton-locks-and-dam.jpg'),
     ('Chicago Sanitarty and Ship Canal Dispersal Barrier', 'chicago-sanitary-and-ship-canal-dispersal-barrier', 'chicago-sanitary-and-ship-canal-dispersal-barrier.jpg');
-
