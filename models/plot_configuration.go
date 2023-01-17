@@ -202,16 +202,6 @@ func UpdatePlotConfiguration(db *sqlx.DB, pc *PlotConfiguration) (*PlotConfigura
 		return nil, err
 	}
 
-	// Prepared Statement; Update exiting plot configuration settings
-	stmt4, err := txn.Preparex(`
-		UPDATE plot_configuration_settings SET
-			show_masked = $2, show_nonvalidated = $3, show_comments = $4,
-			auto_range = $5, date_range = $6
-		WHERE id = $1`)
-	if err != nil {
-		return nil, err
-	}
-
 	// Prepared Statement; Delete plot_configuration_timeseries in table that are not in updated plot config
 	// Note: "IN" queries w/ sqlx require use of sqlx.In and Query Re-Binding
 	query, args, err := sqlx.In(
@@ -236,6 +226,25 @@ func UpdatePlotConfiguration(db *sqlx.DB, pc *PlotConfiguration) (*PlotConfigura
 		return nil, err
 	}
 
+	// Prepared Statement; Delete plot_configuration_timeseries in table that are not in updated plot config
+	// Note: "IN" queries w/ sqlx require use of sqlx.In and Query Re-Binding
+	stmt4, err := txn.Preparex(
+		`DELETE FROM plot_configuration_settings WHERE id = $1`,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// Prepared Statement; Update exiting plot configuration settings
+	stmt5, err := txn.Preparex(`
+		INSERT INTO plot_configuration_settings
+		(id, show_masked, show_nonvalidated, show_comments, auto_range, date_range)
+		VALUES ($1, $2, $3, $4, $5, $6)
+	`)
+	if err != nil {
+		return nil, err
+	}
+
 	if _, err := stmt1.Exec(pc.ProjectID, pc.ID, pc.Name, pc.Updater, pc.UpdateDate); err != nil {
 		return nil, err
 	}
@@ -243,7 +252,10 @@ func UpdatePlotConfiguration(db *sqlx.DB, pc *PlotConfiguration) (*PlotConfigura
 	if _, err := stmt2.Exec(args...); err != nil {
 		return nil, err
 	}
-	if _, err := stmt4.Exec(pc.ID, pc.ShowMasked, pc.ShowNonValidated, pc.ShowComments, pc.AutoRange, pc.DateRange); err != nil {
+	if _, err := stmt4.Exec(pc.ID); err != nil {
+		return nil, err
+	}
+	if _, err := stmt5.Exec(pc.ID, pc.ShowMasked, pc.ShowNonValidated, pc.ShowComments, pc.AutoRange, pc.DateRange); err != nil {
 		return nil, err
 	}
 
