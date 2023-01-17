@@ -277,6 +277,9 @@ func UpdatePlotConfiguration(db *sqlx.DB, pc *PlotConfiguration) (*PlotConfigura
 	if err := stmt4.Close(); err != nil {
 		return nil, err
 	}
+	if err := stmt5.Close(); err != nil {
+		return nil, err
+	}
 
 	if err := txn.Commit(); err != nil {
 		return nil, err
