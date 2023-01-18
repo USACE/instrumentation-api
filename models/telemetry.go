@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/google/uuid"
+	"github.com/jmoiron/sqlx"
 )
 
 // Telemetry struct
@@ -16,7 +17,14 @@ type Telemetry struct {
 	TypeName string
 }
 
-type DataLoggerFile struct {
+type DataLogger struct {
+	Name      string
+	SN        string
+	ProjectID uuid.UUID
+	CreatorID uuid.UUID
+}
+
+type DataLoggerPayload struct {
 	Head Head    `json:"head"`
 	Data []Datum `json:"data"`
 }
@@ -49,6 +57,60 @@ type Field struct {
 	Units    string `json:"units"`
 	Process  string `json:"process"`
 	Settable bool   `json:"settable"`
+}
+
+type EquivalencyTable struct {
+	DataLoggerSN string
+	FieldMap     map[string]EquivalencyTableRow
+}
+
+type EquivalencyTableRow struct {
+	InstrumentID uuid.UUID
+	TimeseriesID uuid.UUID
+}
+
+func GetDataLoggerHash(db *sqlx.DB, sn string) (string, error) {
+	var hash string
+
+	if err := db.Get(
+		&hash,
+		`SELECT hash
+		FROM data_logger_hash
+		WHERE serial_number = $1`,
+		sn,
+	); err != nil {
+		return "", err
+	}
+
+	return hash, nil
+}
+
+func GetDataLoggerBySerialNumber(db *sqlx.DB, sn string) (*DataLogger, error) {
+	var dl DataLogger
+
+	if err := db.Get(
+		&dl,
+		`SELECT name, serial_number, project_id, creator_id
+		FROM v_data_logger
+		WHERE serial_number = $1`,
+		sn,
+	); err != nil {
+		return nil, err
+	}
+
+	return &dl, nil
+}
+
+func GetEquivalencyTable(db *sqlx.DB, sn string) (*EquivalencyTable, error) {
+	var eq EquivalencyTable
+
+	if err := db.Get(
+		&eq, ``, sn,
+	); err != nil {
+		return nil, err
+	}
+
+	return &eq, nil
 }
 
 // ParseTOA5 parses a Campbell Scientific TOA5 data file that is simlar to a csv.
