@@ -191,16 +191,14 @@ func (ts Timeseries) AggregateCarryForward(w *timeseries.TimeWindow, allTimes []
 
 	for _, tm := range allTimes {
 		// Time out of range, cannot compute
-		if tm.Before(a[0].Time) || tm.After(a[lastIdx].Time) || wkIdx == lastIdx {
+		if tm.Before(a[0].Time) || tm.After(w.Before) {
 			continue
 		}
 
 		// Time allTimes buffer position caught up with working array index, add measurement and advance working index
-		if tm == a[wkIdx].Time {
-			aggregateMeasurements = append(aggregateMeasurements, Measurement{tm, a[wkIdx].Value})
+		if wkIdx <= lastIdx && tm == a[wkIdx].Time {
 			remember = a[wkIdx].Value
 			wkIdx += 1
-			continue
 		}
 		// allTimes buffer is behind the working array index, add measurement
 		aggregateMeasurements = append(aggregateMeasurements, Measurement{tm, remember})
@@ -313,11 +311,22 @@ func (ts Timeseries) AggregateInterpolate(w *timeseries.TimeWindow, allTimes []t
 	}, nil
 }
 
-//------------------------------ resampling algorithm ------------------------------//
+// ------------------------------ resample ----------------------------------//
 
 // ResampleTimeseriesMeasurements provides values at a fixed, regularized interval based a provided duration
-// These resampled values are interpolated from the nearest points in the aggregate calculation's curve
-func (ts *Timeseries) ResampleTimeseriesMeasurements(w *timeseries.TimeWindow, d time.Duration) (Timeseries, error) {
+// The method of resampling (interpolated or carried forward) is specified via the `interp` function parameter
+func (ts *Timeseries) ResampleTimeseriesMeasurements(w *timeseries.TimeWindow, d time.Duration, interp bool) (Timeseries, error) {
+	if interp {
+		return ts.ResampleInterpolate(w, d)
+	} else {
+		return ts.ResampleCarryForward(w, d)
+	}
+}
+
+//------------------------------ interpolated resampling ------------------------------//
+
+// ResampleInterpolate resamples using interpolation
+func (ts *Timeseries) ResampleInterpolate(w *timeseries.TimeWindow, d time.Duration) (Timeseries, error) {
 
 	resampled := make([]Measurement, 0)
 
@@ -393,6 +402,81 @@ func (ts *Timeseries) ResampleTimeseriesMeasurements(w *timeseries.TimeWindow, d
 		}
 
 		resampled = append(resampled, Measurement{t, currentY})
+		t = t.Add(d)
+	}
+
+	return Timeseries{
+		TimeseriesInfo:      ts.TimeseriesInfo,
+		Measurements:        resampled,
+		TimeWindow:          ts.TimeWindow,
+		NextMeasurementLow:  ts.NextMeasurementLow,
+		NextMeasurementHigh: ts.NextMeasurementHigh,
+	}, nil
+}
+
+//------------------------------ carry-forward resampling ------------------------------//
+
+// ResampleCarryForward resamples using the last known value
+func (ts *Timeseries) ResampleCarryForward(w *timeseries.TimeWindow, d time.Duration) (Timeseries, error) {
+
+	resampled := make([]Measurement, 0)
+
+	// Computed timeseries working array
+	a := make([]Measurement, 0)
+	if ts.NextMeasurementLow != nil {
+		a = append(a, *ts.NextMeasurementLow)
+	}
+	a = append(a, ts.Measurements...)
+	if ts.NextMeasurementHigh != nil {
+		a = append(a, *ts.NextMeasurementHigh)
+	}
+
+	if len(a) == 0 {
+		return Timeseries{
+			TimeseriesInfo:      ts.TimeseriesInfo,
+			Measurements:        make([]Measurement, 0),
+			TimeWindow:          ts.TimeWindow,
+			NextMeasurementLow:  ts.NextMeasurementLow,
+			NextMeasurementHigh: ts.NextMeasurementHigh,
+		}, nil
+	}
+
+	sort.Slice(a, func(i, j int) bool { return a[i].Time.Before(a[j].Time) })
+
+	wkIdx, lastIdx := 0, len(a)-1
+	remember := a[0].Value
+
+	// Max time between time window and measured time
+	t := func() time.Time {
+		if a[0].Time.After(w.After) {
+			return a[0].Time
+		}
+		return w.After
+	}()
+	// Min time between time window and measured time
+	tEnd := func() time.Time {
+		if a[lastIdx].Time.Before(w.Before) {
+			return a[lastIdx].Time
+		}
+		return w.Before
+	}()
+
+	for !t.After(tEnd) {
+		if !t.Before(a[wkIdx].Time) {
+			if wkIdx == lastIdx {
+				remember = a[wkIdx].Value
+				resampled = append(resampled, Measurement{t, remember})
+				t = t.Add(d)
+				continue
+			}
+			wkIdx += 1
+		}
+
+		if wkIdx-1 < 0 {
+			continue
+		}
+
+		resampled = append(resampled, Measurement{t, remember})
 		t = t.Add(d)
 	}
 

@@ -28,7 +28,7 @@ func ListInstrumentsMeasurements(db *sqlx.DB, instrumentIDs []uuid.UUID, tw *tim
 			}
 
 			if ts.IsComputed {
-				tss, err = ProcessComputedTimeseries(tss, tw, true)
+				tss, err = ProcessComputedTimeseries(tss, tw, false)
 				if err != nil {
 					return tss, err
 				}
@@ -38,7 +38,7 @@ func ListInstrumentsMeasurements(db *sqlx.DB, instrumentIDs []uuid.UUID, tw *tim
 				resampled := make([]Timeseries, len(tss))
 
 				for i, t := range tss {
-					t, err = t.ResampleTimeseriesMeasurements(tw, interval)
+					t, err = t.ResampleTimeseriesMeasurements(tw, interval, false)
 					if err != nil {
 						return tss, err
 					}
@@ -65,7 +65,7 @@ func ComputedTimeseriesWithMeasurements(db *sqlx.DB, timeseriesID *uuid.UUID, in
 		return tss, err
 	}
 
-	tss, err = ProcessComputedTimeseries(tss, tw, true)
+	tss, err = ProcessComputedTimeseries(tss, tw, false)
 	if err != nil {
 		return tss, err
 	}
@@ -74,7 +74,7 @@ func ComputedTimeseriesWithMeasurements(db *sqlx.DB, timeseriesID *uuid.UUID, in
 		resampled := make([]Timeseries, len(tss))
 
 		for i, t := range tss {
-			t, err = t.ResampleTimeseriesMeasurements(tw, interval)
+			t, err = t.ResampleTimeseriesMeasurements(tw, interval, false)
 			if err != nil {
 				return tss, err
 			}
