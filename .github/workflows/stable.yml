@@ -22,6 +22,7 @@ jobs:
       - name: Run Tests
         env:
           REPORT: true
+          DOCKER_BUILDKIT: 1
         run: ./test.sh
         
       - name: Configure AWS credentials
