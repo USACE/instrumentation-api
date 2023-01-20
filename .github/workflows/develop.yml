@@ -21,6 +21,7 @@ jobs:
       - name: Run Tests
         env:
           REPORT: true
+          DOCKER_BUILDKIT: 1
         run: ./test.sh
         
       - name: Configure AWS credentials
@@ -48,7 +49,7 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: midas-api
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest api
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
       - name: Logout of Amazon ECR

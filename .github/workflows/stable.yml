@@ -22,6 +22,7 @@ jobs:
       - name: Run Tests
         env:
           REPORT: true
+          DOCKER_BUILDKIT: 1
         run: ./test.sh
         
       - name: Configure AWS credentials
@@ -50,7 +51,7 @@ jobs:
           ECR_REPOSITORY: midas-api
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:stable .
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:stable api
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:stable
 
