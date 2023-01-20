@@ -7,10 +7,18 @@ services:
       - ./database/sql:/sql
       - ./database/sql/init.sql:/docker-entrypoint-initdb.d/z_init.sql
     environment:
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+    user: ${POSTGRES_USER:-postgres}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   api:
     build:
-      context: ./
+      context: api
       labels:
         - com.host.description=instrumentation-api
     restart: always
@@ -37,19 +45,27 @@ services:
       - INSTRUMENTATION_ROUTE_PREFIX=${INSTRUMENTATION_ROUTE_PREFIX:-}
     ports:
       - '${API_PORT:-80}:80'
+    depends_on:
+      postgres:
+        condition: service_healthy
+  
   minio:
     image: minio/minio
     environment:
       - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:-AKIAIOSFODNN7EXAMPLE}
       - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY}
     command: server /data
+    profiles:
+      - local
+
   # configure minio on startup (create buckets, etc)
   # inspired by https://github.com/minio/minio/issues/4769
   # and         https://gist.github.com/haxoza/22afe7cc4a9da7e8bdc09aad393a99cc
   minio_init:
     image: minio/mc
     depends_on:
-      - minio
+      minio:
+        condition: service_started
     entrypoint: >
       /bin/sh -c "
       echo 'sleeping for 10 seconds while minio starts...';
@@ -62,6 +78,9 @@ services:
       "
     volumes:
       - ./data:/media
+    profiles:
+      - local
+
   pgadmin:
     image: dpage/pgadmin4
     environment:
@@ -69,13 +88,18 @@ services:
       - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD:-postgres}
     ports:
       - '${PGADMIN_PORT:-8081}:80'
+    profiles:
+      - local
+  
   # Seed data using container was required as the sql file was so large
   # that it caused the postgres init to hang and exit early.
   seed_data:
     image: python:3
     depends_on:
-      - api
-      - postgres
+      api:
+        condition: service_started
+      postgres:
+        condition: service_started
     volumes:
       - ./_utils/seed_measurements:/app
     environment:
@@ -92,3 +116,32 @@ services:
       python3 /app/generate_seed_measurements.py
       exit 0;
       "
+    profiles:
+      - local
+      - test
+
+  swagger_init:
+    image: node:current-alpine
+    container_name: swagger_init
+    ports:
+      - '${INSTRUMENTATION_SWAGGER_INIT_PORT:-8003}:8080'
+    volumes:
+      - ${INSTRUMENTATION_SWAGGER_APIDOC_VOLUME:-./docs/swagger}:/docs/swagger
+      - ${INSTRUMENTATION_SWAGGER_TESTS_VOLUME:-./tests}:/tests
+    entrypoint: ["/bin/sh", "/docs/swagger/postman2apidoc.sh"]
+    profiles:
+      - local
+
+  swagger:
+    image: swaggerapi/swagger-ui
+    container_name: swagger-ui
+    environment:
+      - API_URL=swagger/apidoc.json
+      - CONFIG_URL=swagger/swagger-config.json
+    ports:
+      - '${INSTRUMENTATION_SWAGGER_PORT:-8002}:8080'
+    volumes:
+      - ${INSTRUMENTATION_SWAGGER_APIDOC_VOLUME:-./docs/swagger}:/usr/share/nginx/html/swagger
+    restart: always
+    profiles:
+      - local

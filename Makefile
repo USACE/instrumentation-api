@@ -3,7 +3,7 @@ packagename = instrumentation-api.zip
 .PHONY: build clean
 
 build:
-	env GOOS=linux go build -ldflags="-s -w" -o bin/api main.go
+	env GOOS=linux go build -ldflags="-s -w" -o bin/api api/main.go
 
 clean:
 	rm -rf ./bin ./vendor $(packagename) Gopkg.lock

@@ -8,11 +8,15 @@ jobs:
   PullRequestCI:
     name: Pull Request CI
     runs-on: ubuntu-latest
+
+    env:
+      DOCKER_BUILDKIT: 1
+
     steps:
       - uses: actions/checkout@v2
       - name: Docker Compose
         run: |
-          docker-compose up -d
+          docker-compose --profile test up -d
           # Give it time to start up our API image
           sleep 5
       - name: Run Tests
