@@ -22,7 +22,7 @@ jobs:
       - name: Docker Compose
         env:
           REPORT: true
-        run: docker-compose up -d
+        run: docker-compose --profile test up -d
       - name: Run Tests
         run: ./test.sh
         
