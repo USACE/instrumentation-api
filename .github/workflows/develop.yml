@@ -11,17 +11,19 @@ jobs:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
+    env:
+      DOCKER_BUILDKIT: 1
+
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
       - name: Docker Compose
-        run: docker-compose up -d
-      - name: Run Tests
         env:
           REPORT: true
-          DOCKER_BUILDKIT: 1
+        run: docker-compose up -d
+      - name: Run Tests
         run: ./test.sh
         
       - name: Configure AWS credentials
