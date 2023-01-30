@@ -1,13 +1,18 @@
 version: '3.9'
 
+volumes:
+  pgdata:
+  pgadmin:
+
 services:
   postgres:
-    image: mdillon/postgis
-    volumes:
-      - ./database/sql:/sql
+    image: postgis/postgis:${POSTGIS_VERSION:-13-3.1}
+    restart: always
     environment:
       - POSTGRES_USER=${POSTGRES_USER:-postgres}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
     user: ${POSTGRES_USER:-postgres}
     healthcheck:
       test: ["CMD-SHELL", "pg_isready"]
@@ -50,6 +55,35 @@ services:
       flyway:
         condition: service_completed_successfully
 
+  flyway:
+    build:
+      context: sql
+    restart: on-failure
+    environment:
+      - FLYWAY_LOCATIONS=${FLYWAY_LOCATIONS:-filesystem:/flyway/sql/common,filesystem:/flyway/sql/local}
+      - FLYWAY_USER=postgres
+      - FLYWAY_PASSWORD=postgres
+      - FLYWAY_URL=jdbc:postgresql://postgres:5432/postgres
+    volumes:
+      - ./sql:/flyway/sql
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # ---------------------- local profile services ---------------------- #
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL:-postgres@postgres.com}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD:-postgres}
+    ports:
+      - '${PGADMIN_PORT:-8081}:80'
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    profiles:
+      - local
+
   minio:
     image: minio/minio
     environment:
@@ -82,46 +116,6 @@ services:
     profiles:
       - local
 
-  pgadmin:
-    image: dpage/pgadmin4
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL:-postgres@postgres.com}
-      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD:-postgres}
-    ports:
-      - '${PGADMIN_PORT:-8081}:80'
-    profiles:
-      - local
-  
-  flyway:
-    image: flyway/flyway
-    environment:
-      - FLYWAY_EDITION=community
-      - FLYWAY_LOCATIONS=${FLYWAY_LOCATIONS:-filesystem:/flyway/sql/common,filesystem:/flyway/sql/local}
-      - FLYWAY_USER=postgres
-      - FLYWAY_PASSWORD=postgres
-      - FLYWAY_SCHEMAS=midas
-      - FLYWAY_URL=jdbc:postgresql://postgres:5432/postgres
-      - FLYWAY_BASELINE_ON_MIGRATE=${FLYWAY_BASELINE_ON_MIGRATE}
-      - FLYWAY_BASELINE_VERSION=${FLYWAY_BASELINE_VERSION}
-    command: -connectRetries=60 migrate
-    volumes:
-      - ./sql:/flyway/sql
-    depends_on:
-      postgres:
-        condition: service_healthy
-
-  swagger_init:
-    image: node:current-alpine
-    container_name: swagger_init
-    ports:
-      - '${INSTRUMENTATION_SWAGGER_INIT_PORT:-8003}:8080'
-    volumes:
-      - ${INSTRUMENTATION_SWAGGER_APIDOC_VOLUME:-./docs/swagger}:/docs/swagger
-      - ${INSTRUMENTATION_SWAGGER_TESTS_VOLUME:-./tests}:/tests
-    entrypoint: ["/bin/sh", "/docs/swagger/postman2apidoc.sh"]
-    profiles:
-      - local
-
   swagger:
     image: swaggerapi/swagger-ui
     container_name: swagger-ui
@@ -133,5 +127,17 @@ services:
     volumes:
       - ${INSTRUMENTATION_SWAGGER_APIDOC_VOLUME:-./docs/swagger}:/usr/share/nginx/html/swagger
     restart: always
+    profiles:
+      - local
+
+  swagger_init:
+    image: node:current-alpine
+    container_name: swagger_init
+    ports:
+      - '${INSTRUMENTATION_SWAGGER_INIT_PORT:-8003}:8080'
+    volumes:
+      - ${INSTRUMENTATION_SWAGGER_APIDOC_VOLUME:-./docs/swagger}:/docs/swagger
+      - ${INSTRUMENTATION_SWAGGER_TESTS_VOLUME:-./tests}:/tests
+    entrypoint: ["/bin/sh", "/docs/swagger/postman2apidoc.sh"]
     profiles:
       - local
