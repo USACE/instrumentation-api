@@ -2,10 +2,37 @@
 
 -- User instrumentation_user
 -- Note: Substitute real password for 'password'
-CREATE USER instrumentation_user WITH ENCRYPTED PASSWORD 'password';
-CREATE ROLE instrumentation_reader;
-CREATE ROLE instrumentation_writer;
-CREATE ROLE postgis_reader;
+DO $$
+BEGIN
+    CREATE USER instrumentation_user WITH ENCRYPTED PASSWORD 'password';
+    EXCEPTION WHEN DUPLICATE_OBJECT THEN
+    RAISE NOTICE 'not creating role instrumentation_user -- it already exists';
+END
+$$;
+
+DO $$
+BEGIN
+    CREATE ROLE instrumentation_reader;
+    EXCEPTION WHEN DUPLICATE_OBJECT THEN
+    RAISE NOTICE 'not creating role instrumentation_reader -- it already exists';
+END
+$$;
+
+DO $$
+BEGIN
+    CREATE ROLE instrumentation_writer;
+    EXCEPTION WHEN DUPLICATE_OBJECT THEN
+    RAISE NOTICE 'not creating role instrumentation_writer -- it already exists';
+END
+$$;
+
+DO $$
+BEGIN
+    CREATE ROLE postgis_reader;
+    EXCEPTION WHEN DUPLICATE_OBJECT THEN
+    RAISE NOTICE 'not creating role postgis_reader -- it already exists';
+END
+$$;
 
 -- Set Search Path
 ALTER ROLE instrumentation_user SET search_path TO midas,topology,public;
@@ -58,7 +85,8 @@ GRANT SELECT ON
     timeseries_measurement,
     timeseries_notes,
     unit,
-    unit_family
+    unit_family,
+    inclinometer_measurement
 TO instrumentation_reader;
 
 -- Role instrumentation_writer
