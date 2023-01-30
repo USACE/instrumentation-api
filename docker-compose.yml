@@ -58,6 +58,7 @@ services:
       - FLYWAY_USER=postgres
       - FLYWAY_PASSWORD=postgres
       - FLYWAY_URL=jdbc:postgresql://postgres:5432/postgres
+    command: migrate
     volumes:
       - ./sql:/flyway/sql
     depends_on:
