@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgtype"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -69,6 +70,11 @@ type EquivalencyTableRow struct {
 	TimeseriesID uuid.UUID
 }
 
+type DataLoggerPreview struct {
+	SN      string
+	Payload pgtype.JSON `json:"payload"`
+}
+
 func GetDataLoggerHash(db *sqlx.DB, sn string) (string, error) {
 	var hash string
 
@@ -111,6 +117,31 @@ func GetEquivalencyTable(db *sqlx.DB, sn string) (*EquivalencyTable, error) {
 	}
 
 	return &eq, nil
+}
+
+func GetDataLoggerPreview(db *sqlx.DB, sn string) (*DataLoggerPreview, error) {
+	var dlp DataLoggerPreview
+
+	if err := db.Get(
+		&dlp,
+		`SELECT sn, payload FROM telemetry_preview WHERE sn = $1`,
+		sn,
+	); err != nil {
+		return nil, err
+	}
+
+	return &dlp, nil
+}
+
+func UpdateDataLoggerPreview(db *sqlx.DB, dlp *DataLoggerPreview) error {
+	if _, err := db.Exec(
+		`UPDATE TABLE telemetry_preview SET payload = $2 WHERE sn = $1`,
+		&dlp.SN, &dlp.Payload,
+	); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // ParseTOA5 parses a Campbell Scientific TOA5 data file that is simlar to a csv.

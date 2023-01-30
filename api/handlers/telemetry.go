@@ -1,16 +1,18 @@
 package handlers
 
 import (
+	"encoding/json"
 	"net/http"
 	"time"
 
-	"github.com/USACE/instrumentation-api/models"
-	"github.com/USACE/instrumentation-api/passwords"
-	"github.com/USACE/instrumentation-api/timeseries"
+	"github.com/USACE/instrumentation-api/api/models"
+	"github.com/USACE/instrumentation-api/api/passwords"
+	"github.com/USACE/instrumentation-api/api/timeseries"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
 )
 
+// TODO: Finish implementation
 func CreateOrUpdateDataLoggerMeasurements(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		// Parse the API key from the header, make sure its hash is in the database
@@ -86,5 +88,53 @@ func CreateOrUpdateDataLoggerMeasurements(db *sqlx.DB) echo.HandlerFunc {
 		}
 
 		return c.JSON(http.StatusCreated, &ret)
+	}
+}
+
+func UpdateDataLoggerPreview(db *sqlx.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		sn := c.Param("sn")
+		if sn == "" {
+			return c.String(http.StatusBadRequest, models.DefaultMessageBadRequest.Message)
+		}
+
+		body := make(map[string]interface{})
+
+		err := json.NewDecoder(c.Request().Body).Decode(&body)
+		if err != nil {
+			return err
+		}
+
+		pl, err := json.Marshal(body)
+		if err != nil {
+			return c.String(http.StatusBadRequest, models.DefaultMessageBadRequest.Message)
+		}
+
+		dlp := models.DataLoggerPreview{SN: sn}
+		dlp.Payload.Set(pl)
+
+		err = models.UpdateDataLoggerPreview(db, &dlp)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, models.DefaultMessageInternalServerError.Message)
+		}
+
+		return c.JSON(http.StatusAccepted, sn)
+	}
+}
+
+func GetDataLoggerPreview(db *sqlx.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		sn := c.Param("sn")
+		if sn == "" {
+			return c.String(http.StatusBadRequest, models.DefaultMessageBadRequest.Message)
+		}
+
+		// Get preview from db
+		preview, err := models.GetDataLoggerPreview(db, sn)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, models.DefaultMessageInternalServerError.Message)
+		}
+
+		return c.JSON(http.StatusOK, preview)
 	}
 }
