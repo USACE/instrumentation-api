@@ -1,16 +1,22 @@
-version: '3'
+version: '3.9'
 
 services:
   postgres:
-    image: mdillon/postgis
-    volumes:
-      - ./database/sql:/sql
-      - ./database/sql/init.sql:/docker-entrypoint-initdb.d/z_init.sql
+    image: postgis/postgis:${POSTGIS_VERSION:-13-3.1}
+    restart: always
     environment:
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+    user: ${POSTGRES_USER:-postgres}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   api:
     build:
-      context: ./
+      context: api
       labels:
         - com.host.description=instrumentation-api
     restart: always
@@ -37,19 +43,57 @@ services:
       - INSTRUMENTATION_ROUTE_PREFIX=${INSTRUMENTATION_ROUTE_PREFIX:-}
     ports:
       - '${API_PORT:-80}:80'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      flyway:
+        condition: service_completed_successfully
+
+  flyway:
+    build:
+      context: sql
+    restart: on-failure
+    environment:
+      - FLYWAY_LOCATIONS=${FLYWAY_LOCATIONS:-filesystem:/flyway/sql/common,filesystem:/flyway/sql/local}
+      - FLYWAY_USER=postgres
+      - FLYWAY_PASSWORD=postgres
+      - FLYWAY_URL=jdbc:postgresql://postgres:5432/postgres
+    command: migrate
+    volumes:
+      - ./sql:/flyway/sql
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # ---------------------- local profile services ---------------------- #
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL:-postgres@postgres.com}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD:-postgres}
+    ports:
+      - '${PGADMIN_PORT:-8081}:80'
+    profiles:
+      - local
+
   minio:
     image: minio/minio
     environment:
       - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:-AKIAIOSFODNN7EXAMPLE}
       - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY}
     command: server /data
+    profiles:
+      - local
+
   # configure minio on startup (create buckets, etc)
   # inspired by https://github.com/minio/minio/issues/4769
   # and         https://gist.github.com/haxoza/22afe7cc4a9da7e8bdc09aad393a99cc
   minio_init:
     image: minio/mc
     depends_on:
-      - minio
+      minio:
+        condition: service_started
     entrypoint: >
       /bin/sh -c "
       echo 'sleeping for 10 seconds while minio starts...';
@@ -62,33 +106,31 @@ services:
       "
     volumes:
       - ./data:/media
-  pgadmin:
-    image: dpage/pgadmin4
+    profiles:
+      - local
+
+  swagger:
+    image: swaggerapi/swagger-ui
+    container_name: swagger-ui
     environment:
-      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL:-postgres@postgres.com}
-      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD:-postgres}
+      - API_URL=swagger/apidoc.json
+      - CONFIG_URL=swagger/swagger-config.json
     ports:
-      - '${PGADMIN_PORT:-8081}:80'
-  # Seed data using container was required as the sql file was so large
-  # that it caused the postgres init to hang and exit early.
-  seed_data:
-    image: python:3
-    depends_on:
-      - api
-      - postgres
+      - '${INSTRUMENTATION_SWAGGER_PORT:-8002}:8080'
     volumes:
-      - ./_utils/seed_measurements:/app
-    environment:
-      - INSTRUMENTATION_API_HOST=${INSTRUMENTATION_API_HOST:-api}
-      - INSTRUMENTATION_DBUSER=${INSTRUMENTATION_DBUSER:-instrumentation_user}
-      - INSTRUMENTATION_DBPASS=${INSTRUMENTATION_DBPASS:-password}
-      - INSTRUMENTATION_DBNAME=${INSTRUMENTATION_DBNAME:-postgres}
-      - INSTRUMENTATION_DBHOST=${INSTRUMENTATION_DBHOST:-postgres}
-      - INSTRUMENTATION_ROUTE_PREFIX=${INSTRUMENTATION_ROUTE_PREFIX:-}
-    entrypoint: >
-      /bin/sh -c "
-      pip3 install requests psycopg2;
-      sleep 10;
-      python3 /app/generate_seed_measurements.py
-      exit 0;
-      "
+      - ${INSTRUMENTATION_SWAGGER_APIDOC_VOLUME:-./docs/swagger}:/usr/share/nginx/html/swagger
+    restart: always
+    profiles:
+      - local
+
+  swagger_init:
+    image: node:current-alpine
+    container_name: swagger_init
+    ports:
+      - '${INSTRUMENTATION_SWAGGER_INIT_PORT:-8003}:8080'
+    volumes:
+      - ${INSTRUMENTATION_SWAGGER_APIDOC_VOLUME:-./docs/swagger}:/docs/swagger
+      - ${INSTRUMENTATION_SWAGGER_TESTS_VOLUME:-./tests}:/tests
+    entrypoint: ["/bin/sh", "/docs/swagger/postman2apidoc.sh"]
+    profiles:
+      - local
