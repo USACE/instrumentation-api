@@ -20,7 +20,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Docker Compose
-        run: docker-compose --profile test up -d
+        run: docker-compose up -d
       - name: Run Tests
         env:
           REPORT: true
