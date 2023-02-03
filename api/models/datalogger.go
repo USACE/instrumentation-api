@@ -113,7 +113,7 @@ func CreateDataLogger(db *sqlx.DB, n *DataLogger) (*DataLogger, error) {
 
 func GetDataLogger(db *sqlx.DB, dlID *uuid.UUID) (*DataLogger, error) {
 	var dl DataLogger
-	if err := db.Get(&dl, `SELECT * FROM datalogger WHERE id = $1`, dlID); err != nil {
+	if err := db.Get(&dl, `SELECT * FROM v_datalogger WHERE id = $1`, dlID); err != nil {
 		return nil, err
 	}
 	return &dl, nil
@@ -121,7 +121,7 @@ func GetDataLogger(db *sqlx.DB, dlID *uuid.UUID) (*DataLogger, error) {
 
 func GetDataLoggerBySN(db *sqlx.DB, sn string) (*DataLogger, error) {
 	var dl DataLogger
-	if err := db.Get(&dl, `SELECT * FROM datalogger WHERE sn = $1`, sn); err != nil {
+	if err := db.Get(&dl, `SELECT * FROM v_datalogger WHERE sn = $1`, sn); err != nil {
 		return nil, err
 	}
 	return &dl, nil
@@ -141,7 +141,7 @@ func UpdateDataLogger(db *sqlx.DB, u *DataLogger) (*DataLogger, error) {
 }
 
 func DeleteDataLogger(db *sqlx.DB, dlID *uuid.UUID) error {
-	if _, err := db.Exec(`UPDATE datalogger SET deleted = true WHERE id = $1`, dlID); err != nil {
+	if _, err := db.Exec(`UPDATE datalogger SET deleted = true WHERE id = $1`, &dlID); err != nil {
 		return err
 	}
 	return nil
@@ -153,8 +153,8 @@ func GetDataLoggerHash(db *sqlx.DB, sn string) (string, error) {
 	if err := db.Get(
 		&hash,
 		`SELECT hash
-		FROM data_logger_hash
-		WHERE serial_number = $1`,
+		FROM datalogger_hash
+		WHERE sn = $1`,
 		sn,
 	); err != nil {
 		return "", err
@@ -167,7 +167,7 @@ func GetEquivalencyTable(db *sqlx.DB, sn string) (*EquivalencyTable, error) {
 	var eq EquivalencyTable
 
 	if err := db.Get(
-		&eq, ``, sn,
+		&eq, `SELECT * FROM v_datalogger_field_instrument_timeseries WHERE datalogger_id = $1`, sn,
 	); err != nil {
 		return nil, err
 	}
@@ -180,7 +180,7 @@ func GetDataLoggerPreview(db *sqlx.DB, sn string) (*DataLoggerPreview, error) {
 
 	if err := db.Get(
 		&dlp,
-		`SELECT sn, payload FROM telemetry_preview WHERE sn = $1`,
+		`SELECT sn, payload FROM datalogger_preview WHERE sn = $1`,
 		sn,
 	); err != nil {
 		return nil, err
@@ -191,7 +191,7 @@ func GetDataLoggerPreview(db *sqlx.DB, sn string) (*DataLoggerPreview, error) {
 
 func UpdateDataLoggerPreview(db *sqlx.DB, dlp *DataLoggerPreview) error {
 	if _, err := db.Exec(
-		`UPDATE TABLE telemetry_preview SET payload = $2 WHERE sn = $1`,
+		`UPDATE TABLE datalogger_preview SET payload = $2 WHERE sn = $1`,
 		&dlp.SN, &dlp.Payload,
 	); err != nil {
 		return err

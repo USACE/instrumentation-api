@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS datalogger (
     name TEXT NOT NULL,
     slug TEXT NOT NULL,
     model TEXT NOT NULL,
+    deleted BOOLEAN NOT NULL DEFAULT false,
     CONSTRAINT datalogger_unique_sn UNIQUE(sn)
 );
 
