@@ -5,12 +5,100 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/USACE/instrumentation-api/api/dbutils"
 	"github.com/USACE/instrumentation-api/api/models"
 	"github.com/USACE/instrumentation-api/api/passwords"
 	"github.com/USACE/instrumentation-api/api/timeseries"
+	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
 )
+
+// ListDataLoggers
+func ListDataLoggers(db *sqlx.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		// TODO: Check if user has read permissions for data logger
+
+		// Check for project_id in url query
+		pID := c.QueryParam("project_id")
+		if pID != "" {
+
+			pID, err := uuid.Parse(pID)
+			if err != nil {
+				return c.String(http.StatusBadRequest, err.Error())
+			}
+
+			// TODO: Check if user has permissions to project
+
+			dls, err := models.ListProjectDataLoggers(db, &pID)
+			if err != nil {
+				return c.String(http.StatusBadRequest, models.DefaultMessageBadRequest.Message)
+			}
+
+			return c.JSON(http.StatusOK, dls)
+		}
+
+		dls, err := models.ListAllDataLoggers(db)
+		if err != nil {
+			return c.String(http.StatusBadRequest, models.DefaultMessageBadRequest.Message)
+		}
+
+		return c.JSON(http.StatusOK, dls)
+	}
+}
+
+// CreateDataLogger
+func CreateDataLogger(db *sqlx.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		n := models.DataLogger{}
+		if err := c.Bind(&n); err != nil {
+			return c.JSON(http.StatusBadRequest, err)
+		}
+
+		p := c.Get("profile").(*models.Profile)
+		n.Creator = p.ID
+
+		// TODO: Check that user has permissions to project
+
+		if n.Name == "" {
+			return c.String(http.StatusBadRequest, models.DefaultMessageBadRequest.Message)
+		}
+		// Generate unique slug
+		slug, err := dbutils.CreateUniqueSlug(db, "datalogger", n.Name)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, models.DefaultMessageInternalServerError.Message)
+		}
+		n.Slug = slug
+
+		dl, err := models.CreateDataLogger(db, &n)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, models.DefaultMessageInternalServerError.Message)
+		}
+
+		return c.JSON(http.StatusCreated, dl)
+	}
+}
+
+// GetDataLogger
+func GetDataLogger(db *sqlx.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		return c.JSON(http.StatusOK, make(map[string]interface{}))
+	}
+}
+
+// UpdateDataLogger
+func UpdateDataLogger(db *sqlx.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		return c.JSON(http.StatusOK, make(map[string]interface{}))
+	}
+}
+
+// DeleteDataLogger
+func DeleteDataLogger(db *sqlx.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		return c.JSON(http.StatusOK, make(map[string]interface{}))
+	}
+}
 
 // TODO: Finish implementation
 func CreateOrUpdateDataLoggerMeasurements(db *sqlx.DB) echo.HandlerFunc {
@@ -28,7 +116,7 @@ func CreateOrUpdateDataLoggerMeasurements(db *sqlx.DB) echo.HandlerFunc {
 		sn := dlp.Head.Environment.SerialNo
 
 		// Check that data logger exists
-		_, err := models.GetDataLoggerBySerialNumber(db, sn)
+		_, err := models.GetDataLoggerBySN(db, sn)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, models.DefaultMessageBadRequest)
 		}

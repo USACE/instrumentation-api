@@ -19,10 +19,13 @@ type Telemetry struct {
 }
 
 type DataLogger struct {
-	Name      string
-	SN        string
-	ProjectID uuid.UUID
-	CreatorID uuid.UUID
+	ID        uuid.UUID `json:"id"`
+	Name      string    `json:"name"`
+	SN        string    `json:"sn"`
+	ProjectID uuid.UUID `json:"project_id"`
+	Creator   uuid.UUID `json:"creator"`
+	Slug      string    `json:"slug"`
+	Model     string    `json:"model"`
 }
 
 type DataLoggerPayload struct {
@@ -75,6 +78,75 @@ type DataLoggerPreview struct {
 	Payload pgtype.JSON `json:"payload"`
 }
 
+func ListProjectDataLoggers(db *sqlx.DB, projectID *uuid.UUID) ([]DataLogger, error) {
+	dls := make([]DataLogger, 0)
+
+	if err := db.Select(
+		&dls, `SELECT * FROM datalogger WHERE project_id = $1`, projectID,
+	); err != nil {
+		return make([]DataLogger, 0), err
+	}
+	return dls, nil
+}
+
+func ListAllDataLoggers(db *sqlx.DB) ([]DataLogger, error) {
+	dls := make([]DataLogger, 0)
+
+	if err := db.Select(
+		&dls, `SELECT * FROM datalogger`,
+	); err != nil {
+		return make([]DataLogger, 0), err
+	}
+	return dls, nil
+}
+
+func CreateDataLogger(db *sqlx.DB, n *DataLogger) (*DataLogger, error) {
+	var dl DataLogger
+	if err := db.Get(&dl,
+		`INSERT INTO datalogger (name, sn, project_id, creator, slug, model) VALUES
+			($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
+		n.Name, n.SN, n.ProjectID, n.Creator, n.Slug, n.Model); err != nil {
+		return nil, err
+	}
+	return &dl, nil
+}
+
+func GetDataLogger(db *sqlx.DB, dlID *uuid.UUID) (*DataLogger, error) {
+	var dl DataLogger
+	if err := db.Get(&dl, `SELECT * FROM datalogger WHERE id = $1`, dlID); err != nil {
+		return nil, err
+	}
+	return &dl, nil
+}
+
+func GetDataLoggerBySN(db *sqlx.DB, sn string) (*DataLogger, error) {
+	var dl DataLogger
+	if err := db.Get(&dl, `SELECT * FROM datalogger WHERE sn = $1`, sn); err != nil {
+		return nil, err
+	}
+	return &dl, nil
+}
+
+func UpdateDataLogger(db *sqlx.DB, u *DataLogger) (*DataLogger, error) {
+	var dl DataLogger
+	err := db.Select(
+		&dl,
+		`UPDATE datalogger SET name = $2, sn = $3, project_id = $4, creator = $5, slug = $6, model = $7 WHERE id = $1`,
+		u.ID, u.Name, u.SN, u.ProjectID, u.Creator, u.Slug, u.Model,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &dl, nil
+}
+
+func DeleteDataLogger(db *sqlx.DB, dlID *uuid.UUID) error {
+	if _, err := db.Exec(`UPDATE datalogger SET deleted = true WHERE id = $1`, dlID); err != nil {
+		return err
+	}
+	return nil
+}
+
 func GetDataLoggerHash(db *sqlx.DB, sn string) (string, error) {
 	var hash string
 
@@ -89,22 +161,6 @@ func GetDataLoggerHash(db *sqlx.DB, sn string) (string, error) {
 	}
 
 	return hash, nil
-}
-
-func GetDataLoggerBySerialNumber(db *sqlx.DB, sn string) (*DataLogger, error) {
-	var dl DataLogger
-
-	if err := db.Get(
-		&dl,
-		`SELECT name, serial_number, project_id, creator_id
-		FROM v_data_logger
-		WHERE serial_number = $1`,
-		sn,
-	); err != nil {
-		return nil, err
-	}
-
-	return &dl, nil
 }
 
 func GetEquivalencyTable(db *sqlx.DB, sn string) (*EquivalencyTable, error) {

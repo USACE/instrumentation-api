@@ -311,14 +311,24 @@ func main() {
 	// OpenDCS Configuration
 	public.GET("/opendcs/sites", handlers.ListOpendcsSites(db))
 
-	// Telemetry
+	// DataLogger CRUD
+	private.GET("/dataloggers", handlers.ListDataLoggers(db))
+	private.POST("/datalogger", handlers.CreateDataLogger(db))
+	private.GET("/datalogger/:datalogger_id", handlers.GetDataLogger(db))
+	private.PUT("/datalogger/:datalogger_id", handlers.UpdateDataLogger(db))
+	private.DELETE("/datalogger/:datalogger_id", handlers.DeleteDataLogger(db))
+
+	// DataLogger Preview
+	private.GET("/datalogger/:datalogger_id/preview", handlers.GetDataLoggerPreview(db))
+
+	// Datalogger Telemetry
 	telemetry := e.Group(cfg.RoutePrefix)
-	// telemetry.Use(middleware.KeyAuth(
+	// datalogger.Use(middleware.KeyAuth(
 	// 	cfg.AuthDisabled,
 	// 	cfg.ApplicationKey,
 	// 	hashExtractor,
 	// ))
-	telemetry.POST("/telemetry/measurements", handlers.CreateOrUpdateDataLoggerMeasurements(db))
+	telemetry.POST("/datalogger/measurements", handlers.CreateOrUpdateDataLoggerMeasurements(db))
 
 	if cfg.LambdaContext {
 		log.Print("starting server; Running On AWS LAMBDA")

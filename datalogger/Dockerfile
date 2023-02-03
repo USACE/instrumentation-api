@@ -14,9 +14,9 @@ COPY . .
 RUN --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/go/pkg \
     GOOS=linux GOARCH=amd64 \
-    go build -ldflags="-w -s" -o /go/bin/instrumentation-api-core
+    go build -ldflags="-w -s" -o /go/bin/instrumentation-api-datalogger
 
 # SCRATCH IMAGE
 FROM scratch
-COPY --from=builder /go/bin/instrumentation-api-core /go/bin/instrumentation-api-core
-ENTRYPOINT ["/go/bin/instrumentation-api-core"]
+COPY --from=builder /go/bin/instrumentation-api-datalogger /go/bin/instrumentation-api-datalogger
+ENTRYPOINT ["/go/bin/instrumentation-api-datalogger"]
