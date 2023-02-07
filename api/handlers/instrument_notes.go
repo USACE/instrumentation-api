@@ -17,7 +17,7 @@ func ListInstrumentNotes(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		notes, err := models.ListInstrumentNotes(db)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, notes)
 	}
@@ -28,11 +28,11 @@ func ListInstrumentInstrumentNotes(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		iID, err := uuid.Parse(c.Param("instrument_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, messages.MalformedID)
+			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
 		notes, err := models.ListInstrumentInstrumentNotes(db, &iID)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, notes)
 	}
@@ -43,11 +43,11 @@ func GetInstrumentNote(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		nID, err := uuid.Parse(c.Param("note_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, messages.MalformedID)
+			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
 		note, err := models.GetInstrumentNote(db, &nID)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, note)
 	}
@@ -58,7 +58,7 @@ func CreateInstrumentNote(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		nc := models.InstrumentNoteCollection{}
 		if err := c.Bind(&nc); err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		// profile and timestamp
 		p := c.Get("profile").(*models.Profile)
@@ -70,7 +70,7 @@ func CreateInstrumentNote(db *sqlx.DB) echo.HandlerFunc {
 		}
 		nn, err := models.CreateInstrumentNote(db, nc.Items)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
 		return c.JSON(http.StatusCreated, nn)
@@ -82,18 +82,15 @@ func UpdateInstrumentNote(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		noteID, err := uuid.Parse(c.Param("note_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		n := models.InstrumentNote{ID: noteID}
 		if err := c.Bind(&n); err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		// check :id in url params matches id in request body
 		if noteID != n.ID {
-			return c.JSON(
-				http.StatusBadRequest,
-				"url note_id does not match object id in body",
-			)
+			return echo.NewHTTPError(http.StatusBadRequest, messages.MatchRouteParam("`note_id`"))
 		}
 		// profile and timestamp
 		p := c.Get("profile").(*models.Profile)
@@ -103,7 +100,7 @@ func UpdateInstrumentNote(db *sqlx.DB) echo.HandlerFunc {
 		// update
 		nUpdated, err := models.UpdateInstrumentNote(db, &n)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		// return updated instrument note
 		return c.JSON(http.StatusOK, nUpdated)
@@ -115,10 +112,10 @@ func DeleteInstrumentNote(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		noteID, err := uuid.Parse(c.Param("note_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		if err := models.DeleteInstrumentNote(db, &noteID); err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, make(map[string]interface{}))
 	}

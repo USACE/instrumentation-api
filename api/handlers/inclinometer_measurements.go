@@ -42,7 +42,7 @@ func ListInclinometerMeasurements(db *sqlx.DB) echo.HandlerFunc {
 
 		tsID, err := uuid.Parse(c.Param("timeseries_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, messages.MalformedID)
+			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
 
 		// Time Window
@@ -50,29 +50,29 @@ func ListInclinometerMeasurements(db *sqlx.DB) echo.HandlerFunc {
 		a, b := c.QueryParam("after"), c.QueryParam("before")
 		err = tw.SetWindow(a, b)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
 		im, err := models.ListInclinometerMeasurements(db, &tsID, &tw)
 
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
 		cm, err := models.ConstantMeasurement(db, &tsID, "inclinometer-constant")
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
 		for idx := range im.Inclinometers {
 			values, err := models.ListInclinometerMeasurementValues(db, &tsID, im.Inclinometers[idx].Time, cm.Value)
 			if err != nil {
-				return c.JSON(http.StatusInternalServerError, err)
+				return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 			}
 
 			jsonValues, err := json.Marshal(values)
 			if err != nil {
-				return c.JSON(http.StatusInternalServerError, err)
+				return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 			}
 			im.Inclinometers[idx].Values = jsonValues
 		}
@@ -88,40 +88,40 @@ func CreateOrUpdateProjectInclinometerMeasurements(db *sqlx.DB) echo.HandlerFunc
 
 		var mcc models.InclinometerMeasurementCollectionCollection
 		if err := c.Bind(&mcc); err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
 		// Check :project_id from route against each timeseries' project_id in the database
 		pID, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		isTrue, err := allInclinometerTimeseriesBelongToProject(db, &mcc, &pID)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		if !isTrue {
-			return c.JSON(http.StatusBadRequest, "all timeseries posted do not belong to project")
+			return echo.NewHTTPError(http.StatusBadRequest, "all timeseries posted do not belong to project")
 		}
 
 		// Post inclinometers
 		p := c.Get("profile").(*models.Profile)
 		stored, err := models.CreateOrUpdateInclinometerMeasurements(db, mcc.Items, p, time.Now())
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
 		//create inclinometer constant if doesn't exist
 		if len(mcc.Items) > 0 {
 			cm, err := models.ConstantMeasurement(db, &mcc.Items[0].TimeseriesID, "inclinometer-constant")
 			if err != nil {
-				return c.JSON(http.StatusBadRequest, err)
+				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 			}
 
 			if cm.TimeseriesID == uuid.Nil {
 				err := models.CreateTimeseriesConstant(db, &mcc.Items[0].TimeseriesID, "inclinometer-constant", "Meters", 20000)
 				if err != nil {
-					return c.JSON(http.StatusBadRequest, err)
+					return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 				}
 			}
 
@@ -137,18 +137,18 @@ func DeleteInclinometerMeasurements(db *sqlx.DB) echo.HandlerFunc {
 		// id from url params
 		id, err := uuid.Parse(c.Param("timeseries_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
 		timeString := c.QueryParam("time")
 
 		t, err := time.Parse(time.RFC3339, timeString)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
 		if err := models.DeleteInclinometerMeasurements(db, &id, t); err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		return c.JSON(http.StatusOK, make(map[string]interface{}))
 	}

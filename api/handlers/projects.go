@@ -18,7 +18,7 @@ func ListProjects(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		projects, err := models.ListProjects(db)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, projects)
 	}
@@ -30,7 +30,7 @@ func ListMyProjects(db *sqlx.DB) echo.HandlerFunc {
 		profileID := p.ID
 		projects, err := models.ListMyProjects(db, &profileID)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, projects)
 	}
@@ -41,11 +41,11 @@ func ListProjectInstruments(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, messages.MalformedID)
+			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
 		nn, err := models.ListProjectInstruments(db, id)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, nn)
 	}
@@ -56,11 +56,11 @@ func ListProjectInstrumentNames(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, messages.MalformedID)
+			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
 		names, err := models.ListProjectInstrumentNames(db, &id)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, names)
 	}
@@ -71,11 +71,11 @@ func ListProjectInstrumentGroups(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, messages.MalformedID)
+			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
 		gg, err := models.ListProjectInstrumentGroups(db, id)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, gg)
 	}
@@ -86,7 +86,7 @@ func GetProjectCount(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		count, err := models.GetProjectCount(db)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, map[string]interface{}{"project_count": count})
 	}
@@ -97,11 +97,11 @@ func GetProject(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, messages.MalformedID)
+			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
 		project, err := models.GetProject(db, id)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, project)
 	}
@@ -113,7 +113,7 @@ func CreateProjectBulk(db *sqlx.DB) echo.HandlerFunc {
 
 		pc := models.ProjectCollection{}
 		if err := c.Bind(&pc); err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
 		// slugs already taken in the database
@@ -136,7 +136,7 @@ func CreateProjectBulk(db *sqlx.DB) echo.HandlerFunc {
 			// Assign Slug
 			s, err := dbutils.NextUniqueSlug(pc.Projects[idx].Name, slugsTaken)
 			if err != nil {
-				return c.JSON(http.StatusBadRequest, err)
+				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 			}
 			pc.Projects[idx].Slug = s
 			// Add slug to array of slugs originally fetched from the database
@@ -146,7 +146,7 @@ func CreateProjectBulk(db *sqlx.DB) echo.HandlerFunc {
 
 		pp, err := models.CreateProjectBulk(db, pc.Projects)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		// Send Project
 		return c.JSON(http.StatusCreated, pp)
@@ -159,15 +159,15 @@ func UpdateProject(db *sqlx.DB) echo.HandlerFunc {
 		// id from url params
 		id, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, messages.MalformedID)
+			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
 		// id from request
 		p := &models.Project{ID: id}
 		if err := c.Bind(p); err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		if id != p.ID {
-			return c.JSON(http.StatusBadRequest, messages.MatchRouteParam("`id`"))
+			return echo.NewHTTPError(http.StatusBadRequest, messages.MatchRouteParam("`id`"))
 		}
 
 		profile := c.Get("profile").(*models.Profile)
@@ -179,7 +179,7 @@ func UpdateProject(db *sqlx.DB) echo.HandlerFunc {
 		// update
 		pUpdated, err := models.UpdateProject(db, p)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		// return whole instrument
 		return c.JSON(http.StatusOK, pUpdated)
@@ -191,10 +191,10 @@ func DeleteFlagProject(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
-			return c.JSON(http.StatusNotFound, err)
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
 		}
 		if err := models.DeleteFlagProject(db, id); err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, make(map[string]interface{}))
 	}
@@ -205,15 +205,15 @@ func CreateProjectTimeseries(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		projectID, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		timeseriesID, err := uuid.Parse(c.Param("timeseries_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		err = models.CreateProjectTimeseries(db, &projectID, &timeseriesID)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusCreated, make(map[string]interface{}))
 	}
@@ -224,15 +224,15 @@ func DeleteProjectTimeseries(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		projectID, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		timeseriesID, err := uuid.Parse(c.Param("timeseries_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		err = models.DeleteProjectTimeseries(db, &projectID, &timeseriesID)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, make(map[string]interface{}))
 	}

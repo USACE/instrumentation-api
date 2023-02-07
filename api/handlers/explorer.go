@@ -38,7 +38,7 @@ func PostExplorer(db *sqlx.DB) echo.HandlerFunc {
 
 		// Instrument IDs from POST
 		if err := (&echo.DefaultBinder{}).BindBody(c, &f.InstrumentID); err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
 		// Get timeWindow from query params
@@ -46,7 +46,7 @@ func PostExplorer(db *sqlx.DB) echo.HandlerFunc {
 		a, b := c.QueryParam("after"), c.QueryParam("before")
 		err := tw.SetWindow(a, b)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		f.TimeWindow = tw
 
@@ -55,13 +55,13 @@ func PostExplorer(db *sqlx.DB) echo.HandlerFunc {
 		interval := time.Hour
 		tt, err := models.ListInstrumentsMeasurements(db, f.InstrumentID, &f.TimeWindow, interval)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
 		// Convert Rows to Response
 		response, err := ExplorerResponseFactory(tt)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
 		return c.JSON(http.StatusOK, response)
@@ -76,7 +76,7 @@ func PostInclinometerExplorer(db *sqlx.DB) echo.HandlerFunc {
 
 		// Instrument IDs from POST
 		if err := (&echo.DefaultBinder{}).BindBody(c, &f.InstrumentID); err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
 		// Get timeWindow from query params
@@ -84,7 +84,7 @@ func PostInclinometerExplorer(db *sqlx.DB) echo.HandlerFunc {
 		a, b := c.QueryParam("after"), c.QueryParam("before")
 		err := tw.SetWindow(a, b)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		f.TimeWindow = tw
 
@@ -92,13 +92,13 @@ func PostInclinometerExplorer(db *sqlx.DB) echo.HandlerFunc {
 		interval := time.Hour // Set to 1 Hour; TODO - do not hard-code interval
 		tt, err := models.ComputedInclinometerTimeseries(db, f.InstrumentID, &f.TimeWindow, &interval)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
 		// Convert Rows to Response
 		response, err := explorerInclinometerResponseFactory(tt)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
 		return c.JSON(http.StatusOK, response)

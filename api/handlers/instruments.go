@@ -19,7 +19,7 @@ func ListInstruments(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		nn, err := models.ListInstruments(db)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		return c.JSON(http.StatusOK, nn)
 	}
@@ -30,7 +30,7 @@ func GetInstrumentCount(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		count, err := models.GetInstrumentCount(db)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, map[string]interface{}{"instrument_count": count})
 	}
@@ -41,11 +41,11 @@ func GetInstrument(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id, err := uuid.Parse(c.Param("instrument_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, messages.MalformedID)
+			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
 		n, err := models.GetInstrument(db, &id)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
 		return c.JSON(http.StatusOK, n)
@@ -105,14 +105,14 @@ func CreateInstruments(db *sqlx.DB) echo.HandlerFunc {
 		// Instruments
 		ic, err := newInstrumentCollection(c)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
 		// Validate POST
 		if c.QueryParam("dry_run") == "true" {
 			v, err := models.ValidateCreateInstruments(db, ic.Items)
 			if err != nil {
-				return c.JSON(http.StatusBadRequest, err)
+				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 			}
 			return c.JSON(http.StatusOK, v)
 		}
@@ -120,7 +120,7 @@ func CreateInstruments(db *sqlx.DB) echo.HandlerFunc {
 		// Actually POST
 		nn, err := models.CreateInstruments(db, ic.Items)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
 		return c.JSON(http.StatusCreated, nn)
@@ -134,31 +134,25 @@ func UpdateInstrument(db *sqlx.DB) echo.HandlerFunc {
 		// instrument_id from url params
 		iID, err := uuid.Parse(c.Param("instrument_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, messages.MalformedID)
+			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
 		// project_id from url params
 		pID, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, messages.MalformedID)
+			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
 		// instrument from request payload
 		i := models.Instrument{ID: iID, ProjectID: &pID}
 		if err := c.Bind(&i); err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		// check project_id in url params matches project_id in request body
 		if pID != *i.ProjectID {
-			return c.JSON(
-				http.StatusBadRequest,
-				"url parameter project_id does not match project_id in request body",
-			)
+			return echo.NewHTTPError(http.StatusBadRequest, messages.MatchRouteParam("`project_id`"))
 		}
 		// check instrument_id in url params matches instrument_id in request body
 		if iID != i.ID {
-			return c.JSON(
-				http.StatusBadRequest,
-				"url parameter instrument_id does not match instrument_id in request body",
-			)
+			return echo.NewHTTPError(http.StatusBadRequest, messages.MatchRouteParam("`instrument_id`"))
 		}
 
 		// profile of user creating instruments
@@ -171,7 +165,7 @@ func UpdateInstrument(db *sqlx.DB) echo.HandlerFunc {
 		// update
 		iUpdated, err := models.UpdateInstrument(db, &i)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		// return updated instrument
 		return c.JSON(http.StatusOK, iUpdated)
@@ -183,21 +177,21 @@ func UpdateInstrumentGeometry(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		projectID, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		instrumentID, err := uuid.Parse(c.Param("instrument_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		var geom geojson.Geometry
 		if err := c.Bind(&geom); err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		// profile of user creating instruments
 		p := c.Get("profile").(*models.Profile)
 		instrument, err := models.UpdateInstrumentGeometry(db, &projectID, &instrumentID, &geom, p)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, instrument)
 	}
@@ -208,16 +202,16 @@ func DeleteFlagInstrument(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		pID, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, messages.MalformedID)
+			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
 
 		iID, err := uuid.Parse(c.Param("instrument_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, messages.MalformedID)
+			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
 
 		if err := models.DeleteFlagInstrument(db, &pID, &iID); err != nil {
-			return c.JSON(http.StatusBadRequest, messages.BadRequest)
+			return echo.NewHTTPError(http.StatusBadRequest, messages.BadRequest)
 		}
 
 		return c.JSON(http.StatusOK, make(map[string]interface{}))

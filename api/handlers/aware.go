@@ -12,7 +12,7 @@ func ListAwareParameters(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		pp, err := models.ListAwareParameters(db)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, pp)
 	}
@@ -22,7 +22,7 @@ func ListAwarePlatformParameterConfig(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		cc, err := models.ListAwarePlatformParameterConfig(db)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, cc)
 	}

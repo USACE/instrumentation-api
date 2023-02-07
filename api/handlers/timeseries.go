@@ -18,7 +18,7 @@ func ListTimeseries(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		tt, err := models.ListTimeseries(db)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		return c.JSON(http.StatusOK, tt)
 	}
@@ -29,11 +29,11 @@ func GetTimeseries(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		tsID, err := uuid.Parse(c.Param("timeseries_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, messages.MalformedID)
+			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
 		t, err := models.GetTimeseries(db, &tsID)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, t)
 	}
@@ -44,11 +44,11 @@ func ListInstrumentTimeseries(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		nID, err := uuid.Parse(c.Param("instrument_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, messages.MalformedID)
+			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
 		tt, err := models.ListInstrumentTimeseries(db, &nID)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, tt)
 	}
@@ -59,11 +59,11 @@ func ListInstrumentGroupTimeseries(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		gID, err := uuid.Parse(c.Param("instrument_group_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, messages.MalformedID)
+			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
 		tt, err := models.ListInstrumentGroupTimeseries(db, &gID)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, tt)
 	}
@@ -74,11 +74,11 @@ func ListProjectTimeseries(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		pID, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, messages.MalformedID)
+			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
 		tt, err := models.ListProjectTimeseries(db, &pID)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, tt)
 	}
@@ -91,7 +91,7 @@ func CreateTimeseries(db *sqlx.DB) echo.HandlerFunc {
 
 		tc := models.TimeseriesCollection{}
 		if err := c.Bind(&tc); err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		// slugs already taken in the database
 		slugsTaken, err := models.ListTimeseriesSlugs(db)
@@ -104,7 +104,7 @@ func CreateTimeseries(db *sqlx.DB) echo.HandlerFunc {
 			// Assign Slug
 			s, err := dbutils.NextUniqueSlug(tc.Items[idx].Name, slugsTaken)
 			if err != nil {
-				return c.JSON(http.StatusBadRequest, err)
+				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 			}
 			tc.Items[idx].Slug = s
 			// Add slug to array of slugs originally fetched from the database
@@ -114,7 +114,7 @@ func CreateTimeseries(db *sqlx.DB) echo.HandlerFunc {
 
 		tt, err := models.CreateTimeseries(db, tc.Items)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
 		return c.JSON(http.StatusCreated, tt)
@@ -129,24 +129,21 @@ func UpdateTimeseries(db *sqlx.DB) echo.HandlerFunc {
 		// id from url params
 		id, err := uuid.Parse(c.Param("timeseries_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, messages.MalformedID)
+			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
 		// id from request
 		t := ts.Timeseries{}
 		if err := c.Bind(&t); err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		// check :id in url params matches id in request body
 		if id != t.ID {
-			return c.JSON(
-				http.StatusBadRequest,
-				"url parameter id does not match object id in body",
-			)
+			return echo.NewHTTPError(http.StatusBadRequest, messages.MatchRouteParam("`id`"))
 		}
 		// update
 		tUpdated, err := models.UpdateTimeseries(db, &t)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		// return updated instrument
 		return c.JSON(http.StatusOK, tUpdated)
@@ -159,10 +156,10 @@ func DeleteTimeseries(db *sqlx.DB) echo.HandlerFunc {
 		// id from url params
 		id, err := uuid.Parse(c.Param("timeseries_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		if err := models.DeleteTimeseries(db, &id); err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		return c.JSON(http.StatusOK, make(map[string]interface{}))
 	}

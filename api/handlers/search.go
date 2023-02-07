@@ -3,7 +3,6 @@ package handlers
 import (
 	"fmt"
 
-	"github.com/USACE/instrumentation-api/api/messages"
 	"github.com/USACE/instrumentation-api/api/models"
 
 	"net/http"
@@ -24,24 +23,19 @@ func Search(db *sqlx.DB) echo.HandlerFunc {
 		case "projects":
 			*pfn = models.ProjectSearch
 		default:
-			return c.JSON(http.StatusBadRequest, messages.Message{
-				Message: fmt.Sprintf("search not implemented for entity: %s", entity),
-			})
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("search not implemented for entity: %s", entity))
 		}
 
 		// Get Search String
 		searchText := c.QueryParam("q")
 		if searchText == "" {
-			return c.JSON(
-				http.StatusOK,
-				make([]models.SearchResult, 0),
-			)
+			return c.JSON(http.StatusOK, make([]models.SearchResult, 0))
 		}
 		// Get Desired Number of Results; Hardcode 5 for now;
 		limit := 5
 		rr, err := fn(db, &searchText, &limit)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, rr)
 	}

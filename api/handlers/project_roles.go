@@ -16,11 +16,11 @@ func ListProjectMembers(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, messages.MalformedID)
+			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
 		mm, err := models.ListProjectMembers(db, &id)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, mm)
 	}
@@ -31,15 +31,15 @@ func AddProjectMemberRole(db *sqlx.DB) echo.HandlerFunc {
 
 		projectID, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, messages.MalformedID)
+			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
 		profileID, err := uuid.Parse(c.Param("profile_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, messages.MalformedID)
+			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
 		roleID, err := uuid.Parse(c.Param("role_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, messages.MalformedID)
+			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
 
 		// profile granting role to profile_id
@@ -48,7 +48,7 @@ func AddProjectMemberRole(db *sqlx.DB) echo.HandlerFunc {
 		r, err := models.AddProjectMemberRole(db, &projectID, &profileID, &roleID, &grantedBy.ID)
 
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, messages.InternalServerError)
+			return echo.NewHTTPError(http.StatusInternalServerError, messages.InternalServerError)
 		}
 		return c.JSON(http.StatusOK, r)
 	}
@@ -59,19 +59,19 @@ func RemoveProjectMemberRole(db *sqlx.DB) echo.HandlerFunc {
 
 		projectID, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, messages.MalformedID)
+			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
 		profileID, err := uuid.Parse(c.Param("profile_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, messages.MalformedID)
+			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
 		roleID, err := uuid.Parse(c.Param("role_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, messages.MalformedID)
+			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
 
 		if err := models.RemoveProjectMemberRole(db, &projectID, &profileID, &roleID); err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, make(map[string]interface{}))
 	}

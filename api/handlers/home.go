@@ -31,7 +31,7 @@ func GetHome(db *sqlx.DB) echo.HandlerFunc {
 					  WHERE (now() - timeseries_measurement.time) < '2 Hours' ) AS new_measurements_2h
 			`,
 		); err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
 		return c.JSON(http.StatusOK, &h)
