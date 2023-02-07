@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/USACE/instrumentation-api/api/dbutils"
+	"github.com/USACE/instrumentation-api/api/messages"
 	"github.com/USACE/instrumentation-api/api/models"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -31,7 +32,7 @@ func CreateInstrumentConstants(db *sqlx.DB) echo.HandlerFunc {
 		for idx := range tc.Items {
 			// Verify object instrument_id matches routeParam
 			if instrumentID != tc.Items[idx].InstrumentID {
-				return c.String(http.StatusBadRequest, "Object instrument_id does not match Route Param")
+				return c.JSON(http.StatusBadRequest, messages.MatchRouteParam("`instrument_id`"))
 			}
 			// Assign Slug
 			s, err := dbutils.NextUniqueSlug(tc.Items[idx].Name, slugsTaken)

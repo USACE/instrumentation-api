@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/dbutils"
+	"github.com/USACE/instrumentation-api/api/messages"
 	"github.com/USACE/instrumentation-api/api/models"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -23,14 +24,14 @@ func ListDataLoggers(db *sqlx.DB) echo.HandlerFunc {
 
 			pID, err := uuid.Parse(pID)
 			if err != nil {
-				return c.String(http.StatusBadRequest, err.Error())
+				return c.JSON(http.StatusBadRequest, err.Error())
 			}
 
 			// TODO: Check if user has permissions to project
 
 			dls, err := models.ListProjectDataLoggers(db, &pID)
 			if err != nil {
-				return c.String(http.StatusBadRequest, models.DefaultMessageBadRequest.Message)
+				return c.JSON(http.StatusBadRequest, messages.BadRequest)
 			}
 
 			return c.JSON(http.StatusOK, dls)
@@ -38,7 +39,7 @@ func ListDataLoggers(db *sqlx.DB) echo.HandlerFunc {
 
 		dls, err := models.ListAllDataLoggers(db)
 		if err != nil {
-			return c.String(http.StatusBadRequest, models.DefaultMessageBadRequest.Message)
+			return c.JSON(http.StatusBadRequest, messages.BadRequest)
 		}
 
 		return c.JSON(http.StatusOK, dls)
@@ -59,18 +60,18 @@ func CreateDataLogger(db *sqlx.DB) echo.HandlerFunc {
 		// TODO: Check user has datalogger role permissions
 
 		if n.Name == "" {
-			return c.String(http.StatusBadRequest, models.DefaultMessageBadRequest.Message)
+			return c.JSON(http.StatusBadRequest, messages.BadRequest)
 		}
 		// Generate unique slug
 		slug, err := dbutils.CreateUniqueSlug(db, "datalogger", n.Name)
 		if err != nil {
-			return c.String(http.StatusInternalServerError, models.DefaultMessageInternalServerError.Message)
+			return c.JSON(http.StatusInternalServerError, messages.InternalServerError)
 		}
 		n.Slug = slug
 
 		dl, err := models.CreateDataLogger(db, &n)
 		if err != nil {
-			return c.String(http.StatusInternalServerError, models.DefaultMessageInternalServerError.Message)
+			return c.JSON(http.StatusInternalServerError, messages.InternalServerError)
 		}
 
 		return c.JSON(http.StatusCreated, dl)
@@ -82,7 +83,7 @@ func CycleDataLoggerKey(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		dlID, err := uuid.Parse(c.Param("datalogger_id"))
 		if err != nil {
-			return c.String(http.StatusBadRequest, "Malformed ID")
+			return c.JSON(http.StatusBadRequest, messages.MalformedID)
 		}
 
 		u := models.DataLogger{ID: dlID}
@@ -93,7 +94,7 @@ func CycleDataLoggerKey(db *sqlx.DB) echo.HandlerFunc {
 
 		dl, err := models.CycleDataLoggerKey(db, &u)
 		if err != nil {
-			return c.String(http.StatusInternalServerError, models.DefaultMessageInternalServerError.Message)
+			return c.JSON(http.StatusInternalServerError, messages.InternalServerError)
 		}
 
 		return c.JSON(http.StatusOK, dl)
@@ -105,13 +106,13 @@ func GetDataLogger(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		dlID, err := uuid.Parse(c.Param("datalogger_id"))
 		if err != nil {
-			return c.String(http.StatusBadRequest, "Malformed ID")
+			return c.JSON(http.StatusBadRequest, messages.MalformedID)
 		}
 		// TODO: Check user has datalogger role permissions
 
 		dl, err := models.GetDataLogger(db, &dlID)
 		if err != nil {
-			return c.String(http.StatusInternalServerError, models.DefaultMessageInternalServerError.Message)
+			return c.JSON(http.StatusInternalServerError, messages.InternalServerError)
 		}
 
 		return c.JSON(http.StatusOK, dl)
@@ -123,7 +124,7 @@ func UpdateDataLogger(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		dlID, err := uuid.Parse(c.Param("datalogger_id"))
 		if err != nil {
-			return c.String(http.StatusBadRequest, "Malformed ID")
+			return c.JSON(http.StatusBadRequest, messages.MalformedID)
 		}
 
 		u := models.DataLogger{ID: dlID}
@@ -133,12 +134,7 @@ func UpdateDataLogger(db *sqlx.DB) echo.HandlerFunc {
 
 		// check id in url params matches id in request body
 		if dlID != u.ID {
-			return c.JSON(
-				http.StatusBadRequest,
-				map[string]interface{}{
-					"err": "url parameter id does not match object id in body",
-				},
-			)
+			return c.JSON(http.StatusBadRequest, messages.MatchRouteParam("`id`"))
 		}
 
 		// TODO: Check user has datalogger role permissions
@@ -149,7 +145,7 @@ func UpdateDataLogger(db *sqlx.DB) echo.HandlerFunc {
 
 		dlUpdated, err := models.UpdateDataLogger(db, &u)
 		if err != nil {
-			return c.String(http.StatusInternalServerError, models.DefaultMessageInternalServerError.Message)
+			return c.JSON(http.StatusInternalServerError, messages.InternalServerError)
 		}
 
 		return c.JSON(http.StatusOK, dlUpdated)
@@ -161,7 +157,7 @@ func DeleteDataLogger(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		dlID, err := uuid.Parse(c.Param("datalogger_id"))
 		if err != nil {
-			return c.String(http.StatusBadRequest, "Malformed ID")
+			return c.JSON(http.StatusBadRequest, messages.MalformedID)
 		}
 
 		d := models.DataLogger{ID: dlID}
@@ -171,7 +167,7 @@ func DeleteDataLogger(db *sqlx.DB) echo.HandlerFunc {
 
 		// TODO: Check user has datalogger role permissions
 		if err := models.DeleteDataLogger(db, &d); err != nil {
-			return c.String(http.StatusInternalServerError, models.DefaultMessageInternalServerError.Message)
+			return c.JSON(http.StatusInternalServerError, messages.InternalServerError)
 		}
 
 		return c.JSON(http.StatusOK, make(map[string]interface{}))
@@ -182,7 +178,7 @@ func GetEquivalencyTable(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		dlID, err := uuid.Parse(c.Param("datalogger_id"))
 		if err != nil {
-			return c.String(http.StatusBadRequest, "Malformed ID")
+			return c.JSON(http.StatusBadRequest, messages.MalformedID)
 		}
 
 		t, err := models.GetEquivalencyTable(db, &dlID)
@@ -198,7 +194,7 @@ func CreateOrUpdateEquivalencyTable(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		dlID, err := uuid.Parse(c.Param("datalogger_id"))
 		if err != nil {
-			return c.String(http.StatusBadRequest, "Malformed ID")
+			return c.JSON(http.StatusBadRequest, messages.MalformedID)
 		}
 
 		t := models.EquivalencyTable{DataLoggerID: dlID}
@@ -208,12 +204,7 @@ func CreateOrUpdateEquivalencyTable(db *sqlx.DB) echo.HandlerFunc {
 
 		// check id in url params matches id in request body
 		if dlID != t.DataLoggerID {
-			return c.JSON(
-				http.StatusBadRequest,
-				map[string]interface{}{
-					"err": "url parameter id does not match object id in body",
-				},
-			)
+			return c.JSON(http.StatusBadRequest, messages.MatchRouteParam("`datalogger_id`"))
 		}
 
 		for _, r := range t.Rows {
@@ -225,10 +216,25 @@ func CreateOrUpdateEquivalencyTable(db *sqlx.DB) echo.HandlerFunc {
 
 		eqt, err := models.GetEquivalencyTable(db, &dlID)
 		if err != nil {
-			return c.String(http.StatusInternalServerError, models.DefaultMessageInternalServerError.Message)
+			return c.JSON(http.StatusInternalServerError, messages.InternalServerError)
 		}
 
 		return c.JSON(http.StatusOK, eqt)
+	}
+}
+
+func DeleteEquivalencyTable(db *sqlx.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		dlID, err := uuid.Parse(c.Param("datalogger_id"))
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, messages.MalformedID)
+		}
+
+		if err := models.DeleteEquivalencyTable(db, &dlID); err != nil {
+			return c.JSON(http.StatusInternalServerError, messages.InternalServerError)
+		}
+
+		return c.JSON(http.StatusOK, make(map[string]interface{}))
 	}
 }
 
@@ -236,16 +242,16 @@ func DeleteEquivalencyTableRow(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		dlID, err := uuid.Parse(c.Param("datalogger_id"))
 		if err != nil {
-			return c.String(http.StatusBadRequest, "Malformed ID")
+			return c.JSON(http.StatusBadRequest, messages.MalformedID)
 		}
 
 		field := c.QueryParam("field_name")
 		if field == "" {
-			return c.String(http.StatusBadRequest, "Missing field_name query parameter")
+			return c.JSON(http.StatusBadRequest, "Missing field_name query parameter")
 		}
 
 		if err := models.DeleteEquivalencyTableRow(db, &dlID, field); err != nil {
-			return c.String(http.StatusInternalServerError, models.DefaultMessageInternalServerError.Message)
+			return c.JSON(http.StatusInternalServerError, messages.InternalServerError)
 		}
 
 		return c.JSON(http.StatusOK, make(map[string]interface{}))
@@ -256,13 +262,13 @@ func GetDataLoggerPreview(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		sn := c.Param("sn")
 		if sn == "" {
-			return c.String(http.StatusBadRequest, models.DefaultMessageBadRequest.Message)
+			return c.JSON(http.StatusBadRequest, messages.BadRequest)
 		}
 
 		// Get preview from db
 		preview, err := models.GetDataLoggerPreview(db, sn)
 		if err != nil {
-			return c.String(http.StatusInternalServerError, models.DefaultMessageInternalServerError.Message)
+			return c.JSON(http.StatusInternalServerError, messages.InternalServerError)
 		}
 
 		return c.JSON(http.StatusOK, preview)

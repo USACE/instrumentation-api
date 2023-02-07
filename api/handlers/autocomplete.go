@@ -24,7 +24,7 @@ func ListEmailAutocomplete(db *sqlx.DB) echo.HandlerFunc {
 		limit := 5
 		rr, err := models.ListEmailAutocomplete(db, &searchText, &limit)
 		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
+			return c.JSON(http.StatusInternalServerError, err)
 		}
 		return c.JSON(http.StatusOK, rr)
 	}

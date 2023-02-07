@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/USACE/instrumentation-api/api/messages"
 	"github.com/USACE/instrumentation-api/api/models"
 
 	"github.com/google/uuid"
@@ -15,12 +16,12 @@ func ListInstrumentStatus(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id, err := uuid.Parse(c.Param("instrument_id"))
 		if err != nil {
-			return c.String(http.StatusBadRequest, "Malformed ID")
+			return c.JSON(http.StatusBadRequest, messages.MalformedID)
 		}
 
 		ss, err := models.ListInstrumentStatus(db, &id)
 		if err != nil {
-			return c.String(http.StatusBadRequest, err.Error())
+			return c.JSON(http.StatusBadRequest, err)
 		}
 		return c.JSON(http.StatusOK, ss)
 	}
@@ -31,12 +32,12 @@ func GetInstrumentStatus(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id, err := uuid.Parse(c.Param("status_id"))
 		if err != nil {
-			return c.String(http.StatusBadRequest, "Malformed ID")
+			return c.JSON(http.StatusBadRequest, messages.MalformedID)
 		}
 
 		s, err := models.GetInstrumentStatus(db, &id)
 		if err != nil {
-			return c.String(http.StatusBadRequest, err.Error())
+			return c.JSON(http.StatusBadRequest, err)
 		}
 		return c.JSON(http.StatusOK, s)
 	}
@@ -47,7 +48,7 @@ func CreateOrUpdateInstrumentStatus(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		instrumentID, err := uuid.Parse(c.Param("instrument_id"))
 		if err != nil {
-			return c.String(http.StatusBadRequest, "Malformed ID")
+			return c.JSON(http.StatusBadRequest, messages.MalformedID)
 		}
 
 		var sc models.InstrumentStatusCollection
@@ -75,7 +76,7 @@ func DeleteInstrumentStatus(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id, err := uuid.Parse(c.Param("status_id"))
 		if err != nil {
-			return c.String(http.StatusBadRequest, "Malformed ID")
+			return c.JSON(http.StatusBadRequest, messages.MalformedID)
 		}
 		if err := models.DeleteInstrumentStatus(db, &id); err != nil {
 			return c.JSON(http.StatusInternalServerError, err)

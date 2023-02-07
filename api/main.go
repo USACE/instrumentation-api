@@ -156,7 +156,7 @@ func main() {
 	public.GET("/heartbeats", handlers.ListHeartbeats(db))
 	public.GET("/heartbeat/latest", handlers.GetLatestHeartbeat(db))
 	public.GET("/health", func(c echo.Context) error {
-		return c.String(http.StatusOK, "OK")
+		return c.JSON(http.StatusOK, map[string]interface{}{"status": "healthy"})
 	})
 
 	// Search
@@ -319,13 +319,14 @@ func main() {
 	private.PUT("/datalogger/:datalogger_id/key", handlers.CycleDataLoggerKey(db))
 	private.DELETE("/datalogger/:datalogger_id", handlers.DeleteDataLogger(db))
 
-	// DataLogger Preview
-	private.GET("/datalogger/:datalogger_id/preview", handlers.GetDataLoggerPreview(db))
-
 	// DataLogger EquivalencyTable
 	private.GET("/datalogger/:datalogger_id/equivalency_table", handlers.GetEquivalencyTable(db))
 	private.POST("/datalogger/:datalogger_id/equivalency_table", handlers.CreateOrUpdateEquivalencyTable(db))
-	private.DELETE("/datalogger/:datalogger_id/equivalency_table/row", handlers.DeleteEquivalencyTableRow(db))
+	private.DELETE("/datalogger/:datalogger_id/equivalency_table", handlers.DeleteEquivalencyTable(db))
+	private.DELETE("/datalogger/:datalogger_id/equivalency_table_row", handlers.DeleteEquivalencyTableRow(db))
+
+	// DataLogger Preview
+	private.GET("/datalogger/:datalogger_id/preview", handlers.GetDataLoggerPreview(db))
 
 	// Datalogger Telemetry
 	telemetry := e.Group(cfg.RoutePrefix)

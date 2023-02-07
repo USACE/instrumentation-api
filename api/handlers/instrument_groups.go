@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/dbutils"
+	"github.com/USACE/instrumentation-api/api/messages"
 	"github.com/USACE/instrumentation-api/api/models"
 
 	"github.com/google/uuid"
@@ -28,7 +29,7 @@ func GetInstrumentGroup(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id, err := uuid.Parse(c.Param("instrument_group_id"))
 		if err != nil {
-			return c.String(http.StatusBadRequest, "Malformed ID")
+			return c.JSON(http.StatusBadRequest, messages.MalformedID)
 		}
 		g, err := models.GetInstrumentGroup(db, id)
 		if err != nil {
@@ -91,7 +92,7 @@ func UpdateInstrumentGroup(db *sqlx.DB) echo.HandlerFunc {
 		// id from url params
 		id, err := uuid.Parse(c.Param("instrument_group_id"))
 		if err != nil {
-			return c.String(http.StatusBadRequest, "Malformed ID")
+			return c.JSON(http.StatusBadRequest, messages.MalformedID)
 		}
 		// id from request
 		g := models.InstrumentGroup{ID: id}
@@ -100,7 +101,7 @@ func UpdateInstrumentGroup(db *sqlx.DB) echo.HandlerFunc {
 		}
 		// check :id in url params matches id in request body
 		if id != g.ID {
-			return c.String(
+			return c.JSON(
 				http.StatusBadRequest,
 				"url parameter id does not match object id in body",
 			)
@@ -141,7 +142,7 @@ func ListInstrumentGroupInstruments(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id, err := uuid.Parse(c.Param("instrument_group_id"))
 		if err != nil {
-			return c.String(http.StatusBadRequest, "Malformed ID")
+			return c.JSON(http.StatusBadRequest, messages.MalformedID)
 		}
 		nn, err := models.ListInstrumentGroupInstruments(db, id)
 		if err != nil {
@@ -158,12 +159,12 @@ func CreateInstrumentGroupInstruments(db *sqlx.DB) echo.HandlerFunc {
 		instrumentGroupID, err := uuid.Parse(c.Param("instrument_group_id"))
 
 		if err != nil || instrumentGroupID == uuid.Nil {
-			return c.JSON(http.StatusBadRequest, models.DefaultMessageBadRequest)
+			return c.JSON(http.StatusBadRequest, messages.BadRequest)
 		}
 		// Instrument
 		i := new(models.Instrument)
 		if err := c.Bind(i); err != nil || i.ID == uuid.Nil {
-			return c.JSON(http.StatusBadRequest, models.DefaultMessageBadRequest)
+			return c.JSON(http.StatusBadRequest, messages.BadRequest)
 		}
 
 		if err := models.CreateInstrumentGroupInstruments(db, instrumentGroupID, i.ID); err != nil {
@@ -179,13 +180,13 @@ func DeleteInstrumentGroupInstruments(db *sqlx.DB) echo.HandlerFunc {
 		// instrument_group_id
 		instrumentGroupID, err := uuid.Parse(c.Param("instrument_group_id"))
 		if err != nil {
-			return c.String(http.StatusBadRequest, "Malformed ID")
+			return c.JSON(http.StatusBadRequest, messages.MalformedID)
 		}
 
 		// instrument
 		instrumentID, err := uuid.Parse(c.Param("instrument_id"))
 		if err != nil {
-			return c.String(http.StatusBadRequest, "Malformed ID")
+			return c.JSON(http.StatusBadRequest, messages.MalformedID)
 		}
 
 		if err := models.DeleteInstrumentGroupInstruments(db, instrumentGroupID, instrumentID); err != nil {

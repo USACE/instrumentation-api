@@ -237,6 +237,14 @@ func CreateOrUpdateEquivalencyTableRow(db *sqlx.DB, u *EquivalencyTableRow) (*Eq
 	return &r, nil
 }
 
+func DeleteEquivalencyTable(db *sqlx.DB, dlID *uuid.UUID) error {
+	_, err := db.Exec(`DELETE FROM datalogger_field_instrument_timeseries WHERE datalogger_id = $1`, &dlID)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func DeleteEquivalencyTableRow(db *sqlx.DB, dlID *uuid.UUID, field string) error {
 	_, err := db.Exec(`DELETE FROM datalogger_field_instrument_timeseries WHERE datalogger_id = $1 AND field_name = $2`, &dlID, field)
 	if err != nil {

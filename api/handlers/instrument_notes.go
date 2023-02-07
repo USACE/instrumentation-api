@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/USACE/instrumentation-api/api/messages"
 	"github.com/USACE/instrumentation-api/api/models"
 
 	"github.com/google/uuid"
@@ -27,7 +28,7 @@ func ListInstrumentInstrumentNotes(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		iID, err := uuid.Parse(c.Param("instrument_id"))
 		if err != nil {
-			return c.String(http.StatusBadRequest, "Malformed ID")
+			return c.JSON(http.StatusBadRequest, messages.MalformedID)
 		}
 		notes, err := models.ListInstrumentInstrumentNotes(db, &iID)
 		if err != nil {
@@ -42,7 +43,7 @@ func GetInstrumentNote(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		nID, err := uuid.Parse(c.Param("note_id"))
 		if err != nil {
-			return c.String(http.StatusBadRequest, "Malformed ID")
+			return c.JSON(http.StatusBadRequest, messages.MalformedID)
 		}
 		note, err := models.GetInstrumentNote(db, &nID)
 		if err != nil {
@@ -89,7 +90,7 @@ func UpdateInstrumentNote(db *sqlx.DB) echo.HandlerFunc {
 		}
 		// check :id in url params matches id in request body
 		if noteID != n.ID {
-			return c.String(
+			return c.JSON(
 				http.StatusBadRequest,
 				"url note_id does not match object id in body",
 			)

@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/USACE/instrumentation-api/api/messages"
 	"github.com/USACE/instrumentation-api/api/models"
 	"github.com/USACE/instrumentation-api/api/passwords"
 	"github.com/USACE/instrumentation-api/api/timeseries"
@@ -17,25 +18,25 @@ func CreateOrUpdateDataLoggerMeasurements(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		sn := c.Param("sn")
 		if sn == "" {
-			return c.JSON(http.StatusBadRequest, models.DefaultMessageBadRequest)
+			return c.JSON(http.StatusBadRequest, messages.BadRequest)
 		}
 
 		// Check header for api key
 		ak, exists := c.Request().Header["X-Api-Key"]
 		if !exists || len(ak) != 1 {
 			// Missing API key header
-			return c.JSON(http.StatusUnauthorized, models.DefaultMessageUnauthorized)
+			return c.JSON(http.StatusUnauthorized, messages.Unauthorized)
 		}
 
 		// Get data logger hash
 		hash, err := models.GetDataLoggerHashBySN(db, sn)
 		if err != nil {
-			return c.JSON(http.StatusUnauthorized, models.DefaultMessageUnauthorized)
+			return c.JSON(http.StatusUnauthorized, messages.Unauthorized)
 		}
 
 		// Check that API Key exists in database
 		if match, err := passwords.ComparePasswordAndHash(ak[0], hash); err != nil || !match {
-			return c.JSON(http.StatusUnauthorized, models.DefaultMessageUnauthorized)
+			return c.JSON(http.StatusUnauthorized, messages.Unauthorized)
 		}
 
 		// Datalogger Authenticated
@@ -49,7 +50,7 @@ func CreateOrUpdateDataLoggerMeasurements(db *sqlx.DB) echo.HandlerFunc {
 
 		raw, err := json.Marshal(body)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, models.DefaultMessageBadRequest)
+			return c.JSON(http.StatusBadRequest, messages.BadRequest)
 		}
 
 		prv := models.DataLoggerPreview{SN: sn}
@@ -57,13 +58,13 @@ func CreateOrUpdateDataLoggerMeasurements(db *sqlx.DB) echo.HandlerFunc {
 
 		err = models.UpdateDataLoggerPreviewBySN(db, &prv)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, models.DefaultMessageInternalServerError)
+			return c.JSON(http.StatusInternalServerError, messages.InternalServerError)
 		}
 
 		// Check that data logger exists
 		_, err = models.GetDataLoggerBySN(db, sn)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, models.DefaultMessageBadRequest)
+			return c.JSON(http.StatusBadRequest, messages.BadRequest)
 		}
 
 		// if dl.Model == "CR6" {
@@ -79,20 +80,18 @@ func getCR6Handler(db *sqlx.DB, sn string) echo.HandlerFunc {
 		// Upload DataLogger Measurements
 		var pl models.DataLoggerPayload
 		if err := c.Bind(&pl); err != nil {
-			return c.JSON(http.StatusBadRequest, models.DefaultMessageBadRequest)
+			return c.JSON(http.StatusBadRequest, messages.BadRequest)
 		}
 
 		// Check sn from route param matches sn in request body
 		if sn != pl.Head.Environment.SerialNo {
-			return c.JSON(http.StatusBadRequest, map[string]interface{}{
-				"err": "url parameter id does not match object id in body",
-			})
+			return c.JSON(http.StatusBadRequest, messages.MatchRouteParam("`sn`"))
 		}
 
 		fields := pl.Head.Fields
 		eqt, err := models.GetEquivalencyTableBySN(db, sn)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, models.DefaultMessageInternalServerError)
+			return c.JSON(http.StatusInternalServerError, messages.InternalServerError)
 		}
 
 		eqtFields := make(map[string]models.EquivalencyTableRow)
@@ -129,7 +128,7 @@ func getCR6Handler(db *sqlx.DB, sn string) echo.HandlerFunc {
 
 		ret, err := models.CreateOrUpdateTimeseriesMeasurements(db, mcs)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, models.DefaultMessageBadRequest)
+			return c.JSON(http.StatusBadRequest, messages.BadRequest)
 		}
 
 		return c.JSON(http.StatusCreated, &ret)

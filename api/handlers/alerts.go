@@ -19,7 +19,7 @@ func ListAlertsForInstrument(db *sqlx.DB) echo.HandlerFunc {
 		}
 		aa, err := models.ListAlertsForInstrument(db, &instrumentID)
 		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
+			return c.JSON(http.StatusInternalServerError, err)
 		}
 		return c.JSON(http.StatusOK, aa)
 	}
@@ -32,7 +32,7 @@ func ListMyAlerts(db *sqlx.DB) echo.HandlerFunc {
 		profileID := p.ID
 		aa, err := models.ListMyAlerts(db, &profileID)
 		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
+			return c.JSON(http.StatusInternalServerError, err)
 		}
 		return c.JSON(http.StatusOK, &aa)
 	}

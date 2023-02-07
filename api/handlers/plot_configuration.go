@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/dbutils"
+	"github.com/USACE/instrumentation-api/api/messages"
 	"github.com/USACE/instrumentation-api/api/models"
 	"github.com/google/uuid"
 
@@ -17,7 +18,7 @@ func ListPlotConfigurations(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		pID, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err.Error())
+			return c.JSON(http.StatusBadRequest, err)
 		}
 		cc, err := models.ListPlotConfigurations(db, &pID)
 		if err != nil {
@@ -33,17 +34,17 @@ func GetPlotConfiguration(db *sqlx.DB) echo.HandlerFunc {
 		// Project ID
 		pID, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
-			return c.String(http.StatusBadRequest, "Malformed ID")
+			return c.JSON(http.StatusBadRequest, messages.MalformedID)
 		}
 		// Plot configuration ID
 		cID, err := uuid.Parse(c.Param("plot_configuration_id"))
 		if err != nil {
-			return c.String(http.StatusBadRequest, "Malformed ID")
+			return c.JSON(http.StatusBadRequest, messages.MalformedID)
 		}
 		// Get the plot configuration
 		g, err := models.GetPlotConfiguration(db, &pID, &cID)
 		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
+			return c.JSON(http.StatusInternalServerError, err)
 		}
 		return c.JSON(http.StatusOK, g)
 	}
@@ -56,32 +57,32 @@ func CreatePlotConfiguration(db *sqlx.DB) echo.HandlerFunc {
 		var pc models.PlotConfiguration
 		// Bind Information Provided in Request Body
 		if err := c.Bind(&pc); err != nil {
-			return c.String(http.StatusBadRequest, err.Error())
+			return c.JSON(http.StatusBadRequest, err)
 		}
 		// Default to 1 year if no date range provided
 		if pc.DateRange == "" {
 			pc.DateRange = "1 year"
 		}
 		if err := pc.ValidateDateRange(); err != nil {
-			return c.String(http.StatusBadRequest, err.Error())
+			return c.JSON(http.StatusBadRequest, err)
 		}
 		// Project ID from Route Params
 		pID, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
-			return c.String(http.StatusBadRequest, err.Error())
+			return c.JSON(http.StatusBadRequest, err)
 		}
 		// Check Project ID in payload vs. Project ID in Route Params
 		if pID != pc.ProjectID {
-			return c.String(http.StatusBadRequest, "route parameter project_id does not match project_id in JSON payload")
+			return c.JSON(http.StatusBadRequest, "route parameter project_id does not match project_id in JSON payload")
 		}
 		// Generate Unique Slug
 		slugsTaken, err := models.ListPlotConfigurationSlugs(db)
 		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
+			return c.JSON(http.StatusInternalServerError, err)
 		}
 		slug, err := dbutils.NextUniqueSlug(pc.Name, slugsTaken)
 		if err != nil {
-			return c.String(http.StatusBadRequest, err.Error())
+			return c.JSON(http.StatusBadRequest, err)
 		}
 		pc.Slug = slug
 
@@ -92,7 +93,7 @@ func CreatePlotConfiguration(db *sqlx.DB) echo.HandlerFunc {
 		// Create Collection Group
 		pcNew, err := models.CreatePlotConfiguration(db, &pc)
 		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
+			return c.JSON(http.StatusInternalServerError, err)
 		}
 		return c.JSON(http.StatusCreated, pcNew)
 	}
@@ -105,23 +106,23 @@ func UpdatePlotConfiguration(db *sqlx.DB) echo.HandlerFunc {
 		var pc models.PlotConfiguration
 		// Bind Information Provided in Request Body
 		if err := c.Bind(&pc); err != nil {
-			return c.String(http.StatusBadRequest, err.Error())
+			return c.JSON(http.StatusBadRequest, err)
 		}
 		// Default to 1 year if no date range provided
 		if pc.DateRange == "" {
 			pc.DateRange = "1 year"
 		}
 		if err := pc.ValidateDateRange(); err != nil {
-			return c.String(http.StatusBadRequest, err.Error())
+			return c.JSON(http.StatusBadRequest, err)
 		}
 		// Project ID from Route Params
 		pID, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
-			return c.String(http.StatusBadRequest, err.Error())
+			return c.JSON(http.StatusBadRequest, err)
 		}
 		// Check Project ID in payload vs. Project ID in Route Params
 		if pID != pc.ProjectID {
-			return c.String(http.StatusBadRequest, "route parameter project_id does not match project_id in JSON payload")
+			return c.JSON(http.StatusBadRequest, "route parameter project_id does not match project_id in JSON payload")
 		}
 
 		// Profile of user creating Plot Configuration
@@ -132,7 +133,7 @@ func UpdatePlotConfiguration(db *sqlx.DB) echo.HandlerFunc {
 		// Update Plot Configuration
 		pcUpdated, err := models.UpdatePlotConfiguration(db, &pc)
 		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
+			return c.JSON(http.StatusInternalServerError, err)
 		}
 		return c.JSON(http.StatusOK, pcUpdated)
 	}
@@ -143,11 +144,11 @@ func DeletePlotConfiguration(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		pID, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err.Error())
+			return c.JSON(http.StatusBadRequest, err)
 		}
 		cID, err := uuid.Parse(c.Param("plot_configuration_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err.Error())
+			return c.JSON(http.StatusBadRequest, err)
 		}
 		if err := models.DeletePlotConfiguration(db, &pID, &cID); err != nil {
 			return c.JSON(http.StatusInternalServerError, err)

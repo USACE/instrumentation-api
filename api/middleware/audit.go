@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/USACE/instrumentation-api/api/messages"
 	"github.com/USACE/instrumentation-api/api/models"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
@@ -25,7 +26,7 @@ func EDIPIMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			// Get EDIPI
 			EDIPI, err := strconv.Atoi(claims["sub"].(string))
 			if err != nil {
-				return c.JSON(http.StatusForbidden, models.DefaultMessageUnauthorized)
+				return c.JSON(http.StatusForbidden, messages.Unauthorized)
 			}
 			c.Set("EDIPI", EDIPI)
 		}
@@ -37,7 +38,7 @@ func CACOnlyMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		EDIPI := c.Get("EDIPI")
 		if EDIPI == nil {
-			return c.JSON(http.StatusForbidden, models.DefaultMessageUnauthorized)
+			return c.JSON(http.StatusForbidden, messages.Unauthorized)
 		}
 		return next(c)
 	}
@@ -53,7 +54,7 @@ func AttachProfileMiddleware(db *sqlx.DB) echo.MiddlewareFunc {
 			if c.Get("ApplicationKeyAuthSuccess") == true {
 				p, err := models.GetProfileFromEDIPI(db, 79)
 				if err != nil {
-					return c.JSON(http.StatusForbidden, models.DefaultMessageUnauthorized)
+					return c.JSON(http.StatusForbidden, messages.Unauthorized)
 				}
 				c.Set("profile", p)
 				return next(c)
@@ -63,7 +64,7 @@ func AttachProfileMiddleware(db *sqlx.DB) echo.MiddlewareFunc {
 				keyID := c.Get("KeyAuthKeyID").(string)
 				p, err := models.GetProfileFromTokenID(db, keyID)
 				if err != nil {
-					return c.JSON(http.StatusForbidden, models.DefaultMessageUnauthorized)
+					return c.JSON(http.StatusForbidden, messages.Unauthorized)
 				}
 				c.Set("profile", p)
 				return next(c)
@@ -71,11 +72,11 @@ func AttachProfileMiddleware(db *sqlx.DB) echo.MiddlewareFunc {
 			// If a User was authenticated using CAC (JWT), lookup Profile by EDIPI
 			EDIPI := c.Get("EDIPI")
 			if EDIPI == nil {
-				return c.JSON(http.StatusForbidden, models.DefaultMessageUnauthorized)
+				return c.JSON(http.StatusForbidden, messages.Unauthorized)
 			}
 			p, err := models.GetProfileFromEDIPI(db, EDIPI.(int))
 			if err != nil {
-				return c.JSON(http.StatusForbidden, models.DefaultMessageUnauthorized)
+				return c.JSON(http.StatusForbidden, messages.Unauthorized)
 			}
 			c.Set("profile", p)
 
@@ -88,10 +89,10 @@ func IsApplicationAdmin(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		p, ok := c.Get("profile").(*models.Profile)
 		if !ok {
-			return c.JSON(http.StatusForbidden, models.DefaultMessageUnauthorized)
+			return c.JSON(http.StatusForbidden, messages.Unauthorized)
 		}
 		if !p.IsAdmin {
-			return c.JSON(http.StatusForbidden, models.DefaultMessageUnauthorized)
+			return c.JSON(http.StatusForbidden, messages.Unauthorized)
 		}
 		return next(c)
 	}
@@ -102,7 +103,7 @@ func IsProjectAdminMiddleware(db *sqlx.DB) echo.MiddlewareFunc {
 		return func(c echo.Context) error {
 			p, ok := c.Get("profile").(*models.Profile)
 			if !ok {
-				return c.JSON(http.StatusForbidden, models.DefaultMessageUnauthorized)
+				return c.JSON(http.StatusForbidden, messages.Unauthorized)
 			}
 			// Application Admins Automatic Admin Status for All Projects
 			if p.IsAdmin {
@@ -111,11 +112,11 @@ func IsProjectAdminMiddleware(db *sqlx.DB) echo.MiddlewareFunc {
 			// Lookup project from URL Route Parameter
 			projectID, err := uuid.Parse(c.Param("project_id"))
 			if err != nil {
-				return c.JSON(http.StatusForbidden, models.DefaultMessageUnauthorized)
+				return c.JSON(http.StatusForbidden, messages.Unauthorized)
 			}
 			project, err := models.GetProject(db, projectID)
 			if err != nil {
-				return c.JSON(http.StatusForbidden, models.DefaultMessageUnauthorized)
+				return c.JSON(http.StatusForbidden, messages.Unauthorized)
 			}
 			grantingRole := fmt.Sprintf("%s.ADMIN", strings.ToUpper(project.Slug))
 			for _, r := range p.Roles {
@@ -123,7 +124,7 @@ func IsProjectAdminMiddleware(db *sqlx.DB) echo.MiddlewareFunc {
 					return next(c)
 				}
 			}
-			return c.JSON(http.StatusForbidden, models.DefaultMessageUnauthorized)
+			return c.JSON(http.StatusForbidden, messages.Unauthorized)
 		}
 	}
 }
@@ -133,15 +134,15 @@ func IsProjectMemberMiddleware(db *sqlx.DB) echo.MiddlewareFunc {
 		return func(c echo.Context) error {
 			p, ok := c.Get("profile").(*models.Profile)
 			if !ok {
-				return c.JSON(http.StatusForbidden, models.DefaultMessageUnauthorized)
+				return c.JSON(http.StatusForbidden, messages.Unauthorized)
 			}
 			projectID, err := uuid.Parse(c.Param("project_id"))
 			if err != nil {
-				return c.JSON(http.StatusForbidden, models.DefaultMessageUnauthorized)
+				return c.JSON(http.StatusForbidden, messages.Unauthorized)
 			}
 			project, err := models.GetProject(db, projectID)
 			if err != nil {
-				return c.JSON(http.StatusForbidden, models.DefaultMessageUnauthorized)
+				return c.JSON(http.StatusForbidden, messages.Unauthorized)
 			}
 			grantingRole := fmt.Sprintf("%s.MEMBER", strings.ToUpper(project.Slug))
 			for _, r := range p.Roles {
@@ -149,7 +150,7 @@ func IsProjectMemberMiddleware(db *sqlx.DB) echo.MiddlewareFunc {
 					return next(c)
 				}
 			}
-			return c.JSON(http.StatusForbidden, models.DefaultMessageUnauthorized)
+			return c.JSON(http.StatusForbidden, messages.Unauthorized)
 		}
 	}
 }

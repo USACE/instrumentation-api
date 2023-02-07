@@ -20,7 +20,7 @@ func ListInstrumentAlertConfigs(db *sqlx.DB) echo.HandlerFunc {
 		}
 		aa, err := models.ListInstrumentAlertConfigs(db, &instrumentID)
 		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
+			return c.JSON(http.StatusInternalServerError, err)
 		}
 		return c.JSON(http.StatusOK, aa)
 	}

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/dbutils"
+	"github.com/USACE/instrumentation-api/api/messages"
 	"github.com/USACE/instrumentation-api/api/models"
 
 	"github.com/google/uuid"
@@ -40,7 +41,7 @@ func ListProjectInstruments(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
-			return c.String(http.StatusBadRequest, "Malformed ID")
+			return c.JSON(http.StatusBadRequest, messages.MalformedID)
 		}
 		nn, err := models.ListProjectInstruments(db, id)
 		if err != nil {
@@ -55,7 +56,7 @@ func ListProjectInstrumentNames(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
-			return c.String(http.StatusBadRequest, "Malformed ID")
+			return c.JSON(http.StatusBadRequest, messages.MalformedID)
 		}
 		names, err := models.ListProjectInstrumentNames(db, &id)
 		if err != nil {
@@ -70,7 +71,7 @@ func ListProjectInstrumentGroups(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
-			return c.String(http.StatusBadRequest, "Malformed ID")
+			return c.JSON(http.StatusBadRequest, messages.MalformedID)
 		}
 		gg, err := models.ListProjectInstrumentGroups(db, id)
 		if err != nil {
@@ -96,7 +97,7 @@ func GetProject(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
-			return c.String(http.StatusBadRequest, "Malformed ID")
+			return c.JSON(http.StatusBadRequest, messages.MalformedID)
 		}
 		project, err := models.GetProject(db, id)
 		if err != nil {
@@ -158,21 +159,15 @@ func UpdateProject(db *sqlx.DB) echo.HandlerFunc {
 		// id from url params
 		id, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
-			return c.String(http.StatusBadRequest, "Malformed ID")
+			return c.JSON(http.StatusBadRequest, messages.MalformedID)
 		}
 		// id from request
 		p := &models.Project{ID: id}
 		if err := c.Bind(p); err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
-		// check :id in url params matches id in request body
 		if id != p.ID {
-			return c.JSON(
-				http.StatusBadRequest,
-				map[string]interface{}{
-					"err": "url parameter id does not match object id in body",
-				},
-			)
+			return c.JSON(http.StatusBadRequest, messages.MatchRouteParam("`id`"))
 		}
 
 		profile := c.Get("profile").(*models.Profile)

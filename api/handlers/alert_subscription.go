@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/USACE/instrumentation-api/api/messages"
 	"github.com/USACE/instrumentation-api/api/models"
 
 	"github.com/google/uuid"
@@ -22,7 +23,7 @@ func SubscribeProfileToAlerts(db *sqlx.DB) echo.HandlerFunc {
 		}
 		pa, err := models.SubscribeProfileToAlerts(db, &alertConfigID, &profileID)
 		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
+			return c.JSON(http.StatusInternalServerError, err)
 		}
 		return c.JSON(http.StatusOK, pa)
 	}
@@ -39,7 +40,7 @@ func UnsubscribeProfileToAlerts(db *sqlx.DB) echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 		if err = models.UnsubscribeProfileToAlerts(db, &alertConfigID, &profileID); err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
+			return c.JSON(http.StatusInternalServerError, err)
 		}
 		return c.JSON(http.StatusOK, make(map[string]interface{}))
 	}
@@ -71,7 +72,7 @@ func UpdateMyAlertSubscription(db *sqlx.DB) echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 		if s.ID != sID {
-			return c.String(http.StatusBadRequest, "route parameter subscription_id does not match id in JSON payload")
+			return c.JSON(http.StatusBadRequest, "route parameter subscription_id does not match id in JSON payload")
 		}
 		// Get Profile
 		p := c.Get("profile").(*models.Profile)
@@ -82,11 +83,11 @@ func UpdateMyAlertSubscription(db *sqlx.DB) echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 		if p.ID != t.ProfileID {
-			return c.JSON(http.StatusUnauthorized, models.DefaultMessageUnauthorized)
+			return c.JSON(http.StatusUnauthorized, messages.Unauthorized)
 		}
 		sUpdated, err := models.UpdateMyAlertSubscription(db, &s)
 		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
+			return c.JSON(http.StatusInternalServerError, err)
 		}
 		return c.JSON(http.StatusOK, sUpdated)
 	}

@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/USACE/instrumentation-api/api/messages"
 	"github.com/USACE/instrumentation-api/api/models"
 	"github.com/USACE/instrumentation-api/api/timeseries"
 
@@ -41,7 +42,7 @@ func ListInclinometerMeasurements(db *sqlx.DB) echo.HandlerFunc {
 
 		tsID, err := uuid.Parse(c.Param("timeseries_id"))
 		if err != nil {
-			return c.String(http.StatusBadRequest, "Malformed ID")
+			return c.JSON(http.StatusBadRequest, messages.MalformedID)
 		}
 
 		// Time Window
@@ -49,7 +50,7 @@ func ListInclinometerMeasurements(db *sqlx.DB) echo.HandlerFunc {
 		a, b := c.QueryParam("after"), c.QueryParam("before")
 		err = tw.SetWindow(a, b)
 		if err != nil {
-			return c.String(http.StatusBadRequest, err.Error())
+			return c.JSON(http.StatusBadRequest, err)
 		}
 
 		im, err := models.ListInclinometerMeasurements(db, &tsID, &tw)
@@ -97,10 +98,10 @@ func CreateOrUpdateProjectInclinometerMeasurements(db *sqlx.DB) echo.HandlerFunc
 		}
 		isTrue, err := allInclinometerTimeseriesBelongToProject(db, &mcc, &pID)
 		if err != nil {
-			return c.String(http.StatusBadRequest, err.Error())
+			return c.JSON(http.StatusBadRequest, err)
 		}
 		if !isTrue {
-			return c.String(http.StatusBadRequest, "all timeseries posted do not belong to project")
+			return c.JSON(http.StatusBadRequest, "all timeseries posted do not belong to project")
 		}
 
 		// Post inclinometers

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/USACE/instrumentation-api/api/dbutils"
+	"github.com/USACE/instrumentation-api/api/messages"
 	"github.com/USACE/instrumentation-api/api/models"
 	ts "github.com/USACE/instrumentation-api/api/timeseries"
 
@@ -28,7 +29,7 @@ func GetTimeseries(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		tsID, err := uuid.Parse(c.Param("timeseries_id"))
 		if err != nil {
-			return c.String(http.StatusBadRequest, "Malformed ID")
+			return c.JSON(http.StatusBadRequest, messages.MalformedID)
 		}
 		t, err := models.GetTimeseries(db, &tsID)
 		if err != nil {
@@ -43,11 +44,11 @@ func ListInstrumentTimeseries(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		nID, err := uuid.Parse(c.Param("instrument_id"))
 		if err != nil {
-			return c.String(http.StatusBadRequest, "Malformed ID")
+			return c.JSON(http.StatusBadRequest, messages.MalformedID)
 		}
 		tt, err := models.ListInstrumentTimeseries(db, &nID)
 		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
+			return c.JSON(http.StatusInternalServerError, err)
 		}
 		return c.JSON(http.StatusOK, tt)
 	}
@@ -58,11 +59,11 @@ func ListInstrumentGroupTimeseries(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		gID, err := uuid.Parse(c.Param("instrument_group_id"))
 		if err != nil {
-			return c.String(http.StatusBadRequest, "Malformed ID")
+			return c.JSON(http.StatusBadRequest, messages.MalformedID)
 		}
 		tt, err := models.ListInstrumentGroupTimeseries(db, &gID)
 		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
+			return c.JSON(http.StatusInternalServerError, err)
 		}
 		return c.JSON(http.StatusOK, tt)
 	}
@@ -73,11 +74,11 @@ func ListProjectTimeseries(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		pID, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
-			return c.String(http.StatusBadRequest, "Malformed ID")
+			return c.JSON(http.StatusBadRequest, messages.MalformedID)
 		}
 		tt, err := models.ListProjectTimeseries(db, &pID)
 		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
+			return c.JSON(http.StatusInternalServerError, err)
 		}
 		return c.JSON(http.StatusOK, tt)
 	}
@@ -128,7 +129,7 @@ func UpdateTimeseries(db *sqlx.DB) echo.HandlerFunc {
 		// id from url params
 		id, err := uuid.Parse(c.Param("timeseries_id"))
 		if err != nil {
-			return c.String(http.StatusBadRequest, "Malformed ID")
+			return c.JSON(http.StatusBadRequest, messages.MalformedID)
 		}
 		// id from request
 		t := ts.Timeseries{}
@@ -137,7 +138,7 @@ func UpdateTimeseries(db *sqlx.DB) echo.HandlerFunc {
 		}
 		// check :id in url params matches id in request body
 		if id != t.ID {
-			return c.String(
+			return c.JSON(
 				http.StatusBadRequest,
 				"url parameter id does not match object id in body",
 			)

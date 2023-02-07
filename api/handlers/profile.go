@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/USACE/instrumentation-api/api/messages"
 	"github.com/USACE/instrumentation-api/api/models"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
@@ -15,14 +16,14 @@ func CreateProfile(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var n models.ProfileInfo
 		if err := c.Bind(&n); err != nil {
-			return c.String(http.StatusBadRequest, err.Error())
+			return c.JSON(http.StatusBadRequest, err)
 		}
 		// Set EDIPI
 		n.EDIPI = c.Get("EDIPI").(int)
 
 		p, err := models.CreateProfile(db, &n)
 		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
+			return c.JSON(http.StatusInternalServerError, err)
 		}
 		return c.JSON(http.StatusCreated, p)
 	}
@@ -35,9 +36,9 @@ func GetMyProfile(db *sqlx.DB) echo.HandlerFunc {
 		p, err := models.GetProfileFromEDIPI(db, EDIPI)
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
-				return c.JSON(http.StatusNotFound, models.DefaultMessageNotFound)
+				return c.JSON(http.StatusNotFound, messages.NotFound)
 			}
-			return c.JSON(http.StatusInternalServerError, models.DefaultMessageInternalServerError)
+			return c.JSON(http.StatusInternalServerError, messages.InternalServerError)
 		}
 		return c.JSON(http.StatusOK, &p)
 	}
@@ -49,14 +50,14 @@ func CreateToken(db *sqlx.DB) echo.HandlerFunc {
 		EDIPI := c.Get("EDIPI").(int)
 		p, err := models.GetProfileFromEDIPI(db, EDIPI)
 		if err != nil {
-			return c.String(
+			return c.JSON(
 				http.StatusBadRequest,
 				"could not locate user profile with information provided",
 			)
 		}
 		token, err := models.CreateProfileToken(db, &p.ID)
 		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
+			return c.JSON(http.StatusInternalServerError, err)
 		}
 		return c.JSON(http.StatusCreated, token)
 	}
@@ -69,16 +70,16 @@ func DeleteToken(db *sqlx.DB) echo.HandlerFunc {
 		EDIPI := c.Get("EDIPI").(int)
 		p, err := models.GetProfileFromEDIPI(db, EDIPI)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, models.DefaultMessageBadRequest)
+			return c.JSON(http.StatusBadRequest, messages.BadRequest)
 		}
 		// Get Token ID
 		tokenID := c.Param("token_id")
 		if tokenID == "" {
-			return c.String(http.StatusBadRequest, "Bad Token ID")
+			return c.JSON(http.StatusBadRequest, "Bad Token ID")
 		}
 		// Delete Token
 		if err := models.DeleteToken(db, &p.ID, &tokenID); err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
+			return c.JSON(http.StatusInternalServerError, err)
 		}
 		return c.JSON(http.StatusOK, make(map[string]interface{}))
 	}
