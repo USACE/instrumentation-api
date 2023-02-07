@@ -1,16 +1,6 @@
 -- v_datalogger
 CREATE OR REPLACE VIEW v_datalogger AS (
-    SELECT 
-        id,
-        sn,
-        project_id,
-        creator,
-        create_date,
-        name,
-        slug,
-        model
-    FROM datalogger
-    WHERE NOT deleted
+    SELECT * FROM datalogger WHERE NOT deleted
 );
 
 -- v_datalogger_preview

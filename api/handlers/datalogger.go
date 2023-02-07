@@ -60,7 +60,7 @@ func CreateDataLogger(db *sqlx.DB) echo.HandlerFunc {
 		// TODO: Check user has datalogger role permissions
 
 		if n.Name == "" {
-			return echo.NewHTTPError(http.StatusBadRequest, messages.BadRequest)
+			return echo.NewHTTPError(http.StatusBadRequest, "valid `name` field required")
 		}
 		// Generate unique slug
 		slug, err := dbutils.CreateUniqueSlug(db, `SELECT slug FROM datalogger`, n.Name)
@@ -68,6 +68,12 @@ func CreateDataLogger(db *sqlx.DB) echo.HandlerFunc {
 			return echo.NewHTTPError(http.StatusInternalServerError, messages.InternalServerError)
 		}
 		n.Slug = slug
+
+		// check if datalogger with sn already exists and is not deleted
+		err = models.VerifyUniqueSN(db, n.SN)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
 
 		dl, err := models.CreateDataLogger(db, &n)
 		if err != nil {

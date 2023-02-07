@@ -91,6 +91,7 @@ GRANT SELECT ON
     aware_platform,
     aware_parameter,
     datalogger,
+    datalogger_hash,
     datalogger_preview,
     datalogger_field_instrument_timeseries
 TO instrumentation_reader;
@@ -142,6 +143,7 @@ GRANT INSERT,UPDATE,DELETE ON
     aware_platform,
     aware_parameter,
     datalogger,
+    datalogger_hash,
     datalogger_preview,
     datalogger_field_instrument_timeseries
 TO instrumentation_writer;

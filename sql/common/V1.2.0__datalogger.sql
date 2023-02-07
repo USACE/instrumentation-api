@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS datalogger (
 
 CREATE TABLE IF NOT EXISTS datalogger_hash (
     datalogger_id UUID NOT NULL REFERENCES datalogger (id),
-    "hash" VARCHAR(40) NOT NULL,
+    "hash" TEXT NOT NULL,
     CONSTRAINT unique_hash UNIQUE("hash"),
     CONSTRAINT unique_datalogger_hash UNIQUE(datalogger_id, "hash")
 );
