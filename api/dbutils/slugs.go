@@ -45,17 +45,17 @@ func NextUniqueSlug(str string, usedSlugs []string) (string, error) {
 	return "", errors.New("reached max iteration %i without finding a unique slug")
 }
 
-func ListSlugs(db *sqlx.DB, tableName string) ([]string, error) {
+func ListSlugs(db *sqlx.DB, slugSQL string) ([]string, error) {
 	slugs := make([]string, 0)
-	if err := db.Select(&slugs, "SELECT slug FROM "+tableName); err != nil {
+	if err := db.Select(&slugs, slugSQL); err != nil {
 		return make([]string, 0), err
 	}
 	return slugs, nil
 }
 
 // CreateUniqueSlug creates a unique slug given a name and tableName
-func CreateUniqueSlug(db *sqlx.DB, name string, tableName string) (string, error) {
-	slugsTaken, err := ListSlugs(db, tableName)
+func CreateUniqueSlug(db *sqlx.DB, slugSQL string, name string) (string, error) {
+	slugsTaken, err := ListSlugs(db, slugSQL)
 	if err != nil {
 		return "", err
 	}
