@@ -1,10 +1,9 @@
 package models
 
 import (
-	"encoding/csv"
-	"log"
-	"os"
+	"time"
 
+	"github.com/USACE/instrumentation-api/api/passwords"
 	"github.com/google/uuid"
 	"github.com/jackc/pgtype"
 	"github.com/jmoiron/sqlx"
@@ -19,58 +18,33 @@ type Telemetry struct {
 }
 
 type DataLogger struct {
-	ID        uuid.UUID `json:"id"`
-	Name      string    `json:"name"`
-	SN        string    `json:"sn"`
-	ProjectID uuid.UUID `json:"project_id"`
-	Creator   uuid.UUID `json:"creator"`
-	Slug      string    `json:"slug"`
-	Model     string    `json:"model"`
+	ID         uuid.UUID  `json:"id"`
+	Name       string     `json:"name"`
+	SN         string     `json:"sn"`
+	ProjectID  uuid.UUID  `json:"project_id"`
+	Creator    uuid.UUID  `json:"creator"`
+	Updater    *uuid.UUID `json:"updater"`
+	UpdateDate *time.Time `json:"update_date"`
+	Slug       string     `json:"slug"`
+	Model      string     `json:"model"`
 }
 
-type DataLoggerPayload struct {
-	Head Head    `json:"head"`
-	Data []Datum `json:"data"`
-}
-
-type Datum struct {
-	Time string    `json:"time"`
-	No   int64     `json:"no"`
-	Vals []float64 `json:"vals"`
-}
-
-type Head struct {
-	Transaction int64       `json:"transaction"`
-	Signature   int64       `json:"signature"`
-	Environment Environment `json:"environment"`
-	Fields      []Field     `json:"fields"`
-}
-
-type Environment struct {
-	StationName string `json:"station_name"`
-	TableName   string `json:"table_name"`
-	Model       string `json:"model"`
-	SerialNo    string `json:"serial_no"`
-	OSVersion   string `json:"os_version"`
-	ProgName    string `json:"prog_name"`
-}
-
-type Field struct {
-	Name     string `json:"name"`
-	Type     string `json:"type"`
-	Units    string `json:"units"`
-	Process  string `json:"process"`
-	Settable bool   `json:"settable"`
+type DataLoggerWithKey struct {
+	DataLogger
+	Key string `json:"key"`
 }
 
 type EquivalencyTable struct {
-	DataLoggerSN string
-	FieldMap     map[string]EquivalencyTableRow
+	DataLoggerID uuid.UUID `json:"datalogger_id"`
+	Rows         []EquivalencyTableRow
 }
 
 type EquivalencyTableRow struct {
-	InstrumentID uuid.UUID
-	TimeseriesID uuid.UUID
+	DataLoggerID uuid.UUID  `json:"-"`
+	FieldName    string     `json:"field_name"`
+	DisplayName  string     `json:"display_name"`
+	InstrumentID *uuid.UUID `json:"instrument_id"`
+	TimeseriesID *uuid.UUID `json:"timeseries_id"`
 }
 
 type DataLoggerPreview struct {
@@ -100,15 +74,99 @@ func ListAllDataLoggers(db *sqlx.DB) ([]DataLogger, error) {
 	return dls, nil
 }
 
-func CreateDataLogger(db *sqlx.DB, n *DataLogger) (*DataLogger, error) {
-	var dl DataLogger
-	if err := db.Get(&dl,
-		`INSERT INTO datalogger (name, sn, project_id, creator, slug, model) VALUES
-			($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
-		n.Name, n.SN, n.ProjectID, n.Creator, n.Slug, n.Model); err != nil {
+func CreateDataLogger(db *sqlx.DB, n *DataLogger) (*DataLoggerWithKey, error) {
+	// check if datalogger with sn already exists and is not deleted
+
+	txn, err := db.Beginx()
+	if err != nil {
 		return nil, err
 	}
-	return &dl, nil
+	defer txn.Rollback()
+
+	stmt1, err := txn.Preparex(`INSERT INTO datalogger (name, sn, project_id, creator, slug, model) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`)
+	if err != nil {
+		return nil, err
+	}
+
+	stmt2, err := txn.Preparex(`INSERT INTO datalogger_hash (datalogger_id, "hash") VALUES ($1, $2)`)
+	if err != nil {
+		return nil, err
+	}
+
+	var dl DataLogger
+	if err := stmt1.Get(&dl, &n.Name, &n.SN, &n.ProjectID, &n.Creator, &n.Slug, &n.Model); err != nil {
+		return nil, err
+	}
+
+	key := passwords.GenerateRandom(40)
+	hash := passwords.MustCreateHash(key, passwords.DefaultParams)
+	_, err = stmt2.Exec(&dl.ID, hash)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := stmt1.Close(); err != nil {
+		return nil, err
+	}
+	if err := stmt2.Close(); err != nil {
+		return nil, err
+	}
+	if err := txn.Commit(); err != nil {
+		return nil, err
+	}
+
+	dk := DataLoggerWithKey{
+		DataLogger: dl,
+		Key:        key,
+	}
+
+	return &dk, nil
+}
+
+func CycleDataLoggerKey(db *sqlx.DB, u *DataLogger) (*DataLoggerWithKey, error) {
+	txn, err := db.Beginx()
+	if err != nil {
+		return nil, err
+	}
+	defer txn.Rollback()
+
+	stmt1, err := txn.Preparex(`UPDATE datalogger_hash SET "hash" = $2 WHERE datalogger_id = $1`)
+	if err != nil {
+		return nil, err
+	}
+	stmt2, err := txn.Preparex(`UPDATE datalogger SET updater = $2, update_date = $3 WHERE id = $1 RETURNING *`)
+	if err != nil {
+		return nil, err
+	}
+
+	key := passwords.GenerateRandom(40)
+	hash := passwords.MustCreateHash(key, passwords.DefaultParams)
+	_, err = stmt1.Exec(&u.ID, hash)
+	if err != nil {
+		return nil, err
+	}
+
+	var dl DataLogger
+	if err := stmt2.Get(&dl, &u.ID, &u.Updater, &u.UpdateDate); err != nil {
+		return nil, err
+	}
+
+	if err := stmt1.Close(); err != nil {
+		return nil, err
+	}
+	if err := stmt2.Close(); err != nil {
+		return nil, err
+	}
+	if err := txn.Commit(); err != nil {
+		return nil, err
+	}
+
+	dk := DataLoggerWithKey{
+		DataLogger: dl,
+		Key:        key,
+	}
+
+	return &dk, nil
 }
 
 func GetDataLogger(db *sqlx.DB, dlID *uuid.UUID) (*DataLogger, error) {
@@ -119,20 +177,17 @@ func GetDataLogger(db *sqlx.DB, dlID *uuid.UUID) (*DataLogger, error) {
 	return &dl, nil
 }
 
-func GetDataLoggerBySN(db *sqlx.DB, sn string) (*DataLogger, error) {
-	var dl DataLogger
-	if err := db.Get(&dl, `SELECT * FROM v_datalogger WHERE sn = $1`, sn); err != nil {
-		return nil, err
-	}
-	return &dl, nil
-}
-
 func UpdateDataLogger(db *sqlx.DB, u *DataLogger) (*DataLogger, error) {
 	var dl DataLogger
-	err := db.Select(
-		&dl,
-		`UPDATE datalogger SET name = $2, sn = $3, project_id = $4, creator = $5, slug = $6, model = $7 WHERE id = $1`,
-		u.ID, u.Name, u.SN, u.ProjectID, u.Creator, u.Slug, u.Model,
+	err := db.Select(&dl, `
+		UPDATE datalogger SET
+			name = $2,
+			sn = $3,
+			model = $6,
+			updater = $7,
+			update_date = $8
+		WHERE id = $1
+		`, &u.ID, &u.Name, &u.SN, &u.Slug, &u.Model, &u.Updater, &u.UpdateDate,
 	)
 	if err != nil {
 		return nil, err
@@ -140,39 +195,54 @@ func UpdateDataLogger(db *sqlx.DB, u *DataLogger) (*DataLogger, error) {
 	return &dl, nil
 }
 
-func DeleteDataLogger(db *sqlx.DB, dlID *uuid.UUID) error {
-	if _, err := db.Exec(`UPDATE datalogger SET deleted = true WHERE id = $1`, &dlID); err != nil {
+func DeleteDataLogger(db *sqlx.DB, d *DataLogger) error {
+	if _, err := db.Exec(
+		`UPDATE datalogger SET deleted = true, updater = $2, update_date = $3  WHERE id = $1`,
+		&d.ID, &d.Updater, &d.UpdateDate,
+	); err != nil {
 		return err
 	}
+
 	return nil
 }
 
-func GetDataLoggerHash(db *sqlx.DB, sn string) (string, error) {
-	var hash string
-
-	if err := db.Get(
-		&hash,
-		`SELECT hash
-		FROM datalogger_hash
-		WHERE sn = $1`,
-		sn,
-	); err != nil {
-		return "", err
+func GetEquivalencyTable(db *sqlx.DB, dlID *uuid.UUID) (*EquivalencyTable, error) {
+	var t EquivalencyTable
+	if err := db.Get(&t, `
+		SELECT * FROM v_datalogger_field_instrument_timeseries WHERE datalogger_id = $1
+	`, &dlID); err != nil {
+		return &EquivalencyTable{
+			DataLoggerID: *dlID,
+			Rows:         make([]EquivalencyTableRow, 0),
+		}, err
 	}
 
-	return hash, nil
+	return &t, nil
 }
 
-func GetEquivalencyTable(db *sqlx.DB, sn string) (*EquivalencyTable, error) {
-	var eq EquivalencyTable
-
-	if err := db.Get(
-		&eq, `SELECT * FROM v_datalogger_field_instrument_timeseries WHERE datalogger_id = $1`, sn,
-	); err != nil {
+func CreateOrUpdateEquivalencyTableRow(db *sqlx.DB, u *EquivalencyTableRow) (*EquivalencyTableRow, error) {
+	var r EquivalencyTableRow
+	if err := db.Get(&r, `
+		INSERT INTO datalogger_field_instrument_timeseries (datalogger_id, field_name, display_name, instrument_id, timeseries_id)
+		VALUES ($1, $2, $3, $4, $5)
+		RETURNING *
+		ON CONFLICT ON CONSTRAINT unique_datalogger_field DO UPDATE SET
+			display_name = EXCLUDED.display_name,
+			instrument_id = EXCLUDED.instrument_id,
+			timeseries_id = EXCLUDED.timeseries_id
+	`, &u.DataLoggerID); err != nil {
 		return nil, err
 	}
 
-	return &eq, nil
+	return &r, nil
+}
+
+func DeleteEquivalencyTableRow(db *sqlx.DB, dlID *uuid.UUID, field string) error {
+	_, err := db.Exec(`DELETE FROM datalogger_field_instrument_timeseries WHERE datalogger_id = $1 AND field_name = $2`, &dlID, field)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func GetDataLoggerPreview(db *sqlx.DB, sn string) (*DataLoggerPreview, error) {
@@ -180,70 +250,11 @@ func GetDataLoggerPreview(db *sqlx.DB, sn string) (*DataLoggerPreview, error) {
 
 	if err := db.Get(
 		&dlp,
-		`SELECT sn, payload FROM datalogger_preview WHERE sn = $1`,
+		`SELECT * FROM v_datalogger_preview WHERE sn = $1`,
 		sn,
 	); err != nil {
 		return nil, err
 	}
 
 	return &dlp, nil
-}
-
-func UpdateDataLoggerPreview(db *sqlx.DB, dlp *DataLoggerPreview) error {
-	if _, err := db.Exec(
-		`UPDATE TABLE datalogger_preview SET payload = $2 WHERE sn = $1`,
-		&dlp.SN, &dlp.Payload,
-	); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// ParseTOA5 parses a Campbell Scientific TOA5 data file that is simlar to a csv.
-// The unique properties of TOA5 are that the meatdata are stored in header of file (first 4 lines of csv)
-func ParseTOA5(filename string) ([][]string, error) {
-	f, err := os.Open(filename)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-
-	r := csv.NewReader(f)
-
-	// read headers
-	// LINE 1: information about the data logger (e.g. serial number and program name)
-	header1, err := r.Read()
-	if err != nil {
-		return nil, err
-	}
-	// LINE 2: data header (names of the variables stored in the table)
-	header2, err := r.Read()
-	if err != nil {
-		return nil, err
-	}
-	// LINE 3: units for the variables if they have been defined in the data logger
-	header3, err := r.Read()
-	if err != nil {
-		return nil, err
-	}
-	// LINE 4: abbreviation for processing data logger performed
-	// (e.g. sample, average, standard deviation, maximum, minimum, etc.)
-	header4, err := r.Read()
-	if err != nil {
-		return nil, err
-	}
-	log.Printf("header1: %v", header1)
-	log.Printf("header2: %v", header2)
-	log.Printf("header3: %v", header3)
-	log.Printf("header4: %v", header4)
-
-	// continue read until EOF
-	data, err := r.ReadAll()
-	if err != nil {
-		return nil, err
-	}
-	log.Printf("data: %v", data)
-
-	return data, nil
 }

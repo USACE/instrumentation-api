@@ -1,14 +1,12 @@
 package handlers
 
 import (
-	"encoding/json"
+	"log"
 	"net/http"
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/dbutils"
 	"github.com/USACE/instrumentation-api/api/models"
-	"github.com/USACE/instrumentation-api/api/passwords"
-	"github.com/USACE/instrumentation-api/api/timeseries"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
@@ -17,7 +15,7 @@ import (
 // ListDataLoggers
 func ListDataLoggers(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		// TODO: Check if user has read permissions for data logger
+		// TODO: Check user has datalogger role permissions
 
 		// Check for project_id in url query
 		pID := c.QueryParam("project_id")
@@ -58,7 +56,7 @@ func CreateDataLogger(db *sqlx.DB) echo.HandlerFunc {
 		p := c.Get("profile").(*models.Profile)
 		n.Creator = p.ID
 
-		// TODO: Check that user has permissions to project
+		// TODO: Check user has datalogger role permissions
 
 		if n.Name == "" {
 			return c.String(http.StatusBadRequest, models.DefaultMessageBadRequest.Message)
@@ -79,134 +77,178 @@ func CreateDataLogger(db *sqlx.DB) echo.HandlerFunc {
 	}
 }
 
+// CycleDataLoggerKey
+func CycleDataLoggerKey(db *sqlx.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		dlID, err := uuid.Parse(c.Param("datalogger_id"))
+		if err != nil {
+			return c.String(http.StatusBadRequest, "Malformed ID")
+		}
+
+		u := models.DataLogger{ID: dlID}
+
+		profile := c.Get("profile").(*models.Profile)
+		t := time.Now()
+		u.Updater, u.UpdateDate = &profile.ID, &t
+
+		dl, err := models.CycleDataLoggerKey(db, &u)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, models.DefaultMessageInternalServerError.Message)
+		}
+
+		return c.JSON(http.StatusOK, dl)
+	}
+}
+
 // GetDataLogger
 func GetDataLogger(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return c.JSON(http.StatusOK, make(map[string]interface{}))
+		dlID, err := uuid.Parse(c.Param("datalogger_id"))
+		if err != nil {
+			return c.String(http.StatusBadRequest, "Malformed ID")
+		}
+		// TODO: Check user has datalogger role permissions
+
+		dl, err := models.GetDataLogger(db, &dlID)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, models.DefaultMessageInternalServerError.Message)
+		}
+
+		return c.JSON(http.StatusOK, dl)
 	}
 }
 
 // UpdateDataLogger
 func UpdateDataLogger(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return c.JSON(http.StatusOK, make(map[string]interface{}))
+		dlID, err := uuid.Parse(c.Param("datalogger_id"))
+		if err != nil {
+			return c.String(http.StatusBadRequest, "Malformed ID")
+		}
+
+		u := models.DataLogger{ID: dlID}
+		if err := c.Bind(&u); err != nil {
+			return c.JSON(http.StatusBadRequest, err)
+		}
+
+		// check id in url params matches id in request body
+		if dlID != u.ID {
+			return c.JSON(
+				http.StatusBadRequest,
+				map[string]interface{}{
+					"err": "url parameter id does not match object id in body",
+				},
+			)
+		}
+
+		// TODO: Check user has datalogger role permissions
+
+		profile := c.Get("profile").(*models.Profile)
+		t := time.Now()
+		u.Updater, u.UpdateDate = &profile.ID, &t
+
+		dlUpdated, err := models.UpdateDataLogger(db, &u)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, models.DefaultMessageInternalServerError.Message)
+		}
+
+		return c.JSON(http.StatusOK, dlUpdated)
 	}
 }
 
 // DeleteDataLogger
 func DeleteDataLogger(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
+		dlID, err := uuid.Parse(c.Param("datalogger_id"))
+		if err != nil {
+			return c.String(http.StatusBadRequest, "Malformed ID")
+		}
+
+		d := models.DataLogger{ID: dlID}
+		profile := c.Get("profile").(*models.Profile)
+		t := time.Now()
+		d.Updater, d.UpdateDate = &profile.ID, &t
+
+		// TODO: Check user has datalogger role permissions
+		if err := models.DeleteDataLogger(db, &d); err != nil {
+			return c.String(http.StatusInternalServerError, models.DefaultMessageInternalServerError.Message)
+		}
+
 		return c.JSON(http.StatusOK, make(map[string]interface{}))
 	}
 }
 
-// TODO: Finish implementation
-func CreateOrUpdateDataLoggerMeasurements(db *sqlx.DB) echo.HandlerFunc {
+func GetEquivalencyTable(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		// Parse the API key from the header, make sure its hash is in the database
-		// This could also be done in the middleware but might not be as condusive
-		// to change if we move to another API not using echo
-
-		// Bind request payload
-		var dlp models.DataLoggerPayload
-		if err := c.Bind(&dlp); err != nil {
-			return c.JSON(http.StatusBadRequest, models.DefaultMessageBadRequest)
-		}
-
-		sn := dlp.Head.Environment.SerialNo
-
-		// Check that data logger exists
-		_, err := models.GetDataLoggerBySN(db, sn)
+		dlID, err := uuid.Parse(c.Param("datalogger_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, models.DefaultMessageBadRequest)
+			return c.String(http.StatusBadRequest, "Malformed ID")
 		}
 
-		// Check header for api key
-		ak, exists := c.Request().Header["X-Api-Key"]
-
-		if !exists || len(ak) != 1 {
-			// Missing API key header
-			return c.JSON(http.StatusUnauthorized, models.DefaultMessageUnauthorized)
-		}
-
-		// Get data logger hash
-		hash, err := models.GetDataLoggerHash(db, sn)
+		t, err := models.GetEquivalencyTable(db, &dlID)
 		if err != nil {
-			return c.JSON(http.StatusUnauthorized, models.DefaultMessageUnauthorized)
+			return c.JSON(http.StatusNotFound, t)
 		}
 
-		// Check that API Key exists in database
-		if match, err := passwords.ComparePasswordAndHash(ak[0], hash); err != nil || !match {
-			return c.JSON(http.StatusUnauthorized, models.DefaultMessageUnauthorized)
-		}
-
-		fields := dlp.Head.Fields
-		eq, err := models.GetEquivalencyTable(db, sn)
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, models.DefaultMessageInternalServerError)
-		}
-
-		mcs := make([]timeseries.MeasurementCollection, len(fields))
-
-		for i, f := range fields {
-			// Map field to timeseries id
-			row, exists := eq.FieldMap[f.Name]
-			if !exists {
-				// TODO: Update validation status
-				continue
-			}
-
-			// collect measurements
-			items := make([]timeseries.Measurement, len(dlp.Data))
-			for j, d := range dlp.Data {
-				t, err := time.Parse(time.RFC3339, d.Time)
-				if err != nil {
-					// TODO: Hanlde error parsing time
-					continue
-				}
-				items[j] = timeseries.Measurement{TimeseriesID: row.TimeseriesID, Time: t, Value: d.Vals[i]}
-			}
-
-			mcs[i] = timeseries.MeasurementCollection{TimeseriesID: row.TimeseriesID, Items: items}
-		}
-
-		ret, err := models.CreateOrUpdateTimeseriesMeasurements(db, mcs)
-		if err != nil {
-			return c.JSON(http.StatusBadRequest, models.DefaultMessageBadRequest)
-		}
-
-		return c.JSON(http.StatusCreated, &ret)
+		return c.JSON(http.StatusOK, t)
 	}
 }
 
-func UpdateDataLoggerPreview(db *sqlx.DB) echo.HandlerFunc {
+func CreateOrUpdateEquivalencyTable(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		sn := c.Param("sn")
-		if sn == "" {
-			return c.String(http.StatusBadRequest, models.DefaultMessageBadRequest.Message)
-		}
-
-		body := make(map[string]interface{})
-
-		err := json.NewDecoder(c.Request().Body).Decode(&body)
+		dlID, err := uuid.Parse(c.Param("datalogger_id"))
 		if err != nil {
-			return err
+			return c.String(http.StatusBadRequest, "Malformed ID")
 		}
 
-		pl, err := json.Marshal(body)
-		if err != nil {
-			return c.String(http.StatusBadRequest, models.DefaultMessageBadRequest.Message)
+		t := models.EquivalencyTable{DataLoggerID: dlID}
+		if err := c.Bind(&t); err != nil {
+			return c.JSON(http.StatusBadRequest, err)
 		}
 
-		dlp := models.DataLoggerPreview{SN: sn}
-		dlp.Payload.Set(pl)
+		// check id in url params matches id in request body
+		if dlID != t.DataLoggerID {
+			return c.JSON(
+				http.StatusBadRequest,
+				map[string]interface{}{
+					"err": "url parameter id does not match object id in body",
+				},
+			)
+		}
 
-		err = models.UpdateDataLoggerPreview(db, &dlp)
+		for _, r := range t.Rows {
+			_, err := models.CreateOrUpdateEquivalencyTableRow(db, &r)
+			if err != nil {
+				log.Printf("error updating table row %v: %s", &r, err.Error())
+			}
+		}
+
+		eqt, err := models.GetEquivalencyTable(db, &dlID)
 		if err != nil {
 			return c.String(http.StatusInternalServerError, models.DefaultMessageInternalServerError.Message)
 		}
 
-		return c.JSON(http.StatusAccepted, sn)
+		return c.JSON(http.StatusOK, eqt)
+	}
+}
+
+func DeleteEquivalencyTableRow(db *sqlx.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		dlID, err := uuid.Parse(c.Param("datalogger_id"))
+		if err != nil {
+			return c.String(http.StatusBadRequest, "Malformed ID")
+		}
+
+		field := c.QueryParam("field_name")
+		if field == "" {
+			return c.String(http.StatusBadRequest, "Missing field_name query parameter")
+		}
+
+		if err := models.DeleteEquivalencyTableRow(db, &dlID, field); err != nil {
+			return c.String(http.StatusInternalServerError, models.DefaultMessageInternalServerError.Message)
+		}
+
+		return c.JSON(http.StatusOK, make(map[string]interface{}))
 	}
 }
 

@@ -316,19 +316,20 @@ func main() {
 	private.POST("/datalogger", handlers.CreateDataLogger(db))
 	private.GET("/datalogger/:datalogger_id", handlers.GetDataLogger(db))
 	private.PUT("/datalogger/:datalogger_id", handlers.UpdateDataLogger(db))
+	private.PUT("/datalogger/:datalogger_id/key", handlers.CycleDataLoggerKey(db))
 	private.DELETE("/datalogger/:datalogger_id", handlers.DeleteDataLogger(db))
 
 	// DataLogger Preview
 	private.GET("/datalogger/:datalogger_id/preview", handlers.GetDataLoggerPreview(db))
 
+	// DataLogger EquivalencyTable
+	private.GET("/datalogger/:datalogger_id/equivalency_table", handlers.GetEquivalencyTable(db))
+	private.POST("/datalogger/:datalogger_id/equivalency_table", handlers.CreateOrUpdateEquivalencyTable(db))
+	private.DELETE("/datalogger/:datalogger_id/equivalency_table/row", handlers.DeleteEquivalencyTableRow(db))
+
 	// Datalogger Telemetry
 	telemetry := e.Group(cfg.RoutePrefix)
-	// datalogger.Use(middleware.KeyAuth(
-	// 	cfg.AuthDisabled,
-	// 	cfg.ApplicationKey,
-	// 	hashExtractor,
-	// ))
-	telemetry.POST("/datalogger/measurements", handlers.CreateOrUpdateDataLoggerMeasurements(db))
+	telemetry.POST("/telemetry/datalogger/measurements", handlers.CreateOrUpdateDataLoggerMeasurements(db))
 
 	if cfg.LambdaContext {
 		log.Print("starting server; Running On AWS LAMBDA")
