@@ -92,10 +92,10 @@ func UpdateEquivalencyTable(db *sqlx.DB, t *EquivalencyTable) error {
 	for _, r := range t.Rows {
 		stmt, err := txn.Preparex(`
 			UPDATE datalogger_equivalency_table SET
-				field_name = $2,
-				display_name = $3,
-				instrument_id = $4,
-				timeseries_id = $5
+				field_name = $3,
+				display_name = $4,
+				instrument_id = $5,
+				timeseries_id = $6
 			WHERE datalogger_id = $1
 			AND id = $2
 		`)

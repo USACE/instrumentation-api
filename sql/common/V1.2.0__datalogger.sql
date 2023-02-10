@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS datalogger_preview (
 CREATE TABLE IF NOT EXISTS datalogger_equivalency_table (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     datalogger_id UUID NOT NULL,
-    datalogger_deleted BOOLEAN,
+    datalogger_deleted BOOLEAN NOT NULL,
     field_name TEXT NOT NULL,
     display_name TEXT,
     instrument_id UUID REFERENCES instrument (id) ON DELETE CASCADE,
