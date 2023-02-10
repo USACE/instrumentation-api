@@ -321,9 +321,10 @@ func main() {
 
 	// DataLogger EquivalencyTable
 	private.GET("/datalogger/:datalogger_id/equivalency_table", handlers.GetEquivalencyTable(db))
-	private.POST("/datalogger/:datalogger_id/equivalency_table", handlers.CreateOrUpdateEquivalencyTable(db))
+	private.POST("/datalogger/:datalogger_id/equivalency_table", handlers.CreateEquivalencyTable(db))
+	private.PUT("/datalogger/:datalogger_id/equivalency_table", handlers.UpdateEquivalencyTable(db))
 	private.DELETE("/datalogger/:datalogger_id/equivalency_table", handlers.DeleteEquivalencyTable(db))
-	private.DELETE("/datalogger/:datalogger_id/equivalency_table_row", handlers.DeleteEquivalencyTableRow(db))
+	private.DELETE("/datalogger/:datalogger_id/equivalency_table/row", handlers.DeleteEquivalencyTableRow(db))
 
 	// DataLogger Preview
 	private.GET("/datalogger/:datalogger_id/preview", handlers.GetDataLoggerPreview(db))

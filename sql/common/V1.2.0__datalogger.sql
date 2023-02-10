@@ -10,7 +10,8 @@ CREATE TABLE IF NOT EXISTS datalogger (
     name TEXT NOT NULL,
     slug TEXT NOT NULL,
     model TEXT NOT NULL,
-    deleted BOOLEAN NOT NULL DEFAULT false
+    deleted BOOLEAN NOT NULL DEFAULT false,
+    CONSTRAINT datalogger_deleted_uni UNIQUE (id, deleted)
 );
 
 CREATE TABLE IF NOT EXISTS datalogger_hash (
@@ -27,12 +28,20 @@ CREATE TABLE IF NOT EXISTS datalogger_preview (
 );
 
 -- Datalogger Field Instrument Timeseries Mapper
-CREATE TABLE IF NOT EXISTS datalogger_field_instrument_timeseries (
-    datalogger_id UUID NOT NULL REFERENCES datalogger (id),
+CREATE TABLE IF NOT EXISTS datalogger_equivalency_table (
+    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+    datalogger_id UUID NOT NULL,
+    datalogger_deleted BOOLEAN,
     field_name TEXT NOT NULL,
     display_name TEXT,
     instrument_id UUID REFERENCES instrument (id) ON DELETE CASCADE,
     timeseries_id UUID REFERENCES timeseries (id) ON DELETE CASCADE,
     CONSTRAINT unique_datalogger_field UNIQUE(datalogger_id, field_name),
-    CONSTRAINT unique_timeseries UNIQUE(timeseries_id)
+    CONSTRAINT fk2 FOREIGN KEY (datalogger_id, datalogger_deleted) REFERENCES datalogger (id, deleted)
 );
+
+-- timeseries must be unique, but only for dataloggers that are not flagged as "deleted".
+-- To reference the "deleted" column of the datalogger table when creating this unique partial index,
+-- a multi-column foreign key is needed: https://stackoverflow.com/a/35570262
+CREATE UNIQUE INDEX datalogger_timeseries_uni_idx ON datalogger_equivalency_table (timeseries_id)
+WHERE NOT datalogger_deleted;

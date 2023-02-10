@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"log"
 	"net/http"
 	"time"
 
@@ -24,14 +23,14 @@ func ListDataLoggers(db *sqlx.DB) echo.HandlerFunc {
 
 			pID, err := uuid.Parse(pID)
 			if err != nil {
-				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+				return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 			}
 
 			// TODO: Check if user has permissions to project
 
 			dls, err := models.ListProjectDataLoggers(db, &pID)
 			if err != nil {
-				return echo.NewHTTPError(http.StatusBadRequest, messages.BadRequest)
+				return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 			}
 
 			return echo.NewHTTPError(http.StatusOK, dls)
@@ -39,7 +38,7 @@ func ListDataLoggers(db *sqlx.DB) echo.HandlerFunc {
 
 		dls, err := models.ListAllDataLoggers(db)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, messages.BadRequest)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
 		return c.JSON(http.StatusOK, dls)
@@ -118,7 +117,7 @@ func GetDataLogger(db *sqlx.DB) echo.HandlerFunc {
 
 		dl, err := models.GetDataLogger(db, &dlID)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, messages.InternalServerError)
+			return echo.NewHTTPError(http.StatusNotFound, messages.NotFound)
 		}
 
 		return c.JSON(http.StatusOK, dl)
@@ -138,9 +137,12 @@ func UpdateDataLogger(db *sqlx.DB) echo.HandlerFunc {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
-		// check id in url params matches id in request body
 		if dlID != u.ID {
 			return echo.NewHTTPError(http.StatusBadRequest, messages.MatchRouteParam("`id`"))
+		}
+
+		if err := models.VerifyDataLoggerExists(db, &dlID); err != nil {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
 		}
 
 		// TODO: Check user has datalogger role permissions
@@ -151,7 +153,7 @@ func UpdateDataLogger(db *sqlx.DB) echo.HandlerFunc {
 
 		dlUpdated, err := models.UpdateDataLogger(db, &u)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, messages.InternalServerError)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
 		return c.JSON(http.StatusOK, dlUpdated)
@@ -166,6 +168,10 @@ func DeleteDataLogger(db *sqlx.DB) echo.HandlerFunc {
 			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
 
+		if err := models.VerifyDataLoggerExists(db, &dlID); err != nil {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		}
+
 		d := models.DataLogger{ID: dlID}
 		profile := c.Get("profile").(*models.Profile)
 		t := time.Now()
@@ -173,91 +179,7 @@ func DeleteDataLogger(db *sqlx.DB) echo.HandlerFunc {
 
 		// TODO: Check user has datalogger role permissions
 		if err := models.DeleteDataLogger(db, &d); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, messages.InternalServerError)
-		}
-
-		return c.JSON(http.StatusOK, make(map[string]interface{}))
-	}
-}
-
-func GetEquivalencyTable(db *sqlx.DB) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		dlID, err := uuid.Parse(c.Param("datalogger_id"))
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
-		}
-
-		t, err := models.GetEquivalencyTable(db, &dlID)
-		if err != nil {
-			return c.JSON(http.StatusNotFound, t)
-		}
-
-		return c.JSON(http.StatusOK, t)
-	}
-}
-
-func CreateOrUpdateEquivalencyTable(db *sqlx.DB) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		dlID, err := uuid.Parse(c.Param("datalogger_id"))
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
-		}
-
-		t := models.EquivalencyTable{DataLoggerID: dlID}
-		if err := c.Bind(&t); err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-		}
-
-		// check id in url params matches id in request body
-		if dlID != t.DataLoggerID {
-			return echo.NewHTTPError(http.StatusBadRequest, messages.MatchRouteParam("`datalogger_id`"))
-		}
-
-		for _, r := range t.Rows {
-			_, err := models.CreateOrUpdateEquivalencyTableRow(db, &r)
-			if err != nil {
-				log.Printf("error updating table row %v: %s", &r, err.Error())
-			}
-		}
-
-		eqt, err := models.GetEquivalencyTable(db, &dlID)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, messages.InternalServerError)
-		}
-
-		return c.JSON(http.StatusOK, eqt)
-	}
-}
-
-func DeleteEquivalencyTable(db *sqlx.DB) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		dlID, err := uuid.Parse(c.Param("datalogger_id"))
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
-		}
-
-		if err := models.DeleteEquivalencyTable(db, &dlID); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, messages.InternalServerError)
-		}
-
-		return c.JSON(http.StatusOK, make(map[string]interface{}))
-	}
-}
-
-func DeleteEquivalencyTableRow(db *sqlx.DB) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		dlID, err := uuid.Parse(c.Param("datalogger_id"))
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
-		}
-
-		field := c.QueryParam("field_name")
-		if field == "" {
-			return echo.NewHTTPError(http.StatusBadRequest, "Missing field_name query parameter")
-		}
-
-		if err := models.DeleteEquivalencyTableRow(db, &dlID, field); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, messages.InternalServerError)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
 		return c.JSON(http.StatusOK, make(map[string]interface{}))
@@ -268,13 +190,13 @@ func GetDataLoggerPreview(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		sn := c.Param("sn")
 		if sn == "" {
-			return echo.NewHTTPError(http.StatusBadRequest, messages.BadRequest)
+			return echo.NewHTTPError(http.StatusBadRequest, "Missing query parameter `id`")
 		}
 
 		// Get preview from db
 		preview, err := models.GetDataLoggerPreview(db, sn)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, messages.InternalServerError)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
 		return c.JSON(http.StatusOK, preview)

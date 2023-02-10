@@ -8,18 +8,16 @@ CREATE OR REPLACE VIEW v_datalogger_preview AS (
     SELECT * FROM datalogger_preview
 );
 
--- v_datalogger_field_instrument_timeseries
-CREATE OR REPLACE VIEW v_datalogger_field_instrument_timeseries AS (
+-- v_datalogger_equivalency_table
+CREATE OR REPLACE VIEW v_datalogger_equivalency_table AS (
     SELECT
         datalogger_id,
-        json_agg(json_build_object(
-                'field_name', field_name,
-                'display_name', display_name,
-                'instrument_id', instrument_id,
-                'timeseries_id', timeseries_id
-        ) ORDER BY field_name ASC)::text AS "rows"
-    FROM datalogger_field_instrument_timeseries
-    GROUP BY datalogger_id
+        field_name,
+        display_name,
+        instrument_id,
+        timeseries_id
+    FROM datalogger_equivalency_table
+    WHERE NOT datalogger_deleted
 );
 
 -- v_datalogger_hash
@@ -35,5 +33,6 @@ CREATE OR REPLACE VIEW v_datalogger_hash AS (
 GRANT SELECT ON
     v_datalogger,
     v_datalogger_preview,
-    v_datalogger_field_instrument_timeseries
+    v_datalogger_equivalency_table,
+    v_datalogger_hash
 TO instrumentation_reader;

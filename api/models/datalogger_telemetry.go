@@ -24,7 +24,7 @@ func GetEquivalencyTableBySN(db *sqlx.DB, sn string) (*EquivalencyTable, error) 
 	var eq EquivalencyTable
 
 	if err := db.Get(
-		&eq, `SELECT * FROM v_datalogger_field_instrument_timeseries WHERE datalogger_id = $1`, sn,
+		&eq, `SELECT * FROM v_datalogger_equivalency_table WHERE datalogger_id = $1`, sn,
 	); err != nil {
 		return nil, err
 	}

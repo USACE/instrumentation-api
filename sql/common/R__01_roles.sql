@@ -93,7 +93,7 @@ GRANT SELECT ON
     datalogger,
     datalogger_hash,
     datalogger_preview,
-    datalogger_field_instrument_timeseries
+    datalogger_equivalency_table
 TO instrumentation_reader;
 
 -- Role instrumentation_writer
@@ -145,7 +145,7 @@ GRANT INSERT,UPDATE,DELETE ON
     datalogger,
     datalogger_hash,
     datalogger_preview,
-    datalogger_field_instrument_timeseries
+    datalogger_equivalency_table
 TO instrumentation_writer;
 
 -- Role postgis_reader
