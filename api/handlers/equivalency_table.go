@@ -108,7 +108,7 @@ func DeleteEquivalencyTable(db *sqlx.DB) echo.HandlerFunc {
 		}
 
 		if err := models.DeleteEquivalencyTable(db, &dlID); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, messages.InternalServerError)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
 		return c.JSON(http.StatusOK, make(map[string]interface{}))
@@ -132,7 +132,7 @@ func DeleteEquivalencyTableRow(db *sqlx.DB) echo.HandlerFunc {
 		}
 
 		if err := models.DeleteEquivalencyTableRow(db, &dlID, &rID); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, messages.InternalServerError)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
 		return c.JSON(http.StatusOK, make(map[string]interface{}))
