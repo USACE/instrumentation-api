@@ -5704,6 +5704,511 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "Data Logger",
+			"item": [
+				{
+					"name": "CreateDataLogger",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"datalogger id exists\", () => {",
+									"    pm.response.to.have.jsonSchema({",
+									"        \"type\": \"object\",",
+									"        \"properties\": {",
+									"            \"id\": { \"type\": \"string\" },",
+									"        },",
+									"        \"required\": [\"id\"]",
+									"    });",
+									"});",
+									"var datalogger_id = pm.response.json().id;",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"sn\": \"11111\",\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\",\n    \"name\": \"Test Create Data Logger\",\n    \"model\": \"CR6\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/datalogger",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"datalogger"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ListProjectDataLoggers",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/dataloggers?project_id=5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"dataloggers"
+							],
+							"query": [
+								{
+									"key": "project_id",
+									"value": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetDataLogger",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/datalogger/:datalogger_id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"datalogger",
+								":datalogger_id"
+							],
+							"variable": [
+								{
+									"key": "datalogger_id",
+									"value": "83a7345c-62d8-4e29-84db-c2e36f8bc40d"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetDataLoggerPreview",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// pm.test(\"Status code is 200\", function () {",
+									"//     pm.response.to.have.status(200);",
+									"// });",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/datalogger/:datalogger_id/preview",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"datalogger",
+								":datalogger_id",
+								"preview"
+							],
+							"variable": [
+								{
+									"key": "datalogger_id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateDataLogger",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"c0b65315-f802-4ca5-a4dd-7e0cfcffd057\",\n    \"name\": \"Updated name\",\n    \"sn\": \"99999\",\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\",\n    \"model\": \"CR1000X\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/datalogger/:datalogger_id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"datalogger",
+								":datalogger_id"
+							],
+							"variable": [
+								{
+									"key": "datalogger_id",
+									"value": "c0b65315-f802-4ca5-a4dd-7e0cfcffd057"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CycleDataLoggerKey",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/datalogger/:datalogger_id/key",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"datalogger",
+								":datalogger_id",
+								"key"
+							],
+							"variable": [
+								{
+									"key": "datalogger_id",
+									"value": "c0b65315-f802-4ca5-a4dd-7e0cfcffd057"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteDataLogger",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/datalogger/:datalogger_id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"datalogger",
+								":datalogger_id"
+							],
+							"variable": [
+								{
+									"key": "datalogger_id",
+									"value": "c0b65315-f802-4ca5-a4dd-7e0cfcffd057"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Equivalency Table",
+			"item": [
+				{
+					"name": "CreateEquivalencyTable",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"datalogger_id\": \"83a7345c-62d8-4e29-84db-c2e36f8bc40d\",\n    \"rows\": [\n        {\n            \"field_name\": \"new field name\",\n            \"display_name\": \"test 123\",\n            \"instrument_id\": \"a7540f69-c41e-43b3-b655-6e44097edb7e\",\n            \"timeseries_id\": \"5985f20a-1e37-4add-823c-545cdca49b5e\"\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/datalogger/:datalogger_id/equivalency_table",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"datalogger",
+								":datalogger_id",
+								"equivalency_table"
+							],
+							"variable": [
+								{
+									"key": "datalogger_id",
+									"value": "83a7345c-62d8-4e29-84db-c2e36f8bc40d"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetEquivalencyTable",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/datalogger/:datalogger_id/equivalency_table",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"datalogger",
+								":datalogger_id",
+								"equivalency_table"
+							],
+							"variable": [
+								{
+									"key": "datalogger_id",
+									"value": "83a7345c-62d8-4e29-84db-c2e36f8bc40d"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateEquivalencyTable",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"datalogger_id\": \"83a7345c-62d8-4e29-84db-c2e36f8bc40d\",\n    \"rows\": [\n        {\n            \"id\": \"40ceff10-cdc3-4715-a4ca-c1e570fe25de\",\n            \"field_name\": \"field name 1\",\n            \"display_name\": \"test 1\",\n            \"instrument_id\": \"a7540f69-c41e-43b3-b655-6e44097edb7e\",\n            \"timeseries_id\": \"7ee902a3-56d0-4acf-8956-67ac82c03a96\"\n        },\n        {\n            \"id\": \"2f1f7c3d-8b6f-4b11-917e-8f049eb6c62b\",\n            \"field_name\": \"changed field name\",\n            \"display_name\": \"changed display name\",\n            \"instrument_id\": \"a7540f69-c41e-43b3-b655-6e44097edb7e\",\n            \"timeseries_id\": \"d9697351-3a38-4194-9ac4-41541927e475\"\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/datalogger/:datalogger_id/equivalency_table",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"datalogger",
+								":datalogger_id",
+								"equivalency_table"
+							],
+							"variable": [
+								{
+									"key": "datalogger_id",
+									"value": "83a7345c-62d8-4e29-84db-c2e36f8bc40d"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteEquivalencyTableRow",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/datalogger/:datalogger_id/equivalency_table/row?id=2f1f7c3d-8b6f-4b11-917e-8f049eb6c62b",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"datalogger",
+								":datalogger_id",
+								"equivalency_table",
+								"row"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "2f1f7c3d-8b6f-4b11-917e-8f049eb6c62b"
+								}
+							],
+							"variable": [
+								{
+									"key": "datalogger_id",
+									"value": "83a7345c-62d8-4e29-84db-c2e36f8bc40d"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteEquivalencyTable",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/datalogger/:datalogger_id/equivalency_table",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"datalogger",
+								":datalogger_id",
+								"equivalency_table"
+							],
+							"variable": [
+								{
+									"key": "datalogger_id",
+									"value": "83a7345c-62d8-4e29-84db-c2e36f8bc40d"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	],
 	"auth": {
