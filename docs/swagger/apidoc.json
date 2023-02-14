@@ -3289,7 +3289,7 @@
                                 "example": {
                                     "sn": "11111",
                                     "project_id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
-                                    "name": "Test Data Logger 2",
+                                    "name": "Test Create Data Logger",
                                     "model": "CR6"
                                 }
                             }
@@ -3369,7 +3369,7 @@
                             "schema": {
                                 "type": "object",
                                 "example": {
-                                    "id": "83a7345c-62d8-4e29-84db-c2e36f8bc40d",
+                                    "id": "c0b65315-f802-4ca5-a4dd-7e0cfcffd057",
                                     "name": "Updated name",
                                     "sn": "99999",
                                     "project_id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
@@ -3387,7 +3387,7 @@
                             "type": "string"
                         },
                         "required": true,
-                        "example": "83a7345c-62d8-4e29-84db-c2e36f8bc40d"
+                        "example": "c0b65315-f802-4ca5-a4dd-7e0cfcffd057"
                     }
                 ],
                 "responses": {
@@ -3412,7 +3412,7 @@
                             "type": "string"
                         },
                         "required": true,
-                        "example": "83a7345c-62d8-4e29-84db-c2e36f8bc40d"
+                        "example": "c0b65315-f802-4ca5-a4dd-7e0cfcffd057"
                     }
                 ],
                 "responses": {
@@ -3468,7 +3468,7 @@
                             "type": "string"
                         },
                         "required": true,
-                        "example": "83a7345c-62d8-4e29-84db-c2e36f8bc40d"
+                        "example": "c0b65315-f802-4ca5-a4dd-7e0cfcffd057"
                     }
                 ],
                 "responses": {
@@ -3493,13 +3493,13 @@
                             "schema": {
                                 "type": "object",
                                 "example": {
-                                    "datalogger_id": "c0b65315-f802-4ca5-a4dd-7e0cfcffd057",
+                                    "datalogger_id": "83a7345c-62d8-4e29-84db-c2e36f8bc40d",
                                     "rows": [
                                         {
                                             "field_name": "new field name",
-                                            "display_name": "test 2",
+                                            "display_name": "test 123",
                                             "instrument_id": "a7540f69-c41e-43b3-b655-6e44097edb7e",
-                                            "timeseries_id": "14247bc8-b264-4857-836f-182d47ebb39d"
+                                            "timeseries_id": "5985f20a-1e37-4add-823c-545cdca49b5e"
                                         }
                                     ]
                                 }
@@ -3515,7 +3515,7 @@
                             "type": "string"
                         },
                         "required": true,
-                        "example": "c0b65315-f802-4ca5-a4dd-7e0cfcffd057"
+                        "example": "83a7345c-62d8-4e29-84db-c2e36f8bc40d"
                     }
                 ],
                 "responses": {
@@ -3540,7 +3540,7 @@
                             "type": "string"
                         },
                         "required": true,
-                        "example": "c0b65315-f802-4ca5-a4dd-7e0cfcffd057"
+                        "example": "83a7345c-62d8-4e29-84db-c2e36f8bc40d"
                     }
                 ],
                 "responses": {
@@ -3563,7 +3563,7 @@
                             "schema": {
                                 "type": "object",
                                 "example": {
-                                    "datalogger_id": "c0b65315-f802-4ca5-a4dd-7e0cfcffd057",
+                                    "datalogger_id": "83a7345c-62d8-4e29-84db-c2e36f8bc40d",
                                     "rows": [
                                         {
                                             "id": "40ceff10-cdc3-4715-a4ca-c1e570fe25de",
@@ -3574,8 +3574,8 @@
                                         },
                                         {
                                             "id": "2f1f7c3d-8b6f-4b11-917e-8f049eb6c62b",
-                                            "field_name": "field name 2",
-                                            "display_name": "name test 2",
+                                            "field_name": "changed field name",
+                                            "display_name": "changed display name",
                                             "instrument_id": "a7540f69-c41e-43b3-b655-6e44097edb7e",
                                             "timeseries_id": "d9697351-3a38-4194-9ac4-41541927e475"
                                         }
@@ -3593,7 +3593,7 @@
                             "type": "string"
                         },
                         "required": true,
-                        "example": "c0b65315-f802-4ca5-a4dd-7e0cfcffd057"
+                        "example": "83a7345c-62d8-4e29-84db-c2e36f8bc40d"
                     }
                 ],
                 "responses": {
@@ -3644,7 +3644,7 @@
                         "schema": {
                             "type": "string"
                         },
-                        "example": "11becb4b-a432-42e4-8f8d-5a71b9e23e04"
+                        "example": "2f1f7c3d-8b6f-4b11-917e-8f049eb6c62b"
                     },
                     {
                         "name": "datalogger_id",
@@ -3653,7 +3653,7 @@
                             "type": "string"
                         },
                         "required": true,
-                        "example": "c0b65315-f802-4ca5-a4dd-7e0cfcffd057"
+                        "example": "83a7345c-62d8-4e29-84db-c2e36f8bc40d"
                     }
                 ],
                 "responses": {
