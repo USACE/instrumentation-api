@@ -18,25 +18,27 @@ import (
 
 // Instrument is an instrument
 type Instrument struct {
-	ID            uuid.UUID        `json:"id"`
-	AwareID       *uuid.UUID       `json:"aware_id,omitempty"`
-	Groups        []uuid.UUID      `json:"groups"`
-	Constants     []uuid.UUID      `json:"constants"`
-	AlertConfigs  []uuid.UUID      `json:"alert_configs"`
-	StatusID      uuid.UUID        `json:"status_id" db:"status_id"`
-	Status        string           `json:"status"`
-	StatusTime    time.Time        `json:"status_time" db:"status_time"`
-	Deleted       bool             `json:"-"`
-	Slug          string           `json:"slug"`
-	Name          string           `json:"name"`
-	TypeID        uuid.UUID        `json:"type_id" db:"type_id"`
-	Type          string           `json:"type"`
-	Geometry      geojson.Geometry `json:"geometry,omitempty"`
-	Station       *int             `json:"station"`
-	StationOffset *int             `json:"offset" db:"station_offset"`
-	ProjectID     *uuid.UUID       `json:"project_id" db:"project_id"`
-	NIDID         *string          `json:"nid_id" db:"nid_id"`
-	USGSID        *string          `json:"usgs_id" db:"usgs_id"`
+	ID                 uuid.UUID        `json:"id"`
+	AwareID            *uuid.UUID       `json:"aware_id,omitempty"`
+	Groups             []uuid.UUID      `json:"groups"`
+	Constants          []uuid.UUID      `json:"constants"`
+	AlertConfigs       []uuid.UUID      `json:"alert_configs"`
+	StatusID           uuid.UUID        `json:"status_id" db:"status_id"`
+	Status             string           `json:"status"`
+	StatusTime         time.Time        `json:"status_time" db:"status_time"`
+	Deleted            bool             `json:"-"`
+	Slug               string           `json:"slug"`
+	Name               string           `json:"name"`
+	TypeID             uuid.UUID        `json:"type_id" db:"type_id"`
+	Type               string           `json:"type"`
+	Geometry           geojson.Geometry `json:"geometry,omitempty"`
+	Station            *int             `json:"station"`
+	StationOffset      *float64         `json:"offset" db:"station_offset"`
+	OffsetDescriptor   string           `json:"offset_descriptor" db:"offset_descriptor"`
+	OffsetDescriptorID uuid.UUID        `json:"offset_descriptor_id" db:"offset_descriptor_id"`
+	ProjectID          *uuid.UUID       `json:"project_id" db:"project_id"`
+	NIDID              *string          `json:"nid_id" db:"nid_id"`
+	USGSID             *string          `json:"usgs_id" db:"usgs_id"`
 	AuditInfo
 }
 
@@ -139,9 +141,9 @@ func CreateInstruments(db *sqlx.DB, instruments []Instrument) ([]IDAndSlug, erro
 	// Instrument
 	stmt1, err := txn.Preparex(
 		`INSERT INTO instrument
-			(slug, name, type_id, geometry, station, station_offset, creator, create_date, project_id, nid_id, usgs_id)
+			(slug, name, type_id, geometry, station, station_offset, creator, create_date, project_id, nid_id, usgs_id, offset_descriptor)
 		 VALUES
-			 ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+			 ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
 		 RETURNING id, slug`,
 	)
 	if err != nil {
@@ -247,7 +249,8 @@ func UpdateInstrument(db *sqlx.DB, i *Instrument) (*Instrument, error) {
 				station = $9,
 				station_offset = $10,
 				nid_id = $11,
-				usgs_id = $12
+				usgs_id = $12,
+				offset_descriptor_id = $13
 		 WHERE project_id = $1 AND id = $2
 		 RETURNING id`,
 	)
@@ -259,7 +262,7 @@ func UpdateInstrument(db *sqlx.DB, i *Instrument) (*Instrument, error) {
 	var updatedID uuid.UUID
 	if err := stmt1.QueryRowx(
 		i.ProjectID, i.ID, i.Name, i.TypeID, wkb.Value(i.Geometry.Geometry()),
-		i.Updater, i.UpdateDate, i.ProjectID, i.Station, i.StationOffset, i.NIDID, i.USGSID,
+		i.Updater, i.UpdateDate, i.ProjectID, i.Station, i.StationOffset, i.NIDID, i.USGSID, i.OffsetDescriptorID,
 	).Scan(&updatedID); err != nil {
 		return nil, err
 	}
@@ -322,7 +325,7 @@ func InstrumentsFactory(rows *sqlx.Rows) ([]Instrument, error) {
 		err := rows.Scan(
 			&i.ID, &i.Deleted, &i.StatusID, &i.Status, &i.StatusTime, &i.Slug, &i.Name, &i.TypeID, &i.Type, wkb.Scanner(&p), &i.Station, &i.StationOffset,
 			&i.Creator, &i.CreateDate, &i.Updater, &i.UpdateDate, &i.ProjectID, pq.Array(&i.Constants), pq.Array(&i.Groups), pq.Array(&i.AlertConfigs),
-			&i.NIDID, &i.USGSID,
+			&i.NIDID, &i.USGSID, &i.OffsetDescriptor, &i.OffsetDescriptorID,
 		)
 		if err != nil {
 			return make([]Instrument, 0), err
@@ -340,5 +343,5 @@ func InstrumentsFactory(rows *sqlx.Rows) ([]Instrument, error) {
 var listInstrumentsSQL = `SELECT id, deleted, status_id, status, status_time, slug,
 	name, type_id, type, geometry, station, station_offset, creator, create_date,
 	updater, update_date, project_id, constants, groups, alert_configs, nid_id,
-	usgs_id FROM v_instrument
+	usgs_id, offset_descriptor, offset_descriptor_id FROM v_instrument
 	`

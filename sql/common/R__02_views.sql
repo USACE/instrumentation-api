@@ -29,6 +29,8 @@ CREATE OR REPLACE VIEW v_instrument AS (
         ST_AsBinary(I.geometry) AS geometry,
         I.station,
         I.station_offset,
+        I.offset_descriptor_id,
+        O.name AS offset_descriptor,
         I.creator,
         I.create_date,
         I.updater,
@@ -42,6 +44,7 @@ CREATE OR REPLACE VIEW v_instrument AS (
         COALESCE(A.alert_configs, '{}') AS alert_configs
     FROM instrument I
     INNER JOIN instrument_type T ON T.id = I.type_id
+    INNER JOIN offset_descriptor O ON O.id = I.offset_descriptor_id
     INNER JOIN (
         SELECT DISTINCT ON (instrument_id) instrument_id,
             a.time AS status_time,
