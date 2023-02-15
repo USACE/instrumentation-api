@@ -311,20 +311,20 @@ func main() {
 	// OpenDCS Configuration
 	public.GET("/opendcs/sites", handlers.ListOpendcsSites(db))
 
-	// DataLogger CRUD
+	// DataLogger
 	private.GET("/dataloggers", handlers.ListDataLoggers(db))
-	private.POST("/datalogger", handlers.CreateDataLogger(db))
-	private.GET("/datalogger/:datalogger_id", handlers.GetDataLogger(db))
-	private.PUT("/datalogger/:datalogger_id", handlers.UpdateDataLogger(db))
-	private.PUT("/datalogger/:datalogger_id/key", handlers.CycleDataLoggerKey(db))
-	private.DELETE("/datalogger/:datalogger_id", handlers.DeleteDataLogger(db))
+	private.POST("/datalogger", handlers.CreateDataLogger(db), middleware.IsApplicationAdmin)
+	private.GET("/datalogger/:datalogger_id", handlers.GetDataLogger(db), middleware.IsApplicationAdmin)
+	private.PUT("/datalogger/:datalogger_id", handlers.UpdateDataLogger(db), middleware.IsApplicationAdmin)
+	private.PUT("/datalogger/:datalogger_id/key", handlers.CycleDataLoggerKey(db), middleware.IsApplicationAdmin)
+	private.DELETE("/datalogger/:datalogger_id", handlers.DeleteDataLogger(db), middleware.IsApplicationAdmin)
 
 	// DataLogger EquivalencyTable
 	private.GET("/datalogger/:datalogger_id/equivalency_table", handlers.GetEquivalencyTable(db))
-	private.POST("/datalogger/:datalogger_id/equivalency_table", handlers.CreateEquivalencyTable(db))
-	private.PUT("/datalogger/:datalogger_id/equivalency_table", handlers.UpdateEquivalencyTable(db))
-	private.DELETE("/datalogger/:datalogger_id/equivalency_table", handlers.DeleteEquivalencyTable(db))
-	private.DELETE("/datalogger/:datalogger_id/equivalency_table/row", handlers.DeleteEquivalencyTableRow(db))
+	private.POST("/datalogger/:datalogger_id/equivalency_table", handlers.CreateEquivalencyTable(db), middleware.IsApplicationAdmin)
+	private.PUT("/datalogger/:datalogger_id/equivalency_table", handlers.UpdateEquivalencyTable(db), middleware.IsApplicationAdmin)
+	private.DELETE("/datalogger/:datalogger_id/equivalency_table", handlers.DeleteEquivalencyTable(db), middleware.IsApplicationAdmin)
+	private.DELETE("/datalogger/:datalogger_id/equivalency_table/row", handlers.DeleteEquivalencyTableRow(db), middleware.IsApplicationAdmin)
 
 	// DataLogger Preview
 	private.GET("/datalogger/:datalogger_id/preview", handlers.GetDataLoggerPreview(db))
