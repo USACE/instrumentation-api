@@ -62,7 +62,7 @@ func CreateDataLogger(db *sqlx.DB) echo.HandlerFunc {
 		n.Slug = slug
 
 		// check if datalogger with sn already exists and is not deleted
-		err = models.VerifyUniqueSN(db, n.SN)
+		err = models.VerifyUniqueModelSN(db, &n.ModelID, n.SN)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}

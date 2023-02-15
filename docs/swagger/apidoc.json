@@ -3290,7 +3290,7 @@
                                     "sn": "11111",
                                     "project_id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
                                     "name": "Test Create Data Logger",
-                                    "model": "CR6"
+                                    "model_id": "6a10ef5f-b9d9-4fa0-8b1e-ea1bcc81748c"
                                 }
                             }
                         }
@@ -3519,7 +3519,7 @@
                     }
                 ],
                 "responses": {
-                    "200": {
+                    "201": {
                         "description": "Successful response",
                         "content": {
                             "application/json": {}

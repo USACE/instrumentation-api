@@ -19,6 +19,8 @@ type EquivalencyTable struct {
 type EquivalencyTableRow struct {
 	ID           uuid.UUID  `json:"id" db:"id"`
 	DataLoggerID uuid.UUID  `json:"-" db:"datalogger_id"`
+	SN           string     `json:"-" db:"sn"`
+	Model        string     `json:"-" db:"model"`
 	FieldName    string     `json:"field_name" db:"field_name"`
 	DisplayName  string     `json:"display_name" db:"display_name"`
 	InstrumentID *uuid.UUID `json:"instrument_id" db:"instrument_id"`

@@ -1,3 +1,12 @@
+CREATE TABLE IF NOT EXISTS datalogger_model (
+    id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+    model TEXT
+);
+
+INSERT INTO datalogger_model (id, model) VALUES
+    ('6a10ef5f-b9d9-4fa0-8b1e-ea1bcc81748c', 'CR6'),
+    ('f0d4effa-50dc-44e4-9a9b-cb8181c8e7e0', 'CR1000X');
+
 -- Datalogger
 CREATE TABLE IF NOT EXISTS datalogger (
     id UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
@@ -9,11 +18,15 @@ CREATE TABLE IF NOT EXISTS datalogger (
     update_date TIMESTAMPTZ NOT NULL DEFAULT now(),
     name TEXT NOT NULL,
     slug TEXT NOT NULL,
-    model TEXT NOT NULL,
+    model_id UUID NOT NULL REFERENCES datalogger_model (id),
     deleted BOOLEAN NOT NULL DEFAULT false,
     CONSTRAINT unique_datalogger_deleted UNIQUE (id, deleted)
 );
 
+CREATE UNIQUE INDEX unique_idx_datalogger_sn_model ON datalogger (sn, model_id)
+WHERE NOT deleted;
+
+-- Datalogger Hash
 CREATE TABLE IF NOT EXISTS datalogger_hash (
     datalogger_id UUID NOT NULL REFERENCES datalogger (id),
     "hash" TEXT NOT NULL,
@@ -24,7 +37,7 @@ CREATE TABLE IF NOT EXISTS datalogger_hash (
 -- Datalogger Preview
 CREATE TABLE IF NOT EXISTS datalogger_preview (
     datalogger_id UUID NOT NULL REFERENCES datalogger (id),
-    payload JSON
+    preview JSON
 );
 
 -- Datalogger Field Instrument Timeseries Mapper

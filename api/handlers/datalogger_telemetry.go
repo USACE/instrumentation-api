@@ -16,6 +16,10 @@ import (
 // TODO: Finish implementation
 func CreateOrUpdateDataLoggerMeasurements(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
+		model := c.Param("model")
+		if model == "" {
+			return echo.NewHTTPError(http.StatusBadRequest, messages.BadRequest)
+		}
 		sn := c.Param("sn")
 		if sn == "" {
 			return echo.NewHTTPError(http.StatusBadRequest, messages.BadRequest)
@@ -29,7 +33,7 @@ func CreateOrUpdateDataLoggerMeasurements(db *sqlx.DB) echo.HandlerFunc {
 		}
 
 		// Get data logger hash
-		hash, err := models.GetDataLoggerHashBySN(db, sn)
+		hash, err := models.GetDataLoggerHashByModelSN(db, model, sn)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusUnauthorized, messages.Unauthorized)
 		}
@@ -53,29 +57,32 @@ func CreateOrUpdateDataLoggerMeasurements(db *sqlx.DB) echo.HandlerFunc {
 			return echo.NewHTTPError(http.StatusBadRequest, messages.BadRequest)
 		}
 
-		prv := models.DataLoggerPreview{SN: sn}
+		prv := models.DataLoggerPreview{Model: model, SN: sn}
 		prv.Payload.Set(raw)
 
-		err = models.UpdateDataLoggerPreviewBySN(db, &prv)
+		err = models.UpdateDataLoggerPreviewByModelSN(db, &prv)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, messages.InternalServerError)
 		}
 
 		// Check that data logger exists
-		_, err = models.GetDataLoggerBySN(db, sn)
+		_, err = models.GetDataLoggerByModelSN(db, model, sn)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, messages.BadRequest)
 		}
 
 		// if dl.Model == "CR6" {
-		cr6Handler := getCR6Handler(db, sn)
+		cr6Handler := getCR6Handler(db, model, sn)
 		return cr6Handler(c)
 		// }
 	}
 }
 
 // getCR6Handler handles parsing and uploading of Campbell Scientific CR6 measurement payloads
-func getCR6Handler(db *sqlx.DB, sn string) echo.HandlerFunc {
+// File format must adhere to "CSIJSON" schema, which can be referenced in the CRBASIC documentation:
+// CSIJSON Output Format: https://help.campbellsci.com/crbasic/cr350/#parameters/mqtt_outputformat.htm?Highlight=CSIJSON
+// HTTPPost: https://help.campbellsci.com/crbasic/cr350/#Instructions/httppost.htm?Highlight=httppost
+func getCR6Handler(db *sqlx.DB, model, sn string) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		// Upload DataLogger Measurements
 		var pl models.DataLoggerPayload
@@ -87,9 +94,13 @@ func getCR6Handler(db *sqlx.DB, sn string) echo.HandlerFunc {
 		if sn != pl.Head.Environment.SerialNo {
 			return echo.NewHTTPError(http.StatusBadRequest, messages.MatchRouteParam("`sn`"))
 		}
+		// Check sn from route param matches sn in request body
+		if sn != pl.Head.Environment.Model {
+			return echo.NewHTTPError(http.StatusBadRequest, messages.MatchRouteParam("`model`"))
+		}
 
 		fields := pl.Head.Fields
-		eqt, err := models.GetEquivalencyTableBySN(db, sn)
+		eqt, err := models.GetEquivalencyTableByModelSN(db, model, sn)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, messages.InternalServerError)
 		}

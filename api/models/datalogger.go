@@ -19,17 +19,20 @@ type Telemetry struct {
 }
 
 type DataLogger struct {
-	ID         uuid.UUID  `json:"id" db:"id"`
-	Name       string     `json:"name" db:"name"`
-	SN         string     `json:"sn" db:"sn"`
-	ProjectID  uuid.UUID  `json:"project_id" db:"project_id"`
-	Creator    uuid.UUID  `json:"creator" db:"creator"`
-	CreateDate time.Time  `json:"create_date" db:"create_date"`
-	Updater    *uuid.UUID `json:"updater" db:"updater"`
-	UpdateDate *time.Time `json:"update_date" db:"update_date"`
-	Slug       string     `json:"slug" db:"slug"`
-	Model      string     `json:"model" db:"model"`
-	Deleted    bool       `json:"-" db:"deleted"`
+	ID              uuid.UUID  `json:"id" db:"id"`
+	Name            string     `json:"name" db:"name"`
+	SN              string     `json:"sn" db:"sn"`
+	ProjectID       uuid.UUID  `json:"project_id" db:"project_id"`
+	Creator         uuid.UUID  `json:"creator" db:"creator"`
+	CreatorUsername string     `json:"creator_username" db:"creator_username"`
+	CreateDate      time.Time  `json:"create_date" db:"create_date"`
+	Updater         *uuid.UUID `json:"updater" db:"updater"`
+	UpdaterUsername string     `json:"updater_username" db:"updater_username"`
+	UpdateDate      *time.Time `json:"update_date" db:"update_date"`
+	Slug            string     `json:"slug" db:"slug"`
+	ModelID         uuid.UUID  `json:"model_id" db:"model_id"`
+	Model           *string    `json:"model" db:"model"`
+	Deleted         bool       `json:"-" db:"deleted"`
 }
 
 type DataLoggerWithKey struct {
@@ -38,11 +41,10 @@ type DataLoggerWithKey struct {
 }
 
 type DataLoggerPreview struct {
+	Model   string
 	SN      string
 	Payload pgtype.JSON `json:"payload"`
 }
-
-var dlSQLCols string = `id, name, sn, project_id, creator, create_date, updater, update_date, slug, model, deleted`
 
 func ListProjectDataLoggers(db *sqlx.DB, projectID *uuid.UUID) ([]DataLogger, error) {
 	dls := make([]DataLogger, 0)
@@ -64,10 +66,10 @@ func ListAllDataLoggers(db *sqlx.DB) ([]DataLogger, error) {
 	return dls, nil
 }
 
-func VerifyUniqueSN(db *sqlx.DB, sn string) error {
+func VerifyUniqueModelSN(db *sqlx.DB, modelID *uuid.UUID, sn string) error {
 	// check if datalogger with sn already exists and is not deleted
 	var snExists bool
-	if err := db.Get(&snExists, `SELECT EXISTS (SELECT sn FROM v_datalogger WHERE sn = $1)::int`, sn); err != nil {
+	if err := db.Get(&snExists, `SELECT EXISTS (SELECT * FROM v_datalogger WHERE model_id = $1 AND sn = $2)::int`, &modelID, sn); err != nil {
 		return err
 	}
 	if snExists {
@@ -96,8 +98,8 @@ func CreateDataLogger(db *sqlx.DB, n *DataLogger) (*DataLoggerWithKey, error) {
 	defer txn.Rollback()
 
 	stmt1, err := txn.Preparex(`
-		INSERT INTO datalogger (name, sn, project_id, creator, updater, slug, model)
-			VALUES ($1, $2, $3, $4, $4, $5, $6) RETURNING ` + dlSQLCols)
+		INSERT INTO datalogger (name, sn, project_id, creator, updater, slug, model_id)
+			VALUES ($1, $2, $3, $4, $4, $5, $6) RETURNING id`)
 	if err != nil {
 		return nil, err
 	}
@@ -106,16 +108,25 @@ func CreateDataLogger(db *sqlx.DB, n *DataLogger) (*DataLoggerWithKey, error) {
 	if err != nil {
 		return nil, err
 	}
+	stmt3, err := txn.Preparex(`SELECT * FROM v_datalogger WHERE id = $1`)
+	if err != nil {
+		return nil, err
+	}
 
-	var dl DataLogger
-	if err := stmt1.Get(&dl, n.Name, n.SN, n.ProjectID, n.Creator, n.Slug, n.Model); err != nil {
+	var dlID uuid.UUID
+	if err := stmt1.Get(&dlID, n.Name, n.SN, n.ProjectID, n.Creator, n.Slug, n.ModelID); err != nil {
 		return nil, err
 	}
 
 	key := passwords.GenerateRandom(40)
 	hash := passwords.MustCreateHash(key, passwords.DefaultParams)
-	_, err = stmt2.Exec(&dl.ID, hash)
+	_, err = stmt2.Exec(&dlID, hash)
 	if err != nil {
+		return nil, err
+	}
+
+	var dl DataLogger
+	if err = stmt3.Get(&dl, &dlID); err != nil {
 		return nil, err
 	}
 
@@ -123,6 +134,9 @@ func CreateDataLogger(db *sqlx.DB, n *DataLogger) (*DataLoggerWithKey, error) {
 		return nil, err
 	}
 	if err := stmt2.Close(); err != nil {
+		return nil, err
+	}
+	if err := stmt3.Close(); err != nil {
 		return nil, err
 	}
 	if err := txn.Commit(); err != nil {
@@ -148,20 +162,27 @@ func CycleDataLoggerKey(db *sqlx.DB, u *DataLogger) (*DataLoggerWithKey, error) 
 	if err != nil {
 		return nil, err
 	}
-	stmt2, err := txn.Preparex(`UPDATE datalogger SET updater = $2, update_date = $3 WHERE id = $1 RETURNING ` + dlSQLCols)
+	stmt2, err := txn.Preparex(`UPDATE datalogger SET updater = $2, update_date = $3 WHERE id = $1`)
+	if err != nil {
+		return nil, err
+	}
+	stmt3, err := txn.Preparex(`SELECT * FROM v_datalogger WHERE id = $1`)
 	if err != nil {
 		return nil, err
 	}
 
 	key := passwords.GenerateRandom(40)
 	hash := passwords.MustCreateHash(key, passwords.DefaultParams)
-	_, err = stmt1.Exec(&u.ID, hash)
-	if err != nil {
+	if _, err = stmt1.Exec(&u.ID, hash); err != nil {
+		return nil, err
+	}
+
+	if _, err := stmt2.Exec(&u.ID, &u.Updater, &u.UpdateDate); err != nil {
 		return nil, err
 	}
 
 	var dl DataLogger
-	if err := stmt2.Get(&dl, &u.ID, &u.Updater, &u.UpdateDate); err != nil {
+	if err = stmt3.Get(&dl, &u.ID); err != nil {
 		return nil, err
 	}
 
@@ -169,6 +190,9 @@ func CycleDataLoggerKey(db *sqlx.DB, u *DataLogger) (*DataLoggerWithKey, error) 
 		return nil, err
 	}
 	if err := stmt2.Close(); err != nil {
+		return nil, err
+	}
+	if err := stmt3.Close(); err != nil {
 		return nil, err
 	}
 	if err := txn.Commit(); err != nil {
@@ -192,20 +216,18 @@ func GetDataLogger(db *sqlx.DB, dlID *uuid.UUID) (*DataLogger, error) {
 }
 
 func UpdateDataLogger(db *sqlx.DB, u *DataLogger) (*DataLogger, error) {
-	var dl DataLogger
-	err := db.Get(&dl, `
+	_, err := db.Exec(`
 		UPDATE datalogger SET
 			name = $2,
 			updater = $3,
 			update_date = $4
 		WHERE id = $1
-		RETURNING `+dlSQLCols,
-		&u.ID, &u.Name, &u.Updater, &u.UpdateDate,
-	)
+	`, &u.ID, &u.Name, &u.Updater, &u.UpdateDate)
 	if err != nil {
 		return nil, err
 	}
-	return &dl, nil
+
+	return GetDataLogger(db, &u.ID)
 }
 
 func DeleteDataLogger(db *sqlx.DB, d *DataLogger) error {
