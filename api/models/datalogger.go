@@ -196,13 +196,11 @@ func UpdateDataLogger(db *sqlx.DB, u *DataLogger) (*DataLogger, error) {
 	err := db.Get(&dl, `
 		UPDATE datalogger SET
 			name = $2,
-			sn = $3,
-			model = $4,
-			updater = $5,
-			update_date = $6
+			updater = $3,
+			update_date = $4
 		WHERE id = $1
 		RETURNING `+dlSQLCols,
-		&u.ID, &u.Name, &u.SN, &u.Model, &u.Updater, &u.UpdateDate,
+		&u.ID, &u.Name, &u.Updater, &u.UpdateDate,
 	)
 	if err != nil {
 		return nil, err
