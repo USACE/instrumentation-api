@@ -15,9 +15,6 @@ import (
 // ListDataLoggers
 func ListDataLoggers(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		// TODO: Check user has datalogger role permissions
-
-		// Check for project_id in url query
 		pID := c.QueryParam("project_id")
 		if pID != "" {
 
@@ -25,8 +22,6 @@ func ListDataLoggers(db *sqlx.DB) echo.HandlerFunc {
 			if err != nil {
 				return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 			}
-
-			// TODO: Check if user has permissions to project
 
 			dls, err := models.ListProjectDataLoggers(db, &pID)
 			if err != nil {
@@ -55,8 +50,6 @@ func CreateDataLogger(db *sqlx.DB) echo.HandlerFunc {
 
 		p := c.Get("profile").(*models.Profile)
 		n.Creator = p.ID
-
-		// TODO: Check user has datalogger role permissions
 
 		if n.Name == "" {
 			return echo.NewHTTPError(http.StatusBadRequest, "valid `name` field required")
@@ -113,8 +106,6 @@ func GetDataLogger(db *sqlx.DB) echo.HandlerFunc {
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
-		// TODO: Check user has datalogger role permissions
-
 		dl, err := models.GetDataLogger(db, &dlID)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusNotFound, messages.NotFound)
@@ -144,8 +135,6 @@ func UpdateDataLogger(db *sqlx.DB) echo.HandlerFunc {
 		if err := models.VerifyDataLoggerExists(db, &dlID); err != nil {
 			return echo.NewHTTPError(http.StatusNotFound, err.Error())
 		}
-
-		// TODO: Check user has datalogger role permissions
 
 		profile := c.Get("profile").(*models.Profile)
 		t := time.Now()
@@ -177,12 +166,11 @@ func DeleteDataLogger(db *sqlx.DB) echo.HandlerFunc {
 		t := time.Now()
 		d.Updater, d.UpdateDate = &profile.ID, &t
 
-		// TODO: Check user has datalogger role permissions
 		if err := models.DeleteDataLogger(db, &d); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
-		return c.JSON(http.StatusOK, make(map[string]interface{}))
+		return c.JSON(http.StatusOK, map[string]interface{}{"id": dlID})
 	}
 }
 

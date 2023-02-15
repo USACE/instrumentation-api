@@ -54,12 +54,7 @@ func CreateEquivalencyTable(db *sqlx.DB) echo.HandlerFunc {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
-		eqt, err := models.GetEquivalencyTable(db, &dlID)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-		}
-
-		return c.JSON(http.StatusOK, eqt)
+		return c.JSON(http.StatusCreated, map[string]interface{}{"datalogger_id": dlID})
 	}
 }
 
@@ -111,7 +106,7 @@ func DeleteEquivalencyTable(db *sqlx.DB) echo.HandlerFunc {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
-		return c.JSON(http.StatusOK, make(map[string]interface{}))
+		return c.JSON(http.StatusOK, map[string]interface{}{"datalogger_id": dlID})
 	}
 }
 
@@ -135,6 +130,6 @@ func DeleteEquivalencyTableRow(db *sqlx.DB) echo.HandlerFunc {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
-		return c.JSON(http.StatusOK, make(map[string]interface{}))
+		return c.JSON(http.StatusOK, map[string]interface{}{"row_id": rID})
 	}
 }
