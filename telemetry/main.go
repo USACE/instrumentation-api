@@ -19,17 +19,14 @@ import (
 
 // Config stores configuration information stored in environment variables
 type Config struct {
-	AuthDisabled   bool   `envconfig:"AUTH_DISABLED"`
-	AuthJWTMocked  bool   `envconfig:"AUTH_JWT_MOCKED"`
-	ApplicationKey string `envconfig:"APPLICATION_KEY"`
-	LambdaContext  bool
-	DBUser         string
-	DBPass         string
-	DBName         string
-	DBHost         string
-	DBSSLMode      string
-	HeartbeatKey   string
-	RoutePrefix    string `envconfig:"ROUTE_PREFIX"`
+	LambdaContext bool
+	DBUser        string
+	DBPass        string
+	DBName        string
+	DBHost        string
+	DBSSLMode     string
+	HeartbeatKey  string
+	RoutePrefix   string `envconfig:"ROUTE_PREFIX"`
 }
 
 func (c *Config) dbConnStr() string {
@@ -45,25 +42,22 @@ func main() {
 
 	db := dbutils.Connection(cfg.dbConnStr())
 
-	hashExtractor := func(keyID string) (string, error) {
-		k, err := models.GetTokenInfoByTokenID(db, &keyID)
-		if err != nil {
-			return "", err
-		}
-		return k.Hash, nil
-	}
-
 	e := echo.New()
 	e.Use(middleware.CORS, middleware.GZIP)
 
+	hashExtractor := func(model, sn string) (string, error) {
+		hash, err := models.GetDataLoggerHashByModelSN(db, model, sn)
+		if err != nil {
+			return "", err
+		}
+		return hash, nil
+	}
+
 	// Datalogger Telemetry
 	datalogger := e.Group(cfg.RoutePrefix)
-	datalogger.Use(middleware.KeyAuth(
-		cfg.AuthDisabled,
-		cfg.ApplicationKey,
-		hashExtractor,
-	))
-	datalogger.POST("/telemetry/measurements", handlers.CreateOrUpdateDataLoggerMeasurements(db))
+	datalogger.Use(middleware.DataLoggerKeyAuth(hashExtractor))
+
+	datalogger.POST("/telemetry/datalogger/:model/:sn", handlers.CreateOrUpdateDataLoggerMeasurements(db))
 
 	if cfg.LambdaContext {
 		log.Print("starting server; Running On AWS LAMBDA")

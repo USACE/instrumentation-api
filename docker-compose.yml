@@ -1,4 +1,4 @@
-version: '3.9'
+version: "3.9"
 
 services:
   postgres:
@@ -13,6 +13,22 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  flyway:
+    build:
+      context: sql
+    restart: on-failure
+    environment:
+      - FLYWAY_LOCATIONS=${FLYWAY_LOCATIONS:-filesystem:/flyway/sql/common,filesystem:/flyway/sql/local}
+      - FLYWAY_USER=postgres
+      - FLYWAY_PASSWORD=postgres
+      - FLYWAY_URL=jdbc:postgresql://postgres:5432/postgres
+    command: migrate
+    volumes:
+      - ./sql:/flyway/sql
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   api:
     build:
@@ -42,28 +58,34 @@ services:
       - INSTRUMENTATION_HEARTBEATKEY=${INSTRUMENTATION_HEARTBEATKEY:-password}
       - INSTRUMENTATION_ROUTE_PREFIX=${INSTRUMENTATION_ROUTE_PREFIX:-}
     ports:
-      - '${API_PORT:-80}:80'
+      - "${API_PORT:-80}:80"
     depends_on:
       postgres:
         condition: service_healthy
       flyway:
         condition: service_completed_successfully
 
-  flyway:
+  telemetry:
     build:
-      context: sql
+      context: telemetry
     restart: on-failure
     environment:
-      - FLYWAY_LOCATIONS=${FLYWAY_LOCATIONS:-filesystem:/flyway/sql/common,filesystem:/flyway/sql/local}
-      - FLYWAY_USER=postgres
-      - FLYWAY_PASSWORD=postgres
-      - FLYWAY_URL=jdbc:postgresql://postgres:5432/postgres
-    command: migrate
-    volumes:
-      - ./sql:/flyway/sql
+      # NOTE: AWS_ Variables provided by execution role in deployed version
+      - INSTRUMENTATION_LAMBDACONTEXT=${INSTRUMENTATION_LAMBDACONTEXT:-false}
+      - INSTRUMENTATION_DBUSER=${INSTRUMENTATION_DBUSER:-instrumentation_user}
+      - INSTRUMENTATION_DBPASS=${INSTRUMENTATION_DBPASS:-password}
+      - INSTRUMENTATION_DBNAME=${INSTRUMENTATION_DBNAME:-postgres}
+      - INSTRUMENTATION_DBHOST=${INSTRUMENTATION_DBHOST:-postgres}
+      - INSTRUMENTATION_DBSSLMODE=${INSTRUMENTATION_DBSSLMODE:-disable}
+      - INSTRUMENTATION_HEARTBEATKEY=${INSTRUMENTATION_HEARTBEATKEY:-password}
+      - INSTRUMENTATION_ROUTE_PREFIX=${INSTRUMENTATION_ROUTE_PREFIX:-}
+    ports:
+      - "${TELEMETRY_PORT:-9090}:80"
     depends_on:
       postgres:
         condition: service_healthy
+      flyway:
+        condition: service_completed_successfully
 
   # ---------------------- local profile services ---------------------- #
 
@@ -73,7 +95,7 @@ services:
       - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL:-postgres@postgres.com}
       - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD:-postgres}
     ports:
-      - '${PGADMIN_PORT:-8081}:80'
+      - "${PGADMIN_PORT:-8081}:80"
     profiles:
       - local
 
@@ -115,7 +137,7 @@ services:
       - API_URL=swagger/apidoc.json
       - CONFIG_URL=swagger/swagger-config.json
     ports:
-      - '${INSTRUMENTATION_SWAGGER_PORT:-8002}:8080'
+      - "${INSTRUMENTATION_SWAGGER_PORT:-8002}:8080"
     volumes:
       - ${INSTRUMENTATION_SWAGGER_APIDOC_VOLUME:-./docs/swagger}:/usr/share/nginx/html/swagger
     restart: always
@@ -125,7 +147,7 @@ services:
   swagger_init:
     image: node:current-alpine
     ports:
-      - '${INSTRUMENTATION_SWAGGER_INIT_PORT:-8003}:8080'
+      - "${INSTRUMENTATION_SWAGGER_INIT_PORT:-8003}:8080"
     volumes:
       - ${INSTRUMENTATION_SWAGGER_APIDOC_VOLUME:-./docs/swagger}:/docs/swagger
       - ${INSTRUMENTATION_SWAGGER_TESTS_VOLUME:-./tests}:/tests
