@@ -1,7 +1,7 @@
 package models
 
 import (
-	"errors"
+	"fmt"
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/passwords"
@@ -90,7 +90,7 @@ func GetProfileFromEDIPI(db *sqlx.DB, e int) (*Profile, error) {
 		return nil, err
 	}
 	if len(pp) == 0 {
-		return nil, errors.New("Profile Does Not Exist for User")
+		return nil, fmt.Errorf("Profile Does Not Exist for User")
 	}
 	if err := pp[0].attachTokens(db); err != nil {
 		return nil, err

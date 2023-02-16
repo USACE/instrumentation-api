@@ -1,7 +1,6 @@
 package dbutils
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/gosimple/slug"
@@ -42,7 +41,7 @@ func NextUniqueSlug(str string, usedSlugs []string) (string, error) {
 		}
 		i++
 	}
-	return "", errors.New("reached max iteration %i without finding a unique slug")
+	return "", fmt.Errorf("reached max iteration 1000 without finding a unique slug")
 }
 
 func ListSlugs(db *sqlx.DB, slugSQL string) ([]string, error) {

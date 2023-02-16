@@ -1,7 +1,7 @@
 package models
 
 import (
-	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -50,14 +50,14 @@ func (pc *PlotConfiguration) ValidateDateRange() error {
 	if len(cdr) == 2 {
 		for _, v := range cdr {
 			if _, err := time.Parse("01/02/2006", v); err != nil {
-				return errors.New("custom date values must be in format \"MM/DD/YYYY - MM/DD/YYYY\"")
+				return fmt.Errorf("custom date values must be in format \"MM/DD/YYYY - MM/DD/YYYY\"")
 			}
 		}
 		return nil
 	}
 
 	// No match found
-	return errors.New("invalid date range provided")
+	return fmt.Errorf("invalid date range provided")
 }
 
 // ListPlotConfigurationsSQL is the base SQL statement for above functions

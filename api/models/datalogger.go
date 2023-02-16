@@ -2,13 +2,14 @@ package models
 
 import (
 	"database/sql"
+	"errors"
+	"fmt"
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/passwords"
 	"github.com/google/uuid"
 	"github.com/jackc/pgtype"
 	"github.com/jmoiron/sqlx"
-	"github.com/pkg/errors"
 )
 
 // Telemetry struct
@@ -94,7 +95,7 @@ func VerifyDataLoggerExists(db *sqlx.DB, dlID *uuid.UUID) error {
 		return err
 	}
 	if !dlExists {
-		return errors.Errorf("Active data logger with id %s not found", dlID)
+		return fmt.Errorf("Active data logger with id %s not found", dlID)
 	}
 	return nil
 }
@@ -272,8 +273,8 @@ func GetDataLoggerPreview(db *sqlx.DB, dlID *uuid.UUID) (*DataLoggerPreview, err
 	var dlp DataLoggerPreview
 
 	if err := db.Get(&dlp, `SELECT * FROM v_datalogger_preview WHERE datalogger_id = $1`, &dlID); err != nil {
-		if err == sql.ErrNoRows {
-			return nil, errors.New("preview not found")
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, fmt.Errorf("preview not found")
 		}
 		return nil, err
 	}
