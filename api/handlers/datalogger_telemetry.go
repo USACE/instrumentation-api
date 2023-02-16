@@ -129,6 +129,6 @@ func getCR6Handler(db *sqlx.DB, dl *models.DataLogger, rawJSON *[]byte) echo.Han
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
-		return c.JSON(http.StatusCreated, map[string]interface{}{"model": *dl.Model, "sn": dl.SN})
+		return c.JSON(http.StatusOK, map[string]interface{}{"model": *dl.Model, "sn": dl.SN})
 	}
 }

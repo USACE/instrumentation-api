@@ -3438,7 +3438,8 @@
                         "schema": {
                             "type": "string"
                         },
-                        "required": true
+                        "required": true,
+                        "example": "83a7345c-62d8-4e29-84db-c2e36f8bc40d"
                     }
                 ],
                 "responses": {

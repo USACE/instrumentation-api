@@ -7,20 +7,14 @@ WORKDIR /go/src/app
 # Install dependencies
 ENV CGO_ENABLED=0
 COPY go.* ./
-# RUN go mod download
+RUN go mod download
 
 # Build
 COPY . .
-# RUN --mount=type=cache,target=/root/.cache/go-build \
-#     --mount=type=cache,target=/go/pkg \
-#     GOOS=linux GOARCH=amd64 \
-#     go build -ldflags="-w -s" -o /go/bin/midas-telemetry
-
-# temporarily use vendor copy of dependencies for local development
-RUN GOOS=linux GOARCH=amd64 \
-    go build \
-    -mod=vendor \
-    -ldflags="-w -s" -o /go/bin/midas-telemetry
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    --mount=type=cache,target=/go/pkg \
+    GOOS=linux GOARCH=amd64 \
+    go build -ldflags="-w -s" -o /go/bin/midas-telemetry
 
 # SCRATCH IMAGE
 FROM scratch
