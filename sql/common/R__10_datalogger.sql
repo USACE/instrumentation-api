@@ -27,6 +27,7 @@ CREATE OR REPLACE VIEW v_datalogger_preview AS (
     SELECT
         p.datalogger_id AS datalogger_id,
         p.preview       AS preview,
+        p.update_date   AS update_date,
         m.model         AS model,
         dl.sn           AS sn
     FROM datalogger_preview p

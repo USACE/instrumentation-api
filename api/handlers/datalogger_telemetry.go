@@ -2,107 +2,94 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/messages"
 	"github.com/USACE/instrumentation-api/api/models"
-	"github.com/USACE/instrumentation-api/api/passwords"
 	"github.com/USACE/instrumentation-api/api/timeseries"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
 )
 
-// TODO: Finish implementation
+// CreateOrUpdateDataLoggerMeasurements creates or updates measurements for a timeseires
+// that a datalogger is mapped to using the DataLoggerEquivalencyTable
+//
+// DataLoggerKeyAuth middleware is applied to the group where the corresponding route
+// to this handler is configured
 func CreateOrUpdateDataLoggerMeasurements(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		model := c.Param("model")
 		if model == "" {
-			return echo.NewHTTPError(http.StatusBadRequest, messages.BadRequest)
+			return echo.NewHTTPError(http.StatusBadRequest, "missing route param `model`")
 		}
 		sn := c.Param("sn")
 		if sn == "" {
-			return echo.NewHTTPError(http.StatusBadRequest, messages.BadRequest)
+			return echo.NewHTTPError(http.StatusBadRequest, "missing route param `sn`")
 		}
 
-		// Check header for api key
-		ak, exists := c.Request().Header["X-Api-Key"]
-		if !exists || len(ak) != 1 {
-			// Missing API key header
-			return echo.NewHTTPError(http.StatusUnauthorized, messages.Unauthorized)
-		}
-
-		// Get data logger hash
-		hash, err := models.GetDataLoggerHashByModelSN(db, model, sn)
+		// Make sure data logger is active
+		dl, err := models.GetDataLoggerByModelSN(db, model, sn)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusUnauthorized, messages.Unauthorized)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
-		// Check that API Key exists in database
-		if match, err := passwords.ComparePasswordAndHash(ak[0], hash); err != nil || !match {
-			return echo.NewHTTPError(http.StatusUnauthorized, messages.Unauthorized)
-		}
-
-		// Datalogger Authenticated
-		// Update DataLogger Preview
 		body := make(map[string]interface{})
-
 		err = json.NewDecoder(c.Request().Body).Decode(&body)
 		if err != nil {
 			return err
 		}
-
 		raw, err := json.Marshal(body)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, messages.BadRequest)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
-		prv := models.DataLoggerPreview{Model: model, SN: sn}
-		prv.Payload.Set(raw)
+		prv := models.DataLoggerPreview{DataLoggerID: dl.ID}
+		prv.Preview.Set(raw)
+		prv.UpdateDate = time.Now()
 
-		err = models.UpdateDataLoggerPreviewByModelSN(db, &prv)
+		err = models.UpdateDataLoggerPreview(db, &prv)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, messages.InternalServerError)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
-		// Check that data logger exists
-		_, err = models.GetDataLoggerByModelSN(db, model, sn)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, messages.BadRequest)
+		if model == "CR6" || model == "CR1000X" {
+			cr6Handler := getCR6Handler(db, dl, &raw)
+			return cr6Handler(c)
 		}
 
-		// if dl.Model == "CR6" {
-		cr6Handler := getCR6Handler(db, model, sn)
-		return cr6Handler(c)
-		// }
+		return echo.NewHTTPError(http.StatusBadRequest, messages.BadRequest)
 	}
 }
 
 // getCR6Handler handles parsing and uploading of Campbell Scientific CR6 measurement payloads
 // File format must adhere to "CSIJSON" schema, which can be referenced in the CRBASIC documentation:
+//
 // CSIJSON Output Format: https://help.campbellsci.com/crbasic/cr350/#parameters/mqtt_outputformat.htm?Highlight=CSIJSON
+//
 // HTTPPost: https://help.campbellsci.com/crbasic/cr350/#Instructions/httppost.htm?Highlight=httppost
-func getCR6Handler(db *sqlx.DB, model, sn string) echo.HandlerFunc {
+func getCR6Handler(db *sqlx.DB, dl *models.DataLogger, rawJSON *[]byte) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		// Upload DataLogger Measurements
 		var pl models.DataLoggerPayload
-		if err := c.Bind(&pl); err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, messages.BadRequest)
+		if err := json.Unmarshal(*rawJSON, &pl); err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
 		// Check sn from route param matches sn in request body
-		if sn != pl.Head.Environment.SerialNo {
-			return echo.NewHTTPError(http.StatusBadRequest, messages.MatchRouteParam("`sn`"))
+		if dl.SN != pl.Head.Environment.SerialNo {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprint(messages.MatchRouteParam("`sn`"), dl.SN))
 		}
-		// Check sn from route param matches sn in request body
-		if sn != pl.Head.Environment.Model {
-			return echo.NewHTTPError(http.StatusBadRequest, messages.MatchRouteParam("`model`"))
+		// Check sn from route param matches model in request body
+		if *dl.Model != pl.Head.Environment.Model {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprint(messages.MatchRouteParam("`model`"), *dl.Model))
 		}
 
 		fields := pl.Head.Fields
-		eqt, err := models.GetEquivalencyTableByModelSN(db, model, sn)
+		eqt, err := models.GetEquivalencyTable(db, &dl.ID)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, messages.InternalServerError)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
 		eqtFields := make(map[string]models.EquivalencyTableRow)
@@ -137,11 +124,11 @@ func getCR6Handler(db *sqlx.DB, model, sn string) echo.HandlerFunc {
 			mcs[i] = timeseries.MeasurementCollection{TimeseriesID: *row.TimeseriesID, Items: items}
 		}
 
-		ret, err := models.CreateOrUpdateTimeseriesMeasurements(db, mcs)
+		_, err = models.CreateOrUpdateTimeseriesMeasurements(db, mcs)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, messages.BadRequest)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
-		return c.JSON(http.StatusCreated, &ret)
+		return c.JSON(http.StatusCreated, map[string]interface{}{"model": *dl.Model, "sn": dl.SN})
 	}
 }

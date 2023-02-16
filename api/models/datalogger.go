@@ -1,6 +1,7 @@
 package models
 
 import (
+	"database/sql"
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/passwords"
@@ -41,9 +42,20 @@ type DataLoggerWithKey struct {
 }
 
 type DataLoggerPreview struct {
-	Model   string
-	SN      string
-	Payload pgtype.JSON `json:"payload"`
+	DataLoggerID uuid.UUID   `json:"datalogger_id" db:"datalogger_id"`
+	UpdateDate   time.Time   `json:"update_date" db:"update_date"`
+	Preview      pgtype.JSON `json:"preview" db:"preview"`
+	Model        *string     `json:"model,omitempty"`
+	SN           *string     `json:"sn,omitempty"`
+}
+
+func GetDataLoggerModel(db *sqlx.DB, modelID *uuid.UUID) (string, error) {
+	var model string
+
+	if err := db.Get(&model, `SELECT model FROM datalogger_model WHERE id = $1`, modelID); err != nil {
+		return "", err
+	}
+	return model, nil
 }
 
 func ListProjectDataLoggers(db *sqlx.DB, projectID *uuid.UUID) ([]DataLogger, error) {
@@ -66,16 +78,13 @@ func ListAllDataLoggers(db *sqlx.DB) ([]DataLogger, error) {
 	return dls, nil
 }
 
-func VerifyUniqueModelSN(db *sqlx.DB, modelID *uuid.UUID, sn string) error {
+func DataLoggerActive(db *sqlx.DB, model, sn string) (bool, error) {
 	// check if datalogger with sn already exists and is not deleted
-	var snExists bool
-	if err := db.Get(&snExists, `SELECT EXISTS (SELECT * FROM v_datalogger WHERE model_id = $1 AND sn = $2)::int`, &modelID, sn); err != nil {
-		return err
+	var exists bool
+	if err := db.Get(&exists, `SELECT EXISTS (SELECT * FROM v_datalogger WHERE model = $1 AND sn = $2)::int`, model, sn); err != nil {
+		return false, err
 	}
-	if snExists {
-		return errors.Errorf("Active data logger with serial number %s already exists", sn)
-	}
-	return nil
+	return exists, nil
 }
 
 func VerifyDataLoggerExists(db *sqlx.DB, dlID *uuid.UUID) error {
@@ -108,16 +117,24 @@ func CreateDataLogger(db *sqlx.DB, n *DataLogger) (*DataLoggerWithKey, error) {
 	if err != nil {
 		return nil, err
 	}
-	stmt3, err := txn.Preparex(`SELECT * FROM v_datalogger WHERE id = $1`)
+
+	stmt3, err := txn.Preparex(`INSERT INTO datalogger_preview (datalogger_id, preview) VALUES ($1, '{}')`)
 	if err != nil {
 		return nil, err
 	}
 
+	stmt4, err := txn.Preparex(`SELECT * FROM v_datalogger WHERE id = $1`)
+	if err != nil {
+		return nil, err
+	}
+
+	// create datalogger
 	var dlID uuid.UUID
 	if err := stmt1.Get(&dlID, n.Name, n.SN, n.ProjectID, n.Creator, n.Slug, n.ModelID); err != nil {
 		return nil, err
 	}
 
+	// store hash
 	key := passwords.GenerateRandom(40)
 	hash := passwords.MustCreateHash(key, passwords.DefaultParams)
 	_, err = stmt2.Exec(&dlID, hash)
@@ -125,8 +142,15 @@ func CreateDataLogger(db *sqlx.DB, n *DataLogger) (*DataLoggerWithKey, error) {
 		return nil, err
 	}
 
+	// create preview
+	_, err = stmt3.Exec(&dlID)
+	if err != nil {
+		return nil, err
+	}
+
+	// return datalogger view
 	var dl DataLogger
-	if err = stmt3.Get(&dl, &dlID); err != nil {
+	if err = stmt4.Get(&dl, &dlID); err != nil {
 		return nil, err
 	}
 
@@ -137,6 +161,9 @@ func CreateDataLogger(db *sqlx.DB, n *DataLogger) (*DataLoggerWithKey, error) {
 		return nil, err
 	}
 	if err := stmt3.Close(); err != nil {
+		return nil, err
+	}
+	if err := stmt4.Close(); err != nil {
 		return nil, err
 	}
 	if err := txn.Commit(); err != nil {
@@ -241,10 +268,13 @@ func DeleteDataLogger(db *sqlx.DB, d *DataLogger) error {
 	return nil
 }
 
-func GetDataLoggerPreview(db *sqlx.DB, sn string) (*DataLoggerPreview, error) {
+func GetDataLoggerPreview(db *sqlx.DB, dlID *uuid.UUID) (*DataLoggerPreview, error) {
 	var dlp DataLoggerPreview
 
-	if err := db.Get(&dlp, `SELECT * FROM v_datalogger_preview WHERE sn = $1`, sn); err != nil {
+	if err := db.Get(&dlp, `SELECT * FROM v_datalogger_preview WHERE datalogger_id = $1`, &dlID); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, errors.New("preview not found")
+		}
 		return nil, err
 	}
 

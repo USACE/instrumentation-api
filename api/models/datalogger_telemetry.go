@@ -26,24 +26,11 @@ func GetDataLoggerHashByModelSN(db *sqlx.DB, model, sn string) (string, error) {
 	return hash, nil
 }
 
-func GetEquivalencyTableByModelSN(db *sqlx.DB, model, sn string) (*EquivalencyTable, error) {
-	var eq EquivalencyTable
-
-	if err := db.Get(&eq, `
-		SELECT * FROM v_datalogger_equivalency_table
-		WHERE model = $1 AND sn = $2
-		`, model, sn,
-	); err != nil {
-		return nil, err
-	}
-
-	return &eq, nil
-}
-
-func UpdateDataLoggerPreviewByModelSN(db *sqlx.DB, dlp *DataLoggerPreview) error {
+func UpdateDataLoggerPreview(db *sqlx.DB, dlp *DataLoggerPreview) error {
 	if _, err := db.Exec(`
-		UPDATE datalogger_preview SET payload = $2 WHERE model = $1 AND sn = $2
-	`, &dlp.Model, &dlp.SN, &dlp.Payload,
+		UPDATE datalogger_preview SET preview = $2, update_date = $3
+		WHERE datalogger_id = $1
+	`, &dlp.DataLoggerID, &dlp.Preview, &dlp.UpdateDate,
 	); err != nil {
 		return err
 	}

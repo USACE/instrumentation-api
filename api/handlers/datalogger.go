@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -61,10 +62,22 @@ func CreateDataLogger(db *sqlx.DB) echo.HandlerFunc {
 		}
 		n.Slug = slug
 
-		// check if datalogger with sn already exists and is not deleted
-		err = models.VerifyUniqueModelSN(db, &n.ModelID, n.SN)
+		model, err := models.GetDataLoggerModel(db, &n.ModelID)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("data logger model id %s not found", n.ModelID))
+		}
+
+		// check if datalogger with model and sn already exists and is not deleted
+		exists, err := models.DataLoggerActive(db, model, n.SN)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+
+		if exists {
+			return echo.NewHTTPError(
+				http.StatusInternalServerError,
+				"active data logger model with this model and serial number already exist",
+			)
 		}
 
 		dl, err := models.CreateDataLogger(db, &n)
@@ -176,13 +189,13 @@ func DeleteDataLogger(db *sqlx.DB) echo.HandlerFunc {
 
 func GetDataLoggerPreview(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		sn := c.Param("sn")
-		if sn == "" {
-			return echo.NewHTTPError(http.StatusBadRequest, "Missing query parameter `id`")
+		dlID, err := uuid.Parse(c.Param("datalogger_id"))
+		if err != nil {
+			return err
 		}
 
 		// Get preview from db
-		preview, err := models.GetDataLoggerPreview(db, sn)
+		preview, err := models.GetDataLoggerPreview(db, &dlID)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}

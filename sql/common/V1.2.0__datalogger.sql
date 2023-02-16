@@ -30,14 +30,14 @@ WHERE NOT deleted;
 CREATE TABLE IF NOT EXISTS datalogger_hash (
     datalogger_id UUID NOT NULL REFERENCES datalogger (id),
     "hash" TEXT NOT NULL,
-    CONSTRAINT unique_hash UNIQUE("hash"),
     CONSTRAINT unique_datalogger_hash UNIQUE(datalogger_id, "hash")
 );
 
 -- Datalogger Preview
 CREATE TABLE IF NOT EXISTS datalogger_preview (
     datalogger_id UUID NOT NULL REFERENCES datalogger (id),
-    preview JSON
+    preview JSON,
+    update_date TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- Datalogger Field Instrument Timeseries Mapper
