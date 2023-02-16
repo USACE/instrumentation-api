@@ -95,7 +95,7 @@ func VerifyDataLoggerExists(db *sqlx.DB, dlID *uuid.UUID) error {
 		return err
 	}
 	if !dlExists {
-		return fmt.Errorf("Active data logger with id %s not found", dlID)
+		return fmt.Errorf("active data logger with id %s not found", dlID)
 	}
 	return nil
 }

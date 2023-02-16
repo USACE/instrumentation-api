@@ -154,3 +154,12 @@ services:
     entrypoint: ["/bin/sh", "/docs/swagger/postman2apidoc.sh"]
     profiles:
       - local
+
+  mock_datalogger:
+    build:
+      context: mock_datalogger
+    profiles:
+      - mock
+    depends_on:
+      telemetry:
+        condition: service_started

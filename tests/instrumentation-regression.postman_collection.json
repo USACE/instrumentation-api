@@ -5841,9 +5841,9 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"// pm.test(\"Status code is 200\", function () {",
-									"//     pm.response.to.have.status(200);",
-									"// });",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
 									""
 								],
 								"type": "text/javascript"
@@ -5866,7 +5866,7 @@
 							"variable": [
 								{
 									"key": "datalogger_id",
-									"value": ""
+									"value": "83a7345c-62d8-4e29-84db-c2e36f8bc40d"
 								}
 							]
 						}

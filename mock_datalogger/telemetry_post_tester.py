@@ -12,22 +12,23 @@ import random
 
 from typing import Any
 
-DEFAULT_BASE_URL = "http://localhost:9090"
+DEFAULT_BASE_URL = "http://telemetry"
 DEFAULT_INTERVAL_SECONDS = 10
-API_KEY = "8pszF58y7Hpwr8DgR9UYhovcjJYdBhRSMt9dGX1RBmdj6WtH4NUNFao"
+MOCK_API_KEY = "8pszF58y7Hpwr8DgR9UYhovcjJYdBhRSMt9dGX1RBmdj6WtH4NUNFao"
+MODEL = "CR6"
+SN = "12345"
 
 
 def post_data(url: str, data: str) -> Any | None:
     json_data = json.dumps(data).encode("utf-8")
 
-    request = Request(url, headers={"Content-Type": "application/json", "X-Api-Key": API_KEY}, data=json_data)
+    request = Request(url, headers={"Content-Type": "application/json", "X-Api-Key": MOCK_API_KEY}, data=json_data)
 
     try:
         with urlopen(request, timeout=10) as response:
-            print("response")
-            print("status:", response.status)
-            resObj = json.loads(response.read())
-            print("body: ", json.dumps(resObj, indent=2), sep="\n")
+            print("response status:", response.status)
+            # resObj = json.loads(response.read())
+            # print("body: ", json.dumps(resObj, indent=2), sep="\n")
             return response
     except HTTPError as error:
         print("HTTPError", error.status, error.reason, error.read())
@@ -52,8 +53,8 @@ def create_test_data(interval: int, idx: int) -> dict:
             "environment": {
                 "station_name": "6239",
                 "table_name": "Test",
-                "model": "CR6",
-                "serial_no": "11111",
+                "model": MODEL,
+                "serial_no": SN,
                 "os_version": "CR6.Std.12.01",
                 "prog_name": "CPU:Updated_CR6_Sample_Template.CR6",
             },
@@ -112,14 +113,14 @@ def main() -> None:
     args = parser.parse_args()
 
     interval = args.interval
-    url = f"{args.base_url}/telemetry/datalogger/CR6/11111"
+    url = f"{args.base_url}/telemetry/datalogger/{MODEL}/{SN}"
 
     i = 0
     while True:
         data = create_test_data(interval, i)
         i += 1
         print(f"POST: {url}")
-        print("request payload:", json.dumps(data, indent=2), sep="\n")
+        # print("request payload:", json.dumps(data, indent=2), sep="\n")
         post_data(url, data)
         print(f"waiting {interval} seconds...\n")
         time.sleep(interval)
