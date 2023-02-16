@@ -1,16 +1,14 @@
-
 name: Build SQL Migrator Develop
 
 on:
   push:
     branches: [develop]
     paths:
-      - 'sql/common/*'
-      - 'sql/develop/*'
-      - '.github/workflows/sql-develop.yml'
+      - "sql/common/*"
+      - "sql/develop/*"
+      - ".github/workflows/sql-develop.yml"
   workflow_dispatch:
 jobs:
-
   APIDockerImage:
     name: SQL Migratior Image Develop
     # The type of runner that the job will run on
@@ -18,9 +16,9 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-    
+
       - name: Configure AWS credentials
         if: ${{ always() }}
         uses: aws-actions/configure-aws-credentials@v1
