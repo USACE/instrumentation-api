@@ -11,6 +11,7 @@ import (
 	"github.com/USACE/instrumentation-api/api/timeseries"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/gommon/log"
 )
 
 // CreateOrUpdateDataLoggerMeasurements creates or updates measurements for a timeseires
@@ -106,7 +107,9 @@ func getCR6Handler(db *sqlx.DB, dl *models.DataLogger, rawJSON *[]byte) echo.Han
 			// Map field to timeseries id
 			row, exists := eqtFields[f.Name]
 			if !exists {
-				// TODO: Update validation status
+				// If alert config is needed, equivalency table errors should be handled by the db
+				// Any dangling equivalency table field names or data logger preview field names will be handled by the UI
+				log.Warn(err.Error())
 				continue
 			}
 
@@ -115,7 +118,7 @@ func getCR6Handler(db *sqlx.DB, dl *models.DataLogger, rawJSON *[]byte) echo.Han
 			for j, d := range pl.Data {
 				t, err := time.Parse(time.RFC3339, d.Time)
 				if err != nil {
-					// TODO: Handle error parsing time
+					log.Error(err.Error())
 					continue
 				}
 				items[j] = timeseries.Measurement{TimeseriesID: *row.TimeseriesID, Time: t, Value: d.Vals[i]}
