@@ -9,7 +9,7 @@ INSERT INTO datalogger_hash (datalogger_id, "hash") VALUES
 
 INSERT INTO datalogger_preview (datalogger_id, update_date, preview) VALUES
     ('83a7345c-62d8-4e29-84db-c2e36f8bc40d', '2023-02-16 18:53:00.582812+00', '{"data":[{"no":158,"time":"2023-02-16T18:53:00","vals":[12.13,22.37]},{"no":158,"time":"2023-02-16T18:52:55","vals":[12.25,20.32]}],"head":{"environment":{"model":"CR6","os_version":"CR6.Std.12.01","prog_name":"CPU:Updated_CR6_Sample_Template.CR6","serial_no":"11111","station_name":"6239","table_name":"Test"},"fields":[{"name":"batt_volt_Min","process":"Min","settable":false,"type":"xsd:float","units":"Volts"},{"name":"PanelT","process":"Smp","settable":false,"type":"xsd:float","units":"Deg_C"}],"signature":20883,"transaction":0}}'),
-    ('c0b65315-f802-4ca5-a4dd-7e0cfcffd057', '2023-02-16 18:53:00.582812+00', '{}');
+    ('c0b65315-f802-4ca5-a4dd-7e0cfcffd057', '2023-02-16 18:53:00.582812+00', NULL);
 
 INSERT INTO datalogger_equivalency_table (id, datalogger_id, datalogger_deleted, field_name, display_name, instrument_id, timeseries_id) VALUES
     ('40ceff10-cdc3-4715-a4ca-c1e570fe25de', '83a7345c-62d8-4e29-84db-c2e36f8bc40d', false, 'field name 1', 'test 1', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '7ee902a3-56d0-4acf-8956-67ac82c03a96'),
