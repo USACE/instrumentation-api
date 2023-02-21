@@ -119,7 +119,7 @@ func CreateDataLogger(db *sqlx.DB, n *DataLogger) (*DataLoggerWithKey, error) {
 		return nil, err
 	}
 
-	stmt3, err := txn.Preparex(`INSERT INTO datalogger_preview (datalogger_id, preview) VALUES ($1, '{}')`)
+	stmt3, err := txn.Preparex(`INSERT INTO datalogger_preview (datalogger_id) VALUES ($1)`)
 	if err != nil {
 		return nil, err
 	}
