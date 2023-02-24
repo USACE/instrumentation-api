@@ -59,3 +59,8 @@ CREATE TABLE IF NOT EXISTS datalogger_equivalency_table (
 -- a multi-column foreign key is needed: https://stackoverflow.com/a/35570262
 CREATE UNIQUE INDEX unique_idx_datalogger_timeseries ON datalogger_equivalency_table (timeseries_id)
 WHERE NOT datalogger_deleted;
+
+CREATE TABLE IF NOT EXISTS datalogger_error (
+    datalogger_id UUID NOT NULL REFERENCES datalogger (id) ON DELETE CASCADE,
+    error_message TEXT
+);

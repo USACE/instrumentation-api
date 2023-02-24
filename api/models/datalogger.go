@@ -2,8 +2,10 @@ package models
 
 import (
 	"database/sql"
+	"database/sql/driver"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/passwords"
@@ -43,11 +45,42 @@ type DataLoggerWithKey struct {
 }
 
 type DataLoggerPreview struct {
-	DataLoggerID uuid.UUID   `json:"datalogger_id" db:"datalogger_id"`
-	UpdateDate   time.Time   `json:"update_date" db:"update_date"`
-	Preview      pgtype.JSON `json:"preview" db:"preview"`
-	Model        *string     `json:"model,omitempty"`
-	SN           *string     `json:"sn,omitempty"`
+	DataLoggerID uuid.UUID               `json:"datalogger_id" db:"datalogger_id"`
+	UpdateDate   time.Time               `json:"update_date" db:"update_date"`
+	Preview      pgtype.JSON             `json:"preview" db:"preview"`
+	Model        *string                 `json:"model,omitempty"`
+	SN           *string                 `json:"sn,omitempty"`
+	Errors       DataLoggerErrorMessages `json:"errors" db:"errors"`
+}
+
+type DataLoggerError struct {
+	DataLoggerID uuid.UUID               `json:"datalogger_id" db:"datalogger_id"`
+	Errors       DataLoggerErrorMessages `json:"errors" db:"errors"`
+}
+
+type DataLoggerErrorMessages []string
+
+func (t *DataLoggerErrorMessages) Scan(v interface{}) error {
+	if v == nil {
+		*t = DataLoggerErrorMessages{}
+		return nil
+	}
+	s, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("scan expected string, got [%+v]", v)
+	}
+	s = strings.TrimPrefix(s, "{")
+	s = strings.TrimSuffix(s, "}")
+	if len(s) == 0 {
+		*t = make([]string, 0)
+	} else {
+		*t = strings.Split(s, ",")
+	}
+	return nil
+}
+func (t *DataLoggerErrorMessages) Value() (driver.Value, error) {
+	s := fmt.Sprintf("{%v}", strings.Join(([]string)(*t), ","))
+	return s, nil
 }
 
 func GetDataLoggerModel(db *sqlx.DB, modelID *uuid.UUID) (string, error) {
@@ -272,7 +305,9 @@ func DeleteDataLogger(db *sqlx.DB, d *DataLogger) error {
 func GetDataLoggerPreview(db *sqlx.DB, dlID *uuid.UUID) (*DataLoggerPreview, error) {
 	var dlp DataLoggerPreview
 
-	if err := db.Get(&dlp, `SELECT * FROM v_datalogger_preview WHERE datalogger_id = $1`, &dlID); err != nil {
+	if err := db.Get(&dlp, `
+		SELECT * FROM v_datalogger_preview WHERE datalogger_id = $1
+	`, &dlID); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, fmt.Errorf("preview not found")
 		}

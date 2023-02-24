@@ -94,7 +94,8 @@ GRANT SELECT ON
     datalogger_hash,
     datalogger_preview,
     datalogger_equivalency_table,
-    datalogger_model
+    datalogger_model,
+    datalogger_error
 TO instrumentation_reader;
 
 -- Role instrumentation_writer
@@ -147,7 +148,8 @@ GRANT INSERT,UPDATE,DELETE ON
     datalogger_hash,
     datalogger_preview,
     datalogger_equivalency_table,
-    datalogger_model
+    datalogger_model,
+    datalogger_error
 TO instrumentation_writer;
 
 -- Role postgis_reader
