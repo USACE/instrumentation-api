@@ -34,7 +34,6 @@ func (c *Config) dbConnStr() string {
 }
 
 func main() {
-
 	var cfg Config
 	if err := envconfig.Process("instrumentation", &cfg); err != nil {
 		log.Fatal(err.Error())
@@ -52,6 +51,12 @@ func main() {
 		}
 		return hash, nil
 	}
+
+	// Healthcheck
+	public := e.Group(cfg.RoutePrefix)
+	public.GET("/health", func(c echo.Context) error {
+		return c.JSON(http.StatusOK, map[string]interface{}{"status": "healthy"})
+	})
 
 	// Datalogger Telemetry
 	datalogger := e.Group(cfg.RoutePrefix)

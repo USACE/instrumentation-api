@@ -3,7 +3,7 @@ module github.com/USACE/instrumentation-api/telemetry
 go 1.19
 
 require (
-	github.com/USACE/instrumentation-api/api v0.0.0-20230216191757-8fbf5f7fb83a
+	github.com/USACE/instrumentation-api/api v0.0.0-20230224230753-ea42d67c24f0
 	github.com/apex/gateway v1.1.2
 	github.com/jackc/pgx/v4 v4.18.0
 	github.com/kelseyhightower/envconfig v1.4.0
@@ -40,7 +40,7 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	golang.org/x/crypto v0.6.0 // indirect
-	golang.org/x/net v0.6.0 // indirect
+	golang.org/x/net v0.7.0 // indirect
 	golang.org/x/sys v0.5.0 // indirect
 	golang.org/x/text v0.7.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
