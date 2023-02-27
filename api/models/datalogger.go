@@ -2,10 +2,8 @@ package models
 
 import (
 	"database/sql"
-	"database/sql/driver"
 	"errors"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/passwords"
@@ -45,42 +43,18 @@ type DataLoggerWithKey struct {
 }
 
 type DataLoggerPreview struct {
-	DataLoggerID uuid.UUID               `json:"datalogger_id" db:"datalogger_id"`
-	UpdateDate   time.Time               `json:"update_date" db:"update_date"`
-	Preview      pgtype.JSON             `json:"preview" db:"preview"`
-	Model        *string                 `json:"model,omitempty"`
-	SN           *string                 `json:"sn,omitempty"`
-	Errors       DataLoggerErrorMessages `json:"errors" db:"errors"`
+	DataLoggerID uuid.UUID        `json:"datalogger_id" db:"datalogger_id"`
+	UpdateDate   time.Time        `json:"update_date" db:"update_date"`
+	Preview      pgtype.JSON      `json:"preview" db:"preview"`
+	Model        *string          `json:"model,omitempty"`
+	SN           *string          `json:"sn,omitempty"`
+	Errors       []string         `json:"errors" db:"-"`
+	PgErrors     pgtype.TextArray `json:"-" db:"errors"`
 }
 
 type DataLoggerError struct {
-	DataLoggerID uuid.UUID               `json:"datalogger_id" db:"datalogger_id"`
-	Errors       DataLoggerErrorMessages `json:"errors" db:"errors"`
-}
-
-type DataLoggerErrorMessages []string
-
-func (t *DataLoggerErrorMessages) Scan(v interface{}) error {
-	if v == nil {
-		*t = DataLoggerErrorMessages{}
-		return nil
-	}
-	s, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("scan expected string, got [%+v]", v)
-	}
-	s = strings.TrimPrefix(s, "{")
-	s = strings.TrimSuffix(s, "}")
-	if len(s) == 0 {
-		*t = make([]string, 0)
-	} else {
-		*t = strings.Split(s, ",")
-	}
-	return nil
-}
-func (t *DataLoggerErrorMessages) Value() (driver.Value, error) {
-	s := fmt.Sprintf("{%v}", strings.Join(([]string)(*t), ","))
-	return s, nil
+	DataLoggerID uuid.UUID `json:"datalogger_id" db:"datalogger_id"`
+	Errors       []string  `json:"errors" db:"errors"`
 }
 
 func GetDataLoggerModel(db *sqlx.DB, modelID *uuid.UUID) (string, error) {
@@ -313,6 +287,7 @@ func GetDataLoggerPreview(db *sqlx.DB, dlID *uuid.UUID) (*DataLoggerPreview, err
 		}
 		return nil, err
 	}
+	dlp.PgErrors.AssignTo(&dlp.Errors)
 
 	return &dlp, nil
 }

@@ -134,7 +134,7 @@ func getCR6Handler(db *sqlx.DB, dl *models.DataLogger, rawJSON *[]byte) echo.Han
 			// Map field to timeseries id
 			row, exists := eqtFields[f.Name]
 			if !exists {
-				em = append(em, fmt.Sprintf("field name %s not mapped in equivalency table", f.Name))
+				em = append(em, fmt.Sprintf("field name '%s' not mapped in equivalency table", f.Name))
 				continue
 			}
 
@@ -150,7 +150,7 @@ func getCR6Handler(db *sqlx.DB, dl *models.DataLogger, rawJSON *[]byte) echo.Han
 				// t, err := time.Parse(time.RFC3339, d.Time)
 				t, err := time.Parse("2006-01-02T15:04:05", d.Time)
 				if err != nil {
-					em = append(em, fmt.Sprintf("unable to parse timestamp for field %s %s", f.Name, err.Error()))
+					em = append(em, fmt.Sprintf("unable to parse timestamp for field '%s': %s", f.Name, err.Error()))
 
 					continue
 				}
@@ -165,7 +165,7 @@ func getCR6Handler(db *sqlx.DB, dl *models.DataLogger, rawJSON *[]byte) echo.Han
 
 		// This map should be empty if all fields are mapped, otherwise the error is added
 		for eqtName := range eqtFields {
-			em = append(em, fmt.Sprintf("field name %s in equivalency table does not match any fields in data logger preview", eqtName))
+			em = append(em, fmt.Sprintf("field name '%s' in equivalency table does not match any fields in data logger preview", eqtName))
 		}
 
 		if _, err = models.CreateOrUpdateTimeseriesMeasurements(db, mcs); err != nil {
