@@ -30,10 +30,10 @@ type EquivalencyTableRow struct {
 // ValidEquivalencyTableTimeseries verifies that a Timeseries is not computed or constant
 func ValidEquivalencyTableTimeseries(txn *sqlx.Tx, tsID *uuid.UUID) error {
 	stmt, err := txn.Preparex(`
-		SELECT EXISTS (
-			SELECT id FROM v_timeseries_stored
+		SELECT NOT EXISTS (
+			SELECT id FROM v_timeseries_computed
 			WHERE id = $1
-		)::int
+		)
 	`)
 
 	// TODO: also don't allow constants?
@@ -51,7 +51,7 @@ func ValidEquivalencyTableTimeseries(txn *sqlx.Tx, tsID *uuid.UUID) error {
 		return err
 	}
 	if !isValid {
-		return fmt.Errorf("timeseries %s must not be computed", tsID)
+		return fmt.Errorf("timeseries '%s' must not be computed", tsID)
 	}
 	if err := stmt.Close(); err != nil {
 		return err
