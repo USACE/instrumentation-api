@@ -99,6 +99,10 @@ func CycleDataLoggerKey(db *sqlx.DB) echo.HandlerFunc {
 
 		u := models.DataLogger{ID: dlID}
 
+		if err := models.VerifyDataLoggerExists(db, &dlID); err != nil {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		}
+
 		profile := c.Get("profile").(*models.Profile)
 		t := time.Now()
 		u.Updater, u.UpdateDate = &profile.ID, &t

@@ -3,7 +3,7 @@ module github.com/USACE/instrumentation-api/telemetry
 go 1.19
 
 require (
-	github.com/USACE/instrumentation-api/api v0.0.0-20230224230753-ea42d67c24f0
+	github.com/USACE/instrumentation-api/api v0.0.0-20230308141758-f16cdce78efc
 	github.com/apex/gateway v1.1.2
 	github.com/jackc/pgx/v4 v4.18.0
 	github.com/kelseyhightower/envconfig v1.4.0
