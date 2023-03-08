@@ -14,11 +14,19 @@ CREATE OR REPLACE VIEW v_datalogger AS (
         dl.slug        AS slug,
         m.id           AS model_id,
         m.model        AS model,
+        COALESCE(e.errors, '{}'::TEXT[]) AS errors,
         dl.deleted     AS deleted
     FROM datalogger dl
     INNER JOIN profile p1         ON dl.creator = p1.id
     INNER JOIN profile p2         ON dl.creator = p2.id
     INNER JOIN datalogger_model m ON dl.model_id = m.id
+    LEFT JOIN (
+        SELECT
+            datalogger_id,
+            array_agg(error_message) AS errors
+        FROM datalogger_error
+        GROUP BY datalogger_id
+    ) e ON dl.id = e.datalogger_id
     WHERE NOT dl.deleted
 );
 
@@ -29,18 +37,10 @@ CREATE OR REPLACE VIEW v_datalogger_preview AS (
         p.preview                        AS preview,
         p.update_date                    AS update_date,
         m.model                          AS model,
-        dl.sn                            AS sn,
-        COALESCE(e.errors, '{}'::TEXT[]) AS errors
+        dl.sn                            AS sn
     FROM datalogger_preview p
     INNER JOIN datalogger dl      ON p.datalogger_id = dl.id
     INNER JOIN datalogger_model m ON dl.model_id = m.id
-    LEFT JOIN (
-        SELECT
-            datalogger_id,
-            array_agg(error_message) AS errors
-        FROM datalogger_error
-        GROUP BY datalogger_id
-    ) e ON p.datalogger_id = e.datalogger_id
     WHERE NOT dl.deleted
 );
 

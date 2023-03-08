@@ -21,20 +21,22 @@ type Telemetry struct {
 }
 
 type DataLogger struct {
-	ID              uuid.UUID  `json:"id" db:"id"`
-	Name            string     `json:"name" db:"name"`
-	SN              string     `json:"sn" db:"sn"`
-	ProjectID       uuid.UUID  `json:"project_id" db:"project_id"`
-	Creator         uuid.UUID  `json:"creator" db:"creator"`
-	CreatorUsername string     `json:"creator_username" db:"creator_username"`
-	CreateDate      time.Time  `json:"create_date" db:"create_date"`
-	Updater         *uuid.UUID `json:"updater" db:"updater"`
-	UpdaterUsername string     `json:"updater_username" db:"updater_username"`
-	UpdateDate      *time.Time `json:"update_date" db:"update_date"`
-	Slug            string     `json:"slug" db:"slug"`
-	ModelID         uuid.UUID  `json:"model_id" db:"model_id"`
-	Model           *string    `json:"model" db:"model"`
-	Deleted         bool       `json:"-" db:"deleted"`
+	ID              uuid.UUID        `json:"id" db:"id"`
+	Name            string           `json:"name" db:"name"`
+	SN              string           `json:"sn" db:"sn"`
+	ProjectID       uuid.UUID        `json:"project_id" db:"project_id"`
+	Creator         uuid.UUID        `json:"creator" db:"creator"`
+	CreatorUsername string           `json:"creator_username" db:"creator_username"`
+	CreateDate      time.Time        `json:"create_date" db:"create_date"`
+	Updater         *uuid.UUID       `json:"updater" db:"updater"`
+	UpdaterUsername string           `json:"updater_username" db:"updater_username"`
+	UpdateDate      *time.Time       `json:"update_date" db:"update_date"`
+	Slug            string           `json:"slug" db:"slug"`
+	ModelID         uuid.UUID        `json:"model_id" db:"model_id"`
+	Model           *string          `json:"model" db:"model"`
+	Deleted         bool             `json:"-" db:"deleted"`
+	Errors          []string         `json:"errors" db:"-"`
+	PgErrors        pgtype.TextArray `json:"-" db:"errors"`
 }
 
 type DataLoggerWithKey struct {
@@ -43,13 +45,11 @@ type DataLoggerWithKey struct {
 }
 
 type DataLoggerPreview struct {
-	DataLoggerID uuid.UUID        `json:"datalogger_id" db:"datalogger_id"`
-	UpdateDate   time.Time        `json:"update_date" db:"update_date"`
-	Preview      pgtype.JSON      `json:"preview" db:"preview"`
-	Model        *string          `json:"model,omitempty"`
-	SN           *string          `json:"sn,omitempty"`
-	Errors       []string         `json:"errors" db:"-"`
-	PgErrors     pgtype.TextArray `json:"-" db:"errors"`
+	DataLoggerID uuid.UUID   `json:"datalogger_id" db:"datalogger_id"`
+	UpdateDate   time.Time   `json:"update_date" db:"update_date"`
+	Preview      pgtype.JSON `json:"preview" db:"preview"`
+	Model        *string     `json:"model,omitempty"`
+	SN           *string     `json:"sn,omitempty"`
 }
 
 type DataLoggerError struct {
@@ -74,6 +74,13 @@ func ListProjectDataLoggers(db *sqlx.DB, projectID *uuid.UUID) ([]DataLogger, er
 	); err != nil {
 		return make([]DataLogger, 0), err
 	}
+
+	for i := 0; i < len(dls); i++ {
+		if err := dls[i].PgErrors.AssignTo(&dls[i].Errors); err != nil {
+			return make([]DataLogger, 0), err
+		}
+	}
+
 	return dls, nil
 }
 
@@ -83,6 +90,12 @@ func ListAllDataLoggers(db *sqlx.DB) ([]DataLogger, error) {
 	if err := db.Select(&dls, `SELECT * FROM v_datalogger`); err != nil {
 		return make([]DataLogger, 0), err
 	}
+	for i := 0; i < len(dls); i++ {
+		if err := dls[i].PgErrors.AssignTo(&dls[i].Errors); err != nil {
+			return make([]DataLogger, 0), err
+		}
+	}
+
 	return dls, nil
 }
 
@@ -178,6 +191,10 @@ func CreateDataLogger(db *sqlx.DB, n *DataLogger) (*DataLoggerWithKey, error) {
 		return nil, err
 	}
 
+	if err := dl.PgErrors.AssignTo(&dl.Errors); err != nil {
+		return nil, err
+	}
+
 	dk := DataLoggerWithKey{
 		DataLogger: dl,
 		Key:        key,
@@ -234,6 +251,10 @@ func CycleDataLoggerKey(db *sqlx.DB, u *DataLogger) (*DataLoggerWithKey, error) 
 		return nil, err
 	}
 
+	if err := dl.PgErrors.AssignTo(&dl.Errors); err != nil {
+		return nil, err
+	}
+
 	dk := DataLoggerWithKey{
 		DataLogger: dl,
 		Key:        key,
@@ -247,6 +268,10 @@ func GetDataLogger(db *sqlx.DB, dlID *uuid.UUID) (*DataLogger, error) {
 	if err := db.Get(&dl, `SELECT * FROM v_datalogger WHERE id = $1`, dlID); err != nil {
 		return nil, err
 	}
+	if err := dl.PgErrors.AssignTo(&dl.Errors); err != nil {
+		return nil, err
+	}
+
 	return &dl, nil
 }
 
@@ -287,7 +312,6 @@ func GetDataLoggerPreview(db *sqlx.DB, dlID *uuid.UUID) (*DataLoggerPreview, err
 		}
 		return nil, err
 	}
-	dlp.PgErrors.AssignTo(&dlp.Errors)
 
 	return &dlp, nil
 }
