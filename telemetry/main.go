@@ -25,7 +25,6 @@ type Config struct {
 	DBName        string
 	DBHost        string
 	DBSSLMode     string
-	HeartbeatKey  string
 	RoutePrefix   string `envconfig:"ROUTE_PREFIX"`
 }
 
