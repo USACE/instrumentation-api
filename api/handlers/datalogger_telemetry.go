@@ -46,7 +46,9 @@ func CreateOrUpdateDataLoggerMeasurements(db *sqlx.DB) echo.HandlerFunc {
 		}
 
 		prv := models.DataLoggerPreview{DataLoggerID: dl.ID}
-		prv.Preview.Set(raw)
+		if err := prv.Preview.Set(raw); err != nil {
+			return err
+		}
 		prv.UpdateDate = time.Now()
 
 		err = models.UpdateDataLoggerPreview(db, &prv)

@@ -33,15 +33,11 @@ func ValidEquivalencyTableTimeseries(txn *sqlx.Tx, tsID *uuid.UUID) error {
 		SELECT NOT EXISTS (
 			SELECT id FROM v_timeseries_computed
 			WHERE id = $1
+			AND id NOT IN (
+				SELECT timeseries_id FROM instrument_constants
+			)
 		)
 	`)
-
-	// TODO: also don't allow constants?
-	//
-	// AND id NOT IN (
-	// 	SELECT timeseries_id FROM instrument_constants
-	// )
-
 	if err != nil {
 		return err
 	}
