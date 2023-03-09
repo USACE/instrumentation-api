@@ -1,7 +1,7 @@
 package models
 
 import (
-	"errors"
+	"fmt"
 	"reflect"
 	"time"
 
@@ -197,13 +197,13 @@ func CreateCalculation(db *sqlx.DB, formula *Calculation) error {
 		return err
 	}
 	if !rows.Next() {
-		return errors.New("rows should be non-empty")
+		return fmt.Errorf("rows should be non-empty")
 	}
 	if err := rows.Scan(&formula.ID); err != nil {
 		return err
 	}
 	if rows.Next() {
-		return errors.New("rows should be exactly one")
+		return fmt.Errorf("rows should be exactly one")
 	}
 
 	stmt2, err := txn.Preparex(`
@@ -220,13 +220,13 @@ func CreateCalculation(db *sqlx.DB, formula *Calculation) error {
 		return err
 	}
 	if !rows2.Next() {
-		return errors.New("rows should be non-empty")
+		return fmt.Errorf("rows should be non-empty")
 	}
 	if err := rows2.Scan(&formula.ID); err != nil {
 		return err
 	}
 	if rows2.Next() {
-		return errors.New("rows should be exactly one")
+		return fmt.Errorf("rows should be exactly one")
 	}
 
 	if err := txn.Commit(); err != nil {
@@ -325,7 +325,7 @@ func UpdateCalculation(db *sqlx.DB, formula *Calculation) error {
 		return err
 	}
 	if !rows.Next() {
-		return errors.New("no results")
+		return fmt.Errorf("no results")
 	}
 	if err := rows.Scan(
 		&formula.ID,
@@ -359,7 +359,7 @@ func UpdateCalculation(db *sqlx.DB, formula *Calculation) error {
 		return err
 	}
 	if !rows2.Next() {
-		return errors.New("no results")
+		return fmt.Errorf("no results")
 	}
 	if err := rows2.Scan(
 		&formula.Formula,
@@ -389,7 +389,7 @@ func DeleteCalculation(db *sqlx.DB, formulaID uuid.UUID) error {
 		return err
 	}
 	if count == 0 {
-		return errors.New("formula did not exist")
+		return fmt.Errorf("formula did not exist")
 	}
 	return nil
 }

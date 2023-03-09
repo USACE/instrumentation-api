@@ -5,6 +5,7 @@ import (
 	"sort"
 	"time"
 
+	"github.com/USACE/instrumentation-api/api/messages"
 	"github.com/USACE/instrumentation-api/api/models"
 	"github.com/USACE/instrumentation-api/api/timeseries"
 
@@ -43,7 +44,7 @@ func ListInstrumentGroupMeasurements(db *sqlx.DB) echo.HandlerFunc {
 
 		igID, err := uuid.Parse(c.Param("instrument_group_id"))
 		if err != nil {
-			return c.String(http.StatusBadRequest, "Malformed ID")
+			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
 
 		// Get timeWindow from query params
@@ -51,7 +52,7 @@ func ListInstrumentGroupMeasurements(db *sqlx.DB) echo.HandlerFunc {
 		a, b := c.QueryParam("after"), c.QueryParam("before")
 		err = tw.SetWindow(a, b)
 		if err != nil {
-			return c.String(http.StatusBadRequest, err.Error())
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		f.TimeWindow = tw
 
@@ -60,16 +61,16 @@ func ListInstrumentGroupMeasurements(db *sqlx.DB) echo.HandlerFunc {
 		p := c.QueryParam("interval")
 		interval, err := time.ParseDuration(p)
 		if p != "" && err != nil {
-			return c.String(
+			return echo.NewHTTPError(
 				http.StatusBadRequest,
-				"Invalid interval. Valid time units are \"ns\", \"us\", \"ms\", \"s\", \"m\", \"h\" E.g. \"5h30m5s\"",
+				"invalid interval. valid time units are \"ns\", \"us\", \"ms\", \"s\", \"m\", \"h\" E.g. \"5h30m5s\"",
 			)
 		}
 
 		// Get instrument ids from group
 		instruments, err := models.ListInstrumentGroupInstruments(db, igID)
 		if err != nil {
-			return c.String(http.StatusNotFound, "Unknown ID")
+			return echo.NewHTTPError(http.StatusNotFound, "Unknown ID")
 		}
 
 		iIDs := make([]uuid.UUID, len(instruments))
@@ -80,12 +81,12 @@ func ListInstrumentGroupMeasurements(db *sqlx.DB) echo.HandlerFunc {
 
 		imc, err := models.ListInstrumentsMeasurements(db, f.InstrumentID, &tw, interval)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err.Error())
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
 		response, err := ExplorerResponseFactory(imc)
 		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
 		return c.JSON(http.StatusOK, response)
@@ -97,7 +98,7 @@ func ListTimeseriesMeasurements(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		tsID, err := uuid.Parse(c.Param("timeseries_id"))
 		if err != nil {
-			return c.String(http.StatusBadRequest, "Malformed ID")
+			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
 
 		// Time Window
@@ -105,7 +106,7 @@ func ListTimeseriesMeasurements(db *sqlx.DB) echo.HandlerFunc {
 		a, b := c.QueryParam("after"), c.QueryParam("before")
 		err = tw.SetWindow(a, b)
 		if err != nil {
-			return c.String(http.StatusBadRequest, err.Error())
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
 		// "interval" query parameter
@@ -113,7 +114,7 @@ func ListTimeseriesMeasurements(db *sqlx.DB) echo.HandlerFunc {
 		p := c.QueryParam("interval")
 		interval, err := time.ParseDuration(p)
 		if p != "" && err != nil {
-			return c.String(
+			return echo.NewHTTPError(
 				http.StatusBadRequest,
 				"Invalid interval. Valid time units are \"ns\", \"us\", \"ms\", \"s\", \"m\", \"h\" E.g. \"5h30m5s\"",
 			)
@@ -122,14 +123,14 @@ func ListTimeseriesMeasurements(db *sqlx.DB) echo.HandlerFunc {
 		// Bind Timeseries id to struct
 		ts, err := models.GetTimeseries(db, &tsID)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
 		// If timeseries NOT computed, query stored measurements
 		if !ts.IsComputed {
 			mc, err := models.ListTimeseriesMeasurements(db, &ts.ID, &tw)
 			if err != nil {
-				return c.JSON(http.StatusInternalServerError, err.Error())
+				return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 			}
 			sort.Slice(mc.Items, func(i, j int) bool {
 				return mc.Items[i].Time.Before(mc.Items[j].Time)
@@ -141,7 +142,7 @@ func ListTimeseriesMeasurements(db *sqlx.DB) echo.HandlerFunc {
 		// If timeseries IS computed, calulate measurements
 		ct, err := models.ComputedTimeseriesWithMeasurements(db, &ts.ID, &ts.InstrumentID, &tw, interval)
 		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
 		tsms := make([]models.Measurement, 0)
@@ -174,25 +175,25 @@ func CreateOrUpdateProjectTimeseriesMeasurements(db *sqlx.DB) echo.HandlerFunc {
 
 		var mcc models.TimeseriesMeasurementCollectionCollection
 		if err := c.Bind(&mcc); err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
 		// Check :project_id from route against each timeseries' project_id in the database
 		pID, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		isTrue, err := allTimeseriesBelongToProject(db, &mcc, &pID)
 		if err != nil {
-			return c.String(http.StatusBadRequest, err.Error())
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		if !isTrue {
-			return c.String(http.StatusBadRequest, "all timeseries posted do not belong to project")
+			return echo.NewHTTPError(http.StatusBadRequest, "all timeseries posted do not belong to project")
 		}
 		// Post timeseries
 		stored, err := models.CreateOrUpdateTimeseriesMeasurements(db, mcc.Items)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		return c.JSON(http.StatusCreated, stored)
 	}
@@ -205,12 +206,12 @@ func CreateOrUpdateTimeseriesMeasurements(db *sqlx.DB) echo.HandlerFunc {
 
 		var mcc models.TimeseriesMeasurementCollectionCollection
 		if err := c.Bind(&mcc); err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		// Post timeseries
 		stored, err := models.CreateOrUpdateTimeseriesMeasurements(db, mcc.Items)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		return c.JSON(http.StatusCreated, stored)
 	}
@@ -225,17 +226,17 @@ func UpdateTimeseriesMeasurements(db *sqlx.DB) echo.HandlerFunc {
 		a, b := c.QueryParam("after"), c.QueryParam("before")
 		err := tw.SetWindow(a, b)
 		if err != nil {
-			return c.String(http.StatusBadRequest, err.Error())
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
 		var mcc models.TimeseriesMeasurementCollectionCollection
 		if err := c.Bind(&mcc); err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		// Put timeseries measurments
 		stored, err := models.UpdateTimeseriesMeasurements(db, mcc.Items, &tw)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		return c.JSON(http.StatusOK, stored)
 	}
@@ -247,18 +248,18 @@ func DeleteTimeserieMeasurements(db *sqlx.DB) echo.HandlerFunc {
 		// id from url params
 		id, err := uuid.Parse(c.Param("timeseries_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
 		timeString := c.QueryParam("time")
 
 		t, err := time.Parse(time.RFC3339, timeString)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
 		if err := models.DeleteTimeserieMeasurements(db, &id, t); err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		return c.JSON(http.StatusOK, make(map[string]interface{}))
 	}

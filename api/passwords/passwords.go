@@ -3,7 +3,6 @@ package passwords
 import (
 	"crypto/rand"
 	"crypto/subtle"
-	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -15,11 +14,11 @@ import (
 var (
 	// ErrInvalidHash in returned by ComparePasswordAndHash if the provided
 	// hash isn't in the expected format.
-	ErrInvalidHash = errors.New("passwords: hash is not in the correct format")
+	ErrInvalidHash = fmt.Errorf("passwords: hash is not in the correct format")
 
 	// ErrIncompatibleVersion in returned by ComparePasswordAndHash if the
 	// provided hash was created using a different version of Argon2.
-	ErrIncompatibleVersion = errors.New("passwords: incompatible version of argon2")
+	ErrIncompatibleVersion = fmt.Errorf("passwords: incompatible version of argon2")
 )
 
 // DefaultParams provides some sane default parameters for hashing passwords.
@@ -67,8 +66,7 @@ type Params struct {
 // the Argon2 reference C implementation and contains the base64-encoded Argon2id d
 // derived key prefixed by the salt and parameters. It looks like this:
 //
-//		$argon2id$v=19$m=65536,t=3,p=2$c29tZXNhbHQ$RdescudvJCsgt3ub+b+dWRWJTmaaJObG
-//
+//	$argon2id$v=19$m=65536,t=3,p=2$c29tZXNhbHQ$RdescudvJCsgt3ub+b+dWRWJTmaaJObG
 func CreateHash(password string, params *Params) (hash string, err error) {
 	salt, err := generateRandomBytes(params.SaltLength)
 	if err != nil {

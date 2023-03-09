@@ -15,11 +15,11 @@ func ListAlertsForInstrument(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		instrumentID, err := uuid.Parse(c.Param("instrument_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		aa, err := models.ListAlertsForInstrument(db, &instrumentID)
 		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, aa)
 	}
@@ -32,7 +32,7 @@ func ListMyAlerts(db *sqlx.DB) echo.HandlerFunc {
 		profileID := p.ID
 		aa, err := models.ListMyAlerts(db, &profileID)
 		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, &aa)
 	}
@@ -45,11 +45,11 @@ func DoAlertRead(db *sqlx.DB) echo.HandlerFunc {
 		profileID := p.ID
 		alertID, err := uuid.Parse(c.Param("alert_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		a, err := models.DoAlertRead(db, &profileID, &alertID)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, a)
 	}
@@ -62,11 +62,11 @@ func DoAlertUnread(db *sqlx.DB) echo.HandlerFunc {
 		profileID := p.ID
 		alertID, err := uuid.Parse(c.Param("alert_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		a, err := models.DoAlertUnread(db, &profileID, &alertID)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, a)
 	}

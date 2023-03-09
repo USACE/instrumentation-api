@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/dbutils"
+	"github.com/USACE/instrumentation-api/api/messages"
 
 	"github.com/google/uuid"
 
@@ -19,11 +20,11 @@ func ListCollectionGroups(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		pID, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err.Error())
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		cc, err := models.ListCollectionGroups(db, &pID)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, &cc)
 	}
@@ -34,15 +35,15 @@ func GetCollectionGroupDetails(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		pID, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err.Error())
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		cgID, err := uuid.Parse(c.Param("collection_group_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err.Error())
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		d, err := models.GetCollectionGroupDetails(db, &pID, &cgID)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err.Error())
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, &d)
 	}
@@ -54,22 +55,22 @@ func CreateCollectionGroup(db *sqlx.DB) echo.HandlerFunc {
 		var cg models.CollectionGroup
 		// Bind Information Provided
 		if err := c.Bind(&cg); err != nil {
-			return c.String(http.StatusBadRequest, err.Error())
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		// Project ID from Route Params
 		pID, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
-			return c.String(http.StatusBadRequest, err.Error())
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		cg.ProjectID = pID
 		// Generate Unique Slug
 		slugsTaken, err := models.ListCollectionGroupSlugs(db, &pID)
 		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		slug, err := dbutils.NextUniqueSlug(cg.Name, slugsTaken)
 		if err != nil {
-			return c.String(http.StatusBadRequest, err.Error())
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		cg.Slug = slug
 		// Profile of user creating collection group
@@ -78,7 +79,7 @@ func CreateCollectionGroup(db *sqlx.DB) echo.HandlerFunc {
 		// Create Collection Group
 		cgNew, err := models.CreateCollectionGroup(db, &cg)
 		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusCreated, []models.CollectionGroup{*cgNew})
 	}
@@ -90,25 +91,22 @@ func UpdateCollectionGroup(db *sqlx.DB) echo.HandlerFunc {
 		var cg models.CollectionGroup
 		// Bind Information Provided
 		if err := c.Bind(&cg); err != nil {
-			return c.String(http.StatusBadRequest, err.Error())
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		// Project ID from Route Params
 		pID, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
-			return c.String(http.StatusBadRequest, err.Error())
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		cg.ProjectID = pID
 		// Collection Group ID
 		cgID, err := uuid.Parse(c.Param("collection_group_id"))
 		if err != nil {
-			return c.String(http.StatusBadRequest, err.Error())
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		// Check ID in Route Params vs. ID in Payload
 		if cgID != cg.ID {
-			return c.String(
-				http.StatusBadRequest,
-				"Collection Group ID in route params does not match payload",
-			)
+			return echo.NewHTTPError(http.StatusBadRequest, messages.MatchRouteParam("`collection_group_id`"))
 		}
 		// Actor Information (creator, create_date, updater, update_date)
 		p := c.Get("profile").(*models.Profile)
@@ -117,7 +115,7 @@ func UpdateCollectionGroup(db *sqlx.DB) echo.HandlerFunc {
 		// Update Collection Group
 		cgUpdated, err := models.UpdateCollectionGroup(db, &cg)
 		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusCreated, cgUpdated)
 	}
@@ -128,14 +126,14 @@ func DeleteCollectionGroup(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		pID, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err.Error())
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		cgID, err := uuid.Parse(c.Param("collection_group_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err.Error())
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		if err := models.DeleteCollectionGroup(db, &pID, &cgID); err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, make(map[string]interface{}))
 	}
@@ -146,14 +144,14 @@ func AddTimeseriesToCollectionGroup(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		cgID, err := uuid.Parse(c.Param("collection_group_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err.Error())
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		tsID, err := uuid.Parse(c.Param("timeseries_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err.Error())
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		if err := models.AddTimeseriesToCollectionGroup(db, &cgID, &tsID); err != nil {
-			return c.JSON(http.StatusInternalServerError, err.Error())
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, make(map[string]interface{}))
 	}
@@ -164,14 +162,14 @@ func RemoveTimeseriesFromCollectionGroup(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		cgID, err := uuid.Parse(c.Param("collection_group_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err.Error())
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		tsID, err := uuid.Parse(c.Param("timeseries_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err.Error())
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		if err := models.RemoveTimeseriesFromCollectionGroup(db, &cgID, &tsID); err != nil {
-			return c.JSON(http.StatusInternalServerError, err.Error())
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, make(map[string]interface{}))
 	}

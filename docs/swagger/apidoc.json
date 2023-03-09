@@ -73,6 +73,12 @@
         },
         {
             "name": "Formulas"
+        },
+        {
+            "name": "Data Logger"
+        },
+        {
+            "name": "Equivalency Table"
         }
     ],
     "paths": {
@@ -3257,6 +3263,398 @@
                         "required": true,
                         "description": "Formula uuid",
                         "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/datalogger": {
+            "post": {
+                "tags": [
+                    "Data Logger"
+                ],
+                "summary": "CreateDataLogger",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": {
+                                    "sn": "11111",
+                                    "project_id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+                                    "name": "Test Create Data Logger",
+                                    "model_id": "6a10ef5f-b9d9-4fa0-8b1e-ea1bcc81748c"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/dataloggers": {
+            "get": {
+                "tags": [
+                    "Data Logger"
+                ],
+                "summary": "ListProjectDataLoggers",
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/datalogger/{datalogger_id}": {
+            "get": {
+                "tags": [
+                    "Data Logger"
+                ],
+                "summary": "GetDataLogger",
+                "parameters": [
+                    {
+                        "name": "datalogger_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "example": "83a7345c-62d8-4e29-84db-c2e36f8bc40d"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Data Logger"
+                ],
+                "summary": "UpdateDataLogger",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": {
+                                    "id": "c0b65315-f802-4ca5-a4dd-7e0cfcffd057",
+                                    "name": "Updated name",
+                                    "sn": "99999",
+                                    "project_id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+                                    "model": "CR1000X"
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "datalogger_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "example": "c0b65315-f802-4ca5-a4dd-7e0cfcffd057"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Data Logger"
+                ],
+                "summary": "DeleteDataLogger",
+                "parameters": [
+                    {
+                        "name": "datalogger_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "example": "c0b65315-f802-4ca5-a4dd-7e0cfcffd057"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/datalogger/{datalogger_id}/preview": {
+            "get": {
+                "tags": [
+                    "Data Logger"
+                ],
+                "summary": "GetDataLoggerPreview",
+                "parameters": [
+                    {
+                        "name": "datalogger_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "example": "83a7345c-62d8-4e29-84db-c2e36f8bc40d"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/datalogger/{datalogger_id}/key": {
+            "put": {
+                "tags": [
+                    "Data Logger"
+                ],
+                "summary": "CycleDataLoggerKey",
+                "requestBody": {
+                    "content": {}
+                },
+                "parameters": [
+                    {
+                        "name": "datalogger_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "example": "c0b65315-f802-4ca5-a4dd-7e0cfcffd057"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/datalogger/{datalogger_id}/equivalency_table": {
+            "post": {
+                "tags": [
+                    "Equivalency Table"
+                ],
+                "summary": "CreateEquivalencyTable",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": {
+                                    "datalogger_id": "83a7345c-62d8-4e29-84db-c2e36f8bc40d",
+                                    "rows": [
+                                        {
+                                            "field_name": "new field name",
+                                            "display_name": "test 123",
+                                            "instrument_id": "a7540f69-c41e-43b3-b655-6e44097edb7e",
+                                            "timeseries_id": "5985f20a-1e37-4add-823c-545cdca49b5e"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "datalogger_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "example": "83a7345c-62d8-4e29-84db-c2e36f8bc40d"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "get": {
+                "tags": [
+                    "Equivalency Table"
+                ],
+                "summary": "GetEquivalencyTable",
+                "parameters": [
+                    {
+                        "name": "datalogger_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "example": "83a7345c-62d8-4e29-84db-c2e36f8bc40d"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Equivalency Table"
+                ],
+                "summary": "UpdateEquivalencyTable",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": {
+                                    "datalogger_id": "83a7345c-62d8-4e29-84db-c2e36f8bc40d",
+                                    "rows": [
+                                        {
+                                            "id": "40ceff10-cdc3-4715-a4ca-c1e570fe25de",
+                                            "field_name": "field name 1",
+                                            "display_name": "test 1",
+                                            "instrument_id": "a7540f69-c41e-43b3-b655-6e44097edb7e",
+                                            "timeseries_id": "7ee902a3-56d0-4acf-8956-67ac82c03a96"
+                                        },
+                                        {
+                                            "id": "2f1f7c3d-8b6f-4b11-917e-8f049eb6c62b",
+                                            "field_name": "changed field name",
+                                            "display_name": "changed display name",
+                                            "instrument_id": "a7540f69-c41e-43b3-b655-6e44097edb7e",
+                                            "timeseries_id": "d9697351-3a38-4194-9ac4-41541927e475"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "datalogger_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "example": "83a7345c-62d8-4e29-84db-c2e36f8bc40d"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Equivalency Table"
+                ],
+                "summary": "DeleteEquivalencyTable",
+                "parameters": [
+                    {
+                        "name": "datalogger_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "example": "83a7345c-62d8-4e29-84db-c2e36f8bc40d"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/datalogger/{datalogger_id}/equivalency_table/row": {
+            "delete": {
+                "tags": [
+                    "Equivalency Table"
+                ],
+                "summary": "DeleteEquivalencyTableRow",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2f1f7c3d-8b6f-4b11-917e-8f049eb6c62b"
+                    },
+                    {
+                        "name": "datalogger_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "example": "83a7345c-62d8-4e29-84db-c2e36f8bc40d"
                     }
                 ],
                 "responses": {

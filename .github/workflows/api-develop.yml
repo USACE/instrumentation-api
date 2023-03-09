@@ -3,9 +3,11 @@ name: API Image Develop
 on:
   push:
     branches: [develop]
-
+    paths:
+      - "api/**"
+      - ".github/workflows/api-develop.yml"
+  workflow_dispatch:
 jobs:
-
   APIDockerImage:
     name: API Image Develop
     # The type of runner that the job will run on
@@ -16,14 +18,14 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
       - name: Run Tests
         env:
           REPORT: true
         run: ./compose.sh test
-        
+
       - name: Configure AWS credentials
         if: ${{ always() }}
         uses: aws-actions/configure-aws-credentials@v1
@@ -35,9 +37,9 @@ jobs:
       - name: Upload Test Results
         if: ${{ always() }}
         run: |
-          aws s3 rm s3://corpsmap-appz/api_test_results/develop-midas.html
-          aws s3 cp ./tests/instrumentation.html s3://corpsmap-appz/api_test_results/develop-midas.html
-    
+          aws s3 rm s3://corpsmap-appz/api_test_results/midas-api-develop.html
+          aws s3 cp ./tests/instrumentation.html s3://corpsmap-appz/api_test_results/midas-api-develop.html
+
       - name: Login to Amazon ECR
         if: ${{ success() }}
         id: login-ecr

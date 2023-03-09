@@ -1,7 +1,6 @@
 package models
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"sort"
@@ -220,13 +219,13 @@ func (ts Timeseries) AggregateCarryForward(w *timeseries.TimeWindow, allTimes []
 func Interpolate(xs, ys []float64, x float64) (float64, error) {
 	xsLen := len(xs)
 	if len(ys) != xsLen {
-		return 0, errors.New("xs and ys slices must be same length")
+		return 0, fmt.Errorf("xs and ys slices must be same length")
 	}
 	if xsLen < 2 {
-		return 0, errors.New("xs length must be greater than 2")
+		return 0, fmt.Errorf("xs length must be greater than 2")
 	}
 	if xs[0] > xs[1] {
-		return 0, errors.New("xs array values must be increasing")
+		return 0, fmt.Errorf("xs array values must be increasing")
 	}
 
 	// y = y1 + ((x - x1) / (x2 - x1)) * (y2 - y1)

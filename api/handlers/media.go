@@ -37,7 +37,7 @@ func GetMedia(awsCfg *aws.Config, bucket *string, bucketPrefix string, routePref
 		// Get Wildcard Path
 		path, err := cleanFilepath(c.Request().RequestURI)
 		if err != nil {
-			return c.String(http.StatusBadRequest, err.Error())
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		// Remove URL Route Prefix; Prefix with bucketPrefix
 		// Example: If api hosted at /develop/<endpoint>... and images in bucket under prefix /instrumentation
@@ -46,20 +46,20 @@ func GetMedia(awsCfg *aws.Config, bucket *string, bucketPrefix string, routePref
 
 		newSession, err := session.NewSession(awsCfg)
 		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
 		s3c := s3.New(newSession)
 
 		output, err := s3c.GetObject(&s3.GetObjectInput{Bucket: bucket, Key: key})
 		if err != nil {
-			return c.String(500, err.Error())
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
 		// S3 Output Body to Buffer
 		buff, buffErr := io.ReadAll(output.Body)
 		if buffErr != nil {
-			return c.String(500, err.Error())
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
 		// Buffered Reader
