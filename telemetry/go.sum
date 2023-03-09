@@ -11,6 +11,8 @@ github.com/USACE/instrumentation-api/api v0.0.0-20230308160303-67b6c77651d5 h1:f
 github.com/USACE/instrumentation-api/api v0.0.0-20230308160303-67b6c77651d5/go.mod h1:6yPchsDK9H+xlhYDGaC2wv/7xpKbCPeb5Qi2aixFGro=
 github.com/USACE/instrumentation-api/api v0.0.0-20230309001556-98c577938bfd h1:bi5Qz0zkMI4LfHx1lzWxbPqdqHnZVYgfeCvIUFYBKT8=
 github.com/USACE/instrumentation-api/api v0.0.0-20230309001556-98c577938bfd/go.mod h1:6yPchsDK9H+xlhYDGaC2wv/7xpKbCPeb5Qi2aixFGro=
+github.com/USACE/instrumentation-api/api v0.0.0-20230309131948-f3e4df1575e8 h1:6Yf2lQUUxYcqpPvN5vtqGcXS125XVOH79Yp1JWiRixo=
+github.com/USACE/instrumentation-api/api v0.0.0-20230309131948-f3e4df1575e8/go.mod h1:6yPchsDK9H+xlhYDGaC2wv/7xpKbCPeb5Qi2aixFGro=
 github.com/aead/siphash v1.0.1/go.mod h1:Nywa3cDsYNNK3gaciGTWPwHt0wlpNV15vwmswBAUSII=
 github.com/apex/gateway v1.1.2 h1:OWyLov8eaau8YhkYKkRuOAYqiUhpBJalBR1o+3FzX+8=
 github.com/apex/gateway v1.1.2/go.mod h1:AMTkVbz5u5Hvd6QOGhhg0JUrNgCcLVu3XNJOGntdoB4=
