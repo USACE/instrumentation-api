@@ -312,7 +312,7 @@ func main() {
 	public.GET("/opendcs/sites", handlers.ListOpendcsSites(db))
 
 	// Data Logger
-	private.GET("/dataloggers", handlers.ListDataLoggers(db))
+	private.GET("/dataloggers", handlers.ListDataLoggers(db), middleware.IsApplicationAdmin)
 	private.POST("/datalogger", handlers.CreateDataLogger(db), middleware.IsApplicationAdmin)
 	private.GET("/datalogger/:datalogger_id", handlers.GetDataLogger(db), middleware.IsApplicationAdmin)
 	private.PUT("/datalogger/:datalogger_id", handlers.UpdateDataLogger(db), middleware.IsApplicationAdmin)
@@ -320,14 +320,14 @@ func main() {
 	private.DELETE("/datalogger/:datalogger_id", handlers.DeleteDataLogger(db), middleware.IsApplicationAdmin)
 
 	// Data Logger Equivalency Table
-	private.GET("/datalogger/:datalogger_id/equivalency_table", handlers.GetEquivalencyTable(db))
+	private.GET("/datalogger/:datalogger_id/equivalency_table", handlers.GetEquivalencyTable(db), middleware.IsApplicationAdmin)
 	private.POST("/datalogger/:datalogger_id/equivalency_table", handlers.CreateEquivalencyTable(db), middleware.IsApplicationAdmin)
 	private.PUT("/datalogger/:datalogger_id/equivalency_table", handlers.UpdateEquivalencyTable(db), middleware.IsApplicationAdmin)
 	private.DELETE("/datalogger/:datalogger_id/equivalency_table", handlers.DeleteEquivalencyTable(db), middleware.IsApplicationAdmin)
 	private.DELETE("/datalogger/:datalogger_id/equivalency_table/row", handlers.DeleteEquivalencyTableRow(db), middleware.IsApplicationAdmin)
 
 	// Data Logger Preview
-	private.GET("/datalogger/:datalogger_id/preview", handlers.GetDataLoggerPreview(db))
+	private.GET("/datalogger/:datalogger_id/preview", handlers.GetDataLoggerPreview(db), middleware.IsApplicationAdmin)
 
 	if cfg.LambdaContext {
 		log.Print("starting server; Running On AWS LAMBDA")
