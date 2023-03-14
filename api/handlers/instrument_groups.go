@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/dbutils"
+	"github.com/USACE/instrumentation-api/api/messages"
 	"github.com/USACE/instrumentation-api/api/models"
 
 	"github.com/google/uuid"
@@ -17,7 +18,7 @@ func ListInstrumentGroups(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		groups, err := models.ListInstrumentGroups(db)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, groups)
 	}
@@ -28,11 +29,11 @@ func GetInstrumentGroup(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id, err := uuid.Parse(c.Param("instrument_group_id"))
 		if err != nil {
-			return c.String(http.StatusBadRequest, "Malformed ID")
+			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
 		g, err := models.GetInstrumentGroup(db, id)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, g)
 	}
@@ -44,13 +45,13 @@ func CreateInstrumentGroup(db *sqlx.DB) echo.HandlerFunc {
 
 		gc := models.InstrumentGroupCollection{}
 		if err := c.Bind(&gc); err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
 		// slugs already taken in the database
 		slugsTaken, err := models.ListInstrumentGroupSlugs(db)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
 		// profile
@@ -67,7 +68,7 @@ func CreateInstrumentGroup(db *sqlx.DB) echo.HandlerFunc {
 			// Assign Slug
 			s, err := dbutils.NextUniqueSlug(gc.Items[idx].Name, slugsTaken)
 			if err != nil {
-				return c.JSON(http.StatusBadRequest, err)
+				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 			}
 			gc.Items[idx].Slug = s
 			// Add slug to array of slugs originally fetched from the database
@@ -77,7 +78,7 @@ func CreateInstrumentGroup(db *sqlx.DB) echo.HandlerFunc {
 
 		gg, err := models.CreateInstrumentGroup(db, gc.Items)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		// Send instrumentgroup
 		return c.JSON(http.StatusCreated, gg)
@@ -91,19 +92,16 @@ func UpdateInstrumentGroup(db *sqlx.DB) echo.HandlerFunc {
 		// id from url params
 		id, err := uuid.Parse(c.Param("instrument_group_id"))
 		if err != nil {
-			return c.String(http.StatusBadRequest, "Malformed ID")
+			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
 		// id from request
 		g := models.InstrumentGroup{ID: id}
 		if err := c.Bind(&g); err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		// check :id in url params matches id in request body
 		if id != g.ID {
-			return c.String(
-				http.StatusBadRequest,
-				"url parameter id does not match object id in body",
-			)
+			return echo.NewHTTPError(http.StatusBadRequest, messages.MatchRouteParam("`id`"))
 		}
 
 		// profile information and timestamp
@@ -115,7 +113,7 @@ func UpdateInstrumentGroup(db *sqlx.DB) echo.HandlerFunc {
 		// update
 		gUpdated, err := models.UpdateInstrumentGroup(db, &g)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		// return updated instrument
 		return c.JSON(http.StatusOK, gUpdated)
@@ -127,10 +125,10 @@ func DeleteFlagInstrumentGroup(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id, err := uuid.Parse(c.Param("instrument_group_id"))
 		if err != nil {
-			return c.JSON(http.StatusNotFound, err)
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
 		}
 		if err := models.DeleteFlagInstrumentGroup(db, id); err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, make(map[string]interface{}))
 	}
@@ -141,11 +139,11 @@ func ListInstrumentGroupInstruments(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id, err := uuid.Parse(c.Param("instrument_group_id"))
 		if err != nil {
-			return c.String(http.StatusBadRequest, "Malformed ID")
+			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
 		nn, err := models.ListInstrumentGroupInstruments(db, id)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, nn)
 	}
@@ -158,16 +156,16 @@ func CreateInstrumentGroupInstruments(db *sqlx.DB) echo.HandlerFunc {
 		instrumentGroupID, err := uuid.Parse(c.Param("instrument_group_id"))
 
 		if err != nil || instrumentGroupID == uuid.Nil {
-			return c.JSON(http.StatusBadRequest, models.DefaultMessageBadRequest)
+			return echo.NewHTTPError(http.StatusBadRequest, messages.BadRequest)
 		}
 		// Instrument
 		i := new(models.Instrument)
 		if err := c.Bind(i); err != nil || i.ID == uuid.Nil {
-			return c.JSON(http.StatusBadRequest, models.DefaultMessageBadRequest)
+			return echo.NewHTTPError(http.StatusBadRequest, messages.BadRequest)
 		}
 
 		if err := models.CreateInstrumentGroupInstruments(db, instrumentGroupID, i.ID); err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusCreated, make(map[string]interface{}))
 	}
@@ -179,17 +177,17 @@ func DeleteInstrumentGroupInstruments(db *sqlx.DB) echo.HandlerFunc {
 		// instrument_group_id
 		instrumentGroupID, err := uuid.Parse(c.Param("instrument_group_id"))
 		if err != nil {
-			return c.String(http.StatusBadRequest, "Malformed ID")
+			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
 
 		// instrument
 		instrumentID, err := uuid.Parse(c.Param("instrument_id"))
 		if err != nil {
-			return c.String(http.StatusBadRequest, "Malformed ID")
+			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
 
 		if err := models.DeleteInstrumentGroupInstruments(db, instrumentGroupID, instrumentID); err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
 		return c.JSON(http.StatusOK, make(map[string]interface{}))

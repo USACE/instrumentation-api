@@ -4,12 +4,11 @@ on:
   push:
     branches: [stable]
     paths:
-      - 'sql/common/*'
-      - 'sql/stable/*'
-      - '.github/workflows/sql-stable.yml'
+      - "sql/common/*"
+      - "sql/stable/*"
+      - ".github/workflows/sql-stable.yml"
   workflow_dispatch:
 jobs:
-
   APIDockerImage:
     name: SQL Migrator Image Stable
     # The type of runner that the job will run on
@@ -17,7 +16,7 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
       - name: Configure AWS credentials

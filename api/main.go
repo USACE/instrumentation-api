@@ -156,7 +156,7 @@ func main() {
 	public.GET("/heartbeats", handlers.ListHeartbeats(db))
 	public.GET("/heartbeat/latest", handlers.GetLatestHeartbeat(db))
 	public.GET("/health", func(c echo.Context) error {
-		return c.String(http.StatusOK, "OK")
+		return c.JSON(http.StatusOK, map[string]interface{}{"status": "healthy"})
 	})
 
 	// Search
@@ -311,14 +311,23 @@ func main() {
 	// OpenDCS Configuration
 	public.GET("/opendcs/sites", handlers.ListOpendcsSites(db))
 
-	// Telemetry
-	telemetry := e.Group(cfg.RoutePrefix)
-	// telemetry.Use(middleware.KeyAuth(
-	// 	cfg.AuthDisabled,
-	// 	cfg.ApplicationKey,
-	// 	hashExtractor,
-	// ))
-	telemetry.POST("/telemetry/measurements", handlers.CreateOrUpdateDataLoggerMeasurements(db))
+	// Data Logger
+	private.GET("/dataloggers", handlers.ListDataLoggers(db), middleware.IsApplicationAdmin)
+	private.POST("/datalogger", handlers.CreateDataLogger(db), middleware.IsApplicationAdmin)
+	private.GET("/datalogger/:datalogger_id", handlers.GetDataLogger(db), middleware.IsApplicationAdmin)
+	private.PUT("/datalogger/:datalogger_id", handlers.UpdateDataLogger(db), middleware.IsApplicationAdmin)
+	private.PUT("/datalogger/:datalogger_id/key", handlers.CycleDataLoggerKey(db), middleware.IsApplicationAdmin)
+	private.DELETE("/datalogger/:datalogger_id", handlers.DeleteDataLogger(db), middleware.IsApplicationAdmin)
+
+	// Data Logger Equivalency Table
+	private.GET("/datalogger/:datalogger_id/equivalency_table", handlers.GetEquivalencyTable(db), middleware.IsApplicationAdmin)
+	private.POST("/datalogger/:datalogger_id/equivalency_table", handlers.CreateEquivalencyTable(db), middleware.IsApplicationAdmin)
+	private.PUT("/datalogger/:datalogger_id/equivalency_table", handlers.UpdateEquivalencyTable(db), middleware.IsApplicationAdmin)
+	private.DELETE("/datalogger/:datalogger_id/equivalency_table", handlers.DeleteEquivalencyTable(db), middleware.IsApplicationAdmin)
+	private.DELETE("/datalogger/:datalogger_id/equivalency_table/row", handlers.DeleteEquivalencyTableRow(db), middleware.IsApplicationAdmin)
+
+	// Data Logger Preview
+	private.GET("/datalogger/:datalogger_id/preview", handlers.GetDataLoggerPreview(db), middleware.IsApplicationAdmin)
 
 	if cfg.LambdaContext {
 		log.Print("starting server; Running On AWS LAMBDA")

@@ -15,10 +15,10 @@ func DoHeartbeat(db *sqlx.DB) echo.HandlerFunc {
 		// Create a Record of Heartbeat
 		h, err := models.DoHeartbeat(db)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		if err := models.DoCheckAlerts(db); err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, h)
 	}
@@ -29,7 +29,7 @@ func GetLatestHeartbeat(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		h, err := models.GetLatestHeartbeat(db)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, h)
 	}
@@ -40,7 +40,7 @@ func ListHeartbeats(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		hh, err := models.ListHeartbeats(db)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, hh)
 	}

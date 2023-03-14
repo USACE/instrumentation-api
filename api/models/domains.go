@@ -48,6 +48,12 @@ func GetDomains(db *sqlx.DB) ([]Domain, error) {
 				   name   AS value,
 				   null   AS description
 			FROM   role
+			UNION
+			SELECT id,
+				   'datalogger_model' AS group,
+				   model			  AS value,
+				   null 			  AS description
+			FROM   datalogger_model
 			order by "group", value
 	`
 	if err := db.Select(&dd, sql); err != nil {

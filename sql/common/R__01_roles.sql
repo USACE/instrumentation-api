@@ -86,7 +86,16 @@ GRANT SELECT ON
     timeseries_notes,
     unit,
     unit_family,
-    inclinometer_measurement
+    inclinometer_measurement,
+    aware_platform_parameter_enabled,
+    aware_platform,
+    aware_parameter,
+    datalogger,
+    datalogger_hash,
+    datalogger_preview,
+    datalogger_equivalency_table,
+    datalogger_model,
+    datalogger_error
 TO instrumentation_reader;
 
 -- Role instrumentation_writer
@@ -131,32 +140,24 @@ GRANT INSERT,UPDATE,DELETE ON
     timeseries_notes,
     unit,
     unit_family,
-    inclinometer_measurement
+    inclinometer_measurement,
+    aware_platform_parameter_enabled,
+    aware_platform,
+    aware_parameter,
+    datalogger,
+    datalogger_hash,
+    datalogger_preview,
+    datalogger_equivalency_table,
+    datalogger_model,
+    datalogger_error
 TO instrumentation_writer;
 
 -- Role postgis_reader
 GRANT SELECT ON geometry_columns TO postgis_reader;
 GRANT SELECT ON geography_columns TO postgis_reader;
 GRANT SELECT ON spatial_ref_sys TO postgis_reader;
+
 -- Grant Permissions to instrument_user
 GRANT postgis_reader TO instrumentation_user;
 GRANT instrumentation_reader TO instrumentation_user;
 GRANT instrumentation_writer TO instrumentation_user;
-
-
--- Roles Aware
--- Role instrumentation_reader
--- Tables specific to instrumentation app
-GRANT SELECT ON
-    aware_platform_parameter_enabled,
-    aware_platform,
-    aware_parameter
-TO instrumentation_reader;
-
--- Role instrumentation_writer
--- Tables specific to instrumentation app
-GRANT INSERT,UPDATE,DELETE ON
-    aware_platform_parameter_enabled,
-    aware_platform,
-    aware_parameter
-TO instrumentation_writer;

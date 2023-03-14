@@ -14,9 +14,9 @@ COPY . .
 RUN --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/go/pkg \
     GOOS=linux GOARCH=amd64 \
-    go build -ldflags="-w -s" -o /go/bin/instrumentation-api
+    go build -ldflags="-w -s" -o /go/bin/midas-api
 
 # SCRATCH IMAGE
 FROM scratch
-COPY --from=builder /go/bin/instrumentation-api /go/bin/instrumentation-api
-ENTRYPOINT ["/go/bin/instrumentation-api"]
+COPY --from=builder /go/bin/midas-api /go/bin/midas-api
+ENTRYPOINT ["/go/bin/midas-api"]

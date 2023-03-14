@@ -1,11 +1,23 @@
 #!/bin/bash
 
 if [ "$1" = "up" ]; then
-    env DOCKER_BUILDKIT=1 docker-compose --profile=local up -d --build;
+    if [ "$2" = "mock" ]; then
+        env DOCKER_BUILDKIT=1 docker-compose --profile=local --profile=mock up -d --build;
+    else
+        env DOCKER_BUILDKIT=1 docker-compose --profile=local up -d --build;
+    fi
 elif [ "$1" = "down" ]; then
-    docker-compose --profile=local down;
+    if [ "$2" = "mock" ]; then
+        docker-compose --profile=local --profile=mock down;
+    else
+        docker-compose --profile=local down;
+    fi
 elif [ "$1" = "clean" ]; then
-    docker-compose --profile=local down -v;
+    if [ "$2" = "mock" ]; then
+        docker-compose --profile=local --profile=mock down -v;
+    else
+        docker-compose --profile=local down -v;
+    fi
 elif [ "$1" = "test" ]; then
     docker-compose up -d --build;
     if [ "$REPORT" = true ]; then

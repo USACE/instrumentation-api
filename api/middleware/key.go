@@ -9,11 +9,13 @@ import (
 
 // HashExtractor returns a hash (string) to be compared with user supplied key
 type HashExtractor func(keyID string) (string, error)
+type DataLoggerHashExtractor func(model, sn string) (string, error)
 
 // KeyAuth returns a ready-to-go key auth middleware
 func KeyAuth(isDisabled bool, appKey string, h HashExtractor) echo.MiddlewareFunc {
 	return middleware.KeyAuthWithConfig(
 		middleware.KeyAuthConfig{
+			KeyLookup: "query:key",
 			// If Auth Manually Disabled via Environment Variable
 			// or "?key=..." is not in QueryParams (counting on other auth middleware
 			// further down the chain); Skip this middleware
@@ -57,7 +59,41 @@ func KeyAuth(isDisabled bool, appKey string, h HashExtractor) echo.MiddlewareFun
 				// Deny Access otherwise
 				return false, nil
 			},
-			KeyLookup: "query:key",
+		},
+	)
+}
+
+// DataLoggerKeyAuth returns key auth for data logger model / serial number lookup
+func DataLoggerKeyAuth(h DataLoggerHashExtractor) echo.MiddlewareFunc {
+	return middleware.KeyAuthWithConfig(
+		middleware.KeyAuthConfig{
+			KeyLookup: "header:X-Api-Key",
+			Validator: func(key string, c echo.Context) (bool, error) {
+				model := c.Param("model")
+				if model == "" {
+					return false, nil
+				}
+				sn := c.Param("sn")
+				if sn == "" {
+					return false, nil
+				}
+
+				hash, err := h(model, sn)
+				if err != nil {
+					return false, nil
+				}
+
+				match, err := passwords.ComparePasswordAndHash(key, hash)
+				if err != nil {
+					return false, err
+				}
+
+				if match {
+					return true, nil
+				}
+
+				return false, nil
+			},
 		},
 	)
 }

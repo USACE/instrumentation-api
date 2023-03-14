@@ -4,19 +4,9 @@ import (
 	"encoding/csv"
 	"log"
 	"os"
-
-	"github.com/google/uuid"
 )
 
-// Telemetry struct
-type Telemetry struct {
-	ID       uuid.UUID
-	TypeID   string
-	TypeSlug string
-	TypeName string
-}
-
-type DataLoggerFile struct {
+type DataLoggerPayload struct {
 	Head Head    `json:"head"`
 	Data []Datum `json:"data"`
 }
