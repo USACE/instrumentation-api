@@ -107,45 +107,48 @@ def create_test_data(interval: int, idx: int, model: str, sn: str) -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser(
         prog="Mock Data Logger",
-        usage="""
+        description="""
         CLI tool for mocking POST requests sent from Campbell Scientific data loggers.
-        Use default flags for use with local docker compose stack""",
+        Default flags are for use with local docker compose stack""",
+        usage="./telemetry_post_tester.py"
+        + " [-h | --help] [--base-url url] [--interval n] [--model model]"
+        + " [--sn serial_number] [--use-mock-api-key] [--verbose]",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument(
         "--base-url",
-        help=f"base url to send requests to, e.g. stable https://midas-telemetry.rsgis.dev",
+        help="base url to send requests to, e.g. stable https://midas-telemetry.rsgis.dev",
         default=DEFAULT_BASE_URL,
         type=str,
     )
     parser.add_argument(
         "--interval",
-        help=f"interval in seconds to wait between requests",
+        help="interval in seconds to wait between requests",
         default=DEFAULT_INTERVAL_SECONDS,
         type=int,
     )
     parser.add_argument(
         "--model",
-        help=f"valid model of the registered data logger",
+        help="valid model of the registered data logger",
         default=DEFAULT_MODEL,
         type=str,
     )
     parser.add_argument(
         "--sn",
-        help=f"valid serial number of the registered data logger",
+        help="valid serial number of the registered data logger",
         default=DEFAULT_SN,
         type=str,
     )
     parser.add_argument(
         "--use-mock-api-key",
-        help=f"use default mock api key for local testing",
+        help="[optional] use default mock api key for local testing",
         default=DEFAULT_USE_MOCK_API_KEY,
         type=bool,
         action=argparse.BooleanOptionalAction,
     )
     parser.add_argument(
         "--verbose",
-        help=f"show outgoing the request's mocked payloads",
+        help="[optional] show outgoing the request's mocked payloads",
         default=DEFAULT_VERBOSE,
         type=bool,
         action=argparse.BooleanOptionalAction,
