@@ -12,6 +12,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+// MeasurementsFromStream binds to each row returned from QueryTimeseriesMeasurementsRows
 type MeasurementsFromStream struct {
 	Time             time.Time    `db:"time"`
 	TimeseriesID     uuid.UUID    `db:"timeseries_id"`
@@ -21,6 +22,7 @@ type MeasurementsFromStream struct {
 	MeasurementsJSON pgtype.JSONB `db:"measurements_json"`
 }
 
+// MeasurementsStreamResponse for JSON response stream
 type MeasurementsStreamResponse struct {
 	TimeseriesID uuid.UUID `json:"timeseries_id"`
 	InstrumentID uuid.UUID `json:"instrument_id"`
@@ -32,6 +34,7 @@ type MeasurementsStreamResponse struct {
 	Error        string    `json:"error,omitempty"`
 }
 
+// MeasurementsFilter for conveniently passsing SQL query paramters to functions
 type MeasurementsFilter struct {
 	TimeseriesID      *uuid.UUID  `db:"timeseries_id"`
 	InstrumentID      *uuid.UUID  `db:"instrument_id"`
@@ -41,10 +44,29 @@ type MeasurementsFilter struct {
 	Before            time.Time   `db:"before"`
 }
 
+// QueryTimeseriesMeasurementsRows returns an aggregate of stored and computed timeseries rows to be iterated over
+// instead of binding to an object like with Get or Select.
+//
+// This allows a buffer to only load on row into memory at a time, thus reducing the large memory spikes that come with
+// calling large queries. The schema of the JSONB ('measurements_json' column) of the row returned vary depending on
+// whether the is_computed column is true or false.
+//
+// Stored Timeseries measurements will have the following structure:
+//
+// {"value": float, "validated": bool, "masked": bool, "annotation": string}
+//
+// Computed Timeseries will look different, because they need to be fed into the arbitrary expression evaluation library.
+//
+// {"variable-1": float, "variable-2": float}
+//
+// Once the Computed Timeseries are processed however, they are bound
+// to the same struct as the stored measurements: MeasurementsStreamResponse
 func QueryTimeseriesMeasurementsRows(db *sqlx.DB, f *MeasurementsFilter) (*sqlx.Rows, error) {
 	var filterSQL string
 	var filterArg interface{}
 
+	// short circuiting before executing SQL query greatly improves query perfomance,
+	// rather than adding all parameters to the query with logical OR
 	if f.TimeseriesID != nil {
 		filterSQL = `id = ?`
 		filterArg = f.TimeseriesID
