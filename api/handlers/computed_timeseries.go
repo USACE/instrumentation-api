@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"database/sql"
 	"encoding/json"
 	"net/http"
 
@@ -21,7 +20,7 @@ func ListTimeseriesMeasurementsByTimeseries(db *sqlx.DB) echo.HandlerFunc {
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
-		f := models.MeasurementsFilter{TimeseriesID: tsID}
+		f := models.MeasurementsFilter{TimeseriesID: &tsID}
 
 		streamMeasurementsHandler := StreamTimeseriesMeasurements(db, &f)
 		return streamMeasurementsHandler(c)
@@ -34,7 +33,7 @@ func ListTimeseriesMeasurementsByInstrument(db *sqlx.DB) echo.HandlerFunc {
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
-		f := models.MeasurementsFilter{InstrumentID: iID}
+		f := models.MeasurementsFilter{InstrumentID: &iID}
 
 		streamMeasurementsHandler := StreamTimeseriesMeasurements(db, &f)
 		return streamMeasurementsHandler(c)
@@ -47,7 +46,7 @@ func ListTimeseriesMeasurementsByInstrumentGroup(db *sqlx.DB) echo.HandlerFunc {
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
-		f := models.MeasurementsFilter{InstrumentID: igID}
+		f := models.MeasurementsFilter{InstrumentGroupID: &igID}
 
 		streamMeasurementsHandler := StreamTimeseriesMeasurements(db, &f)
 		return streamMeasurementsHandler(c)
@@ -63,10 +62,7 @@ func ListTimeseriesMeasurementsExplorer(db *sqlx.DB) echo.HandlerFunc {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
-		f := models.MeasurementsFilter{}
-		if err := f.InstrumentIDs.Set(&iIDs); err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-		}
+		f := models.MeasurementsFilter{InstrumentIDs: iIDs}
 
 		streamMeasurementsHandler := StreamTimeseriesMeasurements(db, &f)
 		return streamMeasurementsHandler(c)
@@ -102,14 +98,15 @@ func StreamTimeseriesMeasurements(db *sqlx.DB, f *models.MeasurementsFilter) ech
 
 		// LOCF (Last Observation Carried Forward)
 		remember := make(map[uuid.UUID]map[string]interface{})
+		rowCount := 0
 
 		for rows.Next() {
+			rowCount++
 			var mfs models.MeasurementsFromStream
 
 			if err = rows.StructScan(&mfs); err != nil {
 				return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 			}
-
 			var env map[string]interface{}
 			if err = mfs.MeasurementsJSON.AssignTo(&env); err != nil {
 				return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -122,16 +119,35 @@ func StreamTimeseriesMeasurements(db *sqlx.DB, f *models.MeasurementsFilter) ech
 					log.Warnf("bad measurements_json %v for row with date %s and timeseries_id %v", mfs.MeasurementsJSON, mfs.Time, mfs.TimeseriesID)
 					continue
 				}
-				m := map[string]interface{}{"timeseries_id": mfs.TimeseriesID, "time": mfs.Time, "value": val}
+
+				val64, ok := val.(float64)
+				if !ok {
+					log.Warnf("unable to convert %v interface{} to float64", val)
+					continue
+				}
+
+				m := models.MeasurementsStreamResponse{InstrumentID: mfs.InstrumentID, TimeseriesID: mfs.TimeseriesID, Time: mfs.Time, Value: val64}
 
 				if masked, exists := env["masked"]; exists {
-					m["masked"] = masked
+					maskedBool, ok := masked.(bool)
+					if !ok {
+						log.Warnf("unable to convert %v interface{} to bool", masked)
+					}
+					m.Masked = maskedBool
 				}
 				if validated, exists := env["validated"]; exists {
-					m["validated"] = validated
+					validatedBool, ok := validated.(bool)
+					if !ok {
+						log.Warnf("unable to convert %v interface{} to bool", validated)
+					}
+					m.Validated = validatedBool
 				}
 				if annotation, exists := env["annotation"]; exists {
-					m["annotation"] = annotation
+					annotationStr, ok := annotation.(string)
+					if !ok {
+						log.Warnf("unable to convert %v interface{} to string", annotation)
+					}
+					m.Annotation = annotationStr
 				}
 
 				if err := enc.Encode(m); err != nil {
@@ -163,8 +179,10 @@ func StreamTimeseriesMeasurements(db *sqlx.DB, f *models.MeasurementsFilter) ech
 
 			val, err := expression.Evaluate(env)
 			if err != nil {
+				m := models.MeasurementsStreamResponse{InstrumentID: mfs.InstrumentID, TimeseriesID: mfs.TimeseriesID, Time: mfs.Time, Error: err.Error()}
+
 				// Any evaluation errors are passed back to client
-				if err := enc.Encode(map[string]interface{}{"timeseries_id": mfs.TimeseriesID, "time": mfs.Time, "error": err.Error()}); err != nil {
+				if err := enc.Encode(m); err != nil {
 					return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 				}
 				c.Response().Flush()
@@ -177,7 +195,7 @@ func StreamTimeseriesMeasurements(db *sqlx.DB, f *models.MeasurementsFilter) ech
 				continue
 			}
 
-			m := map[string]interface{}{"timeseries_id": mfs.TimeseriesID, "time": mfs.Time, "value": val64}
+			m := models.MeasurementsStreamResponse{InstrumentID: mfs.InstrumentID, TimeseriesID: mfs.TimeseriesID, Time: mfs.Time, Value: val64}
 
 			if err := enc.Encode(m); err != nil {
 				return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -185,11 +203,8 @@ func StreamTimeseriesMeasurements(db *sqlx.DB, f *models.MeasurementsFilter) ech
 			c.Response().Flush()
 		}
 
-		if err := rows.Err(); err != nil {
-			if err == sql.ErrNoRows {
-				return echo.NewHTTPError(http.StatusNotFound, err.Error())
-			}
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		if rowCount == 0 {
+			echo.NewHTTPError(http.StatusNotFound, messages.NotFound)
 		}
 
 		return nil

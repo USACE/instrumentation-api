@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"time"
 
@@ -14,56 +15,76 @@ import (
 type MeasurementsFromStream struct {
 	Time             time.Time    `db:"time"`
 	TimeseriesID     uuid.UUID    `db:"timeseries_id"`
+	InstrumentID     uuid.UUID    `db:"instrument_id"`
 	IsComputed       bool         `db:"is_computed"`
 	Formula          string       `db:"formula"`
 	MeasurementsJSON pgtype.JSONB `db:"measurements_json"`
 }
 
+type MeasurementsStreamResponse struct {
+	TimeseriesID uuid.UUID `json:"timeseries_id"`
+	InstrumentID uuid.UUID `json:"instrument_id"`
+	Time         time.Time `json:"time"`
+	Value        float64   `json:"value"`
+	Masked       bool      `json:"masked,omitempty"`
+	Validated    bool      `json:"validated,omitempty"`
+	Annotation   string    `json:"annotation,omitempty"`
+	Error        string    `json:"error,omitempty"`
+}
+
 type MeasurementsFilter struct {
-	TimeseriesID      uuid.UUID        `db:"timeseries_id"`
-	InstrumentID      uuid.UUID        `db:"instrument_id"`
-	InstrumentGroupID uuid.UUID        `db:"instrument_group_id"`
-	InstrumentIDs     pgtype.UUIDArray `db:"instrument_ids"`
-	After             time.Time        `db:"after"`
-	Before            time.Time        `db:"before"`
+	TimeseriesID      *uuid.UUID  `db:"timeseries_id"`
+	InstrumentID      *uuid.UUID  `db:"instrument_id"`
+	InstrumentGroupID *uuid.UUID  `db:"instrument_group_id"`
+	InstrumentIDs     []uuid.UUID `db:"instrument_ids"`
+	After             time.Time   `db:"after"`
+	Before            time.Time   `db:"before"`
 }
 
 func QueryTimeseriesMeasurementsRows(db *sqlx.DB, f *MeasurementsFilter) (*sqlx.Rows, error) {
+	var filterSQL string
+	var filterArg interface{}
+
+	if f.TimeseriesID != nil {
+		filterSQL = `id = ?`
+		filterArg = f.TimeseriesID
+	} else if f.InstrumentID != nil {
+		filterSQL = `instrument_id = ?`
+		filterArg = f.InstrumentID
+	} else if f.InstrumentGroupID != nil {
+		filterSQL = `
+		instrument_id IN (
+			SELECT instrument_id
+			FROM instrument_group_instruments
+			WHERE instrument_group_id = ?
+		)`
+		filterArg = f.InstrumentGroupID
+	} else if len(f.InstrumentIDs) > 0 {
+		filterSQL = `instrument_id IN (?)`
+		filterArg = f.InstrumentIDs
+	} else {
+		return nil, fmt.Errorf("must supply valid filter for timeseries_measurement query")
+	}
+
 	sql := `
 	WITH required_timeseries AS (
 		SELECT
-			dependency_timeseries_id AS id,
-			timeseries_id AS computed_timeseries_id,
+			dependency_timeseries_id AS stored_timeseries_id,
+			id AS computed_timeseries_id,
 			instrument_id,
 			parsed_variable AS variable,
 			true AS is_computed
 		FROM v_timeseries_dependency
-		WHERE
-			timeseries_id = $1
-			OR instrument_id = $2
-			OR instrument_id IN (
-				SELECT instrument_id
-				FROM instrument_group_instruments
-				WHERE instrument_group_id = $3
-			)
-			-- OR instrument_id = ANY(:instrument_ids)
+		WHERE ` + filterSQL + `
 		UNION
 		SELECT
-			id,
+			id AS stored_timeseries_id,
 			NULL AS computed_timeseries_id,
 			instrument_id,
 			NULL AS variable,
 			false AS is_computed
 		FROM v_timeseries_stored
-		WHERE
-			id = $1
-			OR instrument_id = $2
-			OR instrument_id IN (
-				SELECT instrument_id
-				FROM instrument_group_instruments
-				WHERE instrument_group_id = $3
-			)
-			-- OR instrument_id = ANY(:instrument_ids)
+		WHERE ` + filterSQL + `
 	),
 	next_low AS (
 		SELECT
@@ -71,8 +92,8 @@ func QueryTimeseriesMeasurementsRows(db *sqlx.DB, f *MeasurementsFilter) (*sqlx.
 			MAX(time) AS time
 		FROM timeseries_measurement
 		WHERE
-			timeseries_id IN (SELECT id FROM required_timeseries)
-			AND time < $4
+			timeseries_id IN (SELECT stored_timeseries_id FROM required_timeseries)
+			AND time < ?
 		GROUP BY timeseries_id
 	),
 	next_high AS (
@@ -81,16 +102,17 @@ func QueryTimeseriesMeasurementsRows(db *sqlx.DB, f *MeasurementsFilter) (*sqlx.
 			MIN(time) AS time
 		FROM timeseries_measurement
 		WHERE
-			timeseries_id IN (SELECT id FROM required_timeseries)
-			AND time > $5
+			timeseries_id IN (SELECT stored_timeseries_id FROM required_timeseries)
+			AND time > ?
 		GROUP BY timeseries_id
 	)
 	
 	SELECT
 		tm.time AS time,
-		COALESCE(rt.computed_timeseries_id, rt.id) AS timeseries_id,
+		COALESCE(rt.computed_timeseries_id, rt.stored_timeseries_id) AS timeseries_id,
+		rt.instrument_id AS instrument_id,
 		rt.is_computed AS is_computed,
-		cc.contents AS formula,
+		COALESCE(cc.contents, '') AS formula,
 		jsonb_object_agg(
 			COALESCE(rt.variable, 'value'), tm.value
 		) || (
@@ -106,15 +128,15 @@ func QueryTimeseriesMeasurementsRows(db *sqlx.DB, f *MeasurementsFilter) (*sqlx.
 	FROM required_timeseries rt
 	
 	INNER JOIN timeseries_measurement tm
-		ON rt.id = tm.timeseries_id
+		ON rt.stored_timeseries_id = tm.timeseries_id
 	INNER JOIN instrument i
 		ON i.id = rt.instrument_id
 	LEFT JOIN calculation cc
 		ON rt.computed_timeseries_id = cc.timeseries_id
 	LEFT JOIN next_low nl
-		ON nl.timeseries_id = rt.id
+		ON nl.timeseries_id = rt.stored_timeseries_id
 	LEFT JOIN next_high nh
-		ON nh.timeseries_id = rt.id
+		ON nh.timeseries_id = rt.stored_timeseries_id
 	LEFT JOIN timeseries_notes tn
 		ON tm.timeseries_id = tn.timeseries_id
 		AND tm.time = tn.time
@@ -123,8 +145,9 @@ func QueryTimeseriesMeasurementsRows(db *sqlx.DB, f *MeasurementsFilter) (*sqlx.
 		AND (nh.time IS NULL OR tm.time <= nh.time)
 	GROUP BY
 		rt.computed_timeseries_id,
-		rt.id,
+		rt.stored_timeseries_id,
 		rt.is_computed,
+		rt.instrument_id,
 		tm.time,
 		tn.masked,
 		tn.validated,
@@ -133,7 +156,12 @@ func QueryTimeseriesMeasurementsRows(db *sqlx.DB, f *MeasurementsFilter) (*sqlx.
 	ORDER BY tm.time ASC, rt.is_computed DESC
 	`
 
-	rows, err := db.Queryx(sql, &f.TimeseriesID, &f.InstrumentID, &f.InstrumentGroupID, &f.After, &f.Before)
+	query, args, err := sqlx.In(sql, filterArg, filterArg, f.After, f.Before)
+	if err != nil {
+		return nil, err
+	}
+	query = db.Rebind(query)
+	rows, err := db.Queryx(query, args...)
 	if err != nil {
 		return nil, err
 	}
