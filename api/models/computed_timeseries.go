@@ -7,203 +7,138 @@ import (
 
 	"github.com/USACE/instrumentation-api/api/timeseries"
 	"github.com/google/uuid"
+	"github.com/jackc/pgtype"
 	"github.com/jmoiron/sqlx"
 )
 
-// ListInstrumentsMeasurements returns all stored and computed timeseries for a specified array of instrument IDs
-func ListInstrumentsMeasurements(db *sqlx.DB, instrumentIDs []uuid.UUID, tw *timeseries.TimeWindow, interval time.Duration) ([]Timeseries, error) {
-
-	tr := make([]Timeseries, 0)
-
-	for _, iID := range instrumentIDs {
-		its, err := ListInstrumentTimeseries(db, &iID)
-		if err != nil {
-			return nil, err
-		}
-
-		for _, ts := range its {
-			tss, err := queryTimeseriesMeasurements(db, &ts.ID, &iID, tw, ts.IsComputed)
-			if err != nil {
-				return tss, err
-			}
-
-			if ts.IsComputed {
-				tss, err = ProcessComputedTimeseries(tss, tw, false)
-				if err != nil {
-					return tss, err
-				}
-			}
-
-			if interval != 0 {
-				resampled := make([]Timeseries, len(tss))
-
-				for i, t := range tss {
-					t, err = t.ResampleTimeseriesMeasurements(tw, interval, false)
-					if err != nil {
-						return tss, err
-					}
-
-					resampled[i] = t
-				}
-				tss = resampled
-			}
-			tr = append(tr, tss...)
-		}
-	}
-
-	return tr, nil
+type MeasurementsFromStream struct {
+	Time             time.Time    `db:"time"`
+	TimeseriesID     uuid.UUID    `db:"timeseries_id"`
+	IsComputed       bool         `db:"is_computed"`
+	Formula          string       `db:"formula"`
+	MeasurementsJSON pgtype.JSONB `db:"measurements_json"`
 }
 
-// ComputedTimeseriesWithMeasurements returns computed for a specified instrument ID
-func ComputedTimeseriesWithMeasurements(db *sqlx.DB, timeseriesID *uuid.UUID, instrumentID *uuid.UUID, tw *timeseries.TimeWindow, interval time.Duration) ([]Timeseries, error) {
-
-	tr := make([]Timeseries, 0)
-
-	// Query and unmarshal JSON
-	tss, err := queryTimeseriesMeasurements(db, timeseriesID, instrumentID, tw, true)
-	if err != nil {
-		return tss, err
-	}
-
-	tss, err = ProcessComputedTimeseries(tss, tw, false)
-	if err != nil {
-		return tss, err
-	}
-
-	if interval != 0 {
-		resampled := make([]Timeseries, len(tss))
-
-		for i, t := range tss {
-			t, err = t.ResampleTimeseriesMeasurements(tw, interval, false)
-			if err != nil {
-				return tss, err
-			}
-
-			resampled[i] = t
-		}
-		tss = resampled
-	}
-
-	tr = append(tr, tss...)
-
-	return tr, nil
+type MeasurementsFilter struct {
+	TimeseriesID      uuid.UUID        `db:"timeseries_id"`
+	InstrumentID      uuid.UUID        `db:"instrument_id"`
+	InstrumentGroupID uuid.UUID        `db:"instrument_group_id"`
+	InstrumentIDs     pgtype.UUIDArray `db:"instrument_ids"`
+	After             time.Time        `db:"after"`
+	Before            time.Time        `db:"before"`
 }
 
-// Helper function for getting timeseries by instruments
-func queryTimeseriesMeasurements(db *sqlx.DB, timeseriesID *uuid.UUID, instrumentID *uuid.UUID, tw *timeseries.TimeWindow, computed bool) ([]Timeseries, error) {
-	reqTimseriesSql := `
-	-- Regular stored timeseries
-	SELECT id
-	FROM v_timeseries_stored
-	WHERE id = $1
-	`
-
-	if computed {
-		reqTimseriesSql = `
-		-- Dependencies for computed timeseries
-		SELECT dependency_timeseries_id AS id
-		FROM v_timeseries_dependency
-		WHERE instrument_id = $2
-		`
-	}
-
+func QueryTimeseriesMeasurementsRows(db *sqlx.DB, f *MeasurementsFilter) (*sqlx.Rows, error) {
 	sql := `
-	-- Get Timeseries and Dependencies for Calculations
-	WITH required_timeseries AS (` + reqTimseriesSql + `),
-	-- Next Timeseries Measurement Outside Time Window (Earlier); Needed for Calculation Interpolation
+	WITH required_timeseries AS (
+		SELECT
+			dependency_timeseries_id AS id,
+			timeseries_id AS computed_timeseries_id,
+			instrument_id,
+			parsed_variable AS variable,
+			true AS is_computed
+		FROM v_timeseries_dependency
+		WHERE
+			timeseries_id = $1
+			OR instrument_id = $2
+			OR instrument_id IN (
+				SELECT instrument_id
+				FROM instrument_group_instruments
+				WHERE instrument_group_id = $3
+			)
+			-- OR instrument_id = ANY(:instrument_ids)
+		UNION
+		SELECT
+			id,
+			NULL AS computed_timeseries_id,
+			instrument_id,
+			NULL AS variable,
+			false AS is_computed
+		FROM v_timeseries_stored
+		WHERE
+			id = $1
+			OR instrument_id = $2
+			OR instrument_id IN (
+				SELECT instrument_id
+				FROM instrument_group_instruments
+				WHERE instrument_group_id = $3
+			)
+			-- OR instrument_id = ANY(:instrument_ids)
+	),
 	next_low AS (
-		SELECT nlm.timeseries_id AS timeseries_id, json_build_object('time', nlm.time, 'value', m1.value) AS measurement
-		FROM (
-			SELECT timeseries_id, MAX(time) AS time
-			FROM timeseries_measurement
-			WHERE timeseries_id IN (SELECT id FROM required_timeseries) AND time < $3
-			GROUP BY timeseries_id
-		) nlm
-		INNER JOIN timeseries_measurement m1 ON m1.time = nlm.time AND m1.timeseries_id = nlm.timeseries_id
-	),
-	-- Next Timeseries Measurement Outside Time Window (Later); Needed For Calculation Interpolation
-	next_high AS (
-		SELECT nhm.timeseries_id AS timeseries_id, json_build_object('time', nhm.time, 'value', m2.value) AS measurement
-		FROM (
-			SELECT timeseries_id, MIN(time) AS time
-			FROM timeseries_measurement
-			WHERE timeseries_id IN (SELECT id FROM required_timeseries) AND time > $4
-			GROUP BY timeseries_id
-		) nhm
-		INNER JOIN timeseries_measurement m2 ON m2.time = nhm.time AND m2.timeseries_id = nhm.timeseries_id
-	),
-	-- Measurements Within Time Window by timeseries_id;
-	measurements AS (
-		SELECT timeseries_id,
-			   json_agg(json_build_object('time', time, 'value', value) ORDER BY time ASC)::text AS measurements
+		SELECT
+			timeseries_id,
+			MAX(time) AS time
 		FROM timeseries_measurement
-		WHERE timeseries_id IN (SELECT id FROM required_timeseries) AND time >= $3 AND time <= $4
+		WHERE
+			timeseries_id IN (SELECT id FROM required_timeseries)
+			AND time < $4
+		GROUP BY timeseries_id
+	),
+	next_high AS (
+		SELECT
+			timeseries_id,
+			MIN(time) AS time
+		FROM timeseries_measurement
+		WHERE
+			timeseries_id IN (SELECT id FROM required_timeseries)
+			AND time > $5
 		GROUP BY timeseries_id
 	)
-	-- Timeseries Dependencies
-	SELECT rt.id                          AS timeseries_id,
-		   ts.instrument_id               AS instrument_id,
-		   i.slug || '.' || ts.slug       AS variable,
-		   false                          AS is_computed,
-		   null                           AS formula,
-		   COALESCE(m.measurements, '[]') AS measurements,
-		   nl.measurement::text           AS next_measurement_low,
-		   nh.measurement::text           AS next_measurement_high
+	
+	SELECT
+		tm.time AS time,
+		COALESCE(rt.computed_timeseries_id, rt.id) AS timeseries_id,
+		rt.is_computed AS is_computed,
+		cc.contents AS formula,
+		jsonb_object_agg(
+			COALESCE(rt.variable, 'value'), tm.value
+		) || (
+			CASE rt.is_computed
+			  WHEN NOT true THEN
+				jsonb_build_object(
+					'masked', COALESCE(tn.masked, false),
+					'validated', COALESCE(tn.validated, false),
+					'annotation', COALESCE(tn.annotation, '')
+				)
+			  ELSE '{}'::jsonb
+		END) AS measurements_json
 	FROM required_timeseries rt
-	INNER JOIN timeseries ts ON ts.id = rt.id
-	INNER JOIN instrument i ON i.id = ts.instrument_id AND i.id = $2
-	LEFT JOIN measurements m ON m.timeseries_id = rt.id
-	LEFT JOIN next_low nl ON nl.timeseries_id = rt.id
-	LEFT JOIN next_high nh ON nh.timeseries_id = rt.id
+	
+	INNER JOIN timeseries_measurement tm
+		ON rt.id = tm.timeseries_id
+	INNER JOIN instrument i
+		ON i.id = rt.instrument_id
+	LEFT JOIN calculation cc
+		ON rt.computed_timeseries_id = cc.timeseries_id
+	LEFT JOIN next_low nl
+		ON nl.timeseries_id = rt.id
+	LEFT JOIN next_high nh
+		ON nh.timeseries_id = rt.id
+	LEFT JOIN timeseries_notes tn
+		ON tm.timeseries_id = tn.timeseries_id
+		AND tm.time = tn.time
+	WHERE
+		(nl.time IS NULL OR tm.time >= nl.time)
+		AND (nh.time IS NULL OR tm.time <= nh.time)
+	GROUP BY
+		rt.computed_timeseries_id,
+		rt.id,
+		rt.is_computed,
+		tm.time,
+		tn.masked,
+		tn.validated,
+		tn.annotation,
+		cc.contents
+	ORDER BY tm.time ASC, rt.is_computed DESC
 	`
-	if computed {
-		sql += `
-		UNION
-		-- Computed Timeseries
-		SELECT cc.id                AS timeseries_id,
-			cc.instrument_id        AS instrument_id,
-			cc.slug			        AS variable,
-			true                    AS is_computed,
-			cc.contents             AS formula,
-			'[]'::text              AS measurements,
-			null                    AS next_measurement_low,
-			null                    AS next_measurement_high
-		FROM v_timeseries_computed cc
-		WHERE cc.contents IS NOT NULL
-		AND cc.instrument_id = $2
-		AND cc.id = $1
-		ORDER BY is_computed
-		`
+
+	rows, err := db.Queryx(sql, &f.TimeseriesID, &f.InstrumentID, &f.InstrumentGroupID, &f.After, &f.Before)
+	if err != nil {
+		return nil, err
 	}
 
-	tt := make([]DBTimeseries, 0)
-	if err := db.Select(&tt, sql, timeseriesID, instrumentID, tw.After, tw.Before); err != nil {
-		return make([]Timeseries, 0), err
-	}
-
-	// Unmarshal JSON Strings
-	tt2 := make([]Timeseries, len(tt))
-	for idx, t := range tt {
-		tt2[idx] = Timeseries{
-			TimeseriesInfo: t.TimeseriesInfo,
-			Measurements:   make([]Measurement, 0),
-			TimeWindow:     *tw,
-		}
-		if err := json.Unmarshal([]byte(t.Measurements), &tt2[idx].Measurements); err != nil {
-			log.Println(err)
-		}
-		if t.NextMeasurementHigh != nil {
-			if err := json.Unmarshal([]byte(*t.NextMeasurementHigh), &tt2[idx].NextMeasurementHigh); err != nil {
-				log.Println(err)
-			}
-		}
-		if t.NextMeasurementLow != nil {
-			if err := json.Unmarshal([]byte(*t.NextMeasurementLow), &tt2[idx].NextMeasurementLow); err != nil {
-				log.Println(err)
-			}
-		}
-	}
-	return tt2, nil
+	return rows, nil
 }
 
 // ComputedInclinometerTimeseries returns computed and stored inclinometer timeseries for a specified array of instrument IDs

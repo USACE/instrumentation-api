@@ -29,44 +29,44 @@ type Filter struct {
 	TimeWindow   timeseries.TimeWindow
 }
 
-// PostExplorer retrieves timeseries information for the explorer app component
-func PostExplorer(db *sqlx.DB) echo.HandlerFunc {
-	return func(c echo.Context) error {
+// // PostExplorer retrieves timeseries information for the explorer app component
+// func PostExplorer(db *sqlx.DB) echo.HandlerFunc {
+// 	return func(c echo.Context) error {
 
-		// Filters used in SQL Query
-		var f Filter
+// 		// Filters used in SQL Query
+// 		var f Filter
 
-		// Instrument IDs from POST
-		if err := (&echo.DefaultBinder{}).BindBody(c, &f.InstrumentID); err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-		}
+// 		// Instrument IDs from POST
+// 		if err := (&echo.DefaultBinder{}).BindBody(c, &f.InstrumentID); err != nil {
+// 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+// 		}
 
-		// Get timeWindow from query params
-		var tw timeseries.TimeWindow
-		a, b := c.QueryParam("after"), c.QueryParam("before")
-		err := tw.SetWindow(a, b)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-		}
-		f.TimeWindow = tw
+// 		// Get timeWindow from query params
+// 		var tw timeseries.TimeWindow
+// 		a, b := c.QueryParam("after"), c.QueryParam("before")
+// 		err := tw.SetWindow(a, b)
+// 		if err != nil {
+// 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+// 		}
+// 		f.TimeWindow = tw
 
-		// Get Stored And Computed Timeseries With Measurements
-		// interval, _ := time.ParseDuration("")
-		interval := time.Hour
-		tt, err := models.ListInstrumentsMeasurements(db, f.InstrumentID, &f.TimeWindow, interval)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-		}
+// 		// Get Stored And Computed Timeseries With Measurements
+// 		// interval, _ := time.ParseDuration("")
+// 		interval := time.Hour
+// 		tt, err := models.ListInstrumentsMeasurements(db, f.InstrumentID, &f.TimeWindow, interval)
+// 		if err != nil {
+// 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+// 		}
 
-		// Convert Rows to Response
-		response, err := ExplorerResponseFactory(tt)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-		}
+// 		// Convert Rows to Response
+// 		response, err := ExplorerResponseFactory(tt)
+// 		if err != nil {
+// 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+// 		}
 
-		return c.JSON(http.StatusOK, response)
-	}
-}
+// 		return c.JSON(http.StatusOK, response)
+// 	}
+// }
 
 func PostInclinometerExplorer(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
