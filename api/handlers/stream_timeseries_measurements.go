@@ -69,6 +69,8 @@ func ListTimeseriesMeasurementsExplorer(db *sqlx.DB) echo.HandlerFunc {
 	}
 }
 
+// StreamTimeseriesMeasurements emits newline delimited json objects. The buffer flushes to the client
+// every 1000 records, plus any remaining records in the buffer when complete
 func StreamTimeseriesMeasurements(db *sqlx.DB, f *models.MeasurementsFilter) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var tw timeseries.TimeWindow
@@ -91,17 +93,21 @@ func StreamTimeseriesMeasurements(db *sqlx.DB, f *models.MeasurementsFilter) ech
 			}
 		}()
 
-		c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextPlainCharsetUTF8)
 		c.Response().WriteHeader(http.StatusOK)
 
 		enc := json.NewEncoder(c.Response())
 
 		// LOCF (Last Observation Carried Forward)
 		remember := make(map[uuid.UUID]map[string]interface{})
-		rowCount := 0
+		rowsInChunk := 0
 
 		for rows.Next() {
-			rowCount++
+			// Buffer is chunked to send for every 1000 records
+			if rowsInChunk > 0 && rowsInChunk%1000 == 0 {
+				c.Response().Flush()
+				rowsInChunk = 0
+			}
 			var mfs models.MeasurementsFromStream
 
 			if err = rows.StructScan(&mfs); err != nil {
@@ -153,7 +159,7 @@ func StreamTimeseriesMeasurements(db *sqlx.DB, f *models.MeasurementsFilter) ech
 				if err := enc.Encode(m); err != nil {
 					return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 				}
-				c.Response().Flush()
+				rowsInChunk++
 				continue
 			}
 
@@ -185,7 +191,7 @@ func StreamTimeseriesMeasurements(db *sqlx.DB, f *models.MeasurementsFilter) ech
 				if err := enc.Encode(m); err != nil {
 					return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 				}
-				c.Response().Flush()
+				rowsInChunk++
 				continue
 			}
 
@@ -200,10 +206,13 @@ func StreamTimeseriesMeasurements(db *sqlx.DB, f *models.MeasurementsFilter) ech
 			if err := enc.Encode(m); err != nil {
 				return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 			}
-			c.Response().Flush()
+			rowsInChunk++
 		}
 
-		if rowCount == 0 {
+		// Send any remianing records
+		if rowsInChunk > 0 {
+			c.Response().Flush()
+		} else {
 			echo.NewHTTPError(http.StatusNotFound, messages.NotFound)
 		}
 
