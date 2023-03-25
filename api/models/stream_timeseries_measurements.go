@@ -92,93 +92,102 @@ func QueryTimeseriesMeasurementsRows(db *sqlx.DB, f *MeasurementsFilter) (*sqlx.
 	WITH required_timeseries AS (
 		SELECT
 			dependency_timeseries_id AS stored_timeseries_id,
-			id AS computed_timeseries_id,
-			instrument_id,
-			parsed_variable AS variable,
-			true AS is_computed
+		  	id AS computed_timeseries_id,
+		  	instrument_id,
+		  	parsed_variable AS variable,
+		  	true AS is_computed
 		FROM v_timeseries_dependency
 		WHERE ` + filterSQL + `
 		UNION
 		SELECT
-			id AS stored_timeseries_id,
-			NULL AS computed_timeseries_id,
-			instrument_id,
-			NULL AS variable,
-			false AS is_computed
+		  	id AS stored_timeseries_id,
+		  	NULL AS computed_timeseries_id,
+		  	instrument_id,
+		  	NULL AS variable,
+		  	false AS is_computed
 		FROM v_timeseries_stored
 		WHERE ` + filterSQL + `
 	),
 	next_low AS (
-		SELECT
-			timeseries_id,
-			MAX(time) AS time
-		FROM timeseries_measurement
-		WHERE
-			timeseries_id IN (SELECT stored_timeseries_id FROM required_timeseries)
-			AND time < ?
-		GROUP BY timeseries_id
+	SELECT
+		timeseries_id,
+		MAX(time) AS time
+	FROM timeseries_measurement
+	WHERE
+		timeseries_id IN (SELECT stored_timeseries_id FROM required_timeseries)
+		AND time < ?
+	GROUP BY timeseries_id
 	),
 	next_high AS (
 		SELECT
-			timeseries_id,
-			MIN(time) AS time
+		  	timeseries_id,
+		  	MIN(time) AS time
 		FROM timeseries_measurement
 		WHERE
-			timeseries_id IN (SELECT stored_timeseries_id FROM required_timeseries)
-			AND time > ?
+		  	timeseries_id IN (SELECT stored_timeseries_id FROM required_timeseries)
+		  	AND time > ?
 		GROUP BY timeseries_id
+	),
+	proc AS (
+		SELECT
+			tab.timeseries_id,
+			array_agg(row(tab.timeseries_id, tab.time, tab.value)::ts_measurement) AS measurements
+		FROM timeseries_measurement tab (time,value)
+		LEFT JOIN next_low nl
+			ON nl.timeseries_id = tab.timeseries_id
+		LEFT JOIN next_high nh
+			ON nh.timeseries_id = tab.timeseries_id
+		WHERE
+			tab.timeseries_id IN (SELECT stored_timeseries_id FROM required_timeseries)
+			AND (nl.time IS NULL OR tab.time >= nl.time)
+			AND (nh.time IS NULL OR tab.time <= nh.time)
+		GROUP BY tab.timeseries_id
 	)
-	
 	SELECT
-		tm.time AS time,
-		COALESCE(rt.computed_timeseries_id, rt.stored_timeseries_id) AS timeseries_id,
+		ds.t AS time,
+		xx.timeseries_id AS timeseries_id,
 		rt.instrument_id AS instrument_id,
 		rt.is_computed AS is_computed,
 		COALESCE(cc.contents, '') AS formula,
 		jsonb_object_agg(
-			COALESCE(rt.variable, 'value'), tm.value
+		  	COALESCE(rt.variable, 'value'), ds.v
 		) || (
-			CASE rt.is_computed
-			  WHEN NOT true THEN
+		  	CASE rt.is_computed
+				WHEN NOT true THEN
 				jsonb_build_object(
 					'masked', COALESCE(tn.masked, false),
 					'validated', COALESCE(tn.validated, false),
 					'annotation', COALESCE(tn.annotation, '')
 				)
-			  ELSE '{}'::jsonb
-		END) AS measurements_json
+				ELSE '{}'::jsonb
+			END) AS measurements_json
 	FROM required_timeseries rt
-	
-	INNER JOIN timeseries_measurement tm
-		ON rt.stored_timeseries_id = tm.timeseries_id
+	CROSS JOIN LATERAL
+		(VALUES (COALESCE(rt.computed_timeseries_id, rt.stored_timeseries_id))) AS xx(timeseries_id)
+	INNER JOIN proc p
+		ON p.timeseries_id = rt.stored_timeseries_id
+	INNER JOIN lttb(?, p.measurements) ds
+		ON rt.stored_timeseries_id = ds.id
 	INNER JOIN instrument i
 		ON i.id = rt.instrument_id
 	LEFT JOIN calculation cc
 		ON rt.computed_timeseries_id = cc.timeseries_id
-	LEFT JOIN next_low nl
-		ON nl.timeseries_id = rt.stored_timeseries_id
-	LEFT JOIN next_high nh
-		ON nh.timeseries_id = rt.stored_timeseries_id
 	LEFT JOIN timeseries_notes tn
-		ON tm.timeseries_id = tn.timeseries_id
-		AND tm.time = tn.time
-	WHERE
-		(nl.time IS NULL OR tm.time >= nl.time)
-		AND (nh.time IS NULL OR tm.time <= nh.time)
+		ON rt.stored_timeseries_id = tn.timeseries_id
+		AND ds.t = tn.time
 	GROUP BY
-		rt.computed_timeseries_id,
-		rt.stored_timeseries_id,
-		rt.is_computed,
+		ds.t,
+		xx.timeseries_id,
 		rt.instrument_id,
-		tm.time,
+		rt.is_computed,
+		cc.contents,
 		tn.masked,
 		tn.validated,
-		tn.annotation,
-		cc.contents
-	ORDER BY tm.time ASC, rt.is_computed DESC
+		tn.annotation
+	ORDER BY ds.t ASC, rt.is_computed DESC
 	`
 
-	query, args, err := sqlx.In(sql, filterArg, filterArg, f.After, f.Before)
+	query, args, err := sqlx.In(sql, filterArg, filterArg, f.After, f.Before, 1)
 	if err != nil {
 		return nil, err
 	}
