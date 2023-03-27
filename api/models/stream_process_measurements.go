@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/USACE/instrumentation-api/api/messages"
 	"github.com/USACE/instrumentation-api/api/timeseries"
 	"github.com/google/uuid"
 	"github.com/jackc/pgtype"
@@ -51,7 +52,7 @@ type MeasurementsFilter struct {
 
 func (mrc *MeasurementsResponseCollection) GroupByInstrument() (map[uuid.UUID][]timeseries.MeasurementCollectionLean, error) {
 	if len(*mrc) == 0 {
-		return make(map[uuid.UUID][]timeseries.MeasurementCollectionLean), fmt.Errorf("no rows")
+		return make(map[uuid.UUID][]timeseries.MeasurementCollectionLean), fmt.Errorf(messages.NotFound)
 	}
 
 	tmp := make(map[uuid.UUID]map[uuid.UUID][]timeseries.MeasurementLean)
@@ -89,7 +90,7 @@ func (mrc *MeasurementsResponseCollection) GroupByInstrument() (map[uuid.UUID][]
 
 func (mrc *MeasurementsResponseCollection) CollectSingleTimeseries() (timeseries.MeasurementCollection, error) {
 	if len(*mrc) == 0 {
-		return timeseries.MeasurementCollection{}, fmt.Errorf("no rows")
+		return timeseries.MeasurementCollection{}, fmt.Errorf(messages.NotFound)
 	}
 
 	mmts := make([]timeseries.Measurement, 0)

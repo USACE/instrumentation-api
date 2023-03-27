@@ -287,7 +287,7 @@ func StreamProcessMeasurements(db *sqlx.DB, f *models.MeasurementsFilter, reques
 		if requestType == byTimeseries {
 			resBody, err = mrc.CollectSingleTimeseries()
 			if err != nil {
-				if err.Error() == "no rows" {
+				if err.Error() == messages.NotFound {
 					return c.JSON(
 						http.StatusOK,
 						timeseries.MeasurementCollection{
@@ -301,7 +301,7 @@ func StreamProcessMeasurements(db *sqlx.DB, f *models.MeasurementsFilter, reques
 		} else {
 			resBody, err = mrc.GroupByInstrument()
 			if err != nil {
-				if err.Error() == "no rows" {
+				if err.Error() == messages.NotFound {
 					return c.JSON(http.StatusOK, make([]map[string]interface{}, 0))
 				}
 				return err
