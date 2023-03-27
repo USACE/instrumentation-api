@@ -2,9 +2,10 @@
 -- i.e. keeps important outliers like peaks and valleys. This can be applied conditionally depending on the density of
 -- data and the area requested. For example, if a user requests 10 years worth of data sampled as 15 minute intervals,
 -- this will need to be downsampled to something that the client can reasonably consume. Adusting the BucketSize based on the
--- estimated number of pixels can return an approximate number of desired points. Since counting all of the rows is expensive,
--- we can estimate using the sample rate (i.e. 15 minutes in this case) and min / max time range. Something like:
---      SELECT extract(epoch from max(time) - min(time)) / (60 * 15) AS n_samples
+-- estimated number of pixels can return an approximate number of desired points.
+-- We can estimate using the number fo records and min / max time range. Something like:
+--      SELECT extract(epoch from max(time) - min(time)) / array_length(dataset, 1) AS n_samples
+-- Alternatively, expose the temporal_resolution directly to be set
 --
 -- https://datylon.medium.com/sampling-time-series-data-sets-fc16caefff1b
 --
