@@ -31,7 +31,7 @@ func ListTimeseriesMeasurementsByTimeseries(db *sqlx.DB) echo.HandlerFunc {
 		}
 		f := models.MeasurementsFilter{TimeseriesID: &tsID}
 
-		streamMeasurementsHandler := StreamTimeseriesMeasurements(db, &f, byTimeseries)
+		streamMeasurementsHandler := StreamProcessMeasurements(db, &f, byTimeseries)
 		return streamMeasurementsHandler(c)
 	}
 }
@@ -44,7 +44,7 @@ func ListTimeseriesMeasurementsByInstrument(db *sqlx.DB) echo.HandlerFunc {
 		}
 		f := models.MeasurementsFilter{InstrumentID: &iID}
 
-		streamMeasurementsHandler := StreamTimeseriesMeasurements(db, &f, byInstrument)
+		streamMeasurementsHandler := StreamProcessMeasurements(db, &f, byInstrument)
 		return streamMeasurementsHandler(c)
 	}
 }
@@ -57,7 +57,7 @@ func ListTimeseriesMeasurementsByInstrumentGroup(db *sqlx.DB) echo.HandlerFunc {
 		}
 		f := models.MeasurementsFilter{InstrumentGroupID: &igID}
 
-		streamMeasurementsHandler := StreamTimeseriesMeasurements(db, &f, byInstrumentGroup)
+		streamMeasurementsHandler := StreamProcessMeasurements(db, &f, byInstrumentGroup)
 		return streamMeasurementsHandler(c)
 	}
 }
@@ -73,14 +73,29 @@ func ListTimeseriesMeasurementsExplorer(db *sqlx.DB) echo.HandlerFunc {
 
 		f := models.MeasurementsFilter{InstrumentIDs: iIDs}
 
-		streamMeasurementsHandler := StreamTimeseriesMeasurements(db, &f, explorer)
+		streamMeasurementsHandler := StreamProcessMeasurements(db, &f, explorer)
 		return streamMeasurementsHandler(c)
 	}
 }
 
-// StreamTimeseriesMeasurements emits newline delimited json objects. The buffer flushes to the client
-// every 1000 records, plus any remaining records in the buffer when complete
-func StreamTimeseriesMeasurements(db *sqlx.DB, f *models.MeasurementsFilter, requestType int) echo.HandlerFunc {
+// StreamProcessMeasurements returns computed and stored timeseries measurements
+// JSON schema of payloads returned depends on the enum passed by the parent function calling this handler
+//
+// If the "Accept" header is set to "application/x-ndjson", it emits  a stream of newline delimited json objects.
+// The buffer flushes to the client every 1000 records, plus any remaining records in the buffer when complete.
+// Otherwise, "application/json" is used.
+//
+// Pass "temporal_resolution" query parameter for downsamping using lttb algorithm:
+//
+//		3600 (seconds) will keep one datapoint per hour
+//		1800 will keep one per 30 minutes
+//		900 will keep one per  15 minutes
+//		60 will keep one per minute
+//		1 (default) will not resample and returns raw data
+//	 	any 0 or negative values will default to 1
+//
+// ~
+func StreamProcessMeasurements(db *sqlx.DB, f *models.MeasurementsFilter, requestType int) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var tw timeseries.TimeWindow
 		a, b := c.QueryParam("after"), c.QueryParam("before")
@@ -91,14 +106,6 @@ func StreamTimeseriesMeasurements(db *sqlx.DB, f *models.MeasurementsFilter, req
 		f.After = tw.After
 		f.Before = tw.Before
 
-		// temporal_resolution defaults to 1 (raw - no downsamping)
-		// examples:
-		// 		3600 (seconds) will keep one datapoint per hour
-		//		1800 will keep one per 30 minutes
-		//		900 will keep one per  15 minutes
-		// 		60 will keep one per minute
-		//		...
-		// 		1 (default) will not resample and returns raw data
 		trs := c.QueryParam("temporal_resolution")
 		if trs == "" {
 			f.TemporalResolution = 1
@@ -127,7 +134,7 @@ func StreamTimeseriesMeasurements(db *sqlx.DB, f *models.MeasurementsFilter, req
 		var mrc models.MeasurementsResponseCollection
 
 		if stream {
-			c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextPlainCharsetUTF8)
+			c.Response().Header().Set(echo.HeaderContentType, "application/x-ndjson")
 			c.Response().WriteHeader(http.StatusOK)
 			enc = json.NewEncoder(c.Response())
 		} else {
