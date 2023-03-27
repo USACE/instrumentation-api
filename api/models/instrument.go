@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/USACE/instrumentation-api/api/messages"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
@@ -113,6 +114,10 @@ func GetInstrument(db *sqlx.DB, id *uuid.UUID) (*Instrument, error) {
 	ii, err := InstrumentsFactory(rows)
 	if err != nil {
 		return nil, err
+	}
+
+	if len(ii) == 0 {
+		return nil, fmt.Errorf(messages.NotFound)
 	}
 
 	return &ii[0], nil

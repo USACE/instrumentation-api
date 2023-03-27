@@ -44,6 +44,7 @@ type MeasurementCollection struct {
 type Measurement struct {
 	Time  time.Time `json:"time"`
 	Value float64   `json:"value"`
+	Error string    `json:"error,omitempty"`
 }
 
 type InclinometerTimeseries struct {

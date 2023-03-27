@@ -34,6 +34,7 @@ type Measurement struct {
 	Masked       bool      `json:"masked"`
 	Validated    bool      `json:"validated"`
 	Annotation   string    `json:"annotation"`
+	Error        string    `json:"error,omitempty"`
 }
 
 // MeasurementLean is the minimalist representation of a timeseries measurement

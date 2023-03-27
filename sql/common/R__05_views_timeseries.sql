@@ -50,19 +50,24 @@ CREATE OR REPLACE VIEW v_timeseries_latest AS (
 -- computed timeseries and stored dependency timeseries
 CREATE OR REPLACE VIEW v_timeseries_dependency AS (
     WITH variable_tsid_map AS (
-	    SELECT a.id AS timeseries_id,
-               b.slug || '.' || a.slug AS variable
+	    SELECT
+            a.id AS timeseries_id,
+            b.slug || '.' || a.slug AS variable
 	    FROM timeseries a
 	    LEFT JOIN instrument b ON b.id = a.instrument_id
         WHERE a.id NOT IN (SELECT timeseries_id FROM calculation)
     )
-    SELECT i.instrument_id   AS instrument_id,
-           i.formula_id      AS timeseries_id,
-           i.parsed_variable AS parsed_variable,
-           m.timeseries_id   AS dependency_timeseries_id
+    -- id references computed timeseries
+    -- dependency_timeseries_id references timeseries used to caclulate computed timeseries
+    SELECT
+        i.id              AS id,
+        i.instrument_id   AS instrument_id,
+        i.parsed_variable AS parsed_variable,
+        m.timeseries_id   AS dependency_timeseries_id
     FROM (
-        SELECT instrument_id,
-            id AS formula_id,
+        SELECT
+            id,
+            instrument_id,
             (regexp_matches(contents, '\[(.*?)\]', 'g'))[1] AS parsed_variable
         FROM timeseries t
         INNER JOIN calculation cc ON cc.timeseries_id = t.id
