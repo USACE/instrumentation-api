@@ -22,6 +22,8 @@ type MeasurementsFromRow struct {
 	MeasurementsJSON pgtype.JSONB `db:"measurements_json"`
 }
 
+type MeasurementsResponseCollection []MeasurementsResponse
+
 // MeasurementsResponse basic type for responses, can be transformed with methods based on MeasurementsFilter
 type MeasurementsResponse struct {
 	TimeseriesID uuid.UUID `json:"timeseries_id"`
@@ -30,22 +32,21 @@ type MeasurementsResponse struct {
 	TimeseriesNote
 }
 
-type MeasurementsResponseCollection []MeasurementsResponse
-
-// MeasurementsFilter for conveniently passsing SQL query paramters to functions
-type MeasurementsFilter struct {
-	TimeseriesID      *uuid.UUID  `db:"timeseries_id"`
-	InstrumentID      *uuid.UUID  `db:"instrument_id"`
-	InstrumentGroupID *uuid.UUID  `db:"instrument_group_id"`
-	InstrumentIDs     []uuid.UUID `db:"instrument_ids"`
-	After             time.Time   `db:"after"`
-	Before            time.Time   `db:"before"`
-}
-
 type TimeseriesNote struct {
 	Masked     bool   `json:"masked,omitempty"`
 	Validated  bool   `json:"validated,omitempty"`
 	Annotation string `json:"annotation,omitempty"`
+}
+
+// MeasurementsFilter for conveniently passsing SQL query paramters to functions
+type MeasurementsFilter struct {
+	TimeseriesID       *uuid.UUID  `db:"timeseries_id"`
+	InstrumentID       *uuid.UUID  `db:"instrument_id"`
+	InstrumentGroupID  *uuid.UUID  `db:"instrument_group_id"`
+	InstrumentIDs      []uuid.UUID `db:"instrument_ids"`
+	After              time.Time   `db:"after"`
+	Before             time.Time   `db:"before"`
+	TemporalResolution int         `db:"temporal_resolution"`
 }
 
 func (mrc *MeasurementsResponseCollection) GroupByInstrument() (map[uuid.UUID][]timeseries.MeasurementCollectionLean, error) {
@@ -251,7 +252,7 @@ func QueryTimeseriesMeasurementsRows(db *sqlx.DB, f *MeasurementsFilter) (*sqlx.
 	ORDER BY ds.t ASC, rt.is_computed DESC
 	`
 
-	query, args, err := sqlx.In(sql, filterArg, filterArg, f.After, f.Before, 1)
+	query, args, err := sqlx.In(sql, filterArg, filterArg, f.After, f.Before, f.TemporalResolution)
 	if err != nil {
 		return nil, err
 	}

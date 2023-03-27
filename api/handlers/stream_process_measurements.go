@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/Knetic/govaluate"
 	"github.com/USACE/instrumentation-api/api/messages"
@@ -89,6 +90,25 @@ func StreamTimeseriesMeasurements(db *sqlx.DB, f *models.MeasurementsFilter, req
 
 		f.After = tw.After
 		f.Before = tw.Before
+
+		// temporal_resolution defaults to 1 (raw - no downsamping)
+		// examples:
+		// 		3600 (seconds) will keep one datapoint per hour
+		//		1800 will keep one per 30 minutes
+		//		900 will keep one per  15 minutes
+		// 		60 will keep one per minute
+		//		...
+		// 		1 (default) will not resample and returns raw data
+		trs := c.QueryParam("temporal_resolution")
+		if trs == "" {
+			f.TemporalResolution = 1
+		} else {
+			tr, err := strconv.Atoi(trs)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			}
+			f.TemporalResolution = tr
+		}
 
 		rows, err := models.QueryTimeseriesMeasurementsRows(db, f)
 		if err != nil {
