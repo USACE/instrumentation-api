@@ -14,6 +14,14 @@ import (
 	"github.com/labstack/gommon/log"
 )
 
+// Request types enum
+const (
+	byTimeseries = iota
+	byInstrument
+	byInstrumentGroup
+	explorer
+)
+
 func ListTimeseriesMeasurementsByTimeseries(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		tsID, err := uuid.Parse(c.Param("timeseries_id"))
@@ -22,7 +30,7 @@ func ListTimeseriesMeasurementsByTimeseries(db *sqlx.DB) echo.HandlerFunc {
 		}
 		f := models.MeasurementsFilter{TimeseriesID: &tsID}
 
-		streamMeasurementsHandler := StreamTimeseriesMeasurements(db, &f)
+		streamMeasurementsHandler := StreamTimeseriesMeasurements(db, &f, byTimeseries)
 		return streamMeasurementsHandler(c)
 	}
 }
@@ -35,7 +43,7 @@ func ListTimeseriesMeasurementsByInstrument(db *sqlx.DB) echo.HandlerFunc {
 		}
 		f := models.MeasurementsFilter{InstrumentID: &iID}
 
-		streamMeasurementsHandler := StreamTimeseriesMeasurements(db, &f)
+		streamMeasurementsHandler := StreamTimeseriesMeasurements(db, &f, byInstrument)
 		return streamMeasurementsHandler(c)
 	}
 }
@@ -48,7 +56,7 @@ func ListTimeseriesMeasurementsByInstrumentGroup(db *sqlx.DB) echo.HandlerFunc {
 		}
 		f := models.MeasurementsFilter{InstrumentGroupID: &igID}
 
-		streamMeasurementsHandler := StreamTimeseriesMeasurements(db, &f)
+		streamMeasurementsHandler := StreamTimeseriesMeasurements(db, &f, byInstrumentGroup)
 		return streamMeasurementsHandler(c)
 	}
 }
@@ -64,14 +72,14 @@ func ListTimeseriesMeasurementsExplorer(db *sqlx.DB) echo.HandlerFunc {
 
 		f := models.MeasurementsFilter{InstrumentIDs: iIDs}
 
-		streamMeasurementsHandler := StreamTimeseriesMeasurements(db, &f)
+		streamMeasurementsHandler := StreamTimeseriesMeasurements(db, &f, explorer)
 		return streamMeasurementsHandler(c)
 	}
 }
 
 // StreamTimeseriesMeasurements emits newline delimited json objects. The buffer flushes to the client
 // every 1000 records, plus any remaining records in the buffer when complete
-func StreamTimeseriesMeasurements(db *sqlx.DB, f *models.MeasurementsFilter) echo.HandlerFunc {
+func StreamTimeseriesMeasurements(db *sqlx.DB, f *models.MeasurementsFilter, requestType int) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var tw timeseries.TimeWindow
 		a, b := c.QueryParam("after"), c.QueryParam("before")
@@ -93,10 +101,18 @@ func StreamTimeseriesMeasurements(db *sqlx.DB, f *models.MeasurementsFilter) ech
 			}
 		}()
 
-		c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextPlainCharsetUTF8)
-		c.Response().WriteHeader(http.StatusOK)
+		stream := c.Request().Header.Get("Accept") == "application/x-ndjson"
 
-		enc := json.NewEncoder(c.Response())
+		var enc *json.Encoder
+		var mrc models.MeasurementsResponseCollection
+
+		if stream {
+			c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextPlainCharsetUTF8)
+			c.Response().WriteHeader(http.StatusOK)
+			enc = json.NewEncoder(c.Response())
+		} else {
+			mrc = make(models.MeasurementsResponseCollection, 0)
+		}
 
 		// LOCF (Last Observation Carried Forward)
 		remember := make(map[uuid.UUID]map[string]interface{})
@@ -104,25 +120,25 @@ func StreamTimeseriesMeasurements(db *sqlx.DB, f *models.MeasurementsFilter) ech
 
 		for rows.Next() {
 			// Buffer is chunked to send for every 1000 records
-			if rowsInChunk > 0 && rowsInChunk%1000 == 0 {
+			if stream && rowsInChunk > 0 && rowsInChunk%1000 == 0 {
 				c.Response().Flush()
 				rowsInChunk = 0
 			}
-			var mfs models.MeasurementsFromStream
+			var mfr models.MeasurementsFromRow
 
-			if err = rows.StructScan(&mfs); err != nil {
+			if err = rows.StructScan(&mfr); err != nil {
 				return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 			}
 			var env map[string]interface{}
-			if err = mfs.MeasurementsJSON.AssignTo(&env); err != nil {
+			if err = mfr.MeasurementsJSON.AssignTo(&env); err != nil {
 				return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 			}
 
 			// Simply stream stored timeseries and continue
-			if !mfs.IsComputed {
+			if !mfr.IsComputed {
 				val, exists := env["value"]
 				if !exists {
-					log.Warnf("bad measurements_json %v for row with date %s and timeseries_id %v", mfs.MeasurementsJSON, mfs.Time, mfs.TimeseriesID)
+					log.Warnf("bad measurements_json %v for row with date %s and timeseries_id %v", mfr.MeasurementsJSON, mfr.Time, mfr.TimeseriesID)
 					continue
 				}
 
@@ -132,64 +148,79 @@ func StreamTimeseriesMeasurements(db *sqlx.DB, f *models.MeasurementsFilter) ech
 					continue
 				}
 
-				m := models.MeasurementsStreamResponse{InstrumentID: mfs.InstrumentID, TimeseriesID: mfs.TimeseriesID, Time: mfs.Time, Value: val64}
+				mmt := models.Measurement{Time: mfr.Time, Value: val64}
+				tsn := models.TimeseriesNote{}
 
 				if masked, exists := env["masked"]; exists {
 					maskedBool, ok := masked.(bool)
 					if !ok {
 						log.Warnf("unable to convert %v interface{} to bool", masked)
 					}
-					m.Masked = maskedBool
+					tsn.Masked = maskedBool
 				}
 				if validated, exists := env["validated"]; exists {
 					validatedBool, ok := validated.(bool)
 					if !ok {
 						log.Warnf("unable to convert %v interface{} to bool", validated)
 					}
-					m.Validated = validatedBool
+					tsn.Validated = validatedBool
 				}
 				if annotation, exists := env["annotation"]; exists {
 					annotationStr, ok := annotation.(string)
 					if !ok {
 						log.Warnf("unable to convert %v interface{} to string", annotation)
 					}
-					m.Annotation = annotationStr
+					tsn.Annotation = annotationStr
 				}
 
-				if err := enc.Encode(m); err != nil {
-					return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+				mr := models.MeasurementsResponse{
+					InstrumentID:   mfr.InstrumentID,
+					TimeseriesID:   mfr.TimeseriesID,
+					Measurement:    mmt,
+					TimeseriesNote: tsn,
+				}
+				if stream {
+					if err := enc.Encode(mr); err != nil {
+						return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+					}
+				} else {
+					mrc = append(mrc, mr)
 				}
 				rowsInChunk++
 				continue
 			}
 
 			// Carry forward any values that don't exist for this timestamp with the last known observation
-			if _, exists := remember[mfs.TimeseriesID]; !exists {
-				remember[mfs.TimeseriesID] = make(map[string]interface{})
+			if _, exists := remember[mfr.TimeseriesID]; !exists {
+				remember[mfr.TimeseriesID] = make(map[string]interface{})
 			}
-			for k, v := range remember[mfs.TimeseriesID] {
+			for k, v := range remember[mfr.TimeseriesID] {
 				if _, exists := env[k]; !exists {
 					env[k] = v
 				}
 			}
 			// Add/Update the most recent values
 			for k, v := range env {
-				remember[mfs.TimeseriesID][k] = v
+				remember[mfr.TimeseriesID][k] = v
 			}
 
-			expression, err := govaluate.NewEvaluableExpression(mfs.Formula)
+			expr, err := govaluate.NewEvaluableExpression(mfr.Formula)
 			if err != nil {
 				log.Warn(err.Error())
 				return err
 			}
 
-			val, err := expression.Evaluate(env)
+			val, err := expr.Evaluate(env)
 			if err != nil {
-				m := models.MeasurementsStreamResponse{InstrumentID: mfs.InstrumentID, TimeseriesID: mfs.TimeseriesID, Time: mfs.Time, Error: err.Error()}
-
 				// Any evaluation errors are passed back to client
-				if err := enc.Encode(m); err != nil {
-					return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+				mmt := models.Measurement{Time: mfr.Time, Error: err.Error()}
+				mr := models.MeasurementsResponse{InstrumentID: mfr.InstrumentID, TimeseriesID: mfr.TimeseriesID, Measurement: mmt}
+				if stream {
+					if err := enc.Encode(mr); err != nil {
+						return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+					}
+				} else {
+					mrc = append(mrc, mr)
 				}
 				rowsInChunk++
 				continue
@@ -201,21 +232,53 @@ func StreamTimeseriesMeasurements(db *sqlx.DB, f *models.MeasurementsFilter) ech
 				continue
 			}
 
-			m := models.MeasurementsStreamResponse{InstrumentID: mfs.InstrumentID, TimeseriesID: mfs.TimeseriesID, Time: mfs.Time, Value: val64}
+			mmt := models.Measurement{Time: mfr.Time, Value: val64}
+			mr := models.MeasurementsResponse{InstrumentID: mfr.InstrumentID, TimeseriesID: mfr.TimeseriesID, Measurement: mmt}
 
-			if err := enc.Encode(m); err != nil {
-				return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			if stream {
+				if err := enc.Encode(mr); err != nil {
+					return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+				}
+			} else {
+				mrc = append(mrc, mr)
 			}
 			rowsInChunk++
 		}
 
 		// Send any remianing records
-		if rowsInChunk > 0 {
-			c.Response().Flush()
-		} else {
-			echo.NewHTTPError(http.StatusNotFound, messages.NotFound)
+		if stream {
+			if rowsInChunk > 0 {
+				c.Response().Flush()
+			}
+			return nil
 		}
 
-		return nil
+		var resBody interface{}
+
+		if requestType == byTimeseries {
+			resBody, err = mrc.CollectSingleTimeseries()
+			if err != nil {
+				if err.Error() == "no rows" {
+					return c.JSON(
+						http.StatusOK,
+						timeseries.MeasurementCollection{
+							TimeseriesID: *f.TimeseriesID,
+							Items:        make([]timeseries.Measurement, 0),
+						},
+					)
+				}
+				return err
+			}
+		} else {
+			resBody, err = mrc.GroupByInstrument()
+			if err != nil {
+				if err.Error() == "no rows" {
+					return c.JSON(http.StatusOK, make([]map[string]interface{}, 0))
+				}
+				return err
+			}
+		}
+
+		return c.JSON(http.StatusOK, resBody)
 	}
 }

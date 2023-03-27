@@ -139,8 +139,8 @@ AS $$
   )
   SELECT
     src.id AS id,
-    ppc.t AS t,
-    ppc.v AS v
+    CASE WHEN bucket_size = 1 THEN src.t ELSE ppc.t END AS t,
+    CASE WHEN bucket_size = 1 THEN src.v ELSE ppc.v END AS v
   FROM postproc ppc
   INNER JOIN timeseries src
     ON src.t = ppc.t

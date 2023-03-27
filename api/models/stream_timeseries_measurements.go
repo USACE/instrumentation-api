@@ -12,8 +12,8 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-// MeasurementsFromStream binds to each row returned from QueryTimeseriesMeasurementsRows
-type MeasurementsFromStream struct {
+// MeasurementsFromRow binds to each row returned from QueryTimeseriesMeasurementsRows
+type MeasurementsFromRow struct {
 	Time             time.Time    `db:"time"`
 	TimeseriesID     uuid.UUID    `db:"timeseries_id"`
 	InstrumentID     uuid.UUID    `db:"instrument_id"`
@@ -22,17 +22,15 @@ type MeasurementsFromStream struct {
 	MeasurementsJSON pgtype.JSONB `db:"measurements_json"`
 }
 
-// MeasurementsStreamResponse for JSON response stream
-type MeasurementsStreamResponse struct {
+// MeasurementsResponse basic type for responses, can be transformed with methods based on MeasurementsFilter
+type MeasurementsResponse struct {
 	TimeseriesID uuid.UUID `json:"timeseries_id"`
 	InstrumentID uuid.UUID `json:"instrument_id"`
-	Time         time.Time `json:"time"`
-	Value        float64   `json:"value"`
-	Masked       bool      `json:"masked,omitempty"`
-	Validated    bool      `json:"validated,omitempty"`
-	Annotation   string    `json:"annotation,omitempty"`
-	Error        string    `json:"error,omitempty"`
+	Measurement
+	TimeseriesNote
 }
+
+type MeasurementsResponseCollection []MeasurementsResponse
 
 // MeasurementsFilter for conveniently passsing SQL query paramters to functions
 type MeasurementsFilter struct {
@@ -42,6 +40,72 @@ type MeasurementsFilter struct {
 	InstrumentIDs     []uuid.UUID `db:"instrument_ids"`
 	After             time.Time   `db:"after"`
 	Before            time.Time   `db:"before"`
+}
+
+type TimeseriesNote struct {
+	Masked     bool   `json:"masked,omitempty"`
+	Validated  bool   `json:"validated,omitempty"`
+	Annotation string `json:"annotation,omitempty"`
+}
+
+func (mrc *MeasurementsResponseCollection) GroupByInstrument() (map[uuid.UUID][]timeseries.MeasurementCollectionLean, error) {
+	if len(*mrc) == 0 {
+		return make(map[uuid.UUID][]timeseries.MeasurementCollectionLean), fmt.Errorf("no rows")
+	}
+
+	tmp := make(map[uuid.UUID]map[uuid.UUID][]timeseries.MeasurementLean)
+
+	for _, t := range *mrc {
+		if _, hasInstrument := tmp[t.InstrumentID]; !hasInstrument {
+			tmp[t.InstrumentID] = make(map[uuid.UUID][]timeseries.MeasurementLean, 0)
+		}
+		if _, hasTimeseries := tmp[t.InstrumentID][t.TimeseriesID]; !hasTimeseries {
+			tmp[t.InstrumentID][t.TimeseriesID] = make([]timeseries.MeasurementLean, 0)
+		}
+		if len(t.Error) != 0 {
+			continue
+		}
+		tmp[t.InstrumentID][t.TimeseriesID] = append(tmp[t.InstrumentID][t.TimeseriesID], timeseries.MeasurementLean{t.Time: t.Value})
+	}
+
+	res := make(map[uuid.UUID][]timeseries.MeasurementCollectionLean)
+
+	for instrumentID := range tmp {
+		res[instrumentID] = make([]timeseries.MeasurementCollectionLean, 0)
+
+		for tsID := range tmp[instrumentID] {
+			res[instrumentID] = append(res[instrumentID],
+				timeseries.MeasurementCollectionLean{
+					TimeseriesID: tsID,
+					Items:        tmp[instrumentID][tsID],
+				},
+			)
+		}
+	}
+
+	return res, nil
+}
+
+func (mrc *MeasurementsResponseCollection) CollectSingleTimeseries() (timeseries.MeasurementCollection, error) {
+	if len(*mrc) == 0 {
+		return timeseries.MeasurementCollection{}, fmt.Errorf("no rows")
+	}
+
+	mmts := make([]timeseries.Measurement, 0)
+
+	for _, t := range *mrc {
+		mmts = append(mmts, timeseries.Measurement{
+			TimeseriesID: t.TimeseriesID,
+			Time:         t.Time,
+			Value:        t.Value,
+			Masked:       t.Masked,
+			Validated:    t.Validated,
+			Annotation:   t.Annotation,
+			Error:        t.Error,
+		})
+	}
+
+	return timeseries.MeasurementCollection{TimeseriesID: mmts[0].TimeseriesID, Items: mmts}, nil
 }
 
 // QueryTimeseriesMeasurementsRows returns an aggregate of stored and computed timeseries rows to be iterated over
