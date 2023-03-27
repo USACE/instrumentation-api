@@ -213,16 +213,18 @@ func StreamTimeseriesMeasurements(db *sqlx.DB, f *models.MeasurementsFilter, req
 			val, err := expr.Evaluate(env)
 			if err != nil {
 				// Any evaluation errors are passed back to client
-				mmt := models.Measurement{Time: mfr.Time, Error: err.Error()}
-				mr := models.MeasurementsResponse{InstrumentID: mfr.InstrumentID, TimeseriesID: mfr.TimeseriesID, Measurement: mmt}
-				if stream {
-					if err := enc.Encode(mr); err != nil {
-						return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-					}
-				} else {
-					mrc = append(mrc, mr)
-				}
-				rowsInChunk++
+				// TODO: Apply once UI appropriately filters errors, as to not incorrectly plot 0 values
+
+				// mmt := models.Measurement{Time: mfr.Time, Error: err.Error()}
+				// mr := models.MeasurementsResponse{InstrumentID: mfr.InstrumentID, TimeseriesID: mfr.TimeseriesID, Measurement: mmt}
+				// if stream {
+				// 	if err := enc.Encode(mr); err != nil {
+				// 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+				// 	}
+				// } else {
+				// 	mrc = append(mrc, mr)
+				// }
+				// rowsInChunk++
 				continue
 			}
 
