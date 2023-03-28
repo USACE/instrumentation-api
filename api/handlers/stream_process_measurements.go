@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"net/http"
 	"strconv"
 
@@ -127,12 +128,29 @@ func StreamProcessMeasurements(db *sqlx.DB, f *models.MeasurementsFilter, reques
 			}
 		}()
 
-		mrc := make(models.MeasurementsResponseCollection, 0)
+		stream := c.Request().Header.Get("Accept") == "application/x-ndjson"
+
+		var enc *json.Encoder
+		var mrc models.MeasurementsResponseCollection
+
+		if stream {
+			c.Response().Header().Set(echo.HeaderContentType, "application/x-ndjson")
+			c.Response().WriteHeader(http.StatusOK)
+			enc = json.NewEncoder(c.Response())
+		} else {
+			mrc = make(models.MeasurementsResponseCollection, 0)
+		}
 
 		// LOCF (Last Observation Carried Forward)
 		remember := make(map[uuid.UUID]map[string]interface{})
+		rowsInChunk := 0
 
 		for rows.Next() {
+			// Buffer is chunked to send for every 1000 records
+			if stream && rowsInChunk > 0 && rowsInChunk%1000 == 0 {
+				c.Response().Flush()
+				rowsInChunk = 0
+			}
 			var mfr models.MeasurementsFromRow
 
 			if err = rows.StructScan(&mfr); err != nil {
@@ -188,8 +206,14 @@ func StreamProcessMeasurements(db *sqlx.DB, f *models.MeasurementsFilter, reques
 					Measurement:    mmt,
 					TimeseriesNote: tsn,
 				}
-				mrc = append(mrc, mr)
-
+				if stream {
+					if err := enc.Encode(mr); err != nil {
+						return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+					}
+				} else {
+					mrc = append(mrc, mr)
+				}
+				rowsInChunk++
 				continue
 			}
 
@@ -220,7 +244,14 @@ func StreamProcessMeasurements(db *sqlx.DB, f *models.MeasurementsFilter, reques
 
 				// mmt := models.Measurement{Time: mfr.Time, Error: err.Error()}
 				// mr := models.MeasurementsResponse{InstrumentID: mfr.InstrumentID, TimeseriesID: mfr.TimeseriesID, Measurement: mmt}
-				// mrc = append(mrc, mr)
+				// if stream {
+				// 	if err := enc.Encode(mr); err != nil {
+				// 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+				// 	}
+				// } else {
+				// 	mrc = append(mrc, mr)
+				// }
+				// rowsInChunk++
 				continue
 			}
 
@@ -233,7 +264,22 @@ func StreamProcessMeasurements(db *sqlx.DB, f *models.MeasurementsFilter, reques
 			mmt := models.Measurement{Time: mfr.Time, Value: val64}
 			mr := models.MeasurementsResponse{InstrumentID: mfr.InstrumentID, TimeseriesID: mfr.TimeseriesID, Measurement: mmt}
 
-			mrc = append(mrc, mr)
+			if stream {
+				if err := enc.Encode(mr); err != nil {
+					return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+				}
+			} else {
+				mrc = append(mrc, mr)
+			}
+			rowsInChunk++
+		}
+
+		// Send any remianing records
+		if stream {
+			if rowsInChunk > 0 {
+				c.Response().Flush()
+			}
+			return nil
 		}
 
 		var resBody interface{}
