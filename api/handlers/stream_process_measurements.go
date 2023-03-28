@@ -274,6 +274,10 @@ func StreamProcessMeasurements(db *sqlx.DB, f *models.MeasurementsFilter, reques
 			rowsInChunk++
 		}
 
+		if err := rows.Err(); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+
 		// Send any remianing records
 		if stream {
 			if rowsInChunk > 0 {
