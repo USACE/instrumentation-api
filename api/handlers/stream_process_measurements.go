@@ -124,7 +124,7 @@ func StreamProcessMeasurements(db *sqlx.DB, f *models.MeasurementsFilter, reques
 
 		defer func() {
 			if err := rows.Close(); err != nil {
-				log.Fatal(err.Error())
+				log.Error(err.Error())
 			}
 		}()
 
@@ -233,8 +233,7 @@ func StreamProcessMeasurements(db *sqlx.DB, f *models.MeasurementsFilter, reques
 
 			expr, err := govaluate.NewEvaluableExpression(mfr.Formula)
 			if err != nil {
-				log.Warn(err.Error())
-				return err
+				return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 			}
 
 			val, err := expr.Evaluate(env)
@@ -300,7 +299,7 @@ func StreamProcessMeasurements(db *sqlx.DB, f *models.MeasurementsFilter, reques
 						},
 					)
 				}
-				return err
+				return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 			}
 		} else {
 			resBody, err = mrc.GroupByInstrument()
@@ -308,7 +307,7 @@ func StreamProcessMeasurements(db *sqlx.DB, f *models.MeasurementsFilter, reques
 				if err.Error() == messages.NotFound {
 					return c.JSON(http.StatusOK, make([]map[string]interface{}, 0))
 				}
-				return err
+				return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 			}
 		}
 
