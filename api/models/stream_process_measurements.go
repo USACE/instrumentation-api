@@ -254,17 +254,12 @@ func QueryTimeseriesMeasurementsRows(db *sqlx.DB, f *MeasurementsFilter) (*sqlx.
 	`
 
 	query, args, err := sqlx.In(sql, filterArg, filterArg, f.After, f.Before, f.TemporalResolution)
-	log.Printf("sqlx.In called with query: %s, args: %+v", query, args)
 	if err != nil {
-		log.Printf("sqlx.In error with %s", err.Error())
 		return nil, err
 	}
 	query = db.Rebind(query)
-	log.Printf("db.Rebind query: %s", query)
 	rows, err := db.Queryx(query, args...)
-	log.Printf("db.Queryx rows: %+v", rows)
 	if err != nil {
-		log.Printf("db.Queryx error: %s", err.Error())
 		return nil, err
 	}
 

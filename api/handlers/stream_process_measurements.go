@@ -64,7 +64,6 @@ func ListTimeseriesMeasurementsByInstrumentGroup(db *sqlx.DB) echo.HandlerFunc {
 
 func ListTimeseriesMeasurementsExplorer(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		log.Print("ListTimeseriesMeasurementsExplorer called")
 		var iIDs []uuid.UUID
 
 		// Instrument IDs from POST
@@ -98,7 +97,6 @@ func ListTimeseriesMeasurementsExplorer(db *sqlx.DB) echo.HandlerFunc {
 // ~
 func StreamProcessMeasurements(db *sqlx.DB, f *models.MeasurementsFilter, requestType int) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		log.Printf("StreamProcessMeasurements called")
 		var tw timeseries.TimeWindow
 		a, b := c.QueryParam("after"), c.QueryParam("before")
 		if err := tw.SetWindow(a, b); err != nil {
@@ -119,17 +117,12 @@ func StreamProcessMeasurements(db *sqlx.DB, f *models.MeasurementsFilter, reques
 			f.TemporalResolution = tr
 		}
 
-		log.Print("before QueryTimeseriesMeasurementsRows")
-
 		rows, err := models.QueryTimeseriesMeasurementsRows(db, f)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
-		log.Print("after QueryTimeseriesMeasurementsRows")
-
 		defer func() {
-			log.Print("rows closed")
 			if err := rows.Close(); err != nil {
 				log.Error(err.Error())
 			}
@@ -153,7 +146,6 @@ func StreamProcessMeasurements(db *sqlx.DB, f *models.MeasurementsFilter, reques
 		rowsInChunk := 0
 
 		for rows.Next() {
-			log.Printf("rows in chunk %d", rowsInChunk)
 			// Buffer is chunked to send for every 1000 records
 			if stream && rowsInChunk > 0 && rowsInChunk%1000 == 0 {
 				c.Response().Flush()
@@ -291,12 +283,9 @@ func StreamProcessMeasurements(db *sqlx.DB, f *models.MeasurementsFilter, reques
 				c.Response().Flush()
 			}
 			return nil
-		}
 
-		var resBody interface{}
-
-		if requestType == byTimeseries {
-			resBody, err = mrc.CollectSingleTimeseries()
+		} else if requestType == byTimeseries {
+			resBody, err := mrc.CollectSingleTimeseries()
 			if err != nil {
 				if err.Error() == messages.NotFound {
 					return c.JSON(
@@ -309,17 +298,18 @@ func StreamProcessMeasurements(db *sqlx.DB, f *models.MeasurementsFilter, reques
 				}
 				return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 			}
+			return c.JSON(http.StatusOK, resBody)
+
 		} else {
-			log.Print("GroupByInstrument")
-			resBody, err = mrc.GroupByInstrument()
+			resBody, err := mrc.GroupByInstrument()
 			if err != nil {
 				if err.Error() == messages.NotFound {
 					return c.JSON(http.StatusOK, make([]map[string]interface{}, 0))
 				}
 				return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 			}
+			log.Printf("%+v", resBody)
+			return c.JSON(http.StatusOK, resBody)
 		}
-
-		return c.JSON(http.StatusOK, resBody)
 	}
 }
