@@ -81,8 +81,6 @@ func main() {
 	e.Use(middleware.CORS, middleware.GZIP)
 	public := e.Group(cfg.RoutePrefix) // TODO: /instrumentation/v1/
 
-	public.Use(middleware.Logger)
-
 	// Media Routes
 	public.GET("/projects/:project_slug/images/*", handlers.GetMedia(awsCfg, &cfg.AWSS3Bucket, "/midas", &cfg.RoutePrefix))
 
