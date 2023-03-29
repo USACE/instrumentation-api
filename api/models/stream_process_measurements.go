@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/USACE/instrumentation-api/api/dbutils"
 	"github.com/USACE/instrumentation-api/api/messages"
 	"github.com/USACE/instrumentation-api/api/timeseries"
 	"github.com/google/uuid"
@@ -51,6 +52,7 @@ type MeasurementsFilter struct {
 }
 
 func (mrc *MeasurementsResponseCollection) GroupByInstrument() (map[uuid.UUID][]timeseries.MeasurementCollectionLean, error) {
+	defer dbutils.Timer()()
 	if len(*mrc) == 0 {
 		return make(map[uuid.UUID][]timeseries.MeasurementCollectionLean), fmt.Errorf(messages.NotFound)
 	}
@@ -128,6 +130,7 @@ func (mrc *MeasurementsResponseCollection) CollectSingleTimeseries() (timeseries
 // Once the Computed Timeseries are processed however, they are bound
 // to the same struct as the stored measurements: MeasurementsStreamResponse
 func QueryTimeseriesMeasurementsRows(db *sqlx.DB, f *MeasurementsFilter) (*sqlx.Rows, error) {
+	defer dbutils.Timer()()
 	var filterSQL string
 	var filterArg interface{}
 

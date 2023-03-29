@@ -3,11 +3,10 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"runtime"
 	"strconv"
-	"time"
 
 	"github.com/Knetic/govaluate"
+	"github.com/USACE/instrumentation-api/api/dbutils"
 	"github.com/USACE/instrumentation-api/api/messages"
 	"github.com/USACE/instrumentation-api/api/models"
 	"github.com/USACE/instrumentation-api/api/timeseries"
@@ -80,28 +79,6 @@ func ListTimeseriesMeasurementsExplorer(db *sqlx.DB) echo.HandlerFunc {
 	}
 }
 
-func callerName(skip int) string {
-	const unknown = "unknown"
-	pcs := make([]uintptr, 1)
-	n := runtime.Callers(skip+2, pcs)
-	if n < 1 {
-		return unknown
-	}
-	frame, _ := runtime.CallersFrames(pcs).Next()
-	if frame.Function == "" {
-		return unknown
-	}
-	return frame.Function
-}
-
-func timer() func() {
-	name := callerName(1)
-	start := time.Now()
-	return func() {
-		log.Printf("%s took %v\n", name, time.Since(start))
-	}
-}
-
 // StreamProcessMeasurements returns computed and stored timeseries measurements
 // JSON schema of payloads returned depends on the enum passed by the parent function calling this handler
 //
@@ -121,7 +98,7 @@ func timer() func() {
 // ~
 func StreamProcessMeasurements(db *sqlx.DB, f *models.MeasurementsFilter, requestType int) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		defer timer()()
+		defer dbutils.Timer()()
 
 		var tw timeseries.TimeWindow
 		a, b := c.QueryParam("after"), c.QueryParam("before")
