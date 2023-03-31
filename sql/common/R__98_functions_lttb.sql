@@ -145,5 +145,4 @@ AS $$
   FROM postproc ppc
   INNER JOIN timeseries src
     ON src.t = ppc.t
-    AND src.v = ppc.v
 $$;
