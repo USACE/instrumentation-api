@@ -16,6 +16,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      # Go needed to pull peer dependencies with go mod vendor
+      - uses: actions/setup-go@v4
+        with:
+          go-version-file: "telemetry/go.mod"
 
       - name: Run Tests
         run: ./compose.sh test
