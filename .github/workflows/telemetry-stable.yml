@@ -24,6 +24,7 @@ jobs:
       - uses: actions/setup-go@v4
         with:
           go-version-file: "telemetry/go.mod"
+          cache-dependency-path: telemetry/go.sum
 
       - name: Run Tests
         env:
