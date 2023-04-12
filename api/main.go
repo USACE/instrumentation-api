@@ -221,7 +221,7 @@ func main() {
 	// Instrument Constants (same as a timeseries in structure/payload)
 	public.GET("/projects/:project_id/instruments/:instrument_id/constants", handlers.ListInstrumentConstants(db))
 	private.POST("/projects/:project_id/instruments/:instrument_id/constants", handlers.CreateInstrumentConstants(db))
-	private.PUT("/projects/:project_id/instruments/:instrument_id/constants/:timeseries_id", handlers.UpdateTimeseries(db), middleware.IsApplicationAdmin)
+	private.PUT("/projects/:project_id/instruments/:instrument_id/constants/:timeseries_id", handlers.UpdateTimeseries(db))
 	private.DELETE("/projects/:project_id/instruments/:instrument_id/constants/:timeseries_id", handlers.DeleteInstrumentConstant(db))
 
 	// Instrument Notes(GET, PUT, DELETE work with or without instrument context in URL)
@@ -295,22 +295,22 @@ func main() {
 	public.GET("/opendcs/sites", handlers.ListOpendcsSites(db))
 
 	// Data Logger
-	private.GET("/dataloggers", handlers.ListDataLoggers(db), middleware.IsApplicationAdmin)
-	private.POST("/datalogger", handlers.CreateDataLogger(db), middleware.IsApplicationAdmin)
-	private.GET("/datalogger/:datalogger_id", handlers.GetDataLogger(db), middleware.IsApplicationAdmin)
-	private.PUT("/datalogger/:datalogger_id", handlers.UpdateDataLogger(db), middleware.IsApplicationAdmin)
-	private.PUT("/datalogger/:datalogger_id/key", handlers.CycleDataLoggerKey(db), middleware.IsApplicationAdmin)
-	private.DELETE("/datalogger/:datalogger_id", handlers.DeleteDataLogger(db), middleware.IsApplicationAdmin)
+	private.GET("/dataloggers", handlers.ListDataLoggers(db))
+	private.POST("/datalogger", handlers.CreateDataLogger(db))
+	private.GET("/datalogger/:datalogger_id", handlers.GetDataLogger(db))
+	private.PUT("/datalogger/:datalogger_id", handlers.UpdateDataLogger(db))
+	private.PUT("/datalogger/:datalogger_id/key", handlers.CycleDataLoggerKey(db))
+	private.DELETE("/datalogger/:datalogger_id", handlers.DeleteDataLogger(db))
 
 	// Data Logger Equivalency Table
-	private.GET("/datalogger/:datalogger_id/equivalency_table", handlers.GetEquivalencyTable(db), middleware.IsApplicationAdmin)
-	private.POST("/datalogger/:datalogger_id/equivalency_table", handlers.CreateEquivalencyTable(db), middleware.IsApplicationAdmin)
-	private.PUT("/datalogger/:datalogger_id/equivalency_table", handlers.UpdateEquivalencyTable(db), middleware.IsApplicationAdmin)
-	private.DELETE("/datalogger/:datalogger_id/equivalency_table", handlers.DeleteEquivalencyTable(db), middleware.IsApplicationAdmin)
-	private.DELETE("/datalogger/:datalogger_id/equivalency_table/row", handlers.DeleteEquivalencyTableRow(db), middleware.IsApplicationAdmin)
+	private.GET("/datalogger/:datalogger_id/equivalency_table", handlers.GetEquivalencyTable(db))
+	private.POST("/datalogger/:datalogger_id/equivalency_table", handlers.CreateEquivalencyTable(db))
+	private.PUT("/datalogger/:datalogger_id/equivalency_table", handlers.UpdateEquivalencyTable(db))
+	private.DELETE("/datalogger/:datalogger_id/equivalency_table", handlers.DeleteEquivalencyTable(db))
+	private.DELETE("/datalogger/:datalogger_id/equivalency_table/row", handlers.DeleteEquivalencyTableRow(db))
 
 	// Data Logger Preview
-	private.GET("/datalogger/:datalogger_id/preview", handlers.GetDataLoggerPreview(db), middleware.IsApplicationAdmin)
+	private.GET("/datalogger/:datalogger_id/preview", handlers.GetDataLoggerPreview(db))
 
 	// Start server
 	s := &http2.Server{
