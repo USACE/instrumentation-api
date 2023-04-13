@@ -16,8 +16,7 @@ func initDB(connStr string) *sqlx.DB {
 	db, err := sqlx.Connect("pgx", connStr)
 
 	if err != nil {
-		log.Fatal("Could not connect to database")
-		panic(err)
+		log.Fatalf("Could not connect to database: %s", err.Error())
 	}
 
 	if db == nil {
@@ -26,7 +25,7 @@ func initDB(connStr string) *sqlx.DB {
 
 	db.SetMaxOpenConns(15)
 	db.SetMaxIdleConns(5)
-	db.SetConnMaxLifetime(time.Minute *30)
+	db.SetConnMaxLifetime(time.Minute * 30)
 
 	return db
 }
