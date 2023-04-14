@@ -31,7 +31,6 @@ type MeasurementsResponse struct {
 	TimeseriesID uuid.UUID `json:"timeseries_id"`
 	InstrumentID uuid.UUID `json:"instrument_id"`
 	Measurement
-	TimeseriesNote
 }
 
 type TimeseriesNote struct {
@@ -42,16 +41,15 @@ type TimeseriesNote struct {
 
 // MeasurementsFilter for conveniently passsing SQL query paramters to functions
 type MeasurementsFilter struct {
-	TimeseriesID       *uuid.UUID  `db:"timeseries_id"`
-	InstrumentID       *uuid.UUID  `db:"instrument_id"`
-	InstrumentGroupID  *uuid.UUID  `db:"instrument_group_id"`
-	InstrumentIDs      []uuid.UUID `db:"instrument_ids"`
-	After              time.Time   `db:"after"`
-	Before             time.Time   `db:"before"`
-	TemporalResolution int         `db:"temporal_resolution"`
+	TimeseriesID      *uuid.UUID  `db:"timeseries_id"`
+	InstrumentID      *uuid.UUID  `db:"instrument_id"`
+	InstrumentGroupID *uuid.UUID  `db:"instrument_group_id"`
+	InstrumentIDs     []uuid.UUID `db:"instrument_ids"`
+	After             time.Time   `db:"after"`
+	Before            time.Time   `db:"before"`
 }
 
-func (mrc *MeasurementsResponseCollection) GroupByInstrument() (map[uuid.UUID][]timeseries.MeasurementCollectionLean, error) {
+func (mrc *MeasurementsResponseCollection) GroupByInstrument(threshold int) (map[uuid.UUID][]timeseries.MeasurementCollectionLean, error) {
 	defer dbutils.Timer()()
 	if len(*mrc) == 0 {
 		return make(map[uuid.UUID][]timeseries.MeasurementCollectionLean), fmt.Errorf(messages.NotFound)
@@ -81,7 +79,7 @@ func (mrc *MeasurementsResponseCollection) GroupByInstrument() (map[uuid.UUID][]
 			res[instrumentID] = append(res[instrumentID],
 				timeseries.MeasurementCollectionLean{
 					TimeseriesID: tsID,
-					Items:        tmp[instrumentID][tsID],
+					Items:        timeseries.LTTB(tmp[instrumentID][tsID], threshold),
 				},
 			)
 		}
@@ -90,7 +88,7 @@ func (mrc *MeasurementsResponseCollection) GroupByInstrument() (map[uuid.UUID][]
 	return res, nil
 }
 
-func (mrc *MeasurementsResponseCollection) CollectSingleTimeseries() (timeseries.MeasurementCollection, error) {
+func (mrc *MeasurementsResponseCollection) CollectSingleTimeseries(threshold int) (timeseries.MeasurementCollection, error) {
 	if len(*mrc) == 0 {
 		return timeseries.MeasurementCollection{}, fmt.Errorf(messages.NotFound)
 	}
@@ -102,14 +100,11 @@ func (mrc *MeasurementsResponseCollection) CollectSingleTimeseries() (timeseries
 			TimeseriesID: t.TimeseriesID,
 			Time:         t.Time,
 			Value:        t.Value,
-			Masked:       t.Masked,
-			Validated:    t.Validated,
-			Annotation:   t.Annotation,
 			Error:        t.Error,
 		})
 	}
 
-	return timeseries.MeasurementCollection{TimeseriesID: mmts[0].TimeseriesID, Items: mmts}, nil
+	return timeseries.MeasurementCollection{TimeseriesID: mmts[0].TimeseriesID, Items: timeseries.LTTB(mmts, threshold)}, nil
 }
 
 // QueryTimeseriesMeasurementsRows returns an aggregate of stored and computed timeseries rows to be iterated over
@@ -159,43 +154,50 @@ func QueryTimeseriesMeasurementsRows(db *sqlx.DB, f *MeasurementsFilter) (*sqlx.
 
 	sql := `
 	WITH required_timeseries AS (
-		SELECT
-			dependency_timeseries_id AS stored_timeseries_id,
-			id AS computed_timeseries_id,
-			instrument_id,
-			parsed_variable AS variable,
-			true AS is_computed
-		FROM v_timeseries_dependency
-		WHERE ` + filterSQL + `
+		(
+			SELECT
+				dependency_timeseries_id AS stored_timeseries_id,
+				id AS computed_timeseries_id,
+				instrument_id,
+				parsed_variable AS variable,
+				true AS is_computed
+			FROM v_timeseries_dependency
+			WHERE ` + filterSQL + `
+		)
 		UNION ALL
-		SELECT
-			id AS stored_timeseries_id,
-			NULL,
-			instrument_id,
-			NULL,
-			false
-		FROM v_timeseries_stored
-		WHERE ` + filterSQL + `
-	),
-	proc AS (
+		(
+			SELECT
+				id AS stored_timeseries_id,
+				NULL,
+				instrument_id,
+				NULL,
+				false
+			FROM v_timeseries_stored
+			WHERE ` + filterSQL + `
+		)
+	), proc AS (
 		SELECT
 			timeseries_id,
 			time AS t,
 			value AS v
---			array_agg(row(timeseries_id, time, value)::ts_measurement) AS measurements
 		FROM timeseries_measurement
 		WHERE
 			time >= COALESCE(
-				(SELECT MAX(time) AS time FROM timeseries_measurement
-				 WHERE timeseries_id = timeseries_id AND time < ?), 
+				(
+					SELECT max( time ) AS time
+					FROM timeseries_measurement
+					WHERE time < ?
+				),
 				'-infinity'
-			)
-			AND time <= COALESCE(
-				(SELECT MIN(time) AS time FROM timeseries_measurement
-				 WHERE timeseries_id = timeseries_id AND time > ?), 
+			) AND
+			time <= COALESCE(
+				(
+					SELECT min( time ) AS time
+					FROM timeseries_measurement
+					WHERE time > ?
+				),
 				'infinity'
 			)
---		GROUP BY timeseries_id
 	)
 	SELECT
 		ds.t AS time,
@@ -205,45 +207,23 @@ func QueryTimeseriesMeasurementsRows(db *sqlx.DB, f *MeasurementsFilter) (*sqlx.
 		COALESCE(cc.contents, '') AS formula,
 		jsonb_object_agg(
 			COALESCE(rt.variable, 'value'), ds.v
-		) || (
-			CASE rt.is_computed
-			  WHEN NOT true THEN
-			  jsonb_build_object(
-				  'masked', COALESCE(tn.masked, false),
-				  'validated', COALESCE(tn.validated, false),
-				  'annotation', COALESCE(tn.annotation, '')
-			  )
-			  ELSE '{}'::jsonb
-		  END) AS measurements_json
-	FROM required_timeseries rt
-	CROSS JOIN LATERAL
-		(VALUES (COALESCE(rt.computed_timeseries_id, rt.stored_timeseries_id))) AS xx(timeseries_id)
---	INNER JOIN proc p
---		ON p.timeseries_id = rt.stored_timeseries_id
-	INNER JOIN proc ds
-		ON ds.timeseries_id = rt.stored_timeseries_id
---	INNER JOIN lttb(1, p.measurements) ds
---	ON rt.stored_timeseries_id = ds.id
-	INNER JOIN instrument i
-		ON i.id = rt.instrument_id
-	LEFT JOIN calculation cc
-		ON rt.computed_timeseries_id = cc.timeseries_id
-	LEFT JOIN timeseries_notes tn
-		ON rt.stored_timeseries_id = tn.timeseries_id
-		AND ds.t = tn.time
+		) AS measurements_json
+	FROM
+		required_timeseries AS rt
+		CROSS JOIN LATERAL (
+			VALUES ( COALESCE( rt.computed_timeseries_id, rt.stored_timeseries_id ) )
+		) AS xx ( timeseries_id ) 
+		JOIN proc AS ds ON ds.timeseries_id = rt.stored_timeseries_id
+		LEFT JOIN calculation AS cc ON rt.computed_timeseries_id = cc.timeseries_id
 	GROUP BY
 		ds.t,
 		xx.timeseries_id,
 		rt.instrument_id,
 		rt.is_computed,
-		cc.contents,
-		tn.masked,
-		tn.validated,
-		tn.annotation
+		cc.contents
 	ORDER BY ds.t ASC
 	`
 
-	// query, args, err := sqlx.In(sql, filterArg, filterArg, f.After, f.Before, f.TemporalResolution)
 	query, args, err := sqlx.In(sql, filterArg, filterArg, f.After, f.Before)
 	if err != nil {
 		return nil, err

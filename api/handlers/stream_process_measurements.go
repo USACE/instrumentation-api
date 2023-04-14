@@ -109,15 +109,15 @@ func StreamProcessMeasurements(db *sqlx.DB, f *models.MeasurementsFilter, reques
 		f.After = tw.After
 		f.Before = tw.Before
 
-		trs := c.QueryParam("temporal_resolution")
-		if trs == "" {
-			f.TemporalResolution = 1
-		} else {
+		trs := c.QueryParam("threshold")
+
+		var threshold int
+		if trs != "" {
 			tr, err := strconv.Atoi(trs)
 			if err != nil {
 				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 			}
-			f.TemporalResolution = tr
+			threshold = tr
 		}
 
 		rows, err := models.QueryTimeseriesMeasurementsRows(db, f)
@@ -179,35 +179,11 @@ func StreamProcessMeasurements(db *sqlx.DB, f *models.MeasurementsFilter, reques
 				}
 
 				mmt := models.Measurement{Time: mfr.Time, Value: val64}
-				tsn := models.TimeseriesNote{}
-
-				if masked, exists := env["masked"]; exists {
-					maskedBool, ok := masked.(bool)
-					if !ok {
-						log.Warnf("unable to convert %v interface{} to bool", masked)
-					}
-					tsn.Masked = maskedBool
-				}
-				if validated, exists := env["validated"]; exists {
-					validatedBool, ok := validated.(bool)
-					if !ok {
-						log.Warnf("unable to convert %v interface{} to bool", validated)
-					}
-					tsn.Validated = validatedBool
-				}
-				if annotation, exists := env["annotation"]; exists {
-					annotationStr, ok := annotation.(string)
-					if !ok {
-						log.Warnf("unable to convert %v interface{} to string", annotation)
-					}
-					tsn.Annotation = annotationStr
-				}
 
 				mr := models.MeasurementsResponse{
-					InstrumentID:   mfr.InstrumentID,
-					TimeseriesID:   mfr.TimeseriesID,
-					Measurement:    mmt,
-					TimeseriesNote: tsn,
+					InstrumentID: mfr.InstrumentID,
+					TimeseriesID: mfr.TimeseriesID,
+					Measurement:  mmt,
 				}
 				if stream {
 					if err := enc.Encode(mr); err != nil {
@@ -288,7 +264,7 @@ func StreamProcessMeasurements(db *sqlx.DB, f *models.MeasurementsFilter, reques
 			return nil
 
 		} else if requestType == byTimeseries {
-			resBody, err := mrc.CollectSingleTimeseries()
+			resBody, err := mrc.CollectSingleTimeseries(threshold)
 			if err != nil {
 				if err.Error() == messages.NotFound {
 					return c.JSON(
@@ -304,7 +280,7 @@ func StreamProcessMeasurements(db *sqlx.DB, f *models.MeasurementsFilter, reques
 			return c.JSON(http.StatusOK, resBody)
 
 		} else {
-			resBody, err := mrc.GroupByInstrument()
+			resBody, err := mrc.GroupByInstrument(threshold)
 			if err != nil {
 				if err.Error() == messages.NotFound {
 					return c.JSON(http.StatusOK, make([]map[string]interface{}, 0))
