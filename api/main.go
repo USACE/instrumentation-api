@@ -313,6 +313,7 @@ func main() {
 	private.GET("/datalogger/:datalogger_id/preview", handlers.GetDataLoggerPreview(db))
 
 	// Start server
+	e.HideBanner = true
 	s := &http2.Server{
 		MaxConcurrentStreams: 250,     // http2 default 250
 		MaxReadFrameSize:     1048576, // http2 default 1048576
