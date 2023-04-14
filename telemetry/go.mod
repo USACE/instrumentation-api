@@ -3,7 +3,7 @@ module github.com/USACE/instrumentation-api/telemetry
 go 1.19
 
 require (
-	github.com/USACE/instrumentation-api/api v0.0.0-20230314193641-23355ba67208
+	github.com/USACE/instrumentation-api/api v0.0.0-20230413184457-436a9d5d8058
 	github.com/apex/gateway v1.1.2
 	github.com/jackc/pgx/v4 v4.18.1
 	github.com/kelseyhightower/envconfig v1.4.0
@@ -12,8 +12,8 @@ require (
 
 require (
 	github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible // indirect
-	github.com/aws/aws-lambda-go v1.39.1 // indirect
-	github.com/aws/aws-sdk-go v1.44.241 // indirect
+	github.com/aws/aws-lambda-go v1.40.0 // indirect
+	github.com/aws/aws-sdk-go v1.44.243 // indirect
 	github.com/btcsuite/btcutil v1.0.2 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang-jwt/jwt/v4 v4.5.0 // indirect

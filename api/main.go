@@ -4,15 +4,14 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/USACE/instrumentation-api/api/dbutils"
 	"github.com/USACE/instrumentation-api/api/handlers"
 	"github.com/USACE/instrumentation-api/api/middleware"
 	"github.com/USACE/instrumentation-api/api/models"
+	"github.com/apex/gateway"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/kelseyhightower/envconfig"
-	"golang.org/x/net/http2"
 
 	"github.com/labstack/echo/v4"
 	echomw "github.com/labstack/echo/v4/middleware"
@@ -312,14 +311,11 @@ func main() {
 	// Data Logger Preview
 	private.GET("/datalogger/:datalogger_id/preview", handlers.GetDataLoggerPreview(db))
 
-	// Start server
-	e.HideBanner = true
-	s := &http2.Server{
-		MaxConcurrentStreams: 250,     // http2 default 250
-		MaxReadFrameSize:     1048576, // http2 default 1048576
-		IdleTimeout:          10 * time.Second,
-	}
-	if err := e.StartH2CServer(":80", s); err != http.ErrServerClosed {
-		log.Fatal(err)
+	if cfg.LambdaContext {
+		log.Print("starting server; Running On AWS LAMBDA")
+		log.Fatal(gateway.ListenAndServe("localhost:3030", e))
+	} else {
+		log.Print("starting server")
+		log.Fatal(http.ListenAndServe(":80", e))
 	}
 }
