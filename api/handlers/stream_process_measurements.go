@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"github.com/Knetic/govaluate"
-	"github.com/USACE/instrumentation-api/api/dbutils"
 	"github.com/USACE/instrumentation-api/api/messages"
 	"github.com/USACE/instrumentation-api/api/models"
 	"github.com/USACE/instrumentation-api/api/timeseries"
@@ -98,8 +97,6 @@ func ListTimeseriesMeasurementsExplorer(db *sqlx.DB) echo.HandlerFunc {
 // ~
 func StreamProcessMeasurements(db *sqlx.DB, f *models.MeasurementsFilter, requestType int) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		defer dbutils.Timer()()
-
 		var tw timeseries.TimeWindow
 		a, b := c.QueryParam("after"), c.QueryParam("before")
 		if err := tw.SetWindow(a, b); err != nil {

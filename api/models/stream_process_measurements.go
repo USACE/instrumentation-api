@@ -6,7 +6,6 @@ import (
 	"log"
 	"time"
 
-	"github.com/USACE/instrumentation-api/api/dbutils"
 	"github.com/USACE/instrumentation-api/api/messages"
 	"github.com/USACE/instrumentation-api/api/timeseries"
 	"github.com/google/uuid"
@@ -50,7 +49,6 @@ type MeasurementsFilter struct {
 }
 
 func (mrc *MeasurementsResponseCollection) GroupByInstrument(threshold int) (map[uuid.UUID][]timeseries.MeasurementCollectionLean, error) {
-	defer dbutils.Timer()()
 	if len(*mrc) == 0 {
 		return make(map[uuid.UUID][]timeseries.MeasurementCollectionLean), fmt.Errorf(messages.NotFound)
 	}
@@ -116,7 +114,7 @@ func (mrc *MeasurementsResponseCollection) CollectSingleTimeseries(threshold int
 //
 // Stored Timeseries measurements will have the following structure:
 //
-// {"value": float, "validated": bool, "masked": bool, "annotation": string}
+// {"value": float}
 //
 // Computed Timeseries will look different, because they need to be fed into the arbitrary expression evaluation library.
 //
@@ -125,7 +123,6 @@ func (mrc *MeasurementsResponseCollection) CollectSingleTimeseries(threshold int
 // Once the Computed Timeseries are processed however, they are bound
 // to the same struct as the stored measurements: MeasurementsStreamResponse
 func QueryTimeseriesMeasurementsRows(db *sqlx.DB, f *MeasurementsFilter) (*sqlx.Rows, error) {
-	defer dbutils.Timer()()
 	var filterSQL string
 	var filterArg interface{}
 
@@ -175,56 +172,72 @@ func QueryTimeseriesMeasurementsRows(db *sqlx.DB, f *MeasurementsFilter) (*sqlx.
 			FROM v_timeseries_stored
 			WHERE ` + filterSQL + `
 		)
-	), proc AS (
-		SELECT
-			timeseries_id,
-			time AS t,
-			value AS v
-		FROM timeseries_measurement
-		WHERE
-			time >= COALESCE(
-				(
-					SELECT max( time ) AS time
-					FROM timeseries_measurement
-					WHERE time < ?
-				),
-				'-infinity'
-			) AND
-			time <= COALESCE(
-				(
-					SELECT min( time ) AS time
-					FROM timeseries_measurement
-					WHERE time > ?
-				),
-				'infinity'
-			)
 	)
 	SELECT
-		ds.t AS time,
+		ds.time AS time,
 		xx.timeseries_id AS timeseries_id,
 		rt.instrument_id AS instrument_id,
 		rt.is_computed AS is_computed,
 		COALESCE(cc.contents, '') AS formula,
 		jsonb_object_agg(
-			COALESCE(rt.variable, 'value'), ds.v
+			COALESCE(rt.variable, 'value'), ds.value
 		) AS measurements_json
 	FROM
-		required_timeseries AS rt
+		required_timeseries rt
 		CROSS JOIN LATERAL (
-			VALUES ( COALESCE( rt.computed_timeseries_id, rt.stored_timeseries_id ) )
-		) AS xx ( timeseries_id ) 
-		JOIN proc AS ds ON ds.timeseries_id = rt.stored_timeseries_id
-		LEFT JOIN calculation AS cc ON rt.computed_timeseries_id = cc.timeseries_id
+			VALUES (COALESCE(rt.computed_timeseries_id, rt.stored_timeseries_id))
+		) xx (timeseries_id)
+		JOIN (
+			SELECT
+				timeseries_id,
+				time,
+				value
+			FROM timeseries_measurement
+			WHERE
+				time 	 >= ?
+				AND time <= ?
+			UNION ALL
+			SELECT
+				rt.stored_timeseries_id AS timeseries_id,
+				min_range.time AS time,
+				min_range.value AS value
+			FROM required_timeseries rt
+			CROSS JOIN LATERAL (
+				SELECT mmt.time, mmt.value
+				FROM   timeseries_measurement mmt
+				WHERE  mmt.timeseries_id = rt.stored_timeseries_id
+				AND    mmt.time < ?
+				ORDER  BY mmt.time DESC NULLS LAST
+				LIMIT  1
+			) min_range
+			UNION ALL
+			SELECT
+				rt.stored_timeseries_id AS timeseries_id,
+				max_range.time AS time,
+				max_range.value AS value
+			FROM required_timeseries rt
+			CROSS JOIN LATERAL (
+				SELECT mmt.time, mmt.value
+				FROM   timeseries_measurement mmt
+				WHERE  mmt.timeseries_id = rt.stored_timeseries_id
+				AND    mmt.time > ?
+				ORDER  BY mmt.time ASC NULLS LAST
+				LIMIT  1
+			) max_range
+		) ds
+			ON ds.timeseries_id = rt.stored_timeseries_id
+		LEFT JOIN calculation AS cc
+			ON rt.computed_timeseries_id = cc.timeseries_id
 	GROUP BY
-		ds.t,
+		ds.time,
 		xx.timeseries_id,
 		rt.instrument_id,
 		rt.is_computed,
 		cc.contents
-	ORDER BY ds.t ASC
+	ORDER BY ds.time ASC;
 	`
 
-	query, args, err := sqlx.In(sql, filterArg, filterArg, f.After, f.Before)
+	query, args, err := sqlx.In(sql, filterArg, filterArg, f.After, f.Before, f.After, f.Before)
 	if err != nil {
 		return nil, err
 	}
