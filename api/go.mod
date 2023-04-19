@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible
 	github.com/apex/gateway v1.1.2
-	github.com/aws/aws-sdk-go v1.44.243
+	github.com/aws/aws-sdk-go v1.44.245
 	github.com/btcsuite/btcutil v1.0.2
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/google/uuid v1.3.0
@@ -19,8 +19,9 @@ require (
 	github.com/labstack/echo-jwt/v4 v4.1.0
 	github.com/labstack/echo/v4 v4.10.2
 	github.com/labstack/gommon v0.4.0
-	github.com/lib/pq v1.10.7
+	github.com/lib/pq v1.10.8
 	github.com/paulmach/orb v0.9.0
+	github.com/tidwall/btree v1.6.0
 	golang.org/x/crypto v0.8.0
 )
 
