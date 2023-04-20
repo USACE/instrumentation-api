@@ -32,10 +32,14 @@ type Measurement struct {
 	TimeseriesID uuid.UUID `json:"-" db:"timeseries_id"`
 	Time         time.Time `json:"time"`
 	Value        float64   `json:"value"`
-	Masked       bool      `json:"masked,omitempty"`
-	Validated    bool      `json:"validated,omitempty"`
-	Annotation   string    `json:"annotation,omitempty"`
 	Error        string    `json:"error,omitempty"`
+	TimeseriesNote
+}
+
+type TimeseriesNote struct {
+	Masked     *bool   `json:"masked,omitempty"`
+	Validated  *bool   `json:"validated,omitempty"`
+	Annotation *string `json:"annotation,omitempty"`
 }
 
 // MeasurementLean is the minimalist representation of a timeseries measurement

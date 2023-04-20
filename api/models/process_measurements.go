@@ -207,7 +207,7 @@ func queryTimeseriesMeasurements(db *sqlx.DB, f *MeasurementsFilter) (Measuremen
 			FROM v_timeseries_stored
 			WHERE ` + filterSQL + `
 		)
-		UNION
+		UNION ALL
 		(
 			SELECT dependency_timeseries_id AS id
 			FROM v_timeseries_dependency
@@ -257,7 +257,7 @@ func queryTimeseriesMeasurements(db *sqlx.DB, f *MeasurementsFilter) (Measuremen
 		LEFT JOIN next_low nl ON nl.timeseries_id = rt.id
 		LEFT JOIN next_high nh ON nh.timeseries_id = rt.id
 	)
-	UNION
+	UNION ALL
 	(
 		SELECT id                		  	  AS timeseries_id,
 			   instrument_id        		  AS instrument_id,

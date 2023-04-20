@@ -46,22 +46,31 @@ func (cc *TimeseriesMeasurementCollectionCollection) UnmarshalJSON(b []byte) err
 }
 
 // ListTimeseriesMeasurements returns a stored timeseries with slice of timeseries measurements populated
-func ListTimeseriesMeasurements(db *sqlx.DB, timeseriesID *uuid.UUID, tw *ts.TimeWindow) (*ts.MeasurementCollection, error) {
+func ListTimeseriesMeasurements(db *sqlx.DB, tsID *uuid.UUID, tw *ts.TimeWindow, threshold int) (*ts.MeasurementCollection, error) {
+	sql := `
+	SELECT M.timeseries_id,
+		   M.time,
+		   M.value,
+		   COALESCE(N.masked, 'false') AS masked,
+		   COALESCE(N.validated, 'false') AS validated,
+		   COALESCE(N.annotation, '') AS annotation
+	FROM timeseries_measurement M
+	LEFT JOIN timeseries_notes N ON M.timeseries_id = N.timeseries_id AND M.time = N.time
+	INNER JOIN timeseries T ON T.id = M.timeseries_id
+	WHERE T.id = $1 AND M.time > $2 AND M.time < $3 ORDER BY M.time ASC
+	`
 
-	mc := ts.MeasurementCollection{TimeseriesID: *timeseriesID}
 	// Get Timeseries Measurements
+	items := make([]ts.Measurement, 0)
 	if err := db.Select(
-		&mc.Items,
-		listTimeseriesMeasurementsSQL()+" WHERE T.id = $1 AND M.time > $2 AND M.time < $3 ORDER BY M.time DESC",
-		timeseriesID, tw.After, tw.Before,
+		&items,
+		sql,
+		tsID, tw.After, tw.Before,
 	); err != nil {
 		return nil, err
 	}
-	if mc.Items == nil {
-		mc.Items = make([]ts.Measurement, 0)
-	}
 
-	return &mc, nil
+	return &ts.MeasurementCollection{TimeseriesID: *tsID, Items: ts.LTTB(items, threshold)}, nil
 }
 
 // DeleteTimeserieMeasurements deletes a timeseries Measurement
@@ -74,12 +83,25 @@ func DeleteTimeserieMeasurements(db *sqlx.DB, id *uuid.UUID, time time.Time) err
 
 // ConstantMeasurement returns a constant timeseries measurement for the same instrument by constant name
 func ConstantMeasurement(db *sqlx.DB, tsID *uuid.UUID, constantName string) (*ts.Measurement, error) {
+	sql := `
+	SELECT M.timeseries_id,
+		   M.time,
+		   M.value
+	FROM  timeseries_measurement M
+	INNER JOIN v_timeseries_stored T ON T.id = M.timeseries_id
+	INNER JOIN parameter P ON P.id = T.parameter_id
+	WHERE T.instrument_id IN (
+		SELECT  instrument_id
+		FROM v_timeseries_stored T
+		WHERE t.id= $1
+	)
+	AND P.name = $2
+	`
 
-	ms := []ts.Measurement{}
-
+	ms := make([]ts.Measurement, 0)
 	if err := db.Select(
 		&ms,
-		constantMeasurementSQL()+" and P.name = $2",
+		sql,
 		tsID, constantName,
 	); err != nil {
 		return nil, err
@@ -203,38 +225,4 @@ func UpdateTimeseriesMeasurements(db *sqlx.DB, mc []ts.MeasurementCollection, tw
 	}
 
 	return mc, nil
-}
-
-// Stored timeseries
-func listTimeseriesMeasurementsSQL() string {
-	return `SELECT  M.timeseries_id,
-			        M.time,
-					M.value,
-					COALESCE(N.masked, 'false') AS masked,
-					COALESCE(N.validated, 'false') AS validated,
-					COALESCE(N.annotation, '') AS annotation
-			FROM timeseries_measurement M
-			LEFT JOIN timeseries_notes N
-					ON M.timeseries_id = N.timeseries_id
-					AND M.time = N.time
-			INNER JOIN timeseries T
-    			    ON T.id = M.timeseries_id
-	`
-}
-
-func constantMeasurementSQL() string {
-	return `SELECT  M.timeseries_id,
-				M.time,
-				M.value
-			FROM timeseries_measurement M
-			INNER JOIN v_timeseries_stored T
-				ON T.id = M.timeseries_id
-			INNER JOIN parameter P
-				ON P.id = T.parameter_id
-			WHERE T.instrument_id in (
-				SELECT  instrument_id
-				FROM v_timeseries_stored T
-				WHERE t.id= $1
-			)
-	`
 }

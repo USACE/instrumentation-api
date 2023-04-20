@@ -37,6 +37,18 @@ func (c *TimeseriesCollection) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+// ValidateStoredTimeseries returns an error if the timeseries id does not exist or the timeseries is computed
+func StoredTimeseriesExists(db *sqlx.DB, tsID *uuid.UUID) (bool, error) {
+	sql := `SELECT EXISTS (SELECT id FROM v_timeseries_stored WHERE id = $1)`
+
+	var isStored bool
+	if err := db.Get(&isStored, sql, &tsID); err != nil {
+		return false, err
+	}
+
+	return isStored, nil
+}
+
 // ListTimeseriesSlugs lists used timeseries slugs in the database
 func ListTimeseriesSlugs(db *sqlx.DB) ([]string, error) {
 

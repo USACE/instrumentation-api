@@ -26,6 +26,41 @@ func ListTimeseriesMeasurementsByTimeseries(db *sqlx.DB) echo.HandlerFunc {
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
+
+		// Not ideal making 2 calls to database here, but need to check if timeseries
+		// is computed to know when to return timeseries notes
+		// Also, returning only stored timeseries is much faster with the current query
+
+		isStored, err := models.StoredTimeseriesExists(db, &tsID)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+
+		if isStored {
+			var tw timeseries.TimeWindow
+			a, b := c.QueryParam("after"), c.QueryParam("before")
+			if err := tw.SetWindow(a, b); err != nil {
+				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			}
+
+			trs := c.QueryParam("threshold")
+
+			var threshold int
+			if trs != "" {
+				tr, err := strconv.Atoi(trs)
+				if err != nil {
+					return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+				}
+				threshold = tr
+			}
+
+			resBody, err := models.ListTimeseriesMeasurements(db, &tsID, &tw, threshold)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			}
+			return c.JSON(http.StatusOK, resBody)
+		}
+
 		f := models.MeasurementsFilter{TimeseriesID: &tsID}
 
 		selectMeasurements := selectMeasurementsHandler(db, &f, byTimeseriesRequest)
