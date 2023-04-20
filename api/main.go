@@ -4,15 +4,14 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/USACE/instrumentation-api/api/dbutils"
 	"github.com/USACE/instrumentation-api/api/handlers"
 	"github.com/USACE/instrumentation-api/api/middleware"
 	"github.com/USACE/instrumentation-api/api/models"
+	"github.com/apex/gateway"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/kelseyhightower/envconfig"
-	"golang.org/x/net/http2"
 
 	"github.com/labstack/echo/v4"
 	echomw "github.com/labstack/echo/v4/middleware"
@@ -197,6 +196,7 @@ func main() {
 	public.GET("/instruments", handlers.ListInstruments(db))
 	public.GET("/instruments/count", handlers.GetInstrumentCount(db))
 	public.GET("/instruments/:instrument_id", handlers.GetInstrument(db))
+	public.GET("/instruments/:instrument_id/timeseries_measurements", handlers.ListTimeseriesMeasurementsByInstrument(db))
 	private.POST("/projects/:project_id/instruments", handlers.CreateInstruments(db))
 	// TODO: Remove endpoint POST /instruments (no project context)
 	private.POST("/instruments", handlers.CreateInstruments(db))
@@ -209,7 +209,7 @@ func main() {
 	public.GET("/instrument_groups/:instrument_group_id", handlers.GetInstrumentGroup(db))
 	public.GET("/instrument_groups/:instrument_group_id/instruments", handlers.ListInstrumentGroupInstruments(db))
 	public.GET("/instrument_groups/:instrument_group_id/timeseries", handlers.ListInstrumentGroupTimeseries(db))
-	public.GET("/instrument_groups/:instrument_group_id/timeseries_measurements", handlers.ListInstrumentGroupMeasurements(db))
+	public.GET("/instrument_groups/:instrument_group_id/timeseries_measurements", handlers.ListTimeseriesMeasurementsByInstrumentGroup(db))
 	private.POST("/instrument_groups", handlers.CreateInstrumentGroup(db))
 	private.PUT("/instrument_groups/:instrument_group_id", handlers.UpdateInstrumentGroup(db))
 	private.DELETE("/instrument_groups/:instrument_group_id", handlers.DeleteFlagInstrumentGroup(db))
@@ -246,11 +246,11 @@ func main() {
 	public.GET("/timeseries", handlers.ListTimeseries(db))
 	public.GET("/timeseries/:timeseries_id", handlers.GetTimeseries(db))
 	public.GET("/instruments/:instrument_id/timeseries/:timeseries_id", handlers.GetTimeseries(db))
-	public.GET("/timeseries/:timeseries_id/measurements", handlers.ListTimeseriesMeasurements(db))
+	public.GET("/timeseries/:timeseries_id/measurements", handlers.ListTimeseriesMeasurementsByTimeseries(db))
 	private.DELETE("/timeseries/:timeseries_id/measurements", handlers.DeleteTimeserieMeasurements(db))
 	public.GET("/timeseries/:timeseries_id/inclinometer_measurements", handlers.ListInclinometerMeasurements(db))
 	private.DELETE("/timeseries/:timeseries_id/inclinometer_measurements", handlers.DeleteInclinometerMeasurements(db))
-	public.GET("/instruments/:instrument_id/timeseries/:timeseries_id/measurements", handlers.ListTimeseriesMeasurements(db))
+	public.GET("/instruments/:instrument_id/timeseries/:timeseries_id/measurements", handlers.ListTimeseriesMeasurementsByTimeseries(db))
 	// TODO: Delete timeseries endpoints without project context in URL
 	private.POST("/timeseries", handlers.CreateTimeseries(db))
 	private.PUT("/timeseries/:timeseries_id", handlers.UpdateTimeseries(db))
@@ -285,7 +285,7 @@ func main() {
 
 	// Misc
 	public.GET("/domains", handlers.GetDomains(db))
-	public.POST("/explorer", handlers.PostExplorer(db))
+	public.POST("/explorer", handlers.ListTimeseriesMeasurementsExplorer(db))
 	public.POST("/inclinometer_explorer", handlers.PostInclinometerExplorer(db))
 	public.GET("/home", handlers.GetHome(db))
 	public.GET("/units", handlers.ListUnits(db))
@@ -311,13 +311,11 @@ func main() {
 	// Data Logger Preview
 	private.GET("/datalogger/:datalogger_id/preview", handlers.GetDataLoggerPreview(db))
 
-	// Start server
-	s := &http2.Server{
-		MaxConcurrentStreams: 250,     // http2 default 250
-		MaxReadFrameSize:     1048576, // http2 default 1048576
-		IdleTimeout:          10 * time.Second,
-	}
-	if err := e.StartH2CServer(":80", s); err != http.ErrServerClosed {
-		log.Fatal(err)
+	if cfg.LambdaContext {
+		log.Print("starting server; Running On AWS LAMBDA")
+		log.Fatal(gateway.ListenAndServe("localhost:3030", e))
+	} else {
+		log.Print("starting server")
+		log.Fatal(http.ListenAndServe(":80", e))
 	}
 }

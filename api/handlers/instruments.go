@@ -45,6 +45,9 @@ func GetInstrument(db *sqlx.DB) echo.HandlerFunc {
 		}
 		n, err := models.GetInstrument(db, &id)
 		if err != nil {
+			if err.Error() == messages.NotFound {
+				return echo.NewHTTPError(http.StatusBadRequest, messages.NotFound)
+			}
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
