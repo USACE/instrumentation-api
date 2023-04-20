@@ -113,6 +113,9 @@ func GetProfileFromTokenID(db *sqlx.DB, tokenID string) (*Profile, error) {
 	if err != nil {
 		return nil, err
 	}
+	if len(pp) == 0 {
+		return nil, fmt.Errorf("Profile Does Not Exist for User")
+	}
 	if err := pp[0].attachTokens(db); err != nil {
 		return nil, err
 	}

@@ -458,7 +458,7 @@ func (mrc *MeasurementsResponseCollection) CollectSingleTimeseries(threshold int
 					Error:        m.Error,
 				}
 			}
-			return timeseries.MeasurementCollection{TimeseriesID: mmts[0].TimeseriesID, Items: timeseries.LTTB(mmts, threshold)}, nil
+			return timeseries.MeasurementCollection{TimeseriesID: t.TimeseriesID, Items: timeseries.LTTB(mmts, threshold)}, nil
 		}
 	}
 
