@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/Knetic/govaluate"
+	"github.com/USACE/instrumentation-api/api/dbutils"
 	"github.com/USACE/instrumentation-api/api/messages"
 	"github.com/USACE/instrumentation-api/api/timeseries"
 	"github.com/google/uuid"
@@ -35,6 +36,7 @@ type Item struct {
 
 // SelectMeasurements returns measurements for the timeseries specified in the filter
 func SelectMeasurements(db *sqlx.DB, f *MeasurementsFilter) (MeasurementsResponseCollection, error) {
+	defer dbutils.Timer()()
 	// Query and unmarshal JSON
 	tss, err := queryTimeseriesMeasurements(db, f)
 	if err != nil {
@@ -51,6 +53,7 @@ func SelectMeasurements(db *sqlx.DB, f *MeasurementsFilter) (MeasurementsRespons
 
 // collectAggregate creates a btree of all sorted times (key) and measurements (value; as variable map) from an array of Timeseries
 func collectAggregate(tss *MeasurementsResponseCollection) *btree.BTreeG[Item] {
+	defer dbutils.Timer()()
 	// Get unique set of all measurement times of timeseries dependencies for non-regularized values
 	btm := btree.NewBTreeG(func(a, b Item) bool { return a.Key.Before(b.Key) })
 
@@ -86,6 +89,7 @@ func collectAggregate(tss *MeasurementsResponseCollection) *btree.BTreeG[Item] {
 
 // processLOCF calculates computed timeseries using "Last-Observation-Carried-Forward" algorithm
 func processLOCF(tss MeasurementsResponseCollection) (MeasurementsResponseCollection, error) {
+	defer dbutils.Timer()()
 	tssFinal := make(MeasurementsResponseCollection, 0)
 
 	var variableMap *btree.BTreeG[Item]
@@ -174,6 +178,7 @@ func processLOCF(tss MeasurementsResponseCollection) (MeasurementsResponseCollec
 
 // SelectTimeseriesMeasurements selects stored measurements and dependencies for computed measurements
 func queryTimeseriesMeasurements(db *sqlx.DB, f *MeasurementsFilter) (MeasurementsResponseCollection, error) {
+	defer dbutils.Timer()()
 	var filterSQL string
 	var filterArg interface{}
 
@@ -406,6 +411,7 @@ func ComputedInclinometerTimeseries(db *sqlx.DB, instrumentIDs []uuid.UUID, tw *
 }
 
 func (mrc *MeasurementsResponseCollection) GroupByInstrument(threshold int) (map[uuid.UUID][]timeseries.MeasurementCollectionLean, error) {
+	defer dbutils.Timer()()
 	if len(*mrc) == 0 {
 		return make(map[uuid.UUID][]timeseries.MeasurementCollectionLean), fmt.Errorf(messages.NotFound)
 	}
@@ -443,6 +449,7 @@ func (mrc *MeasurementsResponseCollection) GroupByInstrument(threshold int) (map
 }
 
 func (mrc *MeasurementsResponseCollection) CollectSingleTimeseries(threshold int, tsID *uuid.UUID) (timeseries.MeasurementCollection, error) {
+	defer dbutils.Timer()()
 	if len(*mrc) == 0 {
 		return timeseries.MeasurementCollection{}, fmt.Errorf(messages.NotFound)
 	}
