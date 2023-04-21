@@ -139,8 +139,11 @@ func CreateOrUpdateTimeseriesMeasurementsTxn(txn *sqlx.Tx, mc []ts.MeasurementCo
 			if _, err := stmt_measurement.Exec(c.TimeseriesID, m.Time, m.Value); err != nil {
 				return nil, err
 			}
-			if _, err := stmt_notes.Exec(c.TimeseriesID, m.Time, m.Masked, m.Validated, m.Annotation); err != nil {
-				return nil, err
+
+			if m.Masked != nil || m.Validated != nil || m.Annotation != nil {
+				if _, err := stmt_notes.Exec(c.TimeseriesID, m.Time, m.Masked, m.Validated, m.Annotation); err != nil {
+					return nil, err
+				}
 			}
 		}
 	}
