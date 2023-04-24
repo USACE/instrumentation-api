@@ -1,20 +1,27 @@
-# Instrumentation API - Build API and Lambda Package
+# Instrumentation API
 
-An Application Programming Interface (API) to manage instrumentation data, built with Golang and deployed on AWS Lambda.
+A REST API to manage instrumentation data for the MIDAS (Monitoring Instrumentation Data Acquisition System) web application. Built with Go, using the [Echo](https://github.com/labstack/echo) web framework.
 
 ## Documentation
 
-Documentation for the API is maintained in a Markdown file held at [`docs/APIDOC.md`](./docs/APIDOC.md). A [Postman](https://www.postman.com/api-documentation-tool/) documentation and testing environment is also maintained at [`tests/postman_environment.local`](./tests/postman_environment.local.json).
+A [Postman](https://www.postman.com/api-documentation-tool/) documentation and testing environment is maintained at [`tests/postman_environment.local`](./tests/postman_environment.local.json). An [OpenAPI Doc](./docs/swagger/apidoc.json) is [automatically generated](https://github.com/USACE/instrumentation-api/blob/423e257f2a4fead223ec53e39008324e81345eb3/docker-compose.yml#L148) when running Swagger locally with docker-compose. See the "Running the Swagger UI to access API documentation locally" section below for more information.
 
 ## How to Develop
 
 ### Quickstart - Running the API Stack Locally with Docker Compose
 
-1. Install, at a minimum, [Docker Engine](https://docs.docker.com/engine/install/) and [Docker Compose](https://docs.docker.com/compose/install/). In place of these two, one can install [Docker Desktop](https://docs.docker.com/desktop/).
+1. Install [Docker Engine](https://docs.docker.com/engine/install/) and [Docker Compose](https://docs.docker.com/compose/install/). In place of these two, one can install [Docker Desktop](https://docs.docker.com/desktop/).
 
-2. Copy the `.env.example` file to `.env` (e.g., `cp .env.example .env`). This provides configuration options to Docker Compose.
+2. [Install Go (Golang)](https://go.dev/doc/install) - needed for pulling peer dependencies when building the containers.
 
-3. Run the [./startup.sh](./startup.sh) shell script to pull the most recent changes from the current upstream branch, build, and (re)start the Docker Compose services. You can now access the application locally through Docker.
+3. Copy the `.env.example` file to `.env` (e.g., `cp .env.example .env`). This provides configuration options to Docker Compose.
+
+4. Use the [./compose.sh](./compose.sh) shell script to build and (re)start the Docker Compose services. You can now access the application locally through Docker. Use the `up` argument to start, `down` to spin down, and `clean` to spin down and remove volumes. Optionally add the `mock` argument to start/remove the mock datalogger service.
+
+```sh
+./compose.sh up    # or ./compose.sh up mock
+./compose.sh down  # or ./compose.sh down mock
+```
 
 ### Running a Database for Local Development
 
@@ -45,11 +52,9 @@ Create a database connection to the Postgres database by right-clicking `servers
 | Username          | postgres       |
 | Password          | postgres       |
 
-Initialize the database and seed it with some data (docker-compose runs this for you)
+Initialize the database and seed it with some data (./compose.sh up runs this for you)
 
-   Use the Query Tool in pgadmin4 and the .sql files in the database/ directory in this repository. You can find the query tool by expanding the left menu tree to `Servers --> Databases --> postgres`. Right click `postgres --> Query Tool`. From here, copy [tables.sql](database/sql/10-tables.sql) into the Query Tool and run it by pressing `f5`. Note: to only run a portion of the SQL you've copied, you can highlight the section you want to run before hitting `f5`.
-
-### Running the GO API for Local Development
+### Running the Go API for Local Development
 
 Either of these options starts the API at `localhost:$API_PORT`, where `$API_PORT` is the variable set in your project's `.env` file. The API uses JSON Web tokens (JWT) for authorization by default.  To disable JWT for testing or development, you can set the environment variable `JWT_DISABLED=TRUE`.
 
@@ -73,7 +78,7 @@ Note: When running the API locally, make sure environment variable `INSTRUMENTAT
 
 ## Running Tests
 
-Regression tests are maintained for the project in the [aforementioned](#documentation) [Postman](https://www.postman.com/api-documentation-tool/) environments. They are run automatically by GitHub Actions through the script `test.sh`.
+Regression tests are maintained for the project in the [aforementioned](#documentation) [Postman](https://www.postman.com/api-documentation-tool/) environments. They are run automatically by GitHub Actions through the [./compose.sh](./compose.sh) script using `./compose.sh test`.
 
 In both cases, the Postman environment regression tests are run, then output. If the environment variable `REPORT` is set to `true`, then this output is sent to an HTML file. Otherwise, it is printed to the caller's stdout.
 
@@ -91,20 +96,10 @@ Note:
 
 ## How To Deploy
 
+### Deploying Develop and Stable Core API & Telemetry API
+Deployments are done though [CI (Continuous Integration) scripts](./.github) using [Github Actions](https://docs.github.com/en/actions). The [core api](./api) and [telemetry api](./telemetry) are tested, built, and pushed to AWS ECR, where they **should** re-deploy on container push when the CI pipelines successfully finish (please check the redployment actually happens and force new deployment if not, it has been the case before that the deployment trigger config gets overwritten...).
+
 ### Postgres Database on AWS Relational Database Service (RDS)
+First, make sure any extensions (such as PostGIS) are installed on the RDS instance.
 
-Database should be initialized with the following SQL files in the order listed:
-
-1. rds_init.sql (install PostGIS extensions)
-
-1. tables.sql (create tables for application)
-
-1. roles.sql (database roles, grants, etc.)
-
-   Note: Change 'password' in roles.sql to a real password for the `instrumentation_user` account.
-
-## How to Update
-
-Updating an instance of `instrumentation-api` is trivially completed by rebuilding the Docker container used by it, then restarting the service.
-
-If a postgres database has already been created and is in use, updates are less trivial. Before rebuilding and restarting the aforementioned API instance, database migrations must be carried out **manually**. Snippets for doing so are supplied in [`database/snippets`](./database/snippets).
+Flyway Migrations are used for automated database migrations in order to keep the schemas of the local environment in sync with develop and stable. Any differentiations in these databases (such as loading test data in the local environment) must be specified in their respective folders within the [./sql](./sql) directory ("common" applying to all environments). For database versioning, each migration script must be incrementally applied (e.g. `V1.2.3__migration.sql` -> `V1.2.4__migration.sql`). Versioned migrations must not change after they are run against the database. Instead, you must create another "version" to make modifications to a schema. Repeatable migrations (e.g. `R__01_repeatable_migration.sql`), may be modified if the overall schema does not change.
