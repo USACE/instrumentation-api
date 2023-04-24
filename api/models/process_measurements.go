@@ -57,7 +57,7 @@ func collectAggregate(tss *MeasurementsResponseCollection) *btree.BTreeG[Item] {
 	for _, ts := range *tss {
 		if ts.NextMeasurementLow != nil {
 			if item, exists := btm.Get(Item{Key: ts.NextMeasurementLow.Time}); !exists {
-				btm.Load(Item{Key: ts.NextMeasurementLow.Time, Value: map[string]interface{}{ts.Variable: ts.NextMeasurementLow.Value}})
+				btm.Set(Item{Key: ts.NextMeasurementLow.Time, Value: map[string]interface{}{ts.Variable: ts.NextMeasurementLow.Value}})
 			} else {
 				item.Value[ts.Variable] = ts.NextMeasurementLow.Value
 				btm.Set(item)
@@ -65,7 +65,7 @@ func collectAggregate(tss *MeasurementsResponseCollection) *btree.BTreeG[Item] {
 		}
 		for _, m := range ts.Measurements {
 			if item, exists := btm.Get(Item{Key: m.Time}); !exists {
-				btm.Load(Item{Key: m.Time, Value: map[string]interface{}{ts.Variable: m.Value}})
+				btm.Set(Item{Key: m.Time, Value: map[string]interface{}{ts.Variable: m.Value}})
 			} else {
 				item.Value[ts.Variable] = m.Value
 				btm.Set(item)
@@ -73,7 +73,7 @@ func collectAggregate(tss *MeasurementsResponseCollection) *btree.BTreeG[Item] {
 		}
 		if ts.NextMeasurementHigh != nil {
 			if item, exists := btm.Get(Item{Key: ts.NextMeasurementHigh.Time}); !exists {
-				btm.Load(Item{Key: ts.NextMeasurementHigh.Time, Value: map[string]interface{}{ts.Variable: ts.NextMeasurementHigh.Value}})
+				btm.Set(Item{Key: ts.NextMeasurementHigh.Time, Value: map[string]interface{}{ts.Variable: ts.NextMeasurementHigh.Value}})
 			} else {
 				item.Value[ts.Variable] = ts.NextMeasurementHigh.Value
 				btm.Set(item)
@@ -233,13 +233,6 @@ func queryTimeseriesMeasurements(db *sqlx.DB, f *MeasurementsFilter) (Measuremen
 			GROUP BY timeseries_id
 		) nhm
 		INNER JOIN timeseries_measurement m2 ON m2.time = nhm.time AND m2.timeseries_id = nhm.timeseries_id
-	),
-	measurements AS (
-		SELECT timeseries_id,
-			   json_agg(json_build_object('time', time, 'value', value) ORDER BY time ASC)::text AS measurements
-		FROM timeseries_measurement
-		WHERE timeseries_id IN (SELECT id FROM required_timeseries) AND time >= ? AND time <= ?
-		GROUP BY timeseries_id
 	)
 	(
 		SELECT rt.id                          AS timeseries_id,
@@ -247,13 +240,16 @@ func queryTimeseriesMeasurements(db *sqlx.DB, f *MeasurementsFilter) (Measuremen
 			   i.slug || '.' || ts.slug       AS variable,
 			   false                          AS is_computed,
 			   null                           AS formula,
-			   COALESCE(m.measurements, '[]') AS measurements,
+			   COALESCE((
+					SELECT json_agg(json_build_object('time', time, 'value', value) ORDER BY time ASC)::text
+					FROM timeseries_measurement
+					WHERE timeseries_id = rt.id AND time >= ? AND time <= ?
+				), '[]')					  AS measurements,
 			   nl.measurement::text           AS next_measurement_low,
 			   nh.measurement::text           AS next_measurement_high
 		FROM required_timeseries rt
 		INNER JOIN timeseries ts ON ts.id = rt.id
 		INNER JOIN instrument i ON i.id = ts.instrument_id
-		LEFT JOIN measurements m ON m.timeseries_id = rt.id
 		LEFT JOIN next_low nl ON nl.timeseries_id = rt.id
 		LEFT JOIN next_high nh ON nh.timeseries_id = rt.id
 	)
