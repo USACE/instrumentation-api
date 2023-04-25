@@ -1630,7 +1630,18 @@
                 "tags": [
                     "Projects"
                 ],
-                "summary": "ListProjects",
+                "summary": "ListProjectsByFederalID",
+                "parameters": [
+                    {
+                        "name": "federal_id",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Project Federal ID",
+                        "example": "NIST001"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Successful response",

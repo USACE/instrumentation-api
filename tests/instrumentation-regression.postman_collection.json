@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "51d89327-5896-4fe4-82b8-ccd27573c248",
+		"_postman_id": "03a9272d-e484-46b7-8403-94d6bcf5e6f5",
 		"name": "instrumentation-regression",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -2814,6 +2814,57 @@
 							],
 							"path": [
 								"projects"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ListProjectsByFederalID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// validate JSON schema",
+									"var schema = {",
+									"    \"type\": \"array\",",
+									"    \"items\": JSON.parse(pm.globals.get('PROJECT_OBJ_SCHEMA'))",
+									"}",
+									"",
+									"pm.globals.set('PROJECT_ARRAY_SCHEMA', JSON.stringify(schema))",
+									"",
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// schema validation",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(schema)",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/projects?federal_id=NIST001",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"projects"
+							],
+							"query": [
+								{
+									"key": "federal_id",
+									"value": "NIST001",
+									"description": "Project Federal ID"
+								}
 							]
 						}
 					},

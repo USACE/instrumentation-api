@@ -89,6 +89,15 @@ func ListProjects(db *sqlx.DB) ([]Project, error) {
 	return ProjectFactory(rows)
 }
 
+// ListProjects returns a slice of projects
+func ListProjectsByFederalID(db *sqlx.DB, id string) ([]Project, error) {
+	rows, err := db.Queryx(listProjectsSQL+" WHERE federal_id IS NOT NULL AND federal_id = $1 AND NOT deleted ORDER BY name", id)
+	if err != nil {
+		return make([]Project, 0), err
+	}
+	return ProjectFactory(rows)
+}
+
 func ListMyProjects(db *sqlx.DB, profileID *uuid.UUID) ([]Project, error) {
 
 	rows, err := db.Queryx(

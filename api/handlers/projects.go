@@ -16,6 +16,15 @@ import (
 // ListProjects returns projects
 func ListProjects(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
+		id := c.QueryParam("federal_id")
+		if id != "" {
+			projects, err := models.ListProjectsByFederalID(db, id)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusInternalServerError, messages.InternalServerError)
+			}
+			return c.JSON(http.StatusOK, projects)
+		}
+
 		projects, err := models.ListProjects(db)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
