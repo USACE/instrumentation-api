@@ -1,11 +1,10 @@
 package models
 
 import (
-	"database/sql/driver"
 	"encoding/json"
+	"time"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgtype"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -15,7 +14,8 @@ type Evaluation struct {
 	ProjectName     string                         `json:"project_name" db:"project_name"`
 	Name            string                         `json:"name" db:"name"`
 	Body            string                         `json:"body" db:"body"`
-	Timerange       Timerange                      `json:"timerange" db:"timerange"`
+	StartDate       time.Time                      `json:"start_date" db:"start_date"`
+	EndDate         time.Time                      `json:"end_date" db:"end_date"`
 	Instruments     EvaluationInstrumentCollection `json:"instruments" db:"instruments"`
 	CreatorUsername string                         `json:"creator_username" db:"creator_username"`
 	UpdaterUsername *string                        `json:"updater_username" db:"updater_username"`
@@ -25,31 +25,6 @@ type Evaluation struct {
 type EvaluationInstrument struct {
 	InstrumentID   uuid.UUID `json:"instrument_id" db:"instrument_id"`
 	InstrumentName string    `json:"instrument_name" db:"instrument_name"`
-}
-
-type Timerange string
-
-func (a *Timerange) Scan(src interface{}) error {
-	var ttr pgtype.Tstzrange
-	var buf []byte
-
-	if err := ttr.Scan(src); err != nil {
-		return err
-	}
-	buf, err := ttr.EncodeText(nil, buf)
-	if err != nil {
-		return err
-	}
-	*a = Timerange(buf)
-	return nil
-}
-
-func (a Timerange) Value() (driver.Value, error) {
-	var ttr pgtype.Tstzrange
-	if err := ttr.DecodeText(nil, []byte(a)); err != nil {
-		return nil, err
-	}
-	return ttr.Value()
 }
 
 type EvaluationInstrumentCollection []EvaluationInstrument
@@ -118,10 +93,11 @@ func CreateEvaluation(db *sqlx.DB, ev *Evaluation) (*Evaluation, error) {
 				project_id,
 				name,
 				body,
-				timerange,
+				start_date,
+				end_date,
 				creator,
 				create_date
-			) VALUES ($1,$2,$3,$4,$5,$6)
+			) VALUES ($1,$2,$3,$4,$5,$6,$7)
 			RETURNING id
 	`)
 	if err != nil {
@@ -140,7 +116,8 @@ func CreateEvaluation(db *sqlx.DB, ev *Evaluation) (*Evaluation, error) {
 		ev.ProjectID,
 		ev.Name,
 		ev.Body,
-		ev.Timerange,
+		ev.StartDate,
+		ev.EndDate,
 		ev.Creator,
 		ev.CreateDate,
 	); err != nil {
@@ -148,7 +125,7 @@ func CreateEvaluation(db *sqlx.DB, ev *Evaluation) (*Evaluation, error) {
 	}
 
 	for _, aci := range ev.Instruments {
-		if _, err := stmt1.Exec(&evaluationID, aci.InstrumentID); err != nil {
+		if _, err := stmt2.Exec(&evaluationID, aci.InstrumentID); err != nil {
 			return nil, err
 		}
 	}
@@ -175,9 +152,10 @@ func UpdateEvaluation(db *sqlx.DB, evaluationID *uuid.UUID, ev *Evaluation) (*Ev
 		UPDATE evaluation SET
 			name=$3,
 			body=$4,
-			timerange=$5
-			updater=$6,
-			update_date=$7
+			start_date=$5,
+			end_date=$6,
+			updater=$7,
+			update_date=$8
 		WHERE id=$1 AND project_id=$2
 	`)
 	if err != nil {
@@ -202,7 +180,8 @@ func UpdateEvaluation(db *sqlx.DB, evaluationID *uuid.UUID, ev *Evaluation) (*Ev
 		ev.ProjectID,
 		ev.Name,
 		ev.Body,
-		ev.Timerange,
+		ev.StartDate,
+		ev.EndDate,
 		ev.Updater,
 		ev.UpdateDate,
 	); err != nil {

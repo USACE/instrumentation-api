@@ -220,9 +220,9 @@ INSERT INTO alert_config (id, project_id, name, body, alert_type_id, schedule_in
 INSERT INTO alert_config_instrument (alert_config_id, instrument_id) VALUES
     ('1efd2d85-d3ee-4388-85a0-f824a761ff8b', 'a7540f69-c41e-43b3-b655-6e44097edb7e');
 
-INSERT INTO evaluation (id, project_id, name, body, timerange) VALUES
-    ('f7169aca-aa5f-4a0b-9fcc-609bb5c2bd7b', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'Test Evaluation 1', 'Evaluation for demonstration purposes.', '[2020-01-01,2020-01-07]'),
-    ('add252bf-2fa7-4824-b129-e4d0ff42dffa', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'Test Evaluation 2', 'Evaluation for demonstration purposes.', '[2022-12-01,2023-01-01]');
+INSERT INTO evaluation (id, project_id, name, body, start_date, end_date) VALUES
+    ('f7169aca-aa5f-4a0b-9fcc-609bb5c2bd7b', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'Test Evaluation 1', 'Evaluation for demonstration purposes.', '2020-01-01', '2020-01-07'),
+    ('add252bf-2fa7-4824-b129-e4d0ff42dffa', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'Test Evaluation 2', 'Evaluation for demonstration purposes.', '2022-12-01', '2023-01-01');
 
 INSERT INTO evaluation_instrument (evaluation_id, instrument_id) VALUES
     ('f7169aca-aa5f-4a0b-9fcc-609bb5c2bd7b', 'a7540f69-c41e-43b3-b655-6e44097edb7e');

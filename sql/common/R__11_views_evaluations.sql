@@ -11,7 +11,8 @@ CREATE OR REPLACE VIEW v_evaluation AS (
         ev.update_date                      AS update_date,
         prj.id                              AS project_id,
         prj.name                            AS project_name,
-        ev.timerange                        AS timerange,
+        ev.start_date                       AS start_date,
+        ev.end_date                         AS end_date,
         (
             SELECT COALESCE(JSON_AGG(JSON_BUILD_OBJECT(
                 'instrument_id',   id,
