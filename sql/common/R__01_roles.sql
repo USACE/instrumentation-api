@@ -95,7 +95,12 @@ GRANT SELECT ON
     datalogger_preview,
     datalogger_equivalency_table,
     datalogger_model,
-    datalogger_error
+    datalogger_error,
+    evaluation,
+    evaluation_instrument,
+    alert_status,
+    alert_type,
+    alert_config_instrument
 TO instrumentation_reader;
 
 -- Role instrumentation_writer
@@ -149,7 +154,12 @@ GRANT INSERT,UPDATE,DELETE ON
     datalogger_preview,
     datalogger_equivalency_table,
     datalogger_model,
-    datalogger_error
+    datalogger_error,
+    evaluation,
+    evaluation_instrument,
+    alert_status,
+    alert_type,
+    alert_config_instrument
 TO instrumentation_writer;
 
 -- Role postgis_reader

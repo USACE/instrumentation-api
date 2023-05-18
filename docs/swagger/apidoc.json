@@ -66,6 +66,9 @@
             "name": "Alert Configs"
         },
         {
+            "name": "Evaluation"
+        },
+        {
             "name": "Alert Subscriptions"
         },
         {
@@ -2520,7 +2523,7 @@
                 }
             }
         },
-        "/projects/{project_id}/instruments/{instrument_id}/alert_configs/{alert_config_id}": {
+        "/projects/{project_id}/alert_configs/{alert_config_id}": {
             "get": {
                 "tags": [
                     "Alert Configs"
@@ -2538,16 +2541,6 @@
                         "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
                     },
                     {
-                        "name": "instrument_id",
-                        "in": "path",
-                        "schema": {
-                            "type": "string"
-                        },
-                        "required": true,
-                        "description": "Instrument uuid",
-                        "example": "a7540f69-c41e-43b3-b655-6e44097edb7e"
-                    },
-                    {
                         "name": "alert_config_id",
                         "in": "path",
                         "schema": {
@@ -2555,7 +2548,7 @@
                         },
                         "required": true,
                         "description": "Alert Config uuid",
-                        "example": "243e9d32-2cba-4f12-9abe-63adc09fc5dd"
+                        "example": "1efd2d85-d3ee-4388-85a0-f824a761ff8b"
                     }
                 ],
                 "responses": {
@@ -2578,11 +2571,19 @@
                             "schema": {
                                 "type": "object",
                                 "example": {
-                                    "id": "243e9d32-2cba-4f12-9abe-63adc09fc5dd",
-                                    "name": "Test Alert Condition BRAVO",
-                                    "body": "Alert Condition BRAVO Has Occurred!  Sincerely, Midas",
-                                    "formula": "[distance-to-water] <= 0",
-                                    "schedule": "0,10,20,30,40,50 * * * *"
+                                    "name": "Updated Test Alert 1",
+                                    "body": "Updated Alert for demonstration purposes.",
+                                    "project_id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+                                    "project_name": "Blue Water Dam Example Project",
+                                    "alert_type_id": 1,
+                                    "alert_type": "Missing Time Series Measurements",
+                                    "start_date": "2023-05-16T13:19:41.441328Z",
+                                    "schedule_interval": "30 minute",
+                                    "n_missed_before_alert": 3,
+                                    "remind_interval": "1 day",
+                                    "warning_interval": null,
+                                    "instruments": [],
+                                    "alert_email_subscriptions": []
                                 }
                             }
                         }
@@ -2600,16 +2601,6 @@
                         "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
                     },
                     {
-                        "name": "instrument_id",
-                        "in": "path",
-                        "schema": {
-                            "type": "string"
-                        },
-                        "required": true,
-                        "description": "Instrument uuid",
-                        "example": "a7540f69-c41e-43b3-b655-6e44097edb7e"
-                    },
-                    {
                         "name": "alert_config_id",
                         "in": "path",
                         "schema": {
@@ -2617,7 +2608,7 @@
                         },
                         "required": true,
                         "description": "Alert Config uuid",
-                        "example": "243e9d32-2cba-4f12-9abe-63adc09fc5dd"
+                        "example": "90ff91d6-ab39-40db-9160-34ce17416281"
                     }
                 ],
                 "responses": {
@@ -2646,16 +2637,6 @@
                         "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
                     },
                     {
-                        "name": "instrument_id",
-                        "in": "path",
-                        "schema": {
-                            "type": "string"
-                        },
-                        "required": true,
-                        "description": "Instrument uuid",
-                        "example": "9e8f2ca4-4037-45a4-aaca-d9e598877439"
-                    },
-                    {
                         "name": "alert_config_id",
                         "in": "path",
                         "schema": {
@@ -2663,7 +2644,7 @@
                         },
                         "required": true,
                         "description": "Alert Config uuid",
-                        "example": "1efd2d85-d3ee-4388-85a0-f824a761ff8b"
+                        "example": "90ff91d6-ab39-40db-9160-34ce17416281"
                     }
                 ],
                 "responses": {
@@ -2712,28 +2693,221 @@
                         }
                     }
                 }
+            }
+        },
+        "/projects/{project_id}/alert_configs": {
+            "get": {
+                "tags": [
+                    "Alert Configs"
+                ],
+                "summary": "ListProjectAlertConfigs",
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
             },
             "post": {
                 "tags": [
                     "Alert Configs"
                 ],
-                "summary": "CreateAlertConfig_Object",
+                "summary": "CreateAlertConfig",
                 "requestBody": {
                     "content": {
                         "application/json": {
                             "schema": {
                                 "type": "object",
                                 "example": {
-                                    "instrument_id": "a7540f69-c41e-43b3-b655-6e44097edb7e",
-                                    "name": "Test Alert Condition 1",
-                                    "body": "Alert Condition 1!  Sincerely, Midas",
-                                    "formula": "[distance-to-water] <= 2",
-                                    "schedule": "0,10,20,30,40,50 * * * *"
+                                    "project_id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+                                    "name": "New Test Alert Config",
+                                    "body": "New Test Alert Config Description",
+                                    "alert_type_id": 1,
+                                    "start_date": "2023-05-16T13:19:41.441328Z",
+                                    "schedule_interval": "1 day",
+                                    "n_missed_before_alert": 1,
+                                    "remind_interval": "3 days",
+                                    "warning_interval": "1 hour",
+                                    "instruments": [
+                                        {
+                                            "instrument_id": "a7540f69-c41e-43b3-b655-6e44097edb7e"
+                                        }
+                                    ]
                                 }
                             }
                         }
                     }
                 },
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/evaluations/{evaluation_id}": {
+            "get": {
+                "tags": [
+                    "Evaluation"
+                ],
+                "summary": "GetEvaluation",
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    },
+                    {
+                        "name": "evaluation_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Evaluation"
+                ],
+                "summary": "UpdateEvaluation",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": {
+                                    "name": "Updated Test Alert 1",
+                                    "body": "Updated Alert for demonstration purposes.",
+                                    "project_id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+                                    "project_name": "Blue Water Dam Example Project",
+                                    "alert_type_id": 1,
+                                    "alert_type": "Missing Time Series Measurements",
+                                    "start_date": "2023-05-16T13:19:41.441328Z",
+                                    "schedule_interval": "30 minute",
+                                    "n_missed_before_alert": 3,
+                                    "remind_interval": "1 day",
+                                    "warning_interval": null,
+                                    "instruments": [],
+                                    "alert_email_subscriptions": []
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    },
+                    {
+                        "name": "evaluation_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Evaluation"
+                ],
+                "summary": "DeleteEvaluation",
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    },
+                    {
+                        "name": "evaluation_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/instruments/{instrument_id}/evaluations": {
+            "get": {
+                "tags": [
+                    "Evaluation"
+                ],
+                "summary": "ListInstrumentEvaluations",
                 "parameters": [
                     {
                         "name": "project_id",
@@ -2754,6 +2928,85 @@
                         "required": true,
                         "description": "Instrument uuid",
                         "example": "a7540f69-c41e-43b3-b655-6e44097edb7e"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/evaluations": {
+            "get": {
+                "tags": [
+                    "Evaluation"
+                ],
+                "summary": "ListProjectEvaluations",
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Evaluation"
+                ],
+                "summary": "CreateEvaluation",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": {
+                                    "project_id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+                                    "name": "New Test Alert Config",
+                                    "body": "New Test Alert Config Description",
+                                    "alert_type_id": 1,
+                                    "start_date": "2023-05-16T13:19:41.441328Z",
+                                    "schedule_interval": "1 day",
+                                    "n_missed_before_alert": 1,
+                                    "remind_interval": "3 days",
+                                    "warning_interval": "1 hour",
+                                    "instruments": [
+                                        {
+                                            "instrument_id": "a7540f69-c41e-43b3-b655-6e44097edb7e"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
                     }
                 ],
                 "responses": {

@@ -11,14 +11,14 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// ListProjectAlertConfigs lists alerts for a single project
-func ListProjectAlertConfigs(db *sqlx.DB) echo.HandlerFunc {
+// ListProjectEvaluations lists alerts for a single project
+func ListProjectEvaluations(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		projectID, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
-		aa, err := models.ListProjectAlertConfigs(db, &projectID)
+		aa, err := models.ListProjectEvaluations(db, &projectID)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
@@ -26,14 +26,14 @@ func ListProjectAlertConfigs(db *sqlx.DB) echo.HandlerFunc {
 	}
 }
 
-// ListInstrumentAlertConfigs lists alerts for a single instrument
-func ListInstrumentAlertConfigs(db *sqlx.DB) echo.HandlerFunc {
+// ListInstrumentEvaluations lists alerts for a single instrument
+func ListInstrumentEvaluations(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		instrumentID, err := uuid.Parse(c.Param("instrument_id"))
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
-		aa, err := models.ListInstrumentAlertConfigs(db, &instrumentID)
+		aa, err := models.ListInstrumentEvaluations(db, &instrumentID)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
@@ -41,14 +41,14 @@ func ListInstrumentAlertConfigs(db *sqlx.DB) echo.HandlerFunc {
 	}
 }
 
-// GetAlertConfig gets a single alert
-func GetAlertConfig(db *sqlx.DB) echo.HandlerFunc {
+// GetEvaluation gets a single alert
+func GetEvaluation(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		acID, err := uuid.Parse(c.Param("alert_config_id"))
+		acID, err := uuid.Parse(c.Param("evaluation_id"))
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
-		a, err := models.GetAlertConfig(db, &acID)
+		a, err := models.GetEvaluation(db, &acID)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
@@ -56,10 +56,10 @@ func GetAlertConfig(db *sqlx.DB) echo.HandlerFunc {
 	}
 }
 
-// CreateAlertConfig creates one alert config
-func CreateAlertConfig(db *sqlx.DB) echo.HandlerFunc {
+// CreateEvaluation creates one alert config
+func CreateEvaluation(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ac := models.AlertConfig{}
+		ac := models.Evaluation{}
 		if err := c.Bind(&ac); err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
@@ -70,7 +70,7 @@ func CreateAlertConfig(db *sqlx.DB) echo.HandlerFunc {
 		profile := c.Get("profile").(*models.Profile)
 		ac.ProjectID, ac.Creator, ac.CreateDate = projectID, profile.ID, time.Now()
 
-		aa, err := models.CreateAlertConfig(db, &ac)
+		aa, err := models.CreateEvaluation(db, &ac)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
@@ -78,21 +78,21 @@ func CreateAlertConfig(db *sqlx.DB) echo.HandlerFunc {
 	}
 }
 
-// UpdateAlertConfig updates an existing alert
-func UpdateAlertConfig(db *sqlx.DB) echo.HandlerFunc {
+// UpdateEvaluation updates an existing alert
+func UpdateEvaluation(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		var ac models.AlertConfig
+		var ac models.Evaluation
 		if err := c.Bind(&ac); err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
-		acID, err := uuid.Parse(c.Param("alert_config_id"))
+		acID, err := uuid.Parse(c.Param("evaluation_id"))
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		p := c.Get("profile").(*models.Profile)
 		t := time.Now()
 		ac.Updater, ac.UpdateDate = &p.ID, &t
-		aUpdated, err := models.UpdateAlertConfig(db, &acID, &ac)
+		aUpdated, err := models.UpdateEvaluation(db, &acID, &ac)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
@@ -100,14 +100,14 @@ func UpdateAlertConfig(db *sqlx.DB) echo.HandlerFunc {
 	}
 }
 
-// DeleteAlertConfig Deletes an Alert Config
-func DeleteAlertConfig(db *sqlx.DB) echo.HandlerFunc {
+// DeleteEvaluation Deletes an Alert Config
+func DeleteEvaluation(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		acID, err := uuid.Parse(c.Param("alert_config_id"))
+		acID, err := uuid.Parse(c.Param("evaluation_id"))
 		if err != nil {
 			return echo.NewHTTPError(http.StatusNotFound, err.Error())
 		}
-		if err := models.DeleteAlertConfig(db, &acID); err != nil {
+		if err := models.DeleteEvaluation(db, &acID); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, make(map[string]interface{}))

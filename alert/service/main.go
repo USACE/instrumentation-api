@@ -69,7 +69,7 @@ func HandleRequest(ctx context.Context, name MyEvent) error {
 		FROM  (
 			SELECT *
 			FROM alert_config a
-			WHERE last_checked < now() - schedule 
+			WHERE last_checked < now() - schedule_interval 
 		) ac2
 		WHERE  ac1.id = ac2.id
 		RETURNING ac2.*
@@ -99,7 +99,7 @@ func HandleRequest(ctx context.Context, name MyEvent) error {
 // handleMeasurementUploadAlert checks that measurements for an instrument exist within
 // a defined interval subtracted by the current time and sends an alert otherwise
 //
-// Each alert config has a corresponding instrument_id and schedule (interval)
+// Each alert config has a corresponding instrument_id and schedule_interval
 // Query if any timeseries measurements for an instrument exist that are older than the current time minus the interval,
 // and check that for each alert_config/instrument_id.
 func handleMeasurementUploadAlert()
@@ -107,7 +107,7 @@ func handleMeasurementUploadAlert()
 // handleQcDataEvaluationAlert checks that a "QC data evaluation" has been submitted for the instrument
 // within the defined time interval
 //
-// Each alert config has a corresponding instrument_id and schedule (interval)
+// Each alert config has a corresponding instrument_id and schedule_interval
 // Query `qc_instrument_evaluated`
 func handleQcDataEvaluationAlert()
 

@@ -148,15 +148,16 @@ func main() {
 	public.GET("/aware/data_acquisition_config", handlers.ListAwarePlatformParameterConfig(db))
 
 	// AlertConfigs
+	public.GET("/projects/:project_id/alert_configs", handlers.ListProjectAlertConfigs(db))
 	public.GET("/projects/:project_id/instruments/:instrument_id/alert_configs", handlers.ListInstrumentAlertConfigs(db))
-	public.GET("/projects/:project_id/instruments/:instrument_id/alert_configs/:alert_config_id", handlers.GetAlertConfig(db))
-	private.POST("/projects/:project_id/instruments/:instrument_id/alert_configs", handlers.CreateInstrumentAlertConfigs(db))
-	private.PUT("/projects/:project_id/instruments/:instrument_id/alert_configs/:alert_config_id", handlers.UpdateInstrumentAlertConfig(db))
-	private.DELETE("/projects/:project_id/instruments/:instrument_id/alert_configs/:alert_config_id", handlers.DeleteInstrumentAlertConfig(db))
+	public.GET("/projects/:project_id/alert_configs/:alert_config_id", handlers.GetAlertConfig(db))
+	private.POST("/projects/:project_id/alert_configs", handlers.CreateAlertConfig(db))
+	private.PUT("/projects/:project_id/alert_configs/:alert_config_id", handlers.UpdateAlertConfig(db))
+	private.DELETE("/projects/:project_id/alert_configs/:alert_config_id", handlers.DeleteAlertConfig(db))
 
 	// Alerts
 	public.GET("/projects/:project_id/instruments/:instrument_id/alerts", handlers.ListAlertsForInstrument(db))
-	private.GET("/my_alerts", handlers.ListMyAlerts(db)) // Private because token required to determine user (i.e. who is "me")
+	private.GET("/my_alerts", handlers.ListMyAlerts(db))
 	private.POST("/my_alerts/:alert_id/read", handlers.DoAlertRead(db))
 	private.POST("/my_alerts/:alert_id/unread", handlers.DoAlertUnread(db))
 
@@ -168,6 +169,14 @@ func main() {
 
 	// Email Autocomplete
 	public.GET("/email_autocomplete", handlers.ListEmailAutocomplete(db))
+
+	// Evaluations
+	public.GET("/projects/:project_id/evaluations", handlers.ListProjectEvaluations(db))
+	public.GET("/projects/:project_id/instruments/:instrument_id/evaluations", handlers.ListInstrumentEvaluations(db))
+	public.GET("/projects/:project_id/evaluations/:evaluation_id", handlers.GetEvaluation(db))
+	private.POST("/projects/:project_id/evaluations", handlers.CreateEvaluation(db))
+	private.PUT("/projects/:project_id/evaluations/:evaluation_id", handlers.UpdateEvaluation(db))
+	private.DELETE("/projects/:project_id/evaluations/:evaluation_id", handlers.DeleteEvaluation(db))
 
 	// Projects
 	public.GET("/projects", handlers.ListProjects(db))

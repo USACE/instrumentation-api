@@ -9,16 +9,14 @@ import (
 
 // Alert is an alert, triggered by an AlertConfig evaluating to true
 type Alert struct {
-	Read           *bool     `json:"read,omitempty"`
-	ID             uuid.UUID `json:"id"`
-	AlertConfigID  uuid.UUID `json:"alert_config_id" db:"alert_config_id"`
-	ProjectID      uuid.UUID `json:"project_id" db:"project_id"`
-	InstrumentID   uuid.UUID `json:"instrument_id" db:"instrument_id"`
-	ProjectName    string    `json:"project_name" db:"project_name"`
-	InstrumentName string    `json:"instrument_name" db:"instrument_name"`
-	Name           string    `json:"name"`
-	Body           string    `json:"body"`
-	CreateDate     time.Time `json:"create_date" db:"create_date"`
+	Read          *bool     `json:"read,omitempty"`
+	ID            uuid.UUID `json:"id"`
+	AlertConfigID uuid.UUID `json:"alert_config_id" db:"alert_config_id"`
+	ProjectID     uuid.UUID `json:"project_id" db:"project_id"`
+	ProjectName   string    `json:"project_name" db:"project_name"`
+	Name          string    `json:"name"`
+	Body          string    `json:"body"`
+	CreateDate    time.Time `json:"create_date" db:"create_date"`
 }
 
 // CreateAlerts creates one or more new alerts
@@ -49,10 +47,28 @@ func CreateAlerts(db *sqlx.DB, alertConfigIDS []uuid.UUID) error {
 	return nil
 }
 
+// ListProjectAlerts lists all alerts for a given instrument ID
+func ListProjectAlerts(db *sqlx.DB, projectID *uuid.UUID) ([]Alert, error) {
+	var aa []Alert
+	err := db.Select(&aa, `
+		SELECT * FROM v_alerts WHERE project_id = $1
+	`, projectID)
+	if err != nil {
+		return make([]Alert, 0), err
+	}
+	return aa, nil
+}
+
 // ListAlertsForInstrument lists all alerts for a given instrument ID
 func ListAlertsForInstrument(db *sqlx.DB, instrumentID *uuid.UUID) ([]Alert, error) {
 	var aa []Alert
-	err := db.Select(&aa, listAlertsForInstrumentSQL, instrumentID)
+	err := db.Select(&aa, `
+		SELECT * FROM v_alerts
+		WHERE alert_config_id = ANY(
+			SELECT id FROM alert_config_instrument
+			WHERE instrument_id = $1
+		)
+	`, instrumentID)
 	if err != nil {
 		return make([]Alert, 0), err
 	}
@@ -97,22 +113,6 @@ func DoAlertUnread(db *sqlx.DB, profileID *uuid.UUID, alertID *uuid.UUID) (*Aler
 	}
 	return GetMyAlert(db, profileID, alertID)
 }
-
-// DoCheckAlerts checks for alert conditions; Creates alerts as needed
-func DoCheckAlerts(db *sqlx.DB) error {
-	// TEMPORARY; SIMULATE ALERTS
-	alertID, err := uuid.Parse("6f3dfe9f-4664-4c78-931f-32ffac6d2d43")
-	if err != nil {
-		return err
-	}
-	if err := CreateAlerts(db, []uuid.UUID{alertID}); err != nil {
-		return err
-	}
-	return nil
-}
-
-// ListAlertsForInstrumentSQL returns all alerts for a single instrument
-var listAlertsForInstrumentSQL = `SELECT * FROM v_alert WHERE instrument_id = $1`
 
 // ListMyAlertsSQL returns all alerts for a profile's alert_profile_subscriptions
 var listMyAlertsSQL = `SELECT a.*,

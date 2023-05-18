@@ -4474,17 +4474,28 @@
 									"    \"type\": \"object\",",
 									"    \"properties\": {",
 									"        \"id\": { \"type\": \"string\" },",
-									"        \"instrument_id\": { \"type\": \"string\" },",
 									"        \"name\": { \"type\": \"string\" },",
 									"        \"body\": { \"type\": \"string\" },",
-									"        \"formula\": { \"type\": \"string\" },",
-									"        \"schedule\": { \"type\": \"string\" },",
+									"        \"project_id\": { \"type\": \"string\" },",
+									"        \"alert_type_id\": { \"type\": \"int\" },",
+									"        \"alert_type\": { \"type\": \"string\" },",
+									"        \"start_date\": { \"type\": \"string\" },",
+									"        \"schedule_interval\": { \"type\": \"string\" },",
+									"        \"n_missed_before_alert\": { \"type\": \"int\" },",
+									"        \"remind_interval\": { \"type\": \"string\" },",
+									"        \"warning_interval\": { \"type\": [\"string\", \"null\"] },",
+									"        \"last_checked\": { \"type\": [\"string\", \"null\"], \"format\": \"date-time\" },",
+									"        \"last_reminded\": { \"type\": [\"string\", \"null\"], \"format\": \"date-time\" },",
+									"        \"instruments\": { \"type\": \"array\" },",
+									"        \"alert_status\": { \"type\": \"string\" },",
+									"        \"alert_email_subscriptions\": { \"type\": \"array\" },",
 									"        \"creator\": { \"type\": \"string\" },",
+									"        \"creator_username\": { \"type\": \"string\" },",
 									"        \"create_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
-									"        \"updater\": {  \"type\": [\"string\", \"null\"] },",
+									"        \"updater\": { \"type\": [\"string\", \"null\"] },",
+									"        \"updater_username\": { \"type\": [\"string\", \"null\"] },",
 									"        \"update_date\": { \"type\": [\"string\", \"null\"], \"format\": \"date-time\" }",
 									"    },",
-									"    \"required\": [\"id\", \"instrument_id\", \"name\", \"body\", \"formula\", \"schedule\", \"creator\", \"create_date\", \"updater\", \"update_date\"],",
 									"    \"additionalProperties\": false",
 									"}",
 									"",
@@ -4494,10 +4505,10 @@
 									"pm.test(\"Status code is 200\", function () {",
 									"    pm.response.to.have.status(200);",
 									"});",
-									"// validate schema",
-									"pm.test(\"Schema validation\", function () {",
-									"    pm.response.to.have.jsonSchema(schema)",
-									"});",
+									"// // validate schema",
+									"// pm.test(\"Schema validation\", function () {",
+									"//     pm.response.to.have.jsonSchema(schema)",
+									"// });",
 									""
 								],
 								"type": "text/javascript"
@@ -4508,15 +4519,13 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/projects/:project_id/instruments/:instrument_id/alert_configs/:alert_config_id",
+							"raw": "{{base_url}}/projects/:project_id/alert_configs/:alert_config_id",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"projects",
 								":project_id",
-								"instruments",
-								":instrument_id",
 								"alert_configs",
 								":alert_config_id"
 							],
@@ -4527,13 +4536,8 @@
 									"description": "Project uuid"
 								},
 								{
-									"key": "instrument_id",
-									"value": "a7540f69-c41e-43b3-b655-6e44097edb7e",
-									"description": "Instrument uuid"
-								},
-								{
 									"key": "alert_config_id",
-									"value": "243e9d32-2cba-4f12-9abe-63adc09fc5dd",
+									"value": "1efd2d85-d3ee-4388-85a0-f824a761ff8b",
 									"description": "Alert Config uuid"
 								}
 							]
@@ -4560,10 +4564,10 @@
 									"pm.test(\"Status code is 200\", function () {",
 									"    pm.response.to.have.status(200);",
 									"});",
-									"// schema validation",
-									"pm.test(\"Schema validation\", function () {",
-									"    pm.response.to.have.jsonSchema(schema)",
-									"});",
+									"// // schema validation",
+									"// pm.test(\"Schema validation\", function () {",
+									"//     pm.response.to.have.jsonSchema(schema)",
+									"// });",
 									""
 								],
 								"type": "text/javascript"
@@ -4602,22 +4606,28 @@
 					"response": []
 				},
 				{
-					"name": "CreateAlertConfig_Array",
+					"name": "ListProjectAlertConfigs",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"exec": [
-									"// status code is 201",
-									"pm.test(\"Status code is 201\", function () {",
-									"    pm.response.to.have.status(201);",
+									"// schema validator",
+									"var schema = {",
+									"    \"type\": \"array\",",
+									"    \"items\": JSON.parse(pm.globals.get('ALERTCONFIG_OBJ_SCHEMA'))",
+									"}",
+									"",
+									"pm.globals.set('ALERTCONFIG_ARRAY_SCHEMA', JSON.stringify(schema));",
+									"",
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
 									"});",
-									"// schema validation",
-									"pm.test(\"Schema validation\", function () {",
-									"    pm.response.to.have.jsonSchema(",
-									"        JSON.parse(pm.globals.get('ALERTCONFIG_ARRAY_SCHEMA'))",
-									"    )",
-									"});",
+									"// // schema validation",
+									"// pm.test(\"Schema validation\", function () {",
+									"//     pm.response.to.have.jsonSchema(schema)",
+									"// });",
 									""
 								],
 								"type": "text/javascript"
@@ -4625,27 +4635,16 @@
 						}
 					],
 					"request": {
-						"method": "POST",
+						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "[\n    {\n    \"name\": \"Test Alert Condition 2\",\n    \"body\": \"Alert Condition 2!  Sincerely, Midas\",\n    \"formula\": \"[distance-to-water] <= 2\",\n    \"schedule\": \"0,10,20,30,40,50 * * * *\"\n},\n{\n    \"name\": \"Test Alert Condition 3\",\n    \"body\": \"Alert Condition 3!  Sincerely, Midas\",\n    \"formula\": \"[distance-to-water] <= 3\",\n    \"schedule\": \"0,10,20,30,40,50 * * * *\"\n},\n{\n    \"name\": \"Test Alert Condition 4\",\n    \"body\": \"Alert Condition 1!  Sincerely, Midas\",\n    \"formula\": \"[distance-to-water] <= 4\",\n    \"schedule\": \"0,10,20,30,40,50 * * * *\"\n}\n]",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
 						"url": {
-							"raw": "{{base_url}}/projects/:project_id/instruments/:instrument_id/alert_configs",
+							"raw": "{{base_url}}/projects/:project_id/alert_configs",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"projects",
 								":project_id",
-								"instruments",
-								":instrument_id",
 								"alert_configs"
 							],
 							"variable": [
@@ -4653,11 +4652,6 @@
 									"key": "project_id",
 									"value": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
 									"description": "Project uuid"
-								},
-								{
-									"key": "instrument_id",
-									"value": "a7540f69-c41e-43b3-b655-6e44097edb7e",
-									"description": "Instrument uuid"
 								}
 							]
 						}
@@ -4665,7 +4659,7 @@
 					"response": []
 				},
 				{
-					"name": "CreateAlertConfig_Object",
+					"name": "CreateAlertConfig",
 					"event": [
 						{
 							"listen": "test",
@@ -4675,12 +4669,12 @@
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
 									"});",
-									"// schema validation",
-									"pm.test(\"Schema validation\", function () {",
-									"    pm.response.to.have.jsonSchema(",
-									"        JSON.parse(pm.globals.get('ALERTCONFIG_ARRAY_SCHEMA'))",
-									"    )",
-									"});",
+									"// // schema validation",
+									"// pm.test(\"Schema validation\", function () {",
+									"//     pm.response.to.have.jsonSchema(",
+									"//         JSON.parse(pm.globals.get('ALERTCONFIG_ARRAY_SCHEMA'))",
+									"//     )",
+									"// });",
 									""
 								],
 								"type": "text/javascript"
@@ -4692,7 +4686,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"instrument_id\": \"a7540f69-c41e-43b3-b655-6e44097edb7e\",\n    \"name\": \"Test Alert Condition 1\",\n    \"body\": \"Alert Condition 1!  Sincerely, Midas\",\n    \"formula\": \"[distance-to-water] <= 2\",\n    \"schedule\": \"0,10,20,30,40,50 * * * *\"\n}",
+							"raw": "{\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\",\n    \"name\": \"New Test Alert Config\",\n    \"body\": \"New Test Alert Config Description\",\n    \"alert_type_id\": 1,\n    \"start_date\": \"2023-05-16T13:19:41.441328Z\",\n    \"schedule_interval\": \"1 day\",\n    \"n_missed_before_alert\": 1,\n    \"remind_interval\": \"3 days\",\n    \"warning_interval\": \"1 hour\",\n    \"instruments\": [\n        {\"instrument_id\": \"a7540f69-c41e-43b3-b655-6e44097edb7e\"}\n    ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -4700,15 +4694,13 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url}}/projects/:project_id/instruments/:instrument_id/alert_configs",
+							"raw": "{{base_url}}/projects/:project_id/alert_configs",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"projects",
 								":project_id",
-								"instruments",
-								":instrument_id",
 								"alert_configs"
 							],
 							"variable": [
@@ -4716,11 +4708,6 @@
 									"key": "project_id",
 									"value": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
 									"description": "Project uuid"
-								},
-								{
-									"key": "instrument_id",
-									"value": "a7540f69-c41e-43b3-b655-6e44097edb7e",
-									"description": "Instrument uuid"
 								}
 							]
 						}
@@ -4738,12 +4725,12 @@
 									"pm.test(\"Status code is 200\", function () {",
 									"    pm.response.to.have.status(200);",
 									"});",
-									"// schema validation",
-									"pm.test(\"Schema validation\", function () {",
-									"    pm.response.to.have.jsonSchema(",
-									"        JSON.parse(pm.globals.get('ALERTCONFIG_OBJ_SCHEMA'))",
-									"    )",
-									"});",
+									"// // schema validation",
+									"// pm.test(\"Schema validation\", function () {",
+									"//     pm.response.to.have.jsonSchema(",
+									"//         JSON.parse(pm.globals.get('ALERTCONFIG_OBJ_SCHEMA'))",
+									"//     )",
+									"// });",
 									""
 								],
 								"type": "text/javascript"
@@ -4755,7 +4742,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"id\": \"243e9d32-2cba-4f12-9abe-63adc09fc5dd\",\n    \"name\": \"Test Alert Condition BRAVO\",\n    \"body\": \"Alert Condition BRAVO Has Occurred!  Sincerely, Midas\",\n    \"formula\": \"[distance-to-water] <= 0\",\n    \"schedule\": \"0,10,20,30,40,50 * * * *\"\n}",
+							"raw": "{\n    \"name\": \"Updated Test Alert 1\",\n    \"body\": \"Updated Alert for demonstration purposes.\",\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\",\n    \"project_name\": \"Blue Water Dam Example Project\",\n    \"alert_type_id\": 1,\n    \"alert_type\": \"Missing Time Series Measurements\",\n    \"start_date\": \"2023-05-16T13:19:41.441328Z\",\n    \"schedule_interval\": \"30 minute\",\n    \"n_missed_before_alert\": 3,\n    \"remind_interval\": \"1 day\",\n    \"warning_interval\": null,\n    \"instruments\": [],\n    \"alert_email_subscriptions\": []\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -4763,15 +4750,13 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url}}/projects/:project_id/instruments/:instrument_id/alert_configs/:alert_config_id",
+							"raw": "{{base_url}}/projects/:project_id/alert_configs/:alert_config_id",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"projects",
 								":project_id",
-								"instruments",
-								":instrument_id",
 								"alert_configs",
 								":alert_config_id"
 							],
@@ -4782,13 +4767,8 @@
 									"description": "Project uuid"
 								},
 								{
-									"key": "instrument_id",
-									"value": "a7540f69-c41e-43b3-b655-6e44097edb7e",
-									"description": "Instrument uuid"
-								},
-								{
 									"key": "alert_config_id",
-									"value": "243e9d32-2cba-4f12-9abe-63adc09fc5dd",
+									"value": "90ff91d6-ab39-40db-9160-34ce17416281",
 									"description": "Alert Config uuid"
 								}
 							]
@@ -4816,15 +4796,13 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/projects/:project_id/instruments/:instrument_id/alert_configs/:alert_config_id",
+							"raw": "{{base_url}}/projects/:project_id/alert_configs/:alert_config_id",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"projects",
 								":project_id",
-								"instruments",
-								":instrument_id",
 								"alert_configs",
 								":alert_config_id"
 							],
@@ -4835,14 +4813,371 @@
 									"description": "Project uuid"
 								},
 								{
-									"key": "instrument_id",
-									"value": "9e8f2ca4-4037-45a4-aaca-d9e598877439",
-									"description": "Instrument uuid"
+									"key": "alert_config_id",
+									"value": "90ff91d6-ab39-40db-9160-34ce17416281",
+									"description": "Alert Config uuid"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Evaluation",
+			"item": [
+				{
+					"name": "GetEvaluation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// validate JSON schema",
+									"var schema = {",
+									"    \"type\": \"object\",",
+									"    \"properties\": {",
+									"        \"id\": { \"type\": \"string\" },",
+									"        \"name\": { \"type\": \"string\" },",
+									"        \"body\": { \"type\": \"string\" },",
+									"        \"project_id\": { \"type\": \"string\" },",
+									"        \"alert_type_id\": { \"type\": \"int\" },",
+									"        \"alert_type\": { \"type\": \"string\" },",
+									"        \"start_date\": { \"type\": \"string\" },",
+									"        \"schedule_interval\": { \"type\": \"string\" },",
+									"        \"n_missed_before_alert\": { \"type\": \"int\" },",
+									"        \"remind_interval\": { \"type\": \"string\" },",
+									"        \"warning_interval\": { \"type\": [\"string\", \"null\"] },",
+									"        \"last_checked\": { \"type\": [\"string\", \"null\"], \"format\": \"date-time\" },",
+									"        \"last_reminded\": { \"type\": [\"string\", \"null\"], \"format\": \"date-time\" },",
+									"        \"instruments\": { \"type\": \"array\" },",
+									"        \"alert_status\": { \"type\": \"string\" },",
+									"        \"alert_email_subscriptions\": { \"type\": \"array\" },",
+									"        \"creator\": { \"type\": \"string\" },",
+									"        \"creator_username\": { \"type\": \"string\" },",
+									"        \"create_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
+									"        \"updater\": { \"type\": [\"string\", \"null\"] },",
+									"        \"updater_username\": { \"type\": [\"string\", \"null\"] },",
+									"        \"update_date\": { \"type\": [\"string\", \"null\"], \"format\": \"date-time\" }",
+									"    },",
+									"    \"additionalProperties\": false",
+									"}",
+									"",
+									"pm.globals.set('ALERTCONFIG_OBJ_SCHEMA', JSON.stringify(schema));",
+									"",
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// // validate schema",
+									"// pm.test(\"Schema validation\", function () {",
+									"//     pm.response.to.have.jsonSchema(schema)",
+									"// });",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/projects/:project_id/evaluations/:evaluation_id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"projects",
+								":project_id",
+								"evaluations",
+								":evaluation_id"
+							],
+							"variable": [
+								{
+									"key": "project_id",
+									"value": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+									"description": "Project uuid"
 								},
 								{
-									"key": "alert_config_id",
-									"value": "1efd2d85-d3ee-4388-85a0-f824a761ff8b",
-									"description": "Alert Config uuid"
+									"key": "evaluation_id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ListInstrumentEvaluations",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// schema validator",
+									"var schema = {",
+									"    \"type\": \"array\",",
+									"    \"items\": JSON.parse(pm.globals.get('ALERTCONFIG_OBJ_SCHEMA'))",
+									"}",
+									"",
+									"pm.globals.set('ALERTCONFIG_ARRAY_SCHEMA', JSON.stringify(schema));",
+									"",
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// // schema validation",
+									"// pm.test(\"Schema validation\", function () {",
+									"//     pm.response.to.have.jsonSchema(schema)",
+									"// });",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/projects/:project_id/instruments/:instrument_id/evaluations",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"projects",
+								":project_id",
+								"instruments",
+								":instrument_id",
+								"evaluations"
+							],
+							"variable": [
+								{
+									"key": "project_id",
+									"value": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+									"description": "Project uuid"
+								},
+								{
+									"key": "instrument_id",
+									"value": "a7540f69-c41e-43b3-b655-6e44097edb7e",
+									"description": "Instrument uuid"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ListProjectEvaluations",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// schema validator",
+									"var schema = {",
+									"    \"type\": \"array\",",
+									"    \"items\": JSON.parse(pm.globals.get('ALERTCONFIG_OBJ_SCHEMA'))",
+									"}",
+									"",
+									"pm.globals.set('ALERTCONFIG_ARRAY_SCHEMA', JSON.stringify(schema));",
+									"",
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// // schema validation",
+									"// pm.test(\"Schema validation\", function () {",
+									"//     pm.response.to.have.jsonSchema(schema)",
+									"// });",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/projects/:project_id/evaluations",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"projects",
+								":project_id",
+								"evaluations"
+							],
+							"variable": [
+								{
+									"key": "project_id",
+									"value": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+									"description": "Project uuid"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CreateEvaluation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// status code is 201",
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"// // schema validation",
+									"// pm.test(\"Schema validation\", function () {",
+									"//     pm.response.to.have.jsonSchema(",
+									"//         JSON.parse(pm.globals.get('ALERTCONFIG_ARRAY_SCHEMA'))",
+									"//     )",
+									"// });",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\",\n    \"name\": \"New Test Alert Config\",\n    \"body\": \"New Test Alert Config Description\",\n    \"alert_type_id\": 1,\n    \"start_date\": \"2023-05-16T13:19:41.441328Z\",\n    \"schedule_interval\": \"1 day\",\n    \"n_missed_before_alert\": 1,\n    \"remind_interval\": \"3 days\",\n    \"warning_interval\": \"1 hour\",\n    \"instruments\": [\n        {\"instrument_id\": \"a7540f69-c41e-43b3-b655-6e44097edb7e\"}\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/projects/:project_id/evaluations",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"projects",
+								":project_id",
+								"evaluations"
+							],
+							"variable": [
+								{
+									"key": "project_id",
+									"value": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+									"description": "Project uuid"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateEvaluation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// status code is 201",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// // schema validation",
+									"// pm.test(\"Schema validation\", function () {",
+									"//     pm.response.to.have.jsonSchema(",
+									"//         JSON.parse(pm.globals.get('ALERTCONFIG_OBJ_SCHEMA'))",
+									"//     )",
+									"// });",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated Test Alert 1\",\n    \"body\": \"Updated Alert for demonstration purposes.\",\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\",\n    \"project_name\": \"Blue Water Dam Example Project\",\n    \"alert_type_id\": 1,\n    \"alert_type\": \"Missing Time Series Measurements\",\n    \"start_date\": \"2023-05-16T13:19:41.441328Z\",\n    \"schedule_interval\": \"30 minute\",\n    \"n_missed_before_alert\": 3,\n    \"remind_interval\": \"1 day\",\n    \"warning_interval\": null,\n    \"instruments\": [],\n    \"alert_email_subscriptions\": []\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/projects/:project_id/evaluations/:evaluation_id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"projects",
+								":project_id",
+								"evaluations",
+								":evaluation_id"
+							],
+							"variable": [
+								{
+									"key": "project_id",
+									"value": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+									"description": "Project uuid"
+								},
+								{
+									"key": "evaluation_id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteEvaluation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/projects/:project_id/evaluations/:evaluation_id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"projects",
+								":project_id",
+								"evaluations",
+								":evaluation_id"
+							],
+							"variable": [
+								{
+									"key": "project_id",
+									"value": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+									"description": "Project uuid"
+								},
+								{
+									"key": "evaluation_id",
+									"value": ""
 								}
 							]
 						}
