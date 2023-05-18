@@ -16,7 +16,7 @@ type AlertConfig struct {
 	Body                    string                                 `json:"body" db:"body"`
 	ProjectID               uuid.UUID                              `json:"project_id" db:"project_id"`
 	ProjectName             string                                 `json:"project_name" db:"project_name"`
-	AlertTypeID             int                                    `json:"alert_type_id" db:"alert_type_id"`
+	AlertTypeID             uuid.UUID                              `json:"alert_type_id" db:"alert_type_id"`
 	AlertType               string                                 `json:"alert_type" db:"alert_type"`
 	StartDate               time.Time                              `json:"start_date" db:"start_date"`
 	ScheduleInterval        Duration                               `json:"schedule_interval" db:"schedule_interval"`

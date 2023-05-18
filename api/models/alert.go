@@ -9,14 +9,15 @@ import (
 
 // Alert is an alert, triggered by an AlertConfig evaluating to true
 type Alert struct {
-	Read          *bool     `json:"read,omitempty"`
-	ID            uuid.UUID `json:"id"`
-	AlertConfigID uuid.UUID `json:"alert_config_id" db:"alert_config_id"`
-	ProjectID     uuid.UUID `json:"project_id" db:"project_id"`
-	ProjectName   string    `json:"project_name" db:"project_name"`
-	Name          string    `json:"name"`
-	Body          string    `json:"body"`
-	CreateDate    time.Time `json:"create_date" db:"create_date"`
+	Read          *bool                           `json:"read,omitempty"`
+	ID            uuid.UUID                       `json:"id"`
+	AlertConfigID uuid.UUID                       `json:"alert_config_id" db:"alert_config_id"`
+	ProjectID     uuid.UUID                       `json:"project_id" db:"project_id"`
+	ProjectName   string                          `json:"project_name" db:"project_name"`
+	Name          string                          `json:"name"`
+	Body          string                          `json:"body"`
+	CreateDate    time.Time                       `json:"create_date" db:"create_date"`
+	Instruments   AlertConfigInstrumentCollection `json:"instruments" db:"instruments"`
 }
 
 // CreateAlerts creates one or more new alerts
@@ -49,9 +50,9 @@ func CreateAlerts(db *sqlx.DB, alertConfigIDS []uuid.UUID) error {
 
 // ListProjectAlerts lists all alerts for a given instrument ID
 func ListProjectAlerts(db *sqlx.DB, projectID *uuid.UUID) ([]Alert, error) {
-	var aa []Alert
+	aa := make([]Alert, 0)
 	err := db.Select(&aa, `
-		SELECT * FROM v_alerts WHERE project_id = $1
+		SELECT * FROM v_alert WHERE project_id = $1
 	`, projectID)
 	if err != nil {
 		return make([]Alert, 0), err
@@ -61,9 +62,9 @@ func ListProjectAlerts(db *sqlx.DB, projectID *uuid.UUID) ([]Alert, error) {
 
 // ListAlertsForInstrument lists all alerts for a given instrument ID
 func ListAlertsForInstrument(db *sqlx.DB, instrumentID *uuid.UUID) ([]Alert, error) {
-	var aa []Alert
+	aa := make([]Alert, 0)
 	err := db.Select(&aa, `
-		SELECT * FROM v_alerts
+		SELECT * FROM v_alert
 		WHERE alert_config_id = ANY(
 			SELECT id FROM alert_config_instrument
 			WHERE instrument_id = $1

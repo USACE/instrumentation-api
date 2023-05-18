@@ -51,7 +51,7 @@ func ListProjectEvaluations(db *sqlx.DB, projectID *uuid.UUID) ([]Evaluation, er
 }
 
 func ListInstrumentEvaluations(db *sqlx.DB, instrumentID *uuid.UUID) ([]Evaluation, error) {
-	var aa []Evaluation
+	aa := make([]Evaluation, 0)
 	sql := `
 		SELECT *
 		FROM v_evaluation

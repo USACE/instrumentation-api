@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"database/sql"
 	"net/http"
 	"time"
 
+	"github.com/USACE/instrumentation-api/api/messages"
 	"github.com/USACE/instrumentation-api/api/models"
 
 	"github.com/google/uuid"
@@ -50,6 +52,9 @@ func GetEvaluation(db *sqlx.DB) echo.HandlerFunc {
 		}
 		a, err := models.GetEvaluation(db, &acID)
 		if err != nil {
+			if err == sql.ErrNoRows {
+				return echo.NewHTTPError(http.StatusNotFound, messages.NotFound)
+			}
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, a)

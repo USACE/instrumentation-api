@@ -4469,6 +4469,22 @@
 							"listen": "test",
 							"script": {
 								"exec": [
+									"var alertConfigInstrumentSchema = {",
+									"    \"type\": \"object\",",
+									"    \"properties\": {",
+									"        \"instrument_id\": { \"type\": \"string\" },",
+									"        \"instrument_name\": { \"type\": \"string\" }",
+									"    }",
+									"}",
+									"",
+									"var alertConfigEmailSubSchema = {",
+									"    \"type\": \"object\",",
+									"    \"properties\": {",
+									"        \"username\": { \"type\": [\"string\", \"null\"] },",
+									"        \"email\": { \"type\": \"string\" }",
+									"    }",
+									"}",
+									"",
 									"// validate JSON schema",
 									"var schema = {",
 									"    \"type\": \"object\",",
@@ -4477,18 +4493,18 @@
 									"        \"name\": { \"type\": \"string\" },",
 									"        \"body\": { \"type\": \"string\" },",
 									"        \"project_id\": { \"type\": \"string\" },",
-									"        \"alert_type_id\": { \"type\": \"int\" },",
+									"        \"alert_type_id\": { \"type\": \"string\" },",
 									"        \"alert_type\": { \"type\": \"string\" },",
 									"        \"start_date\": { \"type\": \"string\" },",
 									"        \"schedule_interval\": { \"type\": \"string\" },",
-									"        \"n_missed_before_alert\": { \"type\": \"int\" },",
+									"        \"n_missed_before_alert\": { \"type\": \"number\" },",
 									"        \"remind_interval\": { \"type\": \"string\" },",
 									"        \"warning_interval\": { \"type\": [\"string\", \"null\"] },",
 									"        \"last_checked\": { \"type\": [\"string\", \"null\"], \"format\": \"date-time\" },",
 									"        \"last_reminded\": { \"type\": [\"string\", \"null\"], \"format\": \"date-time\" },",
-									"        \"instruments\": { \"type\": \"array\" },",
+									"        \"instruments\": { \"type\": \"array\", \"items\": alertConfigInstrumentSchema },",
+									"        \"alert_email_subscriptions\": { \"type\": \"array\", \"items\": alertConfigEmailSubSchema },",
 									"        \"alert_status\": { \"type\": \"string\" },",
-									"        \"alert_email_subscriptions\": { \"type\": \"array\" },",
 									"        \"creator\": { \"type\": \"string\" },",
 									"        \"creator_username\": { \"type\": \"string\" },",
 									"        \"create_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
@@ -4496,7 +4512,7 @@
 									"        \"updater_username\": { \"type\": [\"string\", \"null\"] },",
 									"        \"update_date\": { \"type\": [\"string\", \"null\"], \"format\": \"date-time\" }",
 									"    },",
-									"    \"additionalProperties\": false",
+									"    \"additionalProperties\": true",
 									"}",
 									"",
 									"pm.globals.set('ALERTCONFIG_OBJ_SCHEMA', JSON.stringify(schema));",
@@ -4505,10 +4521,10 @@
 									"pm.test(\"Status code is 200\", function () {",
 									"    pm.response.to.have.status(200);",
 									"});",
-									"// // validate schema",
-									"// pm.test(\"Schema validation\", function () {",
-									"//     pm.response.to.have.jsonSchema(schema)",
-									"// });",
+									"// validate schema",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(schema)",
+									"});",
 									""
 								],
 								"type": "text/javascript"
@@ -4564,10 +4580,10 @@
 									"pm.test(\"Status code is 200\", function () {",
 									"    pm.response.to.have.status(200);",
 									"});",
-									"// // schema validation",
-									"// pm.test(\"Schema validation\", function () {",
-									"//     pm.response.to.have.jsonSchema(schema)",
-									"// });",
+									"// schema validation",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(schema)",
+									"});",
 									""
 								],
 								"type": "text/javascript"
@@ -4624,10 +4640,10 @@
 									"pm.test(\"Status code is 200\", function () {",
 									"    pm.response.to.have.status(200);",
 									"});",
-									"// // schema validation",
-									"// pm.test(\"Schema validation\", function () {",
-									"//     pm.response.to.have.jsonSchema(schema)",
-									"// });",
+									"// schema validation",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(schema)",
+									"});",
 									""
 								],
 								"type": "text/javascript"
@@ -4669,12 +4685,12 @@
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
 									"});",
-									"// // schema validation",
-									"// pm.test(\"Schema validation\", function () {",
-									"//     pm.response.to.have.jsonSchema(",
-									"//         JSON.parse(pm.globals.get('ALERTCONFIG_ARRAY_SCHEMA'))",
-									"//     )",
-									"// });",
+									"// schema validation",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(",
+									"        JSON.parse(pm.globals.get('ALERTCONFIG_OBJ_SCHEMA'))",
+									"    )",
+									"});",
 									""
 								],
 								"type": "text/javascript"
@@ -4686,7 +4702,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\",\n    \"name\": \"New Test Alert Config\",\n    \"body\": \"New Test Alert Config Description\",\n    \"alert_type_id\": 1,\n    \"start_date\": \"2023-05-16T13:19:41.441328Z\",\n    \"schedule_interval\": \"1 day\",\n    \"n_missed_before_alert\": 1,\n    \"remind_interval\": \"3 days\",\n    \"warning_interval\": \"1 hour\",\n    \"instruments\": [\n        {\"instrument_id\": \"a7540f69-c41e-43b3-b655-6e44097edb7e\"}\n    ]\n}",
+							"raw": "{\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\",\n    \"name\": \"New Test Alert Config\",\n    \"body\": \"New Test Alert Config Description\",\n    \"alert_type_id\": \"97e7a25c-d5c7-4ded-b272-1bb6e5914fe3\",\n    \"start_date\": \"2023-05-16T13:19:41.441328Z\",\n    \"schedule_interval\": \"1 day\",\n    \"n_missed_before_alert\": 1,\n    \"remind_interval\": \"3 days\",\n    \"warning_interval\": \"1 hour\",\n    \"instruments\": [\n        {\n            \"instrument_id\": \"a7540f69-c41e-43b3-b655-6e44097edb7e\"\n        }\n    ],\n    \"alert_email_subscriptions\": [\n        {\n            \"username\": null,\n            \"email\": \"no.profile@fake.usace.army.mil\"\n        },\n        {\n            \"username\": \"AnthonyLambert\",\n            \"email\": \"anthony.lambert@fake.usace.army.mil\"\n        }\n    ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -4725,12 +4741,12 @@
 									"pm.test(\"Status code is 200\", function () {",
 									"    pm.response.to.have.status(200);",
 									"});",
-									"// // schema validation",
-									"// pm.test(\"Schema validation\", function () {",
-									"//     pm.response.to.have.jsonSchema(",
-									"//         JSON.parse(pm.globals.get('ALERTCONFIG_OBJ_SCHEMA'))",
-									"//     )",
-									"// });",
+									"// schema validation",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(",
+									"        JSON.parse(pm.globals.get('ALERTCONFIG_OBJ_SCHEMA'))",
+									"    )",
+									"});",
 									""
 								],
 								"type": "text/javascript"
@@ -4742,7 +4758,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"Updated Test Alert 1\",\n    \"body\": \"Updated Alert for demonstration purposes.\",\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\",\n    \"project_name\": \"Blue Water Dam Example Project\",\n    \"alert_type_id\": 1,\n    \"alert_type\": \"Missing Time Series Measurements\",\n    \"start_date\": \"2023-05-16T13:19:41.441328Z\",\n    \"schedule_interval\": \"30 minute\",\n    \"n_missed_before_alert\": 3,\n    \"remind_interval\": \"1 day\",\n    \"warning_interval\": null,\n    \"instruments\": [],\n    \"alert_email_subscriptions\": []\n}",
+							"raw": "{\n    \"name\": \"Updated Test Alert 1\",\n    \"body\": \"Updated Alert for demonstration purposes.\",\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\",\n    \"alert_type_id\": \"97e7a25c-d5c7-4ded-b272-1bb6e5914fe3\",\n    \"start_date\": \"2023-05-16T13:19:41.441328Z\",\n    \"schedule_interval\": \"30 minute\",\n    \"n_missed_before_alert\": 3,\n    \"remind_interval\": \"1 day\",\n    \"warning_interval\": null,\n    \"instruments\": [],\n    \"alert_email_subscriptions\": []\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -4834,6 +4850,14 @@
 							"listen": "test",
 							"script": {
 								"exec": [
+									"var instrumentsEvaluationsSchema = {",
+									"    \"type\": \"object\",",
+									"    \"properties\": {",
+									"        \"instrument_id\": { \"type\": \"string\" },",
+									"        \"instrument_name\": { \"type\": \"string\" }",
+									"    }",
+									"}",
+									"",
 									"// validate JSON schema",
 									"var schema = {",
 									"    \"type\": \"object\",",
@@ -4842,18 +4866,10 @@
 									"        \"name\": { \"type\": \"string\" },",
 									"        \"body\": { \"type\": \"string\" },",
 									"        \"project_id\": { \"type\": \"string\" },",
-									"        \"alert_type_id\": { \"type\": \"int\" },",
-									"        \"alert_type\": { \"type\": \"string\" },",
-									"        \"start_date\": { \"type\": \"string\" },",
-									"        \"schedule_interval\": { \"type\": \"string\" },",
-									"        \"n_missed_before_alert\": { \"type\": \"int\" },",
-									"        \"remind_interval\": { \"type\": \"string\" },",
-									"        \"warning_interval\": { \"type\": [\"string\", \"null\"] },",
-									"        \"last_checked\": { \"type\": [\"string\", \"null\"], \"format\": \"date-time\" },",
-									"        \"last_reminded\": { \"type\": [\"string\", \"null\"], \"format\": \"date-time\" },",
-									"        \"instruments\": { \"type\": \"array\" },",
-									"        \"alert_status\": { \"type\": \"string\" },",
-									"        \"alert_email_subscriptions\": { \"type\": \"array\" },",
+									"        \"project_name\": { \"type\": \"string\" },",
+									"        \"start_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
+									"        \"end_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
+									"        \"instruments\": { \"type\": \"array\", \"items\": instrumentsEvaluationsSchema },",
 									"        \"creator\": { \"type\": \"string\" },",
 									"        \"creator_username\": { \"type\": \"string\" },",
 									"        \"create_date\": { \"type\": \"string\", \"format\": \"date-time\" },",
@@ -4864,16 +4880,16 @@
 									"    \"additionalProperties\": false",
 									"}",
 									"",
-									"pm.globals.set('ALERTCONFIG_OBJ_SCHEMA', JSON.stringify(schema));",
+									"pm.globals.set('EVALUATION_OBJ_SCHEMA', JSON.stringify(schema));",
 									"",
 									"// status code is 200",
 									"pm.test(\"Status code is 200\", function () {",
 									"    pm.response.to.have.status(200);",
 									"});",
-									"// // validate schema",
-									"// pm.test(\"Schema validation\", function () {",
-									"//     pm.response.to.have.jsonSchema(schema)",
-									"// });",
+									"// validate schema",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(schema)",
+									"});",
 									""
 								],
 								"type": "text/javascript"
@@ -4902,7 +4918,7 @@
 								},
 								{
 									"key": "evaluation_id",
-									"value": ""
+									"value": "f7169aca-aa5f-4a0b-9fcc-609bb5c2bd7b"
 								}
 							]
 						}
@@ -4919,19 +4935,19 @@
 									"// schema validator",
 									"var schema = {",
 									"    \"type\": \"array\",",
-									"    \"items\": JSON.parse(pm.globals.get('ALERTCONFIG_OBJ_SCHEMA'))",
+									"    \"items\": JSON.parse(pm.globals.get('EVALUATION_OBJ_SCHEMA'))",
 									"}",
 									"",
-									"pm.globals.set('ALERTCONFIG_ARRAY_SCHEMA', JSON.stringify(schema));",
+									"pm.globals.set('EVALUATION_ARRAY_SCHEMA', JSON.stringify(schema));",
 									"",
 									"// status code is 200",
 									"pm.test(\"Status code is 200\", function () {",
 									"    pm.response.to.have.status(200);",
 									"});",
-									"// // schema validation",
-									"// pm.test(\"Schema validation\", function () {",
-									"//     pm.response.to.have.jsonSchema(schema)",
-									"// });",
+									"// schema validation",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(schema)",
+									"});",
 									""
 								],
 								"type": "text/javascript"
@@ -4979,19 +4995,19 @@
 									"// schema validator",
 									"var schema = {",
 									"    \"type\": \"array\",",
-									"    \"items\": JSON.parse(pm.globals.get('ALERTCONFIG_OBJ_SCHEMA'))",
+									"    \"items\": JSON.parse(pm.globals.get('EVALUATION_OBJ_SCHEMA'))",
 									"}",
 									"",
-									"pm.globals.set('ALERTCONFIG_ARRAY_SCHEMA', JSON.stringify(schema));",
+									"pm.globals.set('EVALUATION_ARRAY_SCHEMA', JSON.stringify(schema));",
 									"",
 									"// status code is 200",
 									"pm.test(\"Status code is 200\", function () {",
 									"    pm.response.to.have.status(200);",
 									"});",
-									"// // schema validation",
-									"// pm.test(\"Schema validation\", function () {",
-									"//     pm.response.to.have.jsonSchema(schema)",
-									"// });",
+									"// schema validation",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(schema)",
+									"});",
 									""
 								],
 								"type": "text/javascript"
@@ -5033,12 +5049,12 @@
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
 									"});",
-									"// // schema validation",
-									"// pm.test(\"Schema validation\", function () {",
-									"//     pm.response.to.have.jsonSchema(",
-									"//         JSON.parse(pm.globals.get('ALERTCONFIG_ARRAY_SCHEMA'))",
-									"//     )",
-									"// });",
+									"// schema validation",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(",
+									"        JSON.parse(pm.globals.get('EVALUATION_OBJ_SCHEMA'))",
+									"    )",
+									"});",
 									""
 								],
 								"type": "text/javascript"
@@ -5050,7 +5066,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\",\n    \"name\": \"New Test Alert Config\",\n    \"body\": \"New Test Alert Config Description\",\n    \"alert_type_id\": 1,\n    \"start_date\": \"2023-05-16T13:19:41.441328Z\",\n    \"schedule_interval\": \"1 day\",\n    \"n_missed_before_alert\": 1,\n    \"remind_interval\": \"3 days\",\n    \"warning_interval\": \"1 hour\",\n    \"instruments\": [\n        {\"instrument_id\": \"a7540f69-c41e-43b3-b655-6e44097edb7e\"}\n    ]\n}",
+							"raw": "{\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\",\n    \"name\": \"New Test Evaluation\",\n    \"body\": \"New Test Evaluation Description\",\n    \"start_date\": \"2023-05-16T13:19:41.441328Z\",\n    \"end_date\": \"2023-06-16T13:19:41.441328Z\",\n    \"instruments\": [\n        {\"instrument_id\": \"a7540f69-c41e-43b3-b655-6e44097edb7e\"}\n    ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -5089,12 +5105,12 @@
 									"pm.test(\"Status code is 200\", function () {",
 									"    pm.response.to.have.status(200);",
 									"});",
-									"// // schema validation",
-									"// pm.test(\"Schema validation\", function () {",
-									"//     pm.response.to.have.jsonSchema(",
-									"//         JSON.parse(pm.globals.get('ALERTCONFIG_OBJ_SCHEMA'))",
-									"//     )",
-									"// });",
+									"// schema validation",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(",
+									"        JSON.parse(pm.globals.get('EVALUATION_OBJ_SCHEMA'))",
+									"    )",
+									"});",
 									""
 								],
 								"type": "text/javascript"
@@ -5106,7 +5122,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"Updated Test Alert 1\",\n    \"body\": \"Updated Alert for demonstration purposes.\",\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\",\n    \"project_name\": \"Blue Water Dam Example Project\",\n    \"alert_type_id\": 1,\n    \"alert_type\": \"Missing Time Series Measurements\",\n    \"start_date\": \"2023-05-16T13:19:41.441328Z\",\n    \"schedule_interval\": \"30 minute\",\n    \"n_missed_before_alert\": 3,\n    \"remind_interval\": \"1 day\",\n    \"warning_interval\": null,\n    \"instruments\": [],\n    \"alert_email_subscriptions\": []\n}",
+							"raw": "{\n    \"id\": \"add252bf-2fa7-4824-b129-e4d0ff42dffa\",\n    \"project_id\": \"5b6f4f37-7755-4cf9-bd02-94f1e9bc5984\",\n    \"name\": \"Updated Test Evaluation\",\n    \"body\": \"Updated Test Evaluation Description\",\n    \"start_date\": \"2023-07-16T13:19:41.441328Z\",\n    \"end_date\": \"2023-08-16T13:19:41.441328Z\",\n    \"instruments\": []\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -5132,7 +5148,7 @@
 								},
 								{
 									"key": "evaluation_id",
-									"value": ""
+									"value": "f7169aca-aa5f-4a0b-9fcc-609bb5c2bd7b"
 								}
 							]
 						}
@@ -5177,7 +5193,7 @@
 								},
 								{
 									"key": "evaluation_id",
-									"value": ""
+									"value": "f7169aca-aa5f-4a0b-9fcc-609bb5c2bd7b"
 								}
 							]
 						}
@@ -5382,6 +5398,14 @@
 							"listen": "test",
 							"script": {
 								"exec": [
+									"var alertConfigInstrumentSchema = {",
+									"    \"type\": \"object\",",
+									"    \"properties\": {",
+									"        \"instrument_id\": { \"type\": \"string\" },",
+									"        \"instrument_name\": { \"type\": \"string\" }",
+									"    }",
+									"}",
+									"",
 									"// validate JSON schema",
 									"var schema = {",
 									"    \"type\": \"object\",",
@@ -5389,14 +5413,13 @@
 									"        \"id\": { \"type\": \"string\" },",
 									"        \"alert_config_id\": { \"type\": \"string\" },",
 									"        \"project_id\": { \"type\": \"string\" },",
-									"        \"instrument_id\": { \"type\": \"string\" },",
 									"        \"project_name\": { \"type\": \"string\" },",
-									"        \"instrument_name\": { \"type\": \"string\" },",
+									"        \"instruments\": { \"type\": \"array\", \"items\": alertConfigInstrumentSchema },",
 									"        \"name\": { \"type\": \"string\" },",
 									"        \"body\": { \"type\": \"string\" },",
 									"        \"create_date\": { \"type\": \"string\", \"format\": \"date-time\" }",
 									"    },",
-									"    \"required\": [\"id\", \"alert_config_id\", \"project_id\", \"instrument_id\", \"project_name\", \"instrument_name\", \"name\", \"body\", \"create_date\"],",
+									"    \"required\": [\"id\", \"alert_config_id\", \"project_id\", \"project_name\", \"instruments\", \"name\", \"body\", \"create_date\"],",
 									"    \"additionalProperties\": true",
 									"}",
 									"// additionalProperties: true because alert can also contain a property \"read\" when fetched from /my_alerts",
