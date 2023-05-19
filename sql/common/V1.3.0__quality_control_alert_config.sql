@@ -1,3 +1,5 @@
+ALTER TABLE email ADD CONSTRAINT unique_email UNIQUE (email);
+
 DROP VIEW  IF EXISTS v_alert;
 DROP TABLE IF EXISTS alert_config CASCADE;
 

@@ -60,24 +60,32 @@ CREATE OR REPLACE VIEW v_alert_config AS (
         )                           AS instruments,
         (
             SELECT COALESCE(JSON_AGG(JSON_BUILD_OBJECT(
+                'id',       id,
+                'user_type', user_type,
                 'username', username,
                 'email',    email
             ))::text, '[]'::text)
             FROM (
-                (
-                    SELECT username, email FROM profile
-                    WHERE id = ANY(
-                        SELECT profile_id FROM alert_profile_subscription aps
-                        WHERE aps.alert_config_id = ac.id
-                    )
+                SELECT
+                    id,
+                    'email'     AS user_type,
+                    null        AS username,
+                    email       AS email
+                FROM email
+                WHERE id IN (
+                    SELECT aes.email_id FROM alert_email_subscription aes
+                    WHERE aes.alert_config_id = ac.id
                 )
-                UNION ALL
-                (
-                    SELECT null AS username, email FROM email e
-                    WHERE e.id = ANY(
-                        SELECT aes.email_id FROM alert_email_subscription aes
-                        WHERE aes.alert_config_id = ac.id
-                    ) AND NOT EXISTS (SELECT 1 FROM profile p WHERE p.email = e.email)
+                UNION
+                SELECT
+                    id,
+                    'profile'   AS user_type,
+                    username    AS username,
+                    email       AS email
+                FROM profile
+                WHERE id IN (
+                    SELECT aps.profile_id FROM alert_profile_subscription aps
+                    WHERE aps.alert_config_id = ac.id
                 )
             ) all_emails
         )                           AS alert_email_subscriptions

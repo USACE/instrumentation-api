@@ -11,36 +11,31 @@ import (
 )
 
 type AlertConfig struct {
-	ID                      uuid.UUID                              `json:"id" db:"id"`
-	Name                    string                                 `json:"name" db:"name"`
-	Body                    string                                 `json:"body" db:"body"`
-	ProjectID               uuid.UUID                              `json:"project_id" db:"project_id"`
-	ProjectName             string                                 `json:"project_name" db:"project_name"`
-	AlertTypeID             uuid.UUID                              `json:"alert_type_id" db:"alert_type_id"`
-	AlertType               string                                 `json:"alert_type" db:"alert_type"`
-	StartDate               time.Time                              `json:"start_date" db:"start_date"`
-	ScheduleInterval        Duration                               `json:"schedule_interval" db:"schedule_interval"`
-	NMissedBeforeAlert      int                                    `json:"n_missed_before_alert" db:"n_missed_before_alert"`
-	RemindInterval          Duration                               `json:"remind_interval" db:"remind_interval"`
-	WarningInterval         *Duration                              `json:"warning_interval" db:"warning_interval"`
-	LastChecked             *time.Time                             `json:"last_checked" db:"last_checked"`
-	AlertStatus             string                                 `json:"alert_status" db:"alert_status"`
-	LastReminded            *time.Time                             `json:"last_reminded" db:"last_reminded"`
-	Instruments             AlertConfigInstrumentCollection        `json:"instruments" db:"instruments"`
-	AlertEmailSubscriptions AlertConfigEmailSubscriptionCollection `json:"alert_email_subscriptions" db:"alert_email_subscriptions"`
-	CreatorUsername         string                                 `json:"creator_username" db:"creator_username"`
-	UpdaterUsername         *string                                `json:"updater_username" db:"updater_username"`
+	ID                      uuid.UUID                         `json:"id" db:"id"`
+	Name                    string                            `json:"name" db:"name"`
+	Body                    string                            `json:"body" db:"body"`
+	ProjectID               uuid.UUID                         `json:"project_id" db:"project_id"`
+	ProjectName             string                            `json:"project_name" db:"project_name"`
+	AlertTypeID             uuid.UUID                         `json:"alert_type_id" db:"alert_type_id"`
+	AlertType               string                            `json:"alert_type" db:"alert_type"`
+	StartDate               time.Time                         `json:"start_date" db:"start_date"`
+	ScheduleInterval        Duration                          `json:"schedule_interval" db:"schedule_interval"`
+	NMissedBeforeAlert      int                               `json:"n_missed_before_alert" db:"n_missed_before_alert"`
+	RemindInterval          Duration                          `json:"remind_interval" db:"remind_interval"`
+	WarningInterval         *Duration                         `json:"warning_interval" db:"warning_interval"`
+	LastChecked             *time.Time                        `json:"last_checked" db:"last_checked"`
+	AlertStatus             string                            `json:"alert_status" db:"alert_status"`
+	LastReminded            *time.Time                        `json:"last_reminded" db:"last_reminded"`
+	Instruments             AlertConfigInstrumentCollection   `json:"instruments" db:"instruments"`
+	AlertEmailSubscriptions EmailAutocompleteResultCollection `json:"alert_email_subscriptions" db:"alert_email_subscriptions"`
+	CreatorUsername         string                            `json:"creator_username" db:"creator_username"`
+	UpdaterUsername         *string                           `json:"updater_username" db:"updater_username"`
 	AuditInfo
 }
 
 type AlertConfigInstrument struct {
 	InstrumentID   uuid.UUID `json:"instrument_id" db:"instrument_id"`
 	InstrumentName string    `json:"instrument_name" db:"instrument_name"`
-}
-
-type AlertConfigEmailSubscription struct {
-	Username *string `json:"username" db:"username"`
-	Email    string  `json:"email" db:"email"`
 }
 
 type Duration string
@@ -82,15 +77,6 @@ func (a Duration) ToNsDuration() (time.Duration, error) {
 type AlertConfigInstrumentCollection []AlertConfigInstrument
 
 func (a *AlertConfigInstrumentCollection) Scan(src interface{}) error {
-	if err := json.Unmarshal([]byte(src.(string)), a); err != nil {
-		return err
-	}
-	return nil
-}
-
-type AlertConfigEmailSubscriptionCollection []AlertConfigEmailSubscription
-
-func (a *AlertConfigEmailSubscriptionCollection) Scan(src interface{}) error {
 	if err := json.Unmarshal([]byte(src.(string)), a); err != nil {
 		return err
 	}
@@ -202,6 +188,10 @@ func CreateAlertConfig(db *sqlx.DB, ac *AlertConfig) (*AlertConfig, error) {
 			return nil, err
 		}
 	}
+	if err := SubscribeEmailsToAlertConfigTxn(txn, &alertConfigID, ac.AlertEmailSubscriptions); err != nil {
+		return nil, err
+	}
+
 	if err := stmt1.Close(); err != nil {
 		return nil, err
 	}
@@ -276,6 +266,13 @@ func UpdateAlertConfig(db *sqlx.DB, alertConfigID *uuid.UUID, ac *AlertConfig) (
 		if _, err := stmt3.Exec(alertConfigID, aci.InstrumentID); err != nil {
 			return nil, err
 		}
+	}
+
+	if err := UnsubscribeAllEmailsToAlertConfigTxn(txn, alertConfigID, ac.AlertEmailSubscriptions); err != nil {
+		return nil, err
+	}
+	if err := SubscribeEmailsToAlertConfigTxn(txn, alertConfigID, ac.AlertEmailSubscriptions); err != nil {
+		return nil, err
 	}
 
 	if err := stmt1.Close(); err != nil {
