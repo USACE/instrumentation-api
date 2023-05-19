@@ -2581,7 +2581,14 @@
                                     "remind_interval": "1 day",
                                     "warning_interval": null,
                                     "instruments": [],
-                                    "alert_email_subscriptions": []
+                                    "alert_email_subscriptions": [
+                                        {
+                                            "id": "57329df6-9f7a-4dad-9383-4633b452efab",
+                                            "user_type": "profile",
+                                            "username": "AnthonyLambert",
+                                            "email": "anthony.lambert@fake.usace.army.mil"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -2747,12 +2754,22 @@
                                     ],
                                     "alert_email_subscriptions": [
                                         {
+                                            "id": "1ebf9e14-2b1c-404e-9535-6c2ee24944b6",
+                                            "user_type": "email",
                                             "username": null,
                                             "email": "no.profile@fake.usace.army.mil"
                                         },
                                         {
+                                            "id": "57329df6-9f7a-4dad-9383-4633b452efab",
+                                            "user_type": "profile",
                                             "username": "AnthonyLambert",
                                             "email": "anthony.lambert@fake.usace.army.mil"
+                                        },
+                                        {
+                                            "id": null,
+                                            "user_type": null,
+                                            "username": null,
+                                            "email": "noprofile.newemail@fake.usace.army.mil"
                                         }
                                     ]
                                 }
