@@ -2576,9 +2576,9 @@
                                     "project_id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
                                     "alert_type_id": "97e7a25c-d5c7-4ded-b272-1bb6e5914fe3",
                                     "start_date": "2023-05-16T13:19:41.441328Z",
-                                    "schedule_interval": "30 minute",
+                                    "schedule_interval": "PT30M",
                                     "n_missed_before_alert": 3,
-                                    "remind_interval": "1 day",
+                                    "remind_interval": "P1D",
                                     "warning_interval": null,
                                     "instruments": [],
                                     "alert_email_subscriptions": [
@@ -2743,10 +2743,10 @@
                                     "body": "New Test Alert Config Description",
                                     "alert_type_id": "97e7a25c-d5c7-4ded-b272-1bb6e5914fe3",
                                     "start_date": "2023-05-16T13:19:41.441328Z",
-                                    "schedule_interval": "1 day",
+                                    "schedule_interval": "P1D",
                                     "n_missed_before_alert": 1,
-                                    "remind_interval": "3 days",
-                                    "warning_interval": "1 hour",
+                                    "remind_interval": "P3D",
+                                    "warning_interval": "PT1H",
                                     "instruments": [
                                         {
                                             "instrument_id": "a7540f69-c41e-43b3-b655-6e44097edb7e"

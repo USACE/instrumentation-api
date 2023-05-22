@@ -37,6 +37,9 @@ $$;
 -- Set Search Path
 ALTER ROLE instrumentation_user SET search_path TO midas,topology,public;
 
+-- Set intervalstyle
+ALTER ROLE instrumentation_user SET intervalstyle TO 'iso_8601';
+
 -- Grant Schema Usage to instrumentation_user
 GRANT USAGE ON SCHEMA midas TO instrumentation_user;
 
