@@ -19,7 +19,7 @@ type AlertConfig struct {
 	StartDate               time.Time                         `json:"start_date" db:"start_date"`
 	ScheduleInterval        string                            `json:"schedule_interval" db:"schedule_interval"`
 	NMissedBeforeAlert      int                               `json:"n_missed_before_alert" db:"n_missed_before_alert"`
-	RemindInterval          string                            `json:"remind_interval" db:"remind_interval"`
+	RemindInterval          *string                           `json:"remind_interval" db:"remind_interval"`
 	WarningInterval         *string                           `json:"warning_interval" db:"warning_interval"`
 	LastChecked             *time.Time                        `json:"last_checked" db:"last_checked"`
 	AlertStatus             string                            `json:"alert_status" db:"alert_status"`
@@ -80,27 +80,6 @@ func ListInstrumentAlertConfigs(db *sqlx.DB, instrumentID *uuid.UUID) ([]AlertCo
 	return aa, nil
 }
 
-func ListAndRenewExpiredAlertConfigs(db *sqlx.DB) ([]AlertConfig, error) {
-	var aa []AlertConfig
-	sql := `
-		UPDATE alert_config ac1
-		SET last_checked = now()
-		FROM  (
-			SELECT *
-			FROM alert_config a
-			WHERE last_checked < now() - schedule_interval 
-		) ac2
-		WHERE  ac1.id = ac2.id
-		RETURNING ac2.*
-	`
-
-	if err := db.Select(&aa, sql); err != nil {
-		return make([]AlertConfig, 0), err
-	}
-
-	return aa, nil
-}
-
 // GetAlertConfig gets a single alert
 func GetAlertConfig(db *sqlx.DB, alertConfigID *uuid.UUID) (*AlertConfig, error) {
 	var a AlertConfig
@@ -135,7 +114,7 @@ func CreateAlertConfig(db *sqlx.DB, ac *AlertConfig) (*AlertConfig, error) {
 				warning_interval,
 				creator,
 				create_date
-			) VALUES ($1,$2,$3,$4,$5,$6::INTERVAL,$7,$8::INTERVAL,$9::INTERVAL,$10,$11)
+			) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
 			RETURNING id
 	`)
 	if err != nil {
@@ -201,10 +180,10 @@ func UpdateAlertConfig(db *sqlx.DB, alertConfigID *uuid.UUID, ac *AlertConfig) (
 			body=$4,
 			alert_type_id=$5,
 			start_date=$6,
-			schedule_interval=$7::INTERVAL,
+			schedule_interval=$7,
 			n_missed_before_alert=$8,
-			remind_interval=$9::INTERVAL,
-			warning_interval=$10::INTERVAL,
+			remind_interval=$9,
+			warning_interval=$10,
 			updater=$11,
 			update_date=$12
 		WHERE id=$1 AND project_id=$2

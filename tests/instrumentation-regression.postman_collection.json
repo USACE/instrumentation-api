@@ -4500,7 +4500,7 @@
 									"        \"start_date\": { \"type\": \"string\" },",
 									"        \"schedule_interval\": { \"type\": \"string\" },",
 									"        \"n_missed_before_alert\": { \"type\": \"number\" },",
-									"        \"remind_interval\": { \"type\": \"string\" },",
+									"        \"remind_interval\": { \"type\": [\"string\", \"null\"] },",
 									"        \"warning_interval\": { \"type\": [\"string\", \"null\"] },",
 									"        \"last_checked\": { \"type\": [\"string\", \"null\"], \"format\": \"date-time\" },",
 									"        \"last_reminded\": { \"type\": [\"string\", \"null\"], \"format\": \"date-time\" },",

@@ -54,7 +54,7 @@ CREATE TABLE alert_config (
     schedule_interval 	    INTERVAL NOT NULL,
     n_missed_before_alert   INT NOT NULL DEFAULT 1,
     warning_interval        INTERVAL,
-    remind_interval	        INTERVAL NOT NULL default '1 day',
+    remind_interval	        INTERVAL,
     last_checked 	        TIMESTAMPTZ,
     last_reminded	        TIMESTAMPTZ,
     alert_status_id         UUID NOT NULL REFERENCES alert_status (id) DEFAULT '0c0d6487-3f71-4121-8575-19514c7b9f03'
