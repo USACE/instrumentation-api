@@ -45,14 +45,32 @@ func (a *AlertConfigInstrumentCollection) Scan(src interface{}) error {
 	return nil
 }
 
-// ListProjectAlertConfigs lists all alerts for a single project
+// ListProjectAlertConfigs lists all alert configs for a single project
 func ListProjectAlertConfigs(db *sqlx.DB, projectID *uuid.UUID) ([]AlertConfig, error) {
 	var aa []AlertConfig
-	sql := `SELECT *
-			FROM v_alert_config
-			WHERE project_id = $1
+	sql := `
+		SELECT *
+		FROM v_alert_config
+		WHERE project_id = $1
 	`
 	err := db.Select(&aa, sql, projectID)
+	if err != nil {
+		return make([]AlertConfig, 0), err
+	}
+
+	return aa, nil
+}
+
+// ListProjectAlertConfigsByAlertType lists alert configs for a single project filetered by alert type
+func ListProjectAlertConfigsByAlertType(db *sqlx.DB, projectID, alertTypeID *uuid.UUID) ([]AlertConfig, error) {
+	var aa []AlertConfig
+	sql := `
+		SELECT *
+		FROM v_alert_config
+		WHERE project_id = $1
+		AND alert_type_id = $2
+	`
+	err := db.Select(&aa, sql, projectID, alertTypeID)
 	if err != nil {
 		return make([]AlertConfig, 0), err
 	}
@@ -178,14 +196,13 @@ func UpdateAlertConfig(db *sqlx.DB, alertConfigID *uuid.UUID, ac *AlertConfig) (
 		UPDATE alert_config SET
 			name=$3,
 			body=$4,
-			alert_type_id=$5,
-			start_date=$6,
-			schedule_interval=$7,
-			n_missed_before_alert=$8,
-			remind_interval=$9,
-			warning_interval=$10,
-			updater=$11,
-			update_date=$12
+			start_date=$5,
+			schedule_interval=$6,
+			n_missed_before_alert=$7,
+			remind_interval=$8,
+			warning_interval=$9,
+			updater=$10,
+			update_date=$11
 		WHERE id=$1 AND project_id=$2
 	`)
 	if err != nil {
@@ -210,7 +227,6 @@ func UpdateAlertConfig(db *sqlx.DB, alertConfigID *uuid.UUID, ac *AlertConfig) (
 		ac.ProjectID,
 		ac.Name,
 		ac.Body,
-		ac.AlertTypeID,
 		ac.StartDate,
 		ac.ScheduleInterval,
 		ac.NMissedBeforeAlert,

@@ -12,6 +12,8 @@ type Evaluation struct {
 	ID              uuid.UUID                      `json:"id" db:"id"`
 	ProjectID       uuid.UUID                      `json:"project_id" db:"project_id"`
 	ProjectName     string                         `json:"project_name" db:"project_name"`
+	AlertConfigID   *uuid.UUID                     `json:"alert_config_id" db:"alert_config_id"`
+	AlertConfigName *string                        `json:"alert_config_name" db:"alert_config_name"`
 	Name            string                         `json:"name" db:"name"`
 	Body            string                         `json:"body" db:"body"`
 	StartDate       time.Time                      `json:"start_date" db:"start_date"`
@@ -38,11 +40,29 @@ func (a *EvaluationInstrumentCollection) Scan(src interface{}) error {
 
 func ListProjectEvaluations(db *sqlx.DB, projectID *uuid.UUID) ([]Evaluation, error) {
 	var aa []Evaluation
-	sql := `SELECT *
-			FROM v_evaluation
-			WHERE project_id = $1
+	sql := `
+		SELECT *
+		FROM v_evaluation
+		WHERE project_id = $1
 	`
 	err := db.Select(&aa, sql, projectID)
+	if err != nil {
+		return make([]Evaluation, 0), err
+	}
+
+	return aa, nil
+}
+
+func ListProjectEvaluationsByAlertConfig(db *sqlx.DB, projectID, alertConfigID *uuid.UUID) ([]Evaluation, error) {
+	var aa []Evaluation
+	sql := `
+		SELECT *
+		FROM v_evaluation
+		WHERE project_id = $1
+		AND alert_config_id IS NOT NULL
+		AND alert_config_id = $2
+	`
+	err := db.Select(&aa, sql, projectID, alertConfigID)
 	if err != nil {
 		return make([]Evaluation, 0), err
 	}
@@ -91,13 +111,14 @@ func CreateEvaluation(db *sqlx.DB, ev *Evaluation) (*Evaluation, error) {
 		INSERT INTO evaluation
 			(
 				project_id,
+				alert_config_id,
 				name,
 				body,
 				start_date,
 				end_date,
 				creator,
 				create_date
-			) VALUES ($1,$2,$3,$4,$5,$6,$7)
+			) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
 			RETURNING id
 	`)
 	if err != nil {
@@ -114,6 +135,7 @@ func CreateEvaluation(db *sqlx.DB, ev *Evaluation) (*Evaluation, error) {
 	if err := stmt1.Get(
 		&evaluationID,
 		ev.ProjectID,
+		ev.AlertConfigID,
 		ev.Name,
 		ev.Body,
 		ev.StartDate,

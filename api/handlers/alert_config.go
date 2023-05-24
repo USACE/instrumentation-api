@@ -13,16 +13,28 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// ListProjectAlertConfigs lists alerts for a single project
+// ListProjectAlertConfigs lists alert configs for a single project optionally filtered by alert_type_id
 func ListProjectAlertConfigs(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		projectID, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
-		aa, err := models.ListProjectAlertConfigs(db, &projectID)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		var aa []models.AlertConfig
+		if qp := c.QueryParam("alert_type_id"); qp != "" {
+			alertTypeID, err := uuid.Parse(qp)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			}
+			aa, err = models.ListProjectAlertConfigsByAlertType(db, &projectID, &alertTypeID)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			}
+		} else {
+			aa, err = models.ListProjectAlertConfigs(db, &projectID)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			}
 		}
 		return c.JSON(http.StatusOK, aa)
 	}

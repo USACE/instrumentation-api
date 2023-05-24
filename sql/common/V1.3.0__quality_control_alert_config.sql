@@ -3,24 +3,6 @@ ALTER TABLE email ADD CONSTRAINT unique_email UNIQUE (email);
 DROP VIEW  IF EXISTS v_alert;
 DROP TABLE IF EXISTS alert_config CASCADE;
 
-CREATE TABLE evaluation (
-    id              UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
-    project_id      UUID NOT NULL REFERENCES project (id) ON DELETE CASCADE,
-    name 			VARCHAR(480) NOT NULL,
-    body 			TEXT NOT NULL DEFAULT '',
-    start_date      TIMESTAMPTZ NOT NULL,
-    end_date        TIMESTAMPTZ NOT NULL,
-    creator 		UUID NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
-    create_date 	TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updater 		UUID,
-    update_date 	TIMESTAMPTZ
-);
-
-CREATE TABLE evaluation_instrument (
-    evaluation_id   UUID REFERENCES evaluation (id),
-    instrument_id   UUID REFERENCES instrument (id)
-);
-
 CREATE TABLE alert_status (
     id      UUID PRIMARY KEY NOT NULL,
     name    TEXT UNIQUE NOT NULL
@@ -52,7 +34,7 @@ CREATE TABLE alert_config (
     alert_type_id           UUID NOT NULL REFERENCES alert_type (id),
     start_date              TIMESTAMPTZ NOT NULL DEFAULT now(),
     schedule_interval 	    INTERVAL NOT NULL,
-    n_missed_before_alert   INT NOT NULL DEFAULT 1,
+    n_missed_before_alert   INT NOT NULL DEFAULT 1 CHECK (n_missed_before_alert >= 1),
     warning_interval        INTERVAL,
     remind_interval	        INTERVAL,
     last_checked 	        TIMESTAMPTZ,
@@ -63,4 +45,23 @@ CREATE TABLE alert_config (
 CREATE TABLE alert_config_instrument (
     alert_config_id UUID NOT NULL REFERENCES alert_config (id),
     instrument_id   UUID NOT NULL REFERENCES instrument (id)
+);
+
+CREATE TABLE evaluation (
+    id              UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+    project_id      UUID NOT NULL REFERENCES project (id) ON DELETE CASCADE,
+    alert_config_id UUID REFERENCES alert_config (id),
+    name 			VARCHAR(480) NOT NULL,
+    body 			TEXT NOT NULL DEFAULT '',
+    start_date      TIMESTAMPTZ NOT NULL,
+    end_date        TIMESTAMPTZ NOT NULL,
+    creator 		UUID NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
+    create_date 	TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updater 		UUID,
+    update_date 	TIMESTAMPTZ
+);
+
+CREATE TABLE evaluation_instrument (
+    evaluation_id   UUID REFERENCES evaluation (id),
+    instrument_id   UUID REFERENCES instrument (id)
 );

@@ -13,22 +13,34 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// ListProjectEvaluations lists alerts for a single project
+// ListProjectEvaluations lists evaluations for a single project optionally filtered by alert_config_id
 func ListProjectEvaluations(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		projectID, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
-		aa, err := models.ListProjectEvaluations(db, &projectID)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		var aa []models.Evaluation
+		if qp := c.QueryParam("alert_config_id"); qp != "" {
+			alertConfigID, err := uuid.Parse(qp)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			}
+			aa, err = models.ListProjectEvaluationsByAlertConfig(db, &projectID, &alertConfigID)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			}
+		} else {
+			aa, err = models.ListProjectEvaluations(db, &projectID)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			}
 		}
 		return c.JSON(http.StatusOK, aa)
 	}
 }
 
-// ListInstrumentEvaluations lists alerts for a single instrument
+// ListInstrumentEvaluations lists evaluations for a single instrument
 func ListInstrumentEvaluations(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		instrumentID, err := uuid.Parse(c.Param("instrument_id"))
@@ -43,7 +55,7 @@ func ListInstrumentEvaluations(db *sqlx.DB) echo.HandlerFunc {
 	}
 }
 
-// GetEvaluation gets a single alert
+// GetEvaluation gets a single evaluation
 func GetEvaluation(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		acID, err := uuid.Parse(c.Param("evaluation_id"))
@@ -61,7 +73,7 @@ func GetEvaluation(db *sqlx.DB) echo.HandlerFunc {
 	}
 }
 
-// CreateEvaluation creates one alert config
+// CreateEvaluation creates one evaluation
 func CreateEvaluation(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ac := models.Evaluation{}
@@ -83,7 +95,7 @@ func CreateEvaluation(db *sqlx.DB) echo.HandlerFunc {
 	}
 }
 
-// UpdateEvaluation updates an existing alert
+// UpdateEvaluation updates an existing evaluation
 func UpdateEvaluation(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var ac models.Evaluation
@@ -105,7 +117,7 @@ func UpdateEvaluation(db *sqlx.DB) echo.HandlerFunc {
 	}
 }
 
-// DeleteEvaluation Deletes an Alert Config
+// DeleteEvaluation deletes an evaluation
 func DeleteEvaluation(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		acID, err := uuid.Parse(c.Param("evaluation_id"))

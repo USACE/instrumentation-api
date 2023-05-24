@@ -11,6 +11,8 @@ CREATE OR REPLACE VIEW v_evaluation AS (
         ev.update_date                      AS update_date,
         prj.id                              AS project_id,
         prj.name                            AS project_name,
+        ac.id                               AS alert_config_id,
+        ac.name                             AS alert_config_name,
         ev.start_date                       AS start_date,
         ev.end_date                         AS end_date,
         (
@@ -24,11 +26,12 @@ CREATE OR REPLACE VIEW v_evaluation AS (
                 FROM   evaluation_instrument evi
                 WHERE  evi.evaluation_id = ev.id
             )
-        )                   AS instruments
+        )                                   AS instruments
     FROM evaluation ev
     INNER JOIN project prj  ON ev.project_id = prj.id
     LEFT  JOIN profile prf1 ON ev.creator = prf1.id
     LEFT  JOIN profile prf2 ON ev.updater = prf2.id
+    LEFT  JOIN alert_config ac ON ac.id = ev.alert_config_id
 );
 
 GRANT SELECT ON
