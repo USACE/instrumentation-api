@@ -40,6 +40,7 @@ CREATE TABLE alert_config (
     last_checked 	        TIMESTAMPTZ,
     last_reminded	        TIMESTAMPTZ,
     alert_status_id         UUID NOT NULL REFERENCES alert_status (id) DEFAULT '0c0d6487-3f71-4121-8575-19514c7b9f03',
+    deleted                 BOOLEAN NOT NULL DEFAULT false,
     CONSTRAINT warning_before_schedule CHECK (warning_interval < schedule_interval),
     CONSTRAINT interval_not_negative CHECK (
         schedule_interval >= INTERVAL 'PT0'
@@ -49,14 +50,14 @@ CREATE TABLE alert_config (
 );
 
 CREATE TABLE alert_config_instrument (
-    alert_config_id UUID NOT NULL REFERENCES alert_config (id),
-    instrument_id   UUID NOT NULL REFERENCES instrument (id)
+    alert_config_id UUID NOT NULL REFERENCES alert_config (id) ON DELETE CASCADE,
+    instrument_id   UUID NOT NULL REFERENCES instrument (id) ON DELETE CASCADE
 );
 
 CREATE TABLE evaluation (
     id              UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     project_id      UUID NOT NULL REFERENCES project (id) ON DELETE CASCADE,
-    alert_config_id UUID REFERENCES alert_config (id),
+    alert_config_id UUID REFERENCES alert_config (id) ON DELETE SET NULL,
     name 			VARCHAR(480) NOT NULL,
     body 			TEXT NOT NULL DEFAULT '',
     start_date      TIMESTAMPTZ NOT NULL,

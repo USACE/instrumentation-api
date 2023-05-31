@@ -96,6 +96,7 @@ CREATE OR REPLACE VIEW v_alert_config AS (
     INNER JOIN alert_status astatus ON ac.alert_status_id = astatus.id
     LEFT  JOIN profile prf1         ON ac.creator = prf1.id
     LEFT  JOIN profile prf2         ON ac.updater = prf2.id
+    WHERE NOT ac.deleted
 );
 
 GRANT SELECT ON

@@ -127,6 +127,13 @@ func CreateAlertConfig(db *sqlx.DB, ac *AlertConfig) (*AlertConfig, error) {
 	}
 	defer txn.Rollback()
 
+	if ac.RemindInterval == "" {
+		ac.RemindInterval = "PT0"
+	}
+	if ac.WarningInterval == "" {
+		ac.WarningInterval = "PT0"
+	}
+
 	stmt1, err := txn.Preparex(`
 		INSERT INTO alert_config
 			(
@@ -200,6 +207,13 @@ func UpdateAlertConfig(db *sqlx.DB, alertConfigID *uuid.UUID, ac *AlertConfig) (
 		return nil, err
 	}
 	defer txn.Rollback()
+
+	if ac.RemindInterval == "" {
+		ac.RemindInterval = "PT0"
+	}
+	if ac.WarningInterval == "" {
+		ac.WarningInterval = "PT0"
+	}
 
 	stmt1, err := txn.Preparex(`
 		UPDATE alert_config SET
@@ -280,7 +294,7 @@ func UpdateAlertConfig(db *sqlx.DB, alertConfigID *uuid.UUID, ac *AlertConfig) (
 // DeleteAlertConfig deletes an alert by ID
 func DeleteAlertConfig(db *sqlx.DB, alertConfigID *uuid.UUID) error {
 	_, err := db.Exec(
-		`DELETE FROM alert_config WHERE id = $1`, alertConfigID,
+		`UPDATE alert_config SET deleted=true WHERE id=$1`, alertConfigID,
 	)
 	if err != nil {
 		return err
