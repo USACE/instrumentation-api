@@ -11,6 +11,9 @@ import (
 	"github.com/USACE/instrumentation-api/api/models"
 	"github.com/apex/gateway"
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/ses"
 	"github.com/kelseyhightower/envconfig"
 
 	"github.com/labstack/echo/v4"
@@ -37,6 +40,7 @@ type Config struct {
 	AWSS3DisableSSL     bool   `envconfig:"AWS_S3_DISABLE_SSL"`
 	AWSS3ForcePathStyle bool   `envconfig:"AWS_S3_FORCE_PATH_STYLE"`
 	AWSS3Bucket         string `envconfig:"AWS_S3_BUCKET"`
+	AWSSESEmailSender   string `envconfig:"AWS_SES_EMAIL_SENDER"`
 }
 
 func awsConfig(cfg *Config) *aws.Config {
@@ -48,7 +52,6 @@ func awsConfig(cfg *Config) *aws.Config {
 	if cfg.AWSS3Endpoint != "" {
 		awsConfig.WithEndpoint(cfg.AWSS3Endpoint)
 	}
-
 	return awsConfig
 }
 
@@ -63,8 +66,11 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	// AWS S3 Config
+	// AWS Config
 	awsCfg := awsConfig(&cfg)
+	sess := session.Must(session.NewSession(awsCfg))
+	s3c := s3.New(sess)
+	sesc := ses.New(sess)
 
 	db := dbutils.Connection(cfg.dbConnStr())
 
@@ -81,7 +87,7 @@ func main() {
 	public := e.Group(cfg.RoutePrefix) // TODO: /instrumentation/v1/
 
 	// Media Routes
-	public.GET("/projects/:project_slug/images/*", handlers.GetMedia(awsCfg, &cfg.AWSS3Bucket, "/midas", &cfg.RoutePrefix))
+	public.GET("/projects/:project_slug/images/*", handlers.GetMedia(s3c, &cfg.AWSS3Bucket, "/midas", &cfg.RoutePrefix))
 
 	// private routes; can be authenticated via cac or token
 	// setting the second parameter passed to each middleware function to "true"
@@ -166,6 +172,10 @@ func main() {
 	private.POST("/projects/:project_id/instruments/:instrument_id/alert_configs/:alert_config_id/subscribe", handlers.SubscribeProfileToAlerts(db))
 	private.POST("/projects/:project_id/instruments/:instrument_id/alert_configs/:alert_config_id/unsubscribe", handlers.UnsubscribeProfileToAlerts(db))
 	private.PUT("/alert_subscriptions/:alert_subscription_id", handlers.UpdateMyAlertSubscription(db))
+
+	// Check Alerts
+	// runs at scheduled interval
+	public.POST("/check_alerts", handlers.DoAlertChecks(db, sesc, cfg.AWSSESEmailSender))
 
 	// Email Autocomplete
 	public.GET("/email_autocomplete", handlers.ListEmailAutocomplete(db))

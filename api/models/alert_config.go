@@ -19,10 +19,11 @@ type AlertConfig struct {
 	StartDate               time.Time                         `json:"start_date" db:"start_date"`
 	ScheduleInterval        string                            `json:"schedule_interval" db:"schedule_interval"`
 	NMissedBeforeAlert      int                               `json:"n_missed_before_alert" db:"n_missed_before_alert"`
-	RemindInterval          *string                           `json:"remind_interval" db:"remind_interval"`
-	WarningInterval         *string                           `json:"warning_interval" db:"warning_interval"`
+	RemindInterval          string                            `json:"remind_interval" db:"remind_interval"`
+	WarningInterval         string                            `json:"warning_interval" db:"warning_interval"`
 	LastChecked             *time.Time                        `json:"last_checked" db:"last_checked"`
 	AlertStatus             string                            `json:"alert_status" db:"alert_status"`
+	AlertStatusID           uuid.UUID                         `json:"alert_status_id" db:"alert_status_id"`
 	LastReminded            *time.Time                        `json:"last_reminded" db:"last_reminded"`
 	Instruments             AlertConfigInstrumentCollection   `json:"instruments" db:"instruments"`
 	AlertEmailSubscriptions EmailAutocompleteResultCollection `json:"alert_email_subscriptions" db:"alert_email_subscriptions"`
@@ -43,6 +44,14 @@ func (a *AlertConfigInstrumentCollection) Scan(src interface{}) error {
 		return err
 	}
 	return nil
+}
+
+func (ac *AlertConfig) GetToAddresses() []*string {
+	emails := make([]*string, len(ac.AlertEmailSubscriptions))
+	for idx := range ac.AlertEmailSubscriptions {
+		emails[idx] = &ac.AlertEmailSubscriptions[idx].Email
+	}
+	return emails
 }
 
 // ListProjectAlertConfigs lists all alert configs for a single project

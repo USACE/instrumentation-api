@@ -24,7 +24,7 @@ elif [ "$1" = "test" ]; then
     docker-compose up -d --build;
     if [ "$REPORT" = true ]; then
         docker run \
-            -v $(pwd)/tests:/etc/newman --network=instrumentation-api_default \
+            -v $(pwd)/tests/postman:/etc/newman --network=instrumentation-api_default \
             --rm \
             --entrypoint /bin/sh \
             -t postman/newman \
@@ -38,7 +38,7 @@ elif [ "$1" = "test" ]; then
     else
         docker run \
             --rm \
-            -v $(pwd)/tests:/etc/newman --network=instrumentation-api_default \
+            -v $(pwd)/tests/postman:/etc/newman --network=instrumentation-api_default \
             -t postman/newman run /etc/newman/instrumentation-regression.postman_collection.json \
             --environment=/etc/newman/postman_environment.docker-compose.json
     fi

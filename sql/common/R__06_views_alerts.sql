@@ -45,6 +45,7 @@ CREATE OR REPLACE VIEW v_alert_config AS (
         ac.warning_interval::text           AS warning_interval,
         ac.last_checked                     AS last_checked,
         ac.last_reminded                    AS last_reminded,
+        astatus.id                          AS alert_status_id,
         astatus.name                        AS alert_status,
         (
             SELECT COALESCE(JSON_AGG(JSON_BUILD_OBJECT(

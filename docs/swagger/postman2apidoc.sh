@@ -4,7 +4,7 @@
 if ({
     (npm list -g postman-to-openapi || npm i postman-to-openapi -g)
 
-    p2o /tests/instrumentation-regression.postman_collection.json \
+    p2o /tests/postman/instrumentation-regression.postman_collection.json \
         -f /docs/swagger/apidoc.json \
         -o /docs/swagger/postman-compose.env.json;
 } &> /dev/null) ; then

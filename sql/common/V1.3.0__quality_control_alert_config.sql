@@ -19,8 +19,8 @@ CREATE TABLE alert_type (
 );
 
 INSERT INTO alert_type (id, name) VALUES
-    ('97e7a25c-d5c7-4ded-b272-1bb6e5914fe3', 'Missing Time Series Measurements'),
-    ('da6ee89e-58cc-4d85-8384-43c3c33a68bd', 'Overdue Evaluation');
+    ('97e7a25c-d5c7-4ded-b272-1bb6e5914fe3', 'Timeseries Measurement Submittal'),
+    ('da6ee89e-58cc-4d85-8384-43c3c33a68bd', 'Evaluation Submittal');
 
 CREATE TABLE alert_config (
     id 				        UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
@@ -35,11 +35,17 @@ CREATE TABLE alert_config (
     start_date              TIMESTAMPTZ NOT NULL DEFAULT now(),
     schedule_interval 	    INTERVAL NOT NULL,
     n_missed_before_alert   INT NOT NULL DEFAULT 1 CHECK (n_missed_before_alert >= 1),
-    warning_interval        INTERVAL,
-    remind_interval	        INTERVAL,
+    warning_interval        INTERVAL NOT NULL DEFAULT 'PT0',
+    remind_interval	        INTERVAL NOT NULL DEFAULT 'PT0',
     last_checked 	        TIMESTAMPTZ,
     last_reminded	        TIMESTAMPTZ,
-    alert_status_id         UUID NOT NULL REFERENCES alert_status (id) DEFAULT '0c0d6487-3f71-4121-8575-19514c7b9f03'
+    alert_status_id         UUID NOT NULL REFERENCES alert_status (id) DEFAULT '0c0d6487-3f71-4121-8575-19514c7b9f03',
+    CONSTRAINT warning_before_schedule CHECK (warning_interval < schedule_interval),
+    CONSTRAINT interval_not_negative CHECK (
+        schedule_interval >= INTERVAL 'PT0'
+        AND warning_interval >= INTERVAL 'PT0'
+        AND remind_interval >= INTERVAL 'PT0'
+    )
 );
 
 CREATE TABLE alert_config_instrument (

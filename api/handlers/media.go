@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/labstack/echo/v4"
 )
@@ -31,7 +30,7 @@ func cleanFilepath(rawPath string) (string, error) {
 }
 
 // GetMedia serves media, files, etc for a given project
-func GetMedia(awsCfg *aws.Config, bucket *string, bucketPrefix string, routePrefix *string) echo.HandlerFunc {
+func GetMedia(s3c *s3.S3, bucket *string, bucketPrefix string, routePrefix *string) echo.HandlerFunc {
 	return func(c echo.Context) error {
 
 		// Get Wildcard Path
@@ -43,13 +42,6 @@ func GetMedia(awsCfg *aws.Config, bucket *string, bucketPrefix string, routePref
 		// Example: If api hosted at /develop/<endpoint>... and images in bucket under prefix /instrumentation
 		//          S3 Key = (1) Start with URL of request (2) remove /develop (3) prepend /instrumentation
 		key := aws.String(bucketPrefix + strings.TrimPrefix(path, *routePrefix))
-
-		newSession, err := session.NewSession(awsCfg)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-		}
-
-		s3c := s3.New(newSession)
 
 		output, err := s3c.GetObject(&s3.GetObjectInput{Bucket: bucket, Key: key})
 		if err != nil {

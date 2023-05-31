@@ -58,7 +58,7 @@ type MeasurementCollectionLean struct {
 	Items        []MeasurementLean `json:"items"`
 }
 
-type MeasurementLike interface {
+type MeasurementGetter interface {
 	getTime() time.Time
 	getValue() float64
 }
@@ -91,7 +91,7 @@ func (ml MeasurementLean) getValue() float64 {
 
 // A slightly modified LTTB (Largest-Triange-Three-Buckets) algorithm for downsampling timeseries measurements while keeping
 // https://godoc.org/github.com/dgryski/go-lttb
-func LTTB[T MeasurementLike](data []T, threshold int) []T {
+func LTTB[T MeasurementGetter](data []T, threshold int) []T {
 	if threshold == 0 || threshold >= len(data) {
 		return data // Nothing to do
 	}
