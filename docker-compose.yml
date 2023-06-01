@@ -3,7 +3,7 @@ version: "3.9"
 services:
   postgres:
     image: postgis/postgis:${POSTGIS_VERSION:-14-3.1}
-    shm_size: 1g
+    shm_size: 512mb
     restart: always
     environment:
       - POSTGRES_USER=${POSTGRES_USER:-postgres}

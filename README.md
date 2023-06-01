@@ -27,9 +27,9 @@ A [Postman](https://www.postman.com/api-documentation-tool/) documentation and t
 
 After starting up Docker Compose, you will find these two services (among others) on `localhost`
 
-1.  A Postgres database with postgis schema installed using the Docker image [mdillon/postgis](https://hub.docker.com/r/mdillon/postgis/)
+1. A Postgres database with postgis schema installed using the Docker image [mdillon/postgis](https://hub.docker.com/r/mdillon/postgis/)
 
-2.  [pgAdmin4](https://www.pgadmin.org/) using the Docker image [dpage/pgadmin4](https://hub.docker.com/r/dpage/pgadmin4/)
+2. [pgAdmin4](https://www.pgadmin.org/) using the Docker image [dpage/pgadmin4](https://hub.docker.com/r/dpage/pgadmin4/)
 
 To modify the database using pgAdmin4, open a web browser and go to `http://localhost:8081`, or whichever port number is the value set to variable `PGADMIN_PORT` in `.env`.
 
@@ -66,13 +66,15 @@ You can use the launch.json file in this repository in lieu of `go run main.go` 
 
 Set the following environment variables and type `go run main.go` from the top level of this repository.
 
-    * INSTRUMENTATION_DB_USER=postgres
-    * INSTRUMENTATION_DB_PASS=postgres
-    * INSTRUMENTATION_DB_NAME=postgres
-    * INSTRUMENTATION_DB_HOST=localhost
-    * INSTRUMENTATION_DB_SSLMODE=disable
-    * INSTRUMENTATION_LAMBDACONTEXT=FALSE
-    * JWT_DISABLED=FALSE
+```sh
+INSTRUMENTATION_DB_USER=postgres
+INSTRUMENTATION_DB_PASS=postgres
+INSTRUMENTATION_DB_NAME=postgres
+INSTRUMENTATION_DB_HOST=localhost
+INSTRUMENTATION_DB_SSLMODE=disable
+INSTRUMENTATION_LAMBDACONTEXT=FALSE
+JWT_DISABLED=FALSE
+```
 
 Note: When running the API locally, make sure environment variable `INSTRUMENTATION_LAMBDACONTEXT` is either **not set** or is set to `INSTRUMENTATION_LAMBDACONTEXT=FALSE`. `_LAMBDA_SERVER_PORT` and `AWS_LAMBDA_RUNTIME_API` should also be set if running under an AWS Lambda context.
 
