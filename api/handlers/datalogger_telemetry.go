@@ -155,7 +155,7 @@ func getCR6Handler(db *sqlx.DB, dl *models.DataLogger, rawJSON *[]byte) echo.Han
 					delete(eqtFields, f.Name)
 					continue
 				}
-				items[j] = timeseries.Measurement{TimeseriesID: *row.TimeseriesID, Time: t, Value: d.Vals[i]}
+				items[j] = timeseries.Measurement{TimeseriesID: *row.TimeseriesID, Time: t, Value: float64(d.Vals[i])}
 			}
 
 			mcs[i] = timeseries.MeasurementCollection{TimeseriesID: *row.TimeseriesID, Items: items}
