@@ -96,8 +96,8 @@ def create_test_data(interval: int, idx: int, model: str, sn: str) -> dict:
                 "time": measurement_time_2,
                 "no": idx,
                 "vals": [
-                    round(random.uniform(11.50, 12.50), 2),
-                    round(random.uniform(20.00, 25.00), 2),
+                    "NAN",
+                    "INF",
                 ],
             },
         ],
