@@ -1,4 +1,4 @@
-FROM flyway/flyway:8.5.9
+FROM registry1.dso.mil/ironbank/flyway/flyway-docker:v8.5.9
 
 COPY . /flyway/sql/
 
