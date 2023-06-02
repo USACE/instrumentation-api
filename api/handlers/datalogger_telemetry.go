@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"net/http"
 	"time"
 
@@ -142,20 +143,22 @@ func getCR6Handler(db *sqlx.DB, dl *models.DataLogger, rawJSON *[]byte) echo.Han
 			// collect measurements
 			items := make([]timeseries.Measurement, len(pl.Data))
 			for j, d := range pl.Data {
-				// TODO: Timestamps either need to include timezone offset, or the local time sent
-				// by the data logger needs to be assigned a timezone offset based on the site's location
-				//
-				// Alternatively, to avoid complications of daylight savings and related issues, require
-				// all incoming timestamps to be in GMT
-
-				// t, err := time.Parse(time.RFC3339, d.Time)
+				// To avoid complications of daylight savings and related issues,
+				// all incoming datalogger timestamps are expected to be in UTC
 				t, err := time.Parse("2006-01-02T15:04:05", d.Time)
 				if err != nil {
 					em = append(em, fmt.Sprintf("unable to parse timestamp for field '%s': %s", f.Name, err.Error()))
 					delete(eqtFields, f.Name)
 					continue
 				}
-				items[j] = timeseries.Measurement{TimeseriesID: *row.TimeseriesID, Time: t, Value: float64(d.Vals[i])}
+				v := float64(d.Vals[i])
+				if math.IsNaN(v) || math.IsInf(v, 1) {
+					em = append(em, fmt.Sprintf("unable to upload '%s' at %s: %.f", f.Name, t, v))
+					// don't upload nan or inf
+					delete(eqtFields, f.Name)
+					continue
+				}
+				items[j] = timeseries.Measurement{TimeseriesID: *row.TimeseriesID, Time: t, Value: v}
 			}
 
 			mcs[i] = timeseries.MeasurementCollection{TimeseriesID: *row.TimeseriesID, Items: items}

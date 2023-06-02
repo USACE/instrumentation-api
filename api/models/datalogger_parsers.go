@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"log"
+	"math"
 	"os"
 )
 
@@ -13,9 +14,9 @@ type DataLoggerPayload struct {
 }
 
 type Datum struct {
-	Time string              `json:"time"`
-	No   int64               `json:"no"`
-	Vals []FloatIgnoreNanInf `json:"vals"`
+	Time string        `json:"time"`
+	No   int64         `json:"no"`
+	Vals []FloatNanInf `json:"vals"`
 }
 
 type Head struct {
@@ -42,18 +43,20 @@ type Field struct {
 	Settable bool   `json:"settable"`
 }
 
-type FloatIgnoreNanInf float64
+type FloatNanInf float64
 
-func (j *FloatIgnoreNanInf) UnsmarshalJSON(v []byte) error {
+func (j *FloatNanInf) UnmarshalJSON(v []byte) error {
 	switch string(v) {
-	case "NAN", "INF":
-		// ignored
+	case `"NAN"`:
+		*j = FloatNanInf(math.NaN())
+	case `"INF"`:
+		*j = FloatNanInf(math.Inf(1))
 	default:
 		var fv float64
 		if err := json.Unmarshal(v, &fv); err != nil {
 			return err
 		}
-		*j = FloatIgnoreNanInf(fv)
+		*j = FloatNanInf(fv)
 	}
 	return nil
 }
