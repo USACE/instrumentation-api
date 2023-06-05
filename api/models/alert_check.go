@@ -154,8 +154,10 @@ func (ms MeasurementSubmittal) DoEmail(svc *ses.SES, emailType, sender string) e
 	return nil
 }
 
-func ListAndRenewExpiredAlertConfigs(db *sqlx.DB) ([]AlertConfig, error) {
-	sql := `
+func ListAndRenewExpiredAlertConfigsTxn(txn *sqlx.Tx) ([]AlertConfig, error) {
+	aa := make([]AlertConfig, 0)
+
+	stmt, err := txn.Preparex(`
 		UPDATE alert_config ac1
 		SET last_checked = now()
 		FROM  (
@@ -171,25 +173,25 @@ func ListAndRenewExpiredAlertConfigs(db *sqlx.DB) ([]AlertConfig, error) {
 		) ac2
 		WHERE  ac1.id = ac2.id
 		RETURNING ac2.*
-	`
-	aa := make([]AlertConfig, 0)
-	if err := db.Select(&aa, sql); err != nil {
+	`)
+	if err != nil {
+		return aa, err
+	}
+
+	if err := stmt.Select(&aa); err != nil {
 		if err == _sql.ErrNoRows {
 			return aa, nil
 		}
+		return aa, err
+	}
+	if err := stmt.Close(); err != nil {
 		return aa, err
 	}
 
 	return aa, nil
 }
 
-func UpdateAlertConfigStatusAndLastReminded(db *sqlx.DB, alertConfigs []AlertConfig) error {
-	txn, err := db.Beginx()
-	if err != nil {
-		return err
-	}
-	defer txn.Rollback()
-
+func UpdateAlertConfigStatusAndLastRemindedTxn(txn *sqlx.Tx, alertConfigs []AlertConfig) error {
 	stmt, err := txn.Preparex(`
 		UPDATE alert_config SET
 			last_reminded=$2,
@@ -212,14 +214,11 @@ func UpdateAlertConfigStatusAndLastReminded(db *sqlx.DB, alertConfigs []AlertCon
 	if err := stmt.Close(); err != nil {
 		return err
 	}
-	if err := txn.Commit(); err != nil {
-		return err
-	}
 
 	return nil
 }
 
-func ListAlertCheckEvaluationSubmittals(db *sqlx.DB, alertConfigs []AlertConfig) ([]EvaluationSubmittal, error) {
+func ListAlertCheckEvaluationSubmittalsTxn(txn *sqlx.Tx, alertConfigs []AlertConfig) ([]EvaluationSubmittal, error) {
 	es := make([]EvaluationSubmittal, 0)
 	if len(alertConfigs) == 0 {
 		log.Println("no evaluation submittals to check")
@@ -235,8 +234,12 @@ func ListAlertCheckEvaluationSubmittals(db *sqlx.DB, alertConfigs []AlertConfig)
 	if err != nil {
 		return es, err
 	}
-	query = db.Rebind(query)
-	if err := db.Select(&es, query, args...); err != nil {
+
+	stmt, err := txn.Preparex(txn.Rebind(query))
+	if err != nil {
+		return es, err
+	}
+	if err := stmt.Select(&es, args...); err != nil {
 		if err == _sql.ErrNoRows {
 			return es, nil
 		}
@@ -254,11 +257,14 @@ func ListAlertCheckEvaluationSubmittals(db *sqlx.DB, alertConfigs []AlertConfig)
 		}
 		es[idx].AlertConfig = ac
 	}
+	if err := stmt.Close(); err != nil {
+		return es, err
+	}
 
 	return es, nil
 }
 
-func ListAlertCheckMeasurementSubmittals(db *sqlx.DB, alertConfigs []AlertConfig) ([]MeasurementSubmittal, error) {
+func ListAlertCheckMeasurementSubmittalsTxn(txn *sqlx.Tx, alertConfigs []AlertConfig) ([]MeasurementSubmittal, error) {
 	ms := make([]MeasurementSubmittal, 0)
 	if len(alertConfigs) == 0 {
 		log.Println("no measurement submittals to check")
@@ -274,8 +280,9 @@ func ListAlertCheckMeasurementSubmittals(db *sqlx.DB, alertConfigs []AlertConfig
 	if err != nil {
 		return ms, err
 	}
-	query = db.Rebind(query)
-	if err := db.Select(&ms, query, args...); err != nil {
+
+	stmt, err := txn.Preparex(txn.Rebind(query))
+	if err := stmt.Select(&ms, args...); err != nil {
 		if err == _sql.ErrNoRows {
 			return ms, nil
 		}
@@ -292,6 +299,9 @@ func ListAlertCheckMeasurementSubmittals(db *sqlx.DB, alertConfigs []AlertConfig
 			return ms, err
 		}
 		ms[idx].AlertConfig = ac
+	}
+	if err := stmt.Close(); err != nil {
+		return ms, err
 	}
 
 	return ms, nil

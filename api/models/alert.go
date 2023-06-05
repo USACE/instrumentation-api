@@ -21,28 +21,36 @@ type Alert struct {
 }
 
 // CreateAlerts creates one or more new alerts
-func CreateAlerts(db *sqlx.DB, alertConfigIDS []uuid.UUID) error {
+func CreateAlerts(db *sqlx.DB, alertConfigIDs []uuid.UUID) error {
 	txn, err := db.Beginx()
 	if err != nil {
 		return err
 	}
 	defer txn.Rollback()
 
+	if err := CreateAlertsTxn(txn, alertConfigIDs); err != nil {
+		return err
+	}
+
+	if err := txn.Commit(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func CreateAlertsTxn(txn *sqlx.Tx, alertConfigIDs []uuid.UUID) error {
 	// Create Alert (CreateDate is a default now() in the database)
 	stmt1, err := txn.Preparex(`INSERT INTO alert (alert_config_id) VALUES ($1)`)
 	if err != nil {
 		return err
 	}
-	for _, id := range alertConfigIDS {
+	for _, id := range alertConfigIDs {
 		// Load Alert
 		if _, err := stmt1.Exec(id); err != nil {
 			return err
 		}
 	}
 	if err := stmt1.Close(); err != nil {
-		return err
-	}
-	if err := txn.Commit(); err != nil {
 		return err
 	}
 	return nil
@@ -116,17 +124,18 @@ func DoAlertUnread(db *sqlx.DB, profileID *uuid.UUID, alertID *uuid.UUID) (*Aler
 }
 
 // ListMyAlertsSQL returns all alerts for a profile's alert_profile_subscriptions
-var listMyAlertsSQL = `SELECT a.*,
-                              CASE WHEN r.alert_id IS NOT NULL THEN true
-	                               ELSE false
-                              END AS read
-					   FROM v_alert a
-					       LEFT JOIN alert_read r ON r.alert_id = a.id
-                       WHERE a.alert_config_id IN (
-                           SELECT alert_config_id
-                           FROM alert_profile_subscription
-                           WHERE profile_id = $1
-					   )`
+var listMyAlertsSQL = `
+	SELECT a.*,
+		CASE WHEN r.alert_id IS NOT NULL THEN true ELSE false
+		END AS read
+	FROM v_alert a
+	LEFT JOIN alert_read r ON r.alert_id = a.id
+	WHERE a.alert_config_id IN (
+		SELECT alert_config_id
+		FROM alert_profile_subscription
+		WHERE profile_id = $1
+	)
+`
 
 // GetMyAlertSQL returns a single alert
 var getMyAlertSQL = listMyAlertsSQL + " AND a.id = $2"

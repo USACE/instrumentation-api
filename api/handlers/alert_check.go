@@ -28,7 +28,13 @@ const (
 
 func DoAlertChecks(db *sqlx.DB, svc *ses.SES, sender string) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		aa, err := models.ListAndRenewExpiredAlertConfigs(db)
+		txn, err := db.Beginx()
+		if err != nil {
+			return err
+		}
+		defer txn.Rollback()
+
+		aa, err := models.ListAndRenewExpiredAlertConfigsTxn(txn)
 		if err != nil {
 			return err
 		}
@@ -41,18 +47,21 @@ func DoAlertChecks(db *sqlx.DB, svc *ses.SES, sender string) echo.HandlerFunc {
 			acMap[a.AlertTypeID] = append(acMap[a.AlertTypeID], a)
 		}
 
-		evaluationChecks, err := models.ListAlertCheckEvaluationSubmittals(db, aa)
+		measurementChecks, err := models.ListAlertCheckMeasurementSubmittalsTxn(txn, aa)
 		if err != nil {
 			return err
 		}
-		if err := handleChecks(db, svc, evaluationChecks, aa, sender); err != nil {
-			return err
-		}
-		measurementChecks, err := models.ListAlertCheckMeasurementSubmittals(db, aa)
+		evaluationChecks, err := models.ListAlertCheckEvaluationSubmittalsTxn(txn, aa)
 		if err != nil {
 			return err
 		}
-		if err := handleChecks(db, svc, measurementChecks, aa, sender); err != nil {
+		if err := handleChecks(txn, svc, measurementChecks, aa, sender); err != nil {
+			return err
+		}
+		if err := handleChecks(txn, svc, evaluationChecks, aa, sender); err != nil {
+			return err
+		}
+		if err := txn.Commit(); err != nil {
 			return err
 		}
 
@@ -60,7 +69,7 @@ func DoAlertChecks(db *sqlx.DB, svc *ses.SES, sender string) echo.HandlerFunc {
 	}
 }
 
-func handleChecks[T models.AlertChecker](db *sqlx.DB, svc *ses.SES, checks []T, alertConfigs []models.AlertConfig, sender string) error {
+func handleChecks[T models.AlertChecker](txn *sqlx.Tx, svc *ses.SES, checks []T, alertConfigs []models.AlertConfig, sender string) error {
 	check := func(err error) {
 		if err != nil {
 			log.Println(err.Error())
@@ -115,10 +124,10 @@ func handleChecks[T models.AlertChecker](db *sqlx.DB, svc *ses.SES, checks []T, 
 		aa[idx] = ac
 	}
 
-	if err := models.UpdateAlertConfigStatusAndLastReminded(db, aa); err != nil {
+	if err := models.UpdateAlertConfigStatusAndLastRemindedTxn(txn, aa); err != nil {
 		return err
 	}
-	if err := models.CreateAlerts(db, acIDs); err != nil {
+	if err := models.CreateAlertsTxn(txn, acIDs); err != nil {
 		return err
 	}
 
