@@ -37,6 +37,9 @@ $$;
 -- Set Search Path
 ALTER ROLE instrumentation_user SET search_path TO midas,topology,public;
 
+-- Set intervalstyle
+ALTER ROLE instrumentation_user SET intervalstyle TO 'iso_8601';
+
 -- Grant Schema Usage to instrumentation_user
 GRANT USAGE ON SCHEMA midas TO instrumentation_user;
 
@@ -95,7 +98,12 @@ GRANT SELECT ON
     datalogger_preview,
     datalogger_equivalency_table,
     datalogger_model,
-    datalogger_error
+    datalogger_error,
+    evaluation,
+    evaluation_instrument,
+    alert_status,
+    alert_type,
+    alert_config_instrument
 TO instrumentation_reader;
 
 -- Role instrumentation_writer
@@ -149,7 +157,12 @@ GRANT INSERT,UPDATE,DELETE ON
     datalogger_preview,
     datalogger_equivalency_table,
     datalogger_model,
-    datalogger_error
+    datalogger_error,
+    evaluation,
+    evaluation_instrument,
+    alert_status,
+    alert_type,
+    alert_config_instrument
 TO instrumentation_writer;
 
 -- Role postgis_reader

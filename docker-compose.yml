@@ -3,7 +3,7 @@ version: "3.9"
 services:
   postgres:
     image: postgis/postgis:${POSTGIS_VERSION:-14-3.1}
-    shm_size: 1g
+    shm_size: 512mb
     restart: always
     environment:
       - POSTGRES_USER=${POSTGRES_USER:-postgres}
@@ -42,6 +42,7 @@ services:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-AKIAIOSFODNN7EXAMPLE}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY}
       - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-east-1}
+      - AWS_SES_EMAIL_SENDER=${AWS_SES_EMAIL_SENDER:-donotreply@fake.usace.army.mil}
       - INSTRUMENTATION_APPLICATION_KEY=${INSTRUMENTATION_APPLICATION_KEY:-appkey}
       - INSTRUMENTATION_AUTH_DISABLED=${INSTRUMENTATION_AUTH_DISABLED:-False}
       - INSTRUMENTATION_AUTH_JWT_MOCKED=${INSTRUMENTATION_AUTH_JWT_MOCKED:-True}
@@ -71,7 +72,6 @@ services:
       context: telemetry
     restart: on-failure
     environment:
-      # NOTE: AWS_ Variables provided by execution role in deployed version
       - INSTRUMENTATION_LAMBDACONTEXT=${INSTRUMENTATION_LAMBDACONTEXT:-false}
       - INSTRUMENTATION_DBUSER=${INSTRUMENTATION_DBUSER:-instrumentation_user}
       - INSTRUMENTATION_DBPASS=${INSTRUMENTATION_DBPASS:-password}
@@ -151,16 +151,25 @@ services:
       - "${INSTRUMENTATION_SWAGGER_INIT_PORT:-8003}:8080"
     volumes:
       - ${INSTRUMENTATION_SWAGGER_APIDOC_VOLUME:-./docs/swagger}:/docs/swagger
-      - ${INSTRUMENTATION_SWAGGER_TESTS_VOLUME:-./tests}:/tests
+      - ${INSTRUMENTATION_SWAGGER_TESTS_VOLUME:-./tests/postman}:/tests
     entrypoint: ["/bin/sh", "/docs/swagger/postman2apidoc.sh"]
     profiles:
       - local
 
   mock_datalogger:
     build:
-      context: mock_datalogger
+      context: tests/mock/datalogger
     profiles:
       - mock
     depends_on:
       telemetry:
+        condition: service_started
+
+  mock_check_alerts:
+    build:
+      context: tests/mock/check_alerts
+    profiles:
+      - mock
+    depends_on:
+      api:
         condition: service_started

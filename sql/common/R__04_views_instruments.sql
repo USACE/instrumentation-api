@@ -60,9 +60,9 @@ CREATE OR REPLACE VIEW v_instrument AS (
         GROUP BY instrument_id
     ) G on G.instrument_id = I.id
     LEFT JOIN (
-        SELECT array_agg(id) as alert_configs,
+        SELECT array_agg(alert_config_id) as alert_configs,
             instrument_id
-        FROM alert_config
+        FROM alert_config_instrument
         GROUP BY instrument_id
     ) A on A.instrument_id = I.id
     LEFT JOIN (

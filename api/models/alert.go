@@ -9,32 +9,42 @@ import (
 
 // Alert is an alert, triggered by an AlertConfig evaluating to true
 type Alert struct {
-	Read           *bool     `json:"read,omitempty"`
-	ID             uuid.UUID `json:"id"`
-	AlertConfigID  uuid.UUID `json:"alert_config_id" db:"alert_config_id"`
-	ProjectID      uuid.UUID `json:"project_id" db:"project_id"`
-	InstrumentID   uuid.UUID `json:"instrument_id" db:"instrument_id"`
-	ProjectName    string    `json:"project_name" db:"project_name"`
-	InstrumentName string    `json:"instrument_name" db:"instrument_name"`
-	Name           string    `json:"name"`
-	Body           string    `json:"body"`
-	CreateDate     time.Time `json:"create_date" db:"create_date"`
+	Read          *bool                           `json:"read,omitempty"`
+	ID            uuid.UUID                       `json:"id"`
+	AlertConfigID uuid.UUID                       `json:"alert_config_id" db:"alert_config_id"`
+	ProjectID     uuid.UUID                       `json:"project_id" db:"project_id"`
+	ProjectName   string                          `json:"project_name" db:"project_name"`
+	Name          string                          `json:"name"`
+	Body          string                          `json:"body"`
+	CreateDate    time.Time                       `json:"create_date" db:"create_date"`
+	Instruments   AlertConfigInstrumentCollection `json:"instruments" db:"instruments"`
 }
 
 // CreateAlerts creates one or more new alerts
-func CreateAlerts(db *sqlx.DB, alertConfigIDS []uuid.UUID) error {
+func CreateAlerts(db *sqlx.DB, alertConfigIDs []uuid.UUID) error {
 	txn, err := db.Beginx()
 	if err != nil {
 		return err
 	}
 	defer txn.Rollback()
 
+	if err := CreateAlertsTxn(txn, alertConfigIDs); err != nil {
+		return err
+	}
+
+	if err := txn.Commit(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func CreateAlertsTxn(txn *sqlx.Tx, alertConfigIDs []uuid.UUID) error {
 	// Create Alert (CreateDate is a default now() in the database)
 	stmt1, err := txn.Preparex(`INSERT INTO alert (alert_config_id) VALUES ($1)`)
 	if err != nil {
 		return err
 	}
-	for _, id := range alertConfigIDS {
+	for _, id := range alertConfigIDs {
 		// Load Alert
 		if _, err := stmt1.Exec(id); err != nil {
 			return err
@@ -43,16 +53,31 @@ func CreateAlerts(db *sqlx.DB, alertConfigIDS []uuid.UUID) error {
 	if err := stmt1.Close(); err != nil {
 		return err
 	}
-	if err := txn.Commit(); err != nil {
-		return err
-	}
 	return nil
+}
+
+// ListProjectAlerts lists all alerts for a given instrument ID
+func ListProjectAlerts(db *sqlx.DB, projectID *uuid.UUID) ([]Alert, error) {
+	aa := make([]Alert, 0)
+	err := db.Select(&aa, `
+		SELECT * FROM v_alert WHERE project_id = $1
+	`, projectID)
+	if err != nil {
+		return make([]Alert, 0), err
+	}
+	return aa, nil
 }
 
 // ListAlertsForInstrument lists all alerts for a given instrument ID
 func ListAlertsForInstrument(db *sqlx.DB, instrumentID *uuid.UUID) ([]Alert, error) {
-	var aa []Alert
-	err := db.Select(&aa, listAlertsForInstrumentSQL, instrumentID)
+	aa := make([]Alert, 0)
+	err := db.Select(&aa, `
+		SELECT * FROM v_alert
+		WHERE alert_config_id = ANY(
+			SELECT id FROM alert_config_instrument
+			WHERE instrument_id = $1
+		)
+	`, instrumentID)
 	if err != nil {
 		return make([]Alert, 0), err
 	}
@@ -98,34 +123,19 @@ func DoAlertUnread(db *sqlx.DB, profileID *uuid.UUID, alertID *uuid.UUID) (*Aler
 	return GetMyAlert(db, profileID, alertID)
 }
 
-// DoCheckAlerts checks for alert conditions; Creates alerts as needed
-func DoCheckAlerts(db *sqlx.DB) error {
-	// TEMPORARY; SIMULATE ALERTS
-	alertID, err := uuid.Parse("6f3dfe9f-4664-4c78-931f-32ffac6d2d43")
-	if err != nil {
-		return err
-	}
-	if err := CreateAlerts(db, []uuid.UUID{alertID}); err != nil {
-		return err
-	}
-	return nil
-}
-
-// ListAlertsForInstrumentSQL returns all alerts for a single instrument
-var listAlertsForInstrumentSQL = `SELECT * FROM v_alert WHERE instrument_id = $1`
-
 // ListMyAlertsSQL returns all alerts for a profile's alert_profile_subscriptions
-var listMyAlertsSQL = `SELECT a.*,
-                              CASE WHEN r.alert_id IS NOT NULL THEN true
-	                               ELSE false
-                              END AS read
-					   FROM v_alert a
-					       LEFT JOIN alert_read r ON r.alert_id = a.id
-                       WHERE a.alert_config_id IN (
-                           SELECT alert_config_id
-                           FROM alert_profile_subscription
-                           WHERE profile_id = $1
-					   )`
+var listMyAlertsSQL = `
+	SELECT a.*,
+		CASE WHEN r.alert_id IS NOT NULL THEN true ELSE false
+		END AS read
+	FROM v_alert a
+	LEFT JOIN alert_read r ON r.alert_id = a.id
+	WHERE a.alert_config_id IN (
+		SELECT alert_config_id
+		FROM alert_profile_subscription
+		WHERE profile_id = $1
+	)
+`
 
 // GetMyAlertSQL returns a single alert
 var getMyAlertSQL = listMyAlertsSQL + " AND a.id = $2"

@@ -11,6 +11,9 @@ import (
 	"github.com/USACE/instrumentation-api/api/models"
 	"github.com/apex/gateway"
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/ses"
 	"github.com/kelseyhightower/envconfig"
 
 	"github.com/labstack/echo/v4"
@@ -37,6 +40,7 @@ type Config struct {
 	AWSS3DisableSSL     bool   `envconfig:"AWS_S3_DISABLE_SSL"`
 	AWSS3ForcePathStyle bool   `envconfig:"AWS_S3_FORCE_PATH_STYLE"`
 	AWSS3Bucket         string `envconfig:"AWS_S3_BUCKET"`
+	AWSSESEmailSender   string `envconfig:"AWS_SES_EMAIL_SENDER"`
 }
 
 func awsConfig(cfg *Config) *aws.Config {
@@ -48,7 +52,6 @@ func awsConfig(cfg *Config) *aws.Config {
 	if cfg.AWSS3Endpoint != "" {
 		awsConfig.WithEndpoint(cfg.AWSS3Endpoint)
 	}
-
 	return awsConfig
 }
 
@@ -63,8 +66,11 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	// AWS S3 Config
+	// AWS Config
 	awsCfg := awsConfig(&cfg)
+	sess := session.Must(session.NewSession(awsCfg))
+	s3c := s3.New(sess)
+	sesc := ses.New(sess)
 
 	db := dbutils.Connection(cfg.dbConnStr())
 
@@ -81,7 +87,7 @@ func main() {
 	public := e.Group(cfg.RoutePrefix) // TODO: /instrumentation/v1/
 
 	// Media Routes
-	public.GET("/projects/:project_slug/images/*", handlers.GetMedia(awsCfg, &cfg.AWSS3Bucket, "/midas", &cfg.RoutePrefix))
+	public.GET("/projects/:project_slug/images/*", handlers.GetMedia(s3c, &cfg.AWSS3Bucket, "/midas", &cfg.RoutePrefix))
 
 	// private routes; can be authenticated via cac or token
 	// setting the second parameter passed to each middleware function to "true"
@@ -148,15 +154,16 @@ func main() {
 	public.GET("/aware/data_acquisition_config", handlers.ListAwarePlatformParameterConfig(db))
 
 	// AlertConfigs
+	public.GET("/projects/:project_id/alert_configs", handlers.ListProjectAlertConfigs(db))
 	public.GET("/projects/:project_id/instruments/:instrument_id/alert_configs", handlers.ListInstrumentAlertConfigs(db))
-	public.GET("/projects/:project_id/instruments/:instrument_id/alert_configs/:alert_config_id", handlers.GetAlertConfig(db))
-	private.POST("/projects/:project_id/instruments/:instrument_id/alert_configs", handlers.CreateInstrumentAlertConfigs(db))
-	private.PUT("/projects/:project_id/instruments/:instrument_id/alert_configs/:alert_config_id", handlers.UpdateInstrumentAlertConfig(db))
-	private.DELETE("/projects/:project_id/instruments/:instrument_id/alert_configs/:alert_config_id", handlers.DeleteInstrumentAlertConfig(db))
+	public.GET("/projects/:project_id/alert_configs/:alert_config_id", handlers.GetAlertConfig(db))
+	private.POST("/projects/:project_id/alert_configs", handlers.CreateAlertConfig(db))
+	private.PUT("/projects/:project_id/alert_configs/:alert_config_id", handlers.UpdateAlertConfig(db))
+	private.DELETE("/projects/:project_id/alert_configs/:alert_config_id", handlers.DeleteAlertConfig(db))
 
 	// Alerts
 	public.GET("/projects/:project_id/instruments/:instrument_id/alerts", handlers.ListAlertsForInstrument(db))
-	private.GET("/my_alerts", handlers.ListMyAlerts(db)) // Private because token required to determine user (i.e. who is "me")
+	private.GET("/my_alerts", handlers.ListMyAlerts(db))
 	private.POST("/my_alerts/:alert_id/read", handlers.DoAlertRead(db))
 	private.POST("/my_alerts/:alert_id/unread", handlers.DoAlertUnread(db))
 
@@ -166,8 +173,20 @@ func main() {
 	private.POST("/projects/:project_id/instruments/:instrument_id/alert_configs/:alert_config_id/unsubscribe", handlers.UnsubscribeProfileToAlerts(db))
 	private.PUT("/alert_subscriptions/:alert_subscription_id", handlers.UpdateMyAlertSubscription(db))
 
+	// Check Alerts
+	// runs at scheduled interval
+	public.POST("/check_alerts", handlers.DoAlertChecks(db, sesc, cfg.AWSSESEmailSender))
+
 	// Email Autocomplete
 	public.GET("/email_autocomplete", handlers.ListEmailAutocomplete(db))
+
+	// Evaluations
+	public.GET("/projects/:project_id/evaluations", handlers.ListProjectEvaluations(db))
+	public.GET("/projects/:project_id/instruments/:instrument_id/evaluations", handlers.ListInstrumentEvaluations(db))
+	public.GET("/projects/:project_id/evaluations/:evaluation_id", handlers.GetEvaluation(db))
+	private.POST("/projects/:project_id/evaluations", handlers.CreateEvaluation(db))
+	private.PUT("/projects/:project_id/evaluations/:evaluation_id", handlers.UpdateEvaluation(db))
+	private.DELETE("/projects/:project_id/evaluations/:evaluation_id", handlers.DeleteEvaluation(db))
 
 	// Projects
 	public.GET("/projects", handlers.ListProjects(db))

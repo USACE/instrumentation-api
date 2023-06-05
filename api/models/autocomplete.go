@@ -1,6 +1,8 @@
 package models
 
 import (
+	"encoding/json"
+
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
@@ -11,6 +13,15 @@ type EmailAutocompleteResult struct {
 	UserType string    `json:"user_type" db:"user_type"`
 	Username *string   `json:"username"`
 	Email    string    `json:"email"`
+}
+
+type EmailAutocompleteResultCollection []EmailAutocompleteResult
+
+func (a *EmailAutocompleteResultCollection) Scan(src interface{}) error {
+	if err := json.Unmarshal([]byte(src.(string)), a); err != nil {
+		return err
+	}
+	return nil
 }
 
 // ListEmailAutocomplete returns search results for email autocomplete
