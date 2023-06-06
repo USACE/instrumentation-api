@@ -1,14 +1,12 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/dbutils"
 	"github.com/USACE/instrumentation-api/api/handlers"
-	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ses"
@@ -19,19 +17,16 @@ import (
 
 // Config stores configuration information stored in environment variables
 type Config struct {
-	DBUser            string
-	DBPass            string
-	DBName            string
-	DBHost            string
-	DBSSLMode         string
-	AWSSESMocked      bool   `envconfig:"INSTRUMENTATION_AWS_SES_MOCKED"`
-	AWSSESEmailSender string `envconfig:"INSTRUMENTATION_AWS_SES_EMAIL_SENDER"`
-	AWSSESDisableSSL  bool   `envconfig:"INSTRUMENTATION_AWS_SES_DISABLE_SSL"`
-	AWSSESRegion      string `envconfig:"INSTRUMENTATION_AWS_SES_REGION"`
-}
-
-type Event struct {
-	Name string `json:"name"`
+	DBUser              string
+	DBPass              string
+	DBName              string
+	DBHost              string
+	DBSSLMode           string
+	AWSECSTriggerMocked bool   `envconfig:"INSTRUMENTATION_AWS_ECS_TRIGGER_MOCKED"`
+	AWSSESMocked        bool   `envconfig:"INSTRUMENTATION_AWS_SES_MOCKED"`
+	AWSSESEmailSender   string `envconfig:"INSTRUMENTATION_AWS_SES_EMAIL_SENDER"`
+	AWSSESDisableSSL    bool   `envconfig:"INSTRUMENTATION_AWS_SES_DISABLE_SSL"`
+	AWSSESRegion        string `envconfig:"INSTRUMENTATION_AWS_SES_REGION"`
 }
 
 func awsConfig(cfg *Config) *aws.Config {
@@ -44,14 +39,7 @@ func (c *Config) dbConnStr() string {
 	return fmt.Sprintf("user=%s password=%s dbname=%s host=%s sslmode=%s", c.DBUser, c.DBPass, c.DBName, c.DBHost, c.DBSSLMode)
 }
 
-func HandleRequest(_ context.Context, __ Event) error {
-	// Config holding all environment variables
-	var cfg Config
-	if err := envconfig.Process("instrumentation", &cfg); err != nil {
-		log.Fatal(err.Error())
-	}
-
-	// AWS Config
+func checkAlerts(cfg Config) {
 	awsCfg := awsConfig(&cfg)
 	sess := session.Must(session.NewSession(awsCfg))
 	sesc := ses.New(sess)
@@ -65,13 +53,22 @@ func HandleRequest(_ context.Context, __ Event) error {
 	}()
 
 	if err := handlers.DoAlertChecks(db, sesc, cfg.AWSSESEmailSender, cfg.AWSSESMocked); err != nil {
-		return err
+		log.Fatal(err.Error())
 	}
-
 	log.Printf("successfully completed alert checks at %s", time.Now())
-	return nil
 }
 
 func main() {
-	lambda.Start(HandleRequest)
+	var cfg Config
+	if err := envconfig.Process("instrumentation", &cfg); err != nil {
+		log.Fatal(err.Error())
+	}
+	if cfg.AWSECSTriggerMocked {
+		for {
+			checkAlerts(cfg)
+			time.Sleep(15 * time.Second)
+		}
+	} else {
+		checkAlerts(cfg)
+	}
 }

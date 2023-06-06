@@ -91,7 +91,6 @@ services:
     build:
       context: alert
     environment:
-      # NOTE: AWS_ Variables provided by execution role in deployed version
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-AKIAIOSFODNN7EXAMPLE}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY}
       - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-east-1}
@@ -100,6 +99,7 @@ services:
       - INSTRUMENTATION_DBNAME=${INSTRUMENTATION_DBNAME:-postgres}
       - INSTRUMENTATION_DBHOST=${INSTRUMENTATION_DBHOST:-postgres}
       - INSTRUMENTATION_DBSSLMODE=${INSTRUMENTATION_DBSSLMODE:-disable}
+      - INSTRUMENTATION_AWS_ECS_TRIGGER_MOCKED=${INSTRUMENTATION_AWS_ECS_TRIGGER_MOCKED:-True}
       - INSTRUMENTATION_AWS_SES_MOCKED=${INSTRUMENTATION_AWS_SES_MOCKED:-True}
       - INSTRUMENTATION_AWS_SES_EMAIL_SENDER=${INSTRUMENTATION_AWS_SES_EMAIL_SENDER:-success@simulator.amazonses.com}
       - INSTRUMENTATION_AWS_SES_DISABLE_SSL=${INSTRUMENTATION_AWS_SES_DISABLE_SSL:-True}
@@ -187,13 +187,4 @@ services:
       - mock
     depends_on:
       telemetry:
-        condition: service_started
-
-  mock_check_alerts:
-    build:
-      context: tests/mock/check_alerts
-    profiles:
-      - mock
-    depends_on:
-      alert:
         condition: service_started

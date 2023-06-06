@@ -10,10 +10,6 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
     GOOS=linux GOARCH=amd64 \
     go build -ldflags="-w -s" -mod=vendor -o /go/bin/midas-alert
 
-FROM alpine:3.18
+FROM scratch
 COPY --from=builder /go/bin/midas-alert /go/bin/midas-alert
-ADD https://github.com/aws/aws-lambda-runtime-interface-emulator/releases/latest/download/aws-lambda-rie /usr/bin/aws-lambda-rie
-RUN chmod 755 /usr/bin/aws-lambda-rie
-COPY entry.sh /
-RUN chmod 755 /entry.sh
-ENTRYPOINT [ "/entry.sh", "/go/bin/midas-alert" ]  
+ENTRYPOINT [ "/go/bin/midas-alert" ]  

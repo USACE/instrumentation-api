@@ -4,7 +4,6 @@ go 1.20
 
 require (
 	github.com/USACE/instrumentation-api/api v0.0.0-20230602172253-a9fb7636f3be
-	github.com/aws/aws-lambda-go v1.41.0
 	github.com/aws/aws-sdk-go v1.44.276
 	github.com/jackc/pgx/v4 v4.18.1
 	github.com/kelseyhightower/envconfig v1.4.0
