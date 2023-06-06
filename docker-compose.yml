@@ -104,8 +104,6 @@ services:
       - INSTRUMENTATION_AWS_SES_EMAIL_SENDER=${INSTRUMENTATION_AWS_SES_EMAIL_SENDER:-success@simulator.amazonses.com}
       - INSTRUMENTATION_AWS_SES_DISABLE_SSL=${INSTRUMENTATION_AWS_SES_DISABLE_SSL:-True}
       - INSTRUMENTATION_AWS_SES_REGION=${INSTRUMENTATION_AWS_SES_REGION:-us-east-1}
-    ports:
-      - "${ALERT_PORT:-9091}:8080"
     depends_on:
       postgres:
         condition: service_healthy
