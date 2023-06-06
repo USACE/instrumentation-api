@@ -1,7 +1,8 @@
 package handlers
 
 import (
-	"log"
+	"errors"
+	"fmt"
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/models"
@@ -26,13 +27,7 @@ const (
 )
 
 func DoAlertChecks(db *sqlx.DB, svc *ses.SES, sender string, mock bool) error {
-	txn, err := db.Beginx()
-	if err != nil {
-		return err
-	}
-	defer txn.Rollback()
-
-	aa, err := models.ListAndRenewExpiredAlertConfigsTxn(txn)
+	aa, err := models.ListExpiredAlertConfigs(db)
 	if err != nil {
 		return err
 	}
@@ -45,35 +40,28 @@ func DoAlertChecks(db *sqlx.DB, svc *ses.SES, sender string, mock bool) error {
 		acMap[a.AlertTypeID] = append(acMap[a.AlertTypeID], a)
 	}
 
-	measurementChecks, err := models.ListAlertCheckMeasurementSubmittalsTxn(txn, aa)
+	measurementChecks, err := models.ListAlertCheckMeasurementSubmittals(db, aa)
 	if err != nil {
 		return err
 	}
-	evaluationChecks, err := models.ListAlertCheckEvaluationSubmittalsTxn(txn, aa)
+	evaluationChecks, err := models.ListAlertCheckEvaluationSubmittals(db, aa)
 	if err != nil {
 		return err
 	}
-	if err := handleChecks(txn, svc, measurementChecks, aa, sender, mock); err != nil {
+	if err := handleChecks(db, svc, measurementChecks, aa, sender, mock); err != nil {
 		return err
 	}
-	if err := handleChecks(txn, svc, evaluationChecks, aa, sender, mock); err != nil {
-		return err
-	}
-	if err := txn.Commit(); err != nil {
+	if err := handleChecks(db, svc, evaluationChecks, aa, sender, mock); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func handleChecks[T models.AlertChecker](txn *sqlx.Tx, svc *ses.SES, checks []T, alertConfigs []models.AlertConfig, sender string, mock bool) error {
-	check := func(err error) {
-		if err != nil {
-			log.Println(err.Error())
-		}
-	}
+func handleChecks[T models.AlertChecker](db *sqlx.DB, svc *ses.SES, checks []T, alertConfigs []models.AlertConfig, sender string, mock bool) error {
 	acIDs := make([]uuid.UUID, 0)
 	aa := make([]models.AlertConfig, len(checks))
+	errs := make([]error, 0)
 
 	for idx, c := range checks {
 		ac := c.GetAlertConfig()
@@ -84,48 +72,63 @@ func handleChecks[T models.AlertChecker](txn *sqlx.Tx, svc *ses.SES, checks []T,
 		switch ac.AlertStatusID {
 		case GreenAlertStatusID:
 			if shouldWarn && !shouldAlert {
-				ac.AlertStatusID = YellowAlertStatusID
-				check(c.DoEmail(svc, warning, sender, mock))
-				_ = append(acIDs, ac.ID)
+				if err := c.DoEmail(svc, warning, sender, mock); err != nil {
+					_ = append(errs, err) // aggregate errors
+				}
+				ac.AlertStatusID = YellowAlertStatusID // update alert config status
+				_ = append(acIDs, ac.ID)               // add for in-app notification
 			} else if shouldAlert {
+				if err := c.DoEmail(svc, alert, sender, mock); err != nil {
+					_ = append(errs, err)
+				}
 				ac.AlertStatusID = RedAlertStatusID
-				check(c.DoEmail(svc, alert, sender, mock))
 				_ = append(acIDs, ac.ID)
 			}
 		case YellowAlertStatusID:
 			if shouldAlert {
+				if err := c.DoEmail(svc, alert, sender, mock); err != nil {
+					_ = append(errs, err)
+				}
 				ac.AlertStatusID = RedAlertStatusID
-				check(c.DoEmail(svc, alert, sender, mock))
 				_ = append(acIDs, ac.ID)
 			} else if !shouldWarn {
 				ac.AlertStatusID = GreenAlertStatusID
 			}
 		case RedAlertStatusID:
 			if shouldRemind {
+				if err := c.DoEmail(svc, reminder, sender, mock); err != nil {
+					_ = append(errs, err)
+				}
 				t := time.Now()
 				ac.LastReminded = &t
-				check(c.DoEmail(svc, reminder, sender, mock))
 				_ = append(acIDs, ac.ID)
 			} else if !shouldAlert && shouldWarn {
 				// edge case may happen where if an submittal is very late, the next
 				// scheduled submittal may go directly into warning or alert status
+				if err := c.DoEmail(svc, warning, sender, mock); err != nil {
+					_ = append(errs, err)
+				}
 				ac.AlertStatusID = YellowAlertStatusID
-				check(c.DoEmail(svc, warning, sender, mock))
 				_ = append(acIDs, ac.ID)
 			} else if !shouldAlert && !shouldWarn {
 				ac.AlertStatusID = GreenAlertStatusID
 			}
 		default:
-			log.Printf("invalid alert_status_id: %+v", ac.AlertStatusID)
+			_ = append(errs, fmt.Errorf("invalid alert_status_id: %+v", ac.AlertStatusID))
 		}
 		aa[idx] = ac
 	}
 
-	if err := models.UpdateAlertConfigStatusAndLastRemindedTxn(txn, aa); err != nil {
-		return err
+	if err := models.UpdateAlertConfigStatus(db, aa); err != nil {
+		_ = append(errs, err)
+		return errors.Join(errs...)
 	}
-	if err := models.CreateAlertsTxn(txn, acIDs); err != nil {
-		return err
+	if err := models.CreateAlerts(db, acIDs); err != nil {
+		_ = append(errs, err)
+		return errors.Join(errs...)
+	}
+	if len(errs) != 0 {
+		return errors.Join(errs...)
 	}
 
 	return nil

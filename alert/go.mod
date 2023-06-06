@@ -1,9 +1,10 @@
 module github.com/USACE/instrumentation-api/alert
 
-go 1.19
+go 1.20
 
 require (
 	github.com/USACE/instrumentation-api/api v0.0.0-20230602172253-a9fb7636f3be
+	github.com/aws/aws-lambda-go v1.41.0
 	github.com/aws/aws-sdk-go v1.44.276
 	github.com/jackc/pgx/v4 v4.18.1
 	github.com/kelseyhightower/envconfig v1.4.0
@@ -11,7 +12,6 @@ require (
 
 require (
 	github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible // indirect
-	github.com/aws/aws-lambda-go v1.41.0 // indirect
 	github.com/btcsuite/btcutil v1.0.2 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/gosimple/slug v1.13.1 // indirect
@@ -28,17 +28,17 @@ require (
 	github.com/jmoiron/sqlx v1.3.5 // indirect
 	github.com/labstack/echo/v4 v4.10.2 // indirect
 	github.com/labstack/gommon v0.4.0 // indirect
-	github.com/lib/pq v1.10.8 // indirect
+	github.com/lib/pq v1.10.9 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
-	github.com/mattn/go-isatty v0.0.18 // indirect
-	github.com/paulmach/orb v0.9.0 // indirect
+	github.com/mattn/go-isatty v0.0.19 // indirect
+	github.com/paulmach/orb v0.9.2 // indirect
 	github.com/tidwall/btree v1.6.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
-	go.mongodb.org/mongo-driver v1.11.4 // indirect
-	golang.org/x/crypto v0.8.0 // indirect
-	golang.org/x/net v0.9.0 // indirect
-	golang.org/x/sys v0.7.0 // indirect
+	go.mongodb.org/mongo-driver v1.11.6 // indirect
+	golang.org/x/crypto v0.9.0 // indirect
+	golang.org/x/net v0.10.0 // indirect
+	golang.org/x/sys v0.8.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
 )
 
