@@ -16,7 +16,6 @@ require (
 	github.com/aws/aws-sdk-go v1.44.276 // indirect
 	github.com/btcsuite/btcutil v1.0.2 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
-	github.com/golang-jwt/jwt/v4 v4.5.0 // indirect
 	github.com/golang-jwt/jwt/v5 v5.0.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/gosimple/slug v1.13.1 // indirect
