@@ -42,7 +42,6 @@ services:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-AKIAIOSFODNN7EXAMPLE}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY}
       - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-east-1}
-      - AWS_SES_EMAIL_SENDER=${AWS_SES_EMAIL_SENDER:-donotreply@fake.usace.army.mil}
       - INSTRUMENTATION_APPLICATION_KEY=${INSTRUMENTATION_APPLICATION_KEY:-appkey}
       - INSTRUMENTATION_AUTH_DISABLED=${INSTRUMENTATION_AUTH_DISABLED:-False}
       - INSTRUMENTATION_AUTH_JWT_MOCKED=${INSTRUMENTATION_AUTH_JWT_MOCKED:-True}
@@ -82,6 +81,31 @@ services:
       - INSTRUMENTATION_ROUTE_PREFIX=${INSTRUMENTATION_ROUTE_PREFIX:-}
     ports:
       - "${TELEMETRY_PORT:-9090}:80"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      flyway:
+        condition: service_completed_successfully
+
+  alert:
+    build:
+      context: alert
+    environment:
+      # NOTE: AWS_ Variables provided by execution role in deployed version
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-AKIAIOSFODNN7EXAMPLE}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-east-1}
+      - INSTRUMENTATION_DBUSER=${INSTRUMENTATION_DBUSER:-instrumentation_user}
+      - INSTRUMENTATION_DBPASS=${INSTRUMENTATION_DBPASS:-password}
+      - INSTRUMENTATION_DBNAME=${INSTRUMENTATION_DBNAME:-postgres}
+      - INSTRUMENTATION_DBHOST=${INSTRUMENTATION_DBHOST:-postgres}
+      - INSTRUMENTATION_DBSSLMODE=${INSTRUMENTATION_DBSSLMODE:-disable}
+      - INSTRUMENTATION_AWS_SES_MOCKED=${INSTRUMENTATION_AWS_SES_MOCKED:-True}
+      - INSTRUMENTATION_AWS_SES_EMAIL_SENDER=${INSTRUMENTATION_AWS_SES_EMAIL_SENDER:-success@simulator.amazonses.com}
+      - INSTRUMENTATION_AWS_SES_DISABLE_SSL=${INSTRUMENTATION_AWS_SES_DISABLE_SSL:-True}
+      - INSTRUMENTATION_AWS_SES_REGION=${INSTRUMENTATION_AWS_SES_REGION:-us-east-1}
+    ports:
+      - "${ALERT_PORT:-9091}:8080"
     depends_on:
       postgres:
         condition: service_healthy
@@ -171,5 +195,5 @@ services:
     profiles:
       - mock
     depends_on:
-      api:
+      alert:
         condition: service_started

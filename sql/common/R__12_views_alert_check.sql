@@ -32,6 +32,8 @@ CREATE OR REPLACE VIEW v_alert_check_measurement_submittal AS (
             timeseries_id,
             MAX(time) AS time
         FROM timeseries_measurement
+        WHERE NOT timeseries_id = ANY(SELECT timeseries_id FROM instrument_constants)
+        AND time <= now()
         GROUP BY timeseries_id
     ) lm ON lm.timeseries_id = ts.id
     WHERE ac.alert_type_id = '97e7a25c-d5c7-4ded-b272-1bb6e5914fe3'::UUID

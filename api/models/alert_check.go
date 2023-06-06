@@ -50,7 +50,7 @@ type AlertChecker interface {
 	GetShouldWarn() bool
 	GetShouldAlert() bool
 	GetShouldRemind() bool
-	DoEmail(*ses.SES, string, string) error
+	DoEmail(*ses.SES, string, string, bool) error
 }
 
 func (ck AlertCheck) GetAlertConfig() AlertConfig {
@@ -69,7 +69,7 @@ func (ck AlertCheck) GetShouldRemind() bool {
 	return ck.ShouldRemind
 }
 
-func (es EvaluationSubmittal) DoEmail(svc *ses.SES, emailType, sender string) error {
+func (es EvaluationSubmittal) DoEmail(svc *ses.SES, emailType, sender string, mock bool) error {
 	preformatted := et.EmailContent{
 		TextSubject: `MIDAS ` + emailType + `: {{.AlertConfig.ProjectName}} Evaluation Submittal "{{.AlertConfig.Name}}"`,
 		TextBody: `
@@ -79,7 +79,7 @@ func (es EvaluationSubmittal) DoEmail(svc *ses.SES, emailType, sender string) er
 			Name: "{{.AlertConfig.Name}}"
 			Body: "{{.AlertConfig.Body}}"
 			Expected Submittal Time: {{.ExpectedSubmittal.Format "Jan 02, 2006 15:04:05 UTC" }}
-			{{if .LastEvaluationTime}} Last Evaluation Submittal Time: {{.LastEvaluationTime.Format "Jan 02, 2006 15:04:05 UTC" }}
+			{{if .LastEvaluationTime}}Last Evaluation Submittal Time: {{.LastEvaluationTime.Format "Jan 02, 2006 15:04:05 UTC" }}
 			{{end}}
 		`,
 		HtmlBody: `
@@ -89,7 +89,7 @@ func (es EvaluationSubmittal) DoEmail(svc *ses.SES, emailType, sender string) er
 				<strong>Name:</strong> "{{.AlertConfig.Name}}"
 				<strong>Body:</strong> "{{.AlertConfig.Body}}"
 				<strong>Expected Submittal Time:</strong> {{.ExpectedSubmittal.Format "Jan 02, 2006 15:04:05 UTC" }}
-				{{if .LastEvaluationTime}} <strong>Last Evaluation Submittal Time:</strong> {{.LastEvaluationTime.Format "Jan 02, 2006 15:04:05 UTC" }}
+				{{if .LastEvaluationTime}}<strong>Last Evaluation Submittal Time:</strong> {{.LastEvaluationTime.Format "Jan 02, 2006 15:04:05 UTC" }}
 				{{end}}
 			</p>
 		`,
@@ -104,13 +104,13 @@ func (es EvaluationSubmittal) DoEmail(svc *ses.SES, emailType, sender string) er
 	}
 	toAddresses := es.AlertConfig.GetToAddresses()
 
-	if err := et.ConstructAndSendEmail(svc, content, toAddresses, sender); err != nil {
+	if err := et.ConstructAndSendEmail(svc, content, toAddresses, sender, mock); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (ms MeasurementSubmittal) DoEmail(svc *ses.SES, emailType, sender string) error {
+func (ms MeasurementSubmittal) DoEmail(svc *ses.SES, emailType, sender string, mock bool) error {
 	preformatted := et.EmailContent{
 		TextSubject: `MIDAS ` + emailType + `: {{.AlertConfig.ProjectName}} Timeseries Measurement Submittal "{{.AlertConfig.Name}}"`,
 		TextBody: `
@@ -148,7 +148,7 @@ func (ms MeasurementSubmittal) DoEmail(svc *ses.SES, emailType, sender string) e
 	}
 	toAddresses := ms.AlertConfig.GetToAddresses()
 
-	if err := et.ConstructAndSendEmail(svc, content, toAddresses, sender); err != nil {
+	if err := et.ConstructAndSendEmail(svc, content, toAddresses, sender, mock); err != nil {
 		return err
 	}
 	return nil

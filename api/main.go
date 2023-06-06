@@ -13,7 +13,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/aws/aws-sdk-go/service/ses"
 	"github.com/kelseyhightower/envconfig"
 
 	"github.com/labstack/echo/v4"
@@ -40,7 +39,6 @@ type Config struct {
 	AWSS3DisableSSL     bool   `envconfig:"AWS_S3_DISABLE_SSL"`
 	AWSS3ForcePathStyle bool   `envconfig:"AWS_S3_FORCE_PATH_STYLE"`
 	AWSS3Bucket         string `envconfig:"AWS_S3_BUCKET"`
-	AWSSESEmailSender   string `envconfig:"AWS_SES_EMAIL_SENDER"`
 }
 
 func awsConfig(cfg *Config) *aws.Config {
@@ -70,7 +68,6 @@ func main() {
 	awsCfg := awsConfig(&cfg)
 	sess := session.Must(session.NewSession(awsCfg))
 	s3c := s3.New(sess)
-	sesc := ses.New(sess)
 
 	db := dbutils.Connection(cfg.dbConnStr())
 
@@ -172,10 +169,6 @@ func main() {
 	private.POST("/projects/:project_id/instruments/:instrument_id/alert_configs/:alert_config_id/subscribe", handlers.SubscribeProfileToAlerts(db))
 	private.POST("/projects/:project_id/instruments/:instrument_id/alert_configs/:alert_config_id/unsubscribe", handlers.UnsubscribeProfileToAlerts(db))
 	private.PUT("/alert_subscriptions/:alert_subscription_id", handlers.UpdateMyAlertSubscription(db))
-
-	// Check Alerts
-	// runs at scheduled interval
-	public.POST("/check_alerts", handlers.DoAlertChecks(db, sesc, cfg.AWSSESEmailSender))
 
 	// Email Autocomplete
 	public.GET("/email_autocomplete", handlers.ListEmailAutocomplete(db))

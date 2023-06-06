@@ -2,6 +2,7 @@ package email_template
 
 import (
 	htmltemp "html/template"
+	"log"
 	"strings"
 	texttemp "text/template"
 
@@ -60,7 +61,11 @@ func FormatAlertConfigTemplates(templContent *EmailTemplateContent, data any) (*
 	}, nil
 }
 
-func ConstructAndSendEmail(svc *ses.SES, ec *EmailContent, toAddresses []*string, sender string) error {
+func ConstructAndSendEmail(svc *ses.SES, ec *EmailContent, toAddresses []*string, sender string, mock bool) error {
+	if mock {
+		log.Printf("mocking email '%s':\n%s", ec.TextSubject, ec.TextBody)
+		return nil
+	}
 	input := &ses.SendEmailInput{
 		Destination: &ses.Destination{
 			CcAddresses: []*string{},
