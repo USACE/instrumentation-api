@@ -157,7 +157,7 @@ func SubscribeEmailsToAlertConfigTxn(txn *sqlx.Tx, alertConfigID *uuid.UUID, ema
 
 	// Register any emails that are not yet in system
 	for idx, em := range emails {
-		if em.UserType == "" {
+		if em.UserType == "" || em.UserType == "email" {
 			var newID uuid.UUID
 			if err := registerStmt.Get(&newID, em.Email); err != nil {
 				return err
