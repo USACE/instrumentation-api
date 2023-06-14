@@ -215,10 +215,10 @@ INSERT INTO inclinometer_measurement (timeseries_id, time, creator, create_date,
 INSERT INTO alert_config (id, project_id, name, body, alert_type_id, schedule_interval, warning_interval, remind_interval) VALUES
     ('1efd2d85-d3ee-4388-85a0-f824a761ff8b', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'Test Measurement Submittal Alert', 'Alert for demonstration purposes.', '97e7a25c-d5c7-4ded-b272-1bb6e5914fe3', 'PT15S', 'PT0S', 'PT0S'),
     ('90ff91d6-ab39-40db-9160-34ce17416281', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'Test Measurement Submittal Warning', 'Warning for demonstration purposes.', '97e7a25c-d5c7-4ded-b272-1bb6e5914fe3', 'PT30S', 'PT15S', 'PT0S'),
-    ('15c106f5-a293-4a0e-b45a-6a4c7206ac6a', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'Test Measurement Submittal Reminder', 'Reminder for demonstration purposes.', '97e7a25c-d5c7-4ded-b272-1bb6e5914fe3', 'PT15S', 'PT0S', 'PT30S'),
+    ('15c106f5-a293-4a0e-b45a-6a4c7206ac6a', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'Test Measurement Submittal Reminder', 'Reminder for demonstration purposes.', '97e7a25c-d5c7-4ded-b272-1bb6e5914fe3', 'PT15S', 'PT0S', 'P1D'),
     ('c07165de-71ec-40c4-b25b-c42deefea636', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'Test Evaluation Submittal Alert', 'Alert for demonstration purposes.', 'da6ee89e-58cc-4d85-8384-43c3c33a68bd', 'PT15S', 'PT0S', 'PT0S'),
     ('d3738f72-4c0b-47f8-8ff9-8bea46022309', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'Test Evaluation Submittal Warning', 'Warning for demonstration purposes.', 'da6ee89e-58cc-4d85-8384-43c3c33a68bd', 'PT30S', 'PT15S', 'PT0S'),
-    ('5f9555df-c616-4530-bdcd-6b664fc91255', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'Test Evaluation Submittal Reminder', 'Reminder for demonstration purposes.', 'da6ee89e-58cc-4d85-8384-43c3c33a68bd', 'PT15S', 'PT0S', 'PT30S');
+    ('5f9555df-c616-4530-bdcd-6b664fc91255', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'Test Evaluation Submittal Reminder', 'Reminder for demonstration purposes.', 'da6ee89e-58cc-4d85-8384-43c3c33a68bd', 'PT15S', 'PT0S', 'P1D');
 
 INSERT INTO alert_config_instrument (alert_config_id, instrument_id) VALUES
     ('1efd2d85-d3ee-4388-85a0-f824a761ff8b', 'a7540f69-c41e-43b3-b655-6e44097edb7e'),
