@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/USACE/instrumentation-api/api/config"
 	"github.com/USACE/instrumentation-api/api/models"
-	"github.com/aws/aws-sdk-go/service/ses"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
@@ -26,7 +26,7 @@ const (
 	reminder = "Reminder"
 )
 
-func DoAlertChecks(db *sqlx.DB, svc *ses.SES, sender string, mock bool) error {
+func DoAlertChecks(db *sqlx.DB, cfg *config.AlertCheckConfig, smtpCfg *config.SmtpConfig) error {
 	aa, err := models.ListExpiredAlertConfigs(db)
 	if err != nil {
 		return err
@@ -48,17 +48,17 @@ func DoAlertChecks(db *sqlx.DB, svc *ses.SES, sender string, mock bool) error {
 	if err != nil {
 		return err
 	}
-	if err := handleChecks(db, svc, measurementChecks, aa, sender, mock); err != nil {
+	if err := handleChecks(db, measurementChecks, aa, cfg, smtpCfg); err != nil {
 		return err
 	}
-	if err := handleChecks(db, svc, evaluationChecks, aa, sender, mock); err != nil {
+	if err := handleChecks(db, evaluationChecks, aa, cfg, smtpCfg); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func handleChecks[T models.AlertChecker](db *sqlx.DB, svc *ses.SES, checks []T, alertConfigs []models.AlertConfig, sender string, mock bool) error {
+func handleChecks[T models.AlertChecker](db *sqlx.DB, checks []T, alertConfigs []models.AlertConfig, cfg *config.AlertCheckConfig, smtpCfg *config.SmtpConfig) error {
 	acIDs := make([]uuid.UUID, 0)
 	aa := make([]models.AlertConfig, len(checks))
 	errs := make([]error, 0)
@@ -72,13 +72,13 @@ func handleChecks[T models.AlertChecker](db *sqlx.DB, svc *ses.SES, checks []T, 
 		switch ac.AlertStatusID {
 		case GreenAlertStatusID:
 			if shouldWarn && !shouldAlert {
-				if err := c.DoEmail(svc, warning, sender, mock); err != nil {
+				if err := c.DoEmail(warning, cfg, smtpCfg); err != nil {
 					errs = append(errs, err) // aggregate errors
 				}
 				ac.AlertStatusID = YellowAlertStatusID // update alert config status
 				acIDs = append(acIDs, ac.ID)           // add for in-app notification
 			} else if shouldAlert {
-				if err := c.DoEmail(svc, alert, sender, mock); err != nil {
+				if err := c.DoEmail(alert, cfg, smtpCfg); err != nil {
 					errs = append(errs, err)
 				}
 				ac.AlertStatusID = RedAlertStatusID
@@ -86,7 +86,7 @@ func handleChecks[T models.AlertChecker](db *sqlx.DB, svc *ses.SES, checks []T, 
 			}
 		case YellowAlertStatusID:
 			if shouldAlert {
-				if err := c.DoEmail(svc, alert, sender, mock); err != nil {
+				if err := c.DoEmail(alert, cfg, smtpCfg); err != nil {
 					errs = append(errs, err)
 				}
 				ac.AlertStatusID = RedAlertStatusID
@@ -96,7 +96,7 @@ func handleChecks[T models.AlertChecker](db *sqlx.DB, svc *ses.SES, checks []T, 
 			}
 		case RedAlertStatusID:
 			if shouldRemind {
-				if err := c.DoEmail(svc, reminder, sender, mock); err != nil {
+				if err := c.DoEmail(reminder, cfg, smtpCfg); err != nil {
 					errs = append(errs, err)
 				}
 				t := time.Now()
@@ -105,7 +105,7 @@ func handleChecks[T models.AlertChecker](db *sqlx.DB, svc *ses.SES, checks []T, 
 			} else if !shouldAlert && shouldWarn {
 				// edge case may happen where if an submittal is very late, the next
 				// scheduled submittal may go directly into warning or alert status
-				if err := c.DoEmail(svc, warning, sender, mock); err != nil {
+				if err := c.DoEmail(warning, cfg, smtpCfg); err != nil {
 					errs = append(errs, err)
 				}
 				ac.AlertStatusID = YellowAlertStatusID

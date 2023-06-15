@@ -6,8 +6,8 @@ import (
 	"log"
 	"time"
 
+	"github.com/USACE/instrumentation-api/api/config"
 	et "github.com/USACE/instrumentation-api/api/email_template"
-	"github.com/aws/aws-sdk-go/service/ses"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
@@ -50,7 +50,7 @@ type AlertChecker interface {
 	GetShouldWarn() bool
 	GetShouldAlert() bool
 	GetShouldRemind() bool
-	DoEmail(*ses.SES, string, string, bool) error
+	DoEmail(string, *config.AlertCheckConfig, *config.SmtpConfig) error
 }
 
 func (ck AlertCheck) GetAlertConfig() AlertConfig {
@@ -69,7 +69,7 @@ func (ck AlertCheck) GetShouldRemind() bool {
 	return ck.ShouldRemind
 }
 
-func (es EvaluationSubmittal) DoEmail(svc *ses.SES, emailType, sender string, mock bool) error {
+func (es EvaluationSubmittal) DoEmail(emailType string, cfg *config.AlertCheckConfig, smtpCfg *config.SmtpConfig) error {
 	preformatted := et.EmailContent{
 		TextSubject: `MIDAS ` + emailType + `: {{.AlertConfig.ProjectName}} Evaluation Submittal "{{.AlertConfig.Name}}"`,
 		TextBody: `
@@ -82,17 +82,6 @@ func (es EvaluationSubmittal) DoEmail(svc *ses.SES, emailType, sender string, mo
 			{{if .LastEvaluationTime}}Last Evaluation Submittal Time: {{.LastEvaluationTime.Format "Jan 02, 2006 15:04:05 UTC" }}
 			{{end}}
 		`,
-		HtmlBody: `
-			<h1>The following ` + emailType + ` has been triggered:</h1>
-			<p>
-				<strong>Project:</strong> {{.AlertConfig.ProjectName}}
-				<strong>Name:</strong> "{{.AlertConfig.Name}}"
-				<strong>Body:</strong> "{{.AlertConfig.Body}}"
-				<strong>Expected Submittal Time:</strong> {{.ExpectedSubmittal.Format "Jan 02, 2006 15:04:05 UTC" }}
-				{{if .LastEvaluationTime}}<strong>Last Evaluation Submittal Time:</strong> {{.LastEvaluationTime.Format "Jan 02, 2006 15:04:05 UTC" }}
-				{{end}}
-			</p>
-		`,
 	}
 	templContent, err := et.CreateEmailTemplateContent(preformatted)
 	if err != nil {
@@ -102,15 +91,15 @@ func (es EvaluationSubmittal) DoEmail(svc *ses.SES, emailType, sender string, mo
 	if err != nil {
 		return err
 	}
-	toAddresses := es.AlertConfig.GetToAddresses()
+	content.To = es.AlertConfig.GetToAddresses()
 
-	if err := et.ConstructAndSendEmail(svc, content, toAddresses, sender, mock); err != nil {
+	if err := et.ConstructAndSendEmail(content, cfg, smtpCfg); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (ms MeasurementSubmittal) DoEmail(svc *ses.SES, emailType, sender string, mock bool) error {
+func (ms MeasurementSubmittal) DoEmail(emailType string, cfg *config.AlertCheckConfig, smtpCfg *config.SmtpConfig) error {
 	preformatted := et.EmailContent{
 		TextSubject: `MIDAS ` + emailType + `: {{.AlertConfig.ProjectName}} Timeseries Measurement Submittal "{{.AlertConfig.Name}}"`,
 		TextBody: `
@@ -124,19 +113,6 @@ func (ms MeasurementSubmittal) DoEmail(svc *ses.SES, emailType, sender string, m
 			{{range .AffectedInstruments}}	• {{.InstrumentName}}: {{.LastMeasurementTime.Format "Jan 02, 2006 15:04:05 UTC" }}
 			{{end}}
 		`,
-		HtmlBody: `
-			<h1>The following ` + emailType + ` has been triggered:</h1>
-			<p>
-				<strong>Project:</strong> {{.AlertConfig.ProjectName}}
-				<strong>Name:</strong> "{{.AlertConfig.Name}}"
-				<strong>Body:</strong> "{{.AlertConfig.Body}}"
-				<strong>Expected Submittal:</strong> {{.ExpectedSubmittal.Format "Jan 02, 2006 15:04:05 UTC" }}
-				<strong>Affected Instruments Last Measurement Time:</strong>
-				<ul>{{range .AffectedInstruments}}
-					<li>{{.InstrumentName}}: {{.LastMeasurementTime.Format "Jan 02, 2006 15:04:05 UTC" }}</li>
-				{{end}}</ul>
-			</p>
-		`,
 	}
 	templContent, err := et.CreateEmailTemplateContent(preformatted)
 	if err != nil {
@@ -146,9 +122,9 @@ func (ms MeasurementSubmittal) DoEmail(svc *ses.SES, emailType, sender string, m
 	if err != nil {
 		return err
 	}
-	toAddresses := ms.AlertConfig.GetToAddresses()
+	content.To = ms.AlertConfig.GetToAddresses()
 
-	if err := et.ConstructAndSendEmail(svc, content, toAddresses, sender, mock); err != nil {
+	if err := et.ConstructAndSendEmail(content, cfg, smtpCfg); err != nil {
 		return err
 	}
 	return nil

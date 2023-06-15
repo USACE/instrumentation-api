@@ -46,10 +46,10 @@ func (a *AlertConfigInstrumentCollection) Scan(src interface{}) error {
 	return nil
 }
 
-func (ac *AlertConfig) GetToAddresses() []*string {
-	emails := make([]*string, len(ac.AlertEmailSubscriptions))
+func (ac *AlertConfig) GetToAddresses() []string {
+	emails := make([]string, len(ac.AlertEmailSubscriptions))
 	for idx := range ac.AlertEmailSubscriptions {
-		emails[idx] = &ac.AlertEmailSubscriptions[idx].Email
+		emails[idx] = ac.AlertEmailSubscriptions[idx].Email
 	}
 	return emails
 }

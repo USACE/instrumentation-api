@@ -1,19 +1,17 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
+	"github.com/USACE/instrumentation-api/api/config"
 	"github.com/USACE/instrumentation-api/api/dbutils"
 	"github.com/USACE/instrumentation-api/api/handlers"
 	"github.com/USACE/instrumentation-api/api/middleware"
 	"github.com/USACE/instrumentation-api/api/models"
 	"github.com/apex/gateway"
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/kelseyhightower/envconfig"
 
 	"github.com/labstack/echo/v4"
 	echomw "github.com/labstack/echo/v4/middleware"
@@ -21,55 +19,13 @@ import (
 	_ "github.com/jackc/pgx/v4/stdlib"
 )
 
-// Config stores configuration information stored in environment variables
-type Config struct {
-	AuthDisabled        bool   `envconfig:"AUTH_DISABLED"`
-	AuthJWTMocked       bool   `envconfig:"AUTH_JWT_MOCKED"`
-	ApplicationKey      string `envconfig:"APPLICATION_KEY"`
-	LambdaContext       bool
-	DBUser              string
-	DBPass              string
-	DBName              string
-	DBHost              string
-	DBSSLMode           string
-	HeartbeatKey        string
-	RoutePrefix         string `envconfig:"ROUTE_PREFIX"`
-	AWSS3Endpoint       string `envconfig:"AWS_S3_ENDPOINT"`
-	AWSS3Region         string `envconfig:"AWS_S3_REGION"`
-	AWSS3DisableSSL     bool   `envconfig:"AWS_S3_DISABLE_SSL"`
-	AWSS3ForcePathStyle bool   `envconfig:"AWS_S3_FORCE_PATH_STYLE"`
-	AWSS3Bucket         string `envconfig:"AWS_S3_BUCKET"`
-}
-
-func awsConfig(cfg *Config) *aws.Config {
-	awsConfig := aws.NewConfig().WithRegion(cfg.AWSS3Region)
-
-	// Used for "minio" during development
-	awsConfig.WithDisableSSL(cfg.AWSS3DisableSSL)
-	awsConfig.WithS3ForcePathStyle(cfg.AWSS3ForcePathStyle)
-	if cfg.AWSS3Endpoint != "" {
-		awsConfig.WithEndpoint(cfg.AWSS3Endpoint)
-	}
-	return awsConfig
-}
-
-func (c *Config) dbConnStr() string {
-	return fmt.Sprintf("user=%s password=%s dbname=%s host=%s sslmode=%s", c.DBUser, c.DBPass, c.DBName, c.DBHost, c.DBSSLMode)
-}
-
 func main() {
-	// Config holding all environment variables
-	var cfg Config
-	if err := envconfig.Process("instrumentation", &cfg); err != nil {
-		log.Fatal(err.Error())
-	}
+	cfg := config.GetApiConfig()
+	db := dbutils.Connection(config.DBConnStr(&cfg.DBConfig))
 
-	// AWS Config
-	awsCfg := awsConfig(&cfg)
+	awsCfg := config.AWSConfig(cfg)
 	sess := session.Must(session.NewSession(awsCfg))
 	s3c := s3.New(sess)
-
-	db := dbutils.Connection(cfg.dbConnStr())
 
 	hashExtractor := func(keyID string) (string, error) {
 		k, err := models.GetTokenInfoByTokenID(db, &keyID)
