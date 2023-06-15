@@ -12,7 +12,7 @@ import (
 type AlertCheckConfig struct {
 	DBConfig
 	AWSECSTriggerMocked bool   `envconfig:"INSTRUMENTATION_AWS_ECS_TRIGGER_MOCKED"`
-	MailSendMocked      bool   `envconfig:"INSTRUMENTATION_MAIL_SEND_MOCKED"`
+	EmailSendMocked     bool   `envconfig:"INSTRUMENTATION_EMAIL_SEND_MOCKED"`
 	EmailFrom           string `envconfig:"INSTRUMENTATION_EMAIL_FROM"`
 	SmtpHost            string `envconfig:"INSTRUMENTATION_SMTP_HOST"`
 	SmtpPort            int    `envconfig:"INSTRUMENTATION_SMTP_PORT"`

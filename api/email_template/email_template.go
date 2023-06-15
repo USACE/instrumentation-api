@@ -52,7 +52,7 @@ func FormatAlertConfigTemplates(templContent *EmailTemplateContent, data any) (*
 }
 
 func ConstructAndSendEmail(ec *EmailContent, cfg *config.AlertCheckConfig, smtpConfig *config.SmtpConfig) error {
-	if cfg.MailSendMocked {
+	if cfg.EmailSendMocked {
 		log.Printf("mocking email '%s':\n%s", ec.TextSubject, ec.TextBody)
 		return nil
 	}
