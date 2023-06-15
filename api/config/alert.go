@@ -14,7 +14,7 @@ type AlertCheckConfig struct {
 	AWSECSTriggerMocked bool   `envconfig:"INSTRUMENTATION_AWS_ECS_TRIGGER_MOCKED"`
 	MailSendMocked      bool   `envconfig:"INSTRUMENTATION_MAIL_SEND_MOCKED"`
 	EmailFrom           string `envconfig:"INSTRUMENTATION_EMAIL_FROM"`
-	SmtpHostname        string `envconfig:"INSTRUMENTATION_SMTP_HOSTNAME"`
+	SmtpHost            string `envconfig:"INSTRUMENTATION_SMTP_HOST"`
 	SmtpPort            int    `envconfig:"INSTRUMENTATION_SMTP_PORT"`
 	SmtpAuthUser        string `envconfig:"INSTRUMENTATION_SMTP_AUTH_USER"`
 	SmtpAuthPass        string `envconfig:"INSTRUMENTATION_SMTP_AUTH_PASS"`
@@ -35,7 +35,7 @@ type SmtpConfig struct {
 
 func GetSmtpConfig(c *AlertCheckConfig) *SmtpConfig {
 	return &SmtpConfig{
-		SmtpAuth: smtp.PlainAuth("", c.SmtpAuthUser, c.SmtpAuthPass, c.SmtpHostname),
-		SmtpAddr: fmt.Sprintf("%s:%d", c.SmtpHostname, c.SmtpPort),
+		SmtpAuth: smtp.PlainAuth("", c.SmtpAuthUser, c.SmtpAuthPass, c.SmtpHost),
+		SmtpAddr: fmt.Sprintf("%s:%d", c.SmtpHost, c.SmtpPort),
 	}
 }
