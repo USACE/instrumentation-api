@@ -73,58 +73,58 @@ func handleChecks[T models.AlertChecker](db *sqlx.DB, svc *ses.SES, checks []T, 
 		case GreenAlertStatusID:
 			if shouldWarn && !shouldAlert {
 				if err := c.DoEmail(svc, warning, sender, mock); err != nil {
-					_ = append(errs, err) // aggregate errors
+					errs = append(errs, err) // aggregate errors
 				}
 				ac.AlertStatusID = YellowAlertStatusID // update alert config status
-				_ = append(acIDs, ac.ID)               // add for in-app notification
+				acIDs = append(acIDs, ac.ID)           // add for in-app notification
 			} else if shouldAlert {
 				if err := c.DoEmail(svc, alert, sender, mock); err != nil {
-					_ = append(errs, err)
+					errs = append(errs, err)
 				}
 				ac.AlertStatusID = RedAlertStatusID
-				_ = append(acIDs, ac.ID)
+				acIDs = append(acIDs, ac.ID)
 			}
 		case YellowAlertStatusID:
 			if shouldAlert {
 				if err := c.DoEmail(svc, alert, sender, mock); err != nil {
-					_ = append(errs, err)
+					errs = append(errs, err)
 				}
 				ac.AlertStatusID = RedAlertStatusID
-				_ = append(acIDs, ac.ID)
+				acIDs = append(acIDs, ac.ID)
 			} else if !shouldWarn {
 				ac.AlertStatusID = GreenAlertStatusID
 			}
 		case RedAlertStatusID:
 			if shouldRemind {
 				if err := c.DoEmail(svc, reminder, sender, mock); err != nil {
-					_ = append(errs, err)
+					errs = append(errs, err)
 				}
 				t := time.Now()
 				ac.LastReminded = &t
-				_ = append(acIDs, ac.ID)
+				acIDs = append(acIDs, ac.ID)
 			} else if !shouldAlert && shouldWarn {
 				// edge case may happen where if an submittal is very late, the next
 				// scheduled submittal may go directly into warning or alert status
 				if err := c.DoEmail(svc, warning, sender, mock); err != nil {
-					_ = append(errs, err)
+					errs = append(errs, err)
 				}
 				ac.AlertStatusID = YellowAlertStatusID
-				_ = append(acIDs, ac.ID)
+				acIDs = append(acIDs, ac.ID)
 			} else if !shouldAlert && !shouldWarn {
 				ac.AlertStatusID = GreenAlertStatusID
 			}
 		default:
-			_ = append(errs, fmt.Errorf("invalid alert_status_id: %+v", ac.AlertStatusID))
+			errs = append(errs, fmt.Errorf("invalid alert_status_id: %+v", ac.AlertStatusID))
 		}
 		aa[idx] = ac
 	}
 
 	if err := models.UpdateAlertConfigStatus(db, aa); err != nil {
-		_ = append(errs, err)
+		errs = append(errs, err)
 		return errors.Join(errs...)
 	}
 	if err := models.CreateAlerts(db, acIDs); err != nil {
-		_ = append(errs, err)
+		errs = append(errs, err)
 		return errors.Join(errs...)
 	}
 	if len(errs) != 0 {
