@@ -35,6 +35,6 @@ type SmtpConfig struct {
 func GetSmtpConfig(c *AlertCheckConfig) *SmtpConfig {
 	return &SmtpConfig{
 		SmtpAuth: smtp.PlainAuth("", c.SmtpAuthUser, c.SmtpAuthPass, c.SmtpHost),
-		SmtpAddr: c.SmtpHost + c.SmtpPort,
+		SmtpAddr: c.SmtpHost + ":" + c.SmtpPort,
 	}
 }
