@@ -1,7 +1,10 @@
 package email_template
 
 import (
+	"encoding/base64"
+	"fmt"
 	"log"
+	"mime"
 	"net/smtp"
 	"strings"
 	texttemp "text/template"
@@ -57,11 +60,21 @@ func ConstructAndSendEmail(ec *EmailContent, cfg *config.AlertCheckConfig, smtpC
 		return nil
 	}
 
-	mime := "MIME-version: 1.0;\nContent-Type: text/plain; charset=\"UTF-8\";\n\n"
-	subject := "Subject: " + ec.TextSubject + "\n"
-	msg := []byte(subject + mime + "\n" + ec.TextSubject)
+	header := make(map[string]string)
+	header["From"] = cfg.EmailFrom
+	header["To"] = strings.Join(ec.To, ",")
+	header["Subject"] = mime.QEncoding.Encode("UTF-8", ec.TextSubject)
+	header["MIME-Version"] = "1.0"
+	header["Content-Type"] = "text/plain; charset=\"utf-8\""
+	header["Content-Transfer-Encoding"] = "base64"
 
-	if err := smtp.SendMail(smtpConfig.SmtpAddr, smtpConfig.SmtpAuth, cfg.EmailFrom, ec.To, msg); err != nil {
+	msg := ""
+	for k, v := range header {
+		msg += fmt.Sprintf("%s: %s\r\n", k, v)
+	}
+	msg += "\r\n" + base64.StdEncoding.EncodeToString([]byte(ec.TextBody))
+
+	if err := smtp.SendMail(smtpConfig.SmtpAddr, smtpConfig.SmtpAuth, cfg.EmailFrom, ec.To, []byte(msg)); err != nil {
 		return err
 	}
 	return nil
