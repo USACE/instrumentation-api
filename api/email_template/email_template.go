@@ -62,7 +62,8 @@ func ConstructAndSendEmail(ec *EmailContent, cfg *config.AlertCheckConfig, smtpC
 
 	header := make(map[string]string)
 	header["From"] = cfg.EmailFrom
-	header["To"] = strings.Join(ec.To, ",")
+	// Currently all recipients are Bcc'd. Remove below line to include all recipients in "mail to"
+	// header["To"] = strings.Join(ec.To, ",")
 	header["Subject"] = mime.QEncoding.Encode("UTF-8", ec.TextSubject)
 	header["MIME-Version"] = "1.0"
 	header["Content-Type"] = "text/plain; charset=\"utf-8\""
