@@ -12,30 +12,32 @@ CREATE OR REPLACE VIEW v_alert_check_measurement_submittal AS (
             AND (now() >= COALESCE(ac.last_reminded, (ac.start_date + ac.schedule_interval)) + ac.remind_interval)
         ) AS should_remind,
         (now() - (ac.schedule_interval * ac.n_missed_before_alert)) AS expected_submittal,
-        (SELECT COALESCE(JSON_AGG(JSON_BUILD_OBJECT(
-            'instrument_name', name,
-            'last_measurement_time', MAX(lm.time)
+        COALESCE(JSON_AGG(JSON_BUILD_OBJECT(
+            'instrument_name', inst.name,
+            'last_measurement_time', lm.time
         )) FILTER (
-            WHERE MAX(lm.time) < (now() - (ac.schedule_interval * ac.n_missed_before_alert))
-        ), '[]')::text
-        FROM   instrument
-        WHERE  id = ANY(
-            SELECT iac.instrument_id
-            FROM   alert_config_instrument iac
-            WHERE  iac.alert_config_id = ac.id
-        )) AS affected_instruments
+            WHERE lm.time < (now() - (ac.schedule_interval * ac.n_missed_before_alert))
+        ), '[]')::text AS affected_instruments
     FROM alert_config ac
     INNER JOIN alert_config_instrument aci ON aci.alert_config_id = ac.id
-    INNER JOIN timeseries ts ON ts.instrument_id = aci.instrument_id
+    INNER JOIN instrument inst ON aci.instrument_id = inst.id
     INNER JOIN (
-        SELECT
-            timeseries_id,
-            MAX(time) AS time
-        FROM timeseries_measurement
-        WHERE NOT timeseries_id = ANY(SELECT timeseries_id FROM instrument_constants)
-        AND time <= now()
-        GROUP BY timeseries_id
-    ) lm ON lm.timeseries_id = ts.id
+        -- this subquery forces the query planner to use a loose index scan, which Postgres does not do automatically yet
+        -- https://stackoverflow.com/questions/25536422/optimize-group-by-query-to-retrieve-latest-row-per-user/25536748#25536748
+        SELECT inst2.id AS instrument_id, mmt.time AS time
+        FROM (
+            SELECT id FROM instrument
+            ORDER BY id
+        ) inst2,
+        LATERAL (
+            SELECT time FROM timeseries_measurement
+            WHERE timeseries_id = ANY(SELECT id FROM timeseries WHERE instrument_id = inst2.id)
+            AND NOT timeseries_id = ANY(SELECT timeseries_id FROM instrument_constants)
+            AND time <= now()
+            ORDER BY time DESC NULLS LAST
+            LIMIT 1
+        ) mmt
+    ) lm ON lm.instrument_id = inst.id
     WHERE ac.alert_type_id = '97e7a25c-d5c7-4ded-b272-1bb6e5914fe3'::UUID
     GROUP BY ac.id
 );
