@@ -133,13 +133,13 @@ func ListExpiredAlertConfigs(db *sqlx.DB) ([]AlertConfig, error) {
 		FROM  (
 			SELECT *
 			FROM v_alert_config a
-			WHERE (
+			WHERE alert_status_id != '0c0d6487-3f71-4121-8575-19514c7b9f03'::UUID
+			OR (
 				COALESCE(
 					last_checked,
 					start_date
 				) <= now() - schedule_interval::INTERVAL + warning_interval::INTERVAL
 			)
-			OR alert_status_id = '84a0f437-a20a-4ac2-8a5b-f8dc35e8489b'::UUID
 		) ac2
 		WHERE  ac1.id = ac2.id
 		RETURNING ac2.*
