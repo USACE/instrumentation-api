@@ -71,17 +71,14 @@ func (ck AlertCheck) GetShouldRemind() bool {
 
 func (es EvaluationSubmittal) DoEmail(emailType string, cfg *config.AlertCheckConfig, smtpCfg *config.SmtpConfig) error {
 	preformatted := et.EmailContent{
-		TextSubject: `MIDAS ` + emailType + `: {{.AlertConfig.ProjectName}} Evaluation Submittal "{{.AlertConfig.Name}}"`,
-		TextBody: `
-			The following ` + emailType + ` has been triggered:
-			
-			Project: {{.AlertConfig.ProjectName}}
-			Name: "{{.AlertConfig.Name}}"
-			Body: "{{.AlertConfig.Body}}"
-			Expected Evaluation Submittal Time: {{.ExpectedSubmittal.Format "Jan 02, 2006 15:04:05 UTC" }}
-			{{if .LastEvaluationTime}}Last Evaluation Submittal Time: {{.LastEvaluationTime.Format "Jan 02, 2006 15:04:05 UTC" }}
-			{{end}}
-		`,
+		TextSubject: "MIDAS " + emailType + ": {{.AlertConfig.ProjectName}} Evaluation Submittal \"{{.AlertConfig.Name}}\"",
+		TextBody: "The following " + emailType + " has been triggered:\r\n\r\n" +
+			"Project: {{.AlertConfig.ProjectName}}\r\n" +
+			"Alert Type: Evaluation Submittal\r\n" +
+			"Alert Name: \"{{.AlertConfig.Name}}\"\r\n" +
+			"Description: \"{{.AlertConfig.Body}}\"\r\n" +
+			"Expected Evaluation Submittal Time: {{.ExpectedSubmittal.Format \"Jan 02, 2006 15:04:05 UTC\" }}\r\n" +
+			"{{if .LastEvaluationTime}}Last Evaluation Submittal Time: {{.LastEvaluationTime.Format \"Jan 02, 2006 15:04:05 UTC\" }}{{end}}\r\n",
 	}
 	templContent, err := et.CreateEmailTemplateContent(preformatted)
 	if err != nil {
@@ -101,18 +98,15 @@ func (es EvaluationSubmittal) DoEmail(emailType string, cfg *config.AlertCheckCo
 
 func (ms MeasurementSubmittal) DoEmail(emailType string, cfg *config.AlertCheckConfig, smtpCfg *config.SmtpConfig) error {
 	preformatted := et.EmailContent{
-		TextSubject: `MIDAS ` + emailType + `: {{.AlertConfig.ProjectName}} Timeseries Measurement Submittal "{{.AlertConfig.Name}}"`,
-		TextBody: `
-			The following ` + emailType + ` has been triggered:
-
-			Project: {{.AlertConfig.ProjectName}}
-			Name: "{{.AlertConfig.Name}}"
-			Body: "{{.AlertConfig.Body}}"
-			Expected Measurement Submittal Time: {{.ExpectedSubmittal.Format "Jan 02, 2006 15:04:05 UTC" }}
-			Affected Instruments Last Measurement Time:
-			{{range .AffectedInstruments}}	• {{.InstrumentName}}: {{.LastMeasurementTime.Format "Jan 02, 2006 15:04:05 UTC" }}
-			{{end}}
-		`,
+		TextSubject: "MIDAS " + emailType + ": {{.AlertConfig.ProjectName}} Timeseries Measurement Submittal \"{{.AlertConfig.Name}}\"",
+		TextBody: "The following " + emailType + " has been triggered:\r\n\r\n" +
+			"Project: {{.AlertConfig.ProjectName}}\r\n" +
+			"Alert Type: Measurement Submittal\r\n" +
+			"Alert Name: \"{{.AlertConfig.Name}}\"\r\n" +
+			"Description: \"{{.AlertConfig.Body}}\"\r\n" +
+			"Expected Measurement Submittal Time: {{.ExpectedSubmittal.Format \"Jan 02, 2006 15:04:05 UTC\" }}\r\n" +
+			"Affected Instruments Last Measurement Time:\r\n" +
+			"{{range .AffectedInstruments}}\t• {{.InstrumentName}}: {{.LastMeasurementTime.Format \"Jan 02, 2006 15:04:05 UTC\" }}\r\n{{end}}",
 	}
 	templContent, err := et.CreateEmailTemplateContent(preformatted)
 	if err != nil {
