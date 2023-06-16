@@ -48,16 +48,23 @@ func DoAlertChecks(db *sqlx.DB, cfg *config.AlertCheckConfig, smtpCfg *config.Sm
 	if err != nil {
 		return err
 	}
+
+	errs := make([]error, 0)
 	if err := handleChecks(db, measurementChecks, aa, cfg, smtpCfg); err != nil {
-		return err
+		errs = append(errs, err)
 	}
 	if err := handleChecks(db, evaluationChecks, aa, cfg, smtpCfg); err != nil {
-		return err
+		errs = append(errs, err)
+	}
+	if len(errs) > 0 {
+		return errors.Join(errs...)
 	}
 
 	return nil
 }
 
+// TODO: smtp.SendMail esablishes a new connection for each batch of emails sent. I would be better to aggregate
+// the contents of each email, then create a connection pool to reuse and send all emails at once, with any errors wrapped and returned
 func handleChecks[T models.AlertChecker](db *sqlx.DB, checks []T, alertConfigs []models.AlertConfig, cfg *config.AlertCheckConfig, smtpCfg *config.SmtpConfig) error {
 	acIDs := make([]uuid.UUID, 0)
 	aa := make([]models.AlertConfig, len(checks))
@@ -123,11 +130,13 @@ func handleChecks[T models.AlertChecker](db *sqlx.DB, checks []T, alertConfigs [
 		errs = append(errs, err)
 		return errors.Join(errs...)
 	}
-	if err := models.CreateAlerts(db, acIDs); err != nil {
-		errs = append(errs, err)
-		return errors.Join(errs...)
+	if len(acIDs) > 0 {
+		if err := models.CreateAlerts(db, acIDs); err != nil {
+			errs = append(errs, err)
+			return errors.Join(errs...)
+		}
 	}
-	if len(errs) != 0 {
+	if len(errs) > 0 {
 		return errors.Join(errs...)
 	}
 
