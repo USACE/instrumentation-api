@@ -2,10 +2,10 @@ CREATE OR REPLACE VIEW v_alert_check_measurement_submittal AS (
     SELECT
         ac.id AS alert_config_id,
         (SELECT (ac.warning_interval != INTERVAL 'PT0') AND NOT EXISTS (
-            SELECT 1 WHERE MAX(lm.time) >= (now() - (ac.schedule_interval * ac.n_missed_before_alert) + ac.warning_interval)
+            SELECT 1 WHERE (now() - (ac.schedule_interval * ac.n_missed_before_alert) + ac.warning_interval) < ANY(ARRAY_AGG(lm.time))
         )) AS should_warn,
         (SELECT NOT EXISTS (
-            SELECT 1 WHERE MAX(lm.time) >= (now() - (ac.schedule_interval * ac.n_missed_before_alert))
+            SELECT 1 WHERE (now() - (ac.schedule_interval * ac.n_missed_before_alert)) < ANY(ARRAY_AGG(lm.time))
         )) AS should_alert,
         (
             (ac.remind_interval != INTERVAL 'PT0')
