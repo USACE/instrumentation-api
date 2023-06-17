@@ -130,7 +130,7 @@ func ListExpiredAlertConfigs(db *sqlx.DB) ([]AlertConfig, error) {
 	sql := `
 		UPDATE alert_config ac1
 		SET last_checked = now()
-		FROM  (
+		FROM (
 			SELECT *
 			FROM v_alert_config a
 		) ac2

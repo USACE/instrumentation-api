@@ -17,7 +17,7 @@ CREATE OR REPLACE VIEW v_alert_check_measurement_submittal AS (
         ((ac.remind_interval != INTERVAL 'PT0')
             AND (now() >= COALESCE(ac.last_reminded, (ac.start_date + ac.schedule_interval)) + ac.remind_interval)
         ) AS should_remind,
-        (now() - (ac.schedule_interval * ac.n_missed_before_alert)) AS expected_submittal,
+        (MAX(lm.time) + (ac.schedule_interval * ac.n_missed_before_alert)) AS expected_submittal,
         COALESCE(JSON_AGG(JSON_BUILD_OBJECT(
             'instrument_name', inst.name,
             'last_measurement_time', lm.time
@@ -64,7 +64,7 @@ CREATE OR REPLACE VIEW v_alert_check_evaluation_submittal AS (
         ((ac.remind_interval != INTERVAL 'PT0')
             AND (now() >= COALESCE(ac.last_reminded, (ac.start_date + ac.schedule_interval)) + ac.remind_interval)
         ) AS should_remind,
-        (now() - (ac.schedule_interval * ac.n_missed_before_alert)) AS expected_submittal,
+        (le.time + (ac.schedule_interval * ac.n_missed_before_alert)) AS expected_submittal,
         le.time AS last_evaluation_time
     FROM alert_config ac
     LEFT JOIN (
