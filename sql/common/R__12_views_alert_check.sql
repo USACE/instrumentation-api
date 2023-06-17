@@ -52,11 +52,14 @@ CREATE OR REPLACE VIEW v_alert_check_measurement_submittal AS (
 CREATE OR REPLACE VIEW v_alert_check_evaluation_submittal AS (
     SELECT
         ac.id AS alert_config_id,
-        ((ac.warning_interval != INTERVAL 'PT0') AND NOT EXISTS (
-            SELECT 1 WHERE le.time >= (now() - (ac.schedule_interval * ac.n_missed_before_alert) + ac.warning_interval)
+        ((ac.warning_interval != INTERVAL 'PT0')
+            AND (now() >= ac.start_date + (ac.schedule_interval * ac.n_missed_before_alert) - ac.warning_interval)
+            AND NOT EXISTS (
+                SELECT 1 WHERE le.time >= (now() - (ac.schedule_interval * ac.n_missed_before_alert) + ac.warning_interval)
         )) AS should_warn,
-        (NOT EXISTS (
-            SELECT 1 WHERE le.time >= (now() - (ac.schedule_interval * ac.n_missed_before_alert))
+        ((now() >= ac.start_date + (ac.schedule_interval * ac.n_missed_before_alert))
+            AND NOT EXISTS (
+                SELECT 1 WHERE le.time >= (now() - (ac.schedule_interval * ac.n_missed_before_alert))
         )) AS should_alert,
         ((ac.remind_interval != INTERVAL 'PT0')
             AND (now() >= COALESCE(ac.last_reminded, (ac.start_date + ac.schedule_interval)) + ac.remind_interval)
