@@ -1,21 +1,17 @@
 CREATE OR REPLACE VIEW v_alert_check_measurement_submittal AS (
     SELECT
         ac.id AS alert_config_id,
-        ((ac.warning_interval != INTERVAL 'PT0')
-            AND (now() >= ac.start_date + (ac.schedule_interval * ac.n_missed_before_alert) - ac.warning_interval)
-            AND NOT EXISTS (
-                SELECT 1 WHERE (
-                    now() - (ac.schedule_interval * ac.n_missed_before_alert) + ac.warning_interval
-                ) < ANY(ARRAY_AGG(COALESCE(lm.time, (ac.start_date + (ac.schedule_interval * ac.n_missed_before_alert) - ac.warning_interval))))
-        )) AS should_warn,
-        ((now() >= ac.start_date + (ac.schedule_interval * ac.n_missed_before_alert))
-            AND NOT EXISTS (
-                SELECT 1 WHERE (
-                    now() - (ac.schedule_interval * ac.n_missed_before_alert)
-                ) < ANY(ARRAY_AGG(COALESCE(lm.time, (ac.start_date + (ac.schedule_interval * ac.n_missed_before_alert)))))
-        )) AS should_alert,
-        ((ac.remind_interval != INTERVAL 'PT0')
-            AND (now() >= COALESCE(ac.last_reminded, (ac.start_date + (ac.schedule_interval * ac.n_missed_before_alert))) + ac.remind_interval)
+        (ac.warning_interval != INTERVAL 'PT0'
+            AND now() >= ac.start_date + (ac.schedule_interval * ac.n_missed_before_alert) - ac.warning_interval
+            AND (now() - (ac.schedule_interval * ac.n_missed_before_alert) + ac.warning_interval
+            ) < ANY(ARRAY_AGG(COALESCE(lm.time, ac.start_date + (ac.schedule_interval * ac.n_missed_before_alert) - ac.warning_interval)))
+        ) AS should_warn,
+        (now() >= ac.start_date + (ac.schedule_interval * ac.n_missed_before_alert)
+            AND (now() - (ac.schedule_interval * ac.n_missed_before_alert)
+            ) < ANY(ARRAY_AGG(COALESCE(lm.time, ac.start_date + (ac.schedule_interval * ac.n_missed_before_alert))))
+        ) AS should_alert,
+        (ac.remind_interval != INTERVAL 'PT0'
+            AND now() >= COALESCE(ac.last_reminded, (ac.start_date + (ac.schedule_interval * ac.n_missed_before_alert))) + ac.remind_interval
         ) AS should_remind,
         (COALESCE(MIN(lm.time), ac.start_date) + (ac.schedule_interval * ac.n_missed_before_alert)) AS expected_submittal,
         COALESCE(JSON_AGG(JSON_BUILD_OBJECT(
