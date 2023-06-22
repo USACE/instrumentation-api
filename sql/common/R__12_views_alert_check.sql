@@ -1,4 +1,7 @@
-CREATE OR REPLACE VIEW v_alert_check_measurement_submittal AS (
+DROP VIEW IF EXISTS v_alert_check_measurement_submittal;
+DROP VIEW IF EXISTS v_alert_check_evaluation_submittal;
+
+CREATE VIEW v_alert_check_measurement_submittal AS (
     WITH alert_interval AS (
         SELECT
             id AS alert_config_id,
@@ -61,7 +64,7 @@ CREATE OR REPLACE VIEW v_alert_check_measurement_submittal AS (
     GROUP BY ac.id, ai.last_schedule, ai.last_warning, ai.start_schedule, ai.start_warning
 );
 
-CREATE OR REPLACE VIEW v_alert_check_evaluation_submittal AS (
+CREATE VIEW v_alert_check_evaluation_submittal AS (
     WITH alert_interval AS (
         SELECT
             id AS alert_config_id,
