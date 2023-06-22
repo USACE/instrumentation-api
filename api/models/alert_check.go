@@ -27,18 +27,20 @@ type EvaluationSubmittal struct {
 }
 
 type MeasurementSubmittal struct {
-	AffectedInstruments MeasurementSubmittalInstrumentCollection `db:"affected_instruments"`
+	AffectedTimeseries MeasurementSubmittalTimeseriesCollection `db:"affected_timeseries"`
 	AlertCheck
 }
 
-type MeasurementSubmittalInstrument struct {
+type MeasurementSubmittalTimeseries struct {
 	InstrumentName      string    `json:"instrument_name"`
+	TimeseriesName      string    `json:"timeseries_name"`
 	LastMeasurementTime time.Time `json:"last_measurement_time"`
+	Status              string    `json:"status"`
 }
 
-type MeasurementSubmittalInstrumentCollection []MeasurementSubmittalInstrument
+type MeasurementSubmittalTimeseriesCollection []MeasurementSubmittalTimeseries
 
-func (a *MeasurementSubmittalInstrumentCollection) Scan(src interface{}) error {
+func (a *MeasurementSubmittalTimeseriesCollection) Scan(src interface{}) error {
 	if err := json.Unmarshal([]byte(src.(string)), a); err != nil {
 		return err
 	}
@@ -104,9 +106,10 @@ func (ms MeasurementSubmittal) DoEmail(emailType string, cfg *config.AlertCheckC
 			"Alert Type: Measurement Submittal\r\n" +
 			"Alert Name: \"{{.AlertConfig.Name}}\"\r\n" +
 			"Description: \"{{.AlertConfig.Body}}\"\r\n" +
-			"Expected Measurement Submittal Time: {{.ExpectedSubmittal.Format \"Jan 02, 2006 15:04:05 UTC\" }}\r\n" +
-			"Affected Instruments Last Measurement Time:\r\n" +
-			"{{range .AffectedInstruments}}\t• {{.InstrumentName}}: {{.LastMeasurementTime.Format \"Jan 02, 2006 15:04:05 UTC\" }}\r\n{{end}}",
+			"Last Expected Measurement Submittal Time: {{.ExpectedSubmittal.Format \"Jan 02, 2006 15:04:05 UTC\" }}\r\n" +
+			"Affected Timeseries Last Measurement Submittal:\r\n" +
+			"{{range .AffectedTimeseries}}\t• {{.InstrumentName}}: {{.TimeseriesName}}" +
+			" at {{.LastMeasurementTime.Format \"Jan 02, 2006 15:04:05 UTC\" }} (status: {{.Status}})\r\n{{end}}",
 	}
 	templContent, err := et.CreateEmailTemplateContent(preformatted)
 	if err != nil {

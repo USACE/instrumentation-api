@@ -221,11 +221,8 @@ INSERT INTO alert_config (id, project_id, name, body, alert_type_id, schedule_in
     ('5f9555df-c616-4530-bdcd-6b664fc91255', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'Test Evaluation Submittal Reminder', 'Reminder for demonstration purposes.', 'da6ee89e-58cc-4d85-8384-43c3c33a68bd', 'PT15S', 'PT0S', 'P1D');
 
 INSERT INTO alert_config_instrument (alert_config_id, instrument_id) VALUES
-    ('1efd2d85-d3ee-4388-85a0-f824a761ff8b', 'a7540f69-c41e-43b3-b655-6e44097edb7e'),
     ('1efd2d85-d3ee-4388-85a0-f824a761ff8b', '9e8f2ca4-4037-45a4-aaca-d9e598877439'),
-    ('90ff91d6-ab39-40db-9160-34ce17416281', 'a7540f69-c41e-43b3-b655-6e44097edb7e'),
     ('90ff91d6-ab39-40db-9160-34ce17416281', '9e8f2ca4-4037-45a4-aaca-d9e598877439'),
-    ('15c106f5-a293-4a0e-b45a-6a4c7206ac6a', 'a7540f69-c41e-43b3-b655-6e44097edb7e'),
     ('15c106f5-a293-4a0e-b45a-6a4c7206ac6a', '9e8f2ca4-4037-45a4-aaca-d9e598877439');
 
 INSERT INTO evaluation (id, project_id, alert_config_id, name, body, start_date, end_date) VALUES
