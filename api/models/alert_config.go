@@ -56,15 +56,14 @@ func (ac *AlertConfig) GetToAddresses() []string {
 
 // ListProjectAlertConfigs lists all alert configs for a single project
 func ListProjectAlertConfigs(db *sqlx.DB, projectID *uuid.UUID) ([]AlertConfig, error) {
-	var aa []AlertConfig
+	aa := make([]AlertConfig, 0)
 	sql := `
 		SELECT *
 		FROM v_alert_config
 		WHERE project_id = $1
 	`
-	err := db.Select(&aa, sql, projectID)
-	if err != nil {
-		return make([]AlertConfig, 0), err
+	if err := db.Select(&aa, sql, projectID); err != nil {
+		return aa, err
 	}
 
 	return aa, nil
@@ -72,16 +71,15 @@ func ListProjectAlertConfigs(db *sqlx.DB, projectID *uuid.UUID) ([]AlertConfig, 
 
 // ListProjectAlertConfigsByAlertType lists alert configs for a single project filetered by alert type
 func ListProjectAlertConfigsByAlertType(db *sqlx.DB, projectID, alertTypeID *uuid.UUID) ([]AlertConfig, error) {
-	var aa []AlertConfig
+	aa := make([]AlertConfig, 0)
 	sql := `
 		SELECT *
 		FROM v_alert_config
 		WHERE project_id = $1
 		AND alert_type_id = $2
 	`
-	err := db.Select(&aa, sql, projectID, alertTypeID)
-	if err != nil {
-		return make([]AlertConfig, 0), err
+	if err := db.Select(&aa, sql, projectID, alertTypeID); err != nil {
+		return aa, err
 	}
 
 	return aa, nil
@@ -89,7 +87,7 @@ func ListProjectAlertConfigsByAlertType(db *sqlx.DB, projectID, alertTypeID *uui
 
 // ListInstrumentAlertConfigs lists all alerts for a single instrument
 func ListInstrumentAlertConfigs(db *sqlx.DB, instrumentID *uuid.UUID) ([]AlertConfig, error) {
-	var aa []AlertConfig
+	aa := make([]AlertConfig, 0)
 	sql := `
 		SELECT *
 		FROM v_alert_config
@@ -99,9 +97,8 @@ func ListInstrumentAlertConfigs(db *sqlx.DB, instrumentID *uuid.UUID) ([]AlertCo
 			WHERE instrument_id = $1
 		)
 	`
-	err := db.Select(&aa, sql, instrumentID)
-	if err != nil {
-		return make([]AlertConfig, 0), err
+	if err := db.Select(&aa, sql, instrumentID); err != nil {
+		return aa, err
 	}
 
 	return aa, nil
@@ -111,8 +108,7 @@ func ListInstrumentAlertConfigs(db *sqlx.DB, instrumentID *uuid.UUID) ([]AlertCo
 func GetAlertConfig(db *sqlx.DB, alertConfigID *uuid.UUID) (*AlertConfig, error) {
 	var a AlertConfig
 	sql := `SELECT * FROM v_alert_config WHERE id = $1`
-	err := db.Get(&a, sql, alertConfigID)
-	if err != nil {
+	if err := db.Get(&a, sql, alertConfigID); err != nil {
 		return nil, err
 	}
 
@@ -293,10 +289,7 @@ func UpdateAlertConfig(db *sqlx.DB, alertConfigID *uuid.UUID, ac *AlertConfig) (
 
 // DeleteAlertConfig deletes an alert by ID
 func DeleteAlertConfig(db *sqlx.DB, alertConfigID *uuid.UUID) error {
-	_, err := db.Exec(
-		`UPDATE alert_config SET deleted=true WHERE id=$1`, alertConfigID,
-	)
-	if err != nil {
+	if _, err := db.Exec(`UPDATE alert_config SET deleted=true WHERE id=$1`, alertConfigID); err != nil {
 		return err
 	}
 	return nil

@@ -2578,7 +2578,6 @@
                                     "schedule_interval": "PT30M",
                                     "n_missed_before_alert": 3,
                                     "remind_interval": "P1D",
-                                    "warning_interval": null,
                                     "instruments": [],
                                     "alert_email_subscriptions": [
                                         {
@@ -2686,7 +2685,7 @@
                         },
                         "required": true,
                         "description": "Instrument uuid",
-                        "example": "a7540f69-c41e-43b3-b655-6e44097edb7e"
+                        "example": "9e8f2ca4-4037-45a4-aaca-d9e598877439"
                     }
                 ],
                 "responses": {
@@ -2752,7 +2751,6 @@
                                     "start_date": "2023-05-16T13:19:41.441328Z",
                                     "schedule_interval": "P1D",
                                     "n_missed_before_alert": 1,
-                                    "remind_interval": null,
                                     "warning_interval": "PT1H",
                                     "instruments": [
                                         {

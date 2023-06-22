@@ -36,6 +36,9 @@ func ListProjectAlertConfigs(db *sqlx.DB) echo.HandlerFunc {
 				return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 			}
 		}
+		if len(aa) == 0 {
+			return echo.NewHTTPError(http.StatusNotFound, messages.NotFound)
+		}
 		return c.JSON(http.StatusOK, aa)
 	}
 }
@@ -50,6 +53,9 @@ func ListInstrumentAlertConfigs(db *sqlx.DB) echo.HandlerFunc {
 		aa, err := models.ListInstrumentAlertConfigs(db, &instrumentID)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+		if len(aa) == 0 {
+			return echo.NewHTTPError(http.StatusNotFound, messages.NotFound)
 		}
 		return c.JSON(http.StatusOK, aa)
 	}
