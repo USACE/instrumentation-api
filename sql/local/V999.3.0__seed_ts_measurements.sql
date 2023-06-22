@@ -12,7 +12,7 @@ FROM
         'd9697351-3a38-4194-9ac4-41541927e475'::uuid
     ]) AS timeseries_id,
     generate_series(
-        now() - INTERVAL '10 years',
+        now() - INTERVAL '1 year',
         now(),
-        INTERVAL '15 minutes'
+        INTERVAL '1 hour'
     ) AS time;

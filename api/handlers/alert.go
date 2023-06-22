@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"database/sql"
 	"net/http"
 
+	"github.com/USACE/instrumentation-api/api/messages"
 	"github.com/USACE/instrumentation-api/api/models"
 	"github.com/google/uuid"
 
@@ -49,6 +51,9 @@ func DoAlertRead(db *sqlx.DB) echo.HandlerFunc {
 		}
 		a, err := models.DoAlertRead(db, &profileID, &alertID)
 		if err != nil {
+			if err == sql.ErrNoRows {
+				return echo.NewHTTPError(http.StatusNotFound, messages.NotFound)
+			}
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, a)
@@ -66,6 +71,9 @@ func DoAlertUnread(db *sqlx.DB) echo.HandlerFunc {
 		}
 		a, err := models.DoAlertUnread(db, &profileID, &alertID)
 		if err != nil {
+			if err == sql.ErrNoRows {
+				return echo.NewHTTPError(http.StatusNotFound, messages.NotFound)
+			}
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, a)

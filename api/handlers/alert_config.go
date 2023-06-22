@@ -1,15 +1,47 @@
 package handlers
 
 import (
+	"database/sql"
 	"net/http"
 	"time"
 
+	"github.com/USACE/instrumentation-api/api/messages"
 	"github.com/USACE/instrumentation-api/api/models"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
 )
+
+// ListProjectAlertConfigs lists alert configs for a single project optionally filtered by alert_type_id
+func ListProjectAlertConfigs(db *sqlx.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		projectID, err := uuid.Parse(c.Param("project_id"))
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+		var aa []models.AlertConfig
+		if qp := c.QueryParam("alert_type_id"); qp != "" {
+			alertTypeID, err := uuid.Parse(qp)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			}
+			aa, err = models.ListProjectAlertConfigsByAlertType(db, &projectID, &alertTypeID)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			}
+		} else {
+			aa, err = models.ListProjectAlertConfigs(db, &projectID)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			}
+		}
+		if len(aa) == 0 {
+			return echo.NewHTTPError(http.StatusNotFound, messages.NotFound)
+		}
+		return c.JSON(http.StatusOK, aa)
+	}
+}
 
 // ListInstrumentAlertConfigs lists alerts for a single instrument
 func ListInstrumentAlertConfigs(db *sqlx.DB) echo.HandlerFunc {
@@ -22,6 +54,9 @@ func ListInstrumentAlertConfigs(db *sqlx.DB) echo.HandlerFunc {
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
+		if len(aa) == 0 {
+			return echo.NewHTTPError(http.StatusNotFound, messages.NotFound)
+		}
 		return c.JSON(http.StatusOK, aa)
 	}
 }
@@ -29,88 +64,76 @@ func ListInstrumentAlertConfigs(db *sqlx.DB) echo.HandlerFunc {
 // GetAlertConfig gets a single alert
 func GetAlertConfig(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		alertConfigID, err := uuid.Parse(c.Param("alert_config_id"))
+		acID, err := uuid.Parse(c.Param("alert_config_id"))
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
-		a, err := models.GetAlertConfig(db, &alertConfigID)
+		a, err := models.GetAlertConfig(db, &acID)
 		if err != nil {
+			if err == sql.ErrNoRows {
+				return echo.NewHTTPError(http.StatusNotFound, messages.NotFound)
+			}
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, a)
 	}
 }
 
-// CreateInstrumentAlertConfigs creates one or more alerts
-func CreateInstrumentAlertConfigs(db *sqlx.DB) echo.HandlerFunc {
+// CreateAlertConfig creates one alert config
+func CreateAlertConfig(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ac := models.AlertConfigCollection{}
+		ac := models.AlertConfig{}
 		if err := c.Bind(&ac); err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
-		// Get instrument_id from Route Params
-		instrumentID, err := uuid.Parse(c.Param("instrument_id"))
+		projectID, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
-		// Set Creator, CreateDate on all items
-		p := c.Get("profile").(*models.Profile)
-		t := time.Now()
-		for idx := range ac.Items {
-			ac.Items[idx].Creator, ac.Items[idx].CreateDate = p.ID, t
-		}
-		aa, err := models.CreateInstrumentAlertConfigs(db, &instrumentID, ac.Items)
+		profile := c.Get("profile").(*models.Profile)
+		ac.ProjectID, ac.Creator, ac.CreateDate = projectID, profile.ID, time.Now()
+
+		aa, err := models.CreateAlertConfig(db, &ac)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
-		// Send Alerts
 		return c.JSON(http.StatusCreated, aa)
 	}
 }
 
-// UpdateInstrumentAlertConfig updates an existing alert
-func UpdateInstrumentAlertConfig(db *sqlx.DB) echo.HandlerFunc {
+// UpdateAlertConfig updates an existing alert
+func UpdateAlertConfig(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		var alert models.AlertConfig
-		if err := c.Bind(&alert); err != nil {
+		var ac models.AlertConfig
+		if err := c.Bind(&ac); err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
-		// Get instrument_id from Route Params
-		instrumentID, err := uuid.Parse(c.Param("instrument_id"))
+		acID, err := uuid.Parse(c.Param("alert_config_id"))
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
-		// Get alert_config_id from Route Params
-		alertID, err := uuid.Parse(c.Param("alert_config_id"))
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-		}
-		// Profile and timestamp
 		p := c.Get("profile").(*models.Profile)
 		t := time.Now()
-		alert.Updater, alert.UpdateDate = &p.ID, &t
-		aUpdated, err := models.UpdateInstrumentAlertConfig(db, &instrumentID, &alertID, &alert)
+		ac.Updater, ac.UpdateDate = &p.ID, &t
+		aUpdated, err := models.UpdateAlertConfig(db, &acID, &ac)
 		if err != nil {
+			if err == sql.ErrNoRows {
+				return echo.NewHTTPError(http.StatusNotFound, messages.NotFound)
+			}
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
-		// Send Alert
 		return c.JSON(http.StatusOK, &aUpdated)
 	}
 }
 
-// DeleteInstrumentAlertConfig Deletes an Alert
-func DeleteInstrumentAlertConfig(db *sqlx.DB) echo.HandlerFunc {
+// DeleteAlertConfig Deletes an Alert Config
+func DeleteAlertConfig(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		alertID, err := uuid.Parse(c.Param("alert_config_id"))
+		acID, err := uuid.Parse(c.Param("alert_config_id"))
 		if err != nil {
 			return echo.NewHTTPError(http.StatusNotFound, err.Error())
 		}
-		// Get instrument_id from Route Params
-		instrumentID, err := uuid.Parse(c.Param("instrument_id"))
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-		}
-		if err := models.DeleteInstrumentAlertConfig(db, &alertID, &instrumentID); err != nil {
+		if err := models.DeleteAlertConfig(db, &acID); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, make(map[string]interface{}))

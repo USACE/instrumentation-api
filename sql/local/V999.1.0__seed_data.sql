@@ -211,15 +211,38 @@ INSERT INTO inclinometer_measurement (timeseries_id, time, creator, create_date,
                               "b180": 0
                             }
                       ]');
-                      
--- alert_config
-INSERT INTO alert_config (id, instrument_id, name, body, formula, schedule) VALUES
-    ('1efd2d85-d3ee-4388-85a0-f824a761ff8b', '9e8f2ca4-4037-45a4-aaca-d9e598877439','Above Target Height', 'The demo staff gage has exceeded the target height. Sincerely, Midas', '[stage] >= 10', '0,10,20,30,40,50 * * * *'),
-    ('243e9d32-2cba-4f12-9abe-63adc09fc5dd', 'a7540f69-c41e-43b3-b655-6e44097edb7e','Below Target Height', 'Distance to water is near artesian conditions. Sincerely, Midas', '[distance-to-water] <= 2', '0,10,20,30,40,50 * * * *'),
-    ('6f3dfe9f-4664-4c78-931f-32ffac6d2d43', 'a7540f69-c41e-43b3-b655-6e44097edb7e','Sample Demo Alert', 'Sample Alert Condition Has Been Triggered. Sincerely, Midas', '1 == 1', '0,10,20,30,40,50 * * * *');
 
--- alert
-INSERT INTO alert (id, alert_config_id) VALUES ('e070be13-ef17-40f3-99c8-fef3ee1b9fb5', '6f3dfe9f-4664-4c78-931f-32ffac6d2d43');
+INSERT INTO alert_config (id, project_id, name, body, alert_type_id, schedule_interval, warning_interval, remind_interval) VALUES
+    ('1efd2d85-d3ee-4388-85a0-f824a761ff8b', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'Test Measurement Submittal Alert', 'Alert for demonstration purposes.', '97e7a25c-d5c7-4ded-b272-1bb6e5914fe3', 'PT15S', 'PT0S', 'PT0S'),
+    ('90ff91d6-ab39-40db-9160-34ce17416281', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'Test Measurement Submittal Warning', 'Warning for demonstration purposes.', '97e7a25c-d5c7-4ded-b272-1bb6e5914fe3', 'PT30S', 'PT15S', 'PT0S'),
+    ('15c106f5-a293-4a0e-b45a-6a4c7206ac6a', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'Test Measurement Submittal Reminder', 'Reminder for demonstration purposes.', '97e7a25c-d5c7-4ded-b272-1bb6e5914fe3', 'PT15S', 'PT0S', 'P1D'),
+    ('c07165de-71ec-40c4-b25b-c42deefea636', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'Test Evaluation Submittal Alert', 'Alert for demonstration purposes.', 'da6ee89e-58cc-4d85-8384-43c3c33a68bd', 'PT15S', 'PT0S', 'PT0S'),
+    ('d3738f72-4c0b-47f8-8ff9-8bea46022309', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'Test Evaluation Submittal Warning', 'Warning for demonstration purposes.', 'da6ee89e-58cc-4d85-8384-43c3c33a68bd', 'PT30S', 'PT15S', 'PT0S'),
+    ('5f9555df-c616-4530-bdcd-6b664fc91255', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'Test Evaluation Submittal Reminder', 'Reminder for demonstration purposes.', 'da6ee89e-58cc-4d85-8384-43c3c33a68bd', 'PT15S', 'PT0S', 'P1D');
+
+INSERT INTO alert_config_instrument (alert_config_id, instrument_id) VALUES
+    ('1efd2d85-d3ee-4388-85a0-f824a761ff8b', '9e8f2ca4-4037-45a4-aaca-d9e598877439'),
+    ('90ff91d6-ab39-40db-9160-34ce17416281', '9e8f2ca4-4037-45a4-aaca-d9e598877439'),
+    ('15c106f5-a293-4a0e-b45a-6a4c7206ac6a', '9e8f2ca4-4037-45a4-aaca-d9e598877439');
+
+INSERT INTO evaluation (id, project_id, alert_config_id, name, body, start_date, end_date) VALUES
+    ('add252bf-2fa7-4824-b129-e4d0ff42dffa', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', NULL, 'Test Evaluation 1', 'Evaluation for demonstration purposes.', '2022-12-01', '2023-01-01'),
+    ('f7169aca-aa5f-4a0b-9fcc-609bb5c2bd7b', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'd3738f72-4c0b-47f8-8ff9-8bea46022309', 'Test Evaluation 2', 'Evaluation for demonstration purposes.', '2020-01-01', '2020-01-07'),
+    ('5884f481-d724-4a2c-8ff0-14b028e6fd01', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', '5f9555df-c616-4530-bdcd-6b664fc91255', 'Test Evaluation 3', 'Evaluation for demonstration purposes.', now() - INTERVAL 'P1M', now());
+
+INSERT INTO evaluation_instrument (evaluation_id, instrument_id) VALUES
+    ('f7169aca-aa5f-4a0b-9fcc-609bb5c2bd7b', 'a7540f69-c41e-43b3-b655-6e44097edb7e');
+
+INSERT INTO alert_profile_subscription (alert_config_id, profile_id) VALUES
+    ('1efd2d85-d3ee-4388-85a0-f824a761ff8b', '57329df6-9f7a-4dad-9383-4633b452efab');
+
+INSERT INTO email (id, email) VALUES
+    ('1ebf9e14-2b1c-404e-9535-6c2ee24944b6', 'no.profile@fake.usace.army.mil');
+
+INSERT INTO alert_email_subscription (alert_config_id, email_id) VALUES
+    ('1efd2d85-d3ee-4388-85a0-f824a761ff8b', '1ebf9e14-2b1c-404e-9535-6c2ee24944b6');
+
+INSERT INTO alert (id, alert_config_id) VALUES ('e070be13-ef17-40f3-99c8-fef3ee1b9fb5', '1efd2d85-d3ee-4388-85a0-f824a761ff8b');
 
 -- collection_group
 INSERT INTO collection_group (id, project_id, name, slug) VALUES

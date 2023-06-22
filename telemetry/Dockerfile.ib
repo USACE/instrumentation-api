@@ -1,0 +1,12 @@
+FROM golang:1.20-alpine AS builder
+WORKDIR /go/src/app
+
+ENV CGO_ENABLED=0
+
+COPY . .
+RUN GOOS=linux GOARCH=amd64 \
+    go build -ldflags="-w -s" -mod=vendor -o /go/bin/midas-telemetry
+
+FROM registry1.dso.mil/ironbank/docker/scratch:ironbank
+COPY --from=builder /go/bin/midas-telemetry /go/bin/midas-telemetry
+ENTRYPOINT ["/go/bin/midas-telemetry"]

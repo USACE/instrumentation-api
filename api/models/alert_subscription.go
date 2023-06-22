@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -32,6 +33,11 @@ type EmailAlert struct {
 	AlertConfigID uuid.UUID `json:"alert_config_id"`
 	EmailID       uuid.UUID `json:"profile_id"`
 	MuteNotify    bool      `json:"mute_notify" db:"mute_notify"`
+}
+
+type Email struct {
+	ID    uuid.UUID `json:"id" db:"id"`
+	Email string    `json:"email" db:"email"`
 }
 
 // UnmarshalJSON implements the UnmarshalJSON Interface for AlertSubscription
@@ -118,4 +124,186 @@ func UpdateMyAlertSubscription(db *sqlx.DB, s *AlertSubscription) (*AlertSubscri
 		return nil, err
 	}
 	return GetAlertSubscription(db, &s.AlertConfigID, &s.ProfileID)
+}
+
+func SubscribeEmailsToAlertConfigTxn(txn *sqlx.Tx, alertConfigID *uuid.UUID, emails EmailAutocompleteResultCollection) error {
+	registerStmt, err := txn.Preparex(`
+		WITH e AS (
+			INSERT INTO email (email) VALUES ($1)
+			ON CONFLICT ON CONSTRAINT unique_email DO NOTHING
+			RETURNING id
+		)
+		SELECT id FROM e
+		UNION
+		SELECT id from email WHERE email=$1
+	`)
+	if err != nil {
+		return err
+	}
+	emailStmt, err := txn.Preparex(`
+		INSERT INTO alert_email_subscription (alert_config_id, email_id) VALUES ($1,$2)
+		ON CONFLICT ON CONSTRAINT email_unique_alert_config DO NOTHING
+	`)
+	if err != nil {
+		return err
+	}
+	profileStmt, err := txn.Preparex(`
+		INSERT INTO alert_profile_subscription (alert_config_id, profile_id) VALUES ($1,$2)
+		ON CONFLICT ON CONSTRAINT profile_unique_alert_config DO NOTHING
+	`)
+	if err != nil {
+		return err
+	}
+
+	// Register any emails that are not yet in system
+	for idx, em := range emails {
+		if em.UserType == "" || em.UserType == "email" {
+			var newID uuid.UUID
+			if err := registerStmt.Get(&newID, em.Email); err != nil {
+				return err
+			}
+			emails[idx].ID = newID
+			emails[idx].UserType = "email"
+		}
+	}
+	// Subscribe emails
+	for _, em := range emails {
+		if em.UserType == "email" {
+			if _, err := emailStmt.Exec(alertConfigID, em.ID); err != nil {
+				return err
+			}
+		} else if em.UserType == "profile" {
+			if _, err := profileStmt.Exec(alertConfigID, em.ID); err != nil {
+				return err
+			}
+		} else {
+			return fmt.Errorf("unable to unsubscribe email %s: user type %s does not exist, aborting transaction", em.Email, em.UserType)
+		}
+	}
+
+	if err := registerStmt.Close(); err != nil {
+		return err
+	}
+	if err := emailStmt.Close(); err != nil {
+		return err
+	}
+	if err := profileStmt.Close(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func UnsubscribeEmailsToAlertConfigTxn(txn *sqlx.Tx, alertConfigID *uuid.UUID, emails EmailAutocompleteResultCollection) error {
+	emailStmt, err := txn.Preparex(`
+		DELETE FROM alert_email_subscription WHERE alert_config_id=$1 AND email_id=$2
+	`)
+	if err != nil {
+		return err
+	}
+	profileStmt, err := txn.Preparex(`
+		DELETE FROM alert_profile_subscription WHERE alert_config_id=$1 AND profile_id=$2
+	`)
+	if err != nil {
+		return err
+	}
+
+	for _, em := range emails {
+		if em.UserType == "" {
+			return fmt.Errorf("required field user_type is null, aborting transaction")
+		} else if em.UserType == "email" {
+			if _, err := emailStmt.Exec(alertConfigID, em.ID); err != nil {
+				return err
+			}
+		} else if em.UserType == "profile" {
+			if _, err := profileStmt.Exec(alertConfigID, em.ID); err != nil {
+				return err
+			}
+		} else {
+			return fmt.Errorf("unable to unsubscribe email %s: user type %s does not exist, aborting transaction", em.Email, em.UserType)
+		}
+	}
+	if err := emailStmt.Close(); err != nil {
+		return err
+	}
+	if err := profileStmt.Close(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func UnsubscribeAllEmailsToAlertConfigTxn(txn *sqlx.Tx, alertConfigID *uuid.UUID, emails EmailAutocompleteResultCollection) error {
+	emailStmt, err := txn.Preparex(`
+		DELETE FROM alert_email_subscription WHERE alert_config_id=$1
+	`)
+	if err != nil {
+		return err
+	}
+	profileStmt, err := txn.Preparex(`
+		DELETE FROM alert_profile_subscription WHERE alert_config_id=$1
+	`)
+	if err != nil {
+		return err
+	}
+
+	for _, em := range emails {
+		if em.UserType == "" {
+			return fmt.Errorf("required field user_type is null, aborting transaction")
+		} else if em.UserType == "email" {
+			if _, err := emailStmt.Exec(alertConfigID); err != nil {
+				return err
+			}
+		} else if em.UserType == "profile" {
+			if _, err := profileStmt.Exec(alertConfigID); err != nil {
+				return err
+			}
+		} else {
+			return fmt.Errorf("unable to unsubscribe email %s: user type %s does not exist, aborting transaction", em.Email, em.UserType)
+		}
+	}
+	if err := emailStmt.Close(); err != nil {
+		return err
+	}
+	if err := profileStmt.Close(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func SubscribeEmailsToAlertConfig(db *sqlx.DB, alertConfigID *uuid.UUID, emails *EmailAutocompleteResultCollection) (*AlertConfig, error) {
+	txn, err := db.Beginx()
+	if err != nil {
+		return nil, err
+	}
+	defer txn.Rollback()
+
+	if err := SubscribeEmailsToAlertConfigTxn(txn, alertConfigID, *emails); err != nil {
+		return nil, err
+	}
+	if err := txn.Commit(); err != nil {
+		return nil, err
+	}
+	return GetAlertConfig(db, alertConfigID)
+}
+
+func UnsubscribeEmailsToAlertConfig(db *sqlx.DB, alertConfigID *uuid.UUID, emails *EmailAutocompleteResultCollection) (*AlertConfig, error) {
+	txn, err := db.Beginx()
+	if err != nil {
+		return nil, err
+	}
+	defer txn.Rollback()
+
+	if err := UnsubscribeEmailsToAlertConfigTxn(txn, alertConfigID, *emails); err != nil {
+		return nil, err
+	}
+	if err := txn.Commit(); err != nil {
+		return nil, err
+	}
+	return GetAlertConfig(db, alertConfigID)
+}
+
+func DeleteEmail(db *sqlx.DB, emailID *uuid.UUID) error {
+	if _, err := db.Exec(`DELETE FROM email WHERE id = $1`, emailID); err != nil {
+		return err
+	}
+	return nil
 }

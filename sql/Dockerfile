@@ -1,8 +1,8 @@
-FROM flyway/flyway
+FROM flyway/flyway:8.5.9
 
 COPY . /flyway/sql/
 
-# user / pass / jdbc url set in task definition
+# paths / user / pass / jdbc url set in task definition
 ENV FLYWAY_EDITION=community
 ENV FLYWAY_CONNECT_RETRIES=60
 ENV FLYWAY_SCHEMAS=midas
