@@ -4,8 +4,6 @@ CREATE OR REPLACE VIEW v_alert_check_measurement_submittal AS (
             id AS alert_config_id,
             NOW() - (schedule_interval * n_missed_before_alert)                             AS last_schedule,
             NOW() - (schedule_interval * n_missed_before_alert) + warning_interval          AS last_warning,
-            create_date + (schedule_interval * n_missed_before_alert)                       AS first_schedule,
-            create_date + (schedule_interval * n_missed_before_alert) - warning_interval    AS first_warning,
             start_date + (schedule_interval * n_missed_before_alert)                        AS start_schedule,
             start_date + (schedule_interval * n_missed_before_alert) - warning_interval     AS start_warning
         FROM alert_config
@@ -14,11 +12,11 @@ CREATE OR REPLACE VIEW v_alert_check_measurement_submittal AS (
         ac.id AS alert_config_id,
         (ac.warning_interval != INTERVAL 'PT0S'
             AND NOW() >= ai.start_warning
-            AND ((true = ANY(SELECT UNNEST(ARRAY_AGG(lm.time)) IS NULL) AND ai.last_warning >= ai.first_warning)
+            AND ((true = ANY(SELECT UNNEST(ARRAY_AGG(lm.time)) IS NULL) AND ac.create_date <= ai.last_warning)
                 OR (ai.last_warning >= ANY(ARRAY_AGG(lm.time))))
         ) AS should_warn,
         (NOW() >= ai.start_schedule
-            AND ((true = ANY(SELECT UNNEST(ARRAY_AGG(lm.time)) IS NULL) AND ai.last_schedule >= ai.first_schedule)
+            AND ((true = ANY(SELECT UNNEST(ARRAY_AGG(lm.time)) IS NULL) AND ac.create_date <= ai.last_schedule)
                 OR (ai.last_schedule >= ANY(ARRAY_AGG(lm.time))))
         ) AS should_alert,
         (ac.remind_interval != INTERVAL 'PT0S'
@@ -35,8 +33,8 @@ CREATE OR REPLACE VIEW v_alert_check_measurement_submittal AS (
             'status', CASE
                 WHEN lm.time IS NULL
                     THEN CASE
-                        WHEN ai.last_schedule >= ai.first_schedule THEN 'red'
-                        WHEN ai.last_warning  >= ai.first_warning  THEN 'yellow'
+                        WHEN ac.create_date <= ai.last_schedule THEN 'red'
+                        WHEN ac.create_date <= ai.last_warning  THEN 'yellow'
                         ELSE 'green'
                     END
                 WHEN lm.time <= ai.last_schedule THEN 'red'
@@ -60,7 +58,7 @@ CREATE OR REPLACE VIEW v_alert_check_measurement_submittal AS (
     ) lm ON true
     INNER JOIN timeseries ts ON ts.id = lm.timeseries_id
     WHERE ac.alert_type_id = '97e7a25c-d5c7-4ded-b272-1bb6e5914fe3'::UUID AND NOT ac.deleted
-    GROUP BY ac.id, ai.last_schedule, ai.last_warning, ai.first_schedule, ai.first_warning, ai.start_schedule, ai.start_warning
+    GROUP BY ac.id, ai.last_schedule, ai.last_warning, ai.start_schedule, ai.start_warning
 );
 
 CREATE OR REPLACE VIEW v_alert_check_evaluation_submittal AS (
@@ -69,8 +67,6 @@ CREATE OR REPLACE VIEW v_alert_check_evaluation_submittal AS (
             id AS alert_config_id,
             NOW() - (schedule_interval * n_missed_before_alert)                             AS last_schedule,
             NOW() - (schedule_interval * n_missed_before_alert) + warning_interval          AS last_warning,
-            create_date + (schedule_interval * n_missed_before_alert)                       AS first_schedule,
-            create_date + (schedule_interval * n_missed_before_alert) - warning_interval    AS first_warning,
             start_date + (schedule_interval * n_missed_before_alert)                        AS start_schedule,
             start_date + (schedule_interval * n_missed_before_alert) - warning_interval     AS start_warning
         FROM alert_config
@@ -79,10 +75,10 @@ CREATE OR REPLACE VIEW v_alert_check_evaluation_submittal AS (
         ac.id AS alert_config_id,
         (ac.warning_interval != INTERVAL 'PT0S'
             AND NOW() >= ai.start_warning
-            AND COALESCE(le.time, ai.first_warning) < ai.last_warning
+            AND COALESCE(le.time, ac.create_date) <= ai.last_warning
         ) AS should_warn,
         (NOW() >= ai.start_schedule
-            AND COALESCE(le.time, ai.first_schedule) < ai.last_schedule
+            AND COALESCE(le.time, ac.create_date) <= ai.last_schedule
         ) AS should_alert,
         (ac.remind_interval != INTERVAL 'PT0S'
             AND NOW() >= COALESCE(ac.last_reminded, ai.start_schedule) + ac.remind_interval
