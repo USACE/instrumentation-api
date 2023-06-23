@@ -89,6 +89,8 @@ func handleChecks[T models.AlertChecker](db *sqlx.DB, checks []T, alertConfigs [
 					errs = append(errs, err)
 				}
 				ac.AlertStatusID = RedAlertStatusID
+				t := time.Now()
+				ac.LastReminded = &t
 				acIDs = append(acIDs, ac.ID)
 			}
 		case YellowAlertStatusID:
@@ -97,6 +99,8 @@ func handleChecks[T models.AlertChecker](db *sqlx.DB, checks []T, alertConfigs [
 					errs = append(errs, err)
 				}
 				ac.AlertStatusID = RedAlertStatusID
+				t := time.Now()
+				ac.LastReminded = &t
 				acIDs = append(acIDs, ac.ID)
 			} else if !shouldWarn {
 				ac.AlertStatusID = GreenAlertStatusID

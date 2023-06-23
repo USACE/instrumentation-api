@@ -52,14 +52,13 @@ CREATE VIEW v_alert_check_measurement_submittal AS (
     -- forces the query planner to use a loose index scan, which Postgres does not do automatically yet
     -- https://stackoverflow.com/questions/25536422/optimize-group-by-query-to-retrieve-latest-row-per-user/25536748#25536748
     LEFT JOIN LATERAL (
-        SELECT timeseries_id, time FROM timeseries_measurement
+        SELECT timeseries_id, MAX(time) AS time FROM timeseries_measurement
         WHERE timeseries_id = ANY(SELECT id FROM timeseries WHERE instrument_id = inst.id)
             AND NOT timeseries_id = ANY(SELECT timeseries_id FROM instrument_constants)
             AND time <= NOW()
-        ORDER BY time DESC NULLS LAST
-        LIMIT 1
+        GROUP BY timeseries_id
     ) lm ON true
-    INNER JOIN timeseries ts ON ts.id = lm.timeseries_id
+    LEFT JOIN timeseries ts ON ts.id = lm.timeseries_id
     WHERE ac.alert_type_id = '97e7a25c-d5c7-4ded-b272-1bb6e5914fe3'::UUID AND NOT ac.deleted
     GROUP BY ac.id, ai.last_schedule, ai.last_warning, ai.start_schedule, ai.start_warning
 );
