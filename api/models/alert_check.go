@@ -21,6 +21,12 @@ type AlertCheck struct {
 	AlertConfig       AlertConfig `db:"-"`
 }
 
+type SubmittalStatusHistory struct {
+	AlertConfigID uuid.UUID `json:"alert_config_id" db:"alert_config_id"`
+	AlertStatusID uuid.UUID `json:"alert_status_id" db:"alert_status_id"`
+	SubmittedAt   time.Time `json:"submitted_at" db:"submitted_at"`
+}
+
 type EvaluationSubmittal struct {
 	LastEvaluationTime *time.Time `db:"last_evaluation_time"`
 	AlertCheck

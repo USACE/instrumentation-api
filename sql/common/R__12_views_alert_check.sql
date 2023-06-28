@@ -99,6 +99,69 @@ CREATE VIEW v_alert_check_evaluation_submittal AS (
     WHERE ac.alert_type_id = 'da6ee89e-58cc-4d85-8384-43c3c33a68bd'::UUID AND NOT ac.deleted
 );
 
+-- CREATE OR REPLACE VIEW v_evaluation_district_rollup AS (
+--     SELECT
+--         prj.name AS project_name,
+--         pds.alert_config_id AS alert_config_id,
+--         DATE_TRUNC('month', pds.schedule)
+--         COUNT(pds.*) AS expected_submittals,
+--         COUNT(ev.*) AS actual_submittals,
+--         COUNT(pds.*) FILTER (
+--             WHERE pds.alert_config_id = ANY(
+--                 SELECT alert_config_id
+--                 FROM alert
+--                 WHERE status_id = '' -- late
+--                 AND project_id = ''
+--             )
+--         ) AS red_submittals,
+--         COUNT(pds.*) FILTER (
+--             WHERE pds.alert_config_id = ANY(
+--                 SELECT alert_config_id
+--                 FROM alert
+--                 WHERE status_id = '' -- passed warning interval
+--                 AND project_id = ''
+--             )
+--         ) AS yellow_submittals,
+--         COUNT(pds.*) FILTER (
+--             WHERE pds.alert_config_id = ANY(
+--                 SELECT alert_config_id
+--                 FROM alert
+--                 WHERE status_id = '' -- green id
+--                 AND project_id = ''
+--             )
+--         ) AS green_submittals,
+--     FROM (
+--         -- generate number of expected submittals for each alert config
+--         SELECT
+--             id AS alert_config_id,
+--             GENERATE_SERIES(
+--                 start_date,
+--                 NOW(),
+--                 schedule_interval
+--             ) AS schedule
+--             FROM alert_config
+--     ) pds
+--     INNER JOIN evaluation ev ON ev.alert_config_id = pds.alert_config_id
+--     GROUP BY pds.alert_config_id, DATE_TRUNC('month', pds.schedule)
+-- )
+-- CREATE OR REPLACE VIEW v_measurement_district_rollup AS (
+--     WITH all_periods AS (
+--         SELECT
+--             id AS alert_config_id,
+--             GENERATE_SERIES(
+--                 DATE_TRUNC('day', start_date),
+--                 DATE_TRUNC('day', NOW()),
+--                 schedule_interval
+--             ) AS schedule
+--             FROM alert_config
+--     )
+--     SELECT
+--         ac.id AS alert_config_id,
+--         (
+--             SELECT 
+--         ) AS monthly_submittals
+-- )
+
 GRANT SELECT ON
     v_alert_check_measurement_submittal,
     v_alert_check_evaluation_submittal

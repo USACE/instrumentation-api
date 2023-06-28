@@ -151,6 +151,13 @@ func CreateEvaluation(db *sqlx.DB, ev *Evaluation) (*Evaluation, error) {
 			return nil, err
 		}
 	}
+
+	// TODO: record submittal
+	// if evaulation_id in alert_config_evaluation {
+	//		get alert_config status
+	// 		insert into submittal history table with status_id and alert_config_id
+	// }
+
 	if err := stmt1.Close(); err != nil {
 		return nil, err
 	}
