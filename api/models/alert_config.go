@@ -61,6 +61,7 @@ func ListProjectAlertConfigs(db *sqlx.DB, projectID *uuid.UUID) ([]AlertConfig, 
 		SELECT *
 		FROM v_alert_config
 		WHERE project_id = $1
+		ORDER BY name
 	`
 	if err := db.Select(&aa, sql, projectID); err != nil {
 		return aa, err
@@ -77,6 +78,7 @@ func ListProjectAlertConfigsByAlertType(db *sqlx.DB, projectID, alertTypeID *uui
 		FROM v_alert_config
 		WHERE project_id = $1
 		AND alert_type_id = $2
+		ORDER BY name
 	`
 	if err := db.Select(&aa, sql, projectID, alertTypeID); err != nil {
 		return aa, err
@@ -96,6 +98,7 @@ func ListInstrumentAlertConfigs(db *sqlx.DB, instrumentID *uuid.UUID) ([]AlertCo
 			FROM alert_config_instrument
 			WHERE instrument_id = $1
 		)
+		ORDER BY name
 	`
 	if err := db.Select(&aa, sql, instrumentID); err != nil {
 		return aa, err
@@ -265,7 +268,7 @@ func UpdateAlertConfig(db *sqlx.DB, alertConfigID *uuid.UUID, ac *AlertConfig) (
 		}
 	}
 
-	if err := UnsubscribeAllEmailsToAlertConfigTxn(txn, alertConfigID, ac.AlertEmailSubscriptions); err != nil {
+	if err := UnsubscribeAllFromAlertConfigTxn(txn, alertConfigID); err != nil {
 		return nil, err
 	}
 	if err := SubscribeEmailsToAlertConfigTxn(txn, alertConfigID, ac.AlertEmailSubscriptions); err != nil {

@@ -193,7 +193,7 @@ func SubscribeEmailsToAlertConfigTxn(txn *sqlx.Tx, alertConfigID *uuid.UUID, ema
 	return nil
 }
 
-func UnsubscribeEmailsToAlertConfigTxn(txn *sqlx.Tx, alertConfigID *uuid.UUID, emails EmailAutocompleteResultCollection) error {
+func UnsubscribeFromAlertConfigTxn(txn *sqlx.Tx, alertConfigID *uuid.UUID, emails EmailAutocompleteResultCollection) error {
 	emailStmt, err := txn.Preparex(`
 		DELETE FROM alert_email_subscription WHERE alert_config_id=$1 AND email_id=$2
 	`)
@@ -231,7 +231,7 @@ func UnsubscribeEmailsToAlertConfigTxn(txn *sqlx.Tx, alertConfigID *uuid.UUID, e
 	return nil
 }
 
-func UnsubscribeAllEmailsToAlertConfigTxn(txn *sqlx.Tx, alertConfigID *uuid.UUID, emails EmailAutocompleteResultCollection) error {
+func UnsubscribeAllFromAlertConfigTxn(txn *sqlx.Tx, alertConfigID *uuid.UUID) error {
 	emailStmt, err := txn.Preparex(`
 		DELETE FROM alert_email_subscription WHERE alert_config_id=$1
 	`)
@@ -244,21 +244,11 @@ func UnsubscribeAllEmailsToAlertConfigTxn(txn *sqlx.Tx, alertConfigID *uuid.UUID
 	if err != nil {
 		return err
 	}
-
-	for _, em := range emails {
-		if em.UserType == "" {
-			return fmt.Errorf("required field user_type is null, aborting transaction")
-		} else if em.UserType == "email" {
-			if _, err := emailStmt.Exec(alertConfigID); err != nil {
-				return err
-			}
-		} else if em.UserType == "profile" {
-			if _, err := profileStmt.Exec(alertConfigID); err != nil {
-				return err
-			}
-		} else {
-			return fmt.Errorf("unable to unsubscribe email %s: user type %s does not exist, aborting transaction", em.Email, em.UserType)
-		}
+	if _, err := emailStmt.Exec(alertConfigID); err != nil {
+		return err
+	}
+	if _, err := profileStmt.Exec(alertConfigID); err != nil {
+		return err
 	}
 	if err := emailStmt.Close(); err != nil {
 		return err
@@ -292,7 +282,7 @@ func UnsubscribeEmailsToAlertConfig(db *sqlx.DB, alertConfigID *uuid.UUID, email
 	}
 	defer txn.Rollback()
 
-	if err := UnsubscribeEmailsToAlertConfigTxn(txn, alertConfigID, *emails); err != nil {
+	if err := UnsubscribeFromAlertConfigTxn(txn, alertConfigID, *emails); err != nil {
 		return nil, err
 	}
 	if err := txn.Commit(); err != nil {
