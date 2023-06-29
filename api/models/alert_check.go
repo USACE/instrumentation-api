@@ -91,7 +91,9 @@ func (es EvaluationSubmittal) DoEmail(emailType string, cfg *config.AlertCheckCo
 		return err
 	}
 	content.To = es.AlertConfig.GetToAddresses()
-
+	if len(content.To) < 1 {
+		return nil // no email subs
+	}
 	if err := et.ConstructAndSendEmail(content, cfg, smtpCfg); err != nil {
 		return err
 	}
@@ -120,7 +122,9 @@ func (ms MeasurementSubmittal) DoEmail(emailType string, cfg *config.AlertCheckC
 		return err
 	}
 	content.To = ms.AlertConfig.GetToAddresses()
-
+	if len(content.To) < 1 {
+		return nil // no email subs
+	}
 	if err := et.ConstructAndSendEmail(content, cfg, smtpCfg); err != nil {
 		return err
 	}
