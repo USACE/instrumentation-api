@@ -146,3 +146,34 @@ func RemoveTimeseriesFromCollectionGroup(db *sqlx.DB, collectionGroupID *uuid.UU
 	}
 	return nil
 }
+
+// UpdateTimeseriesInCollectionGroup updates timeseries associative details in a certain collection group
+func UpdateTimeseriesInCollectionGroup(db *sqlx.DB, cgD *CollectionGroupDetails) (*CollectionGroupDetails, error) {
+	txn, err := db.Beginx()
+	if err != nil {
+		return nil, err
+	}
+	defer txn.Rollback()
+
+	stmt_timeseries, err := txn.Preparex(
+		`UPDATE collection_group_timeseries
+		 SET list_order = $1
+		 WHERE collection_group_id = $2 AND timeseries_id = $3; 
+		`,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, cgdTs := range cgD.Timeseries {
+		if _, err := stmt_timeseries.Exec(cgdTs.ListOrder, cgD.ID, cgdTs.ID); err != nil {
+			return nil, err
+		}
+	}
+
+	if err := txn.Commit(); err != nil {
+		return nil, err
+	}
+
+	return cgD, nil
+}
