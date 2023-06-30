@@ -30,6 +30,7 @@ type cgdTsItem struct {
 	ts.Timeseries
 	LatestTime  *time.Time `json:"latest_time" db:"latest_time"`
 	LatestValue *float32   `json:"latest_value" db:"latest_value"`
+	ListOrder   *int       `json:"list_order" db:"list_order"`
 }
 
 var listCollectionGroupsSQL = `
@@ -66,7 +67,7 @@ func GetCollectionGroupDetails(db *sqlx.DB, projectID *uuid.UUID, collectionGrou
 	d.Timeseries = make([]cgdTsItem, 0)
 	if err := db.Select(
 		&d.Timeseries,
-		`SELECT t.*, tm.time as latest_time, tm.value as latest_value 
+		`SELECT t.*, tm.time as latest_time, tm.value as latest_value, list_order
 		FROM collection_group_timeseries cgt 
 		INNER JOIN collection_group cg on cg.id = cgt.collection_group_id 
 		INNER JOIN v_timeseries t on t.id = cgt.timeseries_id 

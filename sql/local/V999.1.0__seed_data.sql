@@ -250,9 +250,9 @@ INSERT INTO collection_group (id, project_id, name, slug) VALUES
     ('30b32cb1-0936-42c4-95d1-63a7832a57db', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'High Water Inspection', 'high-water-inspection');
 
 -- collection_group_timeseries
-INSERT INTO collection_group_timeseries (collection_group_id, timeseries_id) VALUES
-    ('30b32cb1-0936-42c4-95d1-63a7832a57db', '7ee902a3-56d0-4acf-8956-67ac82c03a96'),
-    ('30b32cb1-0936-42c4-95d1-63a7832a57db', '9a3864a8-8766-4bfa-bad1-0328b166f6a8');
+INSERT INTO collection_group_timeseries (collection_group_id, timeseries_id, list_order) VALUES
+    ('30b32cb1-0936-42c4-95d1-63a7832a57db', '7ee902a3-56d0-4acf-8956-67ac82c03a96', 1),
+    ('30b32cb1-0936-42c4-95d1-63a7832a57db', '9a3864a8-8766-4bfa-bad1-0328b166f6a8', 0);
 
 -- plot_configuration
 INSERT INTO plot_configuration (project_id, id, slug, name) VALUES
