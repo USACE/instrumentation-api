@@ -3,6 +3,7 @@ package handlers
 import (
 	"errors"
 	"log"
+	"sync"
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/config"
@@ -86,110 +87,123 @@ func DoAlertChecks(db *sqlx.DB, cfg *config.AlertCheckConfig, smtpCfg *config.Sm
 func handleChecks[T models.AlertChecker, PT models.AlertConfigChecker[T]](db *sqlx.DB, accs []PT, cfg *config.AlertCheckConfig, smtpCfg *config.SmtpConfig) error {
 	defer dbutils.Timer()()
 
+	mu := &sync.Mutex{}
+	aaccs := make([]PT, len(accs))
 	errs := make([]error, 0)
 	t := time.Now()
 
-	for i := range accs {
-		ac := accs[i].GetAlertConfig()
-		checks := accs[i].GetChecks()
+	wg := sync.WaitGroup{}
+	for i, p := range accs {
+		wg.Add(1)
+		go func(idx int, acc PT) {
+			defer wg.Done()
 
-		// if the email type is an empty string when it's passed to models.AlertConfigCheck.DoEmail,
-		// the method will exit without sending an email
-		emailType := ""
-		// If ANY "missing" submittals are within an alert config, aggregate missing submittals and send an alert
-		sendAlert := false
-		// If ANY missing submittals previously existed within an alert config, send them in a "reminder" instead of an alert
-		sendReminder := false
-		// If a reminder exists when at least one submittal "shouldAlert", the alert should be aggregated into the next reminder
-		// instead of sending a new reminder email. If NO alerts exist for an alert config, the reminder can be reset to NULL.
-		// Reminders should be set when the first alert for an alert config is triggered, or at each reminder interval
-		resetReminders := true
+			ac := acc.GetAlertConfig()
+			checks := acc.GetChecks()
 
-		for j, c := range checks {
-			shouldWarn := c.GetShouldWarn()
-			shouldAlert := c.GetShouldAlert()
-			shouldRemind := c.GetShouldRemind()
-			sub := c.GetSubmittal()
+			// if the email type is an empty string when it's passed to models.AlertConfigCheck.DoEmail,
+			// the method will exit without sending an email
+			emailType := ""
+			// If ANY "missing" submittals are within an alert config, aggregate missing submittals and send an alert
+			sendAlert := false
+			// If ANY missing submittals previously existed within an alert config, send them in a "reminder" instead of an alert
+			sendReminder := false
+			// If a reminder exists when at least one submittal "shouldAlert", the alert should be aggregated into the next reminder
+			// instead of sending a new reminder email. If NO alerts exist for an alert config, the reminder can be reset to NULL.
+			// Reminders should be set when the first alert for an alert config is triggered, or at each reminder interval
+			resetReminders := true
 
-			// if no submittal alerts or warnings are found, no emails should be sent
-			if !shouldAlert && !shouldWarn {
-				// if submittal status was previously red, update status to yellow and
-				// completion_date to current timestamp
-				if sub.SubmittalStatusID == RedSubmittalStatusID {
-					sub.SubmittalStatusID = YellowSubmittalStatusID
-					sub.CompletionDate = &t
-					ac.CreateNextSubmittalFrom = &t
+			for j, c := range checks {
+				shouldWarn := c.GetShouldWarn()
+				shouldAlert := c.GetShouldAlert()
+				shouldRemind := c.GetShouldRemind()
+				sub := c.GetSubmittal()
+
+				// if no submittal alerts or warnings are found, no emails should be sent
+				if !shouldAlert && !shouldWarn {
+					// if submittal status was previously red, update status to yellow and
+					// completion_date to current timestamp
+					if sub.SubmittalStatusID == RedSubmittalStatusID {
+						sub.SubmittalStatusID = YellowSubmittalStatusID
+						sub.CompletionDate = &t
+						ac.CreateNextSubmittalFrom = &t
+					} else
+
+					// if submittal status is green and the current time is not before the submittal due date,
+					// complete the submittal at that due date and prepare the next submittal interval
+					if sub.SubmittalStatusID == GreenSubmittalStatusID && !t.Before(sub.DueDate) {
+						sub.CompletionDate = &sub.DueDate
+						ac.CreateNextSubmittalFrom = &sub.DueDate
+					}
+
+					// No "Yellow" Status Submittals should be passed to this function
+					// as it implies the submittal has been completed
 				} else
 
-				// if submittal status is green and the current time is not before the submittal due date,
-				// complete the submittal at that due date and prepare the next submittal interval
-				if sub.SubmittalStatusID == GreenSubmittalStatusID && !t.Before(sub.DueDate) {
-					sub.CompletionDate = &sub.DueDate
-					ac.CreateNextSubmittalFrom = &sub.DueDate
+				// if any submittal warning is triggered, immediately send a
+				// warning email, since submittal due dates are unique within alert configs
+				if shouldWarn && !sub.WarningSent {
+					sub.SubmittalStatusID = GreenSubmittalStatusID
+					mu.Lock()
+					if err := acc.DoEmail(warning, cfg, smtpCfg); err != nil {
+						errs = append(errs, err)
+					}
+					mu.Unlock()
+					sub.WarningSent = true
+				} else
+
+				// if any submittal alert is triggered after a warning has been sent within an
+				// alert config, aggregate missing submittals and send their contents in an alert email
+				if shouldAlert {
+					if sub.SubmittalStatusID != RedSubmittalStatusID {
+						sub.SubmittalStatusID = RedSubmittalStatusID
+						sendAlert = true
+						ac.CreateNextSubmittalFrom = &sub.DueDate
+					}
+					resetReminders = false
 				}
 
-				// No "Yellow" Status Submittals should be passed to this function
-				// as it implies the submittal has been completed
-			} else
-
-			// if any submittal warning is triggered, immediately send a
-			// warning email, since submittal due dates are unique within alert configs
-			if shouldWarn && !sub.WarningSent {
-				sub.SubmittalStatusID = GreenSubmittalStatusID
-				if err := accs[i].DoEmail(warning, cfg, smtpCfg); err != nil {
-					errs = append(errs, err)
+				// if any reminder is triggered, aggregate missing
+				// submittals and send their contents in an email
+				if shouldRemind {
+					sendReminder = true
 				}
-				sub.WarningSent = true
-			} else
 
-			// if any submittal alert is triggered after a warning has been sent within an
-			// alert config, aggregate missing submittals and send their contents in an alert email
-			if shouldAlert {
-				if sub.SubmittalStatusID != RedSubmittalStatusID {
-					sub.SubmittalStatusID = RedSubmittalStatusID
-					sendAlert = true
-					ac.CreateNextSubmittalFrom = &sub.DueDate
-				}
-				resetReminders = false
+				c.SetSubmittal(sub)
+				checks[j] = c
 			}
 
-			// if any reminder is triggered, aggregate missing
-			// submittals and send their contents in an email
-			if shouldRemind {
-				sendReminder = true
+			// if there are no alerts, there should also be no reminders sent. "last_reminded" is used to determine
+			// if an alert has already been sent for an alert config, and send a reminder if so
+			if resetReminders {
+				ac.LastReminded = nil
 			}
 
-			c.SetSubmittal(sub)
-			checks[j] = c
-		}
+			// if there are any reminders within an alert config, they will override the alerts
+			if sendReminder {
+				emailType = reminder
+				ac.LastReminded = &t
 
-		// if there are no alerts, there should also be no reminders sent. "last_reminded" is used to determine
-		// if an alert has already been sent for an alert config, and send a reminder if so
-		if resetReminders {
-			ac.LastReminded = nil
-		}
+			} else if sendAlert && ac.LastReminded == nil {
+				emailType = alert
+				ac.LastReminded = &t
+			}
 
-		// if there are any reminders within an alert config, they will override the alerts
-		if sendReminder {
-			emailType = reminder
-			ac.LastReminded = &t
+			acc.SetAlertConfig(ac)
+			acc.SetChecks(checks)
 
-		} else if sendAlert && ac.LastReminded == nil {
-			emailType = alert
-			ac.LastReminded = &t
-		}
+			mu.Lock()
+			if err := acc.DoEmail(emailType, cfg, smtpCfg); err != nil {
+				errs = append(errs, err)
+			}
+			mu.Unlock()
 
-		accs[i].SetAlertConfig(ac)
-		accs[i].SetChecks(checks)
-
-		log.Print("emailType: ", emailType)
-
-		if err := accs[i].DoEmail(emailType, cfg, smtpCfg); err != nil {
-			errs = append(errs, err)
-		}
+			aaccs[idx] = acc
+		}(i, p)
 	}
+	wg.Wait()
 
-	if err := models.UpdateAlertConfigChecks[T, PT](db, accs); err != nil {
+	if err := models.UpdateAlertConfigChecks[T, PT](db, aaccs); err != nil {
 		errs = append(errs, err)
 		return errors.Join(errs...)
 	}
