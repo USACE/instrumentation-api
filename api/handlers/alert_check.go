@@ -2,19 +2,20 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
+	"log"
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/config"
+	"github.com/USACE/instrumentation-api/api/dbutils"
 	"github.com/USACE/instrumentation-api/api/models"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
 
 var (
-	GreenAlertStatusID  uuid.UUID = uuid.MustParse("0c0d6487-3f71-4121-8575-19514c7b9f03")
-	YellowAlertStatusID uuid.UUID = uuid.MustParse("ef9a3235-f6e2-4e6c-92f6-760684308f7f")
-	RedAlertStatusID    uuid.UUID = uuid.MustParse("84a0f437-a20a-4ac2-8a5b-f8dc35e8489b")
+	GreenSubmittalStatusID  uuid.UUID = uuid.MustParse("0c0d6487-3f71-4121-8575-19514c7b9f03")
+	YellowSubmittalStatusID uuid.UUID = uuid.MustParse("ef9a3235-f6e2-4e6c-92f6-760684308f7f")
+	RedSubmittalStatusID    uuid.UUID = uuid.MustParse("84a0f437-a20a-4ac2-8a5b-f8dc35e8489b")
 
 	MeasurementSubmittalAlertTypeID uuid.UUID = uuid.MustParse("97e7a25c-d5c7-4ded-b272-1bb6e5914fe3")
 	EvaluationSubmittalAlertTypeID  uuid.UUID = uuid.MustParse("da6ee89e-58cc-4d85-8384-43c3c33a68bd")
@@ -27,33 +28,42 @@ const (
 )
 
 func DoAlertChecks(db *sqlx.DB, cfg *config.AlertCheckConfig, smtpCfg *config.SmtpConfig) error {
-	aa, err := models.ListExpiredAlertConfigs(db)
+	subs, err := models.ListUnverifiedMissingSubmittals(db)
 	if err != nil {
 		return err
 	}
-
-	acMap := make(map[uuid.UUID][]models.AlertConfig)
-	for _, a := range aa {
-		if _, exists := acMap[a.AlertTypeID]; !exists {
-			acMap[a.AlertTypeID] = make([]models.AlertConfig, 0)
-		}
-		acMap[a.AlertTypeID] = append(acMap[a.AlertTypeID], a)
-	}
-
-	measurementChecks, err := models.ListAlertCheckMeasurementSubmittals(db, aa)
+	acs, err := models.ListAndCheckAlertConfigs(db)
 	if err != nil {
 		return err
 	}
-	evaluationChecks, err := models.ListAlertCheckEvaluationSubmittals(db, aa)
+	if len(acs) == 0 {
+		log.Println("no alert configs to check")
+		return nil
+	}
+
+	subMap := make(map[uuid.UUID]models.Submittal)
+	for _, s := range subs {
+		subMap[s.ID] = s
+	}
+	acMap := make(map[uuid.UUID]models.AlertConfig)
+	for _, a := range acs {
+		acMap[a.ID] = a
+	}
+
+	measurementChecks, err := models.ListMeasurementChecks(db, acMap, subMap)
+	if err != nil {
+		return err
+	}
+	evaluationChecks, err := models.ListEvaluationChecks(db, acMap, subMap)
 	if err != nil {
 		return err
 	}
 
 	errs := make([]error, 0)
-	if err := handleChecks(db, measurementChecks, aa, cfg, smtpCfg); err != nil {
+	if err := handleChecks[*models.MeasurementCheck, *models.AlertConfigMeasurementCheck](db, measurementChecks, cfg, smtpCfg); err != nil {
 		errs = append(errs, err)
 	}
-	if err := handleChecks(db, evaluationChecks, aa, cfg, smtpCfg); err != nil {
+	if err := handleChecks[*models.EvaluationCheck, *models.AlertConfigEvaluationCheck](db, evaluationChecks, cfg, smtpCfg); err != nil {
 		errs = append(errs, err)
 	}
 	if len(errs) > 0 {
@@ -63,82 +73,125 @@ func DoAlertChecks(db *sqlx.DB, cfg *config.AlertCheckConfig, smtpCfg *config.Sm
 	return nil
 }
 
+// there should always be at least one "missing" submittal within an alert config. Submittals are created:
+//  1. when an alert config is created (first submittal)
+//  2. when a submittal is completed (next submittal created)
+//  3. when a submittals due date has passed if it is not completed
+//
+// for evaluations, the next is submittal created manually when the evaluation is made
+// for measurements, the next submittal is created the first time this function runs after the due date
+//
 // TODO: smtp.SendMail esablishes a new connection for each batch of emails sent. I would be better to aggregate
 // the contents of each email, then create a connection pool to reuse and send all emails at once, with any errors wrapped and returned
-func handleChecks[T models.AlertChecker](db *sqlx.DB, checks []T, alertConfigs []models.AlertConfig, cfg *config.AlertCheckConfig, smtpCfg *config.SmtpConfig) error {
-	acIDs := make([]uuid.UUID, 0)
-	aa := make([]models.AlertConfig, len(checks))
+func handleChecks[T models.AlertChecker, PT models.AlertConfigChecker[T]](db *sqlx.DB, accs []PT, cfg *config.AlertCheckConfig, smtpCfg *config.SmtpConfig) error {
+	defer dbutils.Timer()()
+
 	errs := make([]error, 0)
+	t := time.Now()
 
-	for idx, c := range checks {
-		ac := c.GetAlertConfig()
-		shouldWarn := c.GetShouldWarn()
-		shouldAlert := c.GetShouldAlert()
-		shouldRemind := c.GetShouldRemind()
+	for i := range accs {
+		ac := accs[i].GetAlertConfig()
+		checks := accs[i].GetChecks()
 
-		switch ac.AlertStatusID {
-		case GreenAlertStatusID:
-			if shouldWarn && !shouldAlert {
-				if err := c.DoEmail(warning, cfg, smtpCfg); err != nil {
-					errs = append(errs, err) // aggregate errors
+		// if the email type is an empty string when it's passed to models.AlertConfigCheck.DoEmail,
+		// the method will exit without sending an email
+		emailType := ""
+		// If ANY "missing" submittals are within an alert config, aggregate missing submittals and send an alert
+		sendAlert := false
+		// If ANY missing submittals previously existed within an alert config, send them in a "reminder" instead of an alert
+		sendReminder := false
+		// If a reminder exists when at least one submittal "shouldAlert", the alert should be aggregated into the next reminder
+		// instead of sending a new reminder email. If NO alerts exist for an alert config, the reminder can be reset to NULL.
+		// Reminders should be set when the first alert for an alert config is triggered, or at each reminder interval
+		resetReminders := true
+
+		for j, c := range checks {
+			shouldWarn := c.GetShouldWarn()
+			shouldAlert := c.GetShouldAlert()
+			shouldRemind := c.GetShouldRemind()
+			sub := c.GetSubmittal()
+
+			// if no submittal alerts or warnings are found, no emails should be sent
+			if !shouldAlert && !shouldWarn {
+				// if submittal status was previously red, update status to yellow and
+				// completion_date to current timestamp
+				if sub.SubmittalStatusID == RedSubmittalStatusID {
+					sub.SubmittalStatusID = YellowSubmittalStatusID
+					sub.CompletionDate = &t
+					ac.CreateNextSubmittalFrom = &t
+				} else
+
+				// if submittal status is green and the current time is not before the submittal due date,
+				// complete the submittal at that due date and prepare the next submittal interval
+				if sub.SubmittalStatusID == GreenSubmittalStatusID && !t.Before(sub.DueDate) {
+					sub.CompletionDate = &sub.DueDate
+					ac.CreateNextSubmittalFrom = &sub.DueDate
 				}
-				ac.AlertStatusID = YellowAlertStatusID // update alert config status
-				acIDs = append(acIDs, ac.ID)           // add for in-app notification
-			} else if shouldAlert {
-				if err := c.DoEmail(alert, cfg, smtpCfg); err != nil {
+
+				// No "Yellow" Status Submittals should be passed to this function
+				// as it implies the submittal has been completed
+			} else
+
+			// if any submittal warning is triggered, immediately send a
+			// warning email, since submittal due dates are unique within alert configs
+			if shouldWarn && !sub.WarningSent {
+				sub.SubmittalStatusID = GreenSubmittalStatusID
+				if err := accs[i].DoEmail(warning, cfg, smtpCfg); err != nil {
 					errs = append(errs, err)
 				}
-				ac.AlertStatusID = RedAlertStatusID
-				t := time.Now()
-				ac.LastReminded = &t
-				acIDs = append(acIDs, ac.ID)
-			}
-		case YellowAlertStatusID:
+				sub.WarningSent = true
+			} else
+
+			// if any submittal alert is triggered after a warning has been sent within an
+			// alert config, aggregate missing submittals and send their contents in an alert email
 			if shouldAlert {
-				if err := c.DoEmail(alert, cfg, smtpCfg); err != nil {
-					errs = append(errs, err)
+				if sub.SubmittalStatusID != RedSubmittalStatusID {
+					sub.SubmittalStatusID = RedSubmittalStatusID
+					sendAlert = true
+					ac.CreateNextSubmittalFrom = &sub.DueDate
 				}
-				ac.AlertStatusID = RedAlertStatusID
-				t := time.Now()
-				ac.LastReminded = &t
-				acIDs = append(acIDs, ac.ID)
-			} else if !shouldWarn {
-				ac.AlertStatusID = GreenAlertStatusID
+				resetReminders = false
 			}
-		case RedAlertStatusID:
+
+			// if any reminder is triggered, aggregate missing
+			// submittals and send their contents in an email
 			if shouldRemind {
-				if err := c.DoEmail(reminder, cfg, smtpCfg); err != nil {
-					errs = append(errs, err)
-				}
-				t := time.Now()
-				ac.LastReminded = &t
-				acIDs = append(acIDs, ac.ID)
-			} else if !shouldAlert && shouldWarn {
-				// edge case may happen where if an submittal is very late, the next
-				// scheduled submittal may go directly into warning or alert status
-				if err := c.DoEmail(warning, cfg, smtpCfg); err != nil {
-					errs = append(errs, err)
-				}
-				ac.AlertStatusID = YellowAlertStatusID
-				acIDs = append(acIDs, ac.ID)
-			} else if !shouldAlert && !shouldWarn {
-				ac.AlertStatusID = GreenAlertStatusID
+				sendReminder = true
 			}
-		default:
-			errs = append(errs, fmt.Errorf("invalid alert_status_id: %+v", ac.AlertStatusID))
+
+			c.SetSubmittal(sub)
+			checks[j] = c
 		}
-		aa[idx] = ac
+
+		// if there are no alerts, there should also be no reminders sent. "last_reminded" is used to determine
+		// if an alert has already been sent for an alert config, and send a reminder if so
+		if resetReminders {
+			ac.LastReminded = nil
+		}
+
+		// if there are any reminders within an alert config, they will override the alerts
+		if sendReminder {
+			emailType = reminder
+			ac.LastReminded = &t
+
+		} else if sendAlert && ac.LastReminded == nil {
+			emailType = alert
+			ac.LastReminded = &t
+		}
+
+		accs[i].SetAlertConfig(ac)
+		accs[i].SetChecks(checks)
+
+		log.Print("emailType: ", emailType)
+
+		if err := accs[i].DoEmail(emailType, cfg, smtpCfg); err != nil {
+			errs = append(errs, err)
+		}
 	}
 
-	if err := models.UpdateAlertConfigStatus(db, aa); err != nil {
+	if err := models.UpdateAlertConfigChecks[T, PT](db, accs); err != nil {
 		errs = append(errs, err)
 		return errors.Join(errs...)
-	}
-	if len(acIDs) > 0 {
-		if err := models.CreateAlerts(db, acIDs); err != nil {
-			errs = append(errs, err)
-			return errors.Join(errs...)
-		}
 	}
 	if len(errs) > 0 {
 		return errors.Join(errs...)

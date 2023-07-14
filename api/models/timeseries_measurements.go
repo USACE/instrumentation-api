@@ -138,11 +138,8 @@ func CreateOrUpdateTimeseriesMeasurementsTxn(txn *sqlx.Tx, mc []ts.MeasurementCo
 		return nil, err
 	}
 
-	tss := make([]uuid.UUID, len(mc))
-
 	// Iterate All Timeseries Measurements
-	for idx, c := range mc {
-		tss[idx] = c.TimeseriesID
+	for _, c := range mc {
 		for _, m := range c.Items {
 			if _, err := stmt_measurement.Exec(c.TimeseriesID, m.Time, m.Value); err != nil {
 				return nil, err
@@ -156,45 +153,10 @@ func CreateOrUpdateTimeseriesMeasurementsTxn(txn *sqlx.Tx, mc []ts.MeasurementCo
 		}
 	}
 
-	query, args, err := sqlx.In(`
-		SELECT alert_config_id, alert_status_id, NOW() AS submitted_at FROM alert_config_instrument
-		WHERE instrument_id = ANY(SELECT intrument_id FROM timeseries WHERE id IN (?))
-	`, tss)
-	if err != nil {
-		return nil, err
-	}
-
-	stmt_submittal1, err := txn.Preparex(txn.Rebind(query))
-	if err != nil {
-		return nil, err
-	}
-	statuses := make([]SubmittalStatusHistory, 0)
-	stmt_submittal1.Select(&statuses, args...)
-
-	if len(statuses) > 0 {
-		stmt_submittal2, err := txn.Preparex(`
-			INSERT INTO submittal_status_history (alert_config_id, alert_status_id, submitted_at) VALUES ($1, $2, $3)
-		`)
-		if err != nil {
-			return nil, err
-		}
-		for _, s := range statuses {
-			if _, err := stmt_submittal2.Exec(s.AlertConfigID, s.AlertStatusID, s.SubmittedAt); err != nil {
-				return nil, err
-			}
-		}
-		if err := stmt_submittal2.Close(); err != nil {
-			return nil, err
-		}
-	}
-
 	if err := stmt_measurement.Close(); err != nil {
 		return nil, err
 	}
 	if err := stmt_notes.Close(); err != nil {
-		return nil, err
-	}
-	if err := stmt_submittal1.Close(); err != nil {
 		return nil, err
 	}
 

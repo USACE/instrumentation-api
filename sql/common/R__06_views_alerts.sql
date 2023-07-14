@@ -1,4 +1,5 @@
-CREATE OR REPLACE VIEW v_alert AS (
+DROP VIEW IF EXISTS v_alert;
+CREATE VIEW v_alert AS (
     SELECT a.id AS id,
        a.alert_config_id AS alert_config_id,
        a.create_date AS create_date,
@@ -23,7 +24,8 @@ CREATE OR REPLACE VIEW v_alert AS (
     INNER JOIN project p ON ac.project_id = p.id
 );
 
-CREATE OR REPLACE VIEW v_alert_config AS (
+DROP VIEW IF EXISTS v_alert_config;
+CREATE VIEW v_alert_config AS (
     SELECT
         ac.id                               AS id,
         ac.name                             AS name,
@@ -45,8 +47,6 @@ CREATE OR REPLACE VIEW v_alert_config AS (
         ac.warning_interval::text           AS warning_interval,
         ac.last_checked                     AS last_checked,
         ac.last_reminded                    AS last_reminded,
-        astatus.id                          AS alert_status_id,
-        astatus.name                        AS alert_status,
         (
             SELECT COALESCE(JSON_AGG(JSON_BUILD_OBJECT(
                 'instrument_id',   id,
@@ -93,13 +93,34 @@ CREATE OR REPLACE VIEW v_alert_config AS (
     FROM alert_config ac
     INNER JOIN project prj          ON ac.project_id = prj.id
     INNER JOIN alert_type atype     ON ac.alert_type_id = atype.id
-    INNER JOIN alert_status astatus ON ac.alert_status_id = astatus.id
     LEFT  JOIN profile prf1         ON ac.creator = prf1.id
     LEFT  JOIN profile prf2         ON ac.updater = prf2.id
     WHERE NOT ac.deleted
 );
 
+DROP VIEW IF EXISTS v_submittal;
+CREATE VIEW v_submittal AS (
+    SELECT
+        sub.id                  AS id,
+        ac.id                   AS alert_config_id,
+        ac.name                 AS alert_config_name,
+        ac.project_id           AS project_id,
+        sub.due_date            AS due_date,
+        sub.completion_date     AS completion_date,
+        sub.create_date         AS create_date,
+        sst.id                  AS submittal_status_id,
+        sst.name                AS submittal_status_name,
+        aty.id                  AS alert_type_id,
+        aty.name                AS alert_type_name,
+        sub.marked_as_missing   AS marked_as_missing
+    FROM submittal sub
+    INNER JOIN alert_config ac ON sub.alert_config_id = ac.id
+    INNER JOIN submittal_status sst ON sub.submittal_status_id = sst.id
+    INNER JOIN alert_type aty ON ac.alert_type_id = aty.id
+);
+
 GRANT SELECT ON
     v_alert,
-    v_alert_config
+    v_alert_config,
+    v_submittal
 TO instrumentation_reader;

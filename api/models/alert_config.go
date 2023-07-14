@@ -22,13 +22,12 @@ type AlertConfig struct {
 	RemindInterval          string                            `json:"remind_interval" db:"remind_interval"`
 	WarningInterval         string                            `json:"warning_interval" db:"warning_interval"`
 	LastChecked             *time.Time                        `json:"last_checked" db:"last_checked"`
-	AlertStatus             string                            `json:"alert_status" db:"alert_status"`
-	AlertStatusID           uuid.UUID                         `json:"alert_status_id" db:"alert_status_id"`
 	LastReminded            *time.Time                        `json:"last_reminded" db:"last_reminded"`
 	Instruments             AlertConfigInstrumentCollection   `json:"instruments" db:"instruments"`
 	AlertEmailSubscriptions EmailAutocompleteResultCollection `json:"alert_email_subscriptions" db:"alert_email_subscriptions"`
 	CreatorUsername         string                            `json:"creator_username" db:"creator_username"`
 	UpdaterUsername         *string                           `json:"updater_username" db:"updater_username"`
+	CreateNextSubmittalFrom *time.Time                        `json:"-" db:"-"`
 	AuditInfo
 }
 
@@ -46,10 +45,10 @@ func (a *AlertConfigInstrumentCollection) Scan(src interface{}) error {
 	return nil
 }
 
-func (ac *AlertConfig) GetToAddresses() []string {
-	emails := make([]string, len(ac.AlertEmailSubscriptions))
-	for idx := range ac.AlertEmailSubscriptions {
-		emails[idx] = ac.AlertEmailSubscriptions[idx].Email
+func (a *AlertConfig) GetToAddresses() []string {
+	emails := make([]string, len(a.AlertEmailSubscriptions))
+	for idx := range a.AlertEmailSubscriptions {
+		emails[idx] = a.AlertEmailSubscriptions[idx].Email
 	}
 	return emails
 }
@@ -159,6 +158,16 @@ func CreateAlertConfig(db *sqlx.DB, ac *AlertConfig) (*AlertConfig, error) {
 	if err != nil {
 		return nil, err
 	}
+	stmt3, err := txn.Preparex(`
+		INSERT INTO submittal (alert_config_id, due_date)
+		SELECT id, create_date + (schedule_interval * n_missed_before_alert)
+		FROM alert_config
+		WHERE alert_config_id=$1
+		LIMIT 1
+	`)
+	if err != nil {
+		return nil, err
+	}
 
 	var alertConfigID uuid.UUID
 	if err := stmt1.Get(
@@ -186,11 +195,17 @@ func CreateAlertConfig(db *sqlx.DB, ac *AlertConfig) (*AlertConfig, error) {
 	if err := SubscribeEmailsToAlertConfigTxn(txn, &alertConfigID, ac.AlertEmailSubscriptions); err != nil {
 		return nil, err
 	}
+	if _, err := stmt3.Exec(&alertConfigID); err != nil {
+		return nil, err
+	}
 
 	if err := stmt1.Close(); err != nil {
 		return nil, err
 	}
 	if err := stmt2.Close(); err != nil {
+		return nil, err
+	}
+	if err := stmt3.Close(); err != nil {
 		return nil, err
 	}
 	if err := txn.Commit(); err != nil {
@@ -243,6 +258,27 @@ func UpdateAlertConfig(db *sqlx.DB, alertConfigID *uuid.UUID, ac *AlertConfig) (
 	if err != nil {
 		return nil, err
 	}
+	// delete future alert check
+	stmt4, err := txn.Preparex(`
+		DELETE FROM submittal
+		WHERE alert_config_id=$1
+		AND due_date > NOW()
+	`)
+	if err != nil {
+		return nil, err
+	}
+	// update alert check with new interval
+	stmt5, err := txn.Preparex(`
+		INSERT INTO submittal (alert_config_id, due_date)
+		SELECT ac.id, COALESCE(MAX(acs.create_date), ac.create_date) + (ac.schedule_interval * ac.n_missed_before_alert)
+		FROM alert_config ac
+		INNER JOIN submittal acs ON ac.id = acs.alert_config_id
+		WHERE ac.id=$1
+		LIMIT 1
+	`)
+	if err != nil {
+		return nil, err
+	}
 
 	if _, err := stmt1.Exec(
 		alertConfigID,
@@ -275,6 +311,13 @@ func UpdateAlertConfig(db *sqlx.DB, alertConfigID *uuid.UUID, ac *AlertConfig) (
 		return nil, err
 	}
 
+	if _, err := stmt4.Exec(alertConfigID); err != nil {
+		return nil, err
+	}
+	if _, err := stmt5.Exec(alertConfigID); err != nil {
+		return nil, err
+	}
+
 	if err := stmt1.Close(); err != nil {
 		return nil, err
 	}
@@ -282,6 +325,12 @@ func UpdateAlertConfig(db *sqlx.DB, alertConfigID *uuid.UUID, ac *AlertConfig) (
 		return nil, err
 	}
 	if err := stmt3.Close(); err != nil {
+		return nil, err
+	}
+	if err := stmt4.Close(); err != nil {
+		return nil, err
+	}
+	if err := stmt5.Close(); err != nil {
 		return nil, err
 	}
 	if err := txn.Commit(); err != nil {

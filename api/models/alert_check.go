@@ -2,67 +2,35 @@ package models
 
 import (
 	_sql "database/sql"
-	"encoding/json"
-	"log"
-	"time"
 
 	"github.com/USACE/instrumentation-api/api/config"
-	et "github.com/USACE/instrumentation-api/api/email_template"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
 
 type AlertCheck struct {
-	AlertConfigID     uuid.UUID   `db:"alert_config_id"`
-	ShouldWarn        bool        `db:"should_warn"`
-	ShouldAlert       bool        `db:"should_alert"`
-	ShouldRemind      bool        `db:"should_remind"`
-	ExpectedSubmittal time.Time   `db:"expected_submittal"`
-	AlertConfig       AlertConfig `db:"-"`
+	AlertConfigID uuid.UUID `db:"alert_config_id"`
+	SubmittalID   uuid.UUID `db:"submittal_id"`
+	ShouldWarn    bool      `db:"should_warn"`
+	ShouldAlert   bool      `db:"should_alert"`
+	ShouldRemind  bool      `db:"should_remind"`
+	Submittal     Submittal `db:"-"`
 }
 
-type SubmittalStatusHistory struct {
-	AlertConfigID uuid.UUID `json:"alert_config_id" db:"alert_config_id"`
-	AlertStatusID uuid.UUID `json:"alert_status_id" db:"alert_status_id"`
-	SubmittedAt   time.Time `json:"submitted_at" db:"submitted_at"`
-}
-
-type EvaluationSubmittal struct {
-	LastEvaluationTime *time.Time `db:"last_evaluation_time"`
-	AlertCheck
-}
-
-type MeasurementSubmittal struct {
-	AffectedTimeseries MeasurementSubmittalTimeseriesCollection `db:"affected_timeseries"`
-	AlertCheck
-}
-
-type MeasurementSubmittalTimeseries struct {
-	InstrumentName      string    `json:"instrument_name"`
-	TimeseriesName      string    `json:"timeseries_name"`
-	LastMeasurementTime time.Time `json:"last_measurement_time"`
-	Status              string    `json:"status"`
-}
-
-type MeasurementSubmittalTimeseriesCollection []MeasurementSubmittalTimeseries
-
-func (a *MeasurementSubmittalTimeseriesCollection) Scan(src interface{}) error {
-	if err := json.Unmarshal([]byte(src.(string)), a); err != nil {
-		return err
-	}
-	return nil
-}
-
-type AlertChecker interface {
+type AlertConfigChecker[T AlertChecker] interface {
 	GetAlertConfig() AlertConfig
-	GetShouldWarn() bool
-	GetShouldAlert() bool
-	GetShouldRemind() bool
+	SetAlertConfig(AlertConfig)
+	GetChecks() []T
+	SetChecks([]T)
 	DoEmail(string, *config.AlertCheckConfig, *config.SmtpConfig) error
 }
 
-func (ck AlertCheck) GetAlertConfig() AlertConfig {
-	return ck.AlertConfig
+type AlertChecker interface {
+	GetShouldWarn() bool
+	GetShouldAlert() bool
+	GetShouldRemind() bool
+	GetSubmittal() Submittal
+	SetSubmittal(Submittal)
 }
 
 func (ck AlertCheck) GetShouldWarn() bool {
@@ -77,67 +45,15 @@ func (ck AlertCheck) GetShouldRemind() bool {
 	return ck.ShouldRemind
 }
 
-func (es EvaluationSubmittal) DoEmail(emailType string, cfg *config.AlertCheckConfig, smtpCfg *config.SmtpConfig) error {
-	preformatted := et.EmailContent{
-		TextSubject: "-- DO NOT REPLY -- MIDAS " + emailType + ": {{.AlertConfig.ProjectName}} Evaluation Submittal \"{{.AlertConfig.Name}}\"",
-		TextBody: "The following " + emailType + " has been triggered:\r\n\r\n" +
-			"Project: {{.AlertConfig.ProjectName}}\r\n" +
-			"Alert Type: Evaluation Submittal\r\n" +
-			"Alert Name: \"{{.AlertConfig.Name}}\"\r\n" +
-			"Description: \"{{.AlertConfig.Body}}\"\r\n" +
-			"Expected Evaluation Submittal Time: {{.ExpectedSubmittal.Format \"Jan 02, 2006 15:04:05 UTC\" }}\r\n" +
-			"{{if .LastEvaluationTime}}Last Evaluation Submittal Time: {{.LastEvaluationTime.Format \"Jan 02, 2006 15:04:05 UTC\" }}{{end}}\r\n",
-	}
-	templContent, err := et.CreateEmailTemplateContent(preformatted)
-	if err != nil {
-		return err
-	}
-	content, err := et.FormatAlertConfigTemplates(templContent, es)
-	if err != nil {
-		return err
-	}
-	content.To = es.AlertConfig.GetToAddresses()
-	if len(content.To) < 1 {
-		return nil // no email subs
-	}
-	if err := et.ConstructAndSendEmail(content, cfg, smtpCfg); err != nil {
-		return err
-	}
-	return nil
+func (ck AlertCheck) GetSubmittal() Submittal {
+	return ck.Submittal
 }
 
-func (ms MeasurementSubmittal) DoEmail(emailType string, cfg *config.AlertCheckConfig, smtpCfg *config.SmtpConfig) error {
-	preformatted := et.EmailContent{
-		TextSubject: "-- DO NOT REPLY -- MIDAS " + emailType + ": {{.AlertConfig.ProjectName}} Timeseries Measurement Submittal \"{{.AlertConfig.Name}}\"",
-		TextBody: "The following " + emailType + " has been triggered:\r\n\r\n" +
-			"Project: {{.AlertConfig.ProjectName}}\r\n" +
-			"Alert Type: Measurement Submittal\r\n" +
-			"Alert Name: \"{{.AlertConfig.Name}}\"\r\n" +
-			"Description: \"{{.AlertConfig.Body}}\"\r\n" +
-			"Last Expected Measurement Submittal Time: {{.ExpectedSubmittal.Format \"Jan 02, 2006 15:04:05 UTC\" }}\r\n" +
-			"Affected Timeseries Last Measurement Submittal:\r\n" +
-			"{{range .AffectedTimeseries}}\t• {{.InstrumentName}}: {{.TimeseriesName}}" +
-			" at {{.LastMeasurementTime.Format \"Jan 02, 2006 15:04:05 UTC\" }} (status: {{.Status}})\r\n{{end}}",
-	}
-	templContent, err := et.CreateEmailTemplateContent(preformatted)
-	if err != nil {
-		return err
-	}
-	content, err := et.FormatAlertConfigTemplates(templContent, ms)
-	if err != nil {
-		return err
-	}
-	content.To = ms.AlertConfig.GetToAddresses()
-	if len(content.To) < 1 {
-		return nil // no email subs
-	}
-	if err := et.ConstructAndSendEmail(content, cfg, smtpCfg); err != nil {
-		return err
-	}
-	return nil
+func (ck *AlertCheck) SetSubmittal(sub Submittal) {
+	ck.Submittal = sub
 }
 
-func ListExpiredAlertConfigs(db *sqlx.DB) ([]AlertConfig, error) {
+func ListAndCheckAlertConfigs(db *sqlx.DB) ([]AlertConfig, error) {
 	aa := make([]AlertConfig, 0)
 
 	sql := `
@@ -145,7 +61,7 @@ func ListExpiredAlertConfigs(db *sqlx.DB) ([]AlertConfig, error) {
 		SET last_checked = now()
 		FROM (
 			SELECT *
-			FROM v_alert_config a
+			FROM v_alert_config
 		) ac2
 		WHERE  ac1.id = ac2.id
 		RETURNING ac2.*
@@ -161,33 +77,72 @@ func ListExpiredAlertConfigs(db *sqlx.DB) ([]AlertConfig, error) {
 	return aa, nil
 }
 
-func UpdateAlertConfigStatus(db *sqlx.DB, alertConfigs []AlertConfig) error {
+func UpdateAlertConfigChecks[T AlertChecker, PT AlertConfigChecker[T]](db *sqlx.DB, accs []PT) error {
 	txn, err := db.Beginx()
 	if err != nil {
 		return err
 	}
 	defer txn.Rollback()
 
-	stmt, err := txn.Preparex(`
+	stmt1, err := txn.Preparex(`
 		UPDATE alert_config SET
-			last_reminded=$2,
-			alert_status_id=$3
-		WHERE id=$1
+			last_reminded = $2
+		WHERE id = $1
 	`)
 	if err != nil {
 		return err
 	}
 
-	for _, ac := range alertConfigs {
-		if _, err := stmt.Exec(ac.ID, ac.LastReminded, ac.AlertStatusID); err != nil {
-			if err == _sql.ErrNoRows {
-				log.Println(err.Error())
-				return nil
-			}
+	stmt2, err := txn.Preparex(`
+		UPDATE submittal SET
+			submittal_status_id = $2,
+			completion_date = $3,
+			warning_sent = $4
+		WHERE id = $1
+	`)
+	if err != nil {
+		return err
+	}
+
+	stmt3, err := txn.Preparex(`
+		INSERT INTO submittal (alert_config_id, create_date, due_date)
+		SELECT
+			ac.id,
+			$2::TIMESTAMPTZ,
+			$2::TIMESTAMPTZ + ac.schedule_interval
+		FROM alert_config ac
+		WHERE ac.id = $1
+	`)
+	if err != nil {
+		return err
+	}
+
+	for _, acc := range accs {
+		ac := acc.GetAlertConfig()
+		if _, err := stmt1.Exec(ac.ID, ac.LastReminded); err != nil {
 			return err
 		}
+		checks := acc.GetChecks()
+		for _, c := range checks {
+			sub := c.GetSubmittal()
+			if _, err := stmt2.Exec(sub.ID, sub.SubmittalStatusID, sub.CompletionDate, sub.WarningSent); err != nil {
+				return err
+			}
+		}
+		if ac.CreateNextSubmittalFrom != nil {
+			if _, err := stmt3.Exec(ac.ID, ac.CreateNextSubmittalFrom); err != nil {
+				return err
+			}
+		}
 	}
-	if err := stmt.Close(); err != nil {
+
+	if err := stmt1.Close(); err != nil {
+		return err
+	}
+	if err := stmt2.Close(); err != nil {
+		return err
+	}
+	if err := stmt3.Close(); err != nil {
 		return err
 	}
 	if err := txn.Commit(); err != nil {
@@ -195,83 +150,4 @@ func UpdateAlertConfigStatus(db *sqlx.DB, alertConfigs []AlertConfig) error {
 	}
 
 	return nil
-}
-
-func ListAlertCheckEvaluationSubmittals(db *sqlx.DB, alertConfigs []AlertConfig) ([]EvaluationSubmittal, error) {
-	es := make([]EvaluationSubmittal, 0)
-	if len(alertConfigs) == 0 {
-		log.Println("no evaluation submittals to check")
-		return es, nil
-	}
-
-	acIDs := make([]uuid.UUID, len(alertConfigs))
-	for idx := range alertConfigs {
-		acIDs[idx] = alertConfigs[idx].ID
-	}
-
-	query, args, err := sqlx.In(`SELECT * FROM v_alert_check_evaluation_submittal WHERE alert_config_id IN (?)`, acIDs)
-	if err != nil {
-		return es, err
-	}
-	query = db.Rebind(query)
-	if err := db.Select(&es, query, args...); err != nil {
-		if err == _sql.ErrNoRows {
-			return es, nil
-		}
-		return es, err
-	}
-
-	acMap := make(map[uuid.UUID]AlertConfig)
-	for _, a := range alertConfigs {
-		acMap[a.ID] = a
-	}
-	for idx := range es {
-		ac, ok := acMap[es[idx].AlertConfigID]
-		if !ok {
-			return es, err
-		}
-		es[idx].AlertConfig = ac
-	}
-
-	return es, nil
-}
-
-func ListAlertCheckMeasurementSubmittals(db *sqlx.DB, alertConfigs []AlertConfig) ([]MeasurementSubmittal, error) {
-	ms := make([]MeasurementSubmittal, 0)
-	if len(alertConfigs) == 0 {
-		log.Println("no measurement submittals to check")
-		return ms, nil
-	}
-
-	acIDs := make([]uuid.UUID, len(alertConfigs))
-	for idx := range alertConfigs {
-		acIDs[idx] = alertConfigs[idx].ID
-	}
-
-	query, args, err := sqlx.In(`SELECT * FROM v_alert_check_measurement_submittal WHERE alert_config_id IN (?)`, acIDs)
-	if err != nil {
-		return ms, err
-	}
-
-	query = db.Rebind(query)
-	if err := db.Select(&ms, query, args...); err != nil {
-		if err == _sql.ErrNoRows {
-			return ms, nil
-		}
-		return ms, err
-	}
-
-	acMap := make(map[uuid.UUID]AlertConfig)
-	for _, a := range alertConfigs {
-		acMap[a.ID] = a
-	}
-	for idx := range ms {
-		ac, ok := acMap[ms[idx].AlertConfigID]
-		if !ok {
-			return ms, err
-		}
-		ms[idx].AlertConfig = ac
-	}
-
-	return ms, nil
 }

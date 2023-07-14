@@ -14,6 +14,7 @@ type Evaluation struct {
 	ProjectName     string                         `json:"project_name" db:"project_name"`
 	AlertConfigID   *uuid.UUID                     `json:"alert_config_id" db:"alert_config_id"`
 	AlertConfigName *string                        `json:"alert_config_name" db:"alert_config_name"`
+	SubmittalID     *uuid.UUID                     `json:"submittal_id" db:"submittal_id"`
 	Name            string                         `json:"name" db:"name"`
 	Body            string                         `json:"body" db:"body"`
 	StartDate       time.Time                      `json:"start_date" db:"start_date"`
@@ -100,12 +101,48 @@ func GetEvaluation(db *sqlx.DB, evaluationID *uuid.UUID) (*Evaluation, error) {
 	return &a, nil
 }
 
+func RecordEvaluationSubmittalTxn(txn *sqlx.Tx, ev *Evaluation) error {
+	if ev.AlertConfigID != nil {
+		stmt, err := txn.Preparex(`
+			UPDATE submittal SET
+				submittal_status_id = sq.submittal_status_id,
+				completion_date = NOW()
+			FROM (
+				SELECT
+					CASE
+						-- if completed before due date, mark submittal as green id
+						WHEN NOW() <= due_date THEN '0c0d6487-3f71-4121-8575-19514c7b9f03'::UUID
+						-- if completed after due date, mark as yellow
+						ELSE 'ef9a3235-f6e2-4e6c-92f6-760684308f7f'::UUID
+					END
+				FROM submittal
+				WHERE id = $1
+			) sq
+			WHERE id = $1
+		`)
+		if err != nil {
+			return err
+		}
+		if _, err := stmt.Exec(ev.AlertConfigID); err != nil {
+			return err
+		}
+		if err := stmt.Close(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func CreateEvaluation(db *sqlx.DB, ev *Evaluation) (*Evaluation, error) {
 	txn, err := db.Beginx()
 	if err != nil {
 		return nil, err
 	}
 	defer txn.Rollback()
+
+	if err := RecordEvaluationSubmittalTxn(txn, ev); err != nil {
+		return nil, err
+	}
 
 	stmt1, err := txn.Preparex(`
 		INSERT INTO evaluation
@@ -151,12 +188,6 @@ func CreateEvaluation(db *sqlx.DB, ev *Evaluation) (*Evaluation, error) {
 			return nil, err
 		}
 	}
-
-	// TODO: record submittal
-	// if evaulation_id in alert_config_evaluation {
-	//		get alert_config status
-	// 		insert into submittal history table with status_id and alert_config_id
-	// }
 
 	if err := stmt1.Close(); err != nil {
 		return nil, err
