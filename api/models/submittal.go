@@ -44,7 +44,7 @@ func ListProjectSubmittals(db *sqlx.DB, projectID *uuid.UUID, tw timeseries.Time
 		AND ` + q + `
 		ORDER BY due_date DESC, alert_type_name ASC
 	`
-	if err := db.Select(&aa, sql, projectID, tw.After, tw.Before); err != nil {
+	if err := db.Select(&aa, sql, projectID, tw.Start, tw.End); err != nil {
 		return aa, err
 	}
 
@@ -71,7 +71,7 @@ func ListInstrumentSubmittals(db *sqlx.DB, instrumentID *uuid.UUID, tw timeserie
 		AND ` + q + `
 		ORDER BY due_date DESC
 	`
-	if err := db.Select(&aa, sql, instrumentID, tw.After, tw.Before); err != nil {
+	if err := db.Select(&aa, sql, instrumentID, tw.Start, tw.End); err != nil {
 		return aa, err
 	}
 
@@ -93,7 +93,7 @@ func ListAlertConfigSubmittals(db *sqlx.DB, alertConfigID *uuid.UUID, tw timeser
 		AND ` + q + `
 		ORDER BY due_date DESC
 	`
-	if err := db.Select(&aa, sql, alertConfigID, tw.After, tw.Before); err != nil {
+	if err := db.Select(&aa, sql, alertConfigID, tw.Start, tw.End); err != nil {
 		return aa, err
 	}
 

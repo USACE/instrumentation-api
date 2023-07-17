@@ -65,7 +65,7 @@ func ListTimeseriesMeasurements(db *sqlx.DB, tsID *uuid.UUID, tw *ts.TimeWindow,
 	if err := db.Select(
 		&items,
 		sql,
-		tsID, tw.After, tw.Before,
+		tsID, tw.Start, tw.End,
 	); err != nil {
 		return nil, err
 	}
@@ -229,10 +229,10 @@ func UpdateTimeseriesMeasurements(db *sqlx.DB, mc []ts.MeasurementCollection, tw
 	}
 
 	for _, c := range mc {
-		if _, err := stmt_measurement.Exec(c.TimeseriesID, tw.After, tw.Before); err != nil {
+		if _, err := stmt_measurement.Exec(c.TimeseriesID, tw.Start, tw.End); err != nil {
 			return nil, err
 		}
-		if _, err := stmt_notes.Exec(c.TimeseriesID, tw.After, tw.Before); err != nil {
+		if _, err := stmt_notes.Exec(c.TimeseriesID, tw.Start, tw.End); err != nil {
 			return nil, err
 		}
 	}

@@ -82,6 +82,8 @@ func DoAlertChecks(db *sqlx.DB, cfg *config.AlertCheckConfig, smtpCfg *config.Sm
 // for evaluations, the next is submittal created manually when the evaluation is made
 // for measurements, the next submittal is created the first time this function runs after the due date
 //
+// No "Yellow" Status Submittals should be passed to this function as it implies the submittal has been completed
+//
 // TODO: smtp.SendMail esablishes a new connection for each batch of emails sent. I would be better to aggregate
 // the contents of each email, then create a connection pool to reuse and send all emails at once, with any errors wrapped and returned
 func handleChecks[T models.AlertChecker, PT models.AlertConfigChecker[T]](db *sqlx.DB, accs []PT, cfg *config.AlertCheckConfig, smtpCfg *config.SmtpConfig) error {
@@ -102,9 +104,11 @@ func handleChecks[T models.AlertChecker, PT models.AlertConfigChecker[T]](db *sq
 			checks := acc.GetChecks()
 
 			// If ANY "missing" submittals are within an alert config, aggregate missing submittals and send an alert
-			sendAlert := false
+			acAlert := false
+			sendAlertEmail := false
 			// If ANY missing submittals previously existed within an alert config, send them in a "reminder" instead of an alert
-			sendReminder := false
+			acReminder := false
+			sendReminderEmail := false
 			// If a reminder exists when at least one submittal "shouldAlert", the alert should be aggregated into the next reminder
 			// instead of sending a new reminder email. If NO alerts exist for an alert config, the reminder can be reset to NULL.
 			// Reminders should be set when the first alert for an alert config is triggered, or at each reminder interval
@@ -132,9 +136,6 @@ func handleChecks[T models.AlertChecker, PT models.AlertConfigChecker[T]](db *sq
 						sub.CompletionDate = &sub.DueDate
 						ac.CreateNextSubmittalFrom = &sub.DueDate
 					}
-
-					// No "Yellow" Status Submittals should be passed to this function
-					// as it implies the submittal has been completed
 				} else
 
 				// if any submittal warning is triggered, immediately send a
@@ -154,7 +155,7 @@ func handleChecks[T models.AlertChecker, PT models.AlertConfigChecker[T]](db *sq
 				if shouldAlert {
 					if sub.SubmittalStatusID != RedSubmittalStatusID {
 						sub.SubmittalStatusID = RedSubmittalStatusID
-						sendAlert = true
+						acAlert = true
 						ac.CreateNextSubmittalFrom = &sub.DueDate
 					}
 					resetReminders = false
@@ -163,7 +164,7 @@ func handleChecks[T models.AlertChecker, PT models.AlertConfigChecker[T]](db *sq
 				// if any reminder is triggered, aggregate missing
 				// submittals and send their contents in an email
 				if shouldRemind {
-					sendReminder = true
+					acReminder = true
 				}
 
 				c.SetSubmittal(sub)
@@ -177,26 +178,28 @@ func handleChecks[T models.AlertChecker, PT models.AlertConfigChecker[T]](db *sq
 			}
 
 			// if there are any reminders within an alert config, they will override the alerts
-			if sendReminder {
+			if acAlert && ((!acReminder && ac.LastReminded == nil) || !ac.MuteConsecutiveAlerts) {
 				ac.LastReminded = &t
+				sendAlertEmail = true
+			}
+			if acReminder {
+				ac.LastReminded = &t
+				sendReminderEmail = true
+			}
 
-				acc.SetAlertConfig(ac)
-				acc.SetChecks(checks)
+			acc.SetAlertConfig(ac)
+			acc.SetChecks(checks)
 
+			if sendAlertEmail {
 				mu.Lock()
-				if err := acc.DoEmail(reminder, cfg, smtpCfg); err != nil {
+				if err := acc.DoEmail(alert, cfg, smtpCfg); err != nil {
 					errs = append(errs, err)
 				}
 				mu.Unlock()
 			}
-			if sendAlert && ((!sendReminder && ac.LastReminded == nil) || !ac.MuteConsecutiveAlerts) {
-				ac.LastReminded = &t
-
-				acc.SetAlertConfig(ac)
-				acc.SetChecks(checks)
-
+			if sendReminderEmail {
 				mu.Lock()
-				if err := acc.DoEmail(alert, cfg, smtpCfg); err != nil {
+				if err := acc.DoEmail(reminder, cfg, smtpCfg); err != nil {
 					errs = append(errs, err)
 				}
 				mu.Unlock()

@@ -2,9 +2,11 @@ package handlers
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/USACE/instrumentation-api/api/messages"
 	"github.com/USACE/instrumentation-api/api/models"
+	"github.com/USACE/instrumentation-api/api/timeseries"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
@@ -17,7 +19,14 @@ func ListProjectEvaluationDistrictRollup(db *sqlx.DB) echo.HandlerFunc {
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
-		project, err := models.ListEvaluationDistrictRollup(db, id)
+
+		var tw timeseries.TimeWindow
+		from, to := c.QueryParam("from_timestamp_month"), c.QueryParam("to_timestamp_month")
+		if err := tw.SetWindow(from, to, time.Now(), time.Now().AddDate(-1, 0, 0)); err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+
+		project, err := models.ListEvaluationDistrictRollup(db, id, tw)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
@@ -32,7 +41,14 @@ func ListProjectMeasurementDistrictRollup(db *sqlx.DB) echo.HandlerFunc {
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
-		project, err := models.ListMeasurementDistrictRollup(db, id)
+
+		var tw timeseries.TimeWindow
+		from, to := c.QueryParam("from_timestamp_month"), c.QueryParam("to_timestamp_month")
+		if err := tw.SetWindow(from, to, time.Now(), time.Now().AddDate(-1, 0, 0)); err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+
+		project, err := models.ListMeasurementDistrictRollup(db, id, tw)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}

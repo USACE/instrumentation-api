@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/USACE/instrumentation-api/api/messages"
 	"github.com/USACE/instrumentation-api/api/models"
@@ -22,7 +23,7 @@ func ListProjectSubmittals(db *sqlx.DB) echo.HandlerFunc {
 
 		var tw timeseries.TimeWindow
 		a, b := c.QueryParam("after"), c.QueryParam("before")
-		if err = tw.SetWindow(a, b); err != nil {
+		if err = tw.SetWindow(a, b, time.Now(), time.Now().AddDate(0, 0, -7)); err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
@@ -50,7 +51,7 @@ func ListInstrumentSubmittals(db *sqlx.DB) echo.HandlerFunc {
 
 		var tw timeseries.TimeWindow
 		a, b := c.QueryParam("after"), c.QueryParam("before")
-		if err = tw.SetWindow(a, b); err != nil {
+		if err = tw.SetWindow(a, b, time.Now(), time.Now().AddDate(0, 0, -7)); err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
@@ -78,7 +79,7 @@ func ListAlertConfigSubmittals(db *sqlx.DB) echo.HandlerFunc {
 
 		var tw timeseries.TimeWindow
 		a, b := c.QueryParam("after"), c.QueryParam("before")
-		if err = tw.SetWindow(a, b); err != nil {
+		if err = tw.SetWindow(a, b, time.Now(), time.Now().AddDate(0, 0, -7)); err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 

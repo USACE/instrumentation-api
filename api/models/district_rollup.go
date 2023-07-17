@@ -3,6 +3,7 @@ package models
 import (
 	"time"
 
+	"github.com/USACE/instrumentation-api/api/timeseries"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
@@ -22,26 +23,30 @@ type DistrictRollup struct {
 }
 
 // ListCollectionGroups lists all collection groups for a project
-func ListEvaluationDistrictRollup(db *sqlx.DB, opID uuid.UUID) ([]DistrictRollup, error) {
+func ListEvaluationDistrictRollup(db *sqlx.DB, opID uuid.UUID, tw timeseries.TimeWindow) ([]DistrictRollup, error) {
 	dr := make([]DistrictRollup, 0)
 	if err := db.Select(&dr, `
 		SELECT * FROM v_district_rollup
 		WHERE alert_type_id = 'da6ee89e-58cc-4d85-8384-43c3c33a68bd'::UUID
 		AND project_id = $1
-	`, opID); err != nil {
+		AND the_month >= $2
+		AND the_month <= $3
+	`, opID, tw.Start, tw.End); err != nil {
 		return dr, err
 	}
 	return dr, nil
 }
 
 // ListCollectionGroups lists all collection groups for a project
-func ListMeasurementDistrictRollup(db *sqlx.DB, opID uuid.UUID) ([]DistrictRollup, error) {
+func ListMeasurementDistrictRollup(db *sqlx.DB, opID uuid.UUID, tw timeseries.TimeWindow) ([]DistrictRollup, error) {
 	dr := make([]DistrictRollup, 0)
 	if err := db.Select(&dr, `
 		SELECT * FROM v_district_rollup
 		WHERE alert_type_id = '97e7a25c-d5c7-4ded-b272-1bb6e5914fe3'::UUID
 		AND project_id = $1
-	`, opID); err != nil {
+		AND the_month >= $2
+		AND the_month <= $3
+	`, opID, tw.Start, tw.End); err != nil {
 		return dr, err
 	}
 	return dr, nil
