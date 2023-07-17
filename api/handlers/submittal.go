@@ -28,7 +28,11 @@ func ListProjectSubmittals(db *sqlx.DB) echo.HandlerFunc {
 		}
 
 		var fmo bool
-		mo := c.QueryParam("missing_only")
+		mo := c.QueryParam("missing")
+		if mo != "" && (a != "" || b != "") {
+			return echo.NewHTTPError(http.StatusBadRequest, "'after/before' and 'missing' parameters are mutually exclusive")
+		}
+
 		if strings.ToLower(mo) == "true" {
 			fmo = true
 		}
@@ -56,7 +60,7 @@ func ListInstrumentSubmittals(db *sqlx.DB) echo.HandlerFunc {
 		}
 
 		var fmo bool
-		mo := c.QueryParam("missing_only")
+		mo := c.QueryParam("missing")
 		if strings.ToLower(mo) == "true" {
 			fmo = true
 		}
@@ -84,7 +88,7 @@ func ListAlertConfigSubmittals(db *sqlx.DB) echo.HandlerFunc {
 		}
 
 		var fmo bool
-		mo := c.QueryParam("missing_only")
+		mo := c.QueryParam("missing")
 		if strings.ToLower(mo) == "true" {
 			fmo = true
 		}
