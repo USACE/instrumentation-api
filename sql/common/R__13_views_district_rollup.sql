@@ -23,7 +23,7 @@ CREATE OR REPLACE VIEW v_district_rollup AS (
     INNER JOIN project prj ON ac.project_id = prj.id
     LEFT JOIN district dt ON dt.office_id = prj.office_id
     LEFT JOIN submittal sub ON sub.alert_config_id = ac.id
-    WHERE DATE_TRUNC('month', sub.due_date) >= NOW() - INTERVAL '1 year' AND sub.due_date <= NOW()
+    WHERE sub.due_date <= NOW()
     GROUP BY ac.alert_type_id, dt.office_id, dt.initials, prj.id, prj.name, DATE_TRUNC('month', sub.due_date)
 	ORDER BY DATE_TRUNC('month', sub.due_date), ac.alert_type_id
 );

@@ -25,6 +25,9 @@ func ListProjectEvaluationDistrictRollup(db *sqlx.DB) echo.HandlerFunc {
 		if err := tw.SetWindow(from, to, time.Now(), time.Now().AddDate(-1, 0, 0)); err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
+		if fiveYrsAfterStart := tw.Start.AddDate(5, 0, 0); tw.End.After(fiveYrsAfterStart) {
+			return echo.NewHTTPError(http.StatusBadRequest, "maximum requested time range exceeded (5 years)")
+		}
 
 		project, err := models.ListEvaluationDistrictRollup(db, id, tw)
 		if err != nil {
@@ -46,6 +49,9 @@ func ListProjectMeasurementDistrictRollup(db *sqlx.DB) echo.HandlerFunc {
 		from, to := c.QueryParam("from_timestamp_month"), c.QueryParam("to_timestamp_month")
 		if err := tw.SetWindow(from, to, time.Now(), time.Now().AddDate(-1, 0, 0)); err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+		if fiveYrsAfterStart := tw.Start.AddDate(5, 0, 0); tw.End.After(fiveYrsAfterStart) {
+			return echo.NewHTTPError(http.StatusBadRequest, "maximum requested time range exceeded (5 years)")
 		}
 
 		project, err := models.ListMeasurementDistrictRollup(db, id, tw)

@@ -29,8 +29,8 @@ func ListEvaluationDistrictRollup(db *sqlx.DB, opID uuid.UUID, tw timeseries.Tim
 		SELECT * FROM v_district_rollup
 		WHERE alert_type_id = 'da6ee89e-58cc-4d85-8384-43c3c33a68bd'::UUID
 		AND project_id = $1
-		AND the_month >= $2
-		AND the_month <= $3
+		AND the_month >= DATE_TRUNC('month', $2)
+		AND the_month <= DATE_TRUNC('month', $3)
 	`, opID, tw.Start, tw.End); err != nil {
 		return dr, err
 	}
@@ -44,8 +44,8 @@ func ListMeasurementDistrictRollup(db *sqlx.DB, opID uuid.UUID, tw timeseries.Ti
 		SELECT * FROM v_district_rollup
 		WHERE alert_type_id = '97e7a25c-d5c7-4ded-b272-1bb6e5914fe3'::UUID
 		AND project_id = $1
-		AND the_month >= $2
-		AND the_month <= $3
+		AND the_month >= DATE_TRUNC('month', $2)
+		AND the_month <= DATE_TRUNC('month', $3)
 	`, opID, tw.Start, tw.End); err != nil {
 		return dr, err
 	}
