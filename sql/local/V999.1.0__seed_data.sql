@@ -316,12 +316,12 @@ INSERT INTO submittal (
     submittal_status_id,
     marked_as_missing
 ) VALUES
-    ('b8c1c297-d1d5-4cee-b949-72299b330617', '1efd2d85-d3ee-4388-85a0-f824a761ff8b', NOW() - INTERVAL '1 month', NOW(), NOW(), '0c0d6487-3f71-4121-8575-19514c7b9f03', false),
-    ('f4d9f5b2-9327-4098-9a50-27870724695c', '90ff91d6-ab39-40db-9160-34ce17416281', NOW() - INTERVAL '1 month', NOW(), NOW(), '0c0d6487-3f71-4121-8575-19514c7b9f03', false),
-    ('45c82489-1b3e-46fe-842f-92c17962c9f4', '15c106f5-a293-4a0e-b45a-6a4c7206ac6a', NOW() - INTERVAL '1 month', NOW(), NOW(), '0c0d6487-3f71-4121-8575-19514c7b9f03', false),
-    ('f8189297-f1a6-489d-9ea7-f1a0ffc30153', 'c07165de-71ec-40c4-b25b-c42deefea636', NOW() - INTERVAL '1 month', NOW(), NOW(), '0c0d6487-3f71-4121-8575-19514c7b9f03', false),
-    ('bf9e1519-c4dc-4904-9499-6a46fb18a199', 'd3738f72-4c0b-47f8-8ff9-8bea46022309', NOW() - INTERVAL '1 month', NOW(), NOW(), '0c0d6487-3f71-4121-8575-19514c7b9f03', false),
-    ('2aea5fd9-5462-4b6d-9dfb-2e155a06c6ae', '5f9555df-c616-4530-bdcd-6b664fc91255', NOW() - INTERVAL '1 month', NOW(), NOW(), '0c0d6487-3f71-4121-8575-19514c7b9f03', false);
+    ('b8c1c297-d1d5-4cee-b949-72299b330617', '1efd2d85-d3ee-4388-85a0-f824a761ff8b', NOW() - INTERVAL '1 month', NOW(), NULL, '0c0d6487-3f71-4121-8575-19514c7b9f03', false),
+    ('f4d9f5b2-9327-4098-9a50-27870724695c', '90ff91d6-ab39-40db-9160-34ce17416281', NOW() - INTERVAL '1 month', NOW(), NULL, '0c0d6487-3f71-4121-8575-19514c7b9f03', false),
+    ('45c82489-1b3e-46fe-842f-92c17962c9f4', '15c106f5-a293-4a0e-b45a-6a4c7206ac6a', NOW() - INTERVAL '1 month', NOW(), NULL, '0c0d6487-3f71-4121-8575-19514c7b9f03', false),
+    ('f8189297-f1a6-489d-9ea7-f1a0ffc30153', 'c07165de-71ec-40c4-b25b-c42deefea636', NOW() - INTERVAL '1 month', NOW(), NULL, '0c0d6487-3f71-4121-8575-19514c7b9f03', false),
+    ('bf9e1519-c4dc-4904-9499-6a46fb18a199', 'd3738f72-4c0b-47f8-8ff9-8bea46022309', NOW() - INTERVAL '1 month', NOW(), NULL, '0c0d6487-3f71-4121-8575-19514c7b9f03', false),
+    ('2aea5fd9-5462-4b6d-9dfb-2e155a06c6ae', '5f9555df-c616-4530-bdcd-6b664fc91255', NOW() - INTERVAL '1 month', NOW(), NULL, '0c0d6487-3f71-4121-8575-19514c7b9f03', false);
 
 INSERT INTO evaluation (id, project_id, submittal_id, name, body, start_date, end_date, create_date) VALUES
     ('add252bf-2fa7-4824-b129-e4d0ff42dffa', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', NULL, 'Test Evaluation 1', 'Evaluation for demonstration purposes.', '2022-12-01', '2023-01-01', NOW() - INTERVAL 'PT2M'),
