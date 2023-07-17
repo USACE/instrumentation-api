@@ -101,9 +101,6 @@ func handleChecks[T models.AlertChecker, PT models.AlertConfigChecker[T]](db *sq
 			ac := acc.GetAlertConfig()
 			checks := acc.GetChecks()
 
-			// if the email type is an empty string when it's passed to models.AlertConfigCheck.DoEmail,
-			// the method will exit without sending an email
-			emailType := ""
 			// If ANY "missing" submittals are within an alert config, aggregate missing submittals and send an alert
 			sendAlert := false
 			// If ANY missing submittals previously existed within an alert config, send them in a "reminder" instead of an alert
@@ -181,22 +178,29 @@ func handleChecks[T models.AlertChecker, PT models.AlertConfigChecker[T]](db *sq
 
 			// if there are any reminders within an alert config, they will override the alerts
 			if sendReminder {
-				emailType = reminder
 				ac.LastReminded = &t
 
-			} else if sendAlert && ac.LastReminded == nil {
-				emailType = alert
+				acc.SetAlertConfig(ac)
+				acc.SetChecks(checks)
+
+				mu.Lock()
+				if err := acc.DoEmail(reminder, cfg, smtpCfg); err != nil {
+					errs = append(errs, err)
+				}
+				mu.Unlock()
+			}
+			if sendAlert && ((!sendReminder && ac.LastReminded == nil) || !ac.MuteConsecutiveAlerts) {
 				ac.LastReminded = &t
-			}
 
-			acc.SetAlertConfig(ac)
-			acc.SetChecks(checks)
+				acc.SetAlertConfig(ac)
+				acc.SetChecks(checks)
 
-			mu.Lock()
-			if err := acc.DoEmail(emailType, cfg, smtpCfg); err != nil {
-				errs = append(errs, err)
+				mu.Lock()
+				if err := acc.DoEmail(alert, cfg, smtpCfg); err != nil {
+					errs = append(errs, err)
+				}
+				mu.Unlock()
 			}
-			mu.Unlock()
 
 			aaccs[idx] = acc
 		}(i, p)

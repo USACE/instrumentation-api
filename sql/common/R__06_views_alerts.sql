@@ -42,7 +42,7 @@ CREATE VIEW v_alert_config AS (
         atype.name                          AS alert_type,
         ac.start_date                       AS start_date,
         ac.schedule_interval::text          AS schedule_interval,
-        ac.n_missed_before_alert            AS n_missed_before_alert,
+        ac.mute_consecutive_alerts          AS mute_consecutive_alerts,
         ac.remind_interval::text            AS remind_interval,
         ac.warning_interval::text           AS warning_interval,
         ac.last_checked                     AS last_checked,

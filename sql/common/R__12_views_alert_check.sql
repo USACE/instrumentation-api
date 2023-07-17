@@ -22,10 +22,12 @@ CREATE VIEW v_alert_check_measurement_submittal AS (
         ) AS should_alert,
         COALESCE(
             ac.remind_interval != INTERVAL '0'
+            AND ac.last_reminded IS NOT NULL
             AND sub.completion_date IS NULL
             AND NOT sub.marked_as_missing
             AND NOW() >= sub.due_date
-            AND NOW() >= COALESCE(ac.last_reminded, ac.create_date) + ac.remind_interval - INTERVAL '10 seconds',
+            -- subtract 10 second constant to account for ticker accuracy/execution time
+            AND NOW() >= ac.last_reminded + ac.remind_interval - INTERVAL '10 seconds',
             true
         ) AS should_remind,
         COALESCE(JSON_AGG(JSON_BUILD_OBJECT(
@@ -79,6 +81,7 @@ CREATE VIEW v_alert_check_evaluation_submittal AS (
             ac.remind_interval != INTERVAL '0'
             AND sub.completion_date IS NULL
             AND NOW() >= sub.due_date
+            -- subtract 10 second constant to account for ticker accuracy/execution time
             AND NOW() >= COALESCE(ac.last_reminded, sub.due_date) + ac.remind_interval - INTERVAL '10 seconds'
             AND NOT sub.marked_as_missing,
             true

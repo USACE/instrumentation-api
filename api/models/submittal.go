@@ -3,6 +3,7 @@ package models
 import (
 	"time"
 
+	"github.com/USACE/instrumentation-api/api/timeseries"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
@@ -23,23 +24,41 @@ type Submittal struct {
 	WarningSent         bool       `json:"warning_sent" db:"warning_sent"`
 }
 
-func ListProjectSubmittals(db *sqlx.DB, projectID *uuid.UUID) ([]Submittal, error) {
+var (
+	timeFilter    = `due_date > $2 AND due_date < $3`
+	missingFilter = `completion_date IS NULL AND NOT marked_as_missing`
+)
+
+func ListProjectSubmittals(db *sqlx.DB, projectID *uuid.UUID, tw timeseries.TimeWindow, showMissing bool) ([]Submittal, error) {
 	aa := make([]Submittal, 0)
+
+	q := timeFilter
+	if showMissing {
+		q = missingFilter
+	}
+
 	sql := `
 		SELECT *
 		FROM v_submittal
 		WHERE project_id = $1
+		AND ` + q + `
 		ORDER BY due_date DESC, alert_type ASC
 	`
-	if err := db.Select(&aa, sql, projectID); err != nil {
+	if err := db.Select(&aa, sql, projectID, tw.After, tw.Before); err != nil {
 		return aa, err
 	}
 
 	return aa, nil
 }
 
-func ListInstrumentSubmittals(db *sqlx.DB, instrumentID *uuid.UUID) ([]Submittal, error) {
+func ListInstrumentSubmittals(db *sqlx.DB, instrumentID *uuid.UUID, tw timeseries.TimeWindow, showMissing bool) ([]Submittal, error) {
 	aa := make([]Submittal, 0)
+
+	q := timeFilter
+	if showMissing {
+		q = missingFilter
+	}
+
 	sql := `
 		SELECT *
 		FROM v_submittal
@@ -49,24 +68,32 @@ func ListInstrumentSubmittals(db *sqlx.DB, instrumentID *uuid.UUID) ([]Submittal
 			INNER JOIN alert_config_instrument aci ON aci.alert_config_id = sub.alert_config_id
 			WHERE aci.instrument_id = $1
 		)
+		AND ` + q + `
 		ORDER BY due_date DESC
 	`
-	if err := db.Select(&aa, sql, instrumentID); err != nil {
+	if err := db.Select(&aa, sql, instrumentID, tw.After, tw.Before); err != nil {
 		return aa, err
 	}
 
 	return aa, nil
 }
 
-func ListAlertConfigSubmittals(db *sqlx.DB, alertConfigID *uuid.UUID) ([]Submittal, error) {
+func ListAlertConfigSubmittals(db *sqlx.DB, alertConfigID *uuid.UUID, tw timeseries.TimeWindow, showMissing bool) ([]Submittal, error) {
 	aa := make([]Submittal, 0)
+
+	q := timeFilter
+	if showMissing {
+		q = missingFilter
+	}
+
 	sql := `
 		SELECT *
 		FROM v_submittal
 		WHERE alert_config_id = $1
+		AND ` + q + `
 		ORDER BY due_date DESC
 	`
-	if err := db.Select(&aa, sql, alertConfigID); err != nil {
+	if err := db.Select(&aa, sql, alertConfigID, tw.After, tw.Before); err != nil {
 		return aa, err
 	}
 
@@ -75,7 +102,13 @@ func ListAlertConfigSubmittals(db *sqlx.DB, alertConfigID *uuid.UUID) ([]Submitt
 
 func ListUnverifiedMissingSubmittals(db *sqlx.DB) ([]Submittal, error) {
 	aa := make([]Submittal, 0)
-	sql := `SELECT * FROM v_submittal WHERE completion_date IS NULL AND NOT marked_as_missing`
+	sql := `
+		SELECT *
+		FROM v_submittal
+		WHERE completion_date IS NULL
+		AND NOT marked_as_missing
+		ORDER BY due_date DESC
+	`
 
 	if err := db.Select(&aa, sql); err != nil {
 		return aa, err
@@ -106,8 +139,27 @@ func MarkMissingSubmittal(db *sqlx.DB, submittalID *uuid.UUID) error {
 			submittal_status_id = '84a0f437-a20a-4ac2-8a5b-f8dc35e8489b'::UUID,
 			marked_as_missing = true
 		WHERE id = $1
+		AND completion_date IS NULL
+		AND NOW() > due_date
 	`
 	if _, err := db.Exec(sql, submittalID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func MarkAllMissingSubmittals(db *sqlx.DB, acID *uuid.UUID) error {
+	sql := `
+		UPDATE submittal SET
+			submittal_status_id = '84a0f437-a20a-4ac2-8a5b-f8dc35e8489b'::UUID,
+			marked_as_missing = true
+		WHERE alert_config_id = $1
+		AND completion_date IS NULL
+		AND NOW() > due_date
+	`
+
+	if _, err := db.Exec(sql, acID); err != nil {
 		return err
 	}
 

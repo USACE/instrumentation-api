@@ -18,7 +18,6 @@ type AlertConfig struct {
 	AlertType               string                            `json:"alert_type" db:"alert_type"`
 	StartDate               time.Time                         `json:"start_date" db:"start_date"`
 	ScheduleInterval        string                            `json:"schedule_interval" db:"schedule_interval"`
-	NMissedBeforeAlert      int                               `json:"n_missed_before_alert" db:"n_missed_before_alert"`
 	RemindInterval          string                            `json:"remind_interval" db:"remind_interval"`
 	WarningInterval         string                            `json:"warning_interval" db:"warning_interval"`
 	LastChecked             *time.Time                        `json:"last_checked" db:"last_checked"`
@@ -27,6 +26,7 @@ type AlertConfig struct {
 	AlertEmailSubscriptions EmailAutocompleteResultCollection `json:"alert_email_subscriptions" db:"alert_email_subscriptions"`
 	CreatorUsername         string                            `json:"creator_username" db:"creator_username"`
 	UpdaterUsername         *string                           `json:"updater_username" db:"updater_username"`
+	MuteConsecutiveAlerts   bool                              `json:"mute_consecutive_alerts" db:"mute_consecutive_alerts"`
 	CreateNextSubmittalFrom *time.Time                        `json:"-" db:"-"`
 	AuditInfo
 }
@@ -141,7 +141,7 @@ func CreateAlertConfig(db *sqlx.DB, ac *AlertConfig) (*AlertConfig, error) {
 				alert_type_id,
 				start_date,
 				schedule_interval,
-				n_missed_before_alert,
+				mute_consecutive_alerts,
 				remind_interval,
 				warning_interval,
 				creator,
@@ -160,7 +160,7 @@ func CreateAlertConfig(db *sqlx.DB, ac *AlertConfig) (*AlertConfig, error) {
 	}
 	stmt3, err := txn.Preparex(`
 		INSERT INTO submittal (alert_config_id, due_date)
-		SELECT id, create_date + (schedule_interval * n_missed_before_alert)
+		SELECT id, create_date + schedule_interval
 		FROM alert_config
 		WHERE alert_config_id=$1
 		LIMIT 1
@@ -178,7 +178,7 @@ func CreateAlertConfig(db *sqlx.DB, ac *AlertConfig) (*AlertConfig, error) {
 		ac.AlertTypeID,
 		ac.StartDate,
 		ac.ScheduleInterval,
-		ac.NMissedBeforeAlert,
+		ac.MuteConsecutiveAlerts,
 		ac.RemindInterval,
 		ac.WarningInterval,
 		ac.Creator,
@@ -235,7 +235,7 @@ func UpdateAlertConfig(db *sqlx.DB, alertConfigID *uuid.UUID, ac *AlertConfig) (
 			body=$4,
 			start_date=$5,
 			schedule_interval=$6,
-			n_missed_before_alert=$7,
+			mute_consecutive_alerts=$7,
 			remind_interval=$8,
 			warning_interval=$9,
 			updater=$10,
@@ -270,7 +270,7 @@ func UpdateAlertConfig(db *sqlx.DB, alertConfigID *uuid.UUID, ac *AlertConfig) (
 	// update alert check with new interval
 	stmt5, err := txn.Preparex(`
 		INSERT INTO submittal (alert_config_id, due_date)
-		SELECT ac.id, COALESCE(MAX(acs.create_date), ac.create_date) + (ac.schedule_interval * ac.n_missed_before_alert)
+		SELECT ac.id, COALESCE(MAX(acs.create_date), ac.create_date) + ac.schedule_interval
 		FROM alert_config ac
 		INNER JOIN submittal acs ON ac.id = acs.alert_config_id
 		WHERE ac.id=$1
@@ -287,7 +287,7 @@ func UpdateAlertConfig(db *sqlx.DB, alertConfigID *uuid.UUID, ac *AlertConfig) (
 		ac.Body,
 		ac.StartDate,
 		ac.ScheduleInterval,
-		ac.NMissedBeforeAlert,
+		ac.MuteConsecutiveAlerts,
 		ac.RemindInterval,
 		ac.WarningInterval,
 		ac.Updater,
