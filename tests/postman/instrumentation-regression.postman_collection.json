@@ -4849,6 +4849,195 @@
 			]
 		},
 		{
+			"name": "Submittals",
+			"item": [
+				{
+					"name": "ListProjectSubmittals",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/projects/:project_id/submittals",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"projects",
+								":project_id",
+								"submittals"
+							],
+							"variable": [
+								{
+									"key": "project_id",
+									"value": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+									"description": "project uuid"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ListInstrumentSubmittals",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/instruments/:instrument_id/submittals",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instruments",
+								":instrument_id",
+								"submittals"
+							],
+							"variable": [
+								{
+									"key": "instrument_id",
+									"value": "9e8f2ca4-4037-45a4-aaca-d9e598877439"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ListAlertConfigSubmittals",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/alert_configs/:alert_config_id/submittals",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"alert_configs",
+								":alert_config_id",
+								"submittals"
+							],
+							"variable": [
+								{
+									"key": "alert_config_id",
+									"value": "1efd2d85-d3ee-4388-85a0-f824a761ff8b"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "VerifyMissingSubmittal",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/submittals/:submittal_id/verify_missing",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"submittals",
+								":submittal_id",
+								"verify_missing"
+							],
+							"variable": [
+								{
+									"key": "submittal_id",
+									"value": "b8c1c297-d1d5-4cee-b949-72299b330617"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "VerifyMissingAlertConfigSubmittals",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/alert_configs/:alert_config_id/submittals/verify_missing",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"alert_configs",
+								":alert_config_id",
+								"submittals",
+								"verify_missing"
+							],
+							"variable": [
+								{
+									"key": "alert_config_id",
+									"value": "90ff91d6-ab39-40db-9160-34ce17416281"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "District Rollup",
+			"item": [
+				{
+					"name": "ListProjectEvaluationDistrictRollup",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/projects/:project_id/district_rollup/evaluation_submittals",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"projects",
+								":project_id",
+								"district_rollup",
+								"evaluation_submittals"
+							],
+							"variable": [
+								{
+									"key": "project_id",
+									"value": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ListProjectMeasurementDistrictRollup",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/projects/:project_id/district_rollup/measurement_submittals",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"projects",
+								":project_id",
+								"district_rollup",
+								"measurement_submittals"
+							],
+							"variable": [
+								{
+									"key": "project_id",
+									"value": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "Evaluation",
 			"item": [
 				{

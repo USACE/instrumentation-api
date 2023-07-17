@@ -66,6 +66,12 @@
             "name": "Alert Configs"
         },
         {
+            "name": "Submittals"
+        },
+        {
+            "name": "District Rollup"
+        },
+        {
             "name": "Evaluation"
         },
         {
@@ -2796,6 +2802,202 @@
                 ],
                 "responses": {
                     "201": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/submittals": {
+            "get": {
+                "tags": [
+                    "Submittals"
+                ],
+                "summary": "ListProjectSubmittals",
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/instruments/{instrument_id}/submittals": {
+            "get": {
+                "tags": [
+                    "Submittals"
+                ],
+                "summary": "ListInstrumentSubmittals",
+                "parameters": [
+                    {
+                        "name": "instrument_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "example": "9e8f2ca4-4037-45a4-aaca-d9e598877439"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/alert_configs/{alert_config_id}/submittals": {
+            "get": {
+                "tags": [
+                    "Submittals"
+                ],
+                "summary": "ListAlertConfigSubmittals",
+                "parameters": [
+                    {
+                        "name": "alert_config_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "example": "1efd2d85-d3ee-4388-85a0-f824a761ff8b"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/submittals/{submittal_id}/verify_missing": {
+            "put": {
+                "tags": [
+                    "Submittals"
+                ],
+                "summary": "VerifyMissingSubmittal",
+                "requestBody": {
+                    "content": {}
+                },
+                "parameters": [
+                    {
+                        "name": "submittal_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "example": "b8c1c297-d1d5-4cee-b949-72299b330617"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/alert_configs/{alert_config_id}/submittals/verify_missing": {
+            "put": {
+                "tags": [
+                    "Submittals"
+                ],
+                "summary": "VerifyMissingAlertConfigSubmittals",
+                "requestBody": {
+                    "content": {}
+                },
+                "parameters": [
+                    {
+                        "name": "alert_config_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "example": "90ff91d6-ab39-40db-9160-34ce17416281"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/district_rollup/evaluation_submittals": {
+            "get": {
+                "tags": [
+                    "District Rollup"
+                ],
+                "summary": "ListProjectEvaluationDistrictRollup",
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/district_rollup/measurement_submittals": {
+            "get": {
+                "tags": [
+                    "District Rollup"
+                ],
+                "summary": "ListProjectMeasurementDistrictRollup",
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    }
+                ],
+                "responses": {
+                    "200": {
                         "description": "Successful response",
                         "content": {
                             "application/json": {}

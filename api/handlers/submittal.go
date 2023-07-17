@@ -97,13 +97,13 @@ func ListAlertConfigSubmittals(db *sqlx.DB) echo.HandlerFunc {
 }
 
 // DeleteFlagProject sets the instrument group deleted flag true
-func MarkAsMissingSubmittal(db *sqlx.DB) echo.HandlerFunc {
+func VerifyMissingSubmittal(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id, err := uuid.Parse(c.Param("submittal_id"))
 		if err != nil {
 			return echo.NewHTTPError(http.StatusNotFound, err.Error())
 		}
-		if err := models.MarkMissingSubmittal(db, &id); err != nil {
+		if err := models.VerifyMissingSubmittal(db, &id); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, map[string]interface{}{"submittal_id": id})
@@ -111,13 +111,13 @@ func MarkAsMissingSubmittal(db *sqlx.DB) echo.HandlerFunc {
 }
 
 // DeleteFlagProject sets the instrument group deleted flag true
-func MarkAllMissingSubmittals(db *sqlx.DB) echo.HandlerFunc {
+func VerifyMissingAlertConfigSubmittals(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id, err := uuid.Parse(c.Param("alert_config_id"))
 		if err != nil {
 			return echo.NewHTTPError(http.StatusNotFound, err.Error())
 		}
-		if err := models.MarkAllMissingSubmittals(db, &id); err != nil {
+		if err := models.VerifyMissingAlertConfigSubmittals(db, &id); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, map[string]interface{}{"alert_config_id": id})

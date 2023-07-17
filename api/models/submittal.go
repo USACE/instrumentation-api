@@ -42,7 +42,7 @@ func ListProjectSubmittals(db *sqlx.DB, projectID *uuid.UUID, tw timeseries.Time
 		FROM v_submittal
 		WHERE project_id = $1
 		AND ` + q + `
-		ORDER BY due_date DESC, alert_type ASC
+		ORDER BY due_date DESC, alert_type_name ASC
 	`
 	if err := db.Select(&aa, sql, projectID, tw.After, tw.Before); err != nil {
 		return aa, err
@@ -132,7 +132,7 @@ func UpdateSubmittal(db *sqlx.DB, sub Submittal) error {
 	return nil
 }
 
-func MarkMissingSubmittal(db *sqlx.DB, submittalID *uuid.UUID) error {
+func VerifyMissingSubmittal(db *sqlx.DB, submittalID *uuid.UUID) error {
 	sql := `
 		UPDATE submittal SET
 			-- red submittal status
@@ -149,7 +149,7 @@ func MarkMissingSubmittal(db *sqlx.DB, submittalID *uuid.UUID) error {
 	return nil
 }
 
-func MarkAllMissingSubmittals(db *sqlx.DB, acID *uuid.UUID) error {
+func VerifyMissingAlertConfigSubmittals(db *sqlx.DB, acID *uuid.UUID) error {
 	sql := `
 		UPDATE submittal SET
 			submittal_status_id = '84a0f437-a20a-4ac2-8a5b-f8dc35e8489b'::UUID,

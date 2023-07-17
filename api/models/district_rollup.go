@@ -10,7 +10,7 @@ import (
 type DistrictRollup struct {
 	AlertTypeID             uuid.UUID  `json:"alert_type_id" db:"alert_type_id"`
 	OfficeID                *uuid.UUID `json:"office_id" db:"office_id"`
-	DistrictInitials        string     `json:"district_initials" db:"district_initials"`
+	DistrictInitials        *string    `json:"district_initials" db:"district_initials"`
 	ProjectName             string     `json:"project_name" db:"project_name"`
 	ProjectID               uuid.UUID  `json:"project_id" db:"project_id"`
 	Month                   time.Time  `json:"month" db:"the_month"`
