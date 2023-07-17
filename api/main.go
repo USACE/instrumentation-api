@@ -119,7 +119,7 @@ func main() {
 	public.GET("/instruments/:instrument_id/submittals", handlers.ListInstrumentSubmittals(db))
 	public.GET("/alert_configs/:alert_config_id/submittals", handlers.ListAlertConfigSubmittals(db))
 	private.PUT("/submittals/:submittal_id/verify_missing", handlers.MarkAsMissingSubmittal(db))
-	private.PUT("/alert_configs/:alert_config_id/submittals/:submittal_id/verify_missing", handlers.MarkAllMissingSubmittals(db))
+	private.PUT("/alert_configs/:alert_config_id/submittals/verify_missing", handlers.MarkAllMissingSubmittals(db))
 
 	// District Rollup
 	public.GET("/projects/:project_id/district_rollup/evaluation_submittals", handlers.ListProjectEvaluationDistrictRollup(db))
