@@ -2,6 +2,8 @@ CREATE EXTENSION btree_gist;
 
 ALTER TABLE alert_config DROP COLUMN alert_status_id;
 ALTER TABLE alert_config ADD COLUMN mute_consecutive_alerts BOOLEAN NOT NULL DEFAULT false;
+-- behavior should be consistent for existing data
+UPDATE alert_config SET mute_consecutive_alerts=true;
 ALTER TABLE alert_status RENAME TO submittal_status;
 
 CREATE TABLE submittal (

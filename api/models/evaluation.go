@@ -133,6 +133,27 @@ func RecordEvaluationSubmittalTxn(txn *sqlx.Tx, ev *Evaluation) error {
 	return nil
 }
 
+func CreateNextSubmittalTxn(txn *sqlx.Tx, ev *Evaluation) error {
+	stmt, err := txn.Preparex(`
+		INSERT INTO submittal (alert_config_id, due_date)
+		SELECT
+			ac.id,
+			NOW() + ac.schedule_interval
+		FROM alert_config ac
+		WHERE ac.id = $1
+	`)
+	if err != nil {
+		return err
+	}
+	if _, err := stmt.Exec(ev.AlertConfigID); err != nil {
+		return err
+	}
+	if err := stmt.Close(); err != nil {
+		return err
+	}
+	return nil
+}
+
 func CreateEvaluation(db *sqlx.DB, ev *Evaluation) (*Evaluation, error) {
 	txn, err := db.Beginx()
 	if err != nil {
@@ -141,6 +162,9 @@ func CreateEvaluation(db *sqlx.DB, ev *Evaluation) (*Evaluation, error) {
 	defer txn.Rollback()
 
 	if err := RecordEvaluationSubmittalTxn(txn, ev); err != nil {
+		return nil, err
+	}
+	if err := CreateNextSubmittalTxn(txn, ev); err != nil {
 		return nil, err
 	}
 
