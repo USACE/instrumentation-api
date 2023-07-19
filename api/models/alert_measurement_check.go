@@ -84,11 +84,36 @@ func (ms AlertConfigMeasurementCheck) DoEmail(emailType string, cfg *config.Aler
 	return nil
 }
 
-func ListMeasurementChecks(db *sqlx.DB, acMap map[uuid.UUID]AlertConfig, subMap map[uuid.UUID]Submittal) ([]*AlertConfigMeasurementCheck, error) {
+func CheckMeasurements(db *sqlx.DB, subMap map[uuid.UUID]Submittal, acMap map[uuid.UUID]AlertConfig, cfg *config.AlertCheckConfig, smtpCfg *config.SmtpConfig) error {
+	txn, err := db.Beginx()
+	if err != nil {
+		return err
+	}
+	defer txn.Rollback()
+
+	measurementChecks, err := ListMeasurementChecks(txn, acMap, subMap)
+	if err != nil {
+		return err
+	}
+
+	// HandleChecks should not rollback txn but should bubble up errors after txn committed
+	hcErr := HandleChecks[*MeasurementCheck, *AlertConfigMeasurementCheck](txn, measurementChecks, cfg, smtpCfg)
+
+	if err := txn.Commit(); err != nil {
+		return err
+	}
+	if hcErr != nil {
+		return hcErr
+	}
+
+	return nil
+}
+
+func ListMeasurementChecks(txn *sqlx.Tx, acMap map[uuid.UUID]AlertConfig, subMap map[uuid.UUID]Submittal) ([]*AlertConfigMeasurementCheck, error) {
 	mcs := make([]*MeasurementCheck, 0)
 	accs := make([]*AlertConfigMeasurementCheck, 0)
 
-	if err := db.Select(&mcs, `
+	if err := txn.Select(&mcs, `
 		SELECT * FROM v_alert_check_measurement_submittal
 		WHERE submittal_id = ANY(
 			SELECT id FROM submittal

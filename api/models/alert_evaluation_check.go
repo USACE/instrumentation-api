@@ -64,11 +64,36 @@ func (acc AlertConfigEvaluationCheck) DoEmail(emailType string, cfg *config.Aler
 	return nil
 }
 
-func ListEvaluationChecks(db *sqlx.DB, acMap map[uuid.UUID]AlertConfig, subMap map[uuid.UUID]Submittal) ([]*AlertConfigEvaluationCheck, error) {
+func CheckEvaluations(db *sqlx.DB, subMap map[uuid.UUID]Submittal, acMap map[uuid.UUID]AlertConfig, cfg *config.AlertCheckConfig, smtpCfg *config.SmtpConfig) error {
+	txn, err := db.Beginx()
+	if err != nil {
+		return err
+	}
+	defer txn.Rollback()
+
+	evaluationChecks, err := ListEvaluationChecks(txn, acMap, subMap)
+	if err != nil {
+		return err
+	}
+
+	// HandleChecks should not rollback txn but should bubble up errors after txn committed
+	hcErr := HandleChecks[*EvaluationCheck, *AlertConfigEvaluationCheck](txn, evaluationChecks, cfg, smtpCfg)
+
+	if err := txn.Commit(); err != nil {
+		return err
+	}
+	if hcErr != nil {
+		return hcErr
+	}
+
+	return nil
+}
+
+func ListEvaluationChecks(txn *sqlx.Tx, acMap map[uuid.UUID]AlertConfig, subMap map[uuid.UUID]Submittal) ([]*AlertConfigEvaluationCheck, error) {
 	ecs := make([]*EvaluationCheck, 0)
 	accs := make([]*AlertConfigEvaluationCheck, 0)
 
-	if err := db.Select(&ecs, `
+	if err := txn.Select(&ecs, `
 		SELECT * FROM v_alert_check_evaluation_submittal
 		WHERE submittal_id = ANY(
 			SELECT id FROM submittal
