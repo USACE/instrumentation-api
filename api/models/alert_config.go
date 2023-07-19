@@ -162,8 +162,7 @@ func CreateAlertConfig(db *sqlx.DB, ac *AlertConfig) (*AlertConfig, error) {
 		INSERT INTO submittal (alert_config_id, due_date)
 		SELECT id, create_date + schedule_interval
 		FROM alert_config
-		WHERE alert_config_id=$1
-		LIMIT 1
+		WHERE id=$1
 	`)
 	if err != nil {
 		return nil, err
@@ -273,8 +272,7 @@ func UpdateAlertConfig(db *sqlx.DB, alertConfigID *uuid.UUID, ac *AlertConfig) (
 		SELECT ac.id, COALESCE(MAX(acs.create_date), ac.create_date) + ac.schedule_interval
 		FROM alert_config ac
 		INNER JOIN submittal acs ON ac.id = acs.alert_config_id
-		WHERE ac.id=$1
-		LIMIT 1
+		WHERE ac.id = $1
 	`)
 	if err != nil {
 		return nil, err
