@@ -17,7 +17,7 @@ type Submittal struct {
 	ProjectID           uuid.UUID  `json:"project_id" db:"project_id"`
 	SubmittalStatusID   uuid.UUID  `json:"submittal_status_id" db:"submittal_status_id"`
 	SubmittalStatusName string     `json:"submittal_status_name" db:"submittal_status_name"`
-	CompletionDate      *time.Time `json:"completion_date,omitempty" db:"completion_date"`
+	CompletionDate      *time.Time `json:"completion_date" db:"completion_date"`
 	CreateDate          time.Time  `json:"create_date" db:"create_date"`
 	DueDate             time.Time  `json:"due_date" db:"due_date"`
 	MarkedAsMissing     bool       `json:"marked_as_missing" db:"marked_as_missing"`
