@@ -23,7 +23,7 @@ func ListProjectSubmittals(db *sqlx.DB) echo.HandlerFunc {
 
 		var tw timeseries.TimeWindow
 		a, b := c.QueryParam("after"), c.QueryParam("before")
-		if err = tw.SetWindow(a, b, time.Now(), time.Now().AddDate(0, 0, -7)); err != nil {
+		if err = tw.SetWindow(a, b, time.Now().AddDate(0, 0, -7), time.Now()); err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
@@ -55,7 +55,7 @@ func ListInstrumentSubmittals(db *sqlx.DB) echo.HandlerFunc {
 
 		var tw timeseries.TimeWindow
 		a, b := c.QueryParam("after"), c.QueryParam("before")
-		if err = tw.SetWindow(a, b, time.Now(), time.Now().AddDate(0, 0, -7)); err != nil {
+		if err = tw.SetWindow(a, b, time.Now().AddDate(0, 0, -7), time.Now()); err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
@@ -83,7 +83,7 @@ func ListAlertConfigSubmittals(db *sqlx.DB) echo.HandlerFunc {
 
 		var tw timeseries.TimeWindow
 		a, b := c.QueryParam("after"), c.QueryParam("before")
-		if err = tw.SetWindow(a, b, time.Now(), time.Now().AddDate(0, 0, -7)); err != nil {
+		if err = tw.SetWindow(a, b, time.Now().AddDate(0, 0, -7), time.Now()); err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 

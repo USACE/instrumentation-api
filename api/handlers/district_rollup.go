@@ -22,7 +22,7 @@ func ListProjectEvaluationDistrictRollup(db *sqlx.DB) echo.HandlerFunc {
 
 		var tw timeseries.TimeWindow
 		from, to := c.QueryParam("from_timestamp_month"), c.QueryParam("to_timestamp_month")
-		if err := tw.SetWindow(from, to, time.Now(), time.Now().AddDate(-1, 0, 0)); err != nil {
+		if err := tw.SetWindow(from, to, time.Now().AddDate(-1, 0, 0), time.Now()); err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		if fiveYrsAfterStart := tw.Start.AddDate(5, 0, 0); tw.End.After(fiveYrsAfterStart) {
@@ -47,7 +47,7 @@ func ListProjectMeasurementDistrictRollup(db *sqlx.DB) echo.HandlerFunc {
 
 		var tw timeseries.TimeWindow
 		from, to := c.QueryParam("from_timestamp_month"), c.QueryParam("to_timestamp_month")
-		if err := tw.SetWindow(from, to, time.Now(), time.Now().AddDate(-1, 0, 0)); err != nil {
+		if err := tw.SetWindow(from, to, time.Now().AddDate(-1, 0, 0), time.Now()); err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		if fiveYrsAfterStart := tw.Start.AddDate(5, 0, 0); tw.End.After(fiveYrsAfterStart) {

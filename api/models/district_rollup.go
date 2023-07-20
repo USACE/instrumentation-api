@@ -1,6 +1,7 @@
 package models
 
 import (
+	"log"
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/timeseries"
@@ -24,13 +25,14 @@ type DistrictRollup struct {
 
 // ListCollectionGroups lists all collection groups for a project
 func ListEvaluationDistrictRollup(db *sqlx.DB, opID uuid.UUID, tw timeseries.TimeWindow) ([]DistrictRollup, error) {
+	log.Printf("tw: %+v", tw)
 	dr := make([]DistrictRollup, 0)
 	if err := db.Select(&dr, `
 		SELECT * FROM v_district_rollup
 		WHERE alert_type_id = 'da6ee89e-58cc-4d85-8384-43c3c33a68bd'::UUID
 		AND project_id = $1
-		AND the_month >= DATE_TRUNC('month', $2)
-		AND the_month <= DATE_TRUNC('month', $3)
+		AND the_month >= DATE_TRUNC('month', $2::TIMESTAMPTZ)
+		AND the_month <= DATE_TRUNC('month', $3::TIMESTAMPTZ)
 	`, opID, tw.Start, tw.End); err != nil {
 		return dr, err
 	}
@@ -44,8 +46,8 @@ func ListMeasurementDistrictRollup(db *sqlx.DB, opID uuid.UUID, tw timeseries.Ti
 		SELECT * FROM v_district_rollup
 		WHERE alert_type_id = '97e7a25c-d5c7-4ded-b272-1bb6e5914fe3'::UUID
 		AND project_id = $1
-		AND the_month >= DATE_TRUNC('month', $2)
-		AND the_month <= DATE_TRUNC('month', $3)
+		AND the_month >= DATE_TRUNC('month', $2::TIMESTAMPTZ)
+		AND the_month <= DATE_TRUNC('month', $3::TIMESTAMPTZ)
 	`, opID, tw.Start, tw.End); err != nil {
 		return dr, err
 	}

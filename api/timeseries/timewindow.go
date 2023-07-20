@@ -12,8 +12,8 @@ type TimeWindow struct {
 // If after or before are not provided return last 7 days of data from current time
 func (tw *TimeWindow) SetWindow(start, end string, defaultStart, defaultEnd time.Time) error {
 	if start == "" || end == "" {
-		tw.End = defaultStart
-		tw.Start = defaultEnd
+		tw.Start = defaultStart
+		tw.End = defaultEnd
 	} else {
 		// Attempt to parse query param "after"
 		tA, err := time.Parse(time.RFC3339, start)
