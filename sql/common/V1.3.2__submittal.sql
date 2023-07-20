@@ -24,5 +24,6 @@ CREATE UNIQUE INDEX unique_alert_config_id_submittal_date ON submittal (alert_co
 WHERE completion_date IS NOT NULL;
 
 DROP VIEW IF EXISTS v_evaluation;
+DROP VIEW IF EXISTS v_alert_check_evaluation_submittal;
 ALTER TABLE evaluation DROP COLUMN alert_config_id;
 ALTER TABLE evaluation ADD COLUMN submittal_id UUID REFERENCES submittal (id) ON DELETE CASCADE;
