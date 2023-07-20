@@ -63,6 +63,9 @@
             "description": "Tests for explorer endpoints"
         },
         {
+            "name": "Evaluation"
+        },
+        {
             "name": "Alert Configs"
         },
         {
@@ -70,9 +73,6 @@
         },
         {
             "name": "District Rollup"
-        },
-        {
-            "name": "Evaluation"
         },
         {
             "name": "Alert Subscriptions"
@@ -2529,483 +2529,6 @@
                 }
             }
         },
-        "/projects/{project_id}/alert_configs/{alert_config_id}": {
-            "get": {
-                "tags": [
-                    "Alert Configs"
-                ],
-                "summary": "GetAlertConfig",
-                "parameters": [
-                    {
-                        "name": "project_id",
-                        "in": "path",
-                        "schema": {
-                            "type": "string"
-                        },
-                        "required": true,
-                        "description": "Project uuid",
-                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
-                    },
-                    {
-                        "name": "alert_config_id",
-                        "in": "path",
-                        "schema": {
-                            "type": "string"
-                        },
-                        "required": true,
-                        "description": "Alert Config uuid",
-                        "example": "1efd2d85-d3ee-4388-85a0-f824a761ff8b"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful response",
-                        "content": {
-                            "application/json": {}
-                        }
-                    }
-                }
-            },
-            "put": {
-                "tags": [
-                    "Alert Configs"
-                ],
-                "summary": "UpdateAlertConfig",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "example": {
-                                    "name": "Updated Test Alert 1",
-                                    "body": "Updated Alert for demonstration purposes.",
-                                    "project_id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
-                                    "start_date": "2023-05-16T13:19:41.441328Z",
-                                    "schedule_interval": "PT30M",
-                                    "n_missed_before_alert": 3,
-                                    "remind_interval": "P1D",
-                                    "instruments": [],
-                                    "alert_email_subscriptions": [
-                                        {
-                                            "id": "57329df6-9f7a-4dad-9383-4633b452efab",
-                                            "user_type": "profile",
-                                            "username": "AnthonyLambert",
-                                            "email": "anthony.lambert@fake.usace.army.mil"
-                                        }
-                                    ]
-                                }
-                            }
-                        }
-                    }
-                },
-                "parameters": [
-                    {
-                        "name": "project_id",
-                        "in": "path",
-                        "schema": {
-                            "type": "string"
-                        },
-                        "required": true,
-                        "description": "Project uuid",
-                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
-                    },
-                    {
-                        "name": "alert_config_id",
-                        "in": "path",
-                        "schema": {
-                            "type": "string"
-                        },
-                        "required": true,
-                        "description": "Alert Config uuid",
-                        "example": "90ff91d6-ab39-40db-9160-34ce17416281"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful response",
-                        "content": {
-                            "application/json": {}
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "tags": [
-                    "Alert Configs"
-                ],
-                "summary": "DeleteAlertConfig",
-                "parameters": [
-                    {
-                        "name": "project_id",
-                        "in": "path",
-                        "schema": {
-                            "type": "string"
-                        },
-                        "required": true,
-                        "description": "Project uuid",
-                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
-                    },
-                    {
-                        "name": "alert_config_id",
-                        "in": "path",
-                        "schema": {
-                            "type": "string"
-                        },
-                        "required": true,
-                        "description": "Alert Config uuid",
-                        "example": "90ff91d6-ab39-40db-9160-34ce17416281"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful response",
-                        "content": {
-                            "application/json": {}
-                        }
-                    }
-                }
-            }
-        },
-        "/projects/{project_id}/instruments/{instrument_id}/alert_configs": {
-            "get": {
-                "tags": [
-                    "Alert Configs"
-                ],
-                "summary": "ListInstrumentAlertConfigs",
-                "parameters": [
-                    {
-                        "name": "project_id",
-                        "in": "path",
-                        "schema": {
-                            "type": "string"
-                        },
-                        "required": true,
-                        "description": "Project uuid",
-                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
-                    },
-                    {
-                        "name": "instrument_id",
-                        "in": "path",
-                        "schema": {
-                            "type": "string"
-                        },
-                        "required": true,
-                        "description": "Instrument uuid",
-                        "example": "9e8f2ca4-4037-45a4-aaca-d9e598877439"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful response",
-                        "content": {
-                            "application/json": {}
-                        }
-                    }
-                }
-            }
-        },
-        "/projects/{project_id}/alert_configs": {
-            "get": {
-                "tags": [
-                    "Alert Configs"
-                ],
-                "summary": "ListProjectAlertConfigs",
-                "parameters": [
-                    {
-                        "name": "alert_type_id",
-                        "in": "query",
-                        "schema": {
-                            "type": "string"
-                        },
-                        "example": "97e7a25c-d5c7-4ded-b272-1bb6e5914fe3"
-                    },
-                    {
-                        "name": "project_id",
-                        "in": "path",
-                        "schema": {
-                            "type": "string"
-                        },
-                        "required": true,
-                        "description": "Project uuid",
-                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful response",
-                        "content": {
-                            "application/json": {}
-                        }
-                    }
-                }
-            },
-            "post": {
-                "tags": [
-                    "Alert Configs"
-                ],
-                "summary": "CreateAlertConfig",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "example": {
-                                    "project_id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
-                                    "name": "New Test Alert Config",
-                                    "body": "New Test Alert Config Description",
-                                    "alert_type_id": "97e7a25c-d5c7-4ded-b272-1bb6e5914fe3",
-                                    "start_date": "2023-05-16T13:19:41.441328Z",
-                                    "schedule_interval": "P1D",
-                                    "n_missed_before_alert": 1,
-                                    "warning_interval": "PT1H",
-                                    "instruments": [
-                                        {
-                                            "instrument_id": "a7540f69-c41e-43b3-b655-6e44097edb7e"
-                                        }
-                                    ],
-                                    "alert_email_subscriptions": [
-                                        {
-                                            "id": "1ebf9e14-2b1c-404e-9535-6c2ee24944b6",
-                                            "user_type": "email",
-                                            "username": null,
-                                            "email": "no.profile@fake.usace.army.mil"
-                                        },
-                                        {
-                                            "id": "57329df6-9f7a-4dad-9383-4633b452efab",
-                                            "user_type": "profile",
-                                            "username": "AnthonyLambert",
-                                            "email": "anthony.lambert@fake.usace.army.mil"
-                                        },
-                                        {
-                                            "id": null,
-                                            "user_type": null,
-                                            "username": null,
-                                            "email": "noprofile.newemail@fake.usace.army.mil"
-                                        }
-                                    ]
-                                }
-                            }
-                        }
-                    }
-                },
-                "parameters": [
-                    {
-                        "name": "project_id",
-                        "in": "path",
-                        "schema": {
-                            "type": "string"
-                        },
-                        "required": true,
-                        "description": "Project uuid",
-                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Successful response",
-                        "content": {
-                            "application/json": {}
-                        }
-                    }
-                }
-            }
-        },
-        "/projects/{project_id}/submittals": {
-            "get": {
-                "tags": [
-                    "Submittals"
-                ],
-                "summary": "ListProjectSubmittals",
-                "parameters": [
-                    {
-                        "name": "project_id",
-                        "in": "path",
-                        "schema": {
-                            "type": "string"
-                        },
-                        "required": true,
-                        "description": "project uuid",
-                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful response",
-                        "content": {
-                            "application/json": {}
-                        }
-                    }
-                }
-            }
-        },
-        "/instruments/{instrument_id}/submittals": {
-            "get": {
-                "tags": [
-                    "Submittals"
-                ],
-                "summary": "ListInstrumentSubmittals",
-                "parameters": [
-                    {
-                        "name": "instrument_id",
-                        "in": "path",
-                        "schema": {
-                            "type": "string"
-                        },
-                        "required": true,
-                        "example": "9e8f2ca4-4037-45a4-aaca-d9e598877439"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful response",
-                        "content": {
-                            "application/json": {}
-                        }
-                    }
-                }
-            }
-        },
-        "/alert_configs/{alert_config_id}/submittals": {
-            "get": {
-                "tags": [
-                    "Submittals"
-                ],
-                "summary": "ListAlertConfigSubmittals",
-                "parameters": [
-                    {
-                        "name": "alert_config_id",
-                        "in": "path",
-                        "schema": {
-                            "type": "string"
-                        },
-                        "required": true,
-                        "example": "1efd2d85-d3ee-4388-85a0-f824a761ff8b"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful response",
-                        "content": {
-                            "application/json": {}
-                        }
-                    }
-                }
-            }
-        },
-        "/submittals/{submittal_id}/verify_missing": {
-            "put": {
-                "tags": [
-                    "Submittals"
-                ],
-                "summary": "VerifyMissingSubmittal",
-                "requestBody": {
-                    "content": {}
-                },
-                "parameters": [
-                    {
-                        "name": "submittal_id",
-                        "in": "path",
-                        "schema": {
-                            "type": "string"
-                        },
-                        "required": true,
-                        "example": "b8c1c297-d1d5-4cee-b949-72299b330617"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful response",
-                        "content": {
-                            "application/json": {}
-                        }
-                    }
-                }
-            }
-        },
-        "/alert_configs/{alert_config_id}/submittals/verify_missing": {
-            "put": {
-                "tags": [
-                    "Submittals"
-                ],
-                "summary": "VerifyMissingAlertConfigSubmittals",
-                "requestBody": {
-                    "content": {}
-                },
-                "parameters": [
-                    {
-                        "name": "alert_config_id",
-                        "in": "path",
-                        "schema": {
-                            "type": "string"
-                        },
-                        "required": true,
-                        "example": "90ff91d6-ab39-40db-9160-34ce17416281"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful response",
-                        "content": {
-                            "application/json": {}
-                        }
-                    }
-                }
-            }
-        },
-        "/projects/{project_id}/district_rollup/evaluation_submittals": {
-            "get": {
-                "tags": [
-                    "District Rollup"
-                ],
-                "summary": "ListProjectEvaluationDistrictRollup",
-                "parameters": [
-                    {
-                        "name": "project_id",
-                        "in": "path",
-                        "schema": {
-                            "type": "string"
-                        },
-                        "required": true,
-                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful response",
-                        "content": {
-                            "application/json": {}
-                        }
-                    }
-                }
-            }
-        },
-        "/projects/{project_id}/district_rollup/measurement_submittals": {
-            "get": {
-                "tags": [
-                    "District Rollup"
-                ],
-                "summary": "ListProjectMeasurementDistrictRollup",
-                "parameters": [
-                    {
-                        "name": "project_id",
-                        "in": "path",
-                        "schema": {
-                            "type": "string"
-                        },
-                        "required": true,
-                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful response",
-                        "content": {
-                            "application/json": {}
-                        }
-                    }
-                }
-            }
-        },
         "/projects/{project_id}/evaluations/{evaluation_id}": {
             "get": {
                 "tags": [
@@ -3219,7 +2742,7 @@
                                     "body": "New Test Evaluation Description",
                                     "start_date": "2023-05-16T13:19:41.441328Z",
                                     "end_date": "2023-06-16T13:19:41.441328Z",
-                                    "alert_config_id": "1efd2d85-d3ee-4388-85a0-f824a761ff8b",
+                                    "submittal_id": "73692315-d104-4e03-93b0-5f967ed45551",
                                     "instruments": [
                                         {
                                             "instrument_id": "a7540f69-c41e-43b3-b655-6e44097edb7e"
@@ -3244,6 +2767,506 @@
                 ],
                 "responses": {
                     "201": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/alert_configs/{alert_config_id}": {
+            "get": {
+                "tags": [
+                    "Alert Configs"
+                ],
+                "summary": "GetAlertConfig",
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    },
+                    {
+                        "name": "alert_config_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Alert Config uuid",
+                        "example": "1efd2d85-d3ee-4388-85a0-f824a761ff8b"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Alert Configs"
+                ],
+                "summary": "UpdateAlertConfig",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": {
+                                    "name": "Updated Test Alert 1",
+                                    "body": "Updated Alert for demonstration purposes.",
+                                    "project_id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+                                    "start_date": "2023-05-16T13:19:41.441328Z",
+                                    "schedule_interval": "P3D",
+                                    "mute_consecutive_alerts": false,
+                                    "remind_interval": "P1D",
+                                    "instruments": [],
+                                    "alert_email_subscriptions": [
+                                        {
+                                            "id": "57329df6-9f7a-4dad-9383-4633b452efab",
+                                            "user_type": "profile",
+                                            "username": "AnthonyLambert",
+                                            "email": "anthony.lambert@fake.usace.army.mil"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    },
+                    {
+                        "name": "alert_config_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Alert Config uuid",
+                        "example": "90ff91d6-ab39-40db-9160-34ce17416281"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Alert Configs"
+                ],
+                "summary": "DeleteAlertConfig",
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    },
+                    {
+                        "name": "alert_config_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Alert Config uuid",
+                        "example": "90ff91d6-ab39-40db-9160-34ce17416281"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/instruments/{instrument_id}/alert_configs": {
+            "get": {
+                "tags": [
+                    "Alert Configs"
+                ],
+                "summary": "ListInstrumentAlertConfigs",
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    },
+                    {
+                        "name": "instrument_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Instrument uuid",
+                        "example": "9e8f2ca4-4037-45a4-aaca-d9e598877439"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/alert_configs": {
+            "get": {
+                "tags": [
+                    "Alert Configs"
+                ],
+                "summary": "ListProjectAlertConfigs",
+                "parameters": [
+                    {
+                        "name": "alert_type_id",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Alert Configs"
+                ],
+                "summary": "CreateAlertConfig",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": {
+                                    "project_id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+                                    "name": "New Test Alert Config",
+                                    "body": "New Test Alert Config Description",
+                                    "alert_type_id": "97e7a25c-d5c7-4ded-b272-1bb6e5914fe3",
+                                    "start_date": "2023-05-16T13:19:41.441328Z",
+                                    "schedule_interval": "P1D",
+                                    "mute_consecutive_alerts": true,
+                                    "warning_interval": "PT1H",
+                                    "instruments": [
+                                        {
+                                            "instrument_id": "a7540f69-c41e-43b3-b655-6e44097edb7e"
+                                        }
+                                    ],
+                                    "alert_email_subscriptions": [
+                                        {
+                                            "id": "1ebf9e14-2b1c-404e-9535-6c2ee24944b6",
+                                            "user_type": "email",
+                                            "username": null,
+                                            "email": "no.profile@fake.usace.army.mil"
+                                        },
+                                        {
+                                            "id": "57329df6-9f7a-4dad-9383-4633b452efab",
+                                            "user_type": "profile",
+                                            "username": "AnthonyLambert",
+                                            "email": "anthony.lambert@fake.usace.army.mil"
+                                        },
+                                        {
+                                            "id": null,
+                                            "user_type": null,
+                                            "username": null,
+                                            "email": "noprofile.newemail@fake.usace.army.mil"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "Project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/submittals": {
+            "get": {
+                "tags": [
+                    "Submittals"
+                ],
+                "summary": "ListProjectSubmittals",
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "project uuid",
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/instruments/{instrument_id}/submittals": {
+            "get": {
+                "tags": [
+                    "Submittals"
+                ],
+                "summary": "ListInstrumentSubmittals",
+                "parameters": [
+                    {
+                        "name": "instrument_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "example": "9e8f2ca4-4037-45a4-aaca-d9e598877439"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/alert_configs/{alert_config_id}/submittals": {
+            "get": {
+                "tags": [
+                    "Submittals"
+                ],
+                "summary": "ListAlertConfigSubmittals",
+                "parameters": [
+                    {
+                        "name": "missing",
+                        "in": "query",
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "description": "boolean; mututally exclusive from before/after params",
+                        "example": "true"
+                    },
+                    {
+                        "name": "after",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "timestamp; mututally exclusive from missing param"
+                    },
+                    {
+                        "name": "before",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "timestamp; mututally exclusive from missing param"
+                    },
+                    {
+                        "name": "alert_config_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "example": "1efd2d85-d3ee-4388-85a0-f824a761ff8b"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/submittals/{submittal_id}/verify_missing": {
+            "put": {
+                "tags": [
+                    "Submittals"
+                ],
+                "summary": "VerifyMissingSubmittal",
+                "requestBody": {
+                    "content": {}
+                },
+                "parameters": [
+                    {
+                        "name": "submittal_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "example": "b8c1c297-d1d5-4cee-b949-72299b330617"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/alert_configs/{alert_config_id}/submittals/verify_missing": {
+            "put": {
+                "tags": [
+                    "Submittals"
+                ],
+                "summary": "VerifyMissingAlertConfigSubmittals",
+                "requestBody": {
+                    "content": {}
+                },
+                "parameters": [
+                    {
+                        "name": "alert_config_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "example": "1efd2d85-d3ee-4388-85a0-f824a761ff8b"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/district_rollup/evaluation_submittals": {
+            "get": {
+                "tags": [
+                    "District Rollup"
+                ],
+                "summary": "ListProjectEvaluationDistrictRollup",
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/district_rollup/measurement_submittals": {
+            "get": {
+                "tags": [
+                    "District Rollup"
+                ],
+                "summary": "ListProjectMeasurementDistrictRollup",
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "example": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+                    }
+                ],
+                "responses": {
+                    "200": {
                         "description": "Successful response",
                         "content": {
                             "application/json": {}

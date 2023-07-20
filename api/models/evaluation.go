@@ -1,7 +1,9 @@
 package models
 
 import (
+	"database/sql"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -102,40 +104,51 @@ func GetEvaluation(db *sqlx.DB, evaluationID *uuid.UUID) (*Evaluation, error) {
 }
 
 func RecordEvaluationSubmittalTxn(txn *sqlx.Tx, subID *uuid.UUID) error {
-	if _, err := txn.Exec(`
-		UPDATE submittal SET
+	var sub Submittal
+	if err := txn.Get(&sub, `
+		UPDATE submittal sub1 SET
 			submittal_status_id = sq.submittal_status_id,
-			completion_date = $2::TIMESTAMPTZ
+			completion_date = NOW()
 		FROM (
 			SELECT
+				sub2.id AS submittal_id,
 				CASE
 					-- if completed before due date, mark submittal as green id
-					WHEN $2::TIMESTAMPTZ <= due_date THEN '0c0d6487-3f71-4121-8575-19514c7b9f03'::UUID
+					WHEN NOW() <= sub2.due_date THEN '0c0d6487-3f71-4121-8575-19514c7b9f03'::UUID
 					-- if completed after due date, mark as yellow
 					ELSE 'ef9a3235-f6e2-4e6c-92f6-760684308f7f'::UUID
 				END AS submittal_status_id
-			FROM submittal
-			WHERE id = $1
+			FROM submittal sub2
+			INNER JOIN alert_config ac ON sub2.alert_config_id = ac.id
+			WHERE sub2.id = $1
+			AND sub2.completion_date IS NULL
+			AND NOT sub2.marked_as_missing
+			AND ac.alert_type_id = 'da6ee89e-58cc-4d85-8384-43c3c33a68bd'::UUID
 		) sq
-		WHERE id = $1
-		AND $2::TIMESTAMPTZ <= due_date
-	`, subID, time.Now()); err != nil {
+		WHERE sub1.id = sq.submittal_id
+		RETURNING sub1.*
+	`, subID); err != nil {
+		if err == sql.ErrNoRows {
+			return fmt.Errorf("submittal must exist, be of evaluation type, and before due date or unvalidated missing")
+		}
 		return err
 	}
-	return nil
-}
 
-func CreateNextSubmittalTxn(txn *sqlx.Tx, subID *uuid.UUID) error {
-	if _, err := txn.Exec(`
-		INSERT INTO submittal (alert_config_id, due_date)
-		SELECT
-			ac.id,
-			$2::TIMESTAMPTZ + ac.schedule_interval
-		FROM alert_config ac
-		WHERE ac.id IN (SELECT alert_config_id FROM submittal WHERE id = $1)
-	`, subID, time.Now()); err != nil {
-		return err
+	// Create next submittal if submitted on-time
+	// late submittals will have already generated next submittal
+	if sub.SubmittalStatusID == GreenSubmittalStatusID {
+		if _, err := txn.Exec(`
+			INSERT INTO submittal (alert_config_id, due_date)
+			SELECT
+				ac.id,
+				NOW() + ac.schedule_interval
+			FROM alert_config ac
+			WHERE ac.id IN (SELECT alert_config_id FROM submittal WHERE id = $1)
+		`, subID); err != nil {
+			return err
+		}
 	}
+
 	return nil
 }
 
@@ -148,9 +161,6 @@ func CreateEvaluation(db *sqlx.DB, ev *Evaluation) (*Evaluation, error) {
 
 	if ev.SubmittalID != nil {
 		if err := RecordEvaluationSubmittalTxn(txn, ev.SubmittalID); err != nil {
-			return nil, err
-		}
-		if err := CreateNextSubmittalTxn(txn, ev.SubmittalID); err != nil {
 			return nil, err
 		}
 	}

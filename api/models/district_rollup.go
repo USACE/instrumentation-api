@@ -1,7 +1,6 @@
 package models
 
 import (
-	"log"
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/timeseries"
@@ -25,7 +24,6 @@ type DistrictRollup struct {
 
 // ListCollectionGroups lists all collection groups for a project
 func ListEvaluationDistrictRollup(db *sqlx.DB, opID uuid.UUID, tw timeseries.TimeWindow) ([]DistrictRollup, error) {
-	log.Printf("tw: %+v", tw)
 	dr := make([]DistrictRollup, 0)
 	if err := db.Select(&dr, `
 		SELECT * FROM v_district_rollup

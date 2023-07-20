@@ -259,20 +259,20 @@ func UpdateAlertConfig(db *sqlx.DB, alertConfigID *uuid.UUID, ac *AlertConfig) (
 	}
 	// delete future alert check
 	stmt4, err := txn.Preparex(`
-		DELETE FROM submittal
-		WHERE alert_config_id=$1
-		AND due_date > NOW()
-	`)
-	if err != nil {
-		return nil, err
-	}
-	// update alert check with new interval
-	stmt5, err := txn.Preparex(`
-		INSERT INTO submittal (alert_config_id, due_date)
-		SELECT ac.id, COALESCE(MAX(acs.create_date), ac.create_date) + ac.schedule_interval
-		FROM alert_config ac
-		INNER JOIN submittal acs ON ac.id = acs.alert_config_id
-		WHERE ac.id = $1
+		UPDATE submittal
+		SET due_date = sq.new_due_date
+		FROM (
+			SELECT
+				sub.id AS submittal_id,
+				sub.create_date + ac.schedule_interval AS new_due_date
+			FROM submittal sub
+			INNER JOIN alert_config ac ON sub.alert_config_id = ac.id
+			WHERE sub.alert_config_id = $1
+			AND sub.due_date > NOW()
+			AND sub.completion_date IS NULL
+			AND NOT sub.marked_as_missing
+		) sq
+		WHERE id = sq.submittal_id
 	`)
 	if err != nil {
 		return nil, err
@@ -312,9 +312,6 @@ func UpdateAlertConfig(db *sqlx.DB, alertConfigID *uuid.UUID, ac *AlertConfig) (
 	if _, err := stmt4.Exec(alertConfigID); err != nil {
 		return nil, err
 	}
-	if _, err := stmt5.Exec(alertConfigID); err != nil {
-		return nil, err
-	}
 
 	if err := stmt1.Close(); err != nil {
 		return nil, err
@@ -326,9 +323,6 @@ func UpdateAlertConfig(db *sqlx.DB, alertConfigID *uuid.UUID, ac *AlertConfig) (
 		return nil, err
 	}
 	if err := stmt4.Close(); err != nil {
-		return nil, err
-	}
-	if err := stmt5.Close(); err != nil {
 		return nil, err
 	}
 	if err := txn.Commit(); err != nil {
