@@ -114,6 +114,17 @@ func main() {
 	private.PUT("/projects/:project_id/alert_configs/:alert_config_id", handlers.UpdateAlertConfig(db))
 	private.DELETE("/projects/:project_id/alert_configs/:alert_config_id", handlers.DeleteAlertConfig(db))
 
+	// Submittals
+	public.GET("/projects/:project_id/submittals", handlers.ListProjectSubmittals(db))
+	public.GET("/instruments/:instrument_id/submittals", handlers.ListInstrumentSubmittals(db))
+	public.GET("/alert_configs/:alert_config_id/submittals", handlers.ListAlertConfigSubmittals(db))
+	private.PUT("/submittals/:submittal_id/verify_missing", handlers.VerifyMissingSubmittal(db))
+	private.PUT("/alert_configs/:alert_config_id/submittals/verify_missing", handlers.VerifyMissingAlertConfigSubmittals(db))
+
+	// District Rollup
+	public.GET("/projects/:project_id/district_rollup/evaluation_submittals", handlers.ListProjectEvaluationDistrictRollup(db))
+	public.GET("/projects/:project_id/district_rollup/measurement_submittals", handlers.ListProjectMeasurementDistrictRollup(db))
+
 	// Alerts
 	public.GET("/projects/:project_id/instruments/:instrument_id/alerts", handlers.ListAlertsForInstrument(db))
 	private.GET("/my_alerts", handlers.ListMyAlerts(db))

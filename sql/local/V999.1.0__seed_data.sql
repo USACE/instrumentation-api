@@ -31,14 +31,14 @@ INSERT INTO profile_project_roles (profile_id, role_id, project_id) VALUES
     ('89aa1e13-041a-4d15-9e45-f76eba3b0551', '2962bdde-7007-4ba0-943f-cb8e72e90704', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984');
 
 -- instrument_group
-INSERT INTO instrument_group (project_id, id, slug, name, description) VALUES
-    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'd0916e8a-39a6-4f2f-bd31-879881f8b40c', 'sample-instrument-group', 'Sample Instrument Group 1', 'This is an example instrument group');
+INSERT INTO instrument_group (id, project_id, slug, name, description) VALUES
+    ('d0916e8a-39a6-4f2f-bd31-879881f8b40c', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'sample-instrument-group', 'Sample Instrument Group 1', 'This is an example instrument group');
 
 -- instrument
-INSERT INTO instrument (project_id, id, slug, name, geometry, type_id) VALUES
-    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'a7540f69-c41e-43b3-b655-6e44097edb7e', 'demo-piezometer-1', 'Demo Piezometer 1', ST_GeomFromText('POINT(-80.8 26.7)',4326),'1bb4bf7c-f5f8-44eb-9805-43b07ffadbef'),
-    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', '9e8f2ca4-4037-45a4-aaca-d9e598877439', 'demo-staffgage-1', 'Demo Staffgage 1', ST_GeomFromText('POINT(-80.85 26.75)',4326),'0fd1f9ba-2731-4ff9-96dd-3c03215ab06f'),
-    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'd8c66ef9-06f0-4d52-9233-f3778e0624f0', 'inclinometer-1', 'inclinometer-1', ST_GeomFromText('POINT(-80.8 26.7)',4326),'98a61f29-18a8-430a-9d02-0f53486e0984');
+INSERT INTO instrument (id, project_id, slug, name, geometry, type_id) VALUES
+    ('a7540f69-c41e-43b3-b655-6e44097edb7e', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'demo-piezometer-1', 'Demo Piezometer 1', ST_GeomFromText('POINT(-80.8 26.7)',4326),'1bb4bf7c-f5f8-44eb-9805-43b07ffadbef'),
+    ('9e8f2ca4-4037-45a4-aaca-d9e598877439', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'demo-staffgage-1', 'Demo Staffgage 1', ST_GeomFromText('POINT(-80.85 26.75)',4326),'0fd1f9ba-2731-4ff9-96dd-3c03215ab06f'),
+    ('d8c66ef9-06f0-4d52-9233-f3778e0624f0', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'inclinometer-1', 'inclinometer-1', ST_GeomFromText('POINT(-80.8 26.7)',4326),'98a61f29-18a8-430a-9d02-0f53486e0984');
 
 -- instrument_group_instruments
 INSERT INTO instrument_group_instruments (instrument_id, instrument_group_id) VALUES
@@ -212,35 +212,139 @@ INSERT INTO inclinometer_measurement (timeseries_id, time, creator, create_date,
                             }
                       ]');
 
-INSERT INTO alert_config (id, project_id, name, body, alert_type_id, schedule_interval, warning_interval, remind_interval) VALUES
-    ('1efd2d85-d3ee-4388-85a0-f824a761ff8b', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'Test Measurement Submittal Alert', 'Alert for demonstration purposes.', '97e7a25c-d5c7-4ded-b272-1bb6e5914fe3', 'PT15S', 'PT0S', 'PT0S'),
-    ('90ff91d6-ab39-40db-9160-34ce17416281', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'Test Measurement Submittal Warning', 'Warning for demonstration purposes.', '97e7a25c-d5c7-4ded-b272-1bb6e5914fe3', 'PT30S', 'PT15S', 'PT0S'),
-    ('15c106f5-a293-4a0e-b45a-6a4c7206ac6a', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'Test Measurement Submittal Reminder', 'Reminder for demonstration purposes.', '97e7a25c-d5c7-4ded-b272-1bb6e5914fe3', 'PT15S', 'PT0S', 'P1D'),
-    ('c07165de-71ec-40c4-b25b-c42deefea636', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'Test Evaluation Submittal Alert', 'Alert for demonstration purposes.', 'da6ee89e-58cc-4d85-8384-43c3c33a68bd', 'PT15S', 'PT0S', 'PT0S'),
-    ('d3738f72-4c0b-47f8-8ff9-8bea46022309', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'Test Evaluation Submittal Warning', 'Warning for demonstration purposes.', 'da6ee89e-58cc-4d85-8384-43c3c33a68bd', 'PT30S', 'PT15S', 'PT0S'),
-    ('5f9555df-c616-4530-bdcd-6b664fc91255', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'Test Evaluation Submittal Reminder', 'Reminder for demonstration purposes.', 'da6ee89e-58cc-4d85-8384-43c3c33a68bd', 'PT15S', 'PT0S', 'P1D');
+INSERT INTO alert_config (id, project_id, name, body, alert_type_id, schedule_interval, warning_interval, remind_interval, create_date) VALUES
+    ('1efd2d85-d3ee-4388-85a0-f824a761ff8b', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'Test Measurement Submittal Alert', 'Alert for demonstration purposes.', '97e7a25c-d5c7-4ded-b272-1bb6e5914fe3', 'PT1M', 'PT0S', 'PT0S', NOW() - INTERVAL '1 year'),
+    ('90ff91d6-ab39-40db-9160-34ce17416281', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'Test Measurement Submittal Warning', 'Warning for demonstration purposes.', '97e7a25c-d5c7-4ded-b272-1bb6e5914fe3', 'PT1M', 'PT20S', 'PT0S', NOW() - INTERVAL '1 year'),
+    ('15c106f5-a293-4a0e-b45a-6a4c7206ac6a', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'Test Measurement Submittal Reminder', 'Reminder for demonstration purposes.', '97e7a25c-d5c7-4ded-b272-1bb6e5914fe3', 'PT1M', 'PT0S', 'P1D', NOW() - INTERVAL '1 year'),
+    ('c07165de-71ec-40c4-b25b-c42deefea636', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'Test Evaluation Submittal Alert', 'Alert for demonstration purposes.', 'da6ee89e-58cc-4d85-8384-43c3c33a68bd', 'PT1M', 'PT0S', 'PT0S', NOW() - INTERVAL '1 year'),
+    ('d3738f72-4c0b-47f8-8ff9-8bea46022309', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'Test Evaluation Submittal Warning', 'Warning for demonstration purposes.', 'da6ee89e-58cc-4d85-8384-43c3c33a68bd', 'PT1M', 'PT20S', 'PT0S', NOW() - INTERVAL '1 year'),
+    ('5f9555df-c616-4530-bdcd-6b664fc91255', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'Test Evaluation Submittal Reminder', 'Reminder for demonstration purposes.', 'da6ee89e-58cc-4d85-8384-43c3c33a68bd', 'PT1M', 'PT0S', 'P1D', NOW() - INTERVAL '1 year');
 
 INSERT INTO alert_config_instrument (alert_config_id, instrument_id) VALUES
     ('1efd2d85-d3ee-4388-85a0-f824a761ff8b', '9e8f2ca4-4037-45a4-aaca-d9e598877439'),
     ('90ff91d6-ab39-40db-9160-34ce17416281', '9e8f2ca4-4037-45a4-aaca-d9e598877439'),
     ('15c106f5-a293-4a0e-b45a-6a4c7206ac6a', '9e8f2ca4-4037-45a4-aaca-d9e598877439');
 
-INSERT INTO evaluation (id, project_id, alert_config_id, name, body, start_date, end_date) VALUES
-    ('add252bf-2fa7-4824-b129-e4d0ff42dffa', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', NULL, 'Test Evaluation 1', 'Evaluation for demonstration purposes.', '2022-12-01', '2023-01-01'),
-    ('f7169aca-aa5f-4a0b-9fcc-609bb5c2bd7b', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'd3738f72-4c0b-47f8-8ff9-8bea46022309', 'Test Evaluation 2', 'Evaluation for demonstration purposes.', '2020-01-01', '2020-01-07'),
-    ('5884f481-d724-4a2c-8ff0-14b028e6fd01', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', '5f9555df-c616-4530-bdcd-6b664fc91255', 'Test Evaluation 3', 'Evaluation for demonstration purposes.', now() - INTERVAL 'P1M', now());
+-- seed historical submittals for district rollup
+INSERT INTO submittal (
+    alert_config_id,
+    create_date,
+    due_date,
+    completion_date,
+    submittal_status_id,
+    marked_as_missing
+) VALUES
+    ('1efd2d85-d3ee-4388-85a0-f824a761ff8b', NOW() - INTERVAL '13 months', NOW() - INTERVAL '1 year', NOW() - INTERVAL '1 year' + INTERVAL '1 day', '84a0f437-a20a-4ac2-8a5b-f8dc35e8489b', true),
+    ('90ff91d6-ab39-40db-9160-34ce17416281', NOW() - INTERVAL '13 months', NOW() - INTERVAL '1 year', NOW() - INTERVAL '1 year', 'ef9a3235-f6e2-4e6c-92f6-760684308f7f', false),
+    ('15c106f5-a293-4a0e-b45a-6a4c7206ac6a', NOW() - INTERVAL '13 months', NOW() - INTERVAL '1 year', NOW() - INTERVAL '1 year', '0c0d6487-3f71-4121-8575-19514c7b9f03', false),
+    ('c07165de-71ec-40c4-b25b-c42deefea636', NOW() - INTERVAL '13 months', NOW() - INTERVAL '1 year', NOW() - INTERVAL '1 year' + INTERVAL '1 day', '84a0f437-a20a-4ac2-8a5b-f8dc35e8489b', true),
+    ('d3738f72-4c0b-47f8-8ff9-8bea46022309', NOW() - INTERVAL '13 months', NOW() - INTERVAL '1 year', NOW() - INTERVAL '1 year', 'ef9a3235-f6e2-4e6c-92f6-760684308f7f', false),
+    ('5f9555df-c616-4530-bdcd-6b664fc91255', NOW() - INTERVAL '13 months', NOW() - INTERVAL '1 year', NOW() - INTERVAL '1 year', '0c0d6487-3f71-4121-8575-19514c7b9f03', false),
+    ('1efd2d85-d3ee-4388-85a0-f824a761ff8b', NOW() - INTERVAL '1 year', NOW() - INTERVAL '11 months', NOW() - INTERVAL '11 months' + INTERVAL '1 day', '84a0f437-a20a-4ac2-8a5b-f8dc35e8489b', true),
+    ('90ff91d6-ab39-40db-9160-34ce17416281', NOW() - INTERVAL '1 year', NOW() - INTERVAL '11 months', NOW() - INTERVAL '11 months', 'ef9a3235-f6e2-4e6c-92f6-760684308f7f', false),
+    ('15c106f5-a293-4a0e-b45a-6a4c7206ac6a', NOW() - INTERVAL '1 year', NOW() - INTERVAL '11 months', NOW() - INTERVAL '11 months', '0c0d6487-3f71-4121-8575-19514c7b9f03', false),
+    ('c07165de-71ec-40c4-b25b-c42deefea636', NOW() - INTERVAL '1 year', NOW() - INTERVAL '11 months', NOW() - INTERVAL '11 months' + INTERVAL '1 day', '84a0f437-a20a-4ac2-8a5b-f8dc35e8489b', true),
+    ('d3738f72-4c0b-47f8-8ff9-8bea46022309', NOW() - INTERVAL '1 year', NOW() - INTERVAL '11 months', NOW() - INTERVAL '11 months', 'ef9a3235-f6e2-4e6c-92f6-760684308f7f', false),
+    ('5f9555df-c616-4530-bdcd-6b664fc91255', NOW() - INTERVAL '1 year', NOW() - INTERVAL '11 months', NOW() - INTERVAL '11 months', '0c0d6487-3f71-4121-8575-19514c7b9f03', false),
+    ('1efd2d85-d3ee-4388-85a0-f824a761ff8b', NOW() - INTERVAL '11 months', NOW() - INTERVAL '10 months', NOW() - INTERVAL '10 months' + INTERVAL '1 day', '84a0f437-a20a-4ac2-8a5b-f8dc35e8489b', true),
+    ('90ff91d6-ab39-40db-9160-34ce17416281', NOW() - INTERVAL '11 months', NOW() - INTERVAL '10 months', NOW() - INTERVAL '10 months', 'ef9a3235-f6e2-4e6c-92f6-760684308f7f', false),
+    ('15c106f5-a293-4a0e-b45a-6a4c7206ac6a', NOW() - INTERVAL '11 months', NOW() - INTERVAL '10 months', NOW() - INTERVAL '10 months', '0c0d6487-3f71-4121-8575-19514c7b9f03', false),
+    ('c07165de-71ec-40c4-b25b-c42deefea636', NOW() - INTERVAL '11 months', NOW() - INTERVAL '10 months', NOW() - INTERVAL '10 months' + INTERVAL '1 day', '84a0f437-a20a-4ac2-8a5b-f8dc35e8489b', true),
+    ('d3738f72-4c0b-47f8-8ff9-8bea46022309', NOW() - INTERVAL '11 months', NOW() - INTERVAL '10 months', NOW() - INTERVAL '10 months', 'ef9a3235-f6e2-4e6c-92f6-760684308f7f', false),
+    ('5f9555df-c616-4530-bdcd-6b664fc91255', NOW() - INTERVAL '11 months', NOW() - INTERVAL '10 months', NOW() - INTERVAL '10 months', '0c0d6487-3f71-4121-8575-19514c7b9f03', false),
+    ('1efd2d85-d3ee-4388-85a0-f824a761ff8b', NOW() - INTERVAL '10 months', NOW() - INTERVAL '9 months', NOW() - INTERVAL '9 months' + INTERVAL '1 day', '84a0f437-a20a-4ac2-8a5b-f8dc35e8489b', true),
+    ('90ff91d6-ab39-40db-9160-34ce17416281', NOW() - INTERVAL '10 months', NOW() - INTERVAL '9 months', NOW() - INTERVAL '9 months', 'ef9a3235-f6e2-4e6c-92f6-760684308f7f', false),
+    ('15c106f5-a293-4a0e-b45a-6a4c7206ac6a', NOW() - INTERVAL '10 months', NOW() - INTERVAL '9 months', NOW() - INTERVAL '9 months', '0c0d6487-3f71-4121-8575-19514c7b9f03', false),
+    ('c07165de-71ec-40c4-b25b-c42deefea636', NOW() - INTERVAL '10 months', NOW() - INTERVAL '9 months', NOW() - INTERVAL '9 months' + INTERVAL '1 day', '84a0f437-a20a-4ac2-8a5b-f8dc35e8489b', true),
+    ('d3738f72-4c0b-47f8-8ff9-8bea46022309', NOW() - INTERVAL '10 months', NOW() - INTERVAL '9 months', NOW() - INTERVAL '9 months', 'ef9a3235-f6e2-4e6c-92f6-760684308f7f', false),
+    ('5f9555df-c616-4530-bdcd-6b664fc91255', NOW() - INTERVAL '10 months', NOW() - INTERVAL '9 months', NOW() - INTERVAL '9 months', '0c0d6487-3f71-4121-8575-19514c7b9f03', false),
+    ('1efd2d85-d3ee-4388-85a0-f824a761ff8b', NOW() - INTERVAL '9 months', NOW() - INTERVAL '8 months', NOW() - INTERVAL '8 months' + INTERVAL '1 day', '84a0f437-a20a-4ac2-8a5b-f8dc35e8489b', true),
+    ('90ff91d6-ab39-40db-9160-34ce17416281', NOW() - INTERVAL '9 months', NOW() - INTERVAL '8 months', NOW() - INTERVAL '8 months', 'ef9a3235-f6e2-4e6c-92f6-760684308f7f', false),
+    ('15c106f5-a293-4a0e-b45a-6a4c7206ac6a', NOW() - INTERVAL '9 months', NOW() - INTERVAL '8 months', NOW() - INTERVAL '8 months', '0c0d6487-3f71-4121-8575-19514c7b9f03', false),
+    ('c07165de-71ec-40c4-b25b-c42deefea636', NOW() - INTERVAL '9 months', NOW() - INTERVAL '8 months', NOW() - INTERVAL '8 months' + INTERVAL '1 day', '84a0f437-a20a-4ac2-8a5b-f8dc35e8489b', true),
+    ('d3738f72-4c0b-47f8-8ff9-8bea46022309', NOW() - INTERVAL '9 months', NOW() - INTERVAL '8 months', NOW() - INTERVAL '8 months', 'ef9a3235-f6e2-4e6c-92f6-760684308f7f', false),
+    ('5f9555df-c616-4530-bdcd-6b664fc91255', NOW() - INTERVAL '9 months', NOW() - INTERVAL '8 months', NOW() - INTERVAL '8 months', '0c0d6487-3f71-4121-8575-19514c7b9f03', false),
+    ('1efd2d85-d3ee-4388-85a0-f824a761ff8b', NOW() - INTERVAL '8 months', NOW() - INTERVAL '7 months', NOW() - INTERVAL '7 months' + INTERVAL '1 day', '84a0f437-a20a-4ac2-8a5b-f8dc35e8489b', true),
+    ('90ff91d6-ab39-40db-9160-34ce17416281', NOW() - INTERVAL '8 months', NOW() - INTERVAL '7 months', NOW() - INTERVAL '7 months', 'ef9a3235-f6e2-4e6c-92f6-760684308f7f', false),
+    ('15c106f5-a293-4a0e-b45a-6a4c7206ac6a', NOW() - INTERVAL '8 months', NOW() - INTERVAL '7 months', NOW() - INTERVAL '7 months', '0c0d6487-3f71-4121-8575-19514c7b9f03', false),
+    ('c07165de-71ec-40c4-b25b-c42deefea636', NOW() - INTERVAL '8 months', NOW() - INTERVAL '7 months', NOW() - INTERVAL '7 months' + INTERVAL '1 day', '84a0f437-a20a-4ac2-8a5b-f8dc35e8489b', true),
+    ('d3738f72-4c0b-47f8-8ff9-8bea46022309', NOW() - INTERVAL '8 months', NOW() - INTERVAL '7 months', NOW() - INTERVAL '7 months', 'ef9a3235-f6e2-4e6c-92f6-760684308f7f', false),
+    ('5f9555df-c616-4530-bdcd-6b664fc91255', NOW() - INTERVAL '8 months', NOW() - INTERVAL '7 months', NOW() - INTERVAL '7 months', '0c0d6487-3f71-4121-8575-19514c7b9f03', false),
+    ('1efd2d85-d3ee-4388-85a0-f824a761ff8b', NOW() - INTERVAL '7 months', NOW() - INTERVAL '6 months', NOW() - INTERVAL '6 months' + INTERVAL '1 day', '84a0f437-a20a-4ac2-8a5b-f8dc35e8489b', true),
+    ('90ff91d6-ab39-40db-9160-34ce17416281', NOW() - INTERVAL '7 months', NOW() - INTERVAL '6 months', NOW() - INTERVAL '6 months', 'ef9a3235-f6e2-4e6c-92f6-760684308f7f', false),
+    ('15c106f5-a293-4a0e-b45a-6a4c7206ac6a', NOW() - INTERVAL '7 months', NOW() - INTERVAL '6 months', NOW() - INTERVAL '6 months', '0c0d6487-3f71-4121-8575-19514c7b9f03', false),
+    ('c07165de-71ec-40c4-b25b-c42deefea636', NOW() - INTERVAL '7 months', NOW() - INTERVAL '6 months', NOW() - INTERVAL '6 months' + INTERVAL '1 day', '84a0f437-a20a-4ac2-8a5b-f8dc35e8489b', true),
+    ('d3738f72-4c0b-47f8-8ff9-8bea46022309', NOW() - INTERVAL '7 months', NOW() - INTERVAL '6 months', NOW() - INTERVAL '6 months', 'ef9a3235-f6e2-4e6c-92f6-760684308f7f', false),
+    ('5f9555df-c616-4530-bdcd-6b664fc91255', NOW() - INTERVAL '7 months', NOW() - INTERVAL '6 months', NOW() - INTERVAL '6 months', '0c0d6487-3f71-4121-8575-19514c7b9f03', false),
+    ('1efd2d85-d3ee-4388-85a0-f824a761ff8b', NOW() - INTERVAL '6 months', NOW() - INTERVAL '5 months', NOW() - INTERVAL '5 months' + INTERVAL '1 day', '84a0f437-a20a-4ac2-8a5b-f8dc35e8489b', true),
+    ('90ff91d6-ab39-40db-9160-34ce17416281', NOW() - INTERVAL '6 months', NOW() - INTERVAL '5 months', NOW() - INTERVAL '5 months', 'ef9a3235-f6e2-4e6c-92f6-760684308f7f', false),
+    ('15c106f5-a293-4a0e-b45a-6a4c7206ac6a', NOW() - INTERVAL '6 months', NOW() - INTERVAL '5 months', NOW() - INTERVAL '5 months', '0c0d6487-3f71-4121-8575-19514c7b9f03', false),
+    ('c07165de-71ec-40c4-b25b-c42deefea636', NOW() - INTERVAL '6 months', NOW() - INTERVAL '5 months', NOW() - INTERVAL '5 months' + INTERVAL '1 day', '84a0f437-a20a-4ac2-8a5b-f8dc35e8489b', true),
+    ('d3738f72-4c0b-47f8-8ff9-8bea46022309', NOW() - INTERVAL '6 months', NOW() - INTERVAL '5 months', NOW() - INTERVAL '5 months', 'ef9a3235-f6e2-4e6c-92f6-760684308f7f', false),
+    ('5f9555df-c616-4530-bdcd-6b664fc91255', NOW() - INTERVAL '6 months', NOW() - INTERVAL '5 months', NOW() - INTERVAL '5 months', '0c0d6487-3f71-4121-8575-19514c7b9f03', false),
+    ('1efd2d85-d3ee-4388-85a0-f824a761ff8b', NOW() - INTERVAL '5 months', NOW() - INTERVAL '4 months', NOW() - INTERVAL '4 months' + INTERVAL '1 day', '84a0f437-a20a-4ac2-8a5b-f8dc35e8489b', true),
+    ('90ff91d6-ab39-40db-9160-34ce17416281', NOW() - INTERVAL '5 months', NOW() - INTERVAL '4 months', NOW() - INTERVAL '4 months', 'ef9a3235-f6e2-4e6c-92f6-760684308f7f', false),
+    ('15c106f5-a293-4a0e-b45a-6a4c7206ac6a', NOW() - INTERVAL '5 months', NOW() - INTERVAL '4 months', NOW() - INTERVAL '4 months', '0c0d6487-3f71-4121-8575-19514c7b9f03', false),
+    ('c07165de-71ec-40c4-b25b-c42deefea636', NOW() - INTERVAL '5 months', NOW() - INTERVAL '4 months', NOW() - INTERVAL '4 months' + INTERVAL '1 day', '84a0f437-a20a-4ac2-8a5b-f8dc35e8489b', true),
+    ('d3738f72-4c0b-47f8-8ff9-8bea46022309', NOW() - INTERVAL '5 months', NOW() - INTERVAL '4 months', NOW() - INTERVAL '4 months', 'ef9a3235-f6e2-4e6c-92f6-760684308f7f', false),
+    ('5f9555df-c616-4530-bdcd-6b664fc91255', NOW() - INTERVAL '5 months', NOW() - INTERVAL '4 months', NOW() - INTERVAL '4 months', '0c0d6487-3f71-4121-8575-19514c7b9f03', false),
+    ('1efd2d85-d3ee-4388-85a0-f824a761ff8b', NOW() - INTERVAL '4 months', NOW() - INTERVAL '3 months', NOW() - INTERVAL '3 months' + INTERVAL '1 day', '84a0f437-a20a-4ac2-8a5b-f8dc35e8489b', true),
+    ('90ff91d6-ab39-40db-9160-34ce17416281', NOW() - INTERVAL '4 months', NOW() - INTERVAL '3 months', NOW() - INTERVAL '3 months', 'ef9a3235-f6e2-4e6c-92f6-760684308f7f', false),
+    ('15c106f5-a293-4a0e-b45a-6a4c7206ac6a', NOW() - INTERVAL '4 months', NOW() - INTERVAL '3 months', NOW() - INTERVAL '3 months', '0c0d6487-3f71-4121-8575-19514c7b9f03', false),
+    ('c07165de-71ec-40c4-b25b-c42deefea636', NOW() - INTERVAL '4 months', NOW() - INTERVAL '3 months', NOW() - INTERVAL '3 months' + INTERVAL '1 day', '84a0f437-a20a-4ac2-8a5b-f8dc35e8489b', true),
+    ('d3738f72-4c0b-47f8-8ff9-8bea46022309', NOW() - INTERVAL '4 months', NOW() - INTERVAL '3 months', NOW() - INTERVAL '3 months', 'ef9a3235-f6e2-4e6c-92f6-760684308f7f', false),
+    ('5f9555df-c616-4530-bdcd-6b664fc91255', NOW() - INTERVAL '4 months', NOW() - INTERVAL '3 months', NOW() - INTERVAL '3 months', '0c0d6487-3f71-4121-8575-19514c7b9f03', false),
+    ('1efd2d85-d3ee-4388-85a0-f824a761ff8b', NOW() - INTERVAL '3 months', NOW() - INTERVAL '2 months', NOW() - INTERVAL '2 months' + INTERVAL '1 day', '84a0f437-a20a-4ac2-8a5b-f8dc35e8489b', true),
+    ('90ff91d6-ab39-40db-9160-34ce17416281', NOW() - INTERVAL '3 months', NOW() - INTERVAL '2 months', NOW() - INTERVAL '2 months', 'ef9a3235-f6e2-4e6c-92f6-760684308f7f', false),
+    ('15c106f5-a293-4a0e-b45a-6a4c7206ac6a', NOW() - INTERVAL '3 months', NOW() - INTERVAL '2 months', NOW() - INTERVAL '2 months', '0c0d6487-3f71-4121-8575-19514c7b9f03', false),
+    ('c07165de-71ec-40c4-b25b-c42deefea636', NOW() - INTERVAL '3 months', NOW() - INTERVAL '2 months', NOW() - INTERVAL '2 months' + INTERVAL '1 day', '84a0f437-a20a-4ac2-8a5b-f8dc35e8489b', true),
+    ('d3738f72-4c0b-47f8-8ff9-8bea46022309', NOW() - INTERVAL '3 months', NOW() - INTERVAL '2 months', NOW() - INTERVAL '2 months', 'ef9a3235-f6e2-4e6c-92f6-760684308f7f', false),
+    ('5f9555df-c616-4530-bdcd-6b664fc91255', NOW() - INTERVAL '3 months', NOW() - INTERVAL '2 months', NOW() - INTERVAL '2 months', '0c0d6487-3f71-4121-8575-19514c7b9f03', false),
+    ('1efd2d85-d3ee-4388-85a0-f824a761ff8b', NOW() - INTERVAL '2 months', NOW() - INTERVAL '1 month', NOW() - INTERVAL '1 months' + INTERVAL '1 day', '84a0f437-a20a-4ac2-8a5b-f8dc35e8489b', true),
+    ('90ff91d6-ab39-40db-9160-34ce17416281', NOW() - INTERVAL '2 months', NOW() - INTERVAL '1 month', NOW() - INTERVAL '1 months', 'ef9a3235-f6e2-4e6c-92f6-760684308f7f', false),
+    ('15c106f5-a293-4a0e-b45a-6a4c7206ac6a', NOW() - INTERVAL '2 months', NOW() - INTERVAL '1 month', NOW() - INTERVAL '1 months', '0c0d6487-3f71-4121-8575-19514c7b9f03', false),
+    ('c07165de-71ec-40c4-b25b-c42deefea636', NOW() - INTERVAL '2 months', NOW() - INTERVAL '1 month', NOW() - INTERVAL '1 months' + INTERVAL '1 day', '84a0f437-a20a-4ac2-8a5b-f8dc35e8489b', true),
+    ('d3738f72-4c0b-47f8-8ff9-8bea46022309', NOW() - INTERVAL '2 months', NOW() - INTERVAL '1 month', NOW() - INTERVAL '1 months', 'ef9a3235-f6e2-4e6c-92f6-760684308f7f', false),
+    ('5f9555df-c616-4530-bdcd-6b664fc91255', NOW() - INTERVAL '2 months', NOW() - INTERVAL '1 month', NOW() - INTERVAL '1 months', '0c0d6487-3f71-4121-8575-19514c7b9f03', false);
+
+INSERT INTO submittal (
+    id,
+    alert_config_id,
+    create_date,
+    due_date,
+    completion_date,
+    submittal_status_id,
+    marked_as_missing
+) VALUES
+    ('b8c1c297-d1d5-4cee-b949-72299b330617', '1efd2d85-d3ee-4388-85a0-f824a761ff8b', NOW() - INTERVAL '1 month', NOW(), NULL, '0c0d6487-3f71-4121-8575-19514c7b9f03', false),
+    ('f4d9f5b2-9327-4098-9a50-27870724695c', '90ff91d6-ab39-40db-9160-34ce17416281', NOW() - INTERVAL '1 month', NOW(), NULL, '0c0d6487-3f71-4121-8575-19514c7b9f03', false),
+    ('45c82489-1b3e-46fe-842f-92c17962c9f4', '15c106f5-a293-4a0e-b45a-6a4c7206ac6a', NOW() - INTERVAL '1 month', NOW(), NULL, '0c0d6487-3f71-4121-8575-19514c7b9f03', false),
+    ('f8189297-f1a6-489d-9ea7-f1a0ffc30153', 'c07165de-71ec-40c4-b25b-c42deefea636', NOW() - INTERVAL '1 month', NOW(), NULL, '0c0d6487-3f71-4121-8575-19514c7b9f03', false),
+    ('bf9e1519-c4dc-4904-9499-6a46fb18a199', 'd3738f72-4c0b-47f8-8ff9-8bea46022309', NOW() - INTERVAL '1 month', NOW(), NULL, '0c0d6487-3f71-4121-8575-19514c7b9f03', false),
+    ('2aea5fd9-5462-4b6d-9dfb-2e155a06c6ae', '5f9555df-c616-4530-bdcd-6b664fc91255', NOW() - INTERVAL '1 month', NOW(), NULL, '0c0d6487-3f71-4121-8575-19514c7b9f03', false);
+
+INSERT INTO evaluation (id, project_id, submittal_id, name, body, start_date, end_date, create_date) VALUES
+    ('add252bf-2fa7-4824-b129-e4d0ff42dffa', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', NULL, 'Test Evaluation 1', 'Evaluation for demonstration purposes.', '2022-12-01', '2023-01-01', NOW() - INTERVAL 'PT2M'),
+    ('f7169aca-aa5f-4a0b-9fcc-609bb5c2bd7b', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'b8c1c297-d1d5-4cee-b949-72299b330617', 'Test Evaluation 2', 'Evaluation for demonstration purposes.', '2020-01-01', '2020-01-07', NOW() - INTERVAL 'PT1M'),
+    ('5884f481-d724-4a2c-8ff0-14b028e6fd01', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'f4d9f5b2-9327-4098-9a50-27870724695c', 'Test Evaluation 3', 'Evaluation for demonstration purposes.', NOW() - INTERVAL 'P1M', NOW(), NOW());
 
 INSERT INTO evaluation_instrument (evaluation_id, instrument_id) VALUES
     ('f7169aca-aa5f-4a0b-9fcc-609bb5c2bd7b', 'a7540f69-c41e-43b3-b655-6e44097edb7e');
 
 INSERT INTO alert_profile_subscription (alert_config_id, profile_id) VALUES
-    ('1efd2d85-d3ee-4388-85a0-f824a761ff8b', '57329df6-9f7a-4dad-9383-4633b452efab');
+    ('1efd2d85-d3ee-4388-85a0-f824a761ff8b', '57329df6-9f7a-4dad-9383-4633b452efab'),
+    ('90ff91d6-ab39-40db-9160-34ce17416281', '57329df6-9f7a-4dad-9383-4633b452efab'),
+    ('15c106f5-a293-4a0e-b45a-6a4c7206ac6a', '57329df6-9f7a-4dad-9383-4633b452efab'),
+    ('c07165de-71ec-40c4-b25b-c42deefea636', '57329df6-9f7a-4dad-9383-4633b452efab'),
+    ('d3738f72-4c0b-47f8-8ff9-8bea46022309', '57329df6-9f7a-4dad-9383-4633b452efab'),
+    ('5f9555df-c616-4530-bdcd-6b664fc91255', '57329df6-9f7a-4dad-9383-4633b452efab');
 
 INSERT INTO email (id, email) VALUES
     ('1ebf9e14-2b1c-404e-9535-6c2ee24944b6', 'no.profile@fake.usace.army.mil');
 
 INSERT INTO alert_email_subscription (alert_config_id, email_id) VALUES
-    ('1efd2d85-d3ee-4388-85a0-f824a761ff8b', '1ebf9e14-2b1c-404e-9535-6c2ee24944b6');
+    ('1efd2d85-d3ee-4388-85a0-f824a761ff8b', '1ebf9e14-2b1c-404e-9535-6c2ee24944b6'),
+    ('c07165de-71ec-40c4-b25b-c42deefea636', '1ebf9e14-2b1c-404e-9535-6c2ee24944b6');
 
 INSERT INTO alert (id, alert_config_id) VALUES ('e070be13-ef17-40f3-99c8-fef3ee1b9fb5', '1efd2d85-d3ee-4388-85a0-f824a761ff8b');
 
@@ -255,9 +359,9 @@ INSERT INTO collection_group_timeseries (collection_group_id, timeseries_id) VAL
     ('30b32cb1-0936-42c4-95d1-63a7832a57db', '9a3864a8-8766-4bfa-bad1-0328b166f6a8');
 
 -- plot_configuration
-INSERT INTO plot_configuration (project_id, id, slug, name) VALUES
-    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'cc28ca81-f125-46c6-a5cd-cc055a003c19', 'all-plots', 'All Plots'),
-    ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', '64879f68-6a2c-4d78-8e8b-5e9b9d2e0d6a', 'pz-1a-plot', 'PZ-1A PLOT');
+INSERT INTO plot_configuration (id, project_id, slug, name) VALUES
+    ('cc28ca81-f125-46c6-a5cd-cc055a003c19', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'all-plots', 'All Plots'),
+    ('64879f68-6a2c-4d78-8e8b-5e9b9d2e0d6a', '5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'pz-1a-plot', 'PZ-1A PLOT');
 
 
 -- plot_configuration_timeseries

@@ -62,10 +62,10 @@ func GetDomains(db *sqlx.DB) ([]Domain, error) {
 		UNION
 		SELECT
 			id,
-			'alert_status'		AS group,
+			'submittal_status'	AS group,
 			name				AS value,
 			null				AS description
-		FROM alert_status
+		FROM submittal_status
 		UNION
 		SELECT
 			id,

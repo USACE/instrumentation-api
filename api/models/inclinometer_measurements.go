@@ -54,7 +54,7 @@ func ListInclinometerMeasurements(db *sqlx.DB, timeseriesID *uuid.UUID, tw *ts.T
 	if err := db.Select(
 		&mc.Inclinometers,
 		listInclinometerMeasurementsSQL()+" WHERE T.id = $1 AND M.time > $2 AND M.time < $3 ORDER BY M.time DESC",
-		timeseriesID, tw.After, tw.Before,
+		timeseriesID, tw.Start, tw.End,
 	); err != nil {
 		return nil, err
 	}
