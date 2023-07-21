@@ -1,7 +1,9 @@
 package models
 
 import (
+	"database/sql"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -273,6 +275,8 @@ func UpdateAlertConfig(db *sqlx.DB, alertConfigID *uuid.UUID, ac *AlertConfig) (
 			AND NOT sub.marked_as_missing
 		) sq
 		WHERE id = sq.submittal_id
+		AND sq.new_due_date > NOW()
+		RETURNING id
 	`)
 	if err != nil {
 		return nil, err
@@ -309,7 +313,11 @@ func UpdateAlertConfig(db *sqlx.DB, alertConfigID *uuid.UUID, ac *AlertConfig) (
 		return nil, err
 	}
 
-	if _, err := stmt4.Exec(alertConfigID); err != nil {
+	var updatedSubID uuid.UUID
+	if err := stmt4.Get(&updatedSubID, alertConfigID); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("updated alert config new due date must be in the futute! complete the current submittal before updating")
+		}
 		return nil, err
 	}
 
