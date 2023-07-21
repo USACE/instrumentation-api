@@ -101,9 +101,10 @@ GRANT SELECT ON
     datalogger_error,
     evaluation,
     evaluation_instrument,
-    alert_status,
+    submittal_status,
     alert_type,
-    alert_config_instrument
+    alert_config_instrument,
+    submittal
 TO instrumentation_reader;
 
 -- Role instrumentation_writer
@@ -160,9 +161,8 @@ GRANT INSERT,UPDATE,DELETE ON
     datalogger_error,
     evaluation,
     evaluation_instrument,
-    alert_status,
-    alert_type,
-    alert_config_instrument
+    alert_config_instrument,
+    submittal
 TO instrumentation_writer;
 
 -- Role postgis_reader

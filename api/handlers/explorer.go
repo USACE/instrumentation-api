@@ -43,8 +43,7 @@ func PostInclinometerExplorer(db *sqlx.DB) echo.HandlerFunc {
 		// Get timeWindow from query params
 		var tw timeseries.TimeWindow
 		a, b := c.QueryParam("after"), c.QueryParam("before")
-		err := tw.SetWindow(a, b)
-		if err != nil {
+		if err := tw.SetWindow(a, b, time.Now().AddDate(0, 0, -7), time.Now()); err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		f.TimeWindow = tw

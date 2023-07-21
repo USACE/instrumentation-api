@@ -2,61 +2,54 @@ package models
 
 import (
 	_sql "database/sql"
-	"encoding/json"
-	"log"
+	"errors"
+	"sync"
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/config"
-	et "github.com/USACE/instrumentation-api/api/email_template"
+	"github.com/USACE/instrumentation-api/api/dbutils"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
 
+var (
+	GreenSubmittalStatusID  uuid.UUID = uuid.MustParse("0c0d6487-3f71-4121-8575-19514c7b9f03")
+	YellowSubmittalStatusID uuid.UUID = uuid.MustParse("ef9a3235-f6e2-4e6c-92f6-760684308f7f")
+	RedSubmittalStatusID    uuid.UUID = uuid.MustParse("84a0f437-a20a-4ac2-8a5b-f8dc35e8489b")
+
+	MeasurementSubmittalAlertTypeID uuid.UUID = uuid.MustParse("97e7a25c-d5c7-4ded-b272-1bb6e5914fe3")
+	EvaluationSubmittalAlertTypeID  uuid.UUID = uuid.MustParse("da6ee89e-58cc-4d85-8384-43c3c33a68bd")
+)
+
+const (
+	warning  = "Warning"
+	alert    = "Alert"
+	reminder = "Reminder"
+)
+
 type AlertCheck struct {
-	AlertConfigID     uuid.UUID   `db:"alert_config_id"`
-	ShouldWarn        bool        `db:"should_warn"`
-	ShouldAlert       bool        `db:"should_alert"`
-	ShouldRemind      bool        `db:"should_remind"`
-	ExpectedSubmittal time.Time   `db:"expected_submittal"`
-	AlertConfig       AlertConfig `db:"-"`
+	AlertConfigID uuid.UUID `db:"alert_config_id"`
+	SubmittalID   uuid.UUID `db:"submittal_id"`
+	ShouldWarn    bool      `db:"should_warn"`
+	ShouldAlert   bool      `db:"should_alert"`
+	ShouldRemind  bool      `db:"should_remind"`
+	Submittal     Submittal `db:"-"`
 }
 
-type EvaluationSubmittal struct {
-	LastEvaluationTime *time.Time `db:"last_evaluation_time"`
-	AlertCheck
-}
-
-type MeasurementSubmittal struct {
-	AffectedTimeseries MeasurementSubmittalTimeseriesCollection `db:"affected_timeseries"`
-	AlertCheck
-}
-
-type MeasurementSubmittalTimeseries struct {
-	InstrumentName      string    `json:"instrument_name"`
-	TimeseriesName      string    `json:"timeseries_name"`
-	LastMeasurementTime time.Time `json:"last_measurement_time"`
-	Status              string    `json:"status"`
-}
-
-type MeasurementSubmittalTimeseriesCollection []MeasurementSubmittalTimeseries
-
-func (a *MeasurementSubmittalTimeseriesCollection) Scan(src interface{}) error {
-	if err := json.Unmarshal([]byte(src.(string)), a); err != nil {
-		return err
-	}
-	return nil
-}
-
-type AlertChecker interface {
+type AlertConfigChecker[T AlertChecker] interface {
 	GetAlertConfig() AlertConfig
-	GetShouldWarn() bool
-	GetShouldAlert() bool
-	GetShouldRemind() bool
+	SetAlertConfig(AlertConfig)
+	GetChecks() []T
+	SetChecks([]T)
 	DoEmail(string, *config.AlertCheckConfig, *config.SmtpConfig) error
 }
 
-func (ck AlertCheck) GetAlertConfig() AlertConfig {
-	return ck.AlertConfig
+type AlertChecker interface {
+	GetShouldWarn() bool
+	GetShouldAlert() bool
+	GetShouldRemind() bool
+	GetSubmittal() Submittal
+	SetSubmittal(Submittal)
 }
 
 func (ck AlertCheck) GetShouldWarn() bool {
@@ -71,67 +64,15 @@ func (ck AlertCheck) GetShouldRemind() bool {
 	return ck.ShouldRemind
 }
 
-func (es EvaluationSubmittal) DoEmail(emailType string, cfg *config.AlertCheckConfig, smtpCfg *config.SmtpConfig) error {
-	preformatted := et.EmailContent{
-		TextSubject: "-- DO NOT REPLY -- MIDAS " + emailType + ": {{.AlertConfig.ProjectName}} Evaluation Submittal \"{{.AlertConfig.Name}}\"",
-		TextBody: "The following " + emailType + " has been triggered:\r\n\r\n" +
-			"Project: {{.AlertConfig.ProjectName}}\r\n" +
-			"Alert Type: Evaluation Submittal\r\n" +
-			"Alert Name: \"{{.AlertConfig.Name}}\"\r\n" +
-			"Description: \"{{.AlertConfig.Body}}\"\r\n" +
-			"Expected Evaluation Submittal Time: {{.ExpectedSubmittal.Format \"Jan 02, 2006 15:04:05 UTC\" }}\r\n" +
-			"{{if .LastEvaluationTime}}Last Evaluation Submittal Time: {{.LastEvaluationTime.Format \"Jan 02, 2006 15:04:05 UTC\" }}{{end}}\r\n",
-	}
-	templContent, err := et.CreateEmailTemplateContent(preformatted)
-	if err != nil {
-		return err
-	}
-	content, err := et.FormatAlertConfigTemplates(templContent, es)
-	if err != nil {
-		return err
-	}
-	content.To = es.AlertConfig.GetToAddresses()
-	if len(content.To) < 1 {
-		return nil // no email subs
-	}
-	if err := et.ConstructAndSendEmail(content, cfg, smtpCfg); err != nil {
-		return err
-	}
-	return nil
+func (ck AlertCheck) GetSubmittal() Submittal {
+	return ck.Submittal
 }
 
-func (ms MeasurementSubmittal) DoEmail(emailType string, cfg *config.AlertCheckConfig, smtpCfg *config.SmtpConfig) error {
-	preformatted := et.EmailContent{
-		TextSubject: "-- DO NOT REPLY -- MIDAS " + emailType + ": {{.AlertConfig.ProjectName}} Timeseries Measurement Submittal \"{{.AlertConfig.Name}}\"",
-		TextBody: "The following " + emailType + " has been triggered:\r\n\r\n" +
-			"Project: {{.AlertConfig.ProjectName}}\r\n" +
-			"Alert Type: Measurement Submittal\r\n" +
-			"Alert Name: \"{{.AlertConfig.Name}}\"\r\n" +
-			"Description: \"{{.AlertConfig.Body}}\"\r\n" +
-			"Last Expected Measurement Submittal Time: {{.ExpectedSubmittal.Format \"Jan 02, 2006 15:04:05 UTC\" }}\r\n" +
-			"Affected Timeseries Last Measurement Submittal:\r\n" +
-			"{{range .AffectedTimeseries}}\t• {{.InstrumentName}}: {{.TimeseriesName}}" +
-			" at {{.LastMeasurementTime.Format \"Jan 02, 2006 15:04:05 UTC\" }} (status: {{.Status}})\r\n{{end}}",
-	}
-	templContent, err := et.CreateEmailTemplateContent(preformatted)
-	if err != nil {
-		return err
-	}
-	content, err := et.FormatAlertConfigTemplates(templContent, ms)
-	if err != nil {
-		return err
-	}
-	content.To = ms.AlertConfig.GetToAddresses()
-	if len(content.To) < 1 {
-		return nil // no email subs
-	}
-	if err := et.ConstructAndSendEmail(content, cfg, smtpCfg); err != nil {
-		return err
-	}
-	return nil
+func (ck *AlertCheck) SetSubmittal(sub Submittal) {
+	ck.Submittal = sub
 }
 
-func ListExpiredAlertConfigs(db *sqlx.DB) ([]AlertConfig, error) {
+func ListAndCheckAlertConfigs(db *sqlx.DB) ([]AlertConfig, error) {
 	aa := make([]AlertConfig, 0)
 
 	sql := `
@@ -139,7 +80,7 @@ func ListExpiredAlertConfigs(db *sqlx.DB) ([]AlertConfig, error) {
 		SET last_checked = now()
 		FROM (
 			SELECT *
-			FROM v_alert_config a
+			FROM v_alert_config
 		) ac2
 		WHERE  ac1.id = ac2.id
 		RETURNING ac2.*
@@ -155,117 +96,215 @@ func ListExpiredAlertConfigs(db *sqlx.DB) ([]AlertConfig, error) {
 	return aa, nil
 }
 
-func UpdateAlertConfigStatus(db *sqlx.DB, alertConfigs []AlertConfig) error {
-	txn, err := db.Beginx()
-	if err != nil {
-		return err
-	}
-	defer txn.Rollback()
-
-	stmt, err := txn.Preparex(`
+func UpdateAlertConfigChecks[T AlertChecker, PT AlertConfigChecker[T]](txn *sqlx.Tx, accs []PT) error {
+	stmt1, err := txn.Preparex(`
 		UPDATE alert_config SET
-			last_reminded=$2,
-			alert_status_id=$3
-		WHERE id=$1
+			last_reminded = $2
+		WHERE id = $1
 	`)
 	if err != nil {
 		return err
 	}
 
-	for _, ac := range alertConfigs {
-		if _, err := stmt.Exec(ac.ID, ac.LastReminded, ac.AlertStatusID); err != nil {
-			if err == _sql.ErrNoRows {
-				log.Println(err.Error())
-				return nil
-			}
-			return err
-		}
-	}
-	if err := stmt.Close(); err != nil {
+	stmt2, err := txn.Preparex(`
+		UPDATE submittal SET
+			submittal_status_id = $2,
+			completion_date = $3,
+			warning_sent = $4
+		WHERE id = $1
+	`)
+	if err != nil {
 		return err
 	}
-	if err := txn.Commit(); err != nil {
+
+	stmt3, err := txn.Preparex(`
+		INSERT INTO submittal (alert_config_id, create_date, due_date)
+		SELECT
+			ac.id,
+			$2::TIMESTAMPTZ,
+			$2::TIMESTAMPTZ + ac.schedule_interval
+		FROM alert_config ac
+		WHERE ac.id = $1
+	`)
+	if err != nil {
+		return err
+	}
+
+	for _, acc := range accs {
+		ac := acc.GetAlertConfig()
+		if _, err := stmt1.Exec(ac.ID, ac.LastReminded); err != nil {
+			return err
+		}
+		checks := acc.GetChecks()
+		for _, c := range checks {
+			sub := c.GetSubmittal()
+			if _, err := stmt2.Exec(sub.ID, sub.SubmittalStatusID, sub.CompletionDate, sub.WarningSent); err != nil {
+				return err
+			}
+		}
+		if ac.CreateNextSubmittalFrom != nil {
+			if _, err := stmt3.Exec(ac.ID, ac.CreateNextSubmittalFrom); err != nil {
+				return err
+			}
+		}
+	}
+
+	if err := stmt1.Close(); err != nil {
+		return err
+	}
+	if err := stmt2.Close(); err != nil {
+		return err
+	}
+	if err := stmt3.Close(); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func ListAlertCheckEvaluationSubmittals(db *sqlx.DB, alertConfigs []AlertConfig) ([]EvaluationSubmittal, error) {
-	es := make([]EvaluationSubmittal, 0)
-	if len(alertConfigs) == 0 {
-		log.Println("no evaluation submittals to check")
-		return es, nil
+// there should always be at least one "missing" submittal within an alert config. Submittals are created:
+//  1. when an alert config is created (first submittal)
+//  2. when a submittal is completed (next submittal created)
+//  3. when a submittals due date has passed if it is not completed
+//
+// for evaluations, the next is submittal created manually when the evaluation is made
+// for measurements, the next submittal is created the first time this function runs after the due date
+//
+// No "Yellow" Status Submittals should be passed to this function as it implies the submittal has been completed
+//
+// TODO: smtp.SendMail esablishes a new connection for each batch of emails sent. I would be better to aggregate
+// the contents of each email, then create a connection pool to reuse and send all emails at once, with any errors wrapped and returned
+func HandleChecks[T AlertChecker, PT AlertConfigChecker[T]](txn *sqlx.Tx, accs []PT, cfg *config.AlertCheckConfig, smtpCfg *config.SmtpConfig) error {
+	defer dbutils.Timer()()
+
+	mu := &sync.Mutex{}
+	aaccs := make([]PT, len(accs))
+	errs := make([]error, 0)
+	t := time.Now()
+
+	wg := sync.WaitGroup{}
+	for i, p := range accs {
+		wg.Add(1)
+		go func(idx int, acc PT) {
+			defer wg.Done()
+
+			ac := acc.GetAlertConfig()
+			checks := acc.GetChecks()
+
+			// If ANY "missing" submittals are within an alert config, aggregate missing submittals and send an alert
+			acAlert := false
+			sendAlertEmail := false
+			// If ANY missing submittals previously existed within an alert config, send them in a "reminder" instead of an alert
+			acReminder := false
+			sendReminderEmail := false
+			// If a reminder exists when at least one submittal "shouldAlert", the alert should be aggregated into the next reminder
+			// instead of sending a new reminder email. If NO alerts exist for an alert config, the reminder can be reset to NULL.
+			// Reminders should be set when the first alert for an alert config is triggered, or at each reminder interval
+			resetReminders := true
+
+			for j, c := range checks {
+				shouldWarn := c.GetShouldWarn()
+				shouldAlert := c.GetShouldAlert()
+				shouldRemind := c.GetShouldRemind()
+				sub := c.GetSubmittal()
+
+				// if no submittal alerts or warnings are found, no emails should be sent
+				if !shouldAlert && !shouldWarn {
+					// if submittal status was previously red, update status to yellow and
+					// completion_date to current timestamp
+					if sub.SubmittalStatusID == RedSubmittalStatusID {
+						sub.SubmittalStatusID = YellowSubmittalStatusID
+						sub.CompletionDate = &t
+						ac.CreateNextSubmittalFrom = &t
+					} else
+
+					// if submittal status is green and the current time is not before the submittal due date,
+					// complete the submittal at that due date and prepare the next submittal interval
+					if sub.SubmittalStatusID == GreenSubmittalStatusID && !t.Before(sub.DueDate) {
+						sub.CompletionDate = &sub.DueDate
+						ac.CreateNextSubmittalFrom = &sub.DueDate
+					}
+				} else
+
+				// if any submittal warning is triggered, immediately send a
+				// warning email, since submittal due dates are unique within alert configs
+				if shouldWarn && !sub.WarningSent {
+					sub.SubmittalStatusID = GreenSubmittalStatusID
+					mu.Lock()
+					if err := acc.DoEmail(warning, cfg, smtpCfg); err != nil {
+						errs = append(errs, err)
+					}
+					mu.Unlock()
+					sub.WarningSent = true
+				} else
+
+				// if any submittal alert is triggered after a warning has been sent within an
+				// alert config, aggregate missing submittals and send their contents in an alert email
+				if shouldAlert {
+					if sub.SubmittalStatusID != RedSubmittalStatusID {
+						sub.SubmittalStatusID = RedSubmittalStatusID
+						acAlert = true
+						ac.CreateNextSubmittalFrom = &sub.DueDate
+					}
+					resetReminders = false
+				}
+
+				// if any reminder is triggered, aggregate missing
+				// submittals and send their contents in an email
+				if shouldRemind {
+					acReminder = true
+				}
+
+				c.SetSubmittal(sub)
+				checks[j] = c
+			}
+
+			// if there are no alerts, there should also be no reminders sent. "last_reminded" is used to determine
+			// if an alert has already been sent for an alert config, and send a reminder if so
+			if resetReminders {
+				ac.LastReminded = nil
+			}
+
+			// if there are any reminders within an alert config, they will override the alerts
+			if acAlert && ((!acReminder && ac.LastReminded == nil) || !ac.MuteConsecutiveAlerts) {
+				ac.LastReminded = &t
+				sendAlertEmail = true
+			}
+			if acReminder {
+				ac.LastReminded = &t
+				sendReminderEmail = true
+			}
+
+			acc.SetAlertConfig(ac)
+			acc.SetChecks(checks)
+
+			if sendAlertEmail {
+				mu.Lock()
+				if err := acc.DoEmail(alert, cfg, smtpCfg); err != nil {
+					errs = append(errs, err)
+				}
+				mu.Unlock()
+			}
+			if sendReminderEmail {
+				mu.Lock()
+				if err := acc.DoEmail(reminder, cfg, smtpCfg); err != nil {
+					errs = append(errs, err)
+				}
+				mu.Unlock()
+			}
+
+			aaccs[idx] = acc
+		}(i, p)
+	}
+	wg.Wait()
+
+	if err := UpdateAlertConfigChecks[T, PT](txn, aaccs); err != nil {
+		errs = append(errs, err)
+		return errors.Join(errs...)
+	}
+	if len(errs) > 0 {
+		return errors.Join(errs...)
 	}
 
-	acIDs := make([]uuid.UUID, len(alertConfigs))
-	for idx := range alertConfigs {
-		acIDs[idx] = alertConfigs[idx].ID
-	}
-
-	query, args, err := sqlx.In(`SELECT * FROM v_alert_check_evaluation_submittal WHERE alert_config_id IN (?)`, acIDs)
-	if err != nil {
-		return es, err
-	}
-	query = db.Rebind(query)
-	if err := db.Select(&es, query, args...); err != nil {
-		if err == _sql.ErrNoRows {
-			return es, nil
-		}
-		return es, err
-	}
-
-	acMap := make(map[uuid.UUID]AlertConfig)
-	for _, a := range alertConfigs {
-		acMap[a.ID] = a
-	}
-	for idx := range es {
-		ac, ok := acMap[es[idx].AlertConfigID]
-		if !ok {
-			return es, err
-		}
-		es[idx].AlertConfig = ac
-	}
-
-	return es, nil
-}
-
-func ListAlertCheckMeasurementSubmittals(db *sqlx.DB, alertConfigs []AlertConfig) ([]MeasurementSubmittal, error) {
-	ms := make([]MeasurementSubmittal, 0)
-	if len(alertConfigs) == 0 {
-		log.Println("no measurement submittals to check")
-		return ms, nil
-	}
-
-	acIDs := make([]uuid.UUID, len(alertConfigs))
-	for idx := range alertConfigs {
-		acIDs[idx] = alertConfigs[idx].ID
-	}
-
-	query, args, err := sqlx.In(`SELECT * FROM v_alert_check_measurement_submittal WHERE alert_config_id IN (?)`, acIDs)
-	if err != nil {
-		return ms, err
-	}
-
-	query = db.Rebind(query)
-	if err := db.Select(&ms, query, args...); err != nil {
-		if err == _sql.ErrNoRows {
-			return ms, nil
-		}
-		return ms, err
-	}
-
-	acMap := make(map[uuid.UUID]AlertConfig)
-	for _, a := range alertConfigs {
-		acMap[a.ID] = a
-	}
-	for idx := range ms {
-		ac, ok := acMap[ms[idx].AlertConfigID]
-		if !ok {
-			return ms, err
-		}
-		ms[idx].AlertConfig = ac
-	}
-
-	return ms, nil
+	return nil
 }

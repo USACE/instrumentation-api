@@ -1,4 +1,6 @@
-CREATE OR REPLACE VIEW v_evaluation AS (
+DROP VIEW IF EXISTS v_evaluation;
+
+CREATE VIEW v_evaluation AS (
     SELECT
         ev.id                               AS id,
         ev.name                             AS name,
@@ -13,6 +15,7 @@ CREATE OR REPLACE VIEW v_evaluation AS (
         prj.name                            AS project_name,
         ac.id                               AS alert_config_id,
         ac.name                             AS alert_config_name,
+        ev.submittal_id                     AS submittal_id,
         ev.start_date                       AS start_date,
         ev.end_date                         AS end_date,
         (
@@ -31,7 +34,8 @@ CREATE OR REPLACE VIEW v_evaluation AS (
     INNER JOIN project prj  ON ev.project_id = prj.id
     LEFT  JOIN profile prf1 ON ev.creator = prf1.id
     LEFT  JOIN profile prf2 ON ev.updater = prf2.id
-    LEFT  JOIN alert_config ac ON ac.id = ev.alert_config_id
+    LEFT  JOIN submittal sub ON sub.id = ev.submittal_id
+    LEFT  JOIN alert_config ac ON ac.id = sub.alert_config_id
 );
 
 GRANT SELECT ON

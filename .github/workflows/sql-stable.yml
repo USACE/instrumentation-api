@@ -6,6 +6,7 @@ on:
     paths:
       - "sql/common/*"
       - "sql/stable/*"
+      - "sql/Dockerfile"
       - ".github/workflows/sql-stable.yml"
   workflow_dispatch:
 jobs:

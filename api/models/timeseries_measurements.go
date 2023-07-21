@@ -65,7 +65,7 @@ func ListTimeseriesMeasurements(db *sqlx.DB, tsID *uuid.UUID, tw *ts.TimeWindow,
 	if err := db.Select(
 		&items,
 		sql,
-		tsID, tw.After, tw.Before,
+		tsID, tw.Start, tw.End,
 	); err != nil {
 		return nil, err
 	}
@@ -115,19 +115,24 @@ func ConstantMeasurement(db *sqlx.DB, tsID *uuid.UUID, constantName string) (*ts
 	return &m, nil
 }
 
-func CreateOrUpdateTimeseriesMeasurementsTxn(txn *sqlx.Tx, mc []ts.MeasurementCollection) (*sqlx.Tx, error) {
+func CreateOrUpdateTimeseriesMeasurementsTxn(txn *sqlx.Tx, mc []ts.MeasurementCollection, doUpsert bool) (*sqlx.Tx, error) {
+	doMmt := "DO NOTHING"
+	doNotes := "DO NOTHING"
+	if doUpsert {
+		doMmt = `DO UPDATE SET value = EXCLUDED.value`
+		doNotes = `DO UPDATE SET masked = EXCLUDED.masked, validated = EXCLUDED.validated, annotation = EXCLUDED.annotation`
+	}
+
 	stmt_measurement, err := txn.Preparex(
 		`INSERT INTO timeseries_measurement (timeseries_id, time, value) VALUES ($1, $2, $3)
-		 ON CONFLICT ON CONSTRAINT timeseries_unique_time DO UPDATE SET value = EXCLUDED.value; 
-		`,
+		 ON CONFLICT ON CONSTRAINT timeseries_unique_time ` + doMmt,
 	)
 	if err != nil {
 		return nil, err
 	}
 	stmt_notes, err := txn.Preparex(
 		`INSERT INTO timeseries_notes (timeseries_id, time, masked, validated, annotation) VALUES ($1, $2, $3, $4, $5)
-		ON CONFLICT ON CONSTRAINT notes_unique_time DO UPDATE SET masked = EXCLUDED.masked, validated = EXCLUDED.validated, annotation = EXCLUDED.annotation;
-		`,
+		ON CONFLICT ON CONSTRAINT notes_unique_time ` + doNotes,
 	)
 	if err != nil {
 		return nil, err
@@ -147,6 +152,7 @@ func CreateOrUpdateTimeseriesMeasurementsTxn(txn *sqlx.Tx, mc []ts.MeasurementCo
 			}
 		}
 	}
+
 	if err := stmt_measurement.Close(); err != nil {
 		return nil, err
 	}
@@ -155,6 +161,26 @@ func CreateOrUpdateTimeseriesMeasurementsTxn(txn *sqlx.Tx, mc []ts.MeasurementCo
 	}
 
 	return txn, nil
+}
+
+// CreateTimeseriesMeasurements creates many timeseries from an array of timeseries
+func CreateTimeseriesMeasurements(db *sqlx.DB, mc []ts.MeasurementCollection) ([]ts.MeasurementCollection, error) {
+	txn, err := db.Beginx()
+	if err != nil {
+		return nil, err
+	}
+	defer txn.Rollback()
+
+	txn, err = CreateOrUpdateTimeseriesMeasurementsTxn(txn, mc, false)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := txn.Commit(); err != nil {
+		return nil, err
+	}
+
+	return mc, nil
 }
 
 // CreateOrUpdateTimeseriesMeasurements creates many timeseries from an array of timeseries
@@ -166,7 +192,7 @@ func CreateOrUpdateTimeseriesMeasurements(db *sqlx.DB, mc []ts.MeasurementCollec
 	}
 	defer txn.Rollback()
 
-	txn, err = CreateOrUpdateTimeseriesMeasurementsTxn(txn, mc)
+	txn, err = CreateOrUpdateTimeseriesMeasurementsTxn(txn, mc, true)
 	if err != nil {
 		return nil, err
 	}
@@ -203,10 +229,10 @@ func UpdateTimeseriesMeasurements(db *sqlx.DB, mc []ts.MeasurementCollection, tw
 	}
 
 	for _, c := range mc {
-		if _, err := stmt_measurement.Exec(c.TimeseriesID, tw.After, tw.Before); err != nil {
+		if _, err := stmt_measurement.Exec(c.TimeseriesID, tw.Start, tw.End); err != nil {
 			return nil, err
 		}
-		if _, err := stmt_notes.Exec(c.TimeseriesID, tw.After, tw.Before); err != nil {
+		if _, err := stmt_notes.Exec(c.TimeseriesID, tw.Start, tw.End); err != nil {
 			return nil, err
 		}
 	}
@@ -218,7 +244,7 @@ func UpdateTimeseriesMeasurements(db *sqlx.DB, mc []ts.MeasurementCollection, tw
 		return nil, err
 	}
 
-	txn, err = CreateOrUpdateTimeseriesMeasurementsTxn(txn, mc)
+	txn, err = CreateOrUpdateTimeseriesMeasurementsTxn(txn, mc, true)
 	if err != nil {
 		return nil, err
 	}

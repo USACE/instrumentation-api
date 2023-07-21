@@ -286,7 +286,7 @@ func queryTimeseriesMeasurements(db *sqlx.DB, f *MeasurementsFilter) (Measuremen
 		tt2[idx] = Timeseries{
 			TimeseriesInfo: t.TimeseriesInfo,
 			Measurements:   make([]Measurement, 0),
-			TimeWindow:     timeseries.TimeWindow{After: f.After, Before: f.Before},
+			TimeWindow:     timeseries.TimeWindow{Start: f.After, End: f.Before},
 		}
 		if err := json.Unmarshal([]byte(t.Measurements), &tt2[idx].Measurements); err != nil {
 			log.Println(err)
@@ -357,7 +357,7 @@ func ComputedInclinometerTimeseries(db *sqlx.DB, instrumentIDs []uuid.UUID, tw *
 	ORDER BY is_computed
 	`
 
-	query, args, err := sqlx.In(sql, instrumentIDs, tw.After, tw.Before)
+	query, args, err := sqlx.In(sql, instrumentIDs, tw.Start, tw.End)
 	if err != nil {
 		return make([]InclinometerTimeseries, 0), err
 	}

@@ -5,7 +5,7 @@ COPY . /flyway/sql/
 # paths / user / pass / jdbc url set in task definition
 ENV FLYWAY_EDITION=community
 ENV FLYWAY_CONNECT_RETRIES=60
-ENV FLYWAY_SCHEMAS=midas
+ENV FLYWAY_SCHEMAS=midas,public
 
 ENTRYPOINT [ "flyway" ]
 
