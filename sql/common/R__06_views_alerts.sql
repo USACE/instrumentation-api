@@ -104,15 +104,16 @@ CREATE VIEW v_submittal AS (
         sub.id                  AS id,
         ac.id                   AS alert_config_id,
         ac.name                 AS alert_config_name,
-        ac.project_id           AS project_id,
-        sub.due_date            AS due_date,
-        sub.completion_date     AS completion_date,
-        sub.create_date         AS create_date,
-        sst.id                  AS submittal_status_id,
-        sst.name                AS submittal_status_name,
         aty.id                  AS alert_type_id,
         aty.name                AS alert_type_name,
-        sub.marked_as_missing   AS marked_as_missing
+        ac.project_id           AS project_id,
+        sst.id                  AS submittal_status_id,
+        sst.name                AS submittal_status_name,
+        sub.completion_date     AS completion_date,
+        sub.create_date         AS create_date,
+        sub.due_date            AS due_date,
+        sub.marked_as_missing   AS marked_as_missing,
+        sub.warning_sent        AS warning_sent
     FROM submittal sub
     INNER JOIN alert_config ac ON sub.alert_config_id = ac.id
     INNER JOIN submittal_status sst ON sub.submittal_status_id = sst.id
