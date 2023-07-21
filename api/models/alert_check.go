@@ -265,7 +265,7 @@ func HandleChecks[T AlertChecker, PT AlertConfigChecker[T]](txn *sqlx.Tx, accs [
 				ac.LastReminded = nil
 			}
 
-			// if there are any reminders within an alert config, they will override the alerts
+			// if there are any reminders within an alert config, they will override the alerts if MuteConsecutiveAlerts is true
 			if acAlert && ((!acReminder && ac.LastReminded == nil) || !ac.MuteConsecutiveAlerts) {
 				ac.LastReminded = &t
 				sendAlertEmail = true
