@@ -229,12 +229,14 @@ func HandleChecks[T AlertChecker, PT AlertConfigChecker[T]](txn *sqlx.Tx, accs [
 				// if any submittal warning is triggered, immediately send a
 				// warning email, since submittal due dates are unique within alert configs
 				if shouldWarn && !sub.WarningSent {
-					sub.SubmittalStatusID = GreenSubmittalStatusID
-					mu.Lock()
-					if err := acc.DoEmail(warning, cfg, smtpCfg); err != nil {
-						errs = append(errs, err)
+					if !ac.MuteConsecutiveAlerts || ac.LastReminded == nil {
+						mu.Lock()
+						if err := acc.DoEmail(warning, cfg, smtpCfg); err != nil {
+							errs = append(errs, err)
+						}
+						mu.Unlock()
 					}
-					mu.Unlock()
+					sub.SubmittalStatusID = GreenSubmittalStatusID
 					sub.WarningSent = true
 				} else
 
