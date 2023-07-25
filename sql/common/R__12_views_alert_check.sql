@@ -79,10 +79,11 @@ CREATE VIEW v_alert_check_evaluation_submittal AS (
         ) AS should_alert,
         COALESCE(
             ac.remind_interval != INTERVAL '0'
+            AND ac.last_reminded IS NOT NULL
             AND sub.completion_date IS NULL
             AND NOW() >= sub.due_date
             -- subtract 10 second constant to account for ticker accuracy/execution time
-            AND NOW() >= COALESCE(ac.last_reminded, sub.due_date) + ac.remind_interval - INTERVAL '10 seconds'
+            AND NOW() >= ac.last_reminded + ac.remind_interval - INTERVAL '10 seconds'
             AND NOT sub.marked_as_missing,
             true
         ) AS should_remind

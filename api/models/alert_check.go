@@ -270,7 +270,7 @@ func HandleChecks[T AlertChecker, PT AlertConfigChecker[T]](txn *sqlx.Tx, accs [
 				ac.LastReminded = &t
 				sendAlertEmail = true
 			}
-			if acReminder {
+			if acReminder && ac.LastReminded != nil {
 				ac.LastReminded = &t
 				sendReminderEmail = true
 			}
