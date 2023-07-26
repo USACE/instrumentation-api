@@ -3,11 +3,9 @@ package handlers
 import (
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/USACE/instrumentation-api/api/messages"
 	"github.com/USACE/instrumentation-api/api/models"
-	"github.com/USACE/instrumentation-api/api/timeseries"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
@@ -21,23 +19,13 @@ func ListProjectSubmittals(db *sqlx.DB) echo.HandlerFunc {
 			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
 
-		var tw timeseries.TimeWindow
-		a, b := c.QueryParam("after"), c.QueryParam("before")
-		if err = tw.SetWindow(a, b, time.Now().AddDate(0, 0, -7), time.Now()); err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-		}
-
 		var fmo bool
 		mo := c.QueryParam("missing")
-		if mo != "" && (a != "" || b != "") {
-			return echo.NewHTTPError(http.StatusBadRequest, "'after/before' and 'missing' parameters are mutually exclusive")
-		}
-
 		if strings.ToLower(mo) == "true" {
 			fmo = true
 		}
 
-		subs, err := models.ListProjectSubmittals(db, &id, tw, fmo)
+		subs, err := models.ListProjectSubmittals(db, &id, fmo)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
@@ -53,19 +41,13 @@ func ListInstrumentSubmittals(db *sqlx.DB) echo.HandlerFunc {
 			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
 
-		var tw timeseries.TimeWindow
-		a, b := c.QueryParam("after"), c.QueryParam("before")
-		if err = tw.SetWindow(a, b, time.Now().AddDate(0, 0, -7), time.Now()); err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-		}
-
 		var fmo bool
 		mo := c.QueryParam("missing")
 		if strings.ToLower(mo) == "true" {
 			fmo = true
 		}
 
-		subs, err := models.ListInstrumentSubmittals(db, &id, tw, fmo)
+		subs, err := models.ListInstrumentSubmittals(db, &id, fmo)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
@@ -81,19 +63,13 @@ func ListAlertConfigSubmittals(db *sqlx.DB) echo.HandlerFunc {
 			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
 
-		var tw timeseries.TimeWindow
-		a, b := c.QueryParam("after"), c.QueryParam("before")
-		if err = tw.SetWindow(a, b, time.Now().AddDate(0, 0, -7), time.Now()); err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-		}
-
 		var fmo bool
 		mo := c.QueryParam("missing")
 		if strings.ToLower(mo) == "true" {
 			fmo = true
 		}
 
-		subs, err := models.ListAlertConfigSubmittals(db, &id, tw, fmo)
+		subs, err := models.ListAlertConfigSubmittals(db, &id, fmo)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}

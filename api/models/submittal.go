@@ -3,7 +3,6 @@ package models
 import (
 	"time"
 
-	"github.com/USACE/instrumentation-api/api/timeseries"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
@@ -25,14 +24,13 @@ type Submittal struct {
 }
 
 var (
-	timeFilter    = `due_date > $2 AND due_date < $3`
-	missingFilter = `completion_date IS NULL AND NOT marked_as_missing`
+	missingFilter = `AND completion_date IS NULL AND NOT marked_as_missing`
 )
 
-func ListProjectSubmittals(db *sqlx.DB, projectID *uuid.UUID, tw timeseries.TimeWindow, showMissing bool) ([]Submittal, error) {
+func ListProjectSubmittals(db *sqlx.DB, projectID *uuid.UUID, showMissing bool) ([]Submittal, error) {
 	aa := make([]Submittal, 0)
 
-	q := timeFilter
+	q := ``
 	if showMissing {
 		q = missingFilter
 	}
@@ -41,26 +39,20 @@ func ListProjectSubmittals(db *sqlx.DB, projectID *uuid.UUID, tw timeseries.Time
 		SELECT *
 		FROM v_submittal
 		WHERE project_id = $1
-		AND ` + q + `
+		` + q + `
 		ORDER BY due_date DESC, alert_type_name ASC
 	`
-	if showMissing {
-		if err := db.Select(&aa, sql, projectID); err != nil {
-			return aa, err
-		}
-	} else {
-		if err := db.Select(&aa, sql, projectID, tw.Start, tw.End); err != nil {
-			return aa, err
-		}
+	if err := db.Select(&aa, sql, projectID); err != nil {
+		return aa, err
 	}
 
 	return aa, nil
 }
 
-func ListInstrumentSubmittals(db *sqlx.DB, instrumentID *uuid.UUID, tw timeseries.TimeWindow, showMissing bool) ([]Submittal, error) {
+func ListInstrumentSubmittals(db *sqlx.DB, instrumentID *uuid.UUID, showMissing bool) ([]Submittal, error) {
 	aa := make([]Submittal, 0)
 
-	q := timeFilter
+	q := ``
 	if showMissing {
 		q = missingFilter
 	}
@@ -74,26 +66,20 @@ func ListInstrumentSubmittals(db *sqlx.DB, instrumentID *uuid.UUID, tw timeserie
 			INNER JOIN alert_config_instrument aci ON aci.alert_config_id = sub.alert_config_id
 			WHERE aci.instrument_id = $1
 		)
-		AND ` + q + `
+		` + q + `
 		ORDER BY due_date DESC
 	`
-	if showMissing {
-		if err := db.Select(&aa, sql, instrumentID); err != nil {
-			return aa, err
-		}
-	} else {
-		if err := db.Select(&aa, sql, instrumentID, tw.Start, tw.End); err != nil {
-			return aa, err
-		}
+	if err := db.Select(&aa, sql, instrumentID); err != nil {
+		return aa, err
 	}
 
 	return aa, nil
 }
 
-func ListAlertConfigSubmittals(db *sqlx.DB, alertConfigID *uuid.UUID, tw timeseries.TimeWindow, showMissing bool) ([]Submittal, error) {
+func ListAlertConfigSubmittals(db *sqlx.DB, alertConfigID *uuid.UUID, showMissing bool) ([]Submittal, error) {
 	aa := make([]Submittal, 0)
 
-	q := timeFilter
+	q := ``
 	if showMissing {
 		q = missingFilter
 	}
@@ -102,18 +88,11 @@ func ListAlertConfigSubmittals(db *sqlx.DB, alertConfigID *uuid.UUID, tw timeser
 		SELECT *
 		FROM v_submittal
 		WHERE alert_config_id = $1
-		AND ` + q + `
+		` + q + `
 		ORDER BY due_date DESC
 	`
-
-	if showMissing {
-		if err := db.Select(&aa, sql, alertConfigID); err != nil {
-			return aa, err
-		}
-	} else {
-		if err := db.Select(&aa, sql, alertConfigID, tw.Start, tw.End); err != nil {
-			return aa, err
-		}
+	if err := db.Select(&aa, sql, alertConfigID); err != nil {
+		return aa, err
 	}
 
 	return aa, nil
