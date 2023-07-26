@@ -149,6 +149,7 @@ func main() {
 	private.DELETE("/projects/:project_id/evaluations/:evaluation_id", handlers.DeleteEvaluation(db))
 
 	// Projects
+	public.GET("/districts", handlers.ListDistricts(db))
 	public.GET("/projects", handlers.ListProjects(db))
 	public.GET("/projects/:project_id", handlers.GetProject(db))
 	public.GET("/projects/count", handlers.GetProjectCount(db))

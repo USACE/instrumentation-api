@@ -1,8 +1,3 @@
--- -----
--- Views
--- -----
-
--- v_project
 CREATE OR REPLACE VIEW v_project AS (
     SELECT  p.id,
             p.federal_id,
@@ -45,6 +40,19 @@ CREATE OR REPLACE VIEW v_project AS (
 			CROSS JOIN config cfg
 );
 
+CREATE OR REPLACE VIEW v_district AS (
+    SELECT
+        dis.id          AS id,
+        dis.name        AS name,
+        dis.initials    AS initials,
+        div.name        AS division_name,
+        div.initials    AS division_initials,
+        dis.office_id   AS office_id
+    FROM district dis
+    INNER JOIN division div ON dis.division_id = div.id
+);
+
 GRANT SELECT ON
-    v_project
+    v_project,
+    v_district
 TO instrumentation_reader;

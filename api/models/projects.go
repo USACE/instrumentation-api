@@ -13,7 +13,15 @@ const listProjectsSQL = `SELECT id, federal_id, image, office_id, deleted, slug,
      updater, update_date, instrument_count, instrument_group_count, timeseries
 	 FROM v_project`
 
-// Project is a project data structure
+type District struct {
+	ID               uuid.UUID  `json:"id" db:"id"`
+	Name             string     `json:"name" db:"name"`
+	Initials         string     `json:"initials" db:"initials"`
+	DivisionName     string     `json:"division_name" db:"division_name"`
+	DivisionInitials string     `json:"division_initials" db:"division_initials"`
+	OfficeID         *uuid.UUID `json:"office_id" db:"office_id"`
+}
+
 type Project struct {
 	ID                   uuid.UUID   `json:"id"`
 	FederalID            *string     `json:"federal_id" db:"federal_id"`
@@ -28,12 +36,10 @@ type Project struct {
 	AuditInfo
 }
 
-// ProjectCollection helps unpack unspecified JSON into an array of products
 type ProjectCollection struct {
 	Projects []Project
 }
 
-// UnmarshalJSON implements UnmarshalJSON interface
 func (c *ProjectCollection) UnmarshalJSON(b []byte) error {
 
 	switch JSONType(b) {
@@ -69,6 +75,14 @@ func ProjectFactory(rows *sqlx.Rows) ([]Project, error) {
 		pp = append(pp, p)
 	}
 	return pp, nil
+}
+
+func ListDistricts(db *sqlx.DB) ([]District, error) {
+	dd := make([]District, 0)
+	if err := db.Select(&dd, `SELECT * FROM v_district`); err != nil {
+		return dd, err
+	}
+	return dd, nil
 }
 
 // ListProjectSlugs returns a list of used slugs for projects

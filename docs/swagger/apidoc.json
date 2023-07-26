@@ -1440,6 +1440,22 @@
                 }
             }
         },
+        "/districts": {
+            "get": {
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "ListDistricts",
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
         "/projects/{project_id}": {
             "get": {
                 "tags": [
@@ -3062,6 +3078,15 @@
                 "summary": "ListProjectSubmittals",
                 "parameters": [
                     {
+                        "name": "missing",
+                        "in": "query",
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "description": "Only show \"unverified missing\" submnittals",
+                        "example": "false"
+                    },
+                    {
                         "name": "project_id",
                         "in": "path",
                         "schema": {
@@ -3089,6 +3114,15 @@
                 ],
                 "summary": "ListInstrumentSubmittals",
                 "parameters": [
+                    {
+                        "name": "missing",
+                        "in": "query",
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "description": "Only show \"unverified missing\" submnittals",
+                        "example": "false"
+                    },
                     {
                         "name": "instrument_id",
                         "in": "path",
@@ -3122,24 +3156,8 @@
                         "schema": {
                             "type": "boolean"
                         },
-                        "description": "boolean; mututally exclusive from before/after params",
-                        "example": "true"
-                    },
-                    {
-                        "name": "after",
-                        "in": "query",
-                        "schema": {
-                            "type": "string"
-                        },
-                        "description": "timestamp; mututally exclusive from missing param"
-                    },
-                    {
-                        "name": "before",
-                        "in": "query",
-                        "schema": {
-                            "type": "string"
-                        },
-                        "description": "timestamp; mututally exclusive from missing param"
+                        "description": "Only show \"unverified missing\" submnittals",
+                        "example": "false"
                     },
                     {
                         "name": "alert_config_id",
@@ -3229,6 +3247,22 @@
                 "summary": "ListProjectEvaluationDistrictRollup",
                 "parameters": [
                     {
+                        "name": "from_timestamp_month",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "ISO timestamp with first requested month (inclusive)"
+                    },
+                    {
+                        "name": "to_timestamp_month",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "ISO timestamp with last requested month (inclusive)"
+                    },
+                    {
                         "name": "project_id",
                         "in": "path",
                         "schema": {
@@ -3255,6 +3289,22 @@
                 ],
                 "summary": "ListProjectMeasurementDistrictRollup",
                 "parameters": [
+                    {
+                        "name": "from_timestamp_month",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "ISO timestamp with first requested month (inclusive)"
+                    },
+                    {
+                        "name": "to_timestamp_month",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "ISO timestamp with last requested month (inclusive)"
+                    },
                     {
                         "name": "project_id",
                         "in": "path",

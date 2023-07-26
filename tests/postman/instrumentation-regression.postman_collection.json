@@ -2544,6 +2544,65 @@
 			"name": "Projects",
 			"item": [
 				{
+					"name": "ListDistricts",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// validate JSON schema",
+									"var districtSchema = {",
+									"    \"type\": \"object\",",
+									"    \"properties\": {",
+									"        \"id\": { \"type\": \"string\" },",
+									"        \"name\": { \"type\": \"string\" },",
+									"        \"initials\": { \"type\": \"string\" },",
+									"        \"division_name\": { \"type\": \"string\" },",
+									"        \"division_initials\": { \"type\": \"string\" },",
+									"        \"office_id\": { \"type\": [\"string\", \"null\"] }",
+									"    },",
+									"    \"additionalProperties\": false",
+									"}",
+									"",
+									"pm.globals.set('DISTRICT_OBJ_SCHEMA', JSON.stringify(districtSchema));",
+									"",
+									"// schema validator",
+									"var schema = {",
+									"    \"type\": \"array\",",
+									"    \"items\": JSON.parse(pm.globals.get('DISTRICT_OBJ_SCHEMA'))",
+									"}",
+									"",
+									"pm.globals.set('DISTRICT_ARRAY_SCHEMA', JSON.stringify(schema));",
+									"",
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// schema validation",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(schema)",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/districts",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"districts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "GetProject",
 					"event": [
 						{
@@ -5277,7 +5336,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/projects/:project_id/submittals",
+							"raw": "{{base_url}}/projects/:project_id/submittals?missing=false",
 							"host": [
 								"{{base_url}}"
 							],
@@ -5285,6 +5344,13 @@
 								"projects",
 								":project_id",
 								"submittals"
+							],
+							"query": [
+								{
+									"key": "missing",
+									"value": "false",
+									"description": "Only show \"unverified missing\" submnittals"
+								}
 							],
 							"variable": [
 								{
@@ -5328,7 +5394,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/instruments/:instrument_id/submittals",
+							"raw": "{{base_url}}/instruments/:instrument_id/submittals?missing=false",
 							"host": [
 								"{{base_url}}"
 							],
@@ -5336,6 +5402,13 @@
 								"instruments",
 								":instrument_id",
 								"submittals"
+							],
+							"query": [
+								{
+									"key": "missing",
+									"value": "false",
+									"description": "Only show \"unverified missing\" submnittals"
+								}
 							],
 							"variable": [
 								{
@@ -5378,7 +5451,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/alert_configs/:alert_config_id/submittals?missing=true&after&before",
+							"raw": "{{base_url}}/alert_configs/:alert_config_id/submittals?missing=false",
 							"host": [
 								"{{base_url}}"
 							],
@@ -5390,18 +5463,8 @@
 							"query": [
 								{
 									"key": "missing",
-									"value": "true",
-									"description": "boolean; mututally exclusive from before/after params"
-								},
-								{
-									"key": "after",
-									"value": null,
-									"description": "timestamp; mututally exclusive from missing param"
-								},
-								{
-									"key": "before",
-									"value": null,
-									"description": "timestamp; mututally exclusive from missing param"
+									"value": "false",
+									"description": "Only show \"unverified missing\" submnittals"
 								}
 							],
 							"variable": [
@@ -5553,7 +5616,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/projects/:project_id/district_rollup/evaluation_submittals",
+							"raw": "{{base_url}}/projects/:project_id/district_rollup/evaluation_submittals?from_timestamp_month&to_timestamp_month",
 							"host": [
 								"{{base_url}}"
 							],
@@ -5562,6 +5625,18 @@
 								":project_id",
 								"district_rollup",
 								"evaluation_submittals"
+							],
+							"query": [
+								{
+									"key": "from_timestamp_month",
+									"value": null,
+									"description": "ISO timestamp with first requested month (inclusive)"
+								},
+								{
+									"key": "to_timestamp_month",
+									"value": null,
+									"description": "ISO timestamp with last requested month (inclusive)"
+								}
 							],
 							"variable": [
 								{
@@ -5602,7 +5677,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/projects/:project_id/district_rollup/measurement_submittals",
+							"raw": "{{base_url}}/projects/:project_id/district_rollup/measurement_submittals?from_timestamp_month&to_timestamp_month",
 							"host": [
 								"{{base_url}}"
 							],
@@ -5611,6 +5686,18 @@
 								":project_id",
 								"district_rollup",
 								"measurement_submittals"
+							],
+							"query": [
+								{
+									"key": "from_timestamp_month",
+									"value": null,
+									"description": "ISO timestamp with first requested month (inclusive)"
+								},
+								{
+									"key": "to_timestamp_month",
+									"value": null,
+									"description": "ISO timestamp with last requested month (inclusive)"
+								}
 							],
 							"variable": [
 								{

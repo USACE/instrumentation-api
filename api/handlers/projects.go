@@ -13,6 +13,16 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+func ListDistricts(db *sqlx.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		dd, err := models.ListDistricts(db)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+		return c.JSON(http.StatusOK, dd)
+	}
+}
+
 // ListProjects returns projects
 func ListProjects(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
