@@ -19,6 +19,7 @@ type PlotConfigurationSettings struct {
 	ShowComments     bool   `json:"show_comments" db:"show_comments"`
 	AutoRange        bool   `json:"auto_range" db:"auto_range"`
 	DateRange        string `json:"date_range" db:"date_range"`
+	Threshold        int    `json:"threshold" db:"threshold"`
 }
 
 // PlotConfiguration holds information for entity PlotConfiguration
@@ -61,13 +62,25 @@ func (pc *PlotConfiguration) ValidateDateRange() error {
 }
 
 // ListPlotConfigurationsSQL is the base SQL statement for above functions
-var ListPlotConfigurationsSQL = `SELECT
-								 id, slug, name, project_id,
-								 timeseries_id, creator,
-								 create_date, updater, update_date,
-								 show_masked, show_nonvalidated, show_comments,
-								 auto_range, date_range
-								 FROM v_plot_configuration`
+var ListPlotConfigurationsSQL = `
+	SELECT
+		id,
+		slug,
+		name,
+		project_id,
+		timeseries_id,
+		creator,
+		create_date,
+		updater,
+		update_date,
+		show_masked,
+		show_nonvalidated,
+		show_comments,
+		auto_range,
+		date_range,
+		threshold
+	FROM v_plot_configuration
+`
 
 // PlotConfigFactory converts database rows to PlotConfiguration objects
 func PlotConfigFactory(rows *sqlx.Rows) ([]PlotConfiguration, error) {
@@ -76,10 +89,21 @@ func PlotConfigFactory(rows *sqlx.Rows) ([]PlotConfiguration, error) {
 	var p PlotConfiguration
 	for rows.Next() {
 		err := rows.Scan(
-			&p.ID, &p.Slug, &p.Name, &p.ProjectID, pq.Array(&p.TimeseriesID),
-			&p.Creator, &p.CreateDate, &p.Updater, &p.UpdateDate,
-			&p.ShowMasked, &p.ShowNonValidated, &p.ShowComments,
-			&p.AutoRange, &p.DateRange,
+			&p.ID,
+			&p.Slug,
+			&p.Name,
+			&p.ProjectID,
+			pq.Array(&p.TimeseriesID),
+			&p.Creator,
+			&p.CreateDate,
+			&p.Updater,
+			&p.UpdateDate,
+			&p.ShowMasked,
+			&p.ShowNonValidated,
+			&p.ShowComments,
+			&p.AutoRange,
+			&p.DateRange,
+			&p.Threshold,
 		)
 		if err != nil {
 			return make([]PlotConfiguration, 0), err
@@ -152,8 +176,8 @@ func CreatePlotConfiguration(db *sqlx.DB, pc *PlotConfiguration) (*PlotConfigura
 	}
 	stmt3, err := txn.Preparex(
 		`INSERT INTO plot_configuration_settings
-			(id, show_masked, show_nonvalidated, show_comments, auto_range, date_range) 
-			VALUES ($1, $2, $3, $4, $5, $6)`,
+			(id, show_masked, show_nonvalidated, show_comments, auto_range, date_range, threshold) 
+			VALUES ($1, $2, $3, $4, $5, $6, $7)`,
 	)
 	if err != nil {
 		return nil, err
@@ -171,7 +195,7 @@ func CreatePlotConfiguration(db *sqlx.DB, pc *PlotConfiguration) (*PlotConfigura
 		}
 	}
 	// Create settings.
-	if _, err := stmt3.Exec(&pcID, pc.ShowMasked, pc.ShowNonValidated, pc.ShowComments, pc.AutoRange, pc.DateRange); err != nil {
+	if _, err := stmt3.Exec(&pcID, pc.ShowMasked, pc.ShowNonValidated, pc.ShowComments, pc.AutoRange, pc.DateRange, pc.Threshold); err != nil {
 		return nil, err
 	}
 	if err := stmt1.Close(); err != nil {
@@ -238,8 +262,8 @@ func UpdatePlotConfiguration(db *sqlx.DB, pc *PlotConfiguration) (*PlotConfigura
 	// Prepared Statement; Update exiting plot configuration settings
 	stmt5, err := txn.Preparex(`
 		INSERT INTO plot_configuration_settings
-		(id, show_masked, show_nonvalidated, show_comments, auto_range, date_range)
-		VALUES ($1, $2, $3, $4, $5, $6)
+		(id, show_masked, show_nonvalidated, show_comments, auto_range, date_range, threshold)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
 	`)
 	if err != nil {
 		return nil, err
@@ -255,7 +279,7 @@ func UpdatePlotConfiguration(db *sqlx.DB, pc *PlotConfiguration) (*PlotConfigura
 	if _, err := stmt4.Exec(pc.ID); err != nil {
 		return nil, err
 	}
-	if _, err := stmt5.Exec(pc.ID, pc.ShowMasked, pc.ShowNonValidated, pc.ShowComments, pc.AutoRange, pc.DateRange); err != nil {
+	if _, err := stmt5.Exec(pc.ID, pc.ShowMasked, pc.ShowNonValidated, pc.ShowComments, pc.AutoRange, pc.DateRange, pc.Threshold); err != nil {
 		return nil, err
 	}
 

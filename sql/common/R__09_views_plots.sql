@@ -1,4 +1,5 @@
-CREATE OR REPLACE VIEW v_plot_configuration AS (
+DROP VIEW IF EXISTS v_plot_configuration;
+CREATE VIEW v_plot_configuration AS (
     SELECT pc.id                                  AS id,
            pc.slug                                AS slug,
            pc.name                                AS name,
@@ -12,7 +13,8 @@ CREATE OR REPLACE VIEW v_plot_configuration AS (
            COALESCE(k.show_nonvalidated, 'true')  AS show_nonvalidated,
            COALESCE(k.show_comments, 'true')      AS show_comments,
            COALESCE(k.auto_range, 'true')         AS auto_range,
-           COALESCE(k.date_range, '1 year')       AS date_range
+           COALESCE(k.date_range, '1 year')       AS date_range,
+           COALESCE(k.threshold, 3000)            AS threshold
     FROM plot_configuration pc
     LEFT JOIN (
         SELECT plot_configuration_id    AS plot_configuration_id,
@@ -26,10 +28,11 @@ CREATE OR REPLACE VIEW v_plot_configuration AS (
                show_nonvalidated AS show_nonvalidated,
                show_comments     AS show_comments,
                auto_range        AS auto_range,
-               date_range        AS date_range
+               date_range        AS date_range,
+               threshold         AS threshold
         FROM plot_configuration_settings
         GROUP BY id
-    ) as k ON pc.id = k.id
+    ) AS k ON pc.id = k.id
 );
 
 GRANT SELECT ON
