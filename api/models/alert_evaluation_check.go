@@ -1,6 +1,8 @@
 package models
 
 import (
+	"fmt"
+
 	"github.com/USACE/instrumentation-api/api/config"
 	et "github.com/USACE/instrumentation-api/api/email_template"
 	"github.com/google/uuid"
@@ -34,9 +36,8 @@ func (a *AlertConfigEvaluationCheck) SetChecks(ec []*EvaluationCheck) {
 
 func (acc AlertConfigEvaluationCheck) DoEmail(emailType string, cfg *config.AlertCheckConfig, smtpCfg *config.SmtpConfig) error {
 	if emailType == "" {
-		return nil
+		return fmt.Errorf("must provide emailType")
 	}
-
 	preformatted := et.EmailContent{
 		TextSubject: "-- DO NOT REPLY -- MIDAS " + emailType + ": Evaluation Submittal",
 		TextBody: "The following " + emailType + " has been triggered:\r\n\r\n" +
@@ -116,6 +117,9 @@ func ListEvaluationChecks(txn *sqlx.Tx, acMap map[uuid.UUID]AlertConfig, subMap 
 	}
 
 	for k, v := range acMap {
+		if v.AlertTypeID != EvaluationSubmittalAlertTypeID {
+			continue
+		}
 		acc := AlertConfigEvaluationCheck{
 			AlertConfig: v,
 			AlertChecks: ecMap[k],

@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/USACE/instrumentation-api/api/config"
 	et "github.com/USACE/instrumentation-api/api/email_template"
@@ -52,7 +53,7 @@ func (a *AlertConfigMeasurementCheck) SetChecks(mc []*MeasurementCheck) {
 
 func (ms AlertConfigMeasurementCheck) DoEmail(emailType string, cfg *config.AlertCheckConfig, smtpCfg *config.SmtpConfig) error {
 	if emailType == "" {
-		return nil
+		return fmt.Errorf("must provide emailType")
 	}
 
 	preformatted := et.EmailContent{
@@ -136,6 +137,9 @@ func ListMeasurementChecks(txn *sqlx.Tx, acMap map[uuid.UUID]AlertConfig, subMap
 	}
 
 	for k, v := range acMap {
+		if v.AlertTypeID != MeasurementSubmittalAlertTypeID {
+			continue
+		}
 		acc := AlertConfigMeasurementCheck{
 			AlertConfig: v,
 			AlertChecks: mcMap[k],

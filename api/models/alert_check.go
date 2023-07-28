@@ -200,7 +200,7 @@ func HandleChecks[T AlertChecker, PT AlertConfigChecker[T]](txn *sqlx.Tx, accs [
 			// If a reminder exists when at least one submittal "shouldAlert", the alert should be aggregated into the next reminder
 			// instead of sending a new reminder email. If NO alerts exist for an alert config, the reminder can be reset to NULL.
 			// Reminders should be set when the first alert for an alert config is triggered, or at each reminder interval
-			resetReminders := true
+			resetReminders := len(checks) != 0
 
 			for j, c := range checks {
 				shouldWarn := c.GetShouldWarn()
