@@ -19,7 +19,7 @@ import (
 func main() {
 	// Environment Variable Config
 	cfg := config.GetTelemetryConfig()
-	db := dbutils.Connection(config.DBConnStr(&cfg.DBConfig))
+	db := dbutils.Connection(config.DBConn())
 
 	e := echo.New()
 	e.Use(middleware.CORS, middleware.GZIP)

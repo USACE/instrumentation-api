@@ -21,7 +21,7 @@ import (
 
 func main() {
 	cfg := config.GetApiConfig()
-	db := dbutils.Connection(config.DBConnStr(&cfg.DBConfig))
+	db := dbutils.Connection(config.DBConn())
 
 	awsCfg := config.AWSConfig(cfg)
 	sess := session.Must(session.NewSession(awsCfg))

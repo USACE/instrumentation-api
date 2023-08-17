@@ -23,7 +23,7 @@ func checkAlerts(db *sqlx.DB, cfg *config.AlertCheckConfig) {
 
 func main() {
 	cfg := config.GetAlertCheckConfig()
-	db := dbutils.Connection(config.DBConnStr(&cfg.DBConfig))
+	db := dbutils.Connection(config.DBConn())
 	defer func() error {
 		if err := db.Close(); err != nil {
 			log.Fatal(err.Error())

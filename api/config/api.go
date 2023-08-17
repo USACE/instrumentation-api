@@ -9,7 +9,6 @@ import (
 
 // Config stores configuration information stored in environment variables
 type ApiConfig struct {
-	DBConfig
 	AuthDisabled        bool   `envconfig:"AUTH_DISABLED"`
 	AuthJWTMocked       bool   `envconfig:"AUTH_JWT_MOCKED"`
 	ApplicationKey      string `envconfig:"APPLICATION_KEY"`

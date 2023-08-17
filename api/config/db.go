@@ -1,15 +1,17 @@
 package config
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
 
-type DBConfig struct {
-	DBUser    string
-	DBPass    string
-	DBName    string
-	DBHost    string
-	DBSSLMode string
-}
-
-func DBConnStr(c *DBConfig) string {
-	return fmt.Sprintf("user=%s password=%s dbname=%s host=%s sslmode=%s", c.DBUser, c.DBPass, c.DBName, c.DBHost, c.DBSSLMode)
+func DBConn() string {
+	return fmt.Sprintf(
+		"user=%s password=%s dbname=%s host=%s sslmode=%s",
+		os.Getenv("INSTRUMENTATION_DBUSER"),
+		os.Getenv("INSTRUMENTATION_DBPASS"),
+		os.Getenv("INSTRUMENTATION_DBNAME"),
+		os.Getenv("INSTRUMENTATION_DBHOST"),
+		os.Getenv("INSTRUMENTATION_DBSSLMODE"),
+	)
 }

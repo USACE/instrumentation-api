@@ -5,7 +5,11 @@ go 1.20
 require (
 	github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible
 	github.com/apex/gateway v1.1.2
+<<<<<<< Updated upstream
 	github.com/aws/aws-sdk-go v1.44.288
+=======
+	github.com/aws/aws-sdk-go v1.44.274
+>>>>>>> Stashed changes
 	github.com/btcsuite/btcutil v1.0.2
 	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/google/uuid v1.3.0

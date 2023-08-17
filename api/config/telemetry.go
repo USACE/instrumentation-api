@@ -7,7 +7,6 @@ import (
 )
 
 type TelemetryConfig struct {
-	DBConfig
 	LambdaContext bool
 	RoutePrefix   string
 }
