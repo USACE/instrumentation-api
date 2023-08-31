@@ -375,7 +375,7 @@ func ComputedInclinometerTimeseries(db *sqlx.DB, instrumentIDs []uuid.UUID, tw *
 			TimeWindow:     *tw,
 		}
 
-		cm, err := ConstantMeasurement(db, &t.TimeseriesID, "inclinometer-constant")
+		cm, err := GetTimeseriesConstant(db, &t.TimeseriesID, "inclinometer-constant")
 		if err != nil {
 			return nil, err
 		}

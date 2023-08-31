@@ -165,17 +165,13 @@ INSERT INTO timeseries_measurement (timeseries_id, time, value) VALUES
 ('479d90eb-3454-4f39-be9a-bfd23099a552', '6/21/2021', 20000.0);
 
 -- inclinometers
-INSERT INTO inclinometer_measurement (timeseries_id, time, creator, create_date, values) VALUES 
-('5985f20a-1e37-4add-823c-545cdca49b5e', '6/21/2021', '176704ad-829f-44fa-b71b-c112e80261fa', '6/1/2020', 
-    '[
-        {"depth": 106, "a0": 590, "a180": -562, "b0": -142, "b180": 176},
-        {"depth": 108, "a0": 614, "a180": -586, "b0": 107, "b180": -149},
-        {"depth": 110, "a0": 622, "a180": -592, "b0": -67, "b180": 107},
-        {"depth": 112, "a0": 623, "a180": -598, "b0": 8, "b180": -48},
-        {"depth": 114, "a0": 606, "a180": -577, "b0": 124, "b180": -72},
-        {"depth": 116, "a0": 0, "a180": 0, "b0": 0, "b180": 0}
-    ]'
-);
+INSERT INTO inclinometer_measurement (timeseries_id, time, depth, a0, a180, b0, b180) VALUES
+    ('5985f20a-1e37-4add-823c-545cdca49b5e', NOW(), 106, 590, -562, -142, 176),
+    ('5985f20a-1e37-4add-823c-545cdca49b5e', NOW(), 108, 614, -586, 107, -149),
+    ('5985f20a-1e37-4add-823c-545cdca49b5e', NOW(), 110, 622, -592, -67, 107),
+    ('5985f20a-1e37-4add-823c-545cdca49b5e', NOW(), 112, 623, -598, 8, -48),
+    ('5985f20a-1e37-4add-823c-545cdca49b5e', NOW(), 114, 606, -577, 124, -72),
+    ('5985f20a-1e37-4add-823c-545cdca49b5e', NOW(), 116, 0, 0, 0, 0);
 
 -- collection_group
 INSERT INTO collection_group (id, project_id, name, slug) VALUES

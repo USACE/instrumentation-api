@@ -81,40 +81,6 @@ func DeleteTimeserieMeasurements(db *sqlx.DB, id *uuid.UUID, time time.Time) err
 	return nil
 }
 
-// ConstantMeasurement returns a constant timeseries measurement for the same instrument by constant name
-func ConstantMeasurement(db *sqlx.DB, tsID *uuid.UUID, constantName string) (*ts.Measurement, error) {
-	sql := `
-	SELECT M.timeseries_id,
-		   M.time,
-		   M.value
-	FROM  timeseries_measurement M
-	INNER JOIN v_timeseries_stored T ON T.id = M.timeseries_id
-	INNER JOIN parameter P ON P.id = T.parameter_id
-	WHERE T.instrument_id IN (
-		SELECT  instrument_id
-		FROM v_timeseries_stored T
-		WHERE t.id= $1
-	)
-	AND P.name = $2
-	`
-
-	ms := make([]ts.Measurement, 0)
-	if err := db.Select(
-		&ms,
-		sql,
-		tsID, constantName,
-	); err != nil {
-		return nil, err
-	}
-
-	m := ts.Measurement{}
-	if len(ms) > 0 {
-		m = ms[0]
-	}
-
-	return &m, nil
-}
-
 func CreateOrUpdateTimeseriesMeasurementsTxn(txn *sqlx.Tx, mc []ts.MeasurementCollection, doUpsert bool) (*sqlx.Tx, error) {
 	doMmt := "DO NOTHING"
 	doNotes := "DO NOTHING"

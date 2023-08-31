@@ -1,6 +1,8 @@
 package models
 
 import (
+	"time"
+
 	ts "github.com/USACE/instrumentation-api/api/timeseries"
 	"github.com/google/uuid"
 
@@ -23,6 +25,49 @@ func ListInstrumentConstants(db *sqlx.DB, id *uuid.UUID) ([]ts.Timeseries, error
 	return tt, nil
 }
 
+// ConstantMeasurement returns a constant timeseries measurement for the same instrument by constant name
+func GetTimeseriesConstant(db *sqlx.DB, tsID *uuid.UUID, constantName string) (*ts.Measurement, error) {
+	txn, err := db.Beginx()
+	if err != nil {
+		return nil, err
+	}
+	defer txn.Rollback()
+
+	ms, err := GetTimeseriesConstantTxn(txn, tsID, constantName)
+	if err != nil {
+		return nil, err
+	}
+
+	return ms, nil
+}
+
+func GetTimeseriesConstantTxn(txn *sqlx.Tx, tsID *uuid.UUID, constantName string) (*ts.Measurement, error) {
+	sql := `
+		SELECT
+			mmt.timeseries_id,
+			mmt.time,
+			mmt.value
+		FROM  timeseries_measurement mmt
+		INNER JOIN v_timeseries_stored ts ON ts.id = mmt.timeseries_id
+		INNER JOIN parameter pm ON pm.id = ts.parameter_id
+		WHERE ts.instrument_id IN (
+			SELECT instrument_id
+			FROM v_timeseries_stored
+			WHERE id= $1
+		)
+		AND P.name = $2
+		ORDER BY mmt.time DESC
+		LIMIT 1
+	`
+
+	var mmt ts.Measurement
+	if err := txn.Get(&mmt, sql, tsID, constantName); err != nil {
+		return nil, err
+	}
+
+	return &mmt, nil
+}
+
 // CreateInstrumentConstants creates many instrument constants from an array of instrument constants
 // An InstrumentConstant is structurally the same as a timeseries and saved in the same tables
 func CreateInstrumentConstants(db *sqlx.DB, tt []ts.Timeseries) ([]ts.Timeseries, error) {
@@ -32,7 +77,18 @@ func CreateInstrumentConstants(db *sqlx.DB, tt []ts.Timeseries) ([]ts.Timeseries
 	}
 	defer txn.Rollback()
 
-	// Create Timeseries
+	uu, err := CreateInstrumentConstantsTxn(txn, tt)
+	if err != nil {
+		return uu, err
+	}
+
+	if err := txn.Commit(); err != nil {
+		return make([]ts.Timeseries, 0), err
+	}
+	return uu, nil
+}
+
+func CreateInstrumentConstantsTxn(txn *sqlx.Tx, tt []ts.Timeseries) ([]ts.Timeseries, error) {
 	stmt1, err := txn.Preparex(
 		`INSERT INTO timeseries (instrument_id, slug, name, parameter_id, unit_id)
 		 VALUES ($1, $2, $3, $4, $5)
@@ -66,10 +122,86 @@ func CreateInstrumentConstants(db *sqlx.DB, tt []ts.Timeseries) ([]ts.Timeseries
 	if err := stmt2.Close(); err != nil {
 		return make([]ts.Timeseries, 0), err
 	}
-	if err := txn.Commit(); err != nil {
-		return make([]ts.Timeseries, 0), err
+
+	return tt, nil
+}
+
+func CreateTimeseriesConstant(db *sqlx.DB, tsID *uuid.UUID, paramName string, unitName string, value float64) error {
+	txn, err := db.Beginx()
+	if err != nil {
+		return err
 	}
-	return uu, nil
+	defer txn.Rollback()
+
+	if err := CreateTimeseriesConstantTxn(txn, tsID, paramName, unitName, value); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func CreateTimeseriesConstantTxn(txn *sqlx.Tx, tsID *uuid.UUID, paramName string, unitName string, value float64) error {
+	var instrumentId []uuid.UUID
+	if err := txn.Select(&instrumentId, `
+		SELECT instrument_id
+		FROM v_timeseries_stored
+		WHERE id= $1
+	`, tsID); err != nil {
+		return err
+	}
+
+	var paramId []uuid.UUID
+	if err := txn.Select(&paramId, `
+		SELECT id
+		FROM parameter
+		WHERE name= $1
+	`, paramName); err != nil {
+		return err
+	}
+
+	var unitId []uuid.UUID
+	if err := txn.Select(&unitId, `
+		SELECT id
+		FROM unit
+		WHERE name= $1
+	`, unitName); err != nil {
+		return err
+	}
+
+	if len(instrumentId) > 0 && len(paramId) > 0 && len(unitId) > 0 {
+		t := ts.Timeseries{}
+		measurement := ts.Measurement{}
+		measurements := []ts.Measurement{}
+		mc := ts.MeasurementCollection{}
+		mcs := []ts.MeasurementCollection{}
+		ts := []ts.Timeseries{}
+
+		t.InstrumentID = instrumentId[0]
+		t.Slug = paramName
+		t.Name = paramName
+		t.ParameterID = paramId[0]
+		t.UnitID = unitId[0]
+		ts = append(ts, t)
+
+		ic, err := CreateInstrumentConstantsTxn(txn, ts)
+		if err != nil {
+			return err
+		}
+		if len(ic) > 0 {
+			measurement.Time = time.Now()
+			measurement.Value = value
+			measurements = append(measurements, measurement)
+			mc.TimeseriesID = ic[0].ID
+			mc.Items = measurements
+			mcs = append(mcs, mc)
+			_, err = CreateOrUpdateTimeseriesMeasurementsTxn(txn, mcs, true)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }
 
 // DeleteInstrumentConstant removes a timeseries as an Instrument Constant; Does not delete underlying timeseries
