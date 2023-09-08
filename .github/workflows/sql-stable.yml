@@ -4,9 +4,9 @@ on:
   push:
     branches: [stable]
     paths:
-      - "sql/common/*"
-      - "sql/stable/*"
-      - "sql/Dockerfile"
+      - "migrate/common/*"
+      - "migrate/stable/*"
+      - "migrate/Dockerfile"
       - ".github/workflows/sql-stable.yml"
   workflow_dispatch:
 jobs:
