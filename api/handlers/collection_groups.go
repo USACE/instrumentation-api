@@ -174,3 +174,20 @@ func RemoveTimeseriesFromCollectionGroup(db *sqlx.DB) echo.HandlerFunc {
 		return c.JSON(http.StatusOK, make(map[string]interface{}))
 	}
 }
+
+// UpdateTimeseriesInCollectionGroup updates timeseries associative details in a certain collection group
+func UpdateTimeseriesInCollectionGroup(db *sqlx.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		cgD := models.CollectionGroupDetails{}
+		if err := c.Bind(&cgD); err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+
+		cgDT, err := models.UpdateTimeseriesInCollectionGroup(db, &cgD)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+
+		return c.JSON(http.StatusOK, cgDT)
+	}
+}

@@ -249,6 +249,8 @@ func main() {
 	private.POST("/projects/:project_id/collection_groups/:collection_group_id/timeseries/:timeseries_id", handlers.AddTimeseriesToCollectionGroup(db))
 	// // Collection Group; Remove Timeseries from collection_group
 	private.DELETE("/projects/:project_id/collection_groups/:collection_group_id/timeseries/:timeseries_id", handlers.RemoveTimeseriesFromCollectionGroup(db))
+	// // Collection Group; Update Timeseries in collection_group
+	private.PUT("/collection_groups/:collection_group_id/timeseries", handlers.UpdateTimeseriesInCollectionGroup(db))
 
 	// Plotting Configurations
 	public.GET("/projects/:project_id/plot_configurations", handlers.ListPlotConfigurations(db))

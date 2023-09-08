@@ -30,6 +30,7 @@ type cgdTsItem struct {
 	ts.Timeseries
 	LatestTime  *time.Time `json:"latest_time" db:"latest_time"`
 	LatestValue *float32   `json:"latest_value" db:"latest_value"`
+	ListOrder   *int       `json:"list_order" db:"list_order"`
 }
 
 var listCollectionGroupsSQL = `
@@ -66,7 +67,7 @@ func GetCollectionGroupDetails(db *sqlx.DB, projectID *uuid.UUID, collectionGrou
 	d.Timeseries = make([]cgdTsItem, 0)
 	if err := db.Select(
 		&d.Timeseries,
-		`SELECT t.*, tm.time as latest_time, tm.value as latest_value 
+		`SELECT t.*, tm.time as latest_time, tm.value as latest_value, list_order
 		FROM collection_group_timeseries cgt 
 		INNER JOIN collection_group cg on cg.id = cgt.collection_group_id 
 		INNER JOIN v_timeseries t on t.id = cgt.timeseries_id 
@@ -144,4 +145,35 @@ func RemoveTimeseriesFromCollectionGroup(db *sqlx.DB, collectionGroupID *uuid.UU
 		return err
 	}
 	return nil
+}
+
+// UpdateTimeseriesInCollectionGroup updates timeseries associative details in a certain collection group
+func UpdateTimeseriesInCollectionGroup(db *sqlx.DB, cgD *CollectionGroupDetails) (*CollectionGroupDetails, error) {
+	txn, err := db.Beginx()
+	if err != nil {
+		return nil, err
+	}
+	defer txn.Rollback()
+
+	stmt_timeseries, err := txn.Preparex(
+		`UPDATE collection_group_timeseries
+		 SET list_order = $1
+		 WHERE collection_group_id = $2 AND timeseries_id = $3; 
+		`,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, cgdTs := range cgD.Timeseries {
+		if _, err := stmt_timeseries.Exec(cgdTs.ListOrder, cgD.ID, cgdTs.ID); err != nil {
+			return nil, err
+		}
+	}
+
+	if err := txn.Commit(); err != nil {
+		return nil, err
+	}
+
+	return cgD, nil
 }
