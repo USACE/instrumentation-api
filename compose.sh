@@ -44,7 +44,6 @@ elif [ "$1" = "test" ]; then
             -t postman/newman run /etc/newman/instrumentation-regression.postman_collection.json \
             --environment=/etc/newman/postman_environment.docker-compose.json
     fi
-    docker-compose down;
 else
     echo -e "usage:\n\t./compose.sh up\n\t./compose.sh down\n\t./compose.sh clean\n\t./compose.sh test"
 fi
