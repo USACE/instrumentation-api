@@ -1,8 +1,11 @@
 version: "3.9"
 
 services:
-  postgres:
-    image: postgis/postgis:${POSTGIS_VERSION:-14-3.1}
+  db:
+    build:
+      context: db
+      args:
+        - POSTGRES_VERSION=${POSTGRES_VERSION}
     shm_size: 512mb
     restart: always
     environment:
@@ -23,12 +26,12 @@ services:
       - FLYWAY_LOCATIONS=${FLYWAY_LOCATIONS:-filesystem:/flyway/sql/common,filesystem:/flyway/sql/local}
       - FLYWAY_USER=postgres
       - FLYWAY_PASSWORD=postgres
-      - FLYWAY_URL=jdbc:postgresql://postgres:5432/postgres
+      - FLYWAY_URL=jdbc:postgresql://db:5432/postgres
     command: migrate
     volumes:
       - ./sql:/flyway/sql
     depends_on:
-      postgres:
+      db:
         condition: service_healthy
 
   api:
@@ -54,14 +57,14 @@ services:
       - INSTRUMENTATION_DBUSER=${INSTRUMENTATION_DBUSER:-instrumentation_user}
       - INSTRUMENTATION_DBPASS=${INSTRUMENTATION_DBPASS:-password}
       - INSTRUMENTATION_DBNAME=${INSTRUMENTATION_DBNAME:-postgres}
-      - INSTRUMENTATION_DBHOST=${INSTRUMENTATION_DBHOST:-postgres}
+      - INSTRUMENTATION_DBHOST=${INSTRUMENTATION_DBHOST:-db}
       - INSTRUMENTATION_DBSSLMODE=${INSTRUMENTATION_DBSSLMODE:-disable}
       - INSTRUMENTATION_HEARTBEATKEY=${INSTRUMENTATION_HEARTBEATKEY:-password}
       - INSTRUMENTATION_ROUTE_PREFIX=${INSTRUMENTATION_ROUTE_PREFIX:-}
     ports:
       - "${API_PORT:-80}:80"
     depends_on:
-      postgres:
+      db:
         condition: service_healthy
       flyway:
         condition: service_completed_successfully
@@ -75,14 +78,14 @@ services:
       - INSTRUMENTATION_DBUSER=${INSTRUMENTATION_DBUSER:-instrumentation_user}
       - INSTRUMENTATION_DBPASS=${INSTRUMENTATION_DBPASS:-password}
       - INSTRUMENTATION_DBNAME=${INSTRUMENTATION_DBNAME:-postgres}
-      - INSTRUMENTATION_DBHOST=${INSTRUMENTATION_DBHOST:-postgres}
+      - INSTRUMENTATION_DBHOST=${INSTRUMENTATION_DBHOST:-db}
       - INSTRUMENTATION_DBSSLMODE=${INSTRUMENTATION_DBSSLMODE:-disable}
       - INSTRUMENTATION_HEARTBEATKEY=${INSTRUMENTATION_HEARTBEATKEY:-password}
       - INSTRUMENTATION_ROUTE_PREFIX=${INSTRUMENTATION_ROUTE_PREFIX:-}
     ports:
       - "${TELEMETRY_PORT:-9090}:80"
     depends_on:
-      postgres:
+      db:
         condition: service_healthy
       flyway:
         condition: service_completed_successfully
@@ -97,7 +100,7 @@ services:
       - INSTRUMENTATION_DBUSER=${INSTRUMENTATION_DBUSER:-instrumentation_user}
       - INSTRUMENTATION_DBPASS=${INSTRUMENTATION_DBPASS:-password}
       - INSTRUMENTATION_DBNAME=${INSTRUMENTATION_DBNAME:-postgres}
-      - INSTRUMENTATION_DBHOST=${INSTRUMENTATION_DBHOST:-postgres}
+      - INSTRUMENTATION_DBHOST=${INSTRUMENTATION_DBHOST:-db}
       - INSTRUMENTATION_DBSSLMODE=${INSTRUMENTATION_DBSSLMODE:-disable}
       - INSTRUMENTATION_AWS_ECS_TRIGGER_MOCKED=${INSTRUMENTATION_AWS_ECS_TRIGGER_MOCKED:-True}
       - INSTRUMENTATION_EMAIL_SEND_MOCKED=${INSTRUMENTATION_EMAIL_SEND_MOCKED:-True}
@@ -107,7 +110,7 @@ services:
       - INSTRUMENTATION_SMTP_AUTH_USER=${INSTRUMENTATION_SMTP_AUTH_USER:-}
       - INSTRUMENTATION_SMTP_AUTH_PASS=${INSTRUMENTATION_SMTP_AUTH_PASS:-}
     depends_on:
-      postgres:
+      db:
         condition: service_healthy
       flyway:
         condition: service_completed_successfully

@@ -47,7 +47,7 @@ Create a database connection to the Postgres database by right-clicking `servers
 
 | Field             | Value          |
 | ----------------- | -------------- |
-| Host name/address | postgres       |
+| Host name/address | db             |
 | Port              | 5432 (default) |
 | Username          | postgres       |
 | Password          | postgres       |
