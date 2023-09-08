@@ -18,9 +18,9 @@ services:
       timeout: 5s
       retries: 5
 
-  flyway:
+  migrate:
     build:
-      context: sql
+      context: migrate
     restart: on-failure
     environment:
       - FLYWAY_LOCATIONS=${FLYWAY_LOCATIONS:-filesystem:/flyway/sql/common,filesystem:/flyway/sql/local}
@@ -29,7 +29,7 @@ services:
       - FLYWAY_URL=jdbc:postgresql://db:5432/postgres
     command: migrate
     volumes:
-      - ./sql:/flyway/sql
+      - ./migrate:/flyway/sql
     depends_on:
       db:
         condition: service_healthy
@@ -66,7 +66,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      flyway:
+      migrate:
         condition: service_completed_successfully
 
   telemetry:
@@ -87,7 +87,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      flyway:
+      migrate:
         condition: service_completed_successfully
 
   alert:
@@ -112,7 +112,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      flyway:
+      migrate:
         condition: service_completed_successfully
 
   # ---------------------- local profile services ---------------------- #
