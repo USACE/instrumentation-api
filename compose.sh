@@ -27,9 +27,8 @@ elif [ "$1" = "test" ]; then
     if [ "$REPORT" = true ]; then
         docker run \
             -v $(pwd)/tests/postman:/etc/newman --network=instrumentation-api_default \
-            --rm \
             --entrypoint /bin/sh \
-            -t postman/newman \
+            -t $(docker build -q ./tests/postman) \
             -c "npm i -g newman newman-reporter-htmlextra; \
                 newman run /etc/newman/instrumentation-regression.postman_collection.json \
                 --environment=/etc/newman/postman_environment.docker-compose.json \
@@ -39,12 +38,10 @@ elif [ "$1" = "test" ]; then
                 -r htmlextra --reporter-htmlextra-export /etc/newman/instrumentation.html"
     else
         docker run \
-            --rm \
             -v $(pwd)/tests/postman:/etc/newman --network=instrumentation-api_default \
-            -t postman/newman run /etc/newman/instrumentation-regression.postman_collection.json \
+            -t $(docker build -q ./tests/postman) run /etc/newman/instrumentation-regression.postman_collection.json \
             --environment=/etc/newman/postman_environment.docker-compose.json
     fi
-    docker-compose down;
 else
     echo -e "usage:\n\t./compose.sh up\n\t./compose.sh down\n\t./compose.sh clean\n\t./compose.sh test"
 fi
