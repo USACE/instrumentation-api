@@ -10,8 +10,16 @@ COPY . .
 RUN --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/go/pkg \
     GOOS=linux GOARCH=amd64 \
-    go build -ldflags="-w -s" -o /go/bin/midas-api
+    go build -ldflags="-w -s" -o /go/bin ./...
 
-FROM scratch
-COPY --from=builder /go/bin/midas-api /go/bin/midas-api
-ENTRYPOINT ["/go/bin/midas-api"]
+FROM scratch as core
+COPY --from=builder /go/bin/core /go/bin/midas-core
+ENTRYPOINT ["/go/bin/midas-core"]
+
+FROM scratch as telemetry
+COPY --from=builder /go/bin/telemetry /go/bin/midas-telemetry
+ENTRYPOINT ["/go/bin/midas-telemetry"]
+
+FROM scratch as alert
+COPY --from=builder /go/bin/alert /go/bin/midas-alert
+ENTRYPOINT ["/go/bin/midas-alert"]

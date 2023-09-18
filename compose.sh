@@ -1,8 +1,6 @@
 #!/bin/bash
 
 if [ "$1" = "up" ]; then
-    (cd telemetry; go mod vendor);
-    (cd alert; go mod vendor);
     if [ "$2" = "mock" ]; then
         env DOCKER_BUILDKIT=1 docker-compose --profile=local --profile=mock up -d --build;
     else
@@ -21,8 +19,6 @@ elif [ "$1" = "clean" ]; then
         docker-compose --profile=local down -v;
     fi
 elif [ "$1" = "test" ]; then
-    (cd telemetry; go mod vendor);
-    (cd alert; go mod vendor);
     docker-compose up -d --build;
     if [ "$REPORT" = true ]; then
         docker run \
