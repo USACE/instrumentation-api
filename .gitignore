@@ -27,3 +27,7 @@ __debug*
 
 # regression test results
 tests/postman/instrumentation.html
+
+**/.direnv
+
+**/.tool-versions

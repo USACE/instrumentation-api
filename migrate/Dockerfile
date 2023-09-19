@@ -1,4 +1,5 @@
-FROM flyway/flyway:8.5.9
+ARG BASE_IMAGE=flyway/flyway:8.5.9
+FROM $BASE_IMAGE
 
 COPY . /flyway/sql/
 

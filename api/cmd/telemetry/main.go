@@ -17,7 +17,6 @@ import (
 )
 
 func main() {
-	// Environment Variable Config
 	cfg := config.GetTelemetryConfig()
 	db := dbutils.Connection(config.DBConnStr(&cfg.DBConfig))
 
@@ -32,13 +31,11 @@ func main() {
 		return hash, nil
 	}
 
-	// Healthcheck
 	public := e.Group(cfg.RoutePrefix)
 	public.GET("/health", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, map[string]interface{}{"status": "healthy"})
 	})
 
-	// Datalogger Telemetry
 	datalogger := e.Group(cfg.RoutePrefix)
 	datalogger.Use(middleware.DataLoggerKeyAuth(hashExtractor))
 
@@ -46,9 +43,13 @@ func main() {
 
 	if cfg.LambdaContext {
 		log.Print("starting server; Running On AWS LAMBDA")
-		log.Fatal(gateway.ListenAndServe("localhost:3030", e))
+		if err := gateway.ListenAndServe("localhost:3030", e); err != nil {
+			log.Fatal(err.Error())
+		}
 	} else {
 		log.Print("starting server")
-		log.Fatal(http.ListenAndServe(":80", e))
+		if err := http.ListenAndServe(":80", e); err != nil {
+			log.Fatal(err.Error())
+		}
 	}
 }

@@ -6,14 +6,10 @@ if [ -z "$1" ]
     exit 1
 fi
 
-(
-cd api
-docker build --file Dockerfile.ib --target core --tag midas-api:$1 .
-docker build --file Dockerfile.ib --target telemetry --tag midas-telemetry:$1 .
-docker build --file Dockerfile.ib --target alert --tag midas-alert:$1 .
-)
-(
-cd migrate
-docker build --file Dockerfile.ib --tag midas-sql:$1 .
-)
+docker build --build-arg="BASE_IMAGE=registry1.dso.mil/ironbank/docker/scratch:ironbank" --target core -t midas-api:$1 api
+docker build --build-arg="BASE_IMAGE=registry1.dso.mil/ironbank/docker/scratch:ironbank" --target telemetry -t midas-telemetry:$1 api
+docker build --build-arg="BASE_IMAGE=registry1.dso.mil/ironbank/docker/scratch:ironbank" --target alert -t midas-alert:$1 api
+docker build --build-arg="BASE_IMAGE=registry1.dso.mil/ironbank/docker/scratch:ironbank" --target dcs-loader -t midas-dcs-loader:$1 api
+docker build --build-arg="BASE_IMAGE=registry1.dso.mil/ironbank/flyway/flyway-docker:v8.5.9" -t midas-sql:$1 migrate
+
 exit 0

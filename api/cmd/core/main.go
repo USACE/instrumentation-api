@@ -60,11 +60,11 @@ func main() {
 	))
 
 	// keyAuth not allowed on these routes
-	CACOnly := e.Group(cfg.RoutePrefix)
+	cacOnly := e.Group(cfg.RoutePrefix)
 	if cfg.AuthJWTMocked {
-		CACOnly.Use(middleware.JWTMock(cfg.AuthDisabled, false))
+		cacOnly.Use(middleware.JWTMock(cfg.AuthDisabled, false))
 	} else {
-		CACOnly.Use(middleware.JWT(cfg.AuthDisabled, false))
+		cacOnly.Use(middleware.JWT(cfg.AuthDisabled, false))
 	}
 
 	app := e.Group(cfg.RoutePrefix)
@@ -78,14 +78,14 @@ func main() {
 	// AttachProfileMiddleware attaches ProfileID to context, whether
 	// authenticated by token or api key
 	private.Use(middleware.EDIPIMiddleware, middleware.AttachProfileMiddleware(db))
-	CACOnly.Use(middleware.EDIPIMiddleware, middleware.CACOnlyMiddleware)
+	cacOnly.Use(middleware.EDIPIMiddleware, middleware.CACOnlyMiddleware)
 
 	// Profile and Tokens
-	CACOnly.POST("/profiles", handlers.CreateProfile(db))
-	CACOnly.GET("/my_profile", handlers.GetMyProfile(db))
-	CACOnly.GET("/my_projects", handlers.ListMyProjects(db))
-	CACOnly.POST("/my_tokens", handlers.CreateToken(db))
-	CACOnly.DELETE("/my_tokens/:token_id", handlers.DeleteToken(db))
+	cacOnly.POST("/profiles", handlers.CreateProfile(db))
+	cacOnly.GET("/my_profile", handlers.GetMyProfile(db))
+	cacOnly.GET("/my_projects", handlers.ListMyProjects(db))
+	cacOnly.POST("/my_tokens", handlers.CreateToken(db))
+	cacOnly.DELETE("/my_tokens/:token_id", handlers.DeleteToken(db))
 
 	// Authenticated with Appkey only (routes only to be used by other components of the app)
 	// Routes do not have /project/:project_id context and are typically authorized

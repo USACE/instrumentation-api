@@ -107,3 +107,39 @@ Deployments are done though [CI (Continuous Integration) scripts](./.github) usi
 First, make sure any extensions (such as PostGIS) are installed on the RDS instance.
 
 Flyway Migrations are used for automated database migrations in order to keep the schemas of the local environment in sync with develop and stable. Any differentiations in these databases (such as loading test data in the local environment) must be specified in their respective folders within the [./sql](./sql) directory ("common" applying to all environments). For database versioning, each migration script must be incrementally applied (e.g. `V1.2.3__migration.sql` -> `V1.2.4__migration.sql`). Versioned migrations must not change after they are run against the database. Instead, you must create another "version" to make modifications to a schema. Repeatable migrations (e.g. `R__01_repeatable_migration.sql`), may be modified if the overall schema does not change.
+
+## dcs-loader
+
+SQS-Worker to parse CSV Files of timeseries measurements on AWS S3 and post contents to the core api. 
+
+Works with ElasticMQ for local testing with a SQS-compatible interface. Variables noted "Used for local testing" typically do not need to be provided when deployed, for example to AWS. They can be omitted completely or set to "" if not required.
+
+### Environment Variables
+
+| Variable                       | Example Value                                                            | Notes                  |
+| ------------------------------ | ------------------------------------------------------------------------ | ---------------------- |
+| AWS_ACCESS_KEY_ID              | AKIAIOSFODNN7EXAMPLE                                                     | Used for local testing |
+| AWS_SECRET_ACCESS_KEY          | wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY                                 | Used for local testing |
+| AWS_DEFAULT_REGION             | us-east-1                                                                | Used for local testing |
+| ------------------------------ | ------------------------------------------------------------------------ | ---------------------- |
+| LOADER_POST_URL                | http://instrumentation-api_api_1/instrumentation/timeseries_measurements |                        |
+| LOADER_API_KEY                 | appkey                                                                   |                        |
+| ------------------------------ | ------------------------------------------------------------------------ | ---------------------- |
+| LOADER_AWS_S3_ENDPOINT         | http://minio:9000                                                        | Used for local testing |
+| LOADER_AWS_S3_REGION           | us-east-1                                                                |                        |
+| LOADER_AWS_S3_DISABLE_SSL      | False                                                                    |                        |
+| LOADER_AWS_S3_FORCE_PATH_STYLE | True                                                                     |                        |
+| ------------------------------ | ------------------------------------------------------------------------ | ---------------------- |
+| LOADER_AWS_SQS_QUEUE_NAME      | instrumentation-dcs-goes                                                 |                        |
+| LOADER_AWS_SQS_ENDPOINT        | http://elasticmq:9324                                                    | Used for local testing |
+| LOADER_AWS_SQS_QUEUE_URL       | http://elasticmq:9324/queue/instrumentation-dcs-goes                     | Used for local testing |
+| LOADER_AWS_SQS_REGION          | elasticmq                                                                | Used for local testing |
+
+### Example Input File
+
+```
+869465fc-dc1e-445e-81f4-9979b5fadda9,2021-03-01T15:30:00Z,27.6800
+869465fc-dc1e-445e-81f4-9979b5fadda9,2021-03-01T15:00:00Z,27.6200
+869465fc-dc1e-445e-81f4-9979b5fadda9,2021-03-01T14:30:00Z,27.5500
+869465fc-dc1e-445e-81f4-9979b5fadda9,2021-03-01T14:00:00Z,27.4400
+```

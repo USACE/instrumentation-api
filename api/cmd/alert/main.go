@@ -24,11 +24,10 @@ func checkAlerts(db *sqlx.DB, cfg *config.AlertCheckConfig) {
 func main() {
 	cfg := config.GetAlertCheckConfig()
 	db := dbutils.Connection(config.DBConnStr(&cfg.DBConfig))
-	defer func() error {
+	defer func() {
 		if err := db.Close(); err != nil {
 			log.Fatal(err.Error())
 		}
-		return nil
 	}()
 
 	if cfg.AWSECSTriggerMocked {
