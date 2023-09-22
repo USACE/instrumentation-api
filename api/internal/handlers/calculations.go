@@ -7,9 +7,9 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
 
-	"github.com/USACE/instrumentation-api/api/internal/dbutils"
 	"github.com/USACE/instrumentation-api/api/internal/messages"
 	"github.com/USACE/instrumentation-api/api/internal/models"
+	"github.com/USACE/instrumentation-api/api/internal/utils"
 )
 
 // GetInstrumentCalculations retrieves an array of `Calculation`s associated with a particular
@@ -58,10 +58,10 @@ func CreateCalculation(db *sqlx.DB) echo.HandlerFunc {
 		}
 
 		if formula.FormulaName == "" {
-			calculationSlug, err = dbutils.NextUniqueSlug("New Formula", slugsTaken)
+			calculationSlug, err = utils.NextUniqueSlug("New Formula", slugsTaken)
 			formula.FormulaName = calculationSlug
 		} else {
-			calculationSlug, err = dbutils.NextUniqueSlug(formula.FormulaName, slugsTaken)
+			calculationSlug, err = utils.NextUniqueSlug(formula.FormulaName, slugsTaken)
 		}
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -106,10 +106,10 @@ func UpdateCalculation(db *sqlx.DB) echo.HandlerFunc {
 		}
 
 		if formula.FormulaName == "" {
-			calculationSlug, err = dbutils.NextUniqueSlug("New Formula", slugsTaken)
+			calculationSlug, err = utils.NextUniqueSlug("New Formula", slugsTaken)
 			formula.FormulaName = calculationSlug
 		} else {
-			calculationSlug, err = dbutils.NextUniqueSlug(formula.FormulaName, slugsTaken)
+			calculationSlug, err = utils.NextUniqueSlug(formula.FormulaName, slugsTaken)
 		}
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())

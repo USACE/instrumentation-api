@@ -5,10 +5,10 @@ import (
 	"net/http"
 
 	"github.com/USACE/instrumentation-api/api/internal/config"
-	"github.com/USACE/instrumentation-api/api/internal/dbutils"
 	"github.com/USACE/instrumentation-api/api/internal/handlers"
 	"github.com/USACE/instrumentation-api/api/internal/middleware"
 	"github.com/USACE/instrumentation-api/api/internal/models"
+	"github.com/USACE/instrumentation-api/api/internal/utils"
 	"github.com/apex/gateway"
 
 	"github.com/labstack/echo/v4"
@@ -18,7 +18,7 @@ import (
 
 func main() {
 	cfg := config.GetTelemetryConfig()
-	db := dbutils.Connection(config.DBConnStr(&cfg.DBConfig))
+	db := utils.Connection(cfg.DBConfig.ConnStr())
 
 	e := echo.New()
 	e.Use(middleware.CORS, middleware.GZIP)

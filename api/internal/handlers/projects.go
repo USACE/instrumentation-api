@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/USACE/instrumentation-api/api/internal/dbutils"
 	"github.com/USACE/instrumentation-api/api/internal/messages"
 	"github.com/USACE/instrumentation-api/api/internal/models"
+	"github.com/USACE/instrumentation-api/api/internal/utils"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -153,7 +153,7 @@ func CreateProjectBulk(db *sqlx.DB) echo.HandlerFunc {
 			// create date
 			pc.Projects[idx].CreateDate = t
 			// Assign Slug
-			s, err := dbutils.NextUniqueSlug(pc.Projects[idx].Name, slugsTaken)
+			s, err := utils.NextUniqueSlug(pc.Projects[idx].Name, slugsTaken)
 			if err != nil {
 				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 			}

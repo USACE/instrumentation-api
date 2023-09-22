@@ -1,4 +1,4 @@
-package dbutils
+package utils
 
 import (
 	"fmt"

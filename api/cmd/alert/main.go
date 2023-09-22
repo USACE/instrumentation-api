@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/internal/config"
-	"github.com/USACE/instrumentation-api/api/internal/dbutils"
 	"github.com/USACE/instrumentation-api/api/internal/handlers"
+	"github.com/USACE/instrumentation-api/api/internal/utils"
 	"github.com/jmoiron/sqlx"
 
 	_ "github.com/jackc/pgx/v4/stdlib"
@@ -23,7 +23,7 @@ func checkAlerts(db *sqlx.DB, cfg *config.AlertCheckConfig) {
 
 func main() {
 	cfg := config.GetAlertCheckConfig()
-	db := dbutils.Connection(config.DBConnStr(&cfg.DBConfig))
+	db := utils.Connection(cfg.DBConfig.ConnStr())
 	defer func() {
 		if err := db.Close(); err != nil {
 			log.Fatal(err.Error())

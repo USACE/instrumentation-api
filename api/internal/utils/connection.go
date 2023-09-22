@@ -1,4 +1,4 @@
-package dbutils
+package utils
 
 import (
 	"log"
@@ -10,6 +10,8 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+// TODO: Remove this in favor of database package
+// (once refactor finished)
 func initDB(connStr string) *sqlx.DB {
 
 	log.Printf("Getting database connection")

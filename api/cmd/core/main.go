@@ -5,10 +5,10 @@ import (
 	"net/http"
 
 	"github.com/USACE/instrumentation-api/api/internal/config"
-	"github.com/USACE/instrumentation-api/api/internal/dbutils"
 	"github.com/USACE/instrumentation-api/api/internal/handlers"
 	"github.com/USACE/instrumentation-api/api/internal/middleware"
 	"github.com/USACE/instrumentation-api/api/internal/models"
+	"github.com/USACE/instrumentation-api/api/internal/utils"
 	"github.com/apex/gateway"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -21,7 +21,7 @@ import (
 
 func main() {
 	cfg := config.GetApiConfig()
-	db := dbutils.Connection(config.DBConnStr(&cfg.DBConfig))
+	db := utils.Connection(cfg.DBConfig.ConnStr())
 
 	awsCfg := config.AWSConfig(cfg)
 	sess := session.Must(session.NewSession(awsCfg))

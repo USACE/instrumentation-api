@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/USACE/instrumentation-api/api/internal/dbutils"
 	"github.com/USACE/instrumentation-api/api/internal/messages"
 	"github.com/USACE/instrumentation-api/api/internal/models"
+	"github.com/USACE/instrumentation-api/api/internal/utils"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -66,7 +66,7 @@ func CreateInstrumentGroup(db *sqlx.DB) echo.HandlerFunc {
 			// CreateDate
 			gc.Items[idx].CreateDate = t
 			// Assign Slug
-			s, err := dbutils.NextUniqueSlug(gc.Items[idx].Name, slugsTaken)
+			s, err := utils.NextUniqueSlug(gc.Items[idx].Name, slugsTaken)
 			if err != nil {
 				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 			}

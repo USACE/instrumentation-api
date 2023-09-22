@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/USACE/instrumentation-api/api/internal/dbutils"
 	"github.com/USACE/instrumentation-api/api/internal/messages"
+	"github.com/USACE/instrumentation-api/api/internal/utils"
 
 	"github.com/google/uuid"
 
@@ -68,7 +68,7 @@ func CreateCollectionGroup(db *sqlx.DB) echo.HandlerFunc {
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
-		slug, err := dbutils.NextUniqueSlug(cg.Name, slugsTaken)
+		slug, err := utils.NextUniqueSlug(cg.Name, slugsTaken)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}

@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/internal/config"
-	"github.com/USACE/instrumentation-api/api/internal/dbutils"
+	"github.com/USACE/instrumentation-api/api/internal/utils"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
@@ -175,7 +175,7 @@ func UpdateAlertConfigChecks[T AlertChecker, PT AlertConfigChecker[T]](txn *sqlx
 // TODO: smtp.SendMail esablishes a new connection for each batch of emails sent. I would be better to aggregate
 // the contents of each email, then create a connection pool to reuse and send all emails at once, with any errors wrapped and returned
 func HandleChecks[T AlertChecker, PT AlertConfigChecker[T]](txn *sqlx.Tx, accs []PT, cfg *config.AlertCheckConfig, smtpCfg *config.SmtpConfig) error {
-	defer dbutils.Timer()()
+	defer utils.Timer()()
 
 	mu := &sync.Mutex{}
 	aaccs := make([]PT, len(accs))

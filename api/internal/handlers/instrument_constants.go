@@ -3,9 +3,9 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/USACE/instrumentation-api/api/internal/dbutils"
 	"github.com/USACE/instrumentation-api/api/internal/messages"
 	"github.com/USACE/instrumentation-api/api/internal/models"
+	"github.com/USACE/instrumentation-api/api/internal/utils"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
@@ -35,7 +35,7 @@ func CreateInstrumentConstants(db *sqlx.DB) echo.HandlerFunc {
 				return echo.NewHTTPError(http.StatusBadRequest, messages.MatchRouteParam("`instrument_id`"))
 			}
 			// Assign Slug
-			s, err := dbutils.NextUniqueSlug(tc.Items[idx].Name, slugsTaken)
+			s, err := utils.NextUniqueSlug(tc.Items[idx].Name, slugsTaken)
 			if err != nil {
 				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 			}

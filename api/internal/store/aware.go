@@ -1,0 +1,62 @@
+package store
+
+import (
+	"context"
+
+	"github.com/USACE/instrumentation-api/api/internal/model"
+	"github.com/google/uuid"
+)
+
+type AwareParameterStore interface {
+	ListAwareParameters(ctx context.Context) ([]model.AwareParameter, error)
+	ListAwarePlatformParameterConfig(ctx context.Context) ([]model.AwarePlatformParameterConfig, error)
+}
+
+type awareParameterStore struct {
+	db *model.Database
+}
+
+func NewAwareParameterStore(db *model.Database) *awareParameterStore {
+	return &awareParameterStore{db}
+}
+
+// ListAwareParameters returns aware parameters
+func (s awareParameterStore) ListAwareParameters(ctx context.Context) ([]model.AwareParameter, error) {
+	q := model.NewQueries(s.db)
+
+	pp, err := q.ListAwareParameters(ctx)
+	if err != nil {
+		return pp, err
+	}
+	return pp, nil
+}
+
+// ListAwarePlatformParameterConfig returns aware platform parameter configs
+func (s awareParameterStore) ListAwarePlatformParameterConfig(ctx context.Context) ([]model.AwarePlatformParameterConfig, error) {
+	q := model.NewQueries(s.db)
+
+	aa := make([]model.AwarePlatformParameterConfig, 0)
+	ee, err := q.ListAwarePlatformParameterEnabled(ctx)
+	if err != nil {
+		return aa, err
+	}
+	// reorganize aware_parameter_key, timeseries_id into map for each instrument
+	// Map of aware parameters to timeseries
+	m1 := make(map[uuid.UUID]model.AwarePlatformParameterConfig)
+	for _, e := range ee {
+		if _, ok := m1[e.InstrumentID]; !ok {
+			m1[e.InstrumentID] = model.AwarePlatformParameterConfig{
+				ProjectID:       e.ProjectID,
+				InstrumentID:    e.InstrumentID,
+				AwareID:         e.AwareID,
+				AwareParameters: make(map[string]*uuid.UUID),
+			}
+		}
+		m1[e.InstrumentID].AwareParameters[e.AwareParameterKey] = e.TimeseriesID
+	}
+
+	for k := range m1 {
+		aa = append(aa, m1[k])
+	}
+	return aa, nil
+}

@@ -1,10 +1,10 @@
 package handlers
 
 import (
-	"github.com/USACE/instrumentation-api/api/internal/dbutils"
 	"github.com/USACE/instrumentation-api/api/internal/messages"
 	"github.com/USACE/instrumentation-api/api/internal/models"
 	ts "github.com/USACE/instrumentation-api/api/internal/timeseries"
+	"github.com/USACE/instrumentation-api/api/internal/utils"
 
 	"net/http"
 
@@ -102,7 +102,7 @@ func CreateTimeseries(db *sqlx.DB) echo.HandlerFunc {
 			// Assign UUID
 			tc.Items[idx].ID = uuid.Must(uuid.NewRandom())
 			// Assign Slug
-			s, err := dbutils.NextUniqueSlug(tc.Items[idx].Name, slugsTaken)
+			s, err := utils.NextUniqueSlug(tc.Items[idx].Name, slugsTaken)
 			if err != nil {
 				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 			}
