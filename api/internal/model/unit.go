@@ -1,8 +1,9 @@
 package model
 
 import (
+	"context"
+
 	"github.com/google/uuid"
-	"github.com/jmoiron/sqlx"
 )
 
 // Unit is a unit data structure
@@ -16,16 +17,17 @@ type Unit struct {
 	Measure      string    `json:"measure"`
 }
 
+const listUnits = `
+	SELECT id, name, abbreviation, unit_family_id, unit_family, measure_id, measure
+	FROM v_unit
+	ORDER BY name
+`
+
 // ListUnits returns a slice of units
-func ListUnits(db *sqlx.DB) ([]Unit, error) {
+func (q *Queries) ListUnits(ctx context.Context) ([]Unit, error) {
 	uu := make([]Unit, 0)
-	if err := db.Select(
-		&uu,
-		`SELECT id, name, abbreviation, unit_family_id, unit_family, measure_id, measure
-		 FROM v_unit
-		 ORDER BY name`,
-	); err != nil {
-		return make([]Unit, 0), err
+	if err := q.db.SelectContext(ctx, &uu, listUnits); err != nil {
+		return nil, err
 	}
 	return uu, nil
 }

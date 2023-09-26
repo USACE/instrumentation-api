@@ -3,7 +3,7 @@ package models
 import (
 	"time"
 
-	ts "github.com/USACE/instrumentation-api/api/internal/timeseries"
+	"github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
@@ -19,15 +19,15 @@ type CollectionGroup struct {
 
 // CollectionGroupDetails holds same information as a CollectionGroup
 // In Addition, contains array of structs; Each struct contains
-// all fields for ts.Timeseries AND additional latest_value, latest_time
+// all fields for model.Timeseries AND additional latest_value, latest_time
 type CollectionGroupDetails struct {
 	CollectionGroup
 	Timeseries []cgdTsItem `json:"timeseries"`
 }
 
-// collectionGroupDetailsTimeseriesItem is a ts.Timeseries with a little bit of extra information
+// collectionGroupDetailsTimeseriesItem is a model.Timeseries with a little bit of extra information
 type cgdTsItem struct {
-	ts.Timeseries
+	model.Timeseries
 	LatestTime  *time.Time `json:"latest_time" db:"latest_time"`
 	LatestValue *float32   `json:"latest_value" db:"latest_value"`
 }

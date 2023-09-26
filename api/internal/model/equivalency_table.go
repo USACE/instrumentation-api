@@ -1,14 +1,13 @@
 package model
 
 import (
+	"context"
 	"errors"
 	"fmt"
-	"log"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgerrcode"
-	"github.com/jmoiron/sqlx"
 )
 
 type EquivalencyTable struct {
@@ -27,172 +26,123 @@ type EquivalencyTableRow struct {
 	TimeseriesID *uuid.UUID `json:"timeseries_id" db:"timeseries_id"`
 }
 
-// ValidEquivalencyTableTimeseries verifies that a Timeseries is not computed or constant
-func ValidEquivalencyTableTimeseries(txn *sqlx.Tx, tsID *uuid.UUID) error {
-	stmt, err := txn.Preparex(`
-		SELECT NOT EXISTS (
-			SELECT id FROM v_timeseries_computed
-			WHERE id = $1
-			AND id NOT IN (
-				SELECT timeseries_id FROM instrument_constants
-			)
+const getIsValidEquivalencyTableTimeseries = `
+	SELECT NOT EXISTS (
+		SELECT id FROM v_timeseries_computed
+		WHERE id = $1
+		AND id NOT IN (
+			SELECT timeseries_id FROM instrument_constants
 		)
-	`)
-	if err != nil {
-		return err
-	}
+	)
+`
 
+// GetIsValidEquivalencyTableTimeseries verifies that a Timeseries is not computed or constant
+func (q *Queries) GetIsValidEquivalencyTableTimeseries(ctx context.Context, tsID uuid.UUID) error {
 	var isValid bool
-	if err := stmt.Get(&isValid, &tsID); err != nil {
+	if err := q.db.GetContext(ctx, &isValid, getIsValidEquivalencyTableTimeseries, tsID); err != nil {
 		return err
 	}
 	if !isValid {
 		return fmt.Errorf("timeseries '%s' must not be computed", tsID)
 	}
-	if err := stmt.Close(); err != nil {
-		return err
-	}
-
 	return nil
 }
+
+const getEquivalencyTable = `
+	SELECT
+		id,
+		datalogger_id,
+		field_name,
+		display_name,
+		instrument_id,
+		timeseries_id
+	FROM datalogger_equivalency_table
+	WHERE datalogger_id = $1
+`
 
 // GetEquivalencyTable returns a single DataLogger EquivalencyTable
-func GetEquivalencyTable(db *sqlx.DB, dlID *uuid.UUID) (*EquivalencyTable, error) {
+func (q *Queries) GetEquivalencyTable(ctx context.Context, dlID uuid.UUID) (EquivalencyTable, error) {
+	var et EquivalencyTable
 	var tr []EquivalencyTableRow
-	if err := db.Select(&tr, `
-		SELECT
-			id,
-			datalogger_id,
-			field_name,
-			display_name,
-			instrument_id,
-			timeseries_id
-		FROM datalogger_equivalency_table
-		WHERE datalogger_id = $1
-	`, &dlID); err != nil {
-		return nil, err
-	}
-
-	if tr == nil {
-		tr = make([]EquivalencyTableRow, 0)
-	}
-
-	return &EquivalencyTable{
-		DataLoggerID: *dlID,
-		Rows:         tr,
-	}, nil
+	err := q.db.SelectContext(ctx, &tr, getEquivalencyTable, &dlID)
+	et.DataLoggerID = dlID
+	et.Rows = tr
+	return et, err
 }
 
-// CreateEquivalencyTable creates EquivalencyTable rows
-// If a row with the given datalogger id or field name already exists the row will be ignored
-func CreateEquivalencyTable(db *sqlx.DB, t *EquivalencyTable) error {
-	txn, err := db.Beginx()
-	if err != nil {
+const createEquivalencyTableRow = `
+	INSERT INTO datalogger_equivalency_table
+	(datalogger_id, field_name, display_name, instrument_id, timeseries_id)
+	VALUES ($1, $2, $3, $4, $5)
+	ON CONFLICT ON CONSTRAINT unique_datalogger_field DO NOTHING
+`
+
+func (q *Queries) CreateEquivalencyTableRow(ctx context.Context, tr EquivalencyTableRow) error {
+	if _, err := q.db.ExecContext(
+		ctx,
+		createEquivalencyTableRow,
+		tr.DataLoggerID,
+		tr.FieldName,
+		tr.DisplayName,
+		tr.InstrumentID,
+		tr.TimeseriesID,
+	); err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == pgerrcode.UniqueViolation {
+			return fmt.Errorf("timeseries_id %s is already mapped to an active datalogger", tr.TimeseriesID)
+		}
 		return err
 	}
-	defer txn.Rollback()
-
-	for _, r := range t.Rows {
-		if err = ValidEquivalencyTableTimeseries(txn, r.TimeseriesID); err != nil {
-			return err
-		}
-
-		stmt, err := txn.Preparex(`
-			INSERT INTO datalogger_equivalency_table
-			(datalogger_id, field_name, display_name, instrument_id, timeseries_id)
-			VALUES ($1, $2, $3, $4, $5)
-			ON CONFLICT ON CONSTRAINT unique_datalogger_field DO NOTHING
-		`)
-		if err != nil {
-			return err
-		}
-		if _, err := stmt.Exec(
-			&t.DataLoggerID,
-			&r.FieldName,
-			&r.DisplayName,
-			&r.InstrumentID,
-			&r.TimeseriesID,
-		); err != nil {
-			var pgErr *pgconn.PgError
-			if errors.As(err, &pgErr) && pgErr.Code == pgerrcode.UniqueViolation {
-				// TODO: possibly query and return the active eqivalency table row mapped to this timeseries
-
-				return fmt.Errorf("timeseries_id %s is already mapped to an active datalogger", r.TimeseriesID)
-			}
-			log.Printf("error is %s", err)
-			return err
-		}
-		if err := stmt.Close(); err != nil {
-			return err
-		}
-	}
-	if err := txn.Commit(); err != nil {
-		return err
-	}
-
 	return nil
 }
 
-// UpdateEquivalencyTable updates rows of an EquivalencyTable
-func UpdateEquivalencyTable(db *sqlx.DB, t *EquivalencyTable) error {
-	txn, err := db.Beginx()
-	if err != nil {
+const updateEquivalencyTableRow = `
+	UPDATE datalogger_equivalency_table SET
+		field_name = $3,
+		display_name = $4,
+		instrument_id = $5,
+		timeseries_id = $6
+	WHERE datalogger_id = $1
+	AND id = $2
+`
+
+func (q *Queries) UpdateEquivalencyTableRow(ctx context.Context, tr EquivalencyTableRow) error {
+	if _, err := q.db.ExecContext(
+		ctx,
+		updateEquivalencyTableRow,
+		tr.DataLoggerID,
+		tr.ID,
+		tr.FieldName,
+		tr.DisplayName,
+		tr.InstrumentID,
+		tr.TimeseriesID,
+	); err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == pgerrcode.UniqueViolation {
+			return fmt.Errorf("timeseries_id %s is already mapped to an active datalogger", tr.TimeseriesID)
+		}
 		return err
 	}
-	defer txn.Rollback()
-
-	for _, r := range t.Rows {
-		if err = ValidEquivalencyTableTimeseries(txn, r.TimeseriesID); err != nil {
-			return err
-		}
-
-		stmt, err := txn.Preparex(`
-			UPDATE datalogger_equivalency_table SET
-				field_name = $3,
-				display_name = $4,
-				instrument_id = $5,
-				timeseries_id = $6
-			WHERE datalogger_id = $1
-			AND id = $2
-		`)
-		if err != nil {
-			return err
-		}
-		if _, err := stmt.Exec(
-			&t.DataLoggerID,
-			&r.ID,
-			&r.FieldName,
-			&r.DisplayName,
-			&r.InstrumentID,
-			&r.TimeseriesID,
-		); err != nil {
-			return err
-		}
-		if err := stmt.Close(); err != nil {
-			return err
-		}
-	}
-	if err := txn.Commit(); err != nil {
-		return err
-	}
-
 	return nil
 }
+
+const deleteEquivalencyTable = `
+	DELETE FROM datalogger_equivalency_table WHERE datalogger_id = $1
+`
 
 // DeleteEquivalencyTable clears all rows of the EquivalencyTable for a Datalogger
-func DeleteEquivalencyTable(db *sqlx.DB, dlID *uuid.UUID) error {
-	_, err := db.Exec(`DELETE FROM datalogger_equivalency_table WHERE datalogger_id = $1`, &dlID)
-	if err != nil {
-		return err
-	}
-	return nil
+func (q *Queries) DeleteEquivalencyTable(ctx context.Context, dlID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deleteEquivalencyTable, dlID)
+	return err
 }
 
+const deleteEquivalencyTableRow = `
+	DELETE FROM datalogger_equivalency_table WHERE datalogger_id = $1 AND id = $2
+`
+
 // DeleteEquivalencyTableRow deletes a single EquivalencyTable row by row id
-func DeleteEquivalencyTableRow(db *sqlx.DB, dlID *uuid.UUID, rID *uuid.UUID) error {
-	res, err := db.Exec(`
-		DELETE FROM datalogger_equivalency_table WHERE datalogger_id = $1 AND id = $2
-	`, &dlID, &rID)
+func (q *Queries) DeleteEquivalencyTableRow(ctx context.Context, dlID, rID uuid.UUID) error {
+	res, err := q.db.ExecContext(ctx, deleteEquivalencyTableRow, dlID, rID)
 	if err != nil {
 		return err
 	}

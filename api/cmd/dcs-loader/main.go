@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/internal/config"
-	ts "github.com/USACE/instrumentation-api/api/internal/timeseries"
+	"github.com/USACE/instrumentation-api/api/internal/model"
 
 	"github.com/google/uuid"
 
@@ -69,9 +69,9 @@ func HandleRequest(cfg *config.DcsLoaderConfig) handlerFunc {
 	}
 }
 
-func ParseCsvMeasurementCollection(r io.Reader, cfg *config.DcsLoaderConfig) ([]ts.MeasurementCollection, int, error) {
+func ParseCsvMeasurementCollection(r io.Reader, cfg *config.DcsLoaderConfig) ([]model.MeasurementCollection, int, error) {
 
-	mcs := make([]ts.MeasurementCollection, 0)
+	mcs := make([]model.MeasurementCollection, 0)
 	mCount := 0
 	reader := csv.NewReader(r)
 
@@ -87,7 +87,7 @@ func ParseCsvMeasurementCollection(r io.Reader, cfg *config.DcsLoaderConfig) ([]
 		rows = append(rows, row)
 	}
 
-	mcMap := make(map[uuid.UUID]*ts.MeasurementCollection)
+	mcMap := make(map[uuid.UUID]*model.MeasurementCollection)
 	for _, row := range rows {
 		// 0=timeseries_id, 1=time, 2=value
 		tsid, err := uuid.Parse(row[0])
@@ -104,16 +104,16 @@ func ParseCsvMeasurementCollection(r io.Reader, cfg *config.DcsLoaderConfig) ([]
 		}
 
 		if _, ok := mcMap[tsid]; !ok {
-			mcMap[tsid] = &ts.MeasurementCollection{
+			mcMap[tsid] = &model.MeasurementCollection{
 				TimeseriesID: tsid,
-				Items:        make([]ts.Measurement, 0),
+				Items:        make([]model.Measurement, 0),
 			}
 		}
-		mcMap[tsid].Items = append(mcMap[tsid].Items, ts.Measurement{TimeseriesID: tsid, Time: t, Value: v})
+		mcMap[tsid].Items = append(mcMap[tsid].Items, model.Measurement{TimeseriesID: tsid, Time: t, Value: v})
 		mCount++
 	}
 
-	mcs = make([]ts.MeasurementCollection, len(mcMap))
+	mcs = make([]model.MeasurementCollection, len(mcMap))
 	idx := 0
 	for _, v := range mcMap {
 		mcs[idx] = *v
@@ -123,7 +123,7 @@ func ParseCsvMeasurementCollection(r io.Reader, cfg *config.DcsLoaderConfig) ([]
 	return mcs, mCount, nil
 }
 
-func PostMeasurementCollectionToApi(mcs []ts.MeasurementCollection, cfg *config.DcsLoaderConfig, client *http.Client) error {
+func PostMeasurementCollectionToApi(mcs []model.MeasurementCollection, cfg *config.DcsLoaderConfig, client *http.Client) error {
 
 	requestBodyBytes, err := json.Marshal(mcs)
 	if err != nil {

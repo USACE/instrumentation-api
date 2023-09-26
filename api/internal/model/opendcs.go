@@ -1,8 +1,9 @@
 package model
 
 import (
+	"context"
+
 	"github.com/google/uuid"
-	"github.com/jmoiron/sqlx"
 )
 
 // Site is an instrument, represented as an OpenDCS Site
@@ -34,9 +35,8 @@ func (n *Instrument) AsSite() Site {
 
 // ListOpendcsSites returns an array of instruments from the database
 // And formats them as OpenDCS Sites
-func ListOpendcsSites(db *sqlx.DB) ([]Site, error) {
-
-	nn, err := ListInstruments(db)
+func (q *Queries) ListOpendcsSites(ctx context.Context) ([]Site, error) {
+	nn, err := q.ListInstruments(ctx)
 	if err != nil {
 		return make([]Site, 0), err
 	}

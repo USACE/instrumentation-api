@@ -38,7 +38,7 @@ func (h *Handler) ListAlertsForInstrument() echo.HandlerFunc {
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
-		aa, err := h.AlertStore.GetAllAlertsForInstrument(c.Request().Context(), &instrumentID)
+		aa, err := h.AlertStore.GetAllAlertsForInstrument(c.Request().Context(), instrumentID)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
@@ -61,7 +61,7 @@ func (h *Handler) ListMyAlerts() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		p := c.Get("profile").(*models.Profile)
 		profileID := p.ID
-		aa, err := h.AlertStore.GetAllAlertsForProfile(c.Request().Context(), &profileID)
+		aa, err := h.AlertStore.GetAllAlertsForProfile(c.Request().Context(), profileID)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
@@ -90,7 +90,7 @@ func (h *Handler) DoAlertRead() echo.HandlerFunc {
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
-		a, err := h.AlertStore.DoAlertRead(c.Request().Context(), &profileID, &alertID)
+		a, err := h.AlertStore.DoAlertRead(c.Request().Context(), profileID, alertID)
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
 				return echo.NewHTTPError(http.StatusNotFound, messages.NotFound)
@@ -122,7 +122,7 @@ func (h *Handler) DoAlertUnread() echo.HandlerFunc {
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
-		a, err := h.AlertStore.DoAlertUnread(c.Request().Context(), &profileID, &alertID)
+		a, err := h.AlertStore.DoAlertUnread(c.Request().Context(), profileID, alertID)
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
 				return echo.NewHTTPError(http.StatusNotFound, messages.NotFound)

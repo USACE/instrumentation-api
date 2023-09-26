@@ -1,83 +1,59 @@
 package model
 
 import (
-	"github.com/jmoiron/sqlx"
+	"context"
+
+	"github.com/google/uuid"
 )
 
-func GetDataLoggerByModelSN(db *sqlx.DB, model, sn string) (*DataLogger, error) {
-	var dl DataLogger
-	if err := db.Get(&dl, `
-		SELECT * FROM v_datalogger
-		WHERE model = $1 AND sn = $2
-	`, model, sn); err != nil {
-		return nil, err
-	}
-	return &dl, nil
+const getDataloggerByModelSN = `
+	SELECT * FROM v_datalogger
+	WHERE model = $1 AND sn = $2
+`
+
+func (q *Queries) GetDataloggerByModelSN(ctx context.Context, modelName, sn string) (Datalogger, error) {
+	var dl Datalogger
+	err := q.db.GetContext(ctx, &dl, getDataloggerByModelSN, modelName, sn)
+	return dl, err
 }
 
-func GetDataLoggerHashByModelSN(db *sqlx.DB, model, sn string) (string, error) {
-	var hash string
+const getDataloggerHashByModelSN = `
+	SELECT "hash" FROM v_datalogger_hash
+	WHERE model = $1 AND sn = $2
+`
 
-	if err := db.Get(&hash, `
-		SELECT "hash" FROM v_datalogger_hash
-		WHERE model = $1 AND sn = $2
-	`, model, sn); err != nil {
+func (q *Queries) GetDataloggerHashByModelSN(ctx context.Context, modelName, sn string) (string, error) {
+	var hash string
+	if err := q.db.GetContext(ctx, &hash, getDataloggerHashByModelSN, modelName, sn); err != nil {
 		return "", err
 	}
-
 	return hash, nil
 }
 
-func UpdateDataLoggerPreview(db *sqlx.DB, dlp *DataLoggerPreview) error {
-	if _, err := db.Exec(`
-		UPDATE datalogger_preview SET preview = $2, update_date = $3
-		WHERE datalogger_id = $1
-	`, &dlp.DataLoggerID, &dlp.Preview, &dlp.UpdateDate,
-	); err != nil {
-		return err
-	}
+const updateDataloggerPreview = `
+	UPDATE datalogger_preview SET preview = $2, update_date = $3
+	WHERE datalogger_id = $1
+`
 
-	return nil
+func (q *Queries) UpdateDataloggerPreview(ctx context.Context, dlp DataloggerPreview) error {
+	_, err := q.db.ExecContext(ctx, updateDataloggerPreview, dlp.DataloggerID, dlp.Preview, dlp.UpdateDate)
+	return err
 }
 
-func UpdateDataLoggerError(db *sqlx.DB, e *DataLoggerError) error {
-	txn, err := db.Beginx()
-	if err != nil {
-		return err
-	}
-	defer txn.Rollback()
+const deleteDataloggerError = `
+	DELETE FROM datalogger_error WHERE datalogger_id = $1
+`
 
-	stmt1, err := txn.Preparex(`DELETE FROM datalogger_error WHERE datalogger_id = $1`)
-	if err != nil {
-		return err
-	}
+func (q *Queries) DeleteDataloggerError(ctx context.Context, dataloggerID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deleteDataloggerError, dataloggerID)
+	return err
+}
 
-	stmt2, err := txn.Preparex(`INSERT INTO datalogger_error (datalogger_id, error_message) VALUES ($1, $2)`)
-	if err != nil {
-		return err
-	}
+const createDataloggerError = `
+	INSERT INTO datalogger_error (datalogger_id, error_message) VALUES ($1, $2)
+`
 
-	_, err = stmt1.Exec(&e.DataLoggerID)
-	if err != nil {
-		return err
-	}
-
-	for _, m := range e.Errors {
-		_, err = stmt2.Exec(&e.DataLoggerID, m)
-		if err != nil {
-			return err
-		}
-	}
-
-	if err := stmt1.Close(); err != nil {
-		return err
-	}
-	if err := stmt2.Close(); err != nil {
-		return err
-	}
-	if err := txn.Commit(); err != nil {
-		return err
-	}
-
-	return nil
+func (q *Queries) CreateDataloggerError(ctx context.Context, dataloggerID uuid.UUID, errMessage string) error {
+	_, err := q.db.ExecContext(ctx, createDataloggerError, dataloggerID, errMessage)
+	return err
 }

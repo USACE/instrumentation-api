@@ -8,20 +8,18 @@ import (
 	"github.com/USACE/instrumentation-api/api/internal/handlers"
 	"github.com/USACE/instrumentation-api/api/internal/middleware"
 	"github.com/USACE/instrumentation-api/api/internal/models"
-	"github.com/USACE/instrumentation-api/api/internal/utils"
+	"github.com/USACE/instrumentation-api/api/internal/util"
 	"github.com/apex/gateway"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 
 	"github.com/labstack/echo/v4"
 	echomw "github.com/labstack/echo/v4/middleware"
-
-	_ "github.com/jackc/pgx/v4/stdlib"
 )
 
 func main() {
 	cfg := config.GetApiConfig()
-	db := utils.Connection(cfg.DBConfig.ConnStr())
+	db := util.Connection(cfg.DBConfig.ConnStr())
 
 	awsCfg := config.AWSConfig(cfg)
 	sess := session.Must(session.NewSession(awsCfg))

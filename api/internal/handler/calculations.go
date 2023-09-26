@@ -9,7 +9,7 @@ import (
 
 	"github.com/USACE/instrumentation-api/api/internal/messages"
 	"github.com/USACE/instrumentation-api/api/internal/models"
-	"github.com/USACE/instrumentation-api/api/internal/utils"
+	"github.com/USACE/instrumentation-api/api/internal/util"
 )
 
 // GetInstrumentCalculations retrieves an array of `Calculation`s associated with a particular
@@ -58,10 +58,10 @@ func CreateCalculation(db *sqlx.DB) echo.HandlerFunc {
 		}
 
 		if formula.FormulaName == "" {
-			calculationSlug, err = utils.NextUniqueSlug("New Formula", slugsTaken)
+			calculationSlug, err = util.NextUniqueSlug("New Formula", slugsTaken)
 			formula.FormulaName = calculationSlug
 		} else {
-			calculationSlug, err = utils.NextUniqueSlug(formula.FormulaName, slugsTaken)
+			calculationSlug, err = util.NextUniqueSlug(formula.FormulaName, slugsTaken)
 		}
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -106,10 +106,10 @@ func UpdateCalculation(db *sqlx.DB) echo.HandlerFunc {
 		}
 
 		if formula.FormulaName == "" {
-			calculationSlug, err = utils.NextUniqueSlug("New Formula", slugsTaken)
+			calculationSlug, err = util.NextUniqueSlug("New Formula", slugsTaken)
 			formula.FormulaName = calculationSlug
 		} else {
-			calculationSlug, err = utils.NextUniqueSlug(formula.FormulaName, slugsTaken)
+			calculationSlug, err = util.NextUniqueSlug(formula.FormulaName, slugsTaken)
 		}
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())

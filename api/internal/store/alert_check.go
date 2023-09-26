@@ -9,7 +9,7 @@ import (
 
 	"github.com/USACE/instrumentation-api/api/internal/config"
 	"github.com/USACE/instrumentation-api/api/internal/model"
-	"github.com/USACE/instrumentation-api/api/internal/utils"
+	"github.com/USACE/instrumentation-api/api/internal/util"
 	"github.com/google/uuid"
 )
 
@@ -51,12 +51,13 @@ type alertChecker interface {
 
 type alertCheckStore struct {
 	db      *model.Database
+	q       *model.Queries
 	cfg     *config.AlertCheckConfig
 	smtpCfg *config.SmtpConfig
 }
 
-func NewAlertCheckStore(db *model.Database, cfg *config.AlertCheckConfig, smtpCfg *config.SmtpConfig) *alertCheckStore {
-	return &alertCheckStore{db, cfg, smtpCfg}
+func NewAlertCheckStore(db *model.Database, q *model.Queries, cfg *config.AlertCheckConfig, smtpCfg *config.SmtpConfig) *alertCheckStore {
+	return &alertCheckStore{db, q, cfg, smtpCfg}
 }
 
 func (s alertCheckStore) CheckEvaluations(ctx context.Context, subMap model.SubmittalMap, acMap model.AlertConfigMap) error {
@@ -70,10 +71,10 @@ func (s alertCheckStore) CheckEvaluations(ctx context.Context, subMap model.Subm
 		}
 	}()
 
-	q := model.NewQueries(s.db).WithTx(tx)
+	qtx := s.q.WithTx(tx)
 
 	accs := make([]*model.AlertConfigEvaluationCheck, 0)
-	ecs, err := q.GetAllIncompleteEvaluationSubmittals(ctx)
+	ecs, err := qtx.GetAllIncompleteEvaluationSubmittals(ctx)
 	if err != nil {
 		return err
 	}
@@ -100,7 +101,7 @@ func (s alertCheckStore) CheckEvaluations(ctx context.Context, subMap model.Subm
 	}
 
 	// handleChecks should not rollback txn but should bubble up errors after txn committed
-	alertCheckErr := handleChecks[*model.EvaluationCheck, *model.AlertConfigEvaluationCheck](ctx, q, accs, s.cfg, s.smtpCfg)
+	alertCheckErr := handleChecks[*model.EvaluationCheck, *model.AlertConfigEvaluationCheck](ctx, qtx, accs, s.cfg, s.smtpCfg)
 
 	if err := tx.Commit(); err != nil {
 		return err
@@ -123,11 +124,11 @@ func (s alertCheckStore) CheckMeasurements(ctx context.Context, subMap model.Sub
 		}
 	}()
 
-	q := model.NewQueries(s.db).WithTx(tx)
+	qtx := s.q.WithTx(tx)
 
 	accs := make([]*model.AlertConfigMeasurementCheck, 0)
 
-	mcs, err := q.GetAllIncompleteMeasurementSubmittals(ctx)
+	mcs, err := qtx.GetAllIncompleteMeasurementSubmittals(ctx)
 	if err != nil {
 		return err
 	}
@@ -157,7 +158,7 @@ func (s alertCheckStore) CheckMeasurements(ctx context.Context, subMap model.Sub
 	}
 
 	// HandleChecks should not rollback txn but should bubble up errors after txn committed
-	alertCheckErr := handleChecks[*model.MeasurementCheck, *model.AlertConfigMeasurementCheck](ctx, q, accs, s.cfg, s.smtpCfg)
+	alertCheckErr := handleChecks[*model.MeasurementCheck, *model.AlertConfigMeasurementCheck](ctx, qtx, accs, s.cfg, s.smtpCfg)
 
 	if err := tx.Commit(); err != nil {
 		return err
@@ -172,18 +173,18 @@ func (s alertCheckStore) CheckMeasurements(ctx context.Context, subMap model.Sub
 func updateAlertConfigChecks[T alertChecker, PT alertConfigChecker[T]](ctx context.Context, q *model.Queries, accs []PT) error {
 	for _, acc := range accs {
 		ac := acc.GetAlertConfig()
-		if err := q.UpdateAlertConfigLastReminded(ctx, &ac); err != nil {
+		if err := q.UpdateAlertConfigLastReminded(ctx, ac); err != nil {
 			return err
 		}
 		checks := acc.GetChecks()
 		for _, c := range checks {
 			sub := c.GetSubmittal()
-			if err := q.UpdateSubmittalCompletionDateOrWarningSent(ctx, &sub); err != nil {
+			if err := q.UpdateSubmittalCompletionDateOrWarningSent(ctx, sub); err != nil {
 				return err
 			}
 		}
 		if ac.CreateNextSubmittalFrom != nil {
-			if err := q.CreateNextSubmittalFromNewAlertConfigDate(ctx, &ac); err != nil {
+			if err := q.CreateNextSubmittalFromNewAlertConfigDate(ctx, ac); err != nil {
 				return err
 			}
 		}
@@ -205,7 +206,7 @@ func updateAlertConfigChecks[T alertChecker, PT alertConfigChecker[T]](ctx conte
 // the contents of each email, then create a connection pool to reuse and send all emails at once, with any errors wrapped and returned
 // p.s. Dear future me/someone else: I'm sorry
 func handleChecks[T alertChecker, PT alertConfigChecker[T]](ctx context.Context, q *model.Queries, accs []PT, cfg *config.AlertCheckConfig, smtpCfg *config.SmtpConfig) error {
-	defer utils.Timer()()
+	defer util.Timer()()
 
 	mu := &sync.Mutex{}
 	aaccs := make([]PT, len(accs))

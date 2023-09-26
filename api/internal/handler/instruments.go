@@ -6,7 +6,7 @@ import (
 
 	"github.com/USACE/instrumentation-api/api/internal/messages"
 	"github.com/USACE/instrumentation-api/api/internal/models"
-	"github.com/USACE/instrumentation-api/api/internal/utils"
+	"github.com/USACE/instrumentation-api/api/internal/util"
 	"github.com/paulmach/orb/geojson"
 
 	"github.com/google/uuid"
@@ -88,7 +88,7 @@ func CreateInstruments(db *sqlx.DB) echo.HandlerFunc {
 				// Assign ProjectID
 				ic.Items[idx].ProjectID = &projectID
 				// Assign Slug
-				s, err := utils.NextUniqueSlug(ic.Items[idx].Name, slugsTaken)
+				s, err := util.NextUniqueSlug(ic.Items[idx].Name, slugsTaken)
 				if err != nil {
 					return models.InstrumentCollection{}, err
 				}

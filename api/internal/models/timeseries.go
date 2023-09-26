@@ -3,8 +3,7 @@ package models
 import (
 	"encoding/json"
 
-	ts "github.com/USACE/instrumentation-api/api/internal/timeseries"
-
+	"github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
@@ -15,7 +14,7 @@ var listTimeseriesSQL = `SELECT id, slug, name, variable, project_id, project_sl
 
 // TimeseriesCollection is a collection of Timeseries items
 type TimeseriesCollection struct {
-	Items []ts.Timeseries
+	Items []model.Timeseries
 }
 
 // UnmarshalJSON implements UnmarshalJSON interface
@@ -26,13 +25,13 @@ func (c *TimeseriesCollection) UnmarshalJSON(b []byte) error {
 			return err
 		}
 	case "OBJECT":
-		var t ts.Timeseries
+		var t model.Timeseries
 		if err := json.Unmarshal(b, &t); err != nil {
 			return err
 		}
-		c.Items = []ts.Timeseries{t}
+		c.Items = []model.Timeseries{t}
 	default:
-		c.Items = make([]ts.Timeseries, 0)
+		c.Items = make([]model.Timeseries, 0)
 	}
 	return nil
 }
@@ -98,37 +97,37 @@ func ListTimeseriesSlugsForInstrument(db *sqlx.DB, id *uuid.UUID) ([]string, err
 }
 
 // ListTimeseries lists all timeseries
-func ListTimeseries(db *sqlx.DB) ([]ts.Timeseries, error) {
+func ListTimeseries(db *sqlx.DB) ([]model.Timeseries, error) {
 
-	tt := make([]ts.Timeseries, 0)
+	tt := make([]model.Timeseries, 0)
 	if err := db.Select(&tt, listTimeseriesSQL); err != nil {
-		return make([]ts.Timeseries, 0), err
+		return make([]model.Timeseries, 0), err
 	}
 	return tt, nil
 }
 
 // ListProjectTimeseries lists all timeseries for a given project
-func ListProjectTimeseries(db *sqlx.DB, projectID *uuid.UUID) ([]ts.Timeseries, error) {
-	tt := make([]ts.Timeseries, 0)
+func ListProjectTimeseries(db *sqlx.DB, projectID *uuid.UUID) ([]model.Timeseries, error) {
+	tt := make([]model.Timeseries, 0)
 	if err := db.Select(&tt, listTimeseriesSQL+" WHERE project_id = $1", projectID); err != nil {
-		return make([]ts.Timeseries, 0), err
+		return make([]model.Timeseries, 0), err
 	}
 	return tt, nil
 }
 
 // ListInstrumentTimeseries returns an array of timeseries for an instrument
-func ListInstrumentTimeseries(db *sqlx.DB, instrumentID *uuid.UUID) ([]ts.Timeseries, error) {
-	tt := make([]ts.Timeseries, 0)
+func ListInstrumentTimeseries(db *sqlx.DB, instrumentID *uuid.UUID) ([]model.Timeseries, error) {
+	tt := make([]model.Timeseries, 0)
 	if err := db.Select(&tt, listTimeseriesSQL+" WHERE instrument_id = $1", instrumentID); err != nil {
-		return make([]ts.Timeseries, 0), err
+		return make([]model.Timeseries, 0), err
 	}
 	return tt, nil
 }
 
 // ListInstrumentGroupTimeseries returns an array of timeseries for instruments that belong to an instrument_group
-func ListInstrumentGroupTimeseries(db *sqlx.DB, instrumentGroupID *uuid.UUID) ([]ts.Timeseries, error) {
+func ListInstrumentGroupTimeseries(db *sqlx.DB, instrumentGroupID *uuid.UUID) ([]model.Timeseries, error) {
 
-	var tt []ts.Timeseries
+	var tt []model.Timeseries
 	if err := db.Select(
 		&tt,
 		listTimeseriesSQL+` WHERE  instrument_id IN (
@@ -137,15 +136,15 @@ func ListInstrumentGroupTimeseries(db *sqlx.DB, instrumentGroupID *uuid.UUID) ([
 			WHERE  instrument_group_id = $1
 		)`, instrumentGroupID,
 	); err != nil {
-		return make([]ts.Timeseries, 0), err
+		return make([]model.Timeseries, 0), err
 	}
 	return tt, nil
 }
 
 // GetTimeseries returns a single timeseries without measurements
-func GetTimeseries(db *sqlx.DB, id *uuid.UUID) (*ts.Timeseries, error) {
+func GetTimeseries(db *sqlx.DB, id *uuid.UUID) (*model.Timeseries, error) {
 
-	var t ts.Timeseries
+	var t model.Timeseries
 	if err := db.Get(&t, listTimeseriesSQL+" WHERE id = $1", id); err != nil {
 		return nil, err
 	}
@@ -153,7 +152,7 @@ func GetTimeseries(db *sqlx.DB, id *uuid.UUID) (*ts.Timeseries, error) {
 }
 
 // CreateTimeseries creates many timeseries from an array of timeseries
-func CreateTimeseries(db *sqlx.DB, tt []ts.Timeseries) ([]ts.Timeseries, error) {
+func CreateTimeseries(db *sqlx.DB, tt []model.Timeseries) ([]model.Timeseries, error) {
 
 	txn, err := db.Beginx()
 	if err != nil {
@@ -168,30 +167,30 @@ func CreateTimeseries(db *sqlx.DB, tt []ts.Timeseries) ([]ts.Timeseries, error) 
 		 RETURNING id, instrument_id, slug, name, parameter_id, unit_id`,
 	)
 	if err != nil {
-		return make([]ts.Timeseries, 0), err
+		return make([]model.Timeseries, 0), err
 	}
 
 	// Insert
-	uu := make([]ts.Timeseries, len(tt))
+	uu := make([]model.Timeseries, len(tt))
 	for idx, t := range tt {
 		if err := stmt.Get(&uu[idx], t.InstrumentID, t.Slug, t.Name, t.ParameterID, t.UnitID); err != nil {
-			return make([]ts.Timeseries, 0), err
+			return make([]model.Timeseries, 0), err
 		}
 	}
 
 	if err := stmt.Close(); err != nil {
-		return make([]ts.Timeseries, 0), err
+		return make([]model.Timeseries, 0), err
 	}
 
 	if err := txn.Commit(); err != nil {
-		return make([]ts.Timeseries, 0), err
+		return make([]model.Timeseries, 0), err
 	}
 
 	return uu, nil
 }
 
 // UpdateTimeseries updates a timeseries
-func UpdateTimeseries(db *sqlx.DB, t *ts.Timeseries) (*ts.Timeseries, error) {
+func UpdateTimeseries(db *sqlx.DB, t *model.Timeseries) (*model.Timeseries, error) {
 
 	var tID uuid.UUID
 	if err := db.Get(&tID, `UPDATE timeseries

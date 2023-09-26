@@ -54,7 +54,6 @@ func (ms AlertConfigMeasurementCheck) DoEmail(emailType string, cfg *config.Aler
 	if emailType == "" {
 		return fmt.Errorf("must provide emailType")
 	}
-
 	preformatted := et.EmailContent{
 		TextSubject: "-- DO NOT REPLY -- MIDAS " + emailType + ": Timeseries Measurement Submittal",
 		TextBody: "The following " + emailType + " has been triggered:\r\n\r\n" +
@@ -84,16 +83,18 @@ func (ms AlertConfigMeasurementCheck) DoEmail(emailType string, cfg *config.Aler
 	return nil
 }
 
+const getAllIncompleteMeasurementSubmittals = `
+	SELECT * FROM v_alert_check_measurement_submittal
+	WHERE submittal_id = ANY(
+		SELECT id FROM submittal
+		WHERE completion_date IS NULL AND NOT marked_as_missing
+	)
+`
+
 func (q *Queries) GetAllIncompleteMeasurementSubmittals(ctx context.Context) ([]*MeasurementCheck, error) {
 	mcs := make([]*MeasurementCheck, 0)
-	if err := q.db.SelectContext(ctx, &mcs, `
-		SELECT * FROM v_alert_check_measurement_submittal
-		WHERE submittal_id = ANY(
-			SELECT id FROM submittal
-			WHERE completion_date IS NULL AND NOT marked_as_missing
-		)
-	`); err != nil {
-		return mcs, err
+	if err := q.db.SelectContext(ctx, &mcs, getAllIncompleteMeasurementSubmittals); err != nil {
+		return nil, err
 	}
 	return mcs, nil
 }

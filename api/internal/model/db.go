@@ -38,11 +38,31 @@ type DBTX interface {
 	NamedQuery(string, interface{}) (*sqlx.Rows, error)
 }
 
+type DBRows interface {
+	Close() error
+	Columns() ([]string, error)
+	ColumnTypes() ([]*sql.ColumnType, error)
+	Err() error
+	Next() bool
+	NextResultSet() bool
+	Scan(dest ...interface{}) error
+	SliceScan() ([]interface{}, error)
+	MapScan(dest map[string]interface{}) error
+	StructScan(dest interface{}) error
+}
+
 var _ DBTX = (*sqlx.DB)(nil)
 var _ DBTX = (*sqlx.Tx)(nil)
+var _ DBRows = (*sqlx.Rows)(nil)
+
+var sqlIn = sqlx.In
 
 type Database struct {
 	*sqlx.DB
+}
+
+func (db *Database) Queries() *Queries {
+	return &Queries{db}
 }
 
 type Queries struct {
@@ -70,8 +90,4 @@ func NewDatabase(cfg *config.DBConfig) *Database {
 	db.SetConnMaxLifetime(time.Minute * 30)
 
 	return &Database{db}
-}
-
-func NewQueries(db DBTX) *Queries {
-	return &Queries{db: db}
 }

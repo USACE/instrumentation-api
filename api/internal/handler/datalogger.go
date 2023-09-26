@@ -7,7 +7,7 @@ import (
 
 	"github.com/USACE/instrumentation-api/api/internal/messages"
 	"github.com/USACE/instrumentation-api/api/internal/models"
-	"github.com/USACE/instrumentation-api/api/internal/utils"
+	"github.com/USACE/instrumentation-api/api/internal/util"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
@@ -56,7 +56,7 @@ func CreateDataLogger(db *sqlx.DB) echo.HandlerFunc {
 			return echo.NewHTTPError(http.StatusBadRequest, "valid `name` field required")
 		}
 		// Generate unique slug
-		slug, err := utils.CreateUniqueSlug(db, `SELECT slug FROM datalogger`, n.Name)
+		slug, err := util.CreateUniqueSlug(db, `SELECT slug FROM datalogger`, n.Name)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, messages.InternalServerError)
 		}

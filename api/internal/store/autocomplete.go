@@ -7,24 +7,19 @@ import (
 )
 
 type EmailAutocomplereStore interface {
-	ListEmailAutocomplete(ctx context.Context, emailInput *string, limit *int) ([]model.EmailAutocompleteResult, error)
+	ListEmailAutocomplete(ctx context.Context, emailInput string, limit int) ([]model.EmailAutocompleteResult, error)
 }
 
 type emailAutocompleteStore struct {
 	db *model.Database
+	q  *model.Queries
 }
 
-func NewEmailAutoCompleteStore(db *model.Database) *emailAutocompleteStore {
-	return &emailAutocompleteStore{db}
+func NewEmailAutoCompleteStore(db *model.Database, q *model.Queries) *emailAutocompleteStore {
+	return &emailAutocompleteStore{db, q}
 }
 
 // ListEmailAutocomplete returns search results for email autocomplete
-func (s emailAutocompleteStore) ListEmailAutocomplete(ctx context.Context, emailInput *string, limit *int) ([]model.EmailAutocompleteResult, error) {
-	q := model.NewQueries(s.db)
-
-	rr, err := q.ListEmailAutocomplete(ctx, emailInput, limit)
-	if err != nil {
-		return rr, err
-	}
-	return rr, nil
+func (s emailAutocompleteStore) ListEmailAutocomplete(ctx context.Context, emailInput string, limit int) ([]model.EmailAutocompleteResult, error) {
+	return s.q.ListEmailAutocomplete(ctx, emailInput, limit)
 }

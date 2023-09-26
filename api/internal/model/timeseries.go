@@ -1,83 +1,97 @@
 package model
 
 import (
-	"encoding/json"
-
-	ts "github.com/USACE/instrumentation-api/api/internal/timeseries"
+	"context"
 
 	"github.com/google/uuid"
-	"github.com/jmoiron/sqlx"
 )
 
-var listTimeseriesSQL = `SELECT id, slug, name, variable, project_id, project_slug, project,
-                                instrument_id, instrument_slug, instrument, parameter_id, parameter, unit_id, unit, is_computed
-						   FROM v_timeseries`
-
-// TimeseriesCollection is a collection of Timeseries items
-type TimeseriesCollection struct {
-	Items []ts.Timeseries
+// Timeseries is a timeseries data structure
+type Timeseries struct {
+	ID             uuid.UUID     `json:"id"`
+	Slug           string        `json:"slug"`
+	Name           string        `json:"name"`
+	Variable       string        `json:"variable"`
+	ProjectID      uuid.UUID     `json:"project_id" db:"project_id"`
+	ProjectSlug    string        `json:"project_slug" db:"project_slug"`
+	Project        string        `json:"project,omitempty" db:"project"`
+	InstrumentID   uuid.UUID     `json:"instrument_id" db:"instrument_id"`
+	InstrumentSlug string        `json:"instrument_slug" db:"instrument_slug"`
+	Instrument     string        `json:"instrument,omitempty"`
+	ParameterID    uuid.UUID     `json:"parameter_id" db:"parameter_id"`
+	Parameter      string        `json:"parameter,omitempty"`
+	UnitID         uuid.UUID     `json:"unit_id" db:"unit_id"`
+	Unit           string        `json:"unit,omitempty"`
+	Values         []Measurement `json:"values,omitempty"`
+	IsComputed     bool          `json:"is_computed" db:"is_computed"`
 }
 
-// UnmarshalJSON implements UnmarshalJSON interface
-func (c *TimeseriesCollection) UnmarshalJSON(b []byte) error {
-	switch JSONType(b) {
-	case "ARRAY":
-		if err := json.Unmarshal(b, &c.Items); err != nil {
-			return err
-		}
-	case "OBJECT":
-		var t ts.Timeseries
-		if err := json.Unmarshal(b, &t); err != nil {
-			return err
-		}
-		c.Items = []ts.Timeseries{t}
-	default:
-		c.Items = make([]ts.Timeseries, 0)
+type TimeseriesNote struct {
+	Masked     *bool   `json:"masked,omitempty"`
+	Validated  *bool   `json:"validated,omitempty"`
+	Annotation *string `json:"annotation,omitempty"`
+}
+
+const listTimeseries = `
+	SELECT
+		id, slug, name, variable, project_id, project_slug, project, instrument_id,
+		instrument_slug, instrument, parameter_id, parameter, unit_id, unit, is_computed
+	FROM v_timeseries
+`
+
+// ListTimeseries lists all timeseries
+func (q *Queries) ListTimeseries(ctx context.Context) ([]Timeseries, error) {
+	tt := make([]Timeseries, 0)
+	if err := q.db.SelectContext(ctx, &tt, listTimeseries); err != nil {
+		return make([]Timeseries, 0), err
 	}
-	return nil
+	return tt, nil
 }
+
+const getStoredTimeseriesExists = `
+	SELECT EXISTS (SELECT id FROM v_timeseries_stored WHERE id = $1)
+`
 
 // ValidateStoredTimeseries returns an error if the timeseries id does not exist or the timeseries is computed
-func StoredTimeseriesExists(db *sqlx.DB, tsID *uuid.UUID) (bool, error) {
-	sql := `SELECT EXISTS (SELECT id FROM v_timeseries_stored WHERE id = $1)`
-
+func (q *Queries) GetStoredTimeseriesExists(ctx context.Context, timeseriesID uuid.UUID) (bool, error) {
 	var isStored bool
-	if err := db.Get(&isStored, sql, &tsID); err != nil {
+	if err := q.db.GetContext(ctx, &isStored, getStoredTimeseriesExists, &timeseriesID); err != nil {
 		return false, err
 	}
-
 	return isStored, nil
 }
 
-// ListTimeseriesSlugs lists used timeseries slugs in the database
-func ListTimeseriesSlugs(db *sqlx.DB) ([]string, error) {
+const listTimeseriesSlugs = `
+	SELECT slug FROM v_timeseries
+`
 
+// ListTimeseriesSlugs lists used timeseries slugs in the database
+func (q *Queries) ListTimeseriesSlugs(ctx context.Context) ([]string, error) {
 	ss := make([]string, 0)
-	if err := db.Select(&ss, "SELECT slug FROM v_timeseries"); err != nil {
+	if err := q.db.SelectContext(ctx, &ss, listTimeseriesSlugs); err != nil {
 		return make([]string, 0), err
 	}
 	return ss, nil
 }
 
+const getTimeseriesProjectMap = `
+	SELECT timeseries_id, project_id
+	FROM v_timeseries_project_map
+	WHERE timeseries_id IN (?)
+`
+
 // GetTimeseriesProjectMap returns a map of { timeseries_id: project_id, }
-func GetTimeseriesProjectMap(db *sqlx.DB, timeseriesIDS []uuid.UUID) (map[uuid.UUID]uuid.UUID, error) {
-	query, args, err := sqlx.In(
-		`SELECT timeseries_id, project_id
-		 FROM v_timeseries_project_map
-		 WHERE timeseries_id IN (?);`,
-		timeseriesIDS,
-	)
+func (q *Queries) GetTimeseriesProjectMap(ctx context.Context, timeseriesIDs []uuid.UUID) (map[uuid.UUID]uuid.UUID, error) {
+	query, args, err := sqlIn(getTimeseriesProjectMap, timeseriesIDs)
 	if err != nil {
 		return nil, err
 	}
-	query = db.Rebind(query)
-
-	// struct to temporarily hold SQL Query Result
+	query = q.db.Rebind(query)
 	var result []struct {
 		TimeseriesID uuid.UUID `db:"timeseries_id"`
 		ProjectID    uuid.UUID `db:"project_id"`
 	}
-	if err = db.Select(&result, query, args...); err != nil {
+	if err = q.db.SelectContext(ctx, &result, query, args...); err != nil {
 		return nil, err
 	}
 	m := make(map[uuid.UUID]uuid.UUID)
@@ -87,127 +101,105 @@ func GetTimeseriesProjectMap(db *sqlx.DB, timeseriesIDS []uuid.UUID) (map[uuid.U
 	return m, nil
 }
 
-// ListTimeseriesSlugsForInstrument lists used timeseries slugs for a given instrument
-func ListTimeseriesSlugsForInstrument(db *sqlx.DB, id *uuid.UUID) ([]string, error) {
+const listTimeseriesSlugsForInstrument = `
+	SELECT slug FROM v_timeseries WHERE instrument_id = $1
+`
 
+// ListTimeseriesSlugsForInstrument lists used timeseries slugs for a given instrument
+func (q *Queries) ListTimeseriesSlugsForInstrument(ctx context.Context, instrumentID uuid.UUID) ([]string, error) {
 	ss := make([]string, 0)
-	if err := db.Select(&ss, "SELECT slug FROM v_timeseries WHERE instrument_id = $1", id); err != nil {
-		return make([]string, 0), err
+	if err := q.db.SelectContext(ctx, &ss, listTimeseriesSlugsForInstrument, instrumentID); err != nil {
+		return nil, err
 	}
 	return ss, nil
 }
 
-// ListTimeseries lists all timeseries
-func ListTimeseries(db *sqlx.DB) ([]ts.Timeseries, error) {
-
-	tt := make([]ts.Timeseries, 0)
-	if err := db.Select(&tt, listTimeseriesSQL); err != nil {
-		return make([]ts.Timeseries, 0), err
-	}
-	return tt, nil
-}
+const listProjectTimeseries = listTimeseries + `
+	WHERE project_id = $1
+`
 
 // ListProjectTimeseries lists all timeseries for a given project
-func ListProjectTimeseries(db *sqlx.DB, projectID *uuid.UUID) ([]ts.Timeseries, error) {
-	tt := make([]ts.Timeseries, 0)
-	if err := db.Select(&tt, listTimeseriesSQL+" WHERE project_id = $1", projectID); err != nil {
-		return make([]ts.Timeseries, 0), err
+func (q *Queries) ListProjectTimeseries(ctx context.Context, projectID uuid.UUID) ([]Timeseries, error) {
+	tt := make([]Timeseries, 0)
+	if err := q.db.SelectContext(ctx, &tt, listProjectTimeseries, projectID); err != nil {
+		return make([]Timeseries, 0), err
 	}
 	return tt, nil
 }
+
+const listInstrumentTimeseries = listTimeseries + `
+	WHERE instrument_id = $1
+`
 
 // ListInstrumentTimeseries returns an array of timeseries for an instrument
-func ListInstrumentTimeseries(db *sqlx.DB, instrumentID *uuid.UUID) ([]ts.Timeseries, error) {
-	tt := make([]ts.Timeseries, 0)
-	if err := db.Select(&tt, listTimeseriesSQL+" WHERE instrument_id = $1", instrumentID); err != nil {
-		return make([]ts.Timeseries, 0), err
+func (q *Queries) ListInstrumentTimeseries(ctx context.Context, instrumentID uuid.UUID) ([]Timeseries, error) {
+	tt := make([]Timeseries, 0)
+	if err := q.db.Select(&tt, listInstrumentTimeseries, instrumentID); err != nil {
+		return nil, err
 	}
 	return tt, nil
 }
+
+const listInstrumentGroupTimeseries = listTimeseries + `
+	WHERE  instrument_id IN (
+		SELECT instrument_id
+		FROM   instrument_group_instruments
+		WHERE  instrument_group_id = $1
+	)
+`
 
 // ListInstrumentGroupTimeseries returns an array of timeseries for instruments that belong to an instrument_group
-func ListInstrumentGroupTimeseries(db *sqlx.DB, instrumentGroupID *uuid.UUID) ([]ts.Timeseries, error) {
-
-	var tt []ts.Timeseries
-	if err := db.Select(
-		&tt,
-		listTimeseriesSQL+` WHERE  instrument_id IN (
-			SELECT instrument_id
-			FROM   instrument_group_instruments
-			WHERE  instrument_group_id = $1
-		)`, instrumentGroupID,
-	); err != nil {
-		return make([]ts.Timeseries, 0), err
+func (q *Queries) ListInstrumentGroupTimeseries(ctx context.Context, instrumentGroupID uuid.UUID) ([]Timeseries, error) {
+	var tt []Timeseries
+	if err := q.db.SelectContext(ctx, &tt, listInstrumentGroupTimeseries, instrumentGroupID); err != nil {
+		return nil, err
 	}
 	return tt, nil
 }
 
-// GetTimeseries returns a single timeseries without measurements
-func GetTimeseries(db *sqlx.DB, id *uuid.UUID) (*ts.Timeseries, error) {
+const getTimeseries = listTimeseries + `
+	WHERE id = $1
+`
 
-	var t ts.Timeseries
-	if err := db.Get(&t, listTimeseriesSQL+" WHERE id = $1", id); err != nil {
-		return nil, err
-	}
-	return &t, nil
+// GetTimeseries returns a single timeseries without measurements
+func (q *Queries) GetTimeseries(ctx context.Context, timeseriesID uuid.UUID) (Timeseries, error) {
+	var t Timeseries
+	err := q.db.GetContext(ctx, &t, getTimeseries, timeseriesID)
+	return t, err
 }
+
+const createTimeseries = `
+	INSERT INTO timeseries (instrument_id, slug, name, parameter_id, unit_id)
+	VALUES ($1, $2, $3, $4, $5)
+	RETURNING id, instrument_id, slug, name, parameter_id, unit_id
+`
 
 // CreateTimeseries creates many timeseries from an array of timeseries
-func CreateTimeseries(db *sqlx.DB, tt []ts.Timeseries) ([]ts.Timeseries, error) {
-
-	txn, err := db.Beginx()
-	if err != nil {
-		return nil, err
-	}
-	defer txn.Rollback()
-
-	// Insert Timeseries
-	stmt, err := txn.Preparex(
-		`INSERT INTO timeseries (instrument_id, slug, name, parameter_id, unit_id)
-		 VALUES ($1, $2, $3, $4, $5)
-		 RETURNING id, instrument_id, slug, name, parameter_id, unit_id`,
-	)
-	if err != nil {
-		return make([]ts.Timeseries, 0), err
-	}
-
-	// Insert
-	uu := make([]ts.Timeseries, len(tt))
-	for idx, t := range tt {
-		if err := stmt.Get(&uu[idx], t.InstrumentID, t.Slug, t.Name, t.ParameterID, t.UnitID); err != nil {
-			return make([]ts.Timeseries, 0), err
-		}
-	}
-
-	if err := stmt.Close(); err != nil {
-		return make([]ts.Timeseries, 0), err
-	}
-
-	if err := txn.Commit(); err != nil {
-		return make([]ts.Timeseries, 0), err
-	}
-
-	return uu, nil
+func (q *Queries) CreateTimeseries(ctx context.Context, ts Timeseries) (Timeseries, error) {
+	var tsNew Timeseries
+	err := q.db.GetContext(ctx, &tsNew, createTimeseries, ts.InstrumentID, ts.Slug, ts.Name, ts.ParameterID, ts.UnitID)
+	return tsNew, err
 }
+
+const updateTimeseries = `
+	UPDATE timeseries SET name = $2, instrument_id = $3, parameter_id = $4, unit_id = $5
+	WHERE id = $1
+	RETURNING id
+`
 
 // UpdateTimeseries updates a timeseries
-func UpdateTimeseries(db *sqlx.DB, t *ts.Timeseries) (*ts.Timeseries, error) {
-
+func (q *Queries) UpdateTimeseries(ctx context.Context, t Timeseries) (uuid.UUID, error) {
 	var tID uuid.UUID
-	if err := db.Get(&tID, `UPDATE timeseries
-		                   SET name = $2, instrument_id = $3, parameter_id = $4, unit_id = $5
-						   WHERE id = $1
-						   RETURNING id`, t.ID, t.Name, t.InstrumentID, t.ParameterID, t.UnitID,
-	); err != nil {
-		return nil, err
-	}
-	return GetTimeseries(db, &tID)
+	err := q.db.GetContext(ctx, &tID, updateTimeseries, t.ID, t.Name, t.InstrumentID, t.ParameterID, t.UnitID)
+	return tID, err
 }
 
+const deleteTimeseries = `
+	DELETE FROM timeseries WHERE id = $1
+`
+
 // DeleteTimeseries deletes a timeseries and cascade deletes all measurements
-func DeleteTimeseries(db *sqlx.DB, id *uuid.UUID) error {
-	if _, err := db.Exec("DELETE FROM timeseries WHERE id = $1", id); err != nil {
-		return err
-	}
-	return nil
+func (q *Queries) DeleteTimeseries(ctx context.Context, timeseriesID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deleteTimeseries, timeseriesID)
+	return err
 }

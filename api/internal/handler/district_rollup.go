@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/internal/messages"
+	"github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/USACE/instrumentation-api/api/internal/models"
-	"github.com/USACE/instrumentation-api/api/internal/timeseries"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
@@ -20,7 +20,7 @@ func ListProjectEvaluationDistrictRollup(db *sqlx.DB) echo.HandlerFunc {
 			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
 
-		var tw timeseries.TimeWindow
+		var tw model.TimeWindow
 		from, to := c.QueryParam("from_timestamp_month"), c.QueryParam("to_timestamp_month")
 		if err := tw.SetWindow(from, to, time.Now().AddDate(-1, 0, 0), time.Now()); err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -45,7 +45,7 @@ func ListProjectMeasurementDistrictRollup(db *sqlx.DB) echo.HandlerFunc {
 			return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
 		}
 
-		var tw timeseries.TimeWindow
+		var tw model.TimeWindow
 		from, to := c.QueryParam("from_timestamp_month"), c.QueryParam("to_timestamp_month")
 		if err := tw.SetWindow(from, to, time.Now().AddDate(-1, 0, 0), time.Now()); err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())

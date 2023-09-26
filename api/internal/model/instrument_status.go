@@ -1,11 +1,12 @@
 package model
 
 import (
+	"context"
 	"encoding/json"
 	"time"
 
+	"github.com/USACE/instrumentation-api/api/internal/util"
 	"github.com/google/uuid"
-	"github.com/jmoiron/sqlx"
 )
 
 // InstrumentStatus is an instrument status
@@ -23,8 +24,7 @@ type InstrumentStatusCollection struct {
 
 // UnmarshalJSON implements the UnmarshalJSONinterface
 func (c *InstrumentStatusCollection) UnmarshalJSON(b []byte) error {
-
-	switch JSONType(b) {
+	switch util.JSONType(b) {
 	case "ARRAY":
 		if err := json.Unmarshal(b, &c.Items); err != nil {
 			return err
@@ -41,75 +41,60 @@ func (c *InstrumentStatusCollection) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-// CreateInstrumentStatusSQL is the base SQL to create instrument status values, update on conflict
-func createInstrumentStatusSQL() string {
-	return `INSERT INTO instrument_status (instrument_id, status_id, time) VALUES ($1, $2, $3)
-	        ON CONFLICT ON CONSTRAINT instrument_unique_status_in_time DO UPDATE SET status_id = EXCLUDED.status_id;`
-}
+const listInstrumentStatusSQL = `
+	SELECT
+		S.id,
+		S.status_id,
+		D.name         AS status,
+		S.time
+	FROM instrument_status S
+	INNER JOIN status D
+		ON D.id = S.status_id
+`
 
-// ListInstrumentStatusSQL the base SQL to retrieve all status for all instruments
-func listInstrumentStatusSQL() string {
-	return `SELECT S.id,
-				   S.status_id,
-				   D.name         AS status,
-				   S.time
-			FROM instrument_status S
-			INNER JOIN status D
-				ON D.id = S.status_id
-	`
-}
+const listInstrumentStatus = listInstrumentStatusSQL + `
+	WHERE S.instrument_id = $1 ORDER BY time DESC
+`
 
 // ListInstrumentStatus returns all status values for an instrument
-func ListInstrumentStatus(db *sqlx.DB, id *uuid.UUID) ([]InstrumentStatus, error) {
-
+func (q *Queries) ListInstrumentStatus(ctx context.Context, instrumentID uuid.UUID) ([]InstrumentStatus, error) {
 	ss := make([]InstrumentStatus, 0)
-	if err := db.Select(&ss, listInstrumentStatusSQL()+" WHERE S.instrument_id = $1 ORDER BY time DESC", id); err != nil {
-		return make([]InstrumentStatus, 0), err
+	if err := q.db.SelectContext(ctx, &ss, listInstrumentStatus, instrumentID); err != nil {
+		return nil, err
 	}
 	return ss, nil
 }
 
-// GetInstrumentStatus gets a single status
-func GetInstrumentStatus(db *sqlx.DB, id *uuid.UUID) (*InstrumentStatus, error) {
+const getInstrumentStatus = listInstrumentStatusSQL + `
+	WHERE S.id = $1
+`
 
+// GetInstrumentStatus gets a single status
+func (q *Queries) GetInstrumentStatus(ctx context.Context, statusID uuid.UUID) (InstrumentStatus, error) {
 	var s InstrumentStatus
-	if err := db.Get(&s, listInstrumentStatusSQL()+" WHERE S.id = $1", id); err != nil {
-		return nil, err
+	if err := q.db.GetContext(ctx, &s, getInstrumentStatus, statusID); err != nil {
+		return s, err
 	}
-	return &s, nil
+	return s, nil
 }
+
+const createOrUpdateInstrumentStatus = `
+	INSERT INTO instrument_status (instrument_id, status_id, time) VALUES ($1, $2, $3)
+	ON CONFLICT ON CONSTRAINT instrument_unique_status_in_time DO UPDATE SET status_id = EXCLUDED.status_id
+`
 
 // CreateOrUpdateInstrumentStatus creates a Instrument Status, updates value on conflict
-func CreateOrUpdateInstrumentStatus(db *sqlx.DB, instrumentID *uuid.UUID, ss []InstrumentStatus) error {
-
-	txn, err := db.Beginx()
-	if err != nil {
-		return err
-	}
-	defer txn.Rollback()
-
-	stmt2, err := txn.Preparex(createInstrumentStatusSQL())
-	if err != nil {
-		return err
-	}
-	for _, s := range ss {
-		if _, err := stmt2.Exec(instrumentID, s.StatusID, s.Time); err != nil {
-			return err
-		}
-	}
-	if err := stmt2.Close(); err != nil {
-		return err
-	}
-	if err := txn.Commit(); err != nil {
-		return err
-	}
-	return nil
+func (q *Queries) CreateOrUpdateInstrumentStatus(ctx context.Context, instrumentID, statusID uuid.UUID, statusTime time.Time) error {
+	_, err := q.db.ExecContext(ctx, createOrUpdateInstrumentStatus, instrumentID, statusID, statusTime)
+	return err
 }
 
+const deleteInstrumentStatus = `
+	DELETE FROM instrument_status WHERE id = $1
+`
+
 // DeleteInstrumentStatus deletes a status for an instrument
-func DeleteInstrumentStatus(db *sqlx.DB, id *uuid.UUID) error {
-	if _, err := db.Exec(`DELETE FROM instrument_status WHERE id = $1`, id); err != nil {
-		return err
-	}
-	return nil
+func (q *Queries) DeleteInstrumentStatus(ctx context.Context, statusID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deleteInstrumentStatus, statusID)
+	return err
 }

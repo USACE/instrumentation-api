@@ -24,17 +24,18 @@ func (a *EmailAutocompleteResultCollection) Scan(src interface{}) error {
 	return nil
 }
 
+const listEmailAutocomplete = `
+	SELECT id, user_type, username, email
+	FROM v_email_autocomplete
+	WHERE username_email ILIKE '%'||$1||'%'
+	LIMIT $2
+`
+
 // ListEmailAutocomplete returns search results for email autocomplete
-func (q *Queries) ListEmailAutocomplete(ctx context.Context, emailInput *string, limit *int) ([]EmailAutocompleteResult, error) {
-	c := `
-		SELECT id, user_type, username, email
-		FROM v_email_autocomplete
-		WHERE username_email ILIKE '%'||$1||'%'
-		LIMIT $2
-	`
+func (q *Queries) ListEmailAutocomplete(ctx context.Context, emailInput string, limit int) ([]EmailAutocompleteResult, error) {
 	aa := make([]EmailAutocompleteResult, 0)
-	if err := q.db.SelectContext(ctx, &aa, c, emailInput, limit); err != nil {
-		return make([]EmailAutocompleteResult, 0), err
+	if err := q.db.SelectContext(ctx, &aa, listEmailAutocomplete, emailInput, limit); err != nil {
+		return nil, err
 	}
 	return aa, nil
 }

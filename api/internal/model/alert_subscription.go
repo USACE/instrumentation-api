@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
+	"github.com/USACE/instrumentation-api/api/internal/util"
 	"github.com/google/uuid"
 )
 
@@ -42,7 +43,7 @@ type Email struct {
 // UnmarshalJSON implements the UnmarshalJSON Interface for AlertSubscription
 func (c *AlertSubscriptionCollection) UnmarshalJSON(b []byte) error {
 
-	switch JSONType(b) {
+	switch util.JSONType(b) {
 	case "ARRAY":
 		if err := json.Unmarshal(b, &c.Items); err != nil {
 			return err
@@ -59,164 +60,151 @@ func (c *AlertSubscriptionCollection) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+const subscribeProfileToAlerts = `
+	INSERT INTO alert_profile_subscription (alert_config_id, profile_id)
+	VALUES ($1, $2)
+	ON CONFLICT DO NOTHING
+`
+
 // SubscribeProfileToAlerts subscribes a profile to an instrument alert
-func (q *Queries) SubscribeProfileToAlerts(ctx context.Context, alertConfigID, profileID *uuid.UUID) error {
-	c := `
-		INSERT INTO alert_profile_subscription (alert_config_id, profile_id)
-		VALUES ($1, $2)
-		ON CONFLICT DO NOTHING
-	`
-	if _, err := q.db.ExecContext(ctx, c, alertConfigID, profileID); err != nil {
-		return err
-	}
-	return nil
+func (q *Queries) SubscribeProfileToAlerts(ctx context.Context, alertConfigID, profileID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, subscribeProfileToAlerts, alertConfigID, profileID)
+	return err
 }
+
+const unsubscribeProfileToAlerts = `
+	DELETE FROM alert_profile_subscription WHERE alert_config_id = $1 AND profile_id = $2
+`
 
 // UnsubscribeProfileToAlerts subscribes a profile to an instrument alert
-func (q *Queries) UnsubscribeProfileToAlerts(ctx context.Context, alertConfigID, profileID *uuid.UUID) error {
-	c := `
-		DELETE FROM alert_profile_subscription WHERE alert_config_id = $1 AND profile_id = $2
-	`
-	if _, err := q.db.ExecContext(ctx, c, alertConfigID, profileID); err != nil {
-		return err
-	}
-	return nil
+func (q *Queries) UnsubscribeProfileToAlerts(ctx context.Context, alertConfigID, profileID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, unsubscribeProfileToAlerts, alertConfigID, profileID)
+	return err
 }
+
+const getAlertSubscription = `
+	SELECT * FROM alert_profile_subscription WHERE alert_config_id = $1 AND profile_id = $2
+`
 
 // GetAlertSubscription returns a AlertSubscription
-func (q *Queries) GetAlertSubscription(ctx context.Context, alertConfigID, profileID *uuid.UUID) (*AlertSubscription, error) {
-	c := `
-		SELECT * FROM alert_profile_subscription WHERE alert_config_id = $1 AND profile_id = $2
-	`
-	var pa AlertSubscription
-	if err := q.db.GetContext(ctx, &pa, c, alertConfigID, profileID); err != nil {
-		return nil, err
-	}
-	return &pa, nil
+func (q *Queries) GetAlertSubscription(ctx context.Context, alertConfigID, profileID uuid.UUID) (AlertSubscription, error) {
+	var a AlertSubscription
+	err := q.db.GetContext(ctx, &a, getAlertSubscription, alertConfigID, profileID)
+	return a, err
 }
+
+const getAlertSubscriptionByID = `
+	SELECT * FROM alert_profile_subscription WHERE id = $1
+`
 
 // GetAlertSubscriptionByID returns an alert subscription
-func (q *Queries) GetAlertSubscriptionByID(ctx context.Context, id *uuid.UUID) (*AlertSubscription, error) {
-	c := `
-		SELECT * FROM alert_profile_subscription WHERE id = $1
-	`
-	var s AlertSubscription
-	if err := q.db.GetContext(ctx, &s, c, id); err != nil {
-		return nil, err
-	}
-	return &s, nil
+func (q *Queries) GetAlertSubscriptionByID(ctx context.Context, subscriptionID uuid.UUID) (AlertSubscription, error) {
+	var a AlertSubscription
+	err := q.db.GetContext(ctx, &a, getAlertSubscriptionByID, subscriptionID)
+	return a, err
 }
+
+const listMyAlertSubscriptions = `
+	SELECT * FROM alert_profile_subscription WHERE profile_id = $1
+`
 
 // ListMyAlertSubscriptions returns all profile_alerts for a given profile ID
-func (q *Queries) ListMyAlertSubscriptions(ctx context.Context, profileID *uuid.UUID) ([]AlertSubscription, error) {
-	c := `
-		SELECT * FROM alert_profile_subscription WHERE profile_id = $1
-	`
-	ss := make([]AlertSubscription, 0)
-	if err := q.db.SelectContext(ctx, &ss, c, profileID); err != nil {
-		return make([]AlertSubscription, 0), err
-	}
-	return ss, nil
-}
-
-// UpdateMyAlertSubscription updates properties on a AlertSubscription
-func (q *Queries) UpdateMyAlertSubscription(ctx context.Context, s *AlertSubscription) error {
-	c := `
-		UPDATE alert_profile_subscription SET mute_ui=$1, mute_notify=$2 WHERE alert_config_id=$3 AND profile_id=$4
-	`
-	_, err := q.db.ExecContext(ctx, c, s.MuteUI, s.MuteNotify, s.AlertConfigID, s.ProfileID)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (q *Queries) RegisterEmail(ctx context.Context, emailAddress string) (*uuid.UUID, error) {
-	c := `
-		WITH e AS (
-			INSERT INTO email (email) VALUES ($1)
-			ON CONFLICT ON CONSTRAINT unique_email DO NOTHING
-			RETURNING id
-		)
-		SELECT id FROM e
-		UNION
-		SELECT id from email WHERE email = $1
-	`
-	var newID uuid.UUID
-	if err := q.db.GetContext(ctx, &newID, c, emailAddress); err != nil {
+func (q *Queries) ListMyAlertSubscriptions(ctx context.Context, profileID uuid.UUID) ([]AlertSubscription, error) {
+	aa := make([]AlertSubscription, 0)
+	if err := q.db.SelectContext(ctx, &aa, listMyAlertSubscriptions, profileID); err != nil {
 		return nil, err
 	}
-	return &newID, nil
+	return aa, nil
 }
 
-func (q *Queries) UnregisterEmail(ctx context.Context, emailID *uuid.UUID) error {
-	c := `
-		DELETE FROM email WHERE id = $1
-	`
-	if _, err := q.db.ExecContext(ctx, c, emailID); err != nil {
-		return err
-	}
-	return nil
+const updateMyAlertSubscription = `
+	UPDATE alert_profile_subscription SET mute_ui=$1, mute_notify=$2 WHERE alert_config_id=$3 AND profile_id=$4
+`
+
+// UpdateMyAlertSubscription updates properties on a AlertSubscription
+func (q *Queries) UpdateMyAlertSubscription(ctx context.Context, s AlertSubscription) error {
+	_, err := q.db.ExecContext(ctx, updateMyAlertSubscription, s.MuteUI, s.MuteNotify, s.AlertConfigID, s.ProfileID)
+	return err
 }
 
-func (q *Queries) SubscribeEmailToAlertConfig(ctx context.Context, alertConfigID, emailID *uuid.UUID) error {
-	c := `
-		INSERT INTO alert_email_subscription (alert_config_id, email_id) VALUES ($1,$2)
-		ON CONFLICT ON CONSTRAINT email_unique_alert_config DO NOTHING
-	`
-	if _, err := q.db.ExecContext(ctx, c, alertConfigID, emailID); err != nil {
-		return err
-	}
-	return nil
+const registerEmail = `
+	WITH e AS (
+		INSERT INTO email (email) VALUES ($1)
+		ON CONFLICT ON CONSTRAINT unique_email DO NOTHING
+		RETURNING id
+	)
+	SELECT id FROM e
+	UNION
+	SELECT id from email WHERE email = $1
+`
+
+func (q *Queries) RegisterEmail(ctx context.Context, emailAddress string) (uuid.UUID, error) {
+	var newID uuid.UUID
+	err := q.db.GetContext(ctx, &newID, registerEmail, emailAddress)
+	return newID, err
 }
 
-func (q *Queries) SubscribeProfileToAlertConfig(ctx context.Context, alertConfigID, emailID *uuid.UUID) error {
-	c := `
-		INSERT INTO alert_profile_subscription (alert_config_id, profile_id) VALUES ($1,$2)
-		ON CONFLICT ON CONSTRAINT profile_unique_alert_config DO NOTHING
-	`
-	if _, err := q.db.ExecContext(ctx, c, alertConfigID, emailID); err != nil {
-		return err
-	}
-	return nil
+const unregisterEmail = `
+	DELETE FROM email WHERE id = $1
+`
+
+func (q *Queries) UnregisterEmail(ctx context.Context, emailID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, unregisterEmail, emailID)
+	return err
 }
 
-func (q *Queries) UnsubscribeEmailFromAlertConfig(ctx context.Context, alertConfigID, emailID *uuid.UUID) error {
-	c := `
-		DELETE FROM alert_email_subscription WHERE alert_config_id = $1 AND email_id = $2
-	`
-	if _, err := q.db.ExecContext(ctx, c, alertConfigID, emailID); err != nil {
-		return err
-	}
-	return nil
+const subscribeEmailToAlertConfig = `
+	INSERT INTO alert_email_subscription (alert_config_id, email_id) VALUES ($1,$2)
+	ON CONFLICT ON CONSTRAINT email_unique_alert_config DO NOTHING
+`
+
+func (q *Queries) SubscribeEmailToAlertConfig(ctx context.Context, alertConfigID, emailID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, subscribeEmailToAlertConfig, alertConfigID, emailID)
+	return err
 }
 
-func (q *Queries) UnsubscribeProfileFromAlertConfig(ctx context.Context, alertConfigID, emailID *uuid.UUID) error {
-	c := `
-		DELETE FROM alert_profile_subscription WHERE alert_config_id = $1 AND profile_id = $2
-	`
-	if _, err := q.db.ExecContext(ctx, c, alertConfigID, emailID); err != nil {
-		return err
-	}
-	return nil
+const subscribeProfileToAlertConfig = `
+	INSERT INTO alert_profile_subscription (alert_config_id, profile_id) VALUES ($1,$2)
+	ON CONFLICT ON CONSTRAINT profile_unique_alert_config DO NOTHING
+`
+
+func (q *Queries) SubscribeProfileToAlertConfig(ctx context.Context, alertConfigID, emailID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, subscribeProfileToAlertConfig, alertConfigID, emailID)
+	return err
 }
 
-func (q *Queries) UnsubscribeAllEmailsFromAlertConfig(ctx context.Context, alertConfigID *uuid.UUID) error {
-	c := `
-		DELETE FROM alert_email_subscription WHERE alert_config_id = $1
-	`
-	if _, err := q.db.ExecContext(ctx, c, alertConfigID); err != nil {
-		return err
-	}
-	return nil
+const unsubscribeEmailFromAlertConfig = `
+	DELETE FROM alert_email_subscription WHERE alert_config_id = $1 AND email_id = $2
+`
+
+func (q *Queries) UnsubscribeEmailFromAlertConfig(ctx context.Context, alertConfigID, emailID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, unsubscribeEmailFromAlertConfig, alertConfigID, emailID)
+	return err
 }
 
-func (q *Queries) UnsubscribeAllProfilesFromAlertConfig(ctx context.Context, alertConfigID *uuid.UUID) error {
-	c := `
-		DELETE FROM alert_profile_subscription WHERE alert_config_id = $1
-	`
-	if _, err := q.db.ExecContext(ctx, c, alertConfigID); err != nil {
-		return err
-	}
-	return nil
+const unsubscribeProfileFromAlertConfig = `
+	DELETE FROM alert_profile_subscription WHERE alert_config_id = $1 AND profile_id = $2
+`
+
+func (q *Queries) UnsubscribeProfileFromAlertConfig(ctx context.Context, alertConfigID, emailID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, unsubscribeProfileFromAlertConfig, alertConfigID, emailID)
+	return err
+}
+
+const unsubscribeAllEmailsFromAlertConfig = `
+	DELETE FROM alert_email_subscription WHERE alert_config_id = $1
+`
+
+func (q *Queries) UnsubscribeAllEmailsFromAlertConfig(ctx context.Context, alertConfigID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, unsubscribeAllEmailsFromAlertConfig, alertConfigID)
+	return err
+}
+
+const unsubscribeAllProfilesFromAlertConfig = `
+	DELETE FROM alert_profile_subscription WHERE alert_config_id = $1
+`
+
+func (q *Queries) UnsubscribeAllProfilesFromAlertConfig(ctx context.Context, alertConfigID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, unsubscribeAllProfilesFromAlertConfig, alertConfigID)
+	return err
 }

@@ -64,16 +64,18 @@ func (acc AlertConfigEvaluationCheck) DoEmail(emailType string, cfg *config.Aler
 	return nil
 }
 
+const getAllIncompleteEvaluationSubmittals = `
+	SELECT * FROM v_alert_check_evaluation_submittal
+	WHERE submittal_id = ANY(
+		SELECT id FROM submittal
+		WHERE completion_date IS NULL AND NOT marked_as_missing
+	)
+`
+
 func (q *Queries) GetAllIncompleteEvaluationSubmittals(ctx context.Context) ([]*EvaluationCheck, error) {
 	ecs := make([]*EvaluationCheck, 0)
-	if err := q.db.Select(&ecs, `
-		SELECT * FROM v_alert_check_evaluation_submittal
-		WHERE submittal_id = ANY(
-			SELECT id FROM submittal
-			WHERE completion_date IS NULL AND NOT marked_as_missing
-		)
-	`); err != nil {
-		return ecs, err
+	if err := q.db.SelectContext(ctx, &ecs, getAllIncompleteEvaluationSubmittals); err != nil {
+		return nil, err
 	}
 	return ecs, nil
 }

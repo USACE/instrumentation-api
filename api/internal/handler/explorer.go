@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/USACE/instrumentation-api/api/internal/models"
-	"github.com/USACE/instrumentation-api/api/internal/timeseries"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -26,7 +26,7 @@ type ExplorerRow struct {
 type Filter struct {
 	InstrumentID []uuid.UUID
 	ParameterID  []uuid.UUID
-	TimeWindow   timeseries.TimeWindow
+	TimeWindow   model.TimeWindow
 }
 
 func PostInclinometerExplorer(db *sqlx.DB) echo.HandlerFunc {
@@ -41,7 +41,7 @@ func PostInclinometerExplorer(db *sqlx.DB) echo.HandlerFunc {
 		}
 
 		// Get timeWindow from query params
-		var tw timeseries.TimeWindow
+		var tw model.TimeWindow
 		a, b := c.QueryParam("after"), c.QueryParam("before")
 		if err := tw.SetWindow(a, b, time.Now().AddDate(0, 0, -7), time.Now()); err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -66,17 +66,17 @@ func PostInclinometerExplorer(db *sqlx.DB) echo.HandlerFunc {
 }
 
 // explorerResponseFactory returns the explorer-specific JSON response format
-func ExplorerResponseFactory(tt []models.Timeseries) (map[uuid.UUID][]timeseries.MeasurementCollectionLean, error) {
+func ExplorerResponseFactory(tt []models.Timeseries) (map[uuid.UUID][]model.MeasurementCollectionLean, error) {
 
-	response := make(map[uuid.UUID][]timeseries.MeasurementCollectionLean)
+	response := make(map[uuid.UUID][]model.MeasurementCollectionLean)
 
 	for _, t := range tt {
 		if _, hasInstrument := response[t.InstrumentID]; !hasInstrument {
-			response[t.InstrumentID] = make([]timeseries.MeasurementCollectionLean, 0)
+			response[t.InstrumentID] = make([]model.MeasurementCollectionLean, 0)
 		}
-		mcl := timeseries.MeasurementCollectionLean{
+		mcl := model.MeasurementCollectionLean{
 			TimeseriesID: t.TimeseriesID,
-			Items:        make([]timeseries.MeasurementLean, len(t.Measurements)),
+			Items:        make([]model.MeasurementLean, len(t.Measurements)),
 		}
 		for idx, m := range t.Measurements {
 			mcl.Items[idx] = m.Lean()
@@ -88,17 +88,17 @@ func ExplorerResponseFactory(tt []models.Timeseries) (map[uuid.UUID][]timeseries
 }
 
 // explorerResponseFactory returns the explorer-specific JSON response format
-func explorerInclinometerResponseFactory(tt []models.InclinometerTimeseries) (map[uuid.UUID][]timeseries.InclinometerMeasurementCollectionLean, error) {
+func explorerInclinometerResponseFactory(tt []models.InclinometerTimeseries) (map[uuid.UUID][]model.InclinometerMeasurementCollectionLean, error) {
 
-	response := make(map[uuid.UUID][]timeseries.InclinometerMeasurementCollectionLean)
+	response := make(map[uuid.UUID][]model.InclinometerMeasurementCollectionLean)
 
 	for _, t := range tt {
 		if _, hasInstrument := response[t.InstrumentID]; !hasInstrument {
-			response[t.InstrumentID] = make([]timeseries.InclinometerMeasurementCollectionLean, 0)
+			response[t.InstrumentID] = make([]model.InclinometerMeasurementCollectionLean, 0)
 		}
-		mcl := timeseries.InclinometerMeasurementCollectionLean{
+		mcl := model.InclinometerMeasurementCollectionLean{
 			TimeseriesID: t.TimeseriesID,
-			Items:        make([]timeseries.InclinometerMeasurementLean, len(t.Measurements)),
+			Items:        make([]model.InclinometerMeasurementLean, len(t.Measurements)),
 		}
 		for idx, m := range t.Measurements {
 			mcl.Items[idx] = m.InclinometerLean()

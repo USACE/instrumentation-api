@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/internal/messages"
+	"github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/USACE/instrumentation-api/api/internal/models"
-	"github.com/USACE/instrumentation-api/api/internal/timeseries"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
 )
@@ -118,7 +118,7 @@ func getCR6Handler(db *sqlx.DB, dl *models.DataLogger, rawJSON *[]byte) echo.Han
 			}
 		}
 
-		mcs := make([]timeseries.MeasurementCollection, len(fields))
+		mcs := make([]model.MeasurementCollection, len(fields))
 
 		// Error if there is no field name in equivalency table to map the field name in the raw payload to
 		// delete the keys that were used, check for any dangling afterwards
@@ -141,7 +141,7 @@ func getCR6Handler(db *sqlx.DB, dl *models.DataLogger, rawJSON *[]byte) echo.Han
 			}
 
 			// collect measurements
-			items := make([]timeseries.Measurement, len(pl.Data))
+			items := make([]model.Measurement, len(pl.Data))
 			for j, d := range pl.Data {
 				// To avoid complications of daylight savings and related issues,
 				// all incoming datalogger timestamps are expected to be in UTC
@@ -158,10 +158,10 @@ func getCR6Handler(db *sqlx.DB, dl *models.DataLogger, rawJSON *[]byte) echo.Han
 					delete(eqtFields, f.Name)
 					continue
 				}
-				items[j] = timeseries.Measurement{TimeseriesID: *row.TimeseriesID, Time: t, Value: v}
+				items[j] = model.Measurement{TimeseriesID: *row.TimeseriesID, Time: t, Value: v}
 			}
 
-			mcs[i] = timeseries.MeasurementCollection{TimeseriesID: *row.TimeseriesID, Items: items}
+			mcs[i] = model.MeasurementCollection{TimeseriesID: *row.TimeseriesID, Items: items}
 
 			delete(eqtFields, f.Name)
 		}

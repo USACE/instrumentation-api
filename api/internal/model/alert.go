@@ -20,8 +20,47 @@ type Alert struct {
 	Instruments   AlertConfigInstrumentCollection `json:"instruments" db:"instruments"`
 }
 
-// ListMyAlertsSQL returns all alerts for a profile's alert_profile_subscriptions
-var listMyAlertsSQL = `
+const createAlerts = `
+	INSERT INTO alert (alert_config_id) VALUES ($1)
+`
+
+// CreateAlerts creates one or more new alerts
+func (q *Queries) CreateAlerts(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, createAlerts, id)
+	return err
+}
+
+const getAllAlertsForProject = `
+	SELECT * FROM v_alert WHERE project_id = $1
+`
+
+// GetAllAlertsForProject lists all alerts for a given instrument ID
+func (q *Queries) GetAllAlertsForProject(ctx context.Context, projectID uuid.UUID) ([]Alert, error) {
+	aa := make([]Alert, 0)
+	if err := q.db.SelectContext(ctx, &aa, getAllAlertsForProject, projectID); err != nil {
+		return nil, err
+	}
+	return aa, nil
+}
+
+const getAllAlertsForInstrument = `
+	SELECT * FROM v_alert
+	WHERE alert_config_id = ANY(
+		SELECT id FROM alert_config_instrument
+		WHERE instrument_id = $1
+	)
+`
+
+// GetAllAlertsForInstrument lists all alerts for a given instrument ID
+func (q *Queries) GetAllAlertsForInstrument(ctx context.Context, instrumentID uuid.UUID) ([]Alert, error) {
+	aa := make([]Alert, 0)
+	if err := q.db.SelectContext(ctx, &aa, getAllAlertsForInstrument, instrumentID); err != nil {
+		return nil, err
+	}
+	return aa, nil
+}
+
+const getAllAlertsForProfile = `
 	SELECT a.*,
 		CASE WHEN r.alert_id IS NOT NULL THEN true ELSE false
 		END AS read
@@ -34,74 +73,43 @@ var listMyAlertsSQL = `
 	)
 `
 
-// CreateAlerts creates one or more new alerts
-func (q *Queries) CreateAlerts(ctx context.Context, id uuid.UUID) error {
-	if _, err := q.db.ExecContext(ctx, `INSERT INTO alert (alert_config_id) VALUES ($1)`, id); err != nil {
-		return err
-	}
-	return nil
-}
-
-// GetAllAlertsForProject lists all alerts for a given instrument ID
-func (q *Queries) GetAllAlertsForProject(ctx context.Context, projectID *uuid.UUID) ([]Alert, error) {
-	aa := make([]Alert, 0)
-	if err := q.db.SelectContext(ctx, &aa, `SELECT * FROM v_alert WHERE project_id = $1`, projectID); err != nil {
-		return aa, err
-	}
-	return aa, nil
-}
-
-// GetAllAlertsForInstrument lists all alerts for a given instrument ID
-func (q *Queries) GetAllAlertsForInstrument(ctx context.Context, instrumentID *uuid.UUID) ([]Alert, error) {
-	aa := make([]Alert, 0)
-	err := q.db.SelectContext(ctx, &aa, `
-		SELECT * FROM v_alert
-		WHERE alert_config_id = ANY(
-			SELECT id FROM alert_config_instrument
-			WHERE instrument_id = $1
-		)
-	`, instrumentID)
-	if err != nil {
-		return make([]Alert, 0), err
-	}
-	return aa, nil
-}
-
 // GetAllAlertsForProfile returns all alerts for which a profile is subscribed to the AlertConfig
-func (q *Queries) GetAllAlertsForProfile(ctx context.Context, profileID *uuid.UUID) ([]Alert, error) {
+func (q *Queries) GetAllAlertsForProfile(ctx context.Context, profileID uuid.UUID) ([]Alert, error) {
 	aa := make([]Alert, 0)
-	if err := q.db.SelectContext(ctx, &aa, listMyAlertsSQL, profileID); err != nil {
-		return aa, err
+	if err := q.db.SelectContext(ctx, &aa, getAllAlertsForProfile, profileID); err != nil {
+		return nil, err
 	}
 	return aa, nil
 }
+
+const getOneAlertForProfile = getAllAlertsForProfile + `
+	AND a.id = $2
+`
 
 // GetOneAlertForProfile returns a single alert for which a profile is subscribed
-func (q *Queries) GetOneAlertForProfile(ctx context.Context, profileID *uuid.UUID, alertID *uuid.UUID) (*Alert, error) {
+func (q *Queries) GetOneAlertForProfile(ctx context.Context, profileID, alertID uuid.UUID) (Alert, error) {
 	var a Alert
-	if err := q.db.GetContext(ctx, &a, listMyAlertsSQL+`AND a.id = $2`, profileID, alertID); err != nil {
-		return nil, err
-	}
-	return &a, nil
+	err := q.db.GetContext(ctx, &a, getOneAlertForProfile, profileID, alertID)
+	return a, err
 }
+
+const doAlertRead = `
+	INSERT INTO alert_read (profile_id, alert_id) VALUES ($1, $2)
+	ON CONFLICT DO NOTHING
+`
 
 // DoAlertRead marks an alert as read for a profile
-func (q *Queries) DoAlertRead(ctx context.Context, profileID *uuid.UUID, alertID *uuid.UUID) (*Alert, error) {
-	if _, err := q.db.ExecContext(ctx, `
-		INSERT INTO alert_read (profile_id, alert_id) VALUES ($1, $2)
-		ON CONFLICT DO NOTHING
-	`, profileID, alertID); err != nil {
-		return nil, err
-	}
-	return q.GetOneAlertForProfile(ctx, profileID, alertID)
+func (q *Queries) DoAlertRead(ctx context.Context, profileID, alertID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, doAlertRead, profileID, alertID)
+	return err
 }
 
+const doAlertUnread = `
+	DELETE FROM alert_read WHERE profile_id = $1 AND alert_id = $2
+`
+
 // DoAlertUnread marks an alert as unread for a profile
-func (q *Queries) DoAlertUnread(ctx context.Context, profileID *uuid.UUID, alertID *uuid.UUID) (*Alert, error) {
-	if _, err := q.db.ExecContext(ctx, `
-		DELETE FROM alert_read WHERE profile_id = $1 AND alert_id = $2
-	`, profileID, alertID); err != nil {
-		return nil, err
-	}
-	return q.GetOneAlertForProfile(ctx, profileID, alertID)
+func (q *Queries) DoAlertUnread(ctx context.Context, profileID, alertID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, doAlertUnread, profileID, alertID)
+	return err
 }

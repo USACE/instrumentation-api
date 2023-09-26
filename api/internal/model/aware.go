@@ -32,27 +32,38 @@ type AwarePlatformParameterEnabled struct {
 	TimeseriesID      *uuid.UUID `json:"timeseries_id" db:"timeseries_id"`
 }
 
+const listAwareParameters = `
+	SELECT id, key, parameter_id, unit_id FROM aware_parameter
+`
+
 // ListAwareParameters returns aware parameters
 func (q *Queries) ListAwareParameters(ctx context.Context) ([]AwareParameter, error) {
-	c := `
-		SELECT id, key, parameter_id, unit_id FROM aware_parameter
-	`
 	pp := make([]AwareParameter, 0)
-	if err := q.db.SelectContext(ctx, &pp, c); err != nil {
-		return make([]AwareParameter, 0), err
+	if err := q.db.SelectContext(ctx, &pp, listAwareParameters); err != nil {
+		return nil, err
 	}
 	return pp, nil
 }
 
+const listAwarePlatformParameterEnabled = `
+	SELECT project_id, instrument_id, aware_id, aware_parameter_key, timeseries_id
+	FROM v_aware_platform_parameter_enabled
+	ORDER BY project_id, aware_id, aware_parameter_key
+`
+
 func (q *Queries) ListAwarePlatformParameterEnabled(ctx context.Context) ([]AwarePlatformParameterEnabled, error) {
-	c := `
-		SELECT project_id, instrument_id, aware_id, aware_parameter_key, timeseries_id
-		FROM v_aware_platform_parameter_enabled
-		ORDER BY project_id, aware_id, aware_parameter_key
-	`
 	aa := make([]AwarePlatformParameterEnabled, 0)
-	if err := q.db.SelectContext(ctx, &aa, c); err != nil {
-		return make([]AwarePlatformParameterEnabled, 0), err
+	if err := q.db.SelectContext(ctx, &aa, listAwarePlatformParameterEnabled); err != nil {
+		return nil, err
 	}
 	return aa, nil
+}
+
+const createAwarePlatform = `
+	INSERT INTO aware_platform (instrument_id, aware_id) VALUES ($1, $2)
+`
+
+func (q *Queries) CreateAwarePlatform(ctx context.Context, instrumentID, awareID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, createAwarePlatform, &instrumentID, &awareID)
+	return err
 }

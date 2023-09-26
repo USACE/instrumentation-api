@@ -10,64 +10,46 @@ import (
 
 type AlertConfigStore interface {
 	GetAllAlertConfigsForProject(ctx context.Context, projectID *uuid.UUID) ([]model.AlertConfig, error)
-	GetAllAlertConfigsForProjectAndAlertType(ctx context.Context, projectID, alertTypeID *uuid.UUID) ([]model.AlertConfig, error)
-	GetAllAlertConfigsForInstrument(ctx context.Context, instrumentID *uuid.UUID) ([]model.AlertConfig, error)
-	GetOneAlertConfig(ctx context.Context, alertConfigID *uuid.UUID) (*model.AlertConfig, error)
+	GetAllAlertConfigsForProjectAndAlertType(ctx context.Context, projectID, alertTypeID uuid.UUID) ([]model.AlertConfig, error)
+	GetAllAlertConfigsForInstrument(ctx context.Context, instrumentID uuid.UUID) ([]model.AlertConfig, error)
+	GetOneAlertConfig(ctx context.Context, alertConfigID uuid.UUID) (model.AlertConfig, error)
 }
 
 type alertConfigStore struct {
 	db *model.Database
+	q  *model.Queries
 }
 
-func NewAlertConfigStore(db *model.Database) *alertConfigStore {
-	return &alertConfigStore{db}
+func NewAlertConfigStore(db *model.Database, q *model.Queries) *alertConfigStore {
+	return &alertConfigStore{db, q}
 }
 
 // GetAllAlertConfigsForProject lists all alert configs for a single project
-func (s alertConfigStore) GetAllAlertConfigsForProject(ctx context.Context, projectID *uuid.UUID) ([]model.AlertConfig, error) {
-	q := model.NewQueries(s.db)
-	aa, err := q.GetAllAlertConfigsForProject(ctx, projectID)
-	if err != nil {
-		return aa, err
-	}
-	return aa, nil
+func (s alertConfigStore) GetAllAlertConfigsForProject(ctx context.Context, projectID uuid.UUID) ([]model.AlertConfig, error) {
+	return s.q.GetAllAlertConfigsForProject(ctx, projectID)
 }
 
 // GetAllAlertConfigsForProjectAndAlertType lists alert configs for a single project filetered by alert type
-func (s alertConfigStore) GetAllAlertConfigsForProjectAndAlertType(ctx context.Context, projectID, alertTypeID *uuid.UUID) ([]model.AlertConfig, error) {
-	q := model.NewQueries(s.db)
-	aa, err := q.GetAllAlertConfigsForProjectAndAlertType(ctx, projectID, alertTypeID)
-	if err != nil {
-		return aa, err
-	}
-	return aa, nil
+func (s alertConfigStore) GetAllAlertConfigsForProjectAndAlertType(ctx context.Context, projectID, alertTypeID uuid.UUID) ([]model.AlertConfig, error) {
+	return s.q.GetAllAlertConfigsForProjectAndAlertType(ctx, projectID, alertTypeID)
 }
 
 // ListInstrumentAlertConfigs lists all alerts for a single instrument
-func (s alertConfigStore) GetAllAlertConfigsForInstrument(ctx context.Context, instrumentID *uuid.UUID) ([]model.AlertConfig, error) {
-	q := model.NewQueries(s.db)
-	aa, err := q.GetAllAlertConfigsForInstrument(ctx, instrumentID)
-	if err != nil {
-		return aa, err
-	}
-	return aa, nil
+func (s alertConfigStore) GetAllAlertConfigsForInstrument(ctx context.Context, instrumentID uuid.UUID) ([]model.AlertConfig, error) {
+	return s.q.GetAllAlertConfigsForInstrument(ctx, instrumentID)
 }
 
 // GetOneAlertConfig gets a single alert config
-func (s alertConfigStore) GetOneAlertConfig(ctx context.Context, alertConfigID *uuid.UUID) (*model.AlertConfig, error) {
-	q := model.NewQueries(s.db)
-	aa, err := q.GetOneAlertConfig(ctx, alertConfigID)
-	if err != nil {
-		return aa, err
-	}
-	return aa, nil
+func (s alertConfigStore) GetOneAlertConfig(ctx context.Context, alertConfigID uuid.UUID) (model.AlertConfig, error) {
+	return s.q.GetOneAlertConfig(ctx, alertConfigID)
 }
 
 // CreateAlertConfig creates one new alert configuration
-func (s alertConfigStore) CreateAlertConfig(ctx context.Context, ac *model.AlertConfig) (*model.AlertConfig, error) {
+func (s alertConfigStore) CreateAlertConfig(ctx context.Context, ac model.AlertConfig) (model.AlertConfig, error) {
+	var a model.AlertConfig
 	tx, err := s.db.BeginTxx(ctx, nil)
 	if err != nil {
-		return nil, err
+		return a, err
 	}
 	defer func() {
 		if err := tx.Rollback(); err != nil {
@@ -82,44 +64,45 @@ func (s alertConfigStore) CreateAlertConfig(ctx context.Context, ac *model.Alert
 		ac.WarningInterval = "PT0"
 	}
 
-	q := model.NewQueries(s.db).WithTx(tx)
+	qtx := s.q.WithTx(tx)
 
-	acID, err := q.CreateAlertConfig(ctx, ac)
+	acID, err := qtx.CreateAlertConfig(ctx, ac)
 	if err != nil {
-		return nil, err
+		return a, err
 	}
 
 	for _, aci := range ac.Instruments {
-		if err := q.AssignInstrumentToAlertConfig(ctx, acID, &aci.InstrumentID); err != nil {
-			return nil, err
+		if err := qtx.AssignInstrumentToAlertConfig(ctx, acID, aci.InstrumentID); err != nil {
+			return a, err
 		}
 	}
 
-	if err := registerAndSubscribe(ctx, q, acID, ac.AlertEmailSubscriptions); err != nil {
-		return nil, err
+	if err := registerAndSubscribe(ctx, qtx, acID, ac.AlertEmailSubscriptions); err != nil {
+		return a, err
 	}
 
-	if err := q.CreateNextSubmittalFromExistingAlertConfigDate(ctx, acID); err != nil {
-		return nil, err
+	if err := qtx.CreateNextSubmittalFromExistingAlertConfigDate(ctx, acID); err != nil {
+		return a, err
 	}
 
-	acNew, err := q.GetOneAlertConfig(ctx, acID)
+	acNew, err := qtx.GetOneAlertConfig(ctx, acID)
 	if err != nil {
-		return nil, err
+		return a, err
 	}
 
 	if err := tx.Commit(); err != nil {
-		return nil, err
+		return a, err
 	}
 
 	return acNew, nil
 }
 
 // UpdateAlertConfig updates an alert config
-func (s alertConfigStore) UpdateAlertConfig(ctx context.Context, alertConfigID *uuid.UUID, ac *model.AlertConfig) (*model.AlertConfig, error) {
+func (s alertConfigStore) UpdateAlertConfig(ctx context.Context, alertConfigID uuid.UUID, ac model.AlertConfig) (model.AlertConfig, error) {
+	var a model.AlertConfig
 	tx, err := s.db.BeginTxx(ctx, nil)
 	if err != nil {
-		return nil, err
+		return a, err
 	}
 	defer func() {
 		if err := tx.Rollback(); err != nil {
@@ -134,52 +117,47 @@ func (s alertConfigStore) UpdateAlertConfig(ctx context.Context, alertConfigID *
 		ac.WarningInterval = "PT0"
 	}
 
-	q := model.NewQueries(s.db).WithTx(tx)
+	qtx := s.q.WithTx(tx)
 
-	if err := q.UpdateAlertConfig(ctx, ac); err != nil {
-		return nil, err
+	if err := qtx.UpdateAlertConfig(ctx, ac); err != nil {
+		return a, err
 	}
 
-	if err := q.UnassignAllInstrumentsFromAlertConfig(ctx, &ac.ID); err != nil {
-		return nil, err
+	if err := qtx.UnassignAllInstrumentsFromAlertConfig(ctx, ac.ID); err != nil {
+		return a, err
 	}
 
 	for _, aci := range ac.Instruments {
-		if err := q.AssignInstrumentToAlertConfig(ctx, &ac.ID, &aci.InstrumentID); err != nil {
-			return nil, err
+		if err := qtx.AssignInstrumentToAlertConfig(ctx, ac.ID, aci.InstrumentID); err != nil {
+			return a, err
 		}
 	}
 
-	if err := q.UnsubscribeAllEmailsFromAlertConfig(ctx, alertConfigID); err != nil {
-		return nil, err
+	if err := qtx.UnsubscribeAllEmailsFromAlertConfig(ctx, alertConfigID); err != nil {
+		return a, err
 	}
-	if err := registerAndSubscribe(ctx, q, alertConfigID, ac.AlertEmailSubscriptions); err != nil {
-		return nil, err
-	}
-
-	if err := q.UpdateFutureSubmittalForAlertConfig(ctx, &ac.ID); err != nil {
-		return nil, err
+	if err := registerAndSubscribe(ctx, qtx, alertConfigID, ac.AlertEmailSubscriptions); err != nil {
+		return a, err
 	}
 
-	acNew, err := q.GetOneAlertConfig(ctx, &ac.ID)
+	if err := qtx.UpdateFutureSubmittalForAlertConfig(ctx, ac.ID); err != nil {
+		return a, err
+	}
+
+	acNew, err := qtx.GetOneAlertConfig(ctx, ac.ID)
 	if err != nil {
-		return nil, err
+		return a, err
 	}
 
 	if err := tx.Commit(); err != nil {
-		return nil, err
+		return a, err
 	}
 
 	return acNew, nil
 }
 
 // DeleteAlertConfig deletes an alert by ID
-func (s alertConfigStore) DeleteAlertConfig(ctx context.Context, alertConfigID *uuid.UUID) error {
-	q := model.NewQueries(s.db)
-
-	if err := q.DeleteAlertConfig(ctx, alertConfigID); err != nil {
-		return err
-	}
-
-	return nil
+func (s alertConfigStore) DeleteAlertConfig(ctx context.Context, alertConfigID uuid.UUID) error {
+	err := s.q.DeleteAlertConfig(ctx, alertConfigID)
+	return err
 }

@@ -1,9 +1,8 @@
 package model
 
 import (
+	"context"
 	"time"
-
-	"github.com/jmoiron/sqlx"
 )
 
 // Heartbeat is a timestamp
@@ -11,31 +10,40 @@ type Heartbeat struct {
 	Time time.Time `json:"time"`
 }
 
+const doHeartbeat = `
+	INSERT INTO heartbeat (time) VALUES ($1) RETURNING *
+`
+
 // DoHeartbeat does regular-interval tasks
-func DoHeartbeat(db *sqlx.DB) (*Heartbeat, error) {
+func (q *Queries) DoHeartbeat(ctx context.Context) (Heartbeat, error) {
 	var h Heartbeat
-	err := db.Get(&h, "INSERT INTO heartbeat (time) VALUES ($1) RETURNING *", time.Now().In(time.UTC))
-	if err != nil {
-		return nil, err
+	if err := q.db.GetContext(ctx, &h, doHeartbeat, time.Now().In(time.UTC)); err != nil {
+		return h, err
 	}
-	return &h, nil
+	return h, nil
 }
+
+const getLatestHeartbeat = `
+	SELECT MAX(time) AS time FROM heartbeat
+`
 
 // GetLatestHeartbeat returns the most recent system heartbeat
-func GetLatestHeartbeat(db *sqlx.DB) (*Heartbeat, error) {
+func (q *Queries) GetLatestHeartbeat(ctx context.Context) (Heartbeat, error) {
 	var h Heartbeat
-	err := db.Get(&h, "SELECT MAX(time) AS time FROM heartbeat")
-	if err != nil {
-		return nil, err
+	if err := q.db.GetContext(ctx, &h, getLatestHeartbeat); err != nil {
+		return h, err
 	}
-	return &h, nil
+	return h, nil
 }
 
+const listHeartbeats = `
+	SELECT * FROM heartbeat
+`
+
 // ListHeartbeats returns all system heartbeats
-func ListHeartbeats(db *sqlx.DB) ([]Heartbeat, error) {
+func (q *Queries) ListHeartbeats(ctx context.Context) ([]Heartbeat, error) {
 	var hh []Heartbeat
-	err := db.Select(&hh, "SELECT * FROM heartbeat")
-	if err != nil {
+	if err := q.db.SelectContext(ctx, &hh, listHeartbeats); err != nil {
 		return nil, err
 	}
 	return hh, nil

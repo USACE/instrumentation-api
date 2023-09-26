@@ -6,7 +6,7 @@ import (
 
 	"github.com/USACE/instrumentation-api/api/internal/messages"
 	"github.com/USACE/instrumentation-api/api/internal/models"
-	"github.com/USACE/instrumentation-api/api/internal/utils"
+	"github.com/USACE/instrumentation-api/api/internal/util"
 	"github.com/google/uuid"
 
 	"github.com/jmoiron/sqlx"
@@ -80,7 +80,7 @@ func CreatePlotConfiguration(db *sqlx.DB) echo.HandlerFunc {
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
-		slug, err := utils.NextUniqueSlug(pc.Name, slugsTaken)
+		slug, err := util.NextUniqueSlug(pc.Name, slugsTaken)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}

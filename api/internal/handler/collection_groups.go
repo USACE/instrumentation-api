@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/internal/messages"
-	"github.com/USACE/instrumentation-api/api/internal/utils"
+	"github.com/USACE/instrumentation-api/api/internal/util"
 
 	"github.com/google/uuid"
 
@@ -68,7 +68,7 @@ func CreateCollectionGroup(db *sqlx.DB) echo.HandlerFunc {
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
-		slug, err := utils.NextUniqueSlug(cg.Name, slugsTaken)
+		slug, err := util.NextUniqueSlug(cg.Name, slugsTaken)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}

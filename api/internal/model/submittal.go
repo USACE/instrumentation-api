@@ -1,10 +1,10 @@
 package model
 
 import (
+	"context"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/jmoiron/sqlx"
 )
 
 type Submittal struct {
@@ -23,41 +23,36 @@ type Submittal struct {
 	WarningSent         bool       `json:"warning_sent" db:"warning_sent"`
 }
 
-var (
-	missingFilter = `AND completion_date IS NULL AND NOT marked_as_missing`
-)
+const missingFilter = `
+	AND completion_date IS NULL AND NOT marked_as_missing
+`
 
-func ListProjectSubmittals(db *sqlx.DB, projectID *uuid.UUID, showMissing bool) ([]Submittal, error) {
-	aa := make([]Submittal, 0)
-
-	q := ``
+func (q *Queries) ListProjectSubmittals(ctx context.Context, projectID uuid.UUID, showMissing bool) ([]Submittal, error) {
+	var filter string
 	if showMissing {
-		q = missingFilter
+		filter = missingFilter
 	}
-
-	sql := `
+	listProjectSubmittals := `
 		SELECT *
 		FROM v_submittal
 		WHERE project_id = $1
-		` + q + `
+		` + filter + `
 		ORDER BY due_date DESC, alert_type_name ASC
 	`
-	if err := db.Select(&aa, sql, projectID); err != nil {
+
+	aa := make([]Submittal, 0)
+	if err := q.db.SelectContext(ctx, &aa, listProjectSubmittals, projectID); err != nil {
 		return aa, err
 	}
-
 	return aa, nil
 }
 
-func ListInstrumentSubmittals(db *sqlx.DB, instrumentID *uuid.UUID, showMissing bool) ([]Submittal, error) {
-	aa := make([]Submittal, 0)
-
-	q := ``
+func (q *Queries) ListInstrumentSubmittals(ctx context.Context, instrumentID uuid.UUID, showMissing bool) ([]Submittal, error) {
+	var filter string
 	if showMissing {
-		q = missingFilter
+		filter = missingFilter
 	}
-
-	sql := `
+	listInstrumentSubmittals := `
 		SELECT *
 		FROM v_submittal
 		WHERE id = ANY(
@@ -66,100 +61,89 @@ func ListInstrumentSubmittals(db *sqlx.DB, instrumentID *uuid.UUID, showMissing 
 			INNER JOIN alert_config_instrument aci ON aci.alert_config_id = sub.alert_config_id
 			WHERE aci.instrument_id = $1
 		)
-		` + q + `
+		` + filter + `
 		ORDER BY due_date DESC
 	`
-	if err := db.Select(&aa, sql, instrumentID); err != nil {
+	aa := make([]Submittal, 0)
+	if err := q.db.SelectContext(ctx, &aa, listInstrumentSubmittals, instrumentID); err != nil {
 		return aa, err
 	}
-
 	return aa, nil
 }
 
-func ListAlertConfigSubmittals(db *sqlx.DB, alertConfigID *uuid.UUID, showMissing bool) ([]Submittal, error) {
-	aa := make([]Submittal, 0)
-
-	q := ``
+func (q *Queries) ListAlertConfigSubmittals(ctx context.Context, alertConfigID uuid.UUID, showMissing bool) ([]Submittal, error) {
+	var filter string
 	if showMissing {
-		q = missingFilter
+		filter = missingFilter
 	}
-
-	sql := `
+	listAlertConfigSubmittals := `
 		SELECT *
 		FROM v_submittal
 		WHERE alert_config_id = $1
-		` + q + `
+		` + filter + `
 		ORDER BY due_date DESC
 	`
-	if err := db.Select(&aa, sql, alertConfigID); err != nil {
-		return aa, err
-	}
-
-	return aa, nil
-}
-
-func ListUnverifiedMissingSubmittals(db *sqlx.DB) ([]Submittal, error) {
 	aa := make([]Submittal, 0)
-	sql := `
-		SELECT *
-		FROM v_submittal
-		WHERE completion_date IS NULL
-		AND NOT marked_as_missing
-		ORDER BY due_date DESC
-	`
-
-	if err := db.Select(&aa, sql); err != nil {
+	if err := q.db.SelectContext(ctx, &aa, listAlertConfigSubmittals, alertConfigID); err != nil {
 		return aa, err
 	}
-
 	return aa, nil
 }
 
-func UpdateSubmittal(db *sqlx.DB, sub Submittal) error {
-	sql := `
-		UPDATE submittal SET
-			submittal_status_id = $2,
-			completion_date = $3,
-			warning_sent = $4
-		WHERE id = $1
-	`
-	if _, err := db.Exec(sql, sub.ID, sub.SubmittalStatusID, sub.CompletionDate, sub.WarningSent); err != nil {
-		return err
-	}
+const listUnverifiedMissingSubmittals = `
+	SELECT *
+	FROM v_submittal
+	WHERE completion_date IS NULL
+	AND NOT marked_as_missing
+	ORDER BY due_date DESC
+`
 
-	return nil
+func (q *Queries) ListUnverifiedMissingSubmittals(ctx context.Context) ([]Submittal, error) {
+	aa := make([]Submittal, 0)
+	if err := q.db.SelectContext(ctx, &aa, listUnverifiedMissingSubmittals); err != nil {
+		return nil, err
+	}
+	return aa, nil
 }
 
-func VerifyMissingSubmittal(db *sqlx.DB, submittalID *uuid.UUID) error {
-	sql := `
-		UPDATE submittal SET
-			-- red submittal status
-			submittal_status_id = '84a0f437-a20a-4ac2-8a5b-f8dc35e8489b'::UUID,
-			marked_as_missing = true
-		WHERE id = $1
-		AND completion_date IS NULL
-		AND NOW() > due_date
-	`
-	if _, err := db.Exec(sql, submittalID); err != nil {
-		return err
-	}
+const updateSubmittal = `
+	UPDATE submittal SET
+		submittal_status_id = $2,
+		completion_date = $3,
+		warning_sent = $4
+	WHERE id = $1
+`
 
-	return nil
+func (q *Queries) UpdateSubmittal(ctx context.Context, sub Submittal) error {
+	_, err := q.db.ExecContext(ctx, updateSubmittal, sub.ID, sub.SubmittalStatusID, sub.CompletionDate, sub.WarningSent)
+	return err
 }
 
-func VerifyMissingAlertConfigSubmittals(db *sqlx.DB, acID *uuid.UUID) error {
-	sql := `
-		UPDATE submittal SET
-			submittal_status_id = '84a0f437-a20a-4ac2-8a5b-f8dc35e8489b'::UUID,
-			marked_as_missing = true
-		WHERE alert_config_id = $1
-		AND completion_date IS NULL
-		AND NOW() > due_date
-	`
+const verifyMissingSubmittal = `
+	UPDATE submittal SET
+		-- red submittal status
+		submittal_status_id = '84a0f437-a20a-4ac2-8a5b-f8dc35e8489b'::UUID,
+		marked_as_missing = true
+	WHERE id = $1
+	AND completion_date IS NULL
+	AND NOW() > due_date
+`
 
-	if _, err := db.Exec(sql, acID); err != nil {
-		return err
-	}
+func (q *Queries) VerifyMissingSubmittal(ctx context.Context, submittalID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, verifyMissingSubmittal, submittalID)
+	return err
+}
 
-	return nil
+const verifyMissingAlertConfigSubmittals = `
+	UPDATE submittal SET
+		submittal_status_id = '84a0f437-a20a-4ac2-8a5b-f8dc35e8489b'::UUID,
+		marked_as_missing = true
+	WHERE alert_config_id = $1
+	AND completion_date IS NULL
+	AND NOW() > due_date
+`
+
+func (q *Queries) VerifyMissingAlertConfigSubmittals(ctx context.Context, alertConfigID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, verifyMissingAlertConfigSubmittals, alertConfigID)
+	return err
 }

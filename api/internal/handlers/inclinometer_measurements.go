@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/internal/messages"
+	"github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/USACE/instrumentation-api/api/internal/models"
-	"github.com/USACE/instrumentation-api/api/internal/timeseries"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -46,7 +46,7 @@ func ListInclinometerMeasurements(db *sqlx.DB) echo.HandlerFunc {
 		}
 
 		// Time Window
-		var tw timeseries.TimeWindow
+		var tw model.TimeWindow
 		a, b := c.QueryParam("after"), c.QueryParam("before")
 		if err = tw.SetWindow(a, b, time.Now().AddDate(0, 0, -7), time.Now()); err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())

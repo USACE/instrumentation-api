@@ -12,11 +12,13 @@ type Handler struct {
 }
 
 func New(cfg *config.DBConfig) *Handler {
-	database := model.NewDatabase(cfg)
+	db := model.NewDatabase(cfg)
+	q := db.Queries()
+
 	// mediaStore := NewMediaStore(cfg)
 
 	return &Handler{
 		// s3mediaStore:         NewS3MediaStore(mediaStore),
-		AlertStore: store.NewAlertStore(database),
+		AlertStore: store.NewAlertStore(db, q),
 	}
 }

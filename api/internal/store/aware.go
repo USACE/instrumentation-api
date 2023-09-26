@@ -14,29 +14,22 @@ type AwareParameterStore interface {
 
 type awareParameterStore struct {
 	db *model.Database
+	q  *model.Queries
 }
 
-func NewAwareParameterStore(db *model.Database) *awareParameterStore {
-	return &awareParameterStore{db}
+func NewAwareParameterStore(db *model.Database, q *model.Queries) *awareParameterStore {
+	return &awareParameterStore{db, q}
 }
 
 // ListAwareParameters returns aware parameters
 func (s awareParameterStore) ListAwareParameters(ctx context.Context) ([]model.AwareParameter, error) {
-	q := model.NewQueries(s.db)
-
-	pp, err := q.ListAwareParameters(ctx)
-	if err != nil {
-		return pp, err
-	}
-	return pp, nil
+	return s.q.ListAwareParameters(ctx)
 }
 
 // ListAwarePlatformParameterConfig returns aware platform parameter configs
 func (s awareParameterStore) ListAwarePlatformParameterConfig(ctx context.Context) ([]model.AwarePlatformParameterConfig, error) {
-	q := model.NewQueries(s.db)
-
 	aa := make([]model.AwarePlatformParameterConfig, 0)
-	ee, err := q.ListAwarePlatformParameterEnabled(ctx)
+	ee, err := s.q.ListAwarePlatformParameterEnabled(ctx)
 	if err != nil {
 		return aa, err
 	}

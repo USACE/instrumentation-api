@@ -8,7 +8,7 @@ import (
 	"github.com/USACE/instrumentation-api/api/internal/handlers"
 	"github.com/USACE/instrumentation-api/api/internal/middleware"
 	"github.com/USACE/instrumentation-api/api/internal/models"
-	"github.com/USACE/instrumentation-api/api/internal/utils"
+	"github.com/USACE/instrumentation-api/api/internal/util"
 	"github.com/apex/gateway"
 
 	"github.com/labstack/echo/v4"
@@ -18,7 +18,7 @@ import (
 
 func main() {
 	cfg := config.GetTelemetryConfig()
-	db := utils.Connection(cfg.DBConfig.ConnStr())
+	db := util.Connection(cfg.DBConfig.ConnStr())
 
 	e := echo.New()
 	e.Use(middleware.CORS, middleware.GZIP)

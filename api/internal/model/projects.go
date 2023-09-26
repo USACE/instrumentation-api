@@ -1,17 +1,20 @@
 package model
 
 import (
+	"context"
 	"encoding/json"
-	"strings"
 
+	"github.com/USACE/instrumentation-api/api/internal/util"
 	"github.com/google/uuid"
-	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
 )
 
-const listProjectsSQL = `SELECT id, federal_id, image, office_id, deleted, slug, name, creator, create_date,
-     updater, update_date, instrument_count, instrument_group_count, timeseries
-	 FROM v_project`
+const listProjectsSQL = `
+	SELECT
+		id, federal_id, image, office_id, deleted, slug, name, creator, create_date,
+		updater, update_date, instrument_count, instrument_group_count, timeseries
+	FROM v_project
+`
 
 type District struct {
 	ID               uuid.UUID  `json:"id" db:"id"`
@@ -41,8 +44,7 @@ type ProjectCollection struct {
 }
 
 func (c *ProjectCollection) UnmarshalJSON(b []byte) error {
-
-	switch JSONType(b) {
+	switch util.JSONType(b) {
 	case "ARRAY":
 		if err := json.Unmarshal(b, &c.Projects); err != nil {
 			return err
@@ -59,10 +61,10 @@ func (c *ProjectCollection) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-// ProjectFactory converts database rows to Project objects
-func ProjectFactory(rows *sqlx.Rows) ([]Project, error) {
+// projectFactory converts database rows to Project objects
+func projectFactory(rows DBRows) ([]Project, error) {
 	defer rows.Close()
-	pp := make([]Project, 0) // Projects
+	pp := make([]Project, 0)
 	var p Project
 	for rows.Next() {
 		err := rows.Scan(
@@ -77,231 +79,215 @@ func ProjectFactory(rows *sqlx.Rows) ([]Project, error) {
 	return pp, nil
 }
 
-func ListDistricts(db *sqlx.DB) ([]District, error) {
+const projectSearch = listProjectsSQL + `
+	WHERE NOT deleted AND name ILIKE '%' || $1 || '%' LIMIT $2 ORDER BY name
+`
+
+// ProjectSearch returns search result for projects
+func (q *Queries) ProjectSearch(ctx context.Context, searchInput string, limit int) ([]SearchResult, error) {
+	rows, err := q.db.QueryxContext(ctx, projectSearch, searchInput, limit)
+	if err != nil {
+		return make([]SearchResult, 0), err
+	}
+	projects, err := projectFactory(rows)
+	if err != nil {
+		return make([]SearchResult, 0), err
+	}
+	rr := make([]SearchResult, len(projects))
+	for idx, p := range projects {
+		rr[idx] = SearchResult{ID: p.ID, Type: "project", Item: p}
+	}
+	return rr, nil
+}
+
+const listDistricts = `
+	SELECT * FROM v_district
+`
+
+func (q *Queries) ListDistricts(ctx context.Context) ([]District, error) {
 	dd := make([]District, 0)
-	if err := db.Select(&dd, `SELECT * FROM v_district`); err != nil {
-		return dd, err
+	if err := q.db.SelectContext(ctx, &dd, listDistricts); err != nil {
+		return nil, err
 	}
 	return dd, nil
 }
 
+const listProjectSlugs = `
+	SELECT slug FROM project
+`
+
 // ListProjectSlugs returns a list of used slugs for projects
-func ListProjectSlugs(db *sqlx.DB) ([]string, error) {
+func (q *Queries) ListProjectSlugs(ctx context.Context) ([]string, error) {
 	ss := make([]string, 0)
-	if err := db.Select(&ss, "SELECT slug FROM project"); err != nil {
-		return make([]string, 0), err
+	if err := q.db.SelectContext(ctx, &ss, listProjectSlugs); err != nil {
+		return nil, err
 	}
 	return ss, nil
 }
 
-// ListProjects returns a slice of projects
-func ListProjects(db *sqlx.DB) ([]Project, error) {
-	rows, err := db.Queryx(listProjectsSQL + " WHERE NOT deleted ORDER BY name")
-	if err != nil {
-		return make([]Project, 0), err
-	}
-	return ProjectFactory(rows)
-}
+const listProjects = listProjectsSQL + `
+	WHERE NOT deleted ORDER BY name
+`
 
 // ListProjects returns a slice of projects
-func ListProjectsByFederalID(db *sqlx.DB, id string) ([]Project, error) {
-	rows, err := db.Queryx(listProjectsSQL+" WHERE federal_id IS NOT NULL AND federal_id = $1 AND NOT deleted ORDER BY name", id)
+func (q *Queries) ListProjects(ctx context.Context) ([]Project, error) {
+	rows, err := q.db.QueryxContext(ctx, listProjects)
 	if err != nil {
 		return make([]Project, 0), err
 	}
-	return ProjectFactory(rows)
+	return projectFactory(rows)
 }
 
-func ListMyProjects(db *sqlx.DB, profileID *uuid.UUID) ([]Project, error) {
+const listProjectsByFederalID = listProjectsSQL + `
+	WHERE federal_id IS NOT NULL AND federal_id = $1 AND NOT deleted ORDER BY name
+`
 
-	rows, err := db.Queryx(
-		`SELECT DISTINCT p.id, p.federal_id, p.image, p.office_id, p.deleted, p.slug, p.name, p.creator, p.create_date,
-						 p.updater, p.update_date, p.instrument_count, p.instrument_group_count, p.timeseries
-	     FROM profile_project_roles ppr
-	     INNER JOIN v_project p on p.id = ppr.project_id
-	     WHERE ppr.profile_id = $1 AND NOT p.deleted
-	     ORDER BY p.name`, profileID,
-	)
+// ListProjects returns a slice of projects
+func (q *Queries) ListProjectsByFederalID(ctx context.Context, federalID string) ([]Project, error) {
+	rows, err := q.db.QueryxContext(ctx, listProjectsByFederalID, federalID)
+	if err != nil {
+		return nil, err
+	}
+	return projectFactory(rows)
+}
+
+const listProjectsForProfile = `
+	SELECT DISTINCT
+		p.id, p.federal_id, p.image, p.office_id, p.deleted, p.slug, p.name, p.creator, p.create_date,
+		p.updater, p.update_date, p.instrument_count, p.instrument_group_count, p.timeseries
+	FROM profile_project_roles ppr
+	INNER JOIN v_project p on p.id = ppr.project_id
+	WHERE ppr.profile_id = $1 AND NOT p.deleted
+	ORDER BY p.name
+`
+
+func (q *Queries) ListProjectsForProfile(ctx context.Context, profileID uuid.UUID) ([]Project, error) {
+	rows, err := q.db.QueryxContext(ctx, listProjectsForProfile, profileID)
 	if err != nil {
 		return make([]Project, 0), err
 	}
-	return ProjectFactory(rows)
+	return projectFactory(rows)
 }
+
+const listProjectInstruments = listInstrumentsSQL + `
+	WHERE project_id = $1 AND NOT deleted
+`
 
 // ListProjectInstruments returns a slice of instruments for a project
-func ListProjectInstruments(db *sqlx.DB, id uuid.UUID) ([]Instrument, error) {
-
-	rows, err := db.Queryx(listInstrumentsSQL+" WHERE project_id = $1 AND NOT deleted", id)
+func (q *Queries) ListProjectInstruments(ctx context.Context, projectID uuid.UUID) ([]Instrument, error) {
+	rows, err := q.db.QueryxContext(ctx, listProjectInstruments, projectID)
 	if err != nil {
 		return make([]Instrument, 0), err
 	}
-	return InstrumentsFactory(rows)
+	return instrumentFactory(rows)
 }
 
+const listProjectInstrumentNames = `
+	SELECT name FROM instrument WHERE project_id = $1
+`
+
 // ListProjectInstrumentNames returns a slice of instrument names for a project
-func ListProjectInstrumentNames(db *sqlx.DB, id *uuid.UUID) ([]string, error) {
+func (q *Queries) ListProjectInstrumentNames(ctx context.Context, projectID uuid.UUID) ([]string, error) {
 	var names []string
-	if err := db.Select(
-		&names,
-		"SELECT name FROM instrument WHERE project_id = $1",
-		id,
-	); err != nil {
-		return make([]string, 0), err
+	if err := q.db.SelectContext(ctx, &names, listProjectInstrumentNames, projectID); err != nil {
+		return nil, err
 	}
 	return names, nil
 }
 
+const listProjectInstrumentGroups = listInstrumentGroupsSQL + `
+	WHERE project_id = $1 AND NOT deleted
+`
+
 // ListProjectInstrumentGroups returns a list of instrument groups for a project
-func ListProjectInstrumentGroups(db *sqlx.DB, id uuid.UUID) ([]InstrumentGroup, error) {
+func (q *Queries) ListProjectInstrumentGroups(ctx context.Context, projectID uuid.UUID) ([]InstrumentGroup, error) {
 	gg := make([]InstrumentGroup, 0)
-	if err := db.Select(
-		&gg,
-		listInstrumentGroupsSQL+" WHERE project_id = $1 AND NOT deleted",
-		id,
-	); err != nil {
-		return make([]InstrumentGroup, 0), err
+	if err := q.db.SelectContext(ctx, &gg, listProjectInstrumentGroups, projectID); err != nil {
+		return nil, err
 	}
 	return gg, nil
 }
 
+const getProjectCount = `
+	SELECT COUNT(id) FROM project WHERE NOT deleted
+`
+
 // GetProjectCount returns the number of projects in the database that are not deleted
-func GetProjectCount(db *sqlx.DB) (int, error) {
+func (q *Queries) GetProjectCount(ctx context.Context) (int, error) {
 	var count int
-	if err := db.Get(&count, "SELECT COUNT(id) FROM project WHERE NOT deleted"); err != nil {
+	if err := q.db.GetContext(ctx, &count, getProjectCount); err != nil {
 		return 0, err
 	}
 	return count, nil
 }
 
+const getProject = listProjectsSQL + `
+	WHERE id = $1
+`
+
 // GetProject returns a pointer to a project
-func GetProject(db *sqlx.DB, id uuid.UUID) (*Project, error) {
-	rows, err := db.Queryx(listProjectsSQL+" WHERE id = $1", id)
+func (q *Queries) GetProject(ctx context.Context, id uuid.UUID) (Project, error) {
+	var p Project
+	rows, err := q.db.QueryxContext(ctx, getProject, id)
 	if err != nil {
-		return nil, err
+		return p, err
 	}
-	pp, err := ProjectFactory(rows)
+	pp, err := projectFactory(rows)
 	if err != nil {
-		return nil, err
+		return p, err
 	}
-	return &pp[0], nil
+	return pp[0], nil
 }
 
-// CreateProjectBulk creates one or more projects from an array of projects
-func CreateProjectBulk(db *sqlx.DB, projects []Project) ([]IDAndSlug, error) {
+const createProject = `
+	INSERT INTO project (federal_id, slug, name, creator, create_date)
+	VALUES ($1, $2, $3, $4, $5)
+	RETURNING id, slug
+`
 
-	txn, err := db.Beginx()
-	if err != nil {
-		return make([]IDAndSlug, 0), err
-	}
-	defer txn.Rollback()
-
-	// Instrument
-	stmt1, err := txn.Preparex(
-		`INSERT INTO project (federal_id, slug, name, creator, create_date)
-		 VALUES ($1, $2, $3, $4, $5)
-		 RETURNING id, slug`,
-	)
-	if err != nil {
-		return make([]IDAndSlug, 0), err
-	}
-
-	pp := make([]IDAndSlug, len(projects))
-	for idx, p := range projects {
-		if err := stmt1.Get(
-			&pp[idx], p.FederalID, p.Slug, p.Name, p.Creator, p.CreateDate,
-		); err != nil {
-			return make([]IDAndSlug, 0), err
-		}
-	}
-	if err := stmt1.Close(); err != nil {
-		return make([]IDAndSlug, 0), err
-	}
-	if err := txn.Commit(); err != nil {
-		return make([]IDAndSlug, 0), err
-	}
-	return pp, nil
+func (q *Queries) CreateProject(ctx context.Context, p Project) (IDAndSlug, error) {
+	var aa IDAndSlug
+	err := q.db.GetContext(ctx, &aa, createProject, p.FederalID, p.Slug, p.Name, p.Creator, p.CreateDate)
+	return aa, err
 }
+
+const updateProject = `
+	UPDATE project SET name=$2, updater=$3, update_date=$4, office_id=$5, federal_id=$6 WHERE id=$1 RETURNING id
+`
 
 // UpdateProject updates a project
-func UpdateProject(db *sqlx.DB, p *Project) (*Project, error) {
-
-	_, err := db.Exec(
-		"UPDATE project SET name=$2, updater=$3, update_date=$4, office_id=$5, federal_id=$6 WHERE id=$1 RETURNING id",
-		p.ID, p.Name, p.Updater, p.UpdateDate, p.OfficeID, p.FederalID,
-	)
-	if err != nil {
-		return nil, err
-	}
-	return GetProject(db, p.ID)
+func (q *Queries) UpdateProject(ctx context.Context, p Project) error {
+	_, err := q.db.ExecContext(ctx, updateProject, p.ID, p.Name, p.Updater, p.UpdateDate, p.OfficeID, p.FederalID)
+	return err
 }
+
+const deleteFlagProject = `
+	UPDATE project SET deleted=true WHERE id = $1
+`
 
 // DeleteFlagProject sets deleted to true for a project
-func DeleteFlagProject(db *sqlx.DB, id uuid.UUID) error {
-	if _, err := db.Exec("UPDATE project SET deleted=true WHERE id=$1", id); err != nil {
-		return err
-	}
-	return nil
+func (q *Queries) DeleteFlagProject(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deleteFlagProject, id)
+	return err
 }
 
-// projectInstrumentNamesMap returns a map of key: project_id , value: map[string]bool ;  string is name of instrument Upper
-func projectInstrumentNamesMap(db *sqlx.DB, projectIDs []uuid.UUID) (map[uuid.UUID]map[string]bool, error) {
-	sql := `SELECT project_id, name
-			FROM instrument
-			WHERE project_id IN (?)
-			AND NOT deleted
-			ORDER BY project_id
-			`
-	query, args, err := sqlx.In(sql, projectIDs)
-	if err != nil {
-		return nil, err
-	}
-	var nn []struct {
-		ProjectID      uuid.UUID `db:"project_id"`
-		InstrumentName string    `db:"name"`
-	}
-	if err := db.Select(&nn, db.Rebind(query), args...); err != nil {
-		return nil, err
-	}
-
-	// Make Map
-	m := make(map[uuid.UUID]map[string]bool)
-	var _pID uuid.UUID
-	for _, n := range nn {
-		if n.ProjectID != _pID {
-			// Starting on a new project of instrument names
-			m[n.ProjectID] = make(map[string]bool)
-			_pID = n.ProjectID // Increment ProjectID
-		}
-
-		m[n.ProjectID][strings.ToUpper(n.InstrumentName)] = true
-	}
-	return m, nil
-
-}
+const createProjectTimeseries = `
+	INSERT INTO project_timeseries (project_id, timeseries_id) VALUES ($1, $2)
+	ON CONFLICT ON CONSTRAINT project_unique_timeseries DO NOTHING
+`
 
 // CreateProjectTimeseries promotes a timeseries to the project level
-func CreateProjectTimeseries(db *sqlx.DB, projectID *uuid.UUID, timeseriesID *uuid.UUID) error {
-
-	// if the timeseries_id is already promoted to the project level, do nothing (i.e. RESTful 200)
-	if _, err := db.Exec(
-		`INSERT INTO project_timeseries (project_id, timeseries_id) VALUES ($1, $2)
-		 ON CONFLICT ON CONSTRAINT project_unique_timeseries DO NOTHING`,
-		projectID, timeseriesID,
-	); err != nil {
-		return err
-	}
-	return nil
+func (q *Queries) CreateProjectTimeseries(ctx context.Context, projectID, timeseriesID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, createProjectTimeseries, projectID, timeseriesID)
+	return err
 }
 
-// DeleteProjectTimeseries removes a timeseries from the project level; Does not delete underlying timeseries
-func DeleteProjectTimeseries(db *sqlx.DB, projectID *uuid.UUID, timeseriesID *uuid.UUID) error {
+const deleteProjectTimeseries = `
+	DELETE FROM project_timeseries WHERE project_id = $1 AND timeseries_id = $2
+`
 
-	// if the timeseries_id is already promoted to the project level, do nothing (i.e. RESTful 200)
-	if _, err := db.Exec(
-		`DELETE FROM project_timeseries WHERE project_id = $1 AND timeseries_id = $2`,
-		projectID, timeseriesID,
-	); err != nil {
-		return err
-	}
-	return nil
+// DeleteProjectTimeseries removes a timeseries from the project level; Does not delete underlying timeseries
+func (q *Queries) DeleteProjectTimeseries(ctx context.Context, projectID, timeseriesID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deleteProjectTimeseries, projectID, timeseriesID)
+	return err
 }

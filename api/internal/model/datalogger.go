@@ -1,6 +1,7 @@
 package model
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -9,7 +10,6 @@ import (
 	"github.com/USACE/instrumentation-api/api/internal/passwords"
 	"github.com/google/uuid"
 	"github.com/jackc/pgtype"
-	"github.com/jmoiron/sqlx"
 )
 
 // Telemetry struct
@@ -20,7 +20,7 @@ type Telemetry struct {
 	TypeName string
 }
 
-type DataLogger struct {
+type Datalogger struct {
 	ID              uuid.UUID        `json:"id" db:"id"`
 	Name            string           `json:"name" db:"name"`
 	SN              string           `json:"sn" db:"sn"`
@@ -39,79 +39,91 @@ type DataLogger struct {
 	PgErrors        pgtype.TextArray `json:"-" db:"errors"`
 }
 
-type DataLoggerWithKey struct {
-	DataLogger
+type DataloggerWithKey struct {
+	*Datalogger
 	Key string `json:"key"`
 }
 
-type DataLoggerPreview struct {
-	DataLoggerID uuid.UUID   `json:"datalogger_id" db:"datalogger_id"`
+type DataloggerPreview struct {
+	DataloggerID uuid.UUID   `json:"datalogger_id" db:"datalogger_id"`
 	UpdateDate   time.Time   `json:"update_date" db:"update_date"`
 	Preview      pgtype.JSON `json:"preview" db:"preview"`
 	Model        *string     `json:"model,omitempty"`
 	SN           *string     `json:"sn,omitempty"`
 }
 
-type DataLoggerError struct {
-	DataLoggerID uuid.UUID `json:"datalogger_id" db:"datalogger_id"`
+type DataloggerError struct {
+	DataloggerID uuid.UUID `json:"datalogger_id" db:"datalogger_id"`
 	Errors       []string  `json:"errors" db:"errors"`
 }
 
-func GetDataLoggerModel(db *sqlx.DB, modelID *uuid.UUID) (string, error) {
-	var model string
+const getDataloggerModelName = `
+	SELECT model FROM datalogger_model WHERE id = $1
+`
 
-	if err := db.Get(&model, `SELECT model FROM datalogger_model WHERE id = $1`, modelID); err != nil {
+func (q *Queries) GetDataloggerModelName(ctx context.Context, modelID uuid.UUID) (string, error) {
+	var modelName string
+	if err := q.db.GetContext(ctx, &modelName, getDataloggerModelName, modelID); err != nil {
 		return "", err
 	}
-	return model, nil
+	return modelName, nil
 }
 
-func ListProjectDataLoggers(db *sqlx.DB, projectID *uuid.UUID) ([]DataLogger, error) {
-	dls := make([]DataLogger, 0)
+const listProjectDataloggers = `
+	SELECT * FROM v_datalogger WHERE project_id = $1
+`
 
-	if err := db.Select(
-		&dls, `SELECT * FROM v_datalogger WHERE project_id = $1`, projectID,
-	); err != nil {
-		return make([]DataLogger, 0), err
-	}
-
-	for i := 0; i < len(dls); i++ {
-		if err := dls[i].PgErrors.AssignTo(&dls[i].Errors); err != nil {
-			return make([]DataLogger, 0), err
-		}
-	}
-
-	return dls, nil
-}
-
-func ListAllDataLoggers(db *sqlx.DB) ([]DataLogger, error) {
-	dls := make([]DataLogger, 0)
-
-	if err := db.Select(&dls, `SELECT * FROM v_datalogger`); err != nil {
-		return make([]DataLogger, 0), err
+func (q *Queries) ListProjectDataloggers(ctx context.Context, projectID uuid.UUID) ([]Datalogger, error) {
+	dls := make([]Datalogger, 0)
+	if err := q.db.SelectContext(ctx, &dls, listProjectDataloggers, projectID); err != nil {
+		return make([]Datalogger, 0), err
 	}
 	for i := 0; i < len(dls); i++ {
 		if err := dls[i].PgErrors.AssignTo(&dls[i].Errors); err != nil {
-			return make([]DataLogger, 0), err
+			return make([]Datalogger, 0), err
 		}
 	}
-
 	return dls, nil
 }
 
-func DataLoggerActive(db *sqlx.DB, model, sn string) (bool, error) {
-	// check if datalogger with sn already exists and is not deleted
-	var exists bool
-	if err := db.Get(&exists, `SELECT EXISTS (SELECT * FROM v_datalogger WHERE model = $1 AND sn = $2)::int`, model, sn); err != nil {
+const listAllDataloggers = `
+	SELECT * FROM v_datalogger
+`
+
+func (q *Queries) ListAllDataLoggers(ctx context.Context) ([]Datalogger, error) {
+	dls := make([]Datalogger, 0)
+	if err := q.db.SelectContext(ctx, &dls, listAllDataloggers); err != nil {
+		return make([]Datalogger, 0), err
+	}
+	for i := 0; i < len(dls); i++ {
+		if err := dls[i].PgErrors.AssignTo(&dls[i].Errors); err != nil {
+			return make([]Datalogger, 0), err
+		}
+	}
+	return dls, nil
+}
+
+const getDataloggerIsActive = `
+	SELECT EXISTS (SELECT * FROM v_datalogger WHERE model = $1 AND sn = $2)::int
+`
+
+// GetDataloggerIsActive checks if datalogger with sn already exists and is not deleted
+func (q *Queries) GetDataloggerIsActive(ctx context.Context, modelName, sn string) (bool, error) {
+	var isActive bool
+	if err := q.db.GetContext(ctx, &isActive, getDataloggerIsActive, modelName, sn); err != nil {
 		return false, err
 	}
-	return exists, nil
+	return isActive, nil
 }
 
-func VerifyDataLoggerExists(db *sqlx.DB, dlID *uuid.UUID) error {
-	// check if datalogger with sn already exists and is not deleted
+const verifyDataloggerExists = `
+	SELECT EXISTS (SELECT id FROM v_datalogger WHERE id = $1)::int
+`
+
+// VerifyDataloggerExists checks if datalogger with sn already exists and is not deleted
+func (q *Queries) VerifyDataloggerExists(ctx context.Context, dlID uuid.UUID) error {
 	var dlExists bool
-	if err := db.Get(&dlExists, `SELECT EXISTS (SELECT id FROM v_datalogger WHERE id = $1)::int`, &dlID); err != nil {
+	if err := q.db.GetContext(ctx, &dlExists, verifyDataloggerExists, dlID); err != nil {
 		return err
 	}
 	if !dlExists {
@@ -120,198 +132,108 @@ func VerifyDataLoggerExists(db *sqlx.DB, dlID *uuid.UUID) error {
 	return nil
 }
 
-func CreateDataLogger(db *sqlx.DB, n *DataLogger) (*DataLoggerWithKey, error) {
-	txn, err := db.Beginx()
-	if err != nil {
-		return nil, err
-	}
-	defer txn.Rollback()
+const createDataloggerHash = `
+	INSERT INTO datalogger_hash (datalogger_id, "hash") VALUES ($1, $2)
+`
 
-	stmt1, err := txn.Preparex(`
-		INSERT INTO datalogger (name, sn, project_id, creator, updater, slug, model_id)
-			VALUES ($1, $2, $3, $4, $4, $5, $6) RETURNING id`)
-	if err != nil {
-		return nil, err
+func (q *Queries) CreateDataloggerHash(ctx context.Context, dataloggerID uuid.UUID) (string, error) {
+	key := passwords.GenerateRandom(40)
+	if _, err := q.db.ExecContext(ctx, createDataloggerHash, dataloggerID, passwords.MustCreateHash(key, passwords.DefaultParams)); err != nil {
+		return "", err
 	}
+	return key, nil
+}
 
-	stmt2, err := txn.Preparex(`INSERT INTO datalogger_hash (datalogger_id, "hash") VALUES ($1, $2)`)
-	if err != nil {
-		return nil, err
+const createDataloggerPreview = `
+	INSERT INTO datalogger_preview (datalogger_id) VALUES ($1)
+`
+
+func (q *Queries) CreateDataloggerPreview(ctx context.Context, dataloggerID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, createDataloggerPreview, dataloggerID)
+	return err
+}
+
+const getOneDatalogger = `
+	SELECT * FROM v_datalogger WHERE id = $1
+`
+
+func (q *Queries) GetOneDatalogger(ctx context.Context, dataloggerID uuid.UUID) (Datalogger, error) {
+	var dl Datalogger
+	if err := q.db.GetContext(ctx, &dl, getOneDatalogger, dataloggerID); err != nil {
+		return dl, err
 	}
-
-	stmt3, err := txn.Preparex(`INSERT INTO datalogger_preview (datalogger_id) VALUES ($1)`)
-	if err != nil {
-		return nil, err
+	if err := dl.PgErrors.AssignTo(&dl.Errors); err != nil {
+		return dl, err
 	}
+	return dl, nil
+}
 
-	stmt4, err := txn.Preparex(`SELECT * FROM v_datalogger WHERE id = $1`)
-	if err != nil {
-		return nil, err
-	}
+const createDatalogger = `
+	INSERT INTO datalogger (name, sn, project_id, creator, updater, slug, model_id)
+	VALUES ($1, $2, $3, $4, $4, $5, $6)
+	RETURNING id
+`
 
-	// create datalogger
+func (q *Queries) CreateDatalogger(ctx context.Context, dl Datalogger) (uuid.UUID, error) {
 	var dlID uuid.UUID
-	if err := stmt1.Get(&dlID, n.Name, n.SN, n.ProjectID, n.Creator, n.Slug, n.ModelID); err != nil {
-		return nil, err
-	}
+	err := q.db.GetContext(ctx, &dlID, createDatalogger, dl.Name, dl.SN, dl.ProjectID, dl.Creator, dl.Slug, dl.ModelID)
+	return dlID, err
+}
 
-	// store hash
+const updateDatalogger = `
+	UPDATE datalogger SET
+		name = $2,
+		updater = $3,
+		update_date = $4
+	WHERE id = $1
+`
+
+func (q *Queries) UpdateDatalogger(ctx context.Context, dl Datalogger) error {
+	_, err := q.db.ExecContext(ctx, updateDatalogger, dl.ID, dl.Name, dl.Updater, dl.UpdateDate)
+	return err
+}
+
+const updateDataloggerHash = `
+	UPDATE datalogger_hash SET "hash" = $2 WHERE datalogger_id = $1
+`
+
+func (q *Queries) UpdateDataloggerHash(ctx context.Context, dataloggerID uuid.UUID) (string, error) {
 	key := passwords.GenerateRandom(40)
-	hash := passwords.MustCreateHash(key, passwords.DefaultParams)
-	_, err = stmt2.Exec(&dlID, hash)
-	if err != nil {
-		return nil, err
+	if _, err := q.db.ExecContext(ctx, updateDataloggerHash, dataloggerID, passwords.MustCreateHash(key, passwords.DefaultParams)); err != nil {
+		return "", err
 	}
-
-	// create preview
-	_, err = stmt3.Exec(&dlID)
-	if err != nil {
-		return nil, err
-	}
-
-	// return datalogger view
-	var dl DataLogger
-	if err = stmt4.Get(&dl, &dlID); err != nil {
-		return nil, err
-	}
-
-	if err := stmt1.Close(); err != nil {
-		return nil, err
-	}
-	if err := stmt2.Close(); err != nil {
-		return nil, err
-	}
-	if err := stmt3.Close(); err != nil {
-		return nil, err
-	}
-	if err := stmt4.Close(); err != nil {
-		return nil, err
-	}
-	if err := txn.Commit(); err != nil {
-		return nil, err
-	}
-
-	if err := dl.PgErrors.AssignTo(&dl.Errors); err != nil {
-		return nil, err
-	}
-
-	dk := DataLoggerWithKey{
-		DataLogger: dl,
-		Key:        key,
-	}
-
-	return &dk, nil
+	return key, nil
 }
 
-func CycleDataLoggerKey(db *sqlx.DB, u *DataLogger) (*DataLoggerWithKey, error) {
-	txn, err := db.Beginx()
-	if err != nil {
-		return nil, err
-	}
-	defer txn.Rollback()
+const updateDataloggerUpdater = `
+	UPDATE datalogger SET updater = $2, update_date = $3 WHERE id = $1
+`
 
-	stmt1, err := txn.Preparex(`UPDATE datalogger_hash SET "hash" = $2 WHERE datalogger_id = $1`)
-	if err != nil {
-		return nil, err
-	}
-	stmt2, err := txn.Preparex(`UPDATE datalogger SET updater = $2, update_date = $3 WHERE id = $1`)
-	if err != nil {
-		return nil, err
-	}
-	stmt3, err := txn.Preparex(`SELECT * FROM v_datalogger WHERE id = $1`)
-	if err != nil {
-		return nil, err
-	}
-
-	key := passwords.GenerateRandom(40)
-	hash := passwords.MustCreateHash(key, passwords.DefaultParams)
-	if _, err = stmt1.Exec(&u.ID, hash); err != nil {
-		return nil, err
-	}
-
-	if _, err := stmt2.Exec(&u.ID, &u.Updater, &u.UpdateDate); err != nil {
-		return nil, err
-	}
-
-	var dl DataLogger
-	if err = stmt3.Get(&dl, &u.ID); err != nil {
-		return nil, err
-	}
-
-	if err := stmt1.Close(); err != nil {
-		return nil, err
-	}
-	if err := stmt2.Close(); err != nil {
-		return nil, err
-	}
-	if err := stmt3.Close(); err != nil {
-		return nil, err
-	}
-	if err := txn.Commit(); err != nil {
-		return nil, err
-	}
-
-	if err := dl.PgErrors.AssignTo(&dl.Errors); err != nil {
-		return nil, err
-	}
-
-	dk := DataLoggerWithKey{
-		DataLogger: dl,
-		Key:        key,
-	}
-
-	return &dk, nil
+func (q *Queries) UpdateDataloggerUpdater(ctx context.Context, dl Datalogger) error {
+	_, err := q.db.ExecContext(ctx, updateDataloggerUpdater, dl.ID, dl.Updater, dl.UpdateDate)
+	return err
 }
 
-func GetDataLogger(db *sqlx.DB, dlID *uuid.UUID) (*DataLogger, error) {
-	var dl DataLogger
-	if err := db.Get(&dl, `SELECT * FROM v_datalogger WHERE id = $1`, dlID); err != nil {
-		return nil, err
-	}
-	if err := dl.PgErrors.AssignTo(&dl.Errors); err != nil {
-		return nil, err
-	}
+const deleteDatalogger = `
+	UPDATE datalogger SET deleted = true, updater = $2, update_date = $3  WHERE id = $1
+`
 
-	return &dl, nil
+func (q *Queries) DeleteDatalogger(ctx context.Context, dl Datalogger) error {
+	_, err := q.db.ExecContext(ctx, deleteDatalogger, dl.ID, dl.Updater, dl.UpdateDate)
+	return err
 }
 
-func UpdateDataLogger(db *sqlx.DB, u *DataLogger) (*DataLogger, error) {
-	_, err := db.Exec(`
-		UPDATE datalogger SET
-			name = $2,
-			updater = $3,
-			update_date = $4
-		WHERE id = $1
-	`, &u.ID, &u.Name, &u.Updater, &u.UpdateDate)
-	if err != nil {
-		return nil, err
-	}
+const getDataloggerPreview = `
+	SELECT * FROM v_datalogger_preview WHERE datalogger_id = $1
+`
 
-	return GetDataLogger(db, &u.ID)
-}
-
-func DeleteDataLogger(db *sqlx.DB, d *DataLogger) error {
-	if _, err := db.Exec(
-		`UPDATE datalogger SET deleted = true, updater = $2, update_date = $3  WHERE id = $1`,
-		&d.ID, &d.Updater, &d.UpdateDate,
-	); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func GetDataLoggerPreview(db *sqlx.DB, dlID *uuid.UUID) (*DataLoggerPreview, error) {
-	var dlp DataLoggerPreview
-
-	if err := db.Get(&dlp, `
-		SELECT * FROM v_datalogger_preview WHERE datalogger_id = $1
-	`, &dlID); err != nil {
+func (q *Queries) GetDataloggerPreview(ctx context.Context, dlID uuid.UUID) (DataloggerPreview, error) {
+	var dlp DataloggerPreview
+	if err := q.db.GetContext(ctx, &dlp, getDataloggerPreview, dlID); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, fmt.Errorf("preview not found")
+			return dlp, fmt.Errorf("preview not found")
 		}
-		return nil, err
+		return dlp, err
 	}
-
-	return &dlp, nil
+	return dlp, nil
 }

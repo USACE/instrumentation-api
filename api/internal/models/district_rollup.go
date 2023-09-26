@@ -3,7 +3,7 @@ package models
 import (
 	"time"
 
-	"github.com/USACE/instrumentation-api/api/internal/timeseries"
+	"github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
@@ -23,7 +23,7 @@ type DistrictRollup struct {
 }
 
 // ListCollectionGroups lists all collection groups for a project
-func ListEvaluationDistrictRollup(db *sqlx.DB, opID uuid.UUID, tw timeseries.TimeWindow) ([]DistrictRollup, error) {
+func ListEvaluationDistrictRollup(db *sqlx.DB, opID uuid.UUID, tw model.TimeWindow) ([]DistrictRollup, error) {
 	dr := make([]DistrictRollup, 0)
 	if err := db.Select(&dr, `
 		SELECT * FROM v_district_rollup
@@ -38,7 +38,7 @@ func ListEvaluationDistrictRollup(db *sqlx.DB, opID uuid.UUID, tw timeseries.Tim
 }
 
 // ListCollectionGroups lists all collection groups for a project
-func ListMeasurementDistrictRollup(db *sqlx.DB, opID uuid.UUID, tw timeseries.TimeWindow) ([]DistrictRollup, error) {
+func ListMeasurementDistrictRollup(db *sqlx.DB, opID uuid.UUID, tw model.TimeWindow) ([]DistrictRollup, error) {
 	dr := make([]DistrictRollup, 0)
 	if err := db.Select(&dr, `
 		SELECT * FROM v_district_rollup
