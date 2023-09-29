@@ -9,30 +9,21 @@ import (
 )
 
 type InstrumentNoteStore interface {
+	ListInstrumentNotes(ctx context.Context) ([]model.InstrumentNote, error)
+	ListInstrumentInstrumentNotes(ctx context.Context, instrumentID uuid.UUID) ([]model.InstrumentNote, error)
+	GetInstrumentNote(ctx context.Context, noteID uuid.UUID) (model.InstrumentNote, error)
+	CreateInstrumentNote(ctx context.Context, notes []model.InstrumentNote) ([]model.InstrumentNote, error)
+	UpdateInstrumentNote(ctx context.Context, n model.InstrumentNote) (model.InstrumentNote, error)
+	DeleteInstrumentNote(ctx context.Context, noteID uuid.UUID) error
 }
 
 type instrumentNoteStore struct {
 	db *model.Database
-	q  *model.Queries
+	*model.Queries
 }
 
 func NewInstrumentNoteStore(db *model.Database, q *model.Queries) *instrumentNoteStore {
 	return &instrumentNoteStore{db, q}
-}
-
-// ListInstrumentNotes returns an array of instruments from the database
-func (s instrumentNoteStore) ListInstrumentNotes(ctx context.Context) ([]model.InstrumentNote, error) {
-	return s.q.ListInstrumentNotes(ctx)
-}
-
-// ListInstrumentInstrumentNotes returns an array of instrument notes for a given instrument
-func (s instrumentNoteStore) ListInstrumentInstrumentNotes(ctx context.Context, instrumentID uuid.UUID) ([]model.InstrumentNote, error) {
-	return s.q.ListInstrumentInstrumentNotes(ctx, instrumentID)
-}
-
-// GetInstrumentNote returns a single instrument note
-func (s instrumentNoteStore) GetInstrumentNote(ctx context.Context, noteID uuid.UUID) (model.InstrumentNote, error) {
-	return s.q.GetInstrumentNote(ctx, noteID)
 }
 
 // CreateInstrumentNote creates many instrument notes from an array of instrument notes
@@ -47,7 +38,7 @@ func (s instrumentNoteStore) CreateInstrumentNote(ctx context.Context, notes []m
 		}
 	}()
 
-	qtx := s.q.WithTx(tx)
+	qtx := s.WithTx(tx)
 
 	nn := make([]model.InstrumentNote, len(notes))
 	for idx, n := range notes {
@@ -63,14 +54,4 @@ func (s instrumentNoteStore) CreateInstrumentNote(ctx context.Context, notes []m
 	}
 
 	return nn, nil
-}
-
-// UpdateInstrumentNote updates a single instrument note
-func (s instrumentNoteStore) UpdateInstrumentNote(ctx context.Context, n model.InstrumentNote) (model.InstrumentNote, error) {
-	return s.q.UpdateInstrumentNote(ctx, n)
-}
-
-// DeleteInstrumentNote deletes an instrument note
-func (s instrumentNoteStore) DeleteInstrumentNote(ctx context.Context, noteID uuid.UUID) error {
-	return s.q.DeleteInstrumentNote(ctx, noteID)
 }

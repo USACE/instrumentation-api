@@ -9,30 +9,22 @@ import (
 )
 
 type PlotConfigStore interface {
+	ListPlotConfigSlugs(ctx context.Context) ([]string, error)
+	ListPlotConfigs(ctx context.Context, projectID uuid.UUID) ([]model.PlotConfig, error)
+	GetPlotConfig(ctx context.Context, plotconfigID uuid.UUID) (model.PlotConfig, error)
+	CreatePlotConfig(ctx context.Context, pc model.PlotConfig) (model.PlotConfig, error)
+	UpdatePlotConfig(ctx context.Context, pc model.PlotConfig) error
+	UpdatePlotConfiguration(ctx context.Context, pc model.PlotConfig) (model.PlotConfig, error)
+	DeletePlotConfig(ctx context.Context, projectID, plotConfigID uuid.UUID) error
 }
 
 type plotConfigStore struct {
 	db *model.Database
-	q  *model.Queries
+	*model.Queries
 }
 
 func NewPlotConfigStore(db *model.Database, q *model.Queries) *plotConfigStore {
 	return &plotConfigStore{db, q}
-}
-
-// ListPlotConfigSlugs lists used instrument group slugs in the database
-func (s plotConfigStore) ListPlotConfigSlugs(ctx context.Context) ([]string, error) {
-	return s.q.ListPlotConfigSlugs(ctx)
-}
-
-// ListPlotConfigs returns a list of Plot groups
-func (s plotConfigStore) ListPlotConfigs(ctx context.Context, projectID uuid.UUID) ([]model.PlotConfig, error) {
-	return s.q.ListPlotConfigs(ctx, projectID)
-}
-
-// GetPlotConfig returns a single plot configuration
-func (s plotConfigStore) GetPlotConfig(ctx context.Context, plotconfigID uuid.UUID) (model.PlotConfig, error) {
-	return s.q.GetPlotConfig(ctx, plotconfigID)
 }
 
 // CreatePlotConfiguration add plot configuration for a project
@@ -48,7 +40,7 @@ func (s plotConfigStore) CreatePlotConfig(ctx context.Context, pc model.PlotConf
 		}
 	}()
 
-	qtx := s.q.WithTx(tx)
+	qtx := s.WithTx(tx)
 
 	pcID, err := qtx.CreatePlotConfig(ctx, pc)
 	if err != nil {
@@ -75,14 +67,6 @@ func (s plotConfigStore) CreatePlotConfig(ctx context.Context, pc model.PlotConf
 	return pcNew, nil
 }
 
-const updatePlotConfig = `
-	UPDATE plot_configuration SET name = $3, updater = $4, update_date = $5 WHERE project_id = $1 AND id = $2
-`
-
-func (s plotConfigStore) UpdatePlotConfig(ctx context.Context, pc model.PlotConfig) error {
-	return s.q.UpdatePlotConfig(ctx, pc)
-}
-
 // UpdatePlotConfiguration update plot configuration for a project
 func (s plotConfigStore) UpdatePlotConfiguration(ctx context.Context, pc model.PlotConfig) (model.PlotConfig, error) {
 	var a model.PlotConfig
@@ -96,7 +80,7 @@ func (s plotConfigStore) UpdatePlotConfiguration(ctx context.Context, pc model.P
 		}
 	}()
 
-	qtx := s.q.WithTx(tx)
+	qtx := s.WithTx(tx)
 
 	if err != nil {
 		return a, err
@@ -134,9 +118,4 @@ func (s plotConfigStore) UpdatePlotConfiguration(ctx context.Context, pc model.P
 	}
 
 	return pcNew, nil
-}
-
-// DeletePlotConfig delete plot configuration for a project
-func (s plotConfigStore) DeletePlotConfig(ctx context.Context, projectID, plotConfigID uuid.UUID) error {
-	return s.q.DeletePlotConfig(ctx, projectID, plotConfigID)
 }

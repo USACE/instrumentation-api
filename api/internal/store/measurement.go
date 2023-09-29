@@ -10,46 +10,26 @@ import (
 )
 
 type MeasurementStore interface {
+	ListTimeseriesMeasurements(ctx context.Context, timeseriesID uuid.UUID, tw model.TimeWindow, threshold int) (*model.MeasurementCollection, error)
+	DeleteTimeserieMeasurements(ctx context.Context, timeseriesID uuid.UUID, t time.Time) error
+	GetTimeseriesConstantMeasurement(ctx context.Context, timeseriesID uuid.UUID, constantName string) (model.Measurement, error)
+	CreateTimeseriesMeasurement(ctx context.Context, timeseriesID uuid.UUID, t time.Time, value float64) error
+	CreateOrUpdateTimeseriesMeasurement(ctx context.Context, timeseriesID uuid.UUID, t time.Time, value float64) error
+	CreateTimeseriesNote(ctx context.Context, timeseriesID uuid.UUID, t time.Time, n model.TimeseriesNote) error
+	CreateOrUpdateTimeseriesNote(ctx context.Context, timeseriesID uuid.UUID, t time.Time, n model.TimeseriesNote) error
+	CreateTimeseriesMeasurements(ctx context.Context, mc []model.MeasurementCollection) ([]model.MeasurementCollection, error)
+	CreateOrUpdateTimeseriesMeasurements(ctx context.Context, mc []model.MeasurementCollection) ([]model.MeasurementCollection, error)
+	DeleteTimeseriesMeasurementsByRange(ctx context.Context, timeseriesID uuid.UUID, start, end time.Time) error
+	DeleteTimeseriesNote(ctx context.Context, timeseriesID uuid.UUID, start, end time.Time) error
 }
 
 type measurementStore struct {
 	db *model.Database
-	q  *model.Queries
+	*model.Queries
 }
 
 func NewMeasurementStore(db *model.Database, q *model.Queries) *measurementStore {
 	return &measurementStore{db, q}
-}
-
-// ListTimeseriesMeasurements returns a stored timeseries with slice of timeseries measurements populated
-func (s measurementStore) ListTimeseriesMeasurements(ctx context.Context, timeseriesID uuid.UUID, tw model.TimeWindow, threshold int) (*model.MeasurementCollection, error) {
-	return s.q.ListTimeseriesMeasurements(ctx, timeseriesID, tw, threshold)
-}
-
-// DeleteTimeserieMeasurements deletes a timeseries Measurement
-func (s measurementStore) DeleteTimeserieMeasurements(ctx context.Context, timeseriesID uuid.UUID, t time.Time) error {
-	return s.q.DeleteTimeseriesMeasurement(ctx, timeseriesID, t)
-}
-
-// GetTimeseriesConstantMeasurement returns a constant timeseries measurement for the same instrument by constant name
-func (s measurementStore) GetTimeseriesConstantMeasurement(ctx context.Context, timeseriesID uuid.UUID, constantName string) (model.Measurement, error) {
-	return s.q.GetTimeseriesConstantMeasurement(ctx, timeseriesID, constantName)
-}
-
-func (s measurementStore) CreateTimeseriesMeasurement(ctx context.Context, timeseriesID uuid.UUID, t time.Time, value float64) error {
-	return s.q.CreateTimeseriesMeasurement(ctx, timeseriesID, t, value)
-}
-
-func (s measurementStore) CreateOrUpdateTimeseriesMeasurement(ctx context.Context, timeseriesID uuid.UUID, t time.Time, value float64) error {
-	return s.q.CreateOrUpdateTimeseriesMeasurement(ctx, timeseriesID, t, value)
-}
-
-func (s measurementStore) CreateTimeseriesNote(ctx context.Context, timeseriesID uuid.UUID, t time.Time, n model.TimeseriesNote) error {
-	return s.q.CreateTimeseriesNote(ctx, timeseriesID, t, n)
-}
-
-func (s measurementStore) CreateOrUpdateTimeseriesNote(ctx context.Context, timeseriesID uuid.UUID, t time.Time, n model.TimeseriesNote) error {
-	return s.q.CreateOrUpdateTimeseriesNote(ctx, timeseriesID, t, n)
 }
 
 type mmtCbk func(context.Context, uuid.UUID, time.Time, float64) error
@@ -83,7 +63,7 @@ func (s measurementStore) CreateTimeseriesMeasurements(ctx context.Context, mc [
 		}
 	}()
 
-	qtx := s.q.WithTx(tx)
+	qtx := s.WithTx(tx)
 
 	if err := createMeasurements(ctx, mc, qtx.CreateTimeseriesMeasurement, qtx.CreateTimeseriesNote); err != nil {
 		return nil, err
@@ -109,7 +89,7 @@ func (s measurementStore) CreateOrUpdateTimeseriesMeasurements(ctx context.Conte
 		}
 	}()
 
-	qtx := s.q.WithTx(tx)
+	qtx := s.WithTx(tx)
 
 	if err := createMeasurements(ctx, mc, qtx.CreateOrUpdateTimeseriesMeasurement, qtx.CreateOrUpdateTimeseriesNote); err != nil {
 		return nil, err
@@ -120,12 +100,4 @@ func (s measurementStore) CreateOrUpdateTimeseriesMeasurements(ctx context.Conte
 	}
 
 	return mc, nil
-}
-
-func (s measurementStore) DeleteTimeseriesMeasurementRange(ctx context.Context, timeseriesID uuid.UUID, start, end time.Time) error {
-	return s.q.DeleteTimeseriesMeasurementsRange(ctx, timeseriesID, start, end)
-}
-
-func (s measurementStore) DeleteTimeseriesNote(ctx context.Context, timeseriesID uuid.UUID, start, end time.Time) error {
-	return s.q.DeleteTimeseriesNote(ctx, timeseriesID, start, end)
 }

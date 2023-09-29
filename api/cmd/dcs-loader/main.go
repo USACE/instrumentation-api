@@ -159,7 +159,7 @@ func PostMeasurementCollectionToApi(mcs []model.MeasurementCollection, cfg *conf
 
 func main() {
 
-	cfg := config.GetDcsLoaderConfig()
+	cfg := config.NewDcsLoaderConfig()
 	handler := HandleRequest(cfg)
 
 	sessSQS := session.Must(session.NewSession(cfg.AWSSQSConfig()))

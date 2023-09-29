@@ -8,30 +8,22 @@ import (
 )
 
 type DataloggerTelemetryStore interface {
+	GetDataloggerByModelSN(ctx context.Context, modelName, sn string) (model.Datalogger, error)
+	GetDataloggerHashByModelSN(ctx context.Context, modelName, sn string) (string, error)
+	UpdateDataloggerPreview(ctx context.Context, dlp model.DataloggerPreview) error
+	UpdateDataloggerError(ctx context.Context, e *model.DataloggerError) error
 }
 
 type dataloggerTelemetryStore struct {
 	db *model.Database
-	q  *model.Queries
+	*model.Queries
 }
 
 func NewDataloggerTelemetryStore(db *model.Database, q *model.Queries) *dataloggerTelemetryStore {
 	return &dataloggerTelemetryStore{db, q}
 }
 
-func (s dataloggerTelemetryStore) GetDataLoggerByModelSN(ctx context.Context, modelName, sn string) (model.Datalogger, error) {
-	return s.q.GetDataloggerByModelSN(ctx, modelName, sn)
-}
-
-func (s dataloggerTelemetryStore) GetDataLoggerHashByModelSN(ctx context.Context, modelName, sn string) (string, error) {
-	return s.q.GetDataloggerHashByModelSN(ctx, modelName, sn)
-}
-
-func (s dataloggerTelemetryStore) UpdateDataLoggerPreview(ctx context.Context, dlp model.DataloggerPreview) error {
-	return s.q.UpdateDataloggerPreview(ctx, dlp)
-}
-
-func (s dataloggerTelemetryStore) UpdateDataLoggerError(ctx context.Context, e *model.DataloggerError) error {
+func (s dataloggerTelemetryStore) UpdateDataloggerError(ctx context.Context, e *model.DataloggerError) error {
 	tx, err := s.db.BeginTxx(ctx, nil)
 	if err != nil {
 		return err
@@ -42,7 +34,7 @@ func (s dataloggerTelemetryStore) UpdateDataLoggerError(ctx context.Context, e *
 		}
 	}()
 
-	qtx := s.q.WithTx(tx)
+	qtx := s.WithTx(tx)
 
 	if err := qtx.DeleteDataloggerError(ctx, e.DataloggerID); err != nil {
 		return err

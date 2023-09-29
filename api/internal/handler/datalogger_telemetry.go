@@ -9,61 +9,57 @@ import (
 
 	"github.com/USACE/instrumentation-api/api/internal/messages"
 	"github.com/USACE/instrumentation-api/api/internal/model"
-	"github.com/USACE/instrumentation-api/api/internal/models"
-	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
 )
 
-// CreateOrUpdateDataLoggerMeasurements creates or updates measurements for a timeseires
-// that a datalogger is mapped to using the DataLoggerEquivalencyTable
+// CreateOrUpdateDataloggerMeasurements creates or updates measurements for a timeseires
+// that a datalogger is mapped to using the DataloggerEquivalencyTable
 //
-// DataLoggerKeyAuth middleware is applied to the group where the corresponding route
+// DataloggerKeyAuth middleware is applied to the group where the corresponding route
 // to this handler is configured
-func CreateOrUpdateDataLoggerMeasurements(db *sqlx.DB) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		model := c.Param("model")
-		if model == "" {
-			return echo.NewHTTPError(http.StatusBadRequest, "missing route param `model`")
-		}
-		sn := c.Param("sn")
-		if sn == "" {
-			return echo.NewHTTPError(http.StatusBadRequest, "missing route param `sn`")
-		}
-
-		// Make sure data logger is active
-		dl, err := models.GetDataLoggerByModelSN(db, model, sn)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-		}
-
-		body := make(map[string]interface{})
-		err = json.NewDecoder(c.Request().Body).Decode(&body)
-		if err != nil {
-			return err
-		}
-		rawJSON, err := json.Marshal(body)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-		}
-
-		prv := models.DataLoggerPreview{DataLoggerID: dl.ID}
-		if err := prv.Preview.Set(rawJSON); err != nil {
-			return err
-		}
-		prv.UpdateDate = time.Now()
-
-		err = models.UpdateDataLoggerPreview(db, &prv)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-		}
-
-		if model == "CR6" || model == "CR1000X" {
-			cr6Handler := getCR6Handler(db, dl, &rawJSON)
-			return cr6Handler(c)
-		}
-
-		return echo.NewHTTPError(http.StatusBadRequest, messages.BadRequest)
+func (h TelemetryHandler) CreateOrUpdateDataloggerMeasurements(c echo.Context) error {
+	modelName := c.Param("model")
+	if modelName == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "missing route param `model`")
 	}
+	sn := c.Param("sn")
+	if sn == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "missing route param `sn`")
+	}
+
+	// Make sure data logger is active
+	dl, err := h.DataloggerTelemetryStore.GetDataloggerByModelSN(c.Request().Context(), modelName, sn)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	body := make(map[string]interface{})
+	err = json.NewDecoder(c.Request().Body).Decode(&body)
+	if err != nil {
+		return err
+	}
+	rawJSON, err := json.Marshal(body)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	prv := model.DataloggerPreview{DataloggerID: dl.ID}
+	if err := prv.Preview.Set(rawJSON); err != nil {
+		return err
+	}
+	prv.UpdateDate = time.Now()
+
+	err = h.DataloggerTelemetryStore.UpdateDataloggerPreview(c.Request().Context(), prv)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	if modelName == "CR6" || modelName == "CR1000X" {
+		cr6Handler := getCR6Handler(h, dl, rawJSON)
+		return cr6Handler(c)
+	}
+
+	return echo.NewHTTPError(http.StatusBadRequest, messages.BadRequest)
 }
 
 // getCR6Handler handles parsing and uploading of Campbell Scientific CR6 measurement payloads
@@ -72,22 +68,23 @@ func CreateOrUpdateDataLoggerMeasurements(db *sqlx.DB) echo.HandlerFunc {
 // CSIJSON Output Format: https://help.campbellsci.com/crbasic/cr350/#parameters/mqtt_outputformat.htm?Highlight=CSIJSON
 //
 // HTTPPost: https://help.campbellsci.com/crbasic/cr350/#Instructions/httppost.htm?Highlight=httppost
-func getCR6Handler(db *sqlx.DB, dl *models.DataLogger, rawJSON *[]byte) echo.HandlerFunc {
+func getCR6Handler(h TelemetryHandler, dl model.Datalogger, rawJSON []byte) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		// Errors are cellected and sent to data logger preview for debugging since data logger clients cannot parse responses
 		em := make([]string, 0)
+		ctx := c.Request().Context()
 
 		// The error returned from this function is not particularly relevant. Since these actual HTTP responses
 		// will be returned to data logger clients, this operates on a "best effort" basis, to collect logs to
 		// be previewed in the core web application. Additionally, the error code returned to the client data logger
 		// will sill be relavent to the arm of control flow that raised it.
 		defer func() {
-			models.UpdateDataLoggerError(db, &models.DataLoggerError{DataLoggerID: dl.ID, Errors: em})
+			h.DataloggerTelemetryStore.UpdateDataloggerError(ctx, &model.DataloggerError{DataloggerID: dl.ID, Errors: em})
 		}()
 
-		// Upload DataLogger Measurements
-		var pl models.DataLoggerPayload
-		if err := json.Unmarshal(*rawJSON, &pl); err != nil {
+		// Upload Datalogger Measurements
+		var pl model.DataloggerPayload
+		if err := json.Unmarshal(rawJSON, &pl); err != nil {
 			em = append(em, fmt.Sprintf("%d: %s", http.StatusBadRequest, err.Error()))
 			return echo.NewHTTPError(http.StatusBadRequest, messages.BadRequest)
 		}
@@ -104,15 +101,15 @@ func getCR6Handler(db *sqlx.DB, dl *models.DataLogger, rawJSON *[]byte) echo.Han
 		}
 
 		fields := pl.Head.Fields
-		eqt, err := models.GetEquivalencyTable(db, &dl.ID)
+		eqt, err := h.EquivalencyTableStore.GetEquivalencyTable(ctx, dl.ID)
 		if err != nil {
 			em = append(em, fmt.Sprintf("%d: %s", http.StatusInternalServerError, err.Error()))
 			return echo.NewHTTPError(http.StatusNotFound, messages.NotFound)
 		}
 
-		eqtFields := make(map[string]models.EquivalencyTableRow)
+		eqtFields := make(map[string]model.EquivalencyTableRow)
 		for _, r := range eqt.Rows {
-			eqtFields[r.FieldName] = models.EquivalencyTableRow{
+			eqtFields[r.FieldName] = model.EquivalencyTableRow{
 				TimeseriesID: r.TimeseriesID,
 				InstrumentID: r.InstrumentID,
 			}
@@ -171,7 +168,7 @@ func getCR6Handler(db *sqlx.DB, dl *models.DataLogger, rawJSON *[]byte) echo.Han
 			em = append(em, fmt.Sprintf("field '%s' in equivalency table does not match any fields from data logger", eqtName))
 		}
 
-		if _, err = models.CreateOrUpdateTimeseriesMeasurements(db, mcs); err != nil {
+		if _, err = h.MeasurementStore.CreateOrUpdateTimeseriesMeasurements(ctx, mcs); err != nil {
 			em = append(em, fmt.Sprintf("%d: %s", http.StatusInternalServerError, err.Error()))
 			return echo.NewHTTPError(http.StatusInternalServerError, messages.InternalServerError)
 		}

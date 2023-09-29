@@ -9,25 +9,20 @@ import (
 )
 
 type CalculatedTimeseriesStore interface {
-	GetAllCalculationsForInstrument(ctx context.Context, instrumentID *uuid.UUID) ([]model.CalculatedTimeseries, error)
+	GetAllCalculatedTimeseriesForInstrument(ctx context.Context, instrumentID uuid.UUID) ([]model.CalculatedTimeseries, error)
+	ListCalculatedTimeseriesSlugs(ctx context.Context) ([]string, error)
+	CreateCalculatedTimeseries(ctx context.Context, cc model.CalculatedTimeseries) error
+	UpdateCalculatedTimeseries(ctx context.Context, cts model.CalculatedTimeseries) error
+	DeleteCalculatedTimeseries(ctx context.Context, ctsID uuid.UUID) error
 }
 
 type calculatedTimeseriesStore struct {
 	db *model.Database
-	q  *model.Queries
+	*model.Queries
 }
 
 func NewCalculatedTimeseriesStore(db *model.Database, q *model.Queries) *calculatedTimeseriesStore {
 	return &calculatedTimeseriesStore{db, q}
-}
-
-// GetInstrumentCalculations returns all formulas associated to a given instrument ID.
-func (s calculatedTimeseriesStore) GetAllCalculatedTimeseriesForInstrument(ctx context.Context, instrumentID uuid.UUID) ([]model.CalculatedTimeseries, error) {
-	return s.q.GetAllCalculatedTimeseriesForInstrument(ctx, instrumentID)
-}
-
-func (s calculatedTimeseriesStore) ListCalculatedTimeseriesSlugs(ctx context.Context) ([]string, error) {
-	return s.q.ListCalculatedTimeseriesSlugs(ctx)
 }
 
 func (s calculatedTimeseriesStore) CreateCalculatedTimeseries(ctx context.Context, cc model.CalculatedTimeseries) error {
@@ -48,7 +43,7 @@ func (s calculatedTimeseriesStore) CreateCalculatedTimeseries(ctx context.Contex
 		}
 	}()
 
-	qtx := s.q.WithTx(tx)
+	qtx := s.WithTx(tx)
 
 	tsID, err := qtx.CreateCalculatedTimeseries(ctx, cc)
 	if err != nil {
@@ -77,7 +72,7 @@ func (s calculatedTimeseriesStore) UpdateCalculatedTimeseries(ctx context.Contex
 		}
 	}()
 
-	qtx := s.q.WithTx(tx)
+	qtx := s.WithTx(tx)
 
 	defaultCts, err := qtx.GetOneCalculation(ctx, &cts.ID)
 	if err != nil {
@@ -116,10 +111,4 @@ func (s calculatedTimeseriesStore) UpdateCalculatedTimeseries(ctx context.Contex
 	}
 
 	return nil
-}
-
-// DeleteCalculation removes the `Calculation` with ID `formulaID` from the database,
-// effectively dissociating it from the instrument in question.
-func (s calculatedTimeseriesStore) DeleteCalculatedTimeseries(ctx context.Context, ctsID uuid.UUID) error {
-	return s.q.DeleteCalculatedTimeseries(ctx, ctsID)
 }

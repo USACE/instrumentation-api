@@ -11,13 +11,13 @@ import (
 )
 
 type EquivalencyTable struct {
-	DataLoggerID uuid.UUID             `json:"datalogger_id" db:"datalogger_id"`
+	DataloggerID uuid.UUID             `json:"datalogger_id" db:"datalogger_id"`
 	Rows         []EquivalencyTableRow `json:"rows" db:"rows"`
 }
 
 type EquivalencyTableRow struct {
 	ID           uuid.UUID  `json:"id" db:"id"`
-	DataLoggerID uuid.UUID  `json:"-" db:"datalogger_id"`
+	DataloggerID uuid.UUID  `json:"-" db:"datalogger_id"`
 	SN           string     `json:"-" db:"sn"`
 	Model        string     `json:"-" db:"model"`
 	FieldName    string     `json:"field_name" db:"field_name"`
@@ -60,12 +60,12 @@ const getEquivalencyTable = `
 	WHERE datalogger_id = $1
 `
 
-// GetEquivalencyTable returns a single DataLogger EquivalencyTable
+// GetEquivalencyTable returns a single Datalogger EquivalencyTable
 func (q *Queries) GetEquivalencyTable(ctx context.Context, dlID uuid.UUID) (EquivalencyTable, error) {
 	var et EquivalencyTable
 	var tr []EquivalencyTableRow
 	err := q.db.SelectContext(ctx, &tr, getEquivalencyTable, &dlID)
-	et.DataLoggerID = dlID
+	et.DataloggerID = dlID
 	et.Rows = tr
 	return et, err
 }
@@ -81,7 +81,7 @@ func (q *Queries) CreateEquivalencyTableRow(ctx context.Context, tr EquivalencyT
 	if _, err := q.db.ExecContext(
 		ctx,
 		createEquivalencyTableRow,
-		tr.DataLoggerID,
+		tr.DataloggerID,
 		tr.FieldName,
 		tr.DisplayName,
 		tr.InstrumentID,
@@ -110,7 +110,7 @@ func (q *Queries) UpdateEquivalencyTableRow(ctx context.Context, tr EquivalencyT
 	if _, err := q.db.ExecContext(
 		ctx,
 		updateEquivalencyTableRow,
-		tr.DataLoggerID,
+		tr.DataloggerID,
 		tr.ID,
 		tr.FieldName,
 		tr.DisplayName,

@@ -50,7 +50,7 @@ func (a *AlertConfigMeasurementCheck) SetChecks(mc []*MeasurementCheck) {
 	a.AlertChecks = mc
 }
 
-func (ms AlertConfigMeasurementCheck) DoEmail(emailType string, cfg *config.AlertCheckConfig, smtpCfg *config.SmtpConfig) error {
+func (ms AlertConfigMeasurementCheck) DoEmail(emailType string, cfg config.AlertCheckConfig) error {
 	if emailType == "" {
 		return fmt.Errorf("must provide emailType")
 	}
@@ -77,7 +77,7 @@ func (ms AlertConfigMeasurementCheck) DoEmail(emailType string, cfg *config.Aler
 		return err
 	}
 	content.To = ms.AlertConfig.GetToAddresses()
-	if err := et.ConstructAndSendEmail(content, cfg, smtpCfg); err != nil {
+	if err := et.ConstructAndSendEmail(content, cfg); err != nil {
 		return err
 	}
 	return nil

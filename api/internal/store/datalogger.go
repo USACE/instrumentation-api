@@ -9,38 +9,30 @@ import (
 )
 
 type DataloggerStore interface {
+	GetDataloggerModelName(ctx context.Context, modelID uuid.UUID) (string, error)
+	ListProjectDataloggers(ctx context.Context, projectID uuid.UUID) ([]model.Datalogger, error)
+	ListAllDataloggers(ctx context.Context) ([]model.Datalogger, error)
+	GetDataloggerIsActive(ctx context.Context, modelName, sn string) (bool, error)
+	VerifyDataloggerExists(ctx context.Context, dlID uuid.UUID) error
+	CreateDatalogger(ctx context.Context, n model.Datalogger) (model.DataloggerWithKey, error)
+	CycleDataloggerKey(ctx context.Context, u model.Datalogger) (model.DataloggerWithKey, error)
+	GetOneDatalogger(ctx context.Context, dataloggerID uuid.UUID) (model.Datalogger, error)
+	UpdateDatalogger(ctx context.Context, u model.Datalogger) (model.Datalogger, error)
+	DeleteDatalogger(ctx context.Context, d model.Datalogger) error
+	GetDataloggerPreview(ctx context.Context, dlID uuid.UUID) (model.DataloggerPreview, error)
+	CreateUniqueSlugDatalogger(ctx context.Context, dataloggerName string) (string, error)
 }
 
 type dataloggerStore struct {
 	db *model.Database
-	q  *model.Queries
+	*model.Queries
 }
 
 func NewDataloggerStore(db *model.Database, q *model.Queries) *dataloggerStore {
 	return &dataloggerStore{db, q}
 }
 
-func (s dataloggerStore) GetDataLoggerModel(ctx context.Context, modelID uuid.UUID) (string, error) {
-	return s.q.GetDataloggerModelName(ctx, modelID)
-}
-
-func (s dataloggerStore) ListProjectDataLoggers(ctx context.Context, projectID uuid.UUID) ([]model.Datalogger, error) {
-	return s.q.ListProjectDataloggers(ctx, projectID)
-}
-
-func (s dataloggerStore) ListAllDataLoggers(ctx context.Context) ([]model.Datalogger, error) {
-	return s.q.ListAllDataLoggers(ctx)
-}
-
-func (s dataloggerStore) DataLoggerActive(ctx context.Context, modelName, sn string) (bool, error) {
-	return s.q.GetDataloggerIsActive(ctx, modelName, sn)
-}
-
-func (s dataloggerStore) VerifyDataLoggerExists(ctx context.Context, dlID uuid.UUID) error {
-	return s.q.VerifyDataloggerExists(ctx, dlID)
-}
-
-func (s dataloggerStore) CreateDataLogger(ctx context.Context, n model.Datalogger) (model.DataloggerWithKey, error) {
+func (s dataloggerStore) CreateDatalogger(ctx context.Context, n model.Datalogger) (model.DataloggerWithKey, error) {
 	var a model.DataloggerWithKey
 	tx, err := s.db.BeginTxx(ctx, nil)
 	if err != nil {
@@ -52,7 +44,7 @@ func (s dataloggerStore) CreateDataLogger(ctx context.Context, n model.Datalogge
 		}
 	}()
 
-	qtx := s.q.WithTx(tx)
+	qtx := s.WithTx(tx)
 
 	dataloggerID, err := qtx.CreateDatalogger(ctx, n)
 	if err != nil {
@@ -85,7 +77,7 @@ func (s dataloggerStore) CreateDataLogger(ctx context.Context, n model.Datalogge
 	return dk, nil
 }
 
-func (s dataloggerStore) CycleDataLoggerKey(ctx context.Context, u model.Datalogger) (model.DataloggerWithKey, error) {
+func (s dataloggerStore) CycleDataloggerKey(ctx context.Context, u model.Datalogger) (model.DataloggerWithKey, error) {
 	var a model.DataloggerWithKey
 	tx, err := s.db.BeginTxx(ctx, nil)
 	if err != nil {
@@ -97,7 +89,7 @@ func (s dataloggerStore) CycleDataLoggerKey(ctx context.Context, u model.Datalog
 		}
 	}()
 
-	qtx := s.q.WithTx(tx)
+	qtx := s.WithTx(tx)
 
 	key, err := qtx.UpdateDataloggerHash(ctx, u.ID)
 	if err != nil {
@@ -125,11 +117,7 @@ func (s dataloggerStore) CycleDataLoggerKey(ctx context.Context, u model.Datalog
 	return dk, nil
 }
 
-func (s dataloggerStore) GetOneDataLogger(ctx context.Context, dataloggerID uuid.UUID) (model.Datalogger, error) {
-	return s.q.GetOneDatalogger(ctx, dataloggerID)
-}
-
-func (s dataloggerStore) UpdateDataLogger(ctx context.Context, u model.Datalogger) (model.Datalogger, error) {
+func (s dataloggerStore) UpdateDatalogger(ctx context.Context, u model.Datalogger) (model.Datalogger, error) {
 	var a model.Datalogger
 	tx, err := s.db.BeginTxx(ctx, nil)
 	if err != nil {
@@ -141,7 +129,7 @@ func (s dataloggerStore) UpdateDataLogger(ctx context.Context, u model.Datalogge
 		}
 	}()
 
-	qtx := s.q.WithTx(tx)
+	qtx := s.WithTx(tx)
 
 	if err := qtx.UpdateDatalogger(ctx, u); err != nil {
 		return a, err
@@ -157,12 +145,4 @@ func (s dataloggerStore) UpdateDataLogger(ctx context.Context, u model.Datalogge
 	}
 
 	return dlUpdated, nil
-}
-
-func (s dataloggerStore) DeleteDataLogger(ctx context.Context, d model.Datalogger) error {
-	return s.q.DeleteDatalogger(ctx, d)
-}
-
-func (s dataloggerStore) GetDataLoggerPreview(ctx context.Context, dlID uuid.UUID) (model.DataloggerPreview, error) {
-	return s.q.GetDataloggerPreview(ctx, dlID)
 }

@@ -9,25 +9,23 @@ import (
 )
 
 type CollectionGroupStore interface {
+	ListCollectionGroups(ctx context.Context, projectID uuid.UUID) ([]model.CollectionGroup, error)
+	ListCollectionGroupSlugs(ctx context.Context, projectID uuid.UUID) ([]string, error)
+	GetCollectionGroupDetails(ctx context.Context, projectID, collectionGroupID uuid.UUID) (model.CollectionGroupDetails, error)
+	CreateCollectionGroup(ctx context.Context, cg model.CollectionGroup) (model.CollectionGroup, error)
+	UpdateCollectionGroup(ctx context.Context, cg model.CollectionGroup) (model.CollectionGroup, error)
+	DeleteCollectionGroup(ctx context.Context, projectID, collectionGroupID uuid.UUID) error
+	AddTimeseriesToCollectionGroup(ctx context.Context, collectionGroupID, timeseriesID uuid.UUID) error
+	RemoveTimeseriesFromCollectionGroup(ctx context.Context, collectionGroupID, timeseriesID uuid.UUID) error
 }
 
 type collectionGroupStore struct {
 	db *model.Database
-	q  *model.Queries
+	*model.Queries
 }
 
 func NewCollectionGroupStore(db *model.Database, q *model.Queries) *collectionGroupStore {
 	return &collectionGroupStore{db, q}
-}
-
-// ListCollectionGroups lists all collection groups for a project
-func (s collectionGroupStore) ListCollectionGroups(ctx context.Context, projectID uuid.UUID) ([]model.CollectionGroup, error) {
-	return s.q.ListCollectionGroups(ctx, projectID)
-}
-
-// ListCollectionGroupSlugs lists all collection group slugs for a project
-func (s collectionGroupStore) ListCollectionGroupSlugs(ctx context.Context, projectID uuid.UUID) ([]string, error) {
-	return s.q.ListCollectionGroupSlugs(ctx, projectID)
 }
 
 // GetCollectionGroupDetails returns details for a single CollectionGroup
@@ -43,7 +41,7 @@ func (s collectionGroupStore) GetCollectionGroupDetails(ctx context.Context, pro
 		}
 	}()
 
-	qtx := s.q.WithTx(tx)
+	qtx := s.WithTx(tx)
 
 	cg, err := qtx.GetCollectionGroupDetails(ctx, projectID, collectionGroupID)
 	if err != nil {
@@ -61,30 +59,4 @@ func (s collectionGroupStore) GetCollectionGroupDetails(ctx context.Context, pro
 	cg.Timeseries = ts
 
 	return cg, nil
-}
-
-// CreateCollectionGroup creates a new collection group
-func (s collectionGroupStore) CreateCollectionGroup(ctx context.Context, cg model.CollectionGroup) (model.CollectionGroup, error) {
-	return s.q.CreateCollectionGroup(ctx, cg)
-}
-
-// UpdateCollectionGroup updates an existing collection group's metadata
-func (s collectionGroupStore) UpdateCollectionGroup(ctx context.Context, cg model.CollectionGroup) (model.CollectionGroup, error) {
-	return s.q.UpdateCollectionGroup(ctx, cg)
-}
-
-// DeleteCollectionGroup deletes a collection group and associated timeseries relationships
-// using the id of the collection group
-func (s collectionGroupStore) DeleteCollectionGroup(ctx context.Context, projectID, collectionGroupID uuid.UUID) error {
-	return s.q.DeleteCollectionGroup(ctx, projectID, collectionGroupID)
-}
-
-// AddTimeseriesToCollectionGroup adds a timeseries to a collection group
-func (s collectionGroupStore) AddTimeseriesToCollectionGroup(ctx context.Context, collectionGroupID, timeseriesID uuid.UUID) error {
-	return s.q.AddTimeseriesToCollectionGroup(ctx, collectionGroupID, timeseriesID)
-}
-
-// RemoveTimeseriesFromCollectionGroup removes a timeseries from a collection group
-func (s collectionGroupStore) RemoveTimeseriesFromCollectionGroup(ctx context.Context, collectionGroupID, timeseriesID uuid.UUID) error {
-	return s.q.RemoveTimeseriesFromCollectionGroup(ctx, collectionGroupID, timeseriesID)
 }

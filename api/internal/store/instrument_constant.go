@@ -9,24 +9,19 @@ import (
 )
 
 type InstrumentConstantStore interface {
+	ListInstrumentConstants(ctx context.Context, instrumentID uuid.UUID) ([]model.Timeseries, error)
+	CreateInstrumentConstant(ctx context.Context, instrumentID, timeseriesID uuid.UUID) error
+	CreateInstrumentConstants(ctx context.Context, tt []model.Timeseries) ([]model.Timeseries, error)
+	DeleteInstrumentConstant(ctx context.Context, instrumentID, timeseriesID uuid.UUID) error
 }
 
 type instrumentConstantStore struct {
 	db *model.Database
-	q  *model.Queries
+	*model.Queries
 }
 
 func NewInstrumentConstantStore(db *model.Database, q *model.Queries) *instrumentConstantStore {
 	return &instrumentConstantStore{db, q}
-}
-
-// ListInstrumentConstants lists constants for a given instrument id
-func (s instrumentConstantStore) ListInstrumentConstants(ctx context.Context, instrumentID uuid.UUID) ([]model.Timeseries, error) {
-	return s.q.ListInstrumentConstants(ctx, instrumentID)
-}
-
-func (s instrumentConstantStore) CreateInstrumentConstant(ctx context.Context, instrumentID, timeseriesID uuid.UUID) error {
-	return s.q.CreateInstrumentConstant(ctx, instrumentID, timeseriesID)
 }
 
 // CreateInstrumentConstants creates many instrument constants from an array of instrument constants
@@ -42,7 +37,7 @@ func (s instrumentConstantStore) CreateInstrumentConstants(ctx context.Context, 
 		}
 	}()
 
-	qtx := s.q.WithTx(tx)
+	qtx := s.WithTx(tx)
 
 	uu := make([]model.Timeseries, len(tt))
 	for idx, t := range tt {
@@ -73,7 +68,7 @@ func (s instrumentConstantStore) DeleteInstrumentConstant(ctx context.Context, i
 		}
 	}()
 
-	qtx := s.q.WithTx(tx)
+	qtx := s.WithTx(tx)
 
 	if err := qtx.DeleteInstrumentConstant(ctx, instrumentID, timeseriesID); err != nil {
 		return err

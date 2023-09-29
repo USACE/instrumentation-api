@@ -32,6 +32,10 @@ type TimeseriesNote struct {
 	Annotation *string `json:"annotation,omitempty"`
 }
 
+type TimeseriesCollectionItems struct {
+	Items []Timeseries
+}
+
 const listTimeseries = `
 	SELECT
 		id, slug, name, variable, project_id, project_slug, project, instrument_id,

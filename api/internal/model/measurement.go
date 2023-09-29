@@ -220,7 +220,7 @@ const deleteTimeseriesMeasurementsRange = `
 	DELETE FROM timeseries_measurement WHERE timeseries_id = $1 AND time > $2 AND time < $3
 `
 
-func (q *Queries) DeleteTimeseriesMeasurementsRange(ctx context.Context, timeseriesID uuid.UUID, start, end time.Time) error {
+func (q *Queries) DeleteTimeseriesMeasurementsByRange(ctx context.Context, timeseriesID uuid.UUID, start, end time.Time) error {
 	_, err := q.db.ExecContext(ctx, deleteTimeseriesMeasurementsRange, timeseriesID, start, end)
 	return err
 }

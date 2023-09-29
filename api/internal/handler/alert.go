@@ -6,17 +6,17 @@ import (
 	"net/http"
 
 	"github.com/USACE/instrumentation-api/api/internal/messages"
-	"github.com/USACE/instrumentation-api/api/internal/models"
+	"github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/google/uuid"
 
 	"github.com/labstack/echo/v4"
 )
 
-func (r *Router) Alerts(h *Handler) {
-	r.ag.public.GET("/projects/:project_id/instruments/:instrument_id/alerts", h.ListAlertsForInstrument())
-	r.ag.private.GET("/my_alerts", h.ListMyAlerts())
-	r.ag.private.POST("/my_alerts/:alert_id/read", h.DoAlertRead())
-	r.ag.private.POST("/my_alerts/:alert_id/unread", h.DoAlertUnread())
+func (r *ApiRouter) Alerts(h *ApiHandler) {
+	r.g.public.GET("/projects/:project_id/instruments/:instrument_id/alerts", h.ListAlertsForInstrument)
+	r.g.private.GET("/my_alerts", h.ListMyAlerts)
+	r.g.private.POST("/my_alerts/:alert_id/read", h.DoAlertRead)
+	r.g.private.POST("/my_alerts/:alert_id/unread", h.DoAlertUnread)
 }
 
 // ListAlertsForInstrument godoc
@@ -32,18 +32,16 @@ func (r *Router) Alerts(h *Handler) {
 // @Failure      404	{object}  echo.HTTPError
 // @Failure      500	{object}  echo.HTTPError
 // @Router       /projects/{project_id}/instruments/{instrument_id}/alerts [get]
-func (h *Handler) ListAlertsForInstrument() echo.HandlerFunc {
-	return func(c echo.Context) error {
-		instrumentID, err := uuid.Parse(c.Param("instrument_id"))
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-		}
-		aa, err := h.AlertStore.GetAllAlertsForInstrument(c.Request().Context(), instrumentID)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-		}
-		return c.JSON(http.StatusOK, aa)
+func (h *ApiHandler) ListAlertsForInstrument(c echo.Context) error {
+	instrumentID, err := uuid.Parse(c.Param("instrument_id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
+	aa, err := h.AlertStore.GetAllAlertsForInstrument(c.Request().Context(), instrumentID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, aa)
 }
 
 // ListMyAlerts  godoc
@@ -57,16 +55,14 @@ func (h *Handler) ListAlertsForInstrument() echo.HandlerFunc {
 // @Failure      404  {object}  echo.HTTPError
 // @Failure      500  {object}  echo.HTTPError
 // @Router       /my_alerts [get]
-func (h *Handler) ListMyAlerts() echo.HandlerFunc {
-	return func(c echo.Context) error {
-		p := c.Get("profile").(*models.Profile)
-		profileID := p.ID
-		aa, err := h.AlertStore.GetAllAlertsForProfile(c.Request().Context(), profileID)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-		}
-		return c.JSON(http.StatusOK, &aa)
+func (h *ApiHandler) ListMyAlerts(c echo.Context) error {
+	p := c.Get("profile").(*model.Profile)
+	profileID := p.ID
+	aa, err := h.AlertStore.GetAllAlertsForProfile(c.Request().Context(), profileID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
+	return c.JSON(http.StatusOK, &aa)
 }
 
 // DoAlertRead   godoc
@@ -82,23 +78,21 @@ func (h *Handler) ListMyAlerts() echo.HandlerFunc {
 // @Failure      404  {object}  echo.HTTPError
 // @Failure      500  {object}  echo.HTTPError
 // @Router       /my_alerts/{alert_id}/read [post]
-func (h *Handler) DoAlertRead() echo.HandlerFunc {
-	return func(c echo.Context) error {
-		p := c.Get("profile").(*models.Profile)
-		profileID := p.ID
-		alertID, err := uuid.Parse(c.Param("alert_id"))
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-		}
-		a, err := h.AlertStore.DoAlertRead(c.Request().Context(), profileID, alertID)
-		if err != nil {
-			if errors.Is(err, sql.ErrNoRows) {
-				return echo.NewHTTPError(http.StatusNotFound, messages.NotFound)
-			}
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-		}
-		return c.JSON(http.StatusOK, a)
+func (h *ApiHandler) DoAlertRead(c echo.Context) error {
+	p := c.Get("profile").(*model.Profile)
+	profileID := p.ID
+	alertID, err := uuid.Parse(c.Param("alert_id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
+	a, err := h.AlertStore.DoAlertRead(c.Request().Context(), profileID, alertID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return echo.NewHTTPError(http.StatusNotFound, messages.NotFound)
+		}
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, a)
 }
 
 // DoAlertUnread godoc
@@ -114,21 +108,19 @@ func (h *Handler) DoAlertRead() echo.HandlerFunc {
 // @Failure      404  {object}  echo.HTTPError
 // @Failure      500  {object}  echo.HTTPError
 // @Router       /my_alerts/{alert_id}/unread [post]
-func (h *Handler) DoAlertUnread() echo.HandlerFunc {
-	return func(c echo.Context) error {
-		p := c.Get("profile").(*models.Profile)
-		profileID := p.ID
-		alertID, err := uuid.Parse(c.Param("alert_id"))
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-		}
-		a, err := h.AlertStore.DoAlertUnread(c.Request().Context(), profileID, alertID)
-		if err != nil {
-			if errors.Is(err, sql.ErrNoRows) {
-				return echo.NewHTTPError(http.StatusNotFound, messages.NotFound)
-			}
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-		}
-		return c.JSON(http.StatusOK, a)
+func (h *ApiHandler) DoAlertUnread(c echo.Context) error {
+	p := c.Get("profile").(*model.Profile)
+	profileID := p.ID
+	alertID, err := uuid.Parse(c.Param("alert_id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
+	a, err := h.AlertStore.DoAlertUnread(c.Request().Context(), profileID, alertID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return echo.NewHTTPError(http.StatusNotFound, messages.NotFound)
+		}
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, a)
 }

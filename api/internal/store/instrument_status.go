@@ -9,25 +9,19 @@ import (
 )
 
 type InstrumentStatusStore interface {
+	ListInstrumentStatus(ctx context.Context, instrumentID uuid.UUID) ([]model.InstrumentStatus, error)
+	GetInstrumentStatus(ctx context.Context, statusID uuid.UUID) (model.InstrumentStatus, error)
+	CreateOrUpdateInstrumentStatus(ctx context.Context, instrumentID uuid.UUID, ss []model.InstrumentStatus) error
+	DeleteInstrumentStatus(ctx context.Context, statusID uuid.UUID) error
 }
 
 type instrumentStatusStore struct {
 	db *model.Database
-	q  *model.Queries
+	*model.Queries
 }
 
 func NewInstrumentStatusStore(db *model.Database, q *model.Queries) *instrumentStatusStore {
 	return &instrumentStatusStore{db, q}
-}
-
-// ListInstrumentStatus returns all status values for an instrument
-func (s instrumentStatusStore) ListInstrumentStatus(ctx context.Context, instrumentID uuid.UUID) ([]model.InstrumentStatus, error) {
-	return s.q.ListInstrumentStatus(ctx, instrumentID)
-}
-
-// GetInstrumentStatus gets a single status
-func (s instrumentStatusStore) GetInstrumentStatus(ctx context.Context, statusID uuid.UUID) (model.InstrumentStatus, error) {
-	return s.q.GetInstrumentStatus(ctx, statusID)
 }
 
 func (s instrumentStatusStore) CreateOrUpdateInstrumentStatus(ctx context.Context, instrumentID uuid.UUID, ss []model.InstrumentStatus) error {
@@ -41,7 +35,7 @@ func (s instrumentStatusStore) CreateOrUpdateInstrumentStatus(ctx context.Contex
 		}
 	}()
 
-	qtx := s.q.WithTx(tx)
+	qtx := s.WithTx(tx)
 
 	for _, updateStatus := range ss {
 		if err := qtx.CreateOrUpdateInstrumentStatus(ctx, instrumentID, updateStatus.StatusID, updateStatus.Time); err != nil {
@@ -50,9 +44,4 @@ func (s instrumentStatusStore) CreateOrUpdateInstrumentStatus(ctx context.Contex
 	}
 
 	return tx.Commit()
-}
-
-// DeleteInstrumentStatus deletes a status for an instrument
-func (s instrumentStatusStore) DeleteInstrumentStatus(ctx context.Context, statusID uuid.UUID) error {
-	return s.q.DeleteInstrumentStatus(ctx, statusID)
 }

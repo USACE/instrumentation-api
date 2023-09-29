@@ -10,29 +10,21 @@ import (
 )
 
 type InclinometerMeasurementStore interface {
+	ListInclinometerMeasurements(ctx context.Context, timeseriesID uuid.UUID, tw model.TimeWindow) (*model.InclinometerMeasurementCollection, error)
+	ListInclinometerMeasurementValues(ctx context.Context, timeseriesID uuid.UUID, time time.Time, inclConstant float64) ([]*model.InclinometerMeasurementValues, error)
+	DeleteInclinometerMeasurement(ctx context.Context, timeseriesID uuid.UUID, time time.Time) error
+	CreateOrUpdateInclinometerMeasurements(ctx context.Context, im []model.InclinometerMeasurementCollection, p model.Profile, createDate time.Time) ([]model.InclinometerMeasurementCollection, error)
+	ListInstrumentIDsFromTimeseriesID(ctx context.Context, timeseriesID uuid.UUID) ([]uuid.UUID, error)
+	CreateTimeseriesConstant(ctx context.Context, timeseriesID uuid.UUID, parameterName string, unitName string, value float64) error
 }
 
 type inclinometerMeasurementStore struct {
 	db *model.Database
-	q  *model.Queries
+	*model.Queries
 }
 
 func NewInclinometerMeasurementStore(db *model.Database, q *model.Queries) *inclinometerMeasurementStore {
 	return &inclinometerMeasurementStore{db, q}
-}
-
-// ListInclinometersMeasurements returns a timeseries with slice of inclinometer measurements populated
-func (s inclinometerMeasurementStore) ListInclinometerMeasurements(ctx context.Context, timeseriesID uuid.UUID, tw model.TimeWindow) (*model.InclinometerMeasurementCollection, error) {
-	return s.q.ListInclinometerMeasurements(ctx, timeseriesID, tw)
-}
-
-func (s inclinometerMeasurementStore) ListInclinometerMeasurementValues(ctx context.Context, timeseriesID uuid.UUID, time time.Time, inclConstant float64) ([]*model.InclinometerMeasurementValues, error) {
-	return s.q.ListInclinometerMeasurementValues(ctx, timeseriesID, time, inclConstant)
-}
-
-// DeleteInclinometerMeasurements deletes a inclinometer Measurement
-func (s inclinometerMeasurementStore) DeleteInclinometerMeasurement(ctx context.Context, timeseriesID uuid.UUID, time time.Time) error {
-	return s.q.DeleteInclinometerMeasurement(ctx, timeseriesID, time)
 }
 
 // CreateInclinometerMeasurements creates many inclinometer from an array of inclinometer
@@ -48,7 +40,7 @@ func (s inclinometerMeasurementStore) CreateOrUpdateInclinometerMeasurements(ctx
 		}
 	}()
 
-	qtx := s.q.WithTx(tx)
+	qtx := s.WithTx(tx)
 
 	// Iterate All inclinometer Measurements
 	for idx := range im {
@@ -67,14 +59,6 @@ func (s inclinometerMeasurementStore) CreateOrUpdateInclinometerMeasurements(ctx
 	return im, nil
 }
 
-func (s inclinometerMeasurementStore) ListInstrumentIDsFromTimeseriesID(ctx context.Context, timeseriesID uuid.UUID) ([]uuid.UUID, error) {
-	return s.q.ListInstrumentIDsFromTimeseriesID(ctx, timeseriesID)
-}
-
-const listParameterIDsFromParameterName = `
-	SELECT id FROM parameter WHERE name = $1
-`
-
 // CreateTimeseriesConstant creates timeseries constant
 func (s inclinometerMeasurementStore) CreateTimeseriesConstant(ctx context.Context, timeseriesID uuid.UUID, parameterName string, unitName string, value float64) error {
 	tx, err := s.db.BeginTxx(ctx, nil)
@@ -87,7 +71,7 @@ func (s inclinometerMeasurementStore) CreateTimeseriesConstant(ctx context.Conte
 		}
 	}()
 
-	qtx := s.q.WithTx(tx)
+	qtx := s.WithTx(tx)
 
 	instrumentIDs, err := qtx.ListInstrumentIDsFromTimeseriesID(ctx, timeseriesID)
 	if err != nil {

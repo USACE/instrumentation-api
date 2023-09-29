@@ -23,38 +23,38 @@ type EmailContent struct {
 	To                    []string
 }
 
-func CreateEmailTemplateContent(preformatted EmailContent) (*EmailTemplateContent, error) {
+func CreateEmailTemplateContent(preformatted EmailContent) (EmailTemplateContent, error) {
 	tTextSubject, err := texttemp.New("textSubject").Parse(preformatted.TextSubject)
 	if err != nil {
-		return nil, err
+		return EmailTemplateContent{}, err
 	}
 	tTextBody, err := texttemp.New("textBody").Parse(preformatted.TextBody)
 	if err != nil {
-		return nil, err
+		return EmailTemplateContent{}, err
 	}
-	return &EmailTemplateContent{
+	return EmailTemplateContent{
 		TextSubject: tTextSubject,
 		TextBody:    tTextBody,
 	}, nil
 }
 
-func FormatAlertConfigTemplates(templContent *EmailTemplateContent, data any) (*EmailContent, error) {
+func FormatAlertConfigTemplates(templContent EmailTemplateContent, data any) (EmailContent, error) {
 	var textSubject, textBody strings.Builder
 
 	if err := templContent.TextSubject.Execute(&textSubject, data); err != nil {
-		return nil, err
+		return EmailContent{}, err
 	}
 	if err := templContent.TextBody.Execute(&textBody, data); err != nil {
-		return nil, err
+		return EmailContent{}, err
 	}
 
-	return &EmailContent{
+	return EmailContent{
 		TextSubject: textSubject.String(),
 		TextBody:    textBody.String(),
 	}, nil
 }
 
-func ConstructAndSendEmail(ec *EmailContent, cfg *config.AlertCheckConfig, smtpConfig *config.SmtpConfig) error {
+func ConstructAndSendEmail(ec EmailContent, cfg config.AlertCheckConfig) error {
 	if len(ec.To) == 0 {
 		if cfg.EmailSendMocked {
 			log.Print("no email subs")
@@ -85,7 +85,7 @@ func ConstructAndSendEmail(ec *EmailContent, cfg *config.AlertCheckConfig, smtpC
 	}
 	msg += "\r\n" + base64.StdEncoding.EncodeToString([]byte(ec.TextBody))
 
-	if err := smtp.SendMail(smtpConfig.SmtpAddr, smtpConfig.SmtpAuth, cfg.EmailFrom, ec.To, []byte(msg)); err != nil {
+	if err := smtp.SendMail(cfg.SmtpAddr(), cfg.SmtpAuth(), cfg.EmailFrom, ec.To, []byte(msg)); err != nil {
 		return err
 	}
 	return nil

@@ -5,10 +5,8 @@ import (
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/internal/model"
-	"github.com/USACE/instrumentation-api/api/internal/models"
 
 	"github.com/google/uuid"
-	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
 )
 
@@ -29,44 +27,42 @@ type Filter struct {
 	TimeWindow   model.TimeWindow
 }
 
-func PostInclinometerExplorer(db *sqlx.DB) echo.HandlerFunc {
-	return func(c echo.Context) error {
+func (h ApiHandler) PostInclinometerExplorer(c echo.Context) error {
 
-		// Filters used in SQL Query
-		var f Filter
+	// Filters used in SQL Query
+	var f Filter
 
-		// Instrument IDs from POST
-		if err := (&echo.DefaultBinder{}).BindBody(c, &f.InstrumentID); err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-		}
-
-		// Get timeWindow from query params
-		var tw model.TimeWindow
-		a, b := c.QueryParam("after"), c.QueryParam("before")
-		if err := tw.SetWindow(a, b, time.Now().AddDate(0, 0, -7), time.Now()); err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-		}
-		f.TimeWindow = tw
-
-		// Get Stored And Computed Timeseries With Measurements
-		interval := time.Hour // Set to 1 Hour; TODO - do not hard-code interval
-		tt, err := models.ComputedInclinometerTimeseries(db, f.InstrumentID, &f.TimeWindow, &interval)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-		}
-
-		// Convert Rows to Response
-		response, err := explorerInclinometerResponseFactory(tt)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-		}
-
-		return c.JSON(http.StatusOK, response)
+	// Instrument IDs from POST
+	if err := (&echo.DefaultBinder{}).BindBody(c, &f.InstrumentID); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
+
+	// Get timeWindow from query params
+	var tw model.TimeWindow
+	a, b := c.QueryParam("after"), c.QueryParam("before")
+	if err := tw.SetWindow(a, b, time.Now().AddDate(0, 0, -7), time.Now()); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	f.TimeWindow = tw
+
+	// Get Stored And Computed Timeseries With Measurements
+	interval := time.Hour // Set to 1 Hour; TODO - do not hard-code interval
+	tt, err := model.ComputedInclinometerTimeseries(c.Request().Context(), f.InstrumentID, f.TimeWindow, interval)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	// Convert Rows to Response
+	response, err := explorerInclinometerResponseFactory(tt)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, response)
 }
 
 // explorerResponseFactory returns the explorer-specific JSON response format
-func ExplorerResponseFactory(tt []models.Timeseries) (map[uuid.UUID][]model.MeasurementCollectionLean, error) {
+func (h ApiHandler) ExplorerResponseFactory(tt []model.ProcessTimeseries) (map[uuid.UUID][]model.MeasurementCollectionLean, error) {
 
 	response := make(map[uuid.UUID][]model.MeasurementCollectionLean)
 
@@ -88,7 +84,7 @@ func ExplorerResponseFactory(tt []models.Timeseries) (map[uuid.UUID][]model.Meas
 }
 
 // explorerResponseFactory returns the explorer-specific JSON response format
-func explorerInclinometerResponseFactory(tt []models.InclinometerTimeseries) (map[uuid.UUID][]model.InclinometerMeasurementCollectionLean, error) {
+func (h ApiHandler) explorerInclinometerResponseFactory(tt []model.ProcessInclinometerTimeseries) (map[uuid.UUID][]model.InclinometerMeasurementCollectionLean, error) {
 
 	response := make(map[uuid.UUID][]model.InclinometerMeasurementCollectionLean)
 

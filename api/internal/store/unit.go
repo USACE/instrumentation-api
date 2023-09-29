@@ -7,18 +7,14 @@ import (
 )
 
 type UnitStore interface {
+	ListUnits(ctx context.Context) ([]model.Unit, error)
 }
 
 type unitStore struct {
 	db *model.Database
-	q  *model.Queries
+	*model.Queries
 }
 
 func NewUnitStore(db *model.Database, q *model.Queries) *unitStore {
 	return &unitStore{db, q}
-}
-
-// ListUnits returns a slice of units
-func (s unitStore) ListUnits(ctx context.Context) ([]model.Unit, error) {
-	return s.q.ListUnits(ctx)
 }

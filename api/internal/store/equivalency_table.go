@@ -9,20 +9,20 @@ import (
 )
 
 type EquivalencyTableStore interface {
+	GetEquivalencyTable(ctx context.Context, dlID uuid.UUID) (model.EquivalencyTable, error)
+	CreateEquivalencyTable(ctx context.Context, t model.EquivalencyTable) error
+	UpdateEquivalencyTable(ctx context.Context, t *model.EquivalencyTable) error
+	DeleteEquivalencyTable(ctx context.Context, dataloggerID uuid.UUID) error
+	DeleteEquivalencyTableRow(ctx context.Context, dataloggerID, rowID uuid.UUID) error
 }
 
 type equivalencyTableStore struct {
 	db *model.Database
-	q  *model.Queries
+	*model.Queries
 }
 
 func NewEquivalencyTableStore(db *model.Database, q *model.Queries) *equivalencyTableStore {
 	return &equivalencyTableStore{db, q}
-}
-
-// GetEquivalencyTable returns a single DataLogger EquivalencyTable
-func (s equivalencyTableStore) GetEquivalencyTable(ctx context.Context, dlID uuid.UUID) (model.EquivalencyTable, error) {
-	return s.q.GetEquivalencyTable(ctx, dlID)
 }
 
 // CreateEquivalencyTable creates EquivalencyTable rows
@@ -38,7 +38,7 @@ func (s equivalencyTableStore) CreateEquivalencyTable(ctx context.Context, t mod
 		}
 	}()
 
-	qtx := s.q.WithTx(tx)
+	qtx := s.WithTx(tx)
 
 	for _, r := range t.Rows {
 		if r.TimeseriesID == nil {
@@ -66,7 +66,7 @@ func (s equivalencyTableStore) UpdateEquivalencyTable(ctx context.Context, t *mo
 		}
 	}()
 
-	qtx := s.q.WithTx(tx)
+	qtx := s.WithTx(tx)
 
 	for _, r := range t.Rows {
 		if r.TimeseriesID == nil {
@@ -80,14 +80,4 @@ func (s equivalencyTableStore) UpdateEquivalencyTable(ctx context.Context, t *mo
 		}
 	}
 	return tx.Commit()
-}
-
-// DeleteEquivalencyTable clears all rows of the EquivalencyTable for a Datalogger
-func (s equivalencyTableStore) DeleteEquivalencyTable(ctx context.Context, dataloggerID uuid.UUID) error {
-	return s.q.DeleteEquivalencyTable(ctx, dataloggerID)
-}
-
-// DeleteEquivalencyTableRow deletes a single EquivalencyTable row by row id
-func (s equivalencyTableStore) DeleteEquivalencyTableRow(ctx context.Context, dataloggerID, rowID uuid.UUID) error {
-	return s.q.DeleteEquivalencyTableRow(ctx, dataloggerID, rowID)
 }

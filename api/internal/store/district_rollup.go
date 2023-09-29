@@ -8,23 +8,15 @@ import (
 )
 
 type DistrictRollupStore interface {
+	ListEvaluationDistrictRollup(ctx context.Context, opID uuid.UUID, tw model.TimeWindow) ([]model.DistrictRollup, error)
+	ListMeasurementDistrictRollup(ctx context.Context, opID uuid.UUID, tw model.TimeWindow) ([]model.DistrictRollup, error)
 }
 
 type districtRollupStore struct {
 	db *model.Database
-	q  *model.Queries
+	*model.Queries
 }
 
 func NewDistrictRollupStore(db *model.Database, q *model.Queries) *districtRollupStore {
 	return &districtRollupStore{db, q}
-}
-
-// ListCollectionGroups lists all collection groups for a project
-func (s districtRollupStore) ListEvaluationDistrictRollup(ctx context.Context, opID uuid.UUID, tw model.TimeWindow) ([]model.DistrictRollup, error) {
-	return s.q.ListEvaluationDistrictRollup(ctx, opID, tw)
-}
-
-// ListCollectionGroups lists all collection groups for a project
-func (s districtRollupStore) ListMeasurementDistrictRollup(ctx context.Context, opID uuid.UUID, tw model.TimeWindow) ([]model.DistrictRollup, error) {
-	return s.q.ListEvaluationDistrictRollup(ctx, opID, tw)
 }

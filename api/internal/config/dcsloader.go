@@ -23,7 +23,7 @@ type DcsLoaderConfig struct {
 	AWSSQSQueueName     string `envconfig:"AWS_SQS_QUEUE_NAME"`
 }
 
-func GetDcsLoaderConfig() *DcsLoaderConfig {
+func NewDcsLoaderConfig() *DcsLoaderConfig {
 	var cfg DcsLoaderConfig
 	if err := envconfig.Process("loader", &cfg); err != nil {
 		log.Fatal(err.Error())

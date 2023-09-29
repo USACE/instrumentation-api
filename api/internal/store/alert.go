@@ -20,7 +20,7 @@ type AlertStore interface {
 
 type alertStore struct {
 	db *model.Database
-	q  *model.Queries
+	*model.Queries
 }
 
 func NewAlertStore(db *model.Database, q *model.Queries) *alertStore {
@@ -39,7 +39,7 @@ func (s alertStore) CreateAlerts(ctx context.Context, alertConfigIDs []uuid.UUID
 		}
 	}()
 
-	qtx := s.q.WithTx(tx)
+	qtx := s.WithTx(tx)
 	for _, id := range alertConfigIDs {
 		if err := qtx.CreateAlerts(ctx, id); err != nil {
 			return err
@@ -48,32 +48,11 @@ func (s alertStore) CreateAlerts(ctx context.Context, alertConfigIDs []uuid.UUID
 	return tx.Commit()
 }
 
-// GetAllByProject lists all alerts for a given instrument ID
-func (s alertStore) GetAllAlertsForProject(ctx context.Context, projectID uuid.UUID) ([]model.Alert, error) {
-	return s.q.GetAllAlertsForProject(ctx, projectID)
-}
-
-// GetAllByInstrument lists all alerts for a given instrument ID
-func (s alertStore) GetAllAlertsForInstrument(ctx context.Context, instrumentID uuid.UUID) ([]model.Alert, error) {
-	return s.q.GetAllAlertsForInstrument(ctx, instrumentID)
-}
-
-// GetAllByProfile returns all alerts for which a profile is subscribed to the AlertConfig
-func (s alertStore) GetAllAlertsForProfile(ctx context.Context, profileID uuid.UUID) ([]model.Alert, error) {
-	return s.q.GetAllAlertsForProfile(ctx, profileID)
-}
-
-// GetOneByProfile returns a single alert for which a profile is subscribed
-func (s alertStore) GetOneAlertForProfile(ctx context.Context, profileID, alertID uuid.UUID) (model.Alert, error) {
-	return s.q.GetOneAlertForProfile(ctx, profileID, alertID)
-}
-
 // DoAlertRead marks an alert as read for a profile
 func (s alertStore) DoAlertRead(ctx context.Context, profileID, alertID uuid.UUID) (model.Alert, error) {
-	var a model.Alert
 	tx, err := s.db.BeginTxx(ctx, nil)
 	if err != nil {
-		return a, err
+		return model.Alert{}, err
 	}
 	defer func() {
 		if err := tx.Rollback(); err != nil {
@@ -81,16 +60,16 @@ func (s alertStore) DoAlertRead(ctx context.Context, profileID, alertID uuid.UUI
 		}
 	}()
 
-	qtx := s.q.WithTx(tx)
+	qtx := s.WithTx(tx)
 	if err := qtx.DoAlertRead(ctx, profileID, alertID); err != nil {
-		return a, err
+		return model.Alert{}, err
 	}
 	b, err := qtx.GetOneAlertForProfile(ctx, profileID, alertID)
 	if err != nil {
-		return a, err
+		return model.Alert{}, err
 	}
 	if err := tx.Commit(); err != nil {
-		return a, err
+		return model.Alert{}, err
 	}
 
 	return b, nil
@@ -98,10 +77,9 @@ func (s alertStore) DoAlertRead(ctx context.Context, profileID, alertID uuid.UUI
 
 // DoAlertUnread marks an alert as unread for a profile
 func (s alertStore) DoAlertUnread(ctx context.Context, profileID, alertID uuid.UUID) (model.Alert, error) {
-	var b model.Alert
 	tx, err := s.db.BeginTxx(ctx, nil)
 	if err != nil {
-		return b, err
+		return model.Alert{}, err
 	}
 	defer func() {
 		if err := tx.Rollback(); err != nil {
@@ -109,17 +87,17 @@ func (s alertStore) DoAlertUnread(ctx context.Context, profileID, alertID uuid.U
 		}
 	}()
 
-	qtx := s.q.WithTx(tx)
+	qtx := s.WithTx(tx)
 	if err := qtx.DoAlertUnread(ctx, profileID, alertID); err != nil {
-		return b, err
+		return model.Alert{}, err
 	}
-	b, err = qtx.GetOneAlertForProfile(ctx, profileID, alertID)
+	a, err := qtx.GetOneAlertForProfile(ctx, profileID, alertID)
 	if err != nil {
-		return b, err
+		return model.Alert{}, err
 	}
 	if err := tx.Commit(); err != nil {
-		return b, err
+		return model.Alert{}, err
 	}
 
-	return b, nil
+	return a, nil
 }

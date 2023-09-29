@@ -90,7 +90,7 @@ const listAllDataloggers = `
 	SELECT * FROM v_datalogger
 `
 
-func (q *Queries) ListAllDataLoggers(ctx context.Context) ([]Datalogger, error) {
+func (q *Queries) ListAllDataloggers(ctx context.Context) ([]Datalogger, error) {
 	dls := make([]Datalogger, 0)
 	if err := q.db.SelectContext(ctx, &dls, listAllDataloggers); err != nil {
 		return make([]Datalogger, 0), err
@@ -236,4 +236,12 @@ func (q *Queries) GetDataloggerPreview(ctx context.Context, dlID uuid.UUID) (Dat
 		return dlp, err
 	}
 	return dlp, nil
+}
+
+const createUniquSlugDatalogger = `
+	SELECT slug FROM datalogger
+`
+
+func (q *Queries) CreateUniqueSlugDatalogger(ctx context.Context, dataloggerName string) (string, error) {
+	return q.CreateUniqueSlug(ctx, createUniquSlugDatalogger, dataloggerName)
 }

@@ -9,11 +9,17 @@ import (
 )
 
 type ProfileStore interface {
+	GetProfileWithTokensFromEDIPI(ctx context.Context, edipi int) (model.Profile, error)
+	GetProfileFromTokenID(ctx context.Context, tokenID string) (model.Profile, error)
+	CreateProfile(ctx context.Context, n model.ProfileInfo) (model.Profile, error)
+	CreateProfileToken(ctx context.Context, profileID uuid.UUID) (model.Token, error)
+	GetTokenInfoByTokenID(ctx context.Context, tokenID string) (model.TokenInfo, error)
+	DeleteToken(ctx context.Context, profileID uuid.UUID, tokenID string) error
 }
 
 type profileStore struct {
 	db *model.Database
-	q  *model.Queries
+	*model.Queries
 }
 
 func NewProfileStore(db *model.Database, q *model.Queries) *profileStore {
@@ -31,7 +37,7 @@ func (s profileStore) GetProfileWithTokensFromEDIPI(ctx context.Context, edipi i
 		}
 	}()
 
-	qtx := s.q.WithTx(tx)
+	qtx := s.WithTx(tx)
 
 	p, err := qtx.GetProfileFromEDIPI(ctx, edipi)
 	if err != nil {
@@ -49,13 +55,6 @@ func (s profileStore) GetProfileWithTokensFromEDIPI(ctx context.Context, edipi i
 	return p, nil
 }
 
-const getProfileFromTokenID = `
-	SELECT p.id, p.edipi, p.username, p.email, p.is_admin
-	FROM profile_token t
-	LEFT JOIN v_profile p ON p.id = t.profile_id
-	WHERE t.token_id=$1
-`
-
 // GetProfileFromTokenID returns a profile given a token ID
 func (s profileStore) GetProfileFromTokenID(ctx context.Context, tokenID string) (model.Profile, error) {
 	tx, err := s.db.BeginTxx(ctx, nil)
@@ -68,7 +67,7 @@ func (s profileStore) GetProfileFromTokenID(ctx context.Context, tokenID string)
 		}
 	}()
 
-	qtx := s.q.WithTx(tx)
+	qtx := s.WithTx(tx)
 
 	p, err := qtx.GetProfileFromTokenID(ctx, tokenID)
 	if err != nil {
@@ -84,26 +83,4 @@ func (s profileStore) GetProfileFromTokenID(ctx context.Context, tokenID string)
 
 	p.Tokens = tokens
 	return p, nil
-}
-
-// CreateProfile creates a new profile
-func (s profileStore) CreateProfile(ctx context.Context, n model.ProfileInfo) (model.Profile, error) {
-	return s.q.CreateProfile(ctx, n)
-}
-
-// CreateProfileToken creates a secret token and stores the HASH (not the actual token)
-// to the database. The return payload of this function is the first and last time you'll see
-// the raw token unless the user writes it down or stores it somewhere safe.
-func (s profileStore) CreateProfileToken(ctx context.Context, profileID uuid.UUID) (model.Token, error) {
-	return s.q.CreateProfileToken(ctx, profileID)
-}
-
-// GetTokenInfoByTokenID returns a single token by token id
-func (s profileStore) GetTokenInfoByTokenID(ctx context.Context, tokenID string) (model.TokenInfo, error) {
-	return s.q.GetTokenInfoByTokenID(ctx, tokenID)
-}
-
-// DeleteToken deletes a token by token_id
-func (s profileStore) DeleteToken(ctx context.Context, profileID uuid.UUID, tokenID string) error {
-	return s.q.DeleteToken(ctx, profileID, tokenID)
 }

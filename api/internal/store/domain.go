@@ -7,18 +7,14 @@ import (
 )
 
 type DomainStore interface {
+	GetDomains(ctx context.Context) ([]model.Domain, error)
 }
 
 type domainStore struct {
 	db *model.Database
-	q  *model.Queries
+	*model.Queries
 }
 
-func NewDomainStore(db *model.Database, q *model.Queries) *districtRollupStore {
-	return &districtRollupStore{db, q}
-}
-
-// ListCollectionGroups lists all collection groups for a project
-func (s domainStore) GetDomains(ctx context.Context) ([]model.Domain, error) {
-	return s.q.GetDomains(ctx)
+func NewDomainStore(db *model.Database, q *model.Queries) *domainStore {
+	return &domainStore{db, q}
 }

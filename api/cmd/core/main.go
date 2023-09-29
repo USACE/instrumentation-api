@@ -18,10 +18,10 @@ import (
 )
 
 func main() {
-	cfg := config.GetApiConfig()
+	cfg := config.NewApiConfig()
 	db := util.Connection(cfg.DBConfig.ConnStr())
 
-	awsCfg := config.AWSConfig(cfg)
+	awsCfg := config.NewAWSConfig(cfg)
 	sess := session.Must(session.NewSession(awsCfg))
 	s3c := s3.New(sess)
 
@@ -96,13 +96,6 @@ func main() {
 	public.GET("/health", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, map[string]interface{}{"status": "healthy"})
 	})
-
-	// Search
-	public.GET("/search/:entity", handlers.Search(db))
-
-	// Aware
-	public.GET("/aware/parameters", handlers.ListAwareParameters(db))
-	public.GET("/aware/data_acquisition_config", handlers.ListAwarePlatformParameterConfig(db))
 
 	// AlertConfigs
 	public.GET("/projects/:project_id/alert_configs", handlers.ListProjectAlertConfigs(db))

@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-type DataLoggerPayload struct {
+type DataloggerPayload struct {
 	Head Head    `json:"head"`
 	Data []Datum `json:"data"`
 }

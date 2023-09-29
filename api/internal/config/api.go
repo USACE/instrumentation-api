@@ -23,7 +23,7 @@ type ApiConfig struct {
 	AWSS3Bucket         string `envconfig:"AWS_S3_BUCKET"`
 }
 
-func AWSConfig(cfg *ApiConfig) *aws.Config {
+func NewAWSConfig(cfg *ApiConfig) *aws.Config {
 	awsConfig := aws.NewConfig().WithRegion(cfg.AWSS3Region)
 
 	// Used for "minio" during development
@@ -36,7 +36,7 @@ func AWSConfig(cfg *ApiConfig) *aws.Config {
 }
 
 // GetConfig returns environment variable config
-func GetApiConfig() *ApiConfig {
+func NewApiConfig() *ApiConfig {
 	var cfg ApiConfig
 	if err := envconfig.Process("instrumentation", &cfg); err != nil {
 		log.Fatal(err.Error())

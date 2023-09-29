@@ -10,39 +10,25 @@ import (
 )
 
 type InstrumentStore interface {
+	ListInstrumentSlugs(ctx context.Context) ([]string, error)
+	ListInstruments(ctx context.Context) ([]model.Instrument, error)
+	GetInstrument(ctx context.Context, instrumentID uuid.UUID) (model.Instrument, error)
+	GetInstrumentCount(ctx context.Context) (int, error)
+	CreateInstrument(ctx context.Context, i model.Instrument) (model.IDAndSlug, error)
+	CreateInstruments(ctx context.Context, instruments []model.Instrument) ([]model.IDAndSlug, error)
+	ValidateCreateInstruments(ctx context.Context, instruments []model.Instrument) (model.CreateInstrumentsValidationResult, error)
+	UpdateInstrument(ctx context.Context, i model.Instrument) (model.Instrument, error)
+	UpdateInstrumentGeometry(ctx context.Context, projectID, instrumentID uuid.UUID, geom geojson.Geometry, p model.Profile) (model.Instrument, error)
+	DeleteFlagInstrument(ctx context.Context, projectID, instrumentID uuid.UUID) error
 }
 
 type instrumentStore struct {
 	db *model.Database
-	q  *model.Queries
+	*model.Queries
 }
 
 func NewInstrumentStore(db *model.Database, q *model.Queries) *instrumentStore {
 	return &instrumentStore{db, q}
-}
-
-// ListInstrumentSlugs lists used instrument slugs in the database
-func (s instrumentStore) ListInstrumentSlugs(ctx context.Context) ([]string, error) {
-	return s.q.ListInstrumentSlugs(ctx)
-}
-
-// ListInstruments returns an array of instruments from the database
-func (s instrumentStore) ListInstruments(ctx context.Context) ([]model.Instrument, error) {
-	return s.q.ListInstruments(ctx)
-}
-
-// GetInstrument returns a single instrument
-func (s instrumentStore) GetInstrument(ctx context.Context, instrumentID uuid.UUID) (model.Instrument, error) {
-	return s.q.GetInstrument(ctx, instrumentID)
-}
-
-// GetInstrumentCount returns the number of instruments in the database
-func (s instrumentStore) GetInstrumentCount(ctx context.Context) (int, error) {
-	return s.q.GetInstrumentCount(ctx)
-}
-
-func (s instrumentStore) CreateInstrument(ctx context.Context, i model.Instrument) (model.IDAndSlug, error) {
-	return s.q.CreateInstrument(ctx, i)
 }
 
 func (s instrumentStore) CreateInstruments(ctx context.Context, instruments []model.Instrument) ([]model.IDAndSlug, error) {
@@ -56,7 +42,7 @@ func (s instrumentStore) CreateInstruments(ctx context.Context, instruments []mo
 		}
 	}()
 
-	qtx := s.q.WithTx(tx)
+	qtx := s.WithTx(tx)
 
 	ii := make([]model.IDAndSlug, len(instruments))
 	for idx, i := range instruments {
@@ -84,11 +70,11 @@ func (s instrumentStore) CreateInstruments(ctx context.Context, instruments []mo
 
 // ValidateCreateInstruments creates many instruments from an array of instruments
 func (s instrumentStore) ValidateCreateInstruments(ctx context.Context, instruments []model.Instrument) (model.CreateInstrumentsValidationResult, error) {
-	return s.q.ValidateCreateInstruments(ctx, instruments)
+	return s.ValidateCreateInstruments(ctx, instruments)
 }
 
 // UpdateInstrument updates a single instrument
-func (s instrumentStore) UpdateInstruments(ctx context.Context, i model.Instrument) (model.Instrument, error) {
+func (s instrumentStore) UpdateInstrument(ctx context.Context, i model.Instrument) (model.Instrument, error) {
 	e := model.Instrument{}
 	tx, err := s.db.BeginTxx(ctx, nil)
 	if err != nil {
@@ -100,7 +86,7 @@ func (s instrumentStore) UpdateInstruments(ctx context.Context, i model.Instrume
 		}
 	}()
 
-	qtx := s.q.WithTx(tx)
+	qtx := s.WithTx(tx)
 
 	if err := qtx.UpdateInstrument(ctx, i); err != nil {
 		return e, err
@@ -133,7 +119,7 @@ func (s instrumentStore) UpdateInstrumentGeometry(ctx context.Context, projectID
 		}
 	}()
 
-	qtx := s.q.WithTx(tx)
+	qtx := s.WithTx(tx)
 
 	if err := qtx.UpdateInstrumentGeometry(ctx, projectID, instrumentID, geom, p); err != nil {
 		return e, err
@@ -149,9 +135,4 @@ func (s instrumentStore) UpdateInstrumentGeometry(ctx context.Context, projectID
 	}
 
 	return aa, nil
-}
-
-// DeleteFlagInstrument changes delete flag to true
-func (s instrumentStore) DeleteFlagInstrument(ctx context.Context, projectID, instrumentID uuid.UUID) error {
-	return s.q.DeleteFlagInstrument(ctx, projectID, instrumentID)
 }

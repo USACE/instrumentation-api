@@ -9,39 +9,22 @@ import (
 )
 
 type AlertConfigStore interface {
-	GetAllAlertConfigsForProject(ctx context.Context, projectID *uuid.UUID) ([]model.AlertConfig, error)
+	GetAllAlertConfigsForProject(ctx context.Context, projectID uuid.UUID) ([]model.AlertConfig, error)
 	GetAllAlertConfigsForProjectAndAlertType(ctx context.Context, projectID, alertTypeID uuid.UUID) ([]model.AlertConfig, error)
 	GetAllAlertConfigsForInstrument(ctx context.Context, instrumentID uuid.UUID) ([]model.AlertConfig, error)
 	GetOneAlertConfig(ctx context.Context, alertConfigID uuid.UUID) (model.AlertConfig, error)
+	CreateAlertConfig(ctx context.Context, ac model.AlertConfig) (model.AlertConfig, error)
+	UpdateAlertConfig(ctx context.Context, alertConfigID uuid.UUID, ac model.AlertConfig) (model.AlertConfig, error)
+	DeleteAlertConfig(ctx context.Context, alertConfigID uuid.UUID) error
 }
 
 type alertConfigStore struct {
 	db *model.Database
-	q  *model.Queries
+	*model.Queries
 }
 
 func NewAlertConfigStore(db *model.Database, q *model.Queries) *alertConfigStore {
 	return &alertConfigStore{db, q}
-}
-
-// GetAllAlertConfigsForProject lists all alert configs for a single project
-func (s alertConfigStore) GetAllAlertConfigsForProject(ctx context.Context, projectID uuid.UUID) ([]model.AlertConfig, error) {
-	return s.q.GetAllAlertConfigsForProject(ctx, projectID)
-}
-
-// GetAllAlertConfigsForProjectAndAlertType lists alert configs for a single project filetered by alert type
-func (s alertConfigStore) GetAllAlertConfigsForProjectAndAlertType(ctx context.Context, projectID, alertTypeID uuid.UUID) ([]model.AlertConfig, error) {
-	return s.q.GetAllAlertConfigsForProjectAndAlertType(ctx, projectID, alertTypeID)
-}
-
-// ListInstrumentAlertConfigs lists all alerts for a single instrument
-func (s alertConfigStore) GetAllAlertConfigsForInstrument(ctx context.Context, instrumentID uuid.UUID) ([]model.AlertConfig, error) {
-	return s.q.GetAllAlertConfigsForInstrument(ctx, instrumentID)
-}
-
-// GetOneAlertConfig gets a single alert config
-func (s alertConfigStore) GetOneAlertConfig(ctx context.Context, alertConfigID uuid.UUID) (model.AlertConfig, error) {
-	return s.q.GetOneAlertConfig(ctx, alertConfigID)
 }
 
 // CreateAlertConfig creates one new alert configuration
@@ -64,7 +47,7 @@ func (s alertConfigStore) CreateAlertConfig(ctx context.Context, ac model.AlertC
 		ac.WarningInterval = "PT0"
 	}
 
-	qtx := s.q.WithTx(tx)
+	qtx := s.WithTx(tx)
 
 	acID, err := qtx.CreateAlertConfig(ctx, ac)
 	if err != nil {
@@ -117,7 +100,7 @@ func (s alertConfigStore) UpdateAlertConfig(ctx context.Context, alertConfigID u
 		ac.WarningInterval = "PT0"
 	}
 
-	qtx := s.q.WithTx(tx)
+	qtx := s.WithTx(tx)
 
 	if err := qtx.UpdateAlertConfig(ctx, ac); err != nil {
 		return a, err
@@ -154,10 +137,4 @@ func (s alertConfigStore) UpdateAlertConfig(ctx context.Context, alertConfigID u
 	}
 
 	return acNew, nil
-}
-
-// DeleteAlertConfig deletes an alert by ID
-func (s alertConfigStore) DeleteAlertConfig(ctx context.Context, alertConfigID uuid.UUID) error {
-	err := s.q.DeleteAlertConfig(ctx, alertConfigID)
-	return err
 }

@@ -9,31 +9,23 @@ import (
 )
 
 type EvaluationStore interface {
+	ListProjectEvaluations(ctx context.Context, projectID uuid.UUID) ([]model.Evaluation, error)
+	ListProjectEvaluationsByAlertConfig(ctx context.Context, projectID, alertConfigID uuid.UUID) ([]model.Evaluation, error)
+	ListInstrumentEvaluations(ctx context.Context, instrumentID uuid.UUID) ([]model.Evaluation, error)
+	GetEvaluation(ctx context.Context, evaluationID uuid.UUID) (model.Evaluation, error)
+	RecordEvaluationSubmittal(ctx context.Context, subID uuid.UUID) error
+	CreateEvaluation(ctx context.Context, ev model.Evaluation) (model.Evaluation, error)
+	UpdateEvaluation(ctx context.Context, evaluationID uuid.UUID, ev model.Evaluation) (model.Evaluation, error)
+	DeleteEvaluation(ctx context.Context, evaluationID uuid.UUID) error
 }
 
 type evaluationStore struct {
 	db *model.Database
-	q  *model.Queries
+	*model.Queries
 }
 
 func NewEvaluationStore(db *model.Database, q *model.Queries) *evaluationStore {
 	return &evaluationStore{db, q}
-}
-
-func (s evaluationStore) ListProjectEvaluations(ctx context.Context, projectID uuid.UUID) ([]model.Evaluation, error) {
-	return s.q.ListProjectEvaluations(ctx, projectID)
-}
-
-func (s evaluationStore) ListProjectEvaluationsByAlertConfig(ctx context.Context, projectID, alertConfigID uuid.UUID) ([]model.Evaluation, error) {
-	return s.q.ListProjectEvaluationsByAlertConfig(ctx, projectID, alertConfigID)
-}
-
-func (s evaluationStore) ListInstrumentEvaluations(ctx context.Context, instrumentID uuid.UUID) ([]model.Evaluation, error) {
-	return s.q.ListInstrumentEvaluations(ctx, instrumentID)
-}
-
-func (s evaluationStore) GetEvaluation(ctx context.Context, evaluationID uuid.UUID) (model.Evaluation, error) {
-	return s.q.GetEvaluation(ctx, evaluationID)
 }
 
 func (s evaluationStore) RecordEvaluationSubmittal(ctx context.Context, subID uuid.UUID) error {
@@ -47,7 +39,7 @@ func (s evaluationStore) RecordEvaluationSubmittal(ctx context.Context, subID uu
 		}
 	}()
 
-	qtx := s.q.WithTx(tx)
+	qtx := s.WithTx(tx)
 
 	sub, err := qtx.CompleteEvaluationSubmittal(ctx, subID)
 	if err != nil {
@@ -76,7 +68,7 @@ func (s evaluationStore) CreateEvaluation(ctx context.Context, ev model.Evaluati
 		}
 	}()
 
-	qtx := s.q.WithTx(tx)
+	qtx := s.WithTx(tx)
 
 	if ev.SubmittalID != nil {
 		sub, err := qtx.CompleteEvaluationSubmittal(ctx, *ev.SubmittalID)
@@ -113,7 +105,7 @@ func (s evaluationStore) CreateEvaluation(ctx context.Context, ev model.Evaluati
 	return evNew, nil
 }
 
-func (s evaluationStore) UpdateEvaluation(ctx context.Context, evaluationID *uuid.UUID, ev model.Evaluation) (model.Evaluation, error) {
+func (s evaluationStore) UpdateEvaluation(ctx context.Context, evaluationID uuid.UUID, ev model.Evaluation) (model.Evaluation, error) {
 	var a model.Evaluation
 	tx, err := s.db.BeginTxx(ctx, nil)
 	if err != nil {
@@ -125,7 +117,7 @@ func (s evaluationStore) UpdateEvaluation(ctx context.Context, evaluationID *uui
 		}
 	}()
 
-	qtx := s.q.WithTx(tx)
+	qtx := s.WithTx(tx)
 
 	if err := qtx.UpdateEvaluation(ctx, ev); err != nil {
 		return a, err
@@ -150,8 +142,4 @@ func (s evaluationStore) UpdateEvaluation(ctx context.Context, evaluationID *uui
 		return a, err
 	}
 	return evUpdated, nil
-}
-
-func (s evaluationStore) DeleteEvaluation(ctx context.Context, evaluationID uuid.UUID) error {
-	return s.q.DeleteEvaluation(ctx, evaluationID)
 }

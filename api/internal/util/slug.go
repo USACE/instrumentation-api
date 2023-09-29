@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/gosimple/slug"
-	"github.com/jmoiron/sqlx"
 )
 
 // Slugify removes spaces and converts to lower case
@@ -15,7 +14,6 @@ func Slugify(str string) string {
 
 // NextUniqueSlug returns the next unique slug available based on
 func NextUniqueSlug(str string, usedSlugs []string) (string, error) {
-
 	slugIsTaken := func(str string, arr []string) bool {
 		for _, i := range arr {
 			if str == i {
@@ -42,25 +40,4 @@ func NextUniqueSlug(str string, usedSlugs []string) (string, error) {
 		i++
 	}
 	return "", fmt.Errorf("reached max iteration 1000 without finding a unique slug")
-}
-
-func ListSlugs(db *sqlx.DB, slugSQL string) ([]string, error) {
-	slugs := make([]string, 0)
-	if err := db.Select(&slugs, slugSQL); err != nil {
-		return make([]string, 0), err
-	}
-	return slugs, nil
-}
-
-// CreateUniqueSlug creates a unique slug given a name and tableName
-func CreateUniqueSlug(db *sqlx.DB, slugSQL string, name string) (string, error) {
-	slugsTaken, err := ListSlugs(db, slugSQL)
-	if err != nil {
-		return "", err
-	}
-	s, err := NextUniqueSlug(name, slugsTaken)
-	if err != nil {
-		return "", err
-	}
-	return s, nil
 }
