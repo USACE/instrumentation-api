@@ -2,7 +2,9 @@ package model
 
 import (
 	"context"
+	"encoding/json"
 
+	"github.com/USACE/instrumentation-api/api/internal/util"
 	"github.com/google/uuid"
 )
 
@@ -34,6 +36,25 @@ type TimeseriesNote struct {
 
 type TimeseriesCollectionItems struct {
 	Items []Timeseries
+}
+
+// UnmarshalJSON implements UnmarshalJSON interface
+func (c *TimeseriesCollectionItems) UnmarshalJSON(b []byte) error {
+	switch util.JSONType(b) {
+	case "ARRAY":
+		if err := json.Unmarshal(b, &c.Items); err != nil {
+			return err
+		}
+	case "OBJECT":
+		var t Timeseries
+		if err := json.Unmarshal(b, &t); err != nil {
+			return err
+		}
+		c.Items = []Timeseries{t}
+	default:
+		c.Items = make([]Timeseries, 0)
+	}
+	return nil
 }
 
 const listTimeseries = `

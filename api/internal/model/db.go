@@ -3,6 +3,7 @@ package model
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"log"
 	"time"
 
@@ -51,9 +52,15 @@ type DBRows interface {
 	StructScan(dest interface{}) error
 }
 
+type Tx interface {
+	Commit() error
+	Rollback() error
+}
+
 var _ DBTX = (*sqlx.DB)(nil)
 var _ DBTX = (*sqlx.Tx)(nil)
 var _ DBRows = (*sqlx.Rows)(nil)
+var _ Tx = (*sqlx.Tx)(nil)
 
 var sqlIn = sqlx.In
 
@@ -75,8 +82,14 @@ func (q *Queries) WithTx(tx *sqlx.Tx) *Queries {
 	}
 }
 
-func NewDatabase(cfg *config.DBConfig) *Database {
+func TxDo(rollback func() error) {
+	err := rollback()
+	if err != nil && !errors.Is(err, sql.ErrTxDone) {
+		log.Print(err.Error())
+	}
+}
 
+func NewDatabase(cfg *config.DBConfig) *Database {
 	db, err := sqlx.Connect("pgx", cfg.ConnStr())
 	if err != nil {
 		log.Fatalf("Could not connect to database: %s", err.Error())

@@ -3,7 +3,7 @@ package handler
 import (
 	"net/http"
 
-	"github.com/USACE/instrumentation-api/api/internal/messages"
+	"github.com/USACE/instrumentation-api/api/internal/message"
 	"github.com/USACE/instrumentation-api/api/internal/model"
 
 	"github.com/google/uuid"
@@ -11,13 +11,13 @@ import (
 )
 
 // ListInstrumentStatus lists all Status for an instrument
-func (h ApiHandler) ListInstrumentStatus(c echo.Context) error {
+func (h *ApiHandler) ListInstrumentStatus(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("instrument_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
+		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
 	}
 
-	ss, err := model.ListInstrumentStatus(db, &id)
+	ss, err := h.InstrumentStatusService.ListInstrumentStatus(c.Request().Context(), id)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -25,13 +25,13 @@ func (h ApiHandler) ListInstrumentStatus(c echo.Context) error {
 }
 
 // GetInstrumentStatus returns a single Status
-func (h ApiHandler) GetInstrumentStatus(c echo.Context) error {
+func (h *ApiHandler) GetInstrumentStatus(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("status_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
+		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
 	}
 
-	s, err := model.GetInstrumentStatus(db, &id)
+	s, err := h.InstrumentStatusService.GetInstrumentStatus(c.Request().Context(), id)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -39,10 +39,10 @@ func (h ApiHandler) GetInstrumentStatus(c echo.Context) error {
 }
 
 // CreateOrUpdateInstrumentStatus creates a Status for an instrument
-func (h ApiHandler) CreateOrUpdateInstrumentStatus(c echo.Context) error {
+func (h *ApiHandler) CreateOrUpdateInstrumentStatus(c echo.Context) error {
 	instrumentID, err := uuid.Parse(c.Param("instrument_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
+		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
 	}
 
 	var sc model.InstrumentStatusCollection
@@ -58,19 +58,19 @@ func (h ApiHandler) CreateOrUpdateInstrumentStatus(c echo.Context) error {
 		sc.Items[idx].ID = id
 	}
 
-	if err := model.CreateOrUpdateInstrumentStatus(db, &instrumentID, sc.Items); err != nil {
+	if err := h.InstrumentStatusService.CreateOrUpdateInstrumentStatus(c.Request().Context(), instrumentID, sc.Items); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusCreated, make(map[string]interface{}))
 }
 
 // DeleteInstrumentStatus deletes a Status for an instrument
-func (h ApiHandler) DeleteInstrumentStatus(c echo.Context) error {
+func (h *ApiHandler) DeleteInstrumentStatus(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("status_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
+		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
 	}
-	if err := model.DeleteInstrumentStatus(db, &id); err != nil {
+	if err := h.InstrumentStatusService.DeleteInstrumentStatus(c.Request().Context(), id); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, make(map[string]interface{}))

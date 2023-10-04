@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/USACE/instrumentation-api/api/internal/config"
-	et "github.com/USACE/instrumentation-api/api/internal/email_template"
+	et "github.com/USACE/instrumentation-api/api/internal/email"
 )
 
 type AlertConfigMeasurementCheck struct {

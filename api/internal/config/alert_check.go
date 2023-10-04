@@ -10,9 +10,9 @@ import (
 type AlertCheckConfig struct {
 	DBConfig
 	SmtpConfig
-	AWSECSTriggerMocked bool   `envconfig:"INSTRUMENTATION_AWS_ECS_TRIGGER_MOCKED"`
-	EmailSendMocked     bool   `envconfig:"INSTRUMENTATION_EMAIL_SEND_MOCKED"`
-	EmailFrom           string `envconfig:"INSTRUMENTATION_EMAIL_FROM"`
+	TriggerMocked   bool   `envconfig:"INSTRUMENTATION_AWS_ECS_TRIGGER_MOCKED"`
+	EmailSendMocked bool   `envconfig:"INSTRUMENTATION_EMAIL_SEND_MOCKED"`
+	EmailFrom       string `envconfig:"INSTRUMENTATION_EMAIL_FROM"`
 }
 
 func NewAlertCheckConfig() *AlertCheckConfig {

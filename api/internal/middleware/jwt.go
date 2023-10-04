@@ -22,7 +22,15 @@ dtc8yA3y/USzK7j6eu1XfOECAwEAAQ==
 -----END PUBLIC KEY-----`
 
 // JWT is Fully Configured JWT Middleware to Support CWBI-Auth
-func JWT(isDisabled bool, skipIfKey bool) echo.MiddlewareFunc {
+func mwJWT(isDisabled, skipIfKey, mock bool) echo.MiddlewareFunc {
+	if mock {
+		return echojwt.WithConfig(echojwt.Config{
+			SigningKey: []byte("mock"),
+			Skipper: func(c echo.Context) bool {
+				return isDisabled || (skipIfKey && c.QueryParam("key") != "")
+			},
+		})
+	}
 	return echojwt.WithConfig(echojwt.Config{
 		SigningMethod: "RS512",
 		KeyFunc: func(t *jwt.Token) (interface{}, error) {
@@ -34,14 +42,12 @@ func JWT(isDisabled bool, skipIfKey bool) echo.MiddlewareFunc {
 	})
 }
 
-// JWTMock is JWT Middleware
-func JWTMock(isDisabled bool, skipIfKey bool) echo.MiddlewareFunc {
-	return echojwt.WithConfig(
-		echojwt.Config{
-			SigningKey: []byte("mock"),
-			Skipper: func(c echo.Context) bool {
-				return isDisabled || (skipIfKey && c.QueryParam("key") != "")
-			},
-		},
-	)
+func (m *mw) JWTSkipIfKey(next echo.HandlerFunc) echo.HandlerFunc {
+	jwtmw := mwJWT(m.cfg.AuthDisabled, true, m.cfg.AuthJWTMocked)
+	return jwtmw(next)
+}
+
+func (m *mw) JWT(next echo.HandlerFunc) echo.HandlerFunc {
+	jwtmw := mwJWT(m.cfg.AuthDisabled, false, m.cfg.AuthJWTMocked)
+	return jwtmw(next)
 }

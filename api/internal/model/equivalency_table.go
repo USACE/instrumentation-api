@@ -30,9 +30,9 @@ const getIsValidEquivalencyTableTimeseries = `
 	SELECT NOT EXISTS (
 		SELECT id FROM v_timeseries_computed
 		WHERE id = $1
-		AND id NOT IN (
-			SELECT timeseries_id FROM instrument_constants
-		)
+		UNION ALL
+		SELECT timeseries_id FROM instrument_constants
+		WHERE timeseries_id = $1
 	)
 `
 
@@ -62,11 +62,12 @@ const getEquivalencyTable = `
 
 // GetEquivalencyTable returns a single Datalogger EquivalencyTable
 func (q *Queries) GetEquivalencyTable(ctx context.Context, dlID uuid.UUID) (EquivalencyTable, error) {
-	var et EquivalencyTable
-	var tr []EquivalencyTableRow
-	err := q.db.SelectContext(ctx, &tr, getEquivalencyTable, &dlID)
-	et.DataloggerID = dlID
-	et.Rows = tr
+	tr := make([]EquivalencyTableRow, 0)
+	err := q.db.SelectContext(ctx, &tr, getEquivalencyTable, dlID)
+	et := EquivalencyTable{
+		DataloggerID: dlID,
+		Rows:         tr,
+	}
 	return et, err
 }
 
@@ -77,11 +78,9 @@ const createEquivalencyTableRow = `
 	ON CONFLICT ON CONSTRAINT unique_datalogger_field DO NOTHING
 `
 
-func (q *Queries) CreateEquivalencyTableRow(ctx context.Context, tr EquivalencyTableRow) error {
-	if _, err := q.db.ExecContext(
-		ctx,
-		createEquivalencyTableRow,
-		tr.DataloggerID,
+func (q *Queries) CreateEquivalencyTableRow(ctx context.Context, dlID uuid.UUID, tr EquivalencyTableRow) error {
+	if _, err := q.db.ExecContext(ctx, createEquivalencyTableRow,
+		dlID,
 		tr.FieldName,
 		tr.DisplayName,
 		tr.InstrumentID,
@@ -107,9 +106,7 @@ const updateEquivalencyTableRow = `
 `
 
 func (q *Queries) UpdateEquivalencyTableRow(ctx context.Context, tr EquivalencyTableRow) error {
-	if _, err := q.db.ExecContext(
-		ctx,
-		updateEquivalencyTableRow,
+	if _, err := q.db.ExecContext(ctx, updateEquivalencyTableRow,
 		tr.DataloggerID,
 		tr.ID,
 		tr.FieldName,

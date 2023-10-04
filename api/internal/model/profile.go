@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/USACE/instrumentation-api/api/internal/passwords"
+	"github.com/USACE/instrumentation-api/api/internal/password"
 	"github.com/google/uuid"
 	"github.com/lib/pq"
 )
@@ -143,9 +143,9 @@ const createProfileToken = `
 // the raw token unless the user writes it down or stores it somewhere safe.
 func (q *Queries) CreateProfileToken(ctx context.Context, profileID uuid.UUID) (Token, error) {
 	var t Token
-	secretToken := passwords.GenerateRandom(40)
-	tokenID := passwords.GenerateRandom(40)
-	hash, err := passwords.CreateHash(secretToken, passwords.DefaultParams)
+	secretToken := password.GenerateRandom(40)
+	tokenID := password.GenerateRandom(40)
+	hash, err := password.CreateHash(secretToken, password.DefaultParams)
 	if err != nil {
 		return t, err
 	}

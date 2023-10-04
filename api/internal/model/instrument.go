@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/USACE/instrumentation-api/api/internal/messages"
+	"github.com/USACE/instrumentation-api/api/internal/message"
 	"github.com/USACE/instrumentation-api/api/internal/util"
 	"github.com/google/uuid"
 	"github.com/lib/pq"
@@ -173,7 +173,7 @@ func (q *Queries) GetInstrument(ctx context.Context, instrumentID uuid.UUID) (In
 		return e, err
 	}
 	if len(ii) == 0 {
-		return e, fmt.Errorf(messages.NotFound)
+		return e, fmt.Errorf(message.NotFound)
 	}
 	return ii[0], nil
 }

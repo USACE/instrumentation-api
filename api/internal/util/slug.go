@@ -7,13 +7,13 @@ import (
 )
 
 // Slugify removes spaces and converts to lower case
-func Slugify(str string) string {
-	slug := slug.Make(str)
+func Slugify(name string) string {
+	slug := slug.Make(name)
 	return slug
 }
 
 // NextUniqueSlug returns the next unique slug available based on
-func NextUniqueSlug(str string, usedSlugs []string) (string, error) {
+func NextUniqueSlug(name string, slugsTaken []string) (string, error) {
 	slugIsTaken := func(str string, arr []string) bool {
 		for _, i := range arr {
 			if str == i {
@@ -23,9 +23,9 @@ func NextUniqueSlug(str string, usedSlugs []string) (string, error) {
 		return false
 	}
 
-	slugBasename := Slugify(str)
+	slugBasename := Slugify(name)
 	// if slug is unique without appending an integer, return it
-	if !(slugIsTaken(slugBasename, usedSlugs)) {
+	if !(slugIsTaken(slugBasename, slugsTaken)) {
 		return slugBasename, nil
 	}
 	// max 1000 iterations trying to get unique slug
@@ -34,7 +34,7 @@ func NextUniqueSlug(str string, usedSlugs []string) (string, error) {
 	i := 1
 	for i < 1000 {
 		slug := fmt.Sprintf("%s-%d", slugBasename, i)
-		if !(slugIsTaken(slug, usedSlugs)) {
+		if !(slugIsTaken(slug, slugsTaken)) {
 			return slug, nil
 		}
 		i++

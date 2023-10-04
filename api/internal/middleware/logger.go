@@ -1,6 +1,12 @@
 package middleware
 
-import "github.com/labstack/echo/v4/middleware"
+import (
+	"github.com/labstack/echo/v4"
+	echomw "github.com/labstack/echo/v4/middleware"
+)
 
-// Logger is ready-to-go Logger middleware
-var Logger = middleware.Logger()
+var logger = echomw.Logger()
+
+func (m *mw) Logger(next echo.HandlerFunc) echo.HandlerFunc {
+	return logger(next)
+}

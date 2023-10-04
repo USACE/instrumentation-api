@@ -6,6 +6,5 @@ import (
 
 func (h *AlertCheckHandler) DoAlertChecks() error {
 	ctx := context.Background()
-
-	return h.AlertCheckStore.DoAlertChecks(ctx)
+	return h.AlertCheckService.DoAlertChecks(ctx)
 }

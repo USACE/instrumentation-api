@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/USACE/instrumentation-api/api/internal/config"
-	et "github.com/USACE/instrumentation-api/api/internal/email_template"
+	"github.com/USACE/instrumentation-api/api/internal/email"
 )
 
 type AlertConfigEvaluationCheck struct {
@@ -37,7 +37,7 @@ func (acc AlertConfigEvaluationCheck) DoEmail(emailType string, cfg config.Alert
 	if emailType == "" {
 		return fmt.Errorf("must provide emailType")
 	}
-	preformatted := et.EmailContent{
+	preformatted := email.EmailContent{
 		TextSubject: "-- DO NOT REPLY -- MIDAS " + emailType + ": Evaluation Submittal",
 		TextBody: "The following " + emailType + " has been triggered:\r\n\r\n" +
 			"Project: {{.AlertConfig.ProjectName}}\r\n" +
@@ -49,16 +49,16 @@ func (acc AlertConfigEvaluationCheck) DoEmail(emailType string, cfg config.Alert
 			"\t• {{.Submittal.CreateDate.Format \"Jan 02 2006 15:04:05 UTC\"}} - {{.Submittal.DueDate.Format \"Jan 02 2006 15:04:05 UTC\"}}" +
 			"{{if .ShouldAlert}} (missing) {{else if .ShouldWarn}} (warning) {{end}}\r\n{{end}}{{end}}",
 	}
-	templContent, err := et.CreateEmailTemplateContent(preformatted)
+	templContent, err := email.CreateEmailTemplateContent(preformatted)
 	if err != nil {
 		return err
 	}
-	content, err := et.FormatAlertConfigTemplates(templContent, acc)
+	content, err := email.FormatAlertConfigTemplates(templContent, acc)
 	if err != nil {
 		return err
 	}
 	content.To = acc.AlertConfig.GetToAddresses()
-	if err := et.ConstructAndSendEmail(content, cfg); err != nil {
+	if err := email.ConstructAndSendEmail(content, cfg); err != nil {
 		return err
 	}
 	return nil

@@ -60,9 +60,7 @@ func (q *Queries) ListCollectionGroupSlugs(ctx context.Context, projectID uuid.U
 }
 
 const getCollectionGroupDetails = listCollectionGroups + `
-	SELECT id, project_id, slug, name, creator, create_date, updater, update_date
-	FROM collection_group
-	WHERE project_id = $1 AND id = $2
+	AND id = $2
 `
 
 // GetCollectionGroupDetails returns details for a single CollectionGroup

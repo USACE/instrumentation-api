@@ -11,20 +11,16 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (r *ApiRouter) Autocomplete(h *ApiHandler) {
-	r.g.public.GET("/search/:entity", h.Search)
-}
-
-type searchfunc func(ctx context.Context, searchText string, limit int) ([]model.SearchResult, error)
+type searchFunc func(ctx context.Context, searchText string, limit int) ([]model.SearchResult, error)
 
 // Search allows searching using a string on different entities
-func (h ApiHandler) Search(c echo.Context) error {
+func (h *ApiHandler) Search(c echo.Context) error {
 	// Search Function
 	var fn searchFunc
 	pfn := &fn
 	switch entity := c.Param("entity"); entity {
 	case "projects":
-		*pfn = model.ProjectSearch
+		*pfn = h.ProjectService.SearchProjects
 	default:
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("search not implemented for entity: %s", entity))
 	}
@@ -36,7 +32,7 @@ func (h ApiHandler) Search(c echo.Context) error {
 	}
 	// Get Desired Number of Results; Hardcode 5 for now;
 	limit := 5
-	rr, err := fn(db, &searchText, &limit)
+	rr, err := fn(c.Request().Context(), searchText, limit)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

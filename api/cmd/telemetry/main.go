@@ -2,54 +2,19 @@ package main
 
 import (
 	"log"
-	"net/http"
 
 	"github.com/USACE/instrumentation-api/api/internal/config"
-	"github.com/USACE/instrumentation-api/api/internal/handlers"
-	"github.com/USACE/instrumentation-api/api/internal/middleware"
-	"github.com/USACE/instrumentation-api/api/internal/models"
-	"github.com/USACE/instrumentation-api/api/internal/util"
-	"github.com/apex/gateway"
-
-	"github.com/labstack/echo/v4"
-
-	_ "github.com/jackc/pgx/v4/stdlib"
+	"github.com/USACE/instrumentation-api/api/internal/handler"
+	"github.com/USACE/instrumentation-api/api/internal/server"
 )
 
 func main() {
-	cfg := config.GetTelemetryConfig()
-	db := util.Connection(cfg.DBConfig.ConnStr())
+	cfg := config.NewTelemetryConfig()
 
-	e := echo.New()
-	e.Use(middleware.CORS, middleware.GZIP)
+	h := handler.NewTelemetry(cfg)
 
-	hashExtractor := func(model, sn string) (string, error) {
-		hash, err := models.GetDataLoggerHashByModelSN(db, model, sn)
-		if err != nil {
-			return "", err
-		}
-		return hash, nil
-	}
+	s := server.NewTelemetryServer(cfg, h)
 
-	public := e.Group(cfg.RoutePrefix)
-	public.GET("/health", func(c echo.Context) error {
-		return c.JSON(http.StatusOK, map[string]interface{}{"status": "healthy"})
-	})
-
-	datalogger := e.Group(cfg.RoutePrefix)
-	datalogger.Use(middleware.DataLoggerKeyAuth(hashExtractor))
-
-	datalogger.POST("/telemetry/datalogger/:model/:sn", handlers.CreateOrUpdateDataLoggerMeasurements(db))
-
-	if cfg.LambdaContext {
-		log.Print("starting server; Running On AWS LAMBDA")
-		if err := gateway.ListenAndServe("localhost:3030", e); err != nil {
-			log.Fatal(err.Error())
-		}
-	} else {
-		log.Print("starting server")
-		if err := http.ListenAndServe(":80", e); err != nil {
-			log.Fatal(err.Error())
-		}
-	}
+	log.Print("starting server...")
+	log.Fatal(s.Start())
 }

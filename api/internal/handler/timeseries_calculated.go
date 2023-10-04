@@ -6,21 +6,17 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 
-	"github.com/USACE/instrumentation-api/api/internal/messages"
+	"github.com/USACE/instrumentation-api/api/internal/message"
 	"github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/USACE/instrumentation-api/api/internal/util"
 )
 
-// GetInstrumentCalculations retrieves an array of `Calculation`s associated with a particular
-// instrument ID.
-//
-// Query Parameters:
-// - `instrument_id`: string
-func (h ApiHandler) GetInstrumentCalculations(c echo.Context) error {
+// GetInstrumentCalculations retrieves an array of `Calculation`s associated with a particular instrument ID.
+func (h *ApiHandler) GetInstrumentCalculations(c echo.Context) error {
 	param := c.QueryParam("instrument_id")
 
 	if param == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, messages.MissingQueryParameter("`instrument_id`"))
+		return echo.NewHTTPError(http.StatusBadRequest, message.MissingQueryParameter("`instrument_id`"))
 	}
 
 	// Instrument ID
@@ -29,7 +25,7 @@ func (h ApiHandler) GetInstrumentCalculations(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	formulas, err := h.CalculatedTimeseriesStore.GetAllCalculatedTimeseriesForInstrument(c.Request().Context(), instrumentID)
+	formulas, err := h.CalculatedTimeseriesService.GetAllCalculatedTimeseriesForInstrument(c.Request().Context(), instrumentID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -37,10 +33,7 @@ func (h ApiHandler) GetInstrumentCalculations(c echo.Context) error {
 }
 
 // CreateCalculation creates a calculation.
-//
-// Parameters:
-// - Body should be a calculation model in the database.
-func (h ApiHandler) CreateCalculation(c echo.Context) error {
+func (h *ApiHandler) CreateCalculation(c echo.Context) error {
 	var formula model.CalculatedTimeseries
 	if err := c.Bind(&formula); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -48,7 +41,7 @@ func (h ApiHandler) CreateCalculation(c echo.Context) error {
 
 	// Create unique slug
 	var calculationSlug string = ""
-	slugsTaken, err := h.CalculatedTimeseriesStore.ListCalculatedTimeseriesSlugs(c.Request().Context())
+	slugsTaken, err := h.CalculatedTimeseriesService.ListCalculatedTimeseriesSlugs(c.Request().Context())
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -64,7 +57,7 @@ func (h ApiHandler) CreateCalculation(c echo.Context) error {
 	}
 	formula.Slug = calculationSlug
 
-	if err := h.CalculatedTimeseriesStore.CreateCalculatedTimeseries(c.Request().Context(), formula); err != nil {
+	if err := h.CalculatedTimeseriesService.CreateCalculatedTimeseries(c.Request().Context(), formula); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, echo.Map{
@@ -73,10 +66,7 @@ func (h ApiHandler) CreateCalculation(c echo.Context) error {
 }
 
 // UpdateCalculation updates a calculation.
-//
-// Paramaters:
-// - `formula_id` should refer to the ID of a calculation in the database.
-func (h ApiHandler) UpdateCalculation(c echo.Context) error {
+func (h *ApiHandler) UpdateCalculation(c echo.Context) error {
 	formulaID, err := uuid.Parse(c.Param("formula_id"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -89,12 +79,12 @@ func (h ApiHandler) UpdateCalculation(c echo.Context) error {
 
 	// Compare formula ID from Route Params to Calculation ID from Payload
 	if formulaID != formula.ID {
-		return echo.NewHTTPError(http.StatusBadRequest, messages.BadRequest)
+		return echo.NewHTTPError(http.StatusBadRequest, message.BadRequest)
 	}
 
 	// Update slug when name is updated
 	var calculationSlug string = ""
-	slugsTaken, err := h.CalculatedTimeseriesStore.ListCalculatedTimeseriesSlugs(c.Request().Context())
+	slugsTaken, err := h.CalculatedTimeseriesService.ListCalculatedTimeseriesSlugs(c.Request().Context())
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -111,23 +101,20 @@ func (h ApiHandler) UpdateCalculation(c echo.Context) error {
 	formula.Slug = calculationSlug
 
 	// Update in database
-	if err := h.CalculatedTimeseriesStore.UpdateCalculatedTimeseries(c.Request().Context(), formula); err != nil {
+	if err := h.CalculatedTimeseriesService.UpdateCalculatedTimeseries(c.Request().Context(), formula); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, &formula)
 }
 
 // DeleteCalculation deletes a calculation.
-//
-// Parameters:
-// - `formula_id` should refer to the ID of a calculation in the database.
-func (h ApiHandler) DeleteCalculation(c echo.Context) error {
+func (h *ApiHandler) DeleteCalculation(c echo.Context) error {
 	calculationID, err := uuid.Parse(c.Param("formula_id"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	if err := h.CalculatedTimeseriesStore.DeleteCalculatedTimeseries(c.Request().Context(), calculationID); err != nil {
+	if err := h.CalculatedTimeseriesService.DeleteCalculatedTimeseries(c.Request().Context(), calculationID); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	return c.NoContent(http.StatusOK)

@@ -6,10 +6,18 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+func (h *ApiHandler) Healthcheck(c echo.Context) error {
+	return c.JSON(http.StatusOK, map[string]interface{}{"status": "healthy"})
+}
+
+func (h *TelemetryHandler) Healthcheck(c echo.Context) error {
+	return c.JSON(http.StatusOK, map[string]interface{}{"status": "healthy"})
+}
+
 // DoHeartbeat triggers regular-interval tasks
-func (h ApiHandler) DoHeartbeat(c echo.Context) error {
+func (h *ApiHandler) DoHeartbeat(c echo.Context) error {
 	// Create a Record of Heartbeat
-	hb, err := h.HeartbeatStore.DoHeartbeat(c.Request().Context())
+	hb, err := h.HeartbeatService.DoHeartbeat(c.Request().Context())
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -17,8 +25,8 @@ func (h ApiHandler) DoHeartbeat(c echo.Context) error {
 }
 
 // GetLatestHeartbeat returns the latest heartbeat entry
-func (h ApiHandler) GetLatestHeartbeat(c echo.Context) error {
-	hb, err := h.HeartbeatStore.GetLatestHeartbeat(c.Request().Context())
+func (h *ApiHandler) GetLatestHeartbeat(c echo.Context) error {
+	hb, err := h.HeartbeatService.GetLatestHeartbeat(c.Request().Context())
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -26,8 +34,8 @@ func (h ApiHandler) GetLatestHeartbeat(c echo.Context) error {
 }
 
 // ListHeartbeats returns all heartbeats
-func (h ApiHandler) ListHeartbeats(c echo.Context) error {
-	hh, err := h.HeartbeatStore.ListHeartbeats(c.Request().Context())
+func (h *ApiHandler) ListHeartbeats(c echo.Context) error {
+	hh, err := h.HeartbeatService.ListHeartbeats(c.Request().Context())
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

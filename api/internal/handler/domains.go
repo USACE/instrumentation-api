@@ -7,8 +7,8 @@ import (
 )
 
 // GetDomains returns all database domains in a single endpoint
-func (h ApiHandler) GetDomains(c echo.Context) error {
-	dd, err := h.DomainStore.GetDomains(c.Request().Context())
+func (h *ApiHandler) GetDomains(c echo.Context) error {
+	dd, err := h.DomainService.GetDomains(c.Request().Context())
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}

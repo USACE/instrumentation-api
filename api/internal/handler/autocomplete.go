@@ -9,7 +9,7 @@ import (
 )
 
 // ListEmailAutocomplete lists results of email autocomplete
-func (h ApiHandler) ListEmailAutocomplete(c echo.Context) error {
+func (h *ApiHandler) ListEmailAutocomplete(c echo.Context) error {
 	// Get Search String
 	searchText := c.QueryParam("q")
 	if searchText == "" {
@@ -17,7 +17,7 @@ func (h ApiHandler) ListEmailAutocomplete(c echo.Context) error {
 	}
 	// Get Desired Number of Results; Hardcode 5 for now;
 	limit := 5
-	rr, err := h.EmailAutocompleteStore.ListEmailAutocomplete(c.Request().Context(), searchText, limit)
+	rr, err := h.EmailAutocompleteService.ListEmailAutocomplete(c.Request().Context(), searchText, limit)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

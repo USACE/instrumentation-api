@@ -5,21 +5,20 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/USACE/instrumentation-api/api/internal/messages"
+	"github.com/USACE/instrumentation-api/api/internal/message"
 	"github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/labstack/echo/v4"
 )
 
 // CreateProfile creates a user profile
-func (h ApiHandler) CreateProfile(c echo.Context) error {
+func (h *ApiHandler) CreateProfile(c echo.Context) error {
 	var n model.ProfileInfo
 	if err := c.Bind(&n); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	// Set EDIPI
 	n.EDIPI = c.Get("EDIPI").(int)
 
-	p, err := model.CreateProfile(db, &n)
+	p, err := h.ProfileService.CreateProfile(c.Request().Context(), n)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -27,26 +26,26 @@ func (h ApiHandler) CreateProfile(c echo.Context) error {
 }
 
 // GetMyProfile returns profile for current authenticated user or 404
-func (h ApiHandler) GetMyProfile(c echo.Context) error {
-	EDIPI := c.Get("EDIPI").(int)
-	p, err := model.GetProfileFromEDIPI(db, EDIPI)
+func (h *ApiHandler) GetMyProfile(c echo.Context) error {
+	edipi := c.Get("EDIPI").(int)
+	p, err := h.ProfileService.GetProfileWithTokensFromEDIPI(c.Request().Context(), edipi)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return echo.NewHTTPError(http.StatusNotFound, messages.NotFound)
+			return echo.NewHTTPError(http.StatusNotFound, message.NotFound)
 		}
-		return echo.NewHTTPError(http.StatusInternalServerError, messages.InternalServerError)
+		return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
 	}
 	return c.JSON(http.StatusOK, &p)
 }
 
 // CreateToken returns a list of all products
-func (h ApiHandler) CreateToken(c echo.Context) error {
-	EDIPI := c.Get("EDIPI").(int)
-	p, err := model.GetProfileFromEDIPI(db, EDIPI)
+func (h *ApiHandler) CreateToken(c echo.Context) error {
+	edipi := c.Get("EDIPI").(int)
+	p, err := h.ProfileService.GetProfileWithTokensFromEDIPI(c.Request().Context(), edipi)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "could not locate user profile with information provided")
 	}
-	token, err := model.CreateProfileToken(db, &p.ID)
+	token, err := h.ProfileService.CreateProfileToken(c.Request().Context(), p.ID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -54,12 +53,12 @@ func (h ApiHandler) CreateToken(c echo.Context) error {
 }
 
 // DeleteToken deletes a token
-func (h ApiHandler) DeleteToken(c echo.Context) error {
+func (h *ApiHandler) DeleteToken(c echo.Context) error {
 	// Get ProfileID
-	EDIPI := c.Get("EDIPI").(int)
-	p, err := model.GetProfileFromEDIPI(db, EDIPI)
+	edipi := c.Get("EDIPI").(int)
+	p, err := h.ProfileService.GetProfileWithTokensFromEDIPI(c.Request().Context(), edipi)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, messages.BadRequest)
+		return echo.NewHTTPError(http.StatusBadRequest, message.BadRequest)
 	}
 	// Get Token ID
 	tokenID := c.Param("token_id")
@@ -67,7 +66,7 @@ func (h ApiHandler) DeleteToken(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Bad Token ID")
 	}
 	// Delete Token
-	if err := model.DeleteToken(db, &p.ID, &tokenID); err != nil {
+	if err := h.ProfileService.DeleteToken(c.Request().Context(), p.ID, tokenID); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, make(map[string]interface{}))

@@ -9,35 +9,35 @@ const (
 	ErrQuery    = "problem executing query"
 )
 
-type ErrorStore interface {
+type ErrorService interface {
 	Error() string
 	Unwrap() error
 }
 
-type errorStore struct {
+type errorService struct {
 	message string
 	err     error
 }
 
 type NotFoundError struct {
-	errorStore
+	errorService
 }
 
 type QueryError struct {
-	errorStore
+	errorService
 }
 
 func NewNotFoundError(wrappedErr error) error {
-	err := errorStore{message: ErrNotFound, err: wrappedErr}
+	err := errorService{message: ErrNotFound, err: wrappedErr}
 	return &NotFoundError{err}
 }
 func NewQueryError(wrappedErr error) error {
-	err := errorStore{message: ErrQuery, err: wrappedErr}
+	err := errorService{message: ErrQuery, err: wrappedErr}
 	return &QueryError{err}
 }
 
-func (e errorStore) Error() string {
-	return fmt.Sprintf("store error: %s", e.message)
+func (e errorService) Error() string {
+	return fmt.Sprintf("service error: %s", e.message)
 }
 
-func (e errorStore) Unwrap() error { return e.err }
+func (e errorService) Unwrap() error { return e.err }

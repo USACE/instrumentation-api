@@ -7,8 +7,8 @@ import (
 )
 
 // ListUnits returns an array of timeseries
-func (h ApiHandler) ListUnits(c echo.Context) error {
-	uu, err := h.UnitStore.ListUnits(c.Request().Context())
+func (h *ApiHandler) ListUnits(c echo.Context) error {
+	uu, err := h.UnitService.ListUnits(c.Request().Context())
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}

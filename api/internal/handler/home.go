@@ -7,8 +7,8 @@ import (
 )
 
 // GetHome returns information for the homepage
-func (h ApiHandler) GetHome(c echo.Context) error {
-	home, err := h.HomeStore.GetHome(c.Request().Context())
+func (h *ApiHandler) GetHome(c echo.Context) error {
+	home, err := h.HomeService.GetHome(c.Request().Context())
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

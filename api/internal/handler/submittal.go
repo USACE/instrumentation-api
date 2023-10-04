@@ -4,17 +4,16 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/USACE/instrumentation-api/api/internal/messages"
-	"github.com/USACE/instrumentation-api/api/internal/model"
+	"github.com/USACE/instrumentation-api/api/internal/message"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
 // ListProjectSubmittals lists all submittals for a project
-func (h ApiHandler) ListProjectSubmittals(c echo.Context) error {
+func (h *ApiHandler) ListProjectSubmittals(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
+		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
 	}
 
 	var fmo bool
@@ -23,7 +22,7 @@ func (h ApiHandler) ListProjectSubmittals(c echo.Context) error {
 		fmo = true
 	}
 
-	subs, err := model.ListProjectSubmittals(db, &id, fmo)
+	subs, err := h.SubmittalService.ListProjectSubmittals(c.Request().Context(), id, fmo)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -31,10 +30,10 @@ func (h ApiHandler) ListProjectSubmittals(c echo.Context) error {
 }
 
 // ListInstrumentSubmittals lists all submittals for an instrument
-func (h ApiHandler) ListInstrumentSubmittals(c echo.Context) error {
+func (h *ApiHandler) ListInstrumentSubmittals(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("instrument_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
+		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
 	}
 
 	var fmo bool
@@ -43,7 +42,7 @@ func (h ApiHandler) ListInstrumentSubmittals(c echo.Context) error {
 		fmo = true
 	}
 
-	subs, err := model.ListInstrumentSubmittals(db, &id, fmo)
+	subs, err := h.SubmittalService.ListInstrumentSubmittals(c.Request().Context(), id, fmo)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -51,10 +50,10 @@ func (h ApiHandler) ListInstrumentSubmittals(c echo.Context) error {
 }
 
 // ListAlertConfigSubmittals lists all submittals for an instrument
-func (h ApiHandler) ListAlertConfigSubmittals(c echo.Context) error {
+func (h *ApiHandler) ListAlertConfigSubmittals(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("alert_config_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
+		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
 	}
 
 	var fmo bool
@@ -63,7 +62,7 @@ func (h ApiHandler) ListAlertConfigSubmittals(c echo.Context) error {
 		fmo = true
 	}
 
-	subs, err := model.ListAlertConfigSubmittals(db, &id, fmo)
+	subs, err := h.SubmittalService.ListAlertConfigSubmittals(c.Request().Context(), id, fmo)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -71,24 +70,24 @@ func (h ApiHandler) ListAlertConfigSubmittals(c echo.Context) error {
 }
 
 // DeleteFlagProject sets the instrument group deleted flag true
-func (h ApiHandler) VerifyMissingSubmittal(c echo.Context) error {
+func (h *ApiHandler) VerifyMissingSubmittal(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("submittal_id"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, err.Error())
 	}
-	if err := model.VerifyMissingSubmittal(db, &id); err != nil {
+	if err := h.SubmittalService.VerifyMissingSubmittal(c.Request().Context(), id); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{"submittal_id": id})
 }
 
 // DeleteFlagProject sets the instrument group deleted flag true
-func (h ApiHandler) VerifyMissingAlertConfigSubmittals(c echo.Context) error {
+func (h *ApiHandler) VerifyMissingAlertConfigSubmittals(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("alert_config_id"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, err.Error())
 	}
-	if err := model.VerifyMissingAlertConfigSubmittals(db, &id); err != nil {
+	if err := h.SubmittalService.VerifyMissingAlertConfigSubmittals(c.Request().Context(), id); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{"alert_config_id": id})

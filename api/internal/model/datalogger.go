@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/USACE/instrumentation-api/api/internal/passwords"
+	"github.com/USACE/instrumentation-api/api/internal/password"
 	"github.com/google/uuid"
 	"github.com/jackc/pgtype"
 )
@@ -40,7 +40,7 @@ type Datalogger struct {
 }
 
 type DataloggerWithKey struct {
-	*Datalogger
+	Datalogger
 	Key string `json:"key"`
 }
 
@@ -137,8 +137,8 @@ const createDataloggerHash = `
 `
 
 func (q *Queries) CreateDataloggerHash(ctx context.Context, dataloggerID uuid.UUID) (string, error) {
-	key := passwords.GenerateRandom(40)
-	if _, err := q.db.ExecContext(ctx, createDataloggerHash, dataloggerID, passwords.MustCreateHash(key, passwords.DefaultParams)); err != nil {
+	key := password.GenerateRandom(40)
+	if _, err := q.db.ExecContext(ctx, createDataloggerHash, dataloggerID, password.MustCreateHash(key, password.DefaultParams)); err != nil {
 		return "", err
 	}
 	return key, nil
@@ -198,8 +198,8 @@ const updateDataloggerHash = `
 `
 
 func (q *Queries) UpdateDataloggerHash(ctx context.Context, dataloggerID uuid.UUID) (string, error) {
-	key := passwords.GenerateRandom(40)
-	if _, err := q.db.ExecContext(ctx, updateDataloggerHash, dataloggerID, passwords.MustCreateHash(key, passwords.DefaultParams)); err != nil {
+	key := password.GenerateRandom(40)
+	if _, err := q.db.ExecContext(ctx, updateDataloggerHash, dataloggerID, password.MustCreateHash(key, password.DefaultParams)); err != nil {
 		return "", err
 	}
 	return key, nil
@@ -238,10 +238,12 @@ func (q *Queries) GetDataloggerPreview(ctx context.Context, dlID uuid.UUID) (Dat
 	return dlp, nil
 }
 
-const createUniquSlugDatalogger = `
+const listDataloggerSlugs = `
 	SELECT slug FROM datalogger
 `
 
-func (q *Queries) CreateUniqueSlugDatalogger(ctx context.Context, dataloggerName string) (string, error) {
-	return q.CreateUniqueSlug(ctx, createUniquSlugDatalogger, dataloggerName)
+func (q *Queries) ListDataloggerSlugs(ctx context.Context) ([]string, error) {
+	aa := make([]string, 0)
+	err := q.db.SelectContext(ctx, &aa, listDataloggerSlugs)
+	return aa, err
 }

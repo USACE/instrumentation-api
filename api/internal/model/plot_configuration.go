@@ -183,7 +183,7 @@ const createPlotConfigSettings = `
 `
 
 func (q *Queries) CreatePlotConfigSettings(ctx context.Context, pc PlotConfig) error {
-	_, err := q.db.ExecContext(ctx, createPlotConfigSettings, pc.Slug, pc.Name, pc.ProjectID, pc.Creator, pc.CreateDate)
+	_, err := q.db.ExecContext(ctx, createPlotConfigSettings, pc.ID, pc.ShowMasked, pc.ShowNonValidated, pc.ShowComments, pc.AutoRange, pc.DateRange, pc.Threshold)
 	return err
 }
 

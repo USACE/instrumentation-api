@@ -83,8 +83,8 @@ const projectSearch = listProjectsSQL + `
 	WHERE NOT deleted AND name ILIKE '%' || $1 || '%' LIMIT $2 ORDER BY name
 `
 
-// ProjectSearch returns search result for projects
-func (q *Queries) ProjectSearch(ctx context.Context, searchInput string, limit int) ([]SearchResult, error) {
+// SearchProjects returns search result for projects
+func (q *Queries) SearchProjects(ctx context.Context, searchInput string, limit int) ([]SearchResult, error) {
 	rows, err := q.db.QueryxContext(ctx, projectSearch, searchInput, limit)
 	if err != nil {
 		return make([]SearchResult, 0), err

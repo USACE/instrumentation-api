@@ -6,6 +6,8 @@ services:
       context: db
       args:
         - POSTGRES_VERSION=${POSTGRES_VERSION:-14}
+    ports:
+      - 5432:5432
     shm_size: 512mb
     restart: unless-stopped
     environment:

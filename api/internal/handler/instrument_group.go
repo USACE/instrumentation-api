@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/USACE/instrumentation-api/api/internal/messages"
+	"github.com/USACE/instrumentation-api/api/internal/message"
 	"github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/USACE/instrumentation-api/api/internal/util"
 
@@ -13,8 +13,8 @@ import (
 )
 
 // ListInstrumentGroups returns instrument groups
-func (h ApiHandler) ListInstrumentGroups(c echo.Context) error {
-	groups, err := h.InstrumentGroupStore.ListInstrumentGroups(c.Request().Context())
+func (h *ApiHandler) ListInstrumentGroups(c echo.Context) error {
+	groups, err := h.InstrumentGroupService.ListInstrumentGroups(c.Request().Context())
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -22,12 +22,12 @@ func (h ApiHandler) ListInstrumentGroups(c echo.Context) error {
 }
 
 // GetInstrumentGroup returns single instrument group
-func (h ApiHandler) GetInstrumentGroup(c echo.Context) error {
+func (h *ApiHandler) GetInstrumentGroup(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("instrument_group_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
+		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
 	}
-	g, err := h.InstrumentGroupStore.GetInstrumentGroup(c.Request().Context(), id)
+	g, err := h.InstrumentGroupService.GetInstrumentGroup(c.Request().Context(), id)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -35,7 +35,7 @@ func (h ApiHandler) GetInstrumentGroup(c echo.Context) error {
 }
 
 // CreateInstrumentGroup accepts an array of instruments for bulk upload to the database
-func (h ApiHandler) CreateInstrumentGroup(c echo.Context) error {
+func (h *ApiHandler) CreateInstrumentGroup(c echo.Context) error {
 
 	gc := model.InstrumentGroupCollection{}
 	if err := c.Bind(&gc); err != nil {
@@ -43,13 +43,13 @@ func (h ApiHandler) CreateInstrumentGroup(c echo.Context) error {
 	}
 
 	// slugs already taken in the database
-	slugsTaken, err := h.InstrumentGroupStore.ListInstrumentGroupSlugs(c.Request().Context())
+	slugsTaken, err := h.InstrumentGroupService.ListInstrumentGroupSlugs(c.Request().Context())
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	// profile
-	p := c.Get("profile").(*model.Profile)
+	p := c.Get("profile").(model.Profile)
 
 	// timestamp
 	t := time.Now()
@@ -70,7 +70,7 @@ func (h ApiHandler) CreateInstrumentGroup(c echo.Context) error {
 		slugsTaken = append(slugsTaken, s)
 	}
 
-	gg, err := h.InstrumentGroupStore.CreateInstrumentGroup(c.Request().Context(), gc.Items)
+	gg, err := h.InstrumentGroupService.CreateInstrumentGroup(c.Request().Context(), gc.Items)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -79,12 +79,12 @@ func (h ApiHandler) CreateInstrumentGroup(c echo.Context) error {
 }
 
 // UpdateInstrumentGroup modifies an existing instrument_group
-func (h ApiHandler) UpdateInstrumentGroup(c echo.Context) error {
+func (h *ApiHandler) UpdateInstrumentGroup(c echo.Context) error {
 
 	// id from url params
 	id, err := uuid.Parse(c.Param("instrument_group_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
+		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
 	}
 	// id from request
 	g := model.InstrumentGroup{ID: id}
@@ -93,17 +93,17 @@ func (h ApiHandler) UpdateInstrumentGroup(c echo.Context) error {
 	}
 	// check :id in url params matches id in request body
 	if id != g.ID {
-		return echo.NewHTTPError(http.StatusBadRequest, messages.MatchRouteParam("`id`"))
+		return echo.NewHTTPError(http.StatusBadRequest, message.MatchRouteParam("`id`"))
 	}
 
 	// profile information and timestamp
-	p := c.Get("profile").(*model.Profile)
+	p := c.Get("profile").(model.Profile)
 
 	t := time.Now()
 	g.Updater, g.UpdateDate = &p.ID, &t
 
 	// update
-	gUpdated, err := h.InstrumentGroupStore.UpdateInstrumentGroup(c.Request().Context(), &g)
+	gUpdated, err := h.InstrumentGroupService.UpdateInstrumentGroup(c.Request().Context(), g)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -112,24 +112,24 @@ func (h ApiHandler) UpdateInstrumentGroup(c echo.Context) error {
 }
 
 // DeleteFlagInstrumentGroup sets the instrument group deleted flag true
-func (h ApiHandler) DeleteFlagInstrumentGroup(c echo.Context) error {
+func (h *ApiHandler) DeleteFlagInstrumentGroup(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("instrument_group_id"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, err.Error())
 	}
-	if err := h.InstrumentGroupStore.DeleteFlagInstrumentGroup(c.Request().Context(), id); err != nil {
+	if err := h.InstrumentGroupService.DeleteFlagInstrumentGroup(c.Request().Context(), id); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, make(map[string]interface{}))
 }
 
 // ListInstrumentGroupInstruments returns a list of instruments for a provided instrument group
-func (h ApiHandler) ListInstrumentGroupInstruments(c echo.Context) error {
+func (h *ApiHandler) ListInstrumentGroupInstruments(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("instrument_group_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
+		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
 	}
-	nn, err := h.InstrumentGroupStore.ListInstrumentGroupInstruments(c.Request().Context(), id)
+	nn, err := h.InstrumentGroupService.ListInstrumentGroupInstruments(c.Request().Context(), id)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -137,40 +137,40 @@ func (h ApiHandler) ListInstrumentGroupInstruments(c echo.Context) error {
 }
 
 // CreateInstrumentGroupInstruments adds an instrument to an instrument group
-func (h ApiHandler) CreateInstrumentGroupInstruments(c echo.Context) error {
+func (h *ApiHandler) CreateInstrumentGroupInstruments(c echo.Context) error {
 	// instrument_group_id
 	instrumentGroupID, err := uuid.Parse(c.Param("instrument_group_id"))
 
 	if err != nil || instrumentGroupID == uuid.Nil {
-		return echo.NewHTTPError(http.StatusBadRequest, messages.BadRequest)
+		return echo.NewHTTPError(http.StatusBadRequest, message.BadRequest)
 	}
 	// Instrument
 	i := new(model.Instrument)
 	if err := c.Bind(i); err != nil || i.ID == uuid.Nil {
-		return echo.NewHTTPError(http.StatusBadRequest, messages.BadRequest)
+		return echo.NewHTTPError(http.StatusBadRequest, message.BadRequest)
 	}
 
-	if err := h.InstrumentGroupStore.CreateInstrumentGroupInstruments(c.Request().Context(), instrumentGroupID, i.ID); err != nil {
+	if err := h.InstrumentGroupService.CreateInstrumentGroupInstruments(c.Request().Context(), instrumentGroupID, i.ID); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusCreated, make(map[string]interface{}))
 }
 
 // DeleteInstrumentGroupInstruments removes an instrument from an instrument group
-func (h ApiHandler) DeleteInstrumentGroupInstruments(c echo.Context) error {
+func (h *ApiHandler) DeleteInstrumentGroupInstruments(c echo.Context) error {
 	// instrument_group_id
 	instrumentGroupID, err := uuid.Parse(c.Param("instrument_group_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
+		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
 	}
 
 	// instrument
 	instrumentID, err := uuid.Parse(c.Param("instrument_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
+		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
 	}
 
-	if err := h.InstrumentGroupStore.DeleteInstrumentGroupInstruments(c.Request().Context(), instrumentGroupID, instrumentID); err != nil {
+	if err := h.InstrumentGroupService.DeleteInstrumentGroupInstruments(c.Request().Context(), instrumentGroupID, instrumentID); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 

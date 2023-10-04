@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"github.com/USACE/instrumentation-api/api/internal/messages"
+	"github.com/USACE/instrumentation-api/api/internal/message"
 	"github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/USACE/instrumentation-api/api/internal/util"
 
@@ -12,8 +12,8 @@ import (
 )
 
 // ListTimeseries returns an array of timeseries
-func (h ApiHandler) ListTimeseries(c echo.Context) error {
-	tt, err := model.ListTimeseries(db)
+func (h *ApiHandler) ListTimeseries(c echo.Context) error {
+	tt, err := h.TimeseriesService.ListTimeseries(c.Request().Context())
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -21,12 +21,12 @@ func (h ApiHandler) ListTimeseries(c echo.Context) error {
 }
 
 // GetTimeseries returns a single timeseries
-func (h ApiHandler) GetTimeseries(c echo.Context) error {
+func (h *ApiHandler) GetTimeseries(c echo.Context) error {
 	tsID, err := uuid.Parse(c.Param("timeseries_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
+		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
 	}
-	t, err := model.GetTimeseries(db, &tsID)
+	t, err := h.TimeseriesService.GetTimeseries(c.Request().Context(), tsID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -34,12 +34,12 @@ func (h ApiHandler) GetTimeseries(c echo.Context) error {
 }
 
 // ListInstrumentTimeseries lists timeseries for an instrument
-func (h ApiHandler) ListInstrumentTimeseries(c echo.Context) error {
+func (h *ApiHandler) ListInstrumentTimeseries(c echo.Context) error {
 	nID, err := uuid.Parse(c.Param("instrument_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
+		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
 	}
-	tt, err := model.ListInstrumentTimeseries(db, &nID)
+	tt, err := h.TimeseriesService.ListInstrumentTimeseries(c.Request().Context(), nID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -47,12 +47,12 @@ func (h ApiHandler) ListInstrumentTimeseries(c echo.Context) error {
 }
 
 // ListInstrumentGroupTimeseries lists timeseries for instruments in an instrument group
-func (h ApiHandler) ListInstrumentGroupTimeseries(c echo.Context) error {
+func (h *ApiHandler) ListInstrumentGroupTimeseries(c echo.Context) error {
 	gID, err := uuid.Parse(c.Param("instrument_group_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
+		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
 	}
-	tt, err := model.ListInstrumentGroupTimeseries(db, &gID)
+	tt, err := h.TimeseriesService.ListInstrumentGroupTimeseries(c.Request().Context(), gID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -60,12 +60,12 @@ func (h ApiHandler) ListInstrumentGroupTimeseries(c echo.Context) error {
 }
 
 // ListProjectTimeseries lists all timeseries for a single project
-func (h ApiHandler) ListProjectTimeseries(c echo.Context) error {
+func (h *ApiHandler) ListProjectTimeseries(c echo.Context) error {
 	pID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
+		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
 	}
-	tt, err := model.ListProjectTimeseries(db, &pID)
+	tt, err := h.TimeseriesService.ListProjectTimeseries(c.Request().Context(), pID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -74,14 +74,13 @@ func (h ApiHandler) ListProjectTimeseries(c echo.Context) error {
 
 // CreateTimeseries accepts a timeseries object or array of timeseries objects
 // Can handle objects with or without TimeseriesMeasurements
-func (h ApiHandler) CreateTimeseries(c echo.Context) error {
-
-	tc := model.TimeseriesCollection{}
+func (h *ApiHandler) CreateTimeseries(c echo.Context) error {
+	var tc model.TimeseriesCollectionItems
 	if err := c.Bind(&tc); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	// slugs already taken in the database
-	slugsTaken, err := model.ListTimeseriesSlugs(db)
+	slugsTaken, err := h.TimeseriesService.ListTimeseriesSlugs(c.Request().Context())
 	if err != nil {
 		return err
 	}
@@ -99,7 +98,7 @@ func (h ApiHandler) CreateTimeseries(c echo.Context) error {
 		slugsTaken = append(slugsTaken, s)
 	}
 
-	tt, err := model.CreateTimeseries(db, tc.Items)
+	tt, err := h.TimeseriesService.CreateTimeseriesBatch(c.Request().Context(), tc.Items)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -108,12 +107,12 @@ func (h ApiHandler) CreateTimeseries(c echo.Context) error {
 }
 
 // UpdateTimeseries updates a single timeseries
-func (h ApiHandler) UpdateTimeseries(c echo.Context) error {
+func (h *ApiHandler) UpdateTimeseries(c echo.Context) error {
 
 	// id from url params
 	id, err := uuid.Parse(c.Param("timeseries_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, messages.MalformedID)
+		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
 	}
 	// id from request
 	t := model.Timeseries{}
@@ -122,25 +121,24 @@ func (h ApiHandler) UpdateTimeseries(c echo.Context) error {
 	}
 	// check :id in url params matches id in request body
 	if id != t.ID {
-		return echo.NewHTTPError(http.StatusBadRequest, messages.MatchRouteParam("`id`"))
+		return echo.NewHTTPError(http.StatusBadRequest, message.MatchRouteParam("`id`"))
 	}
 	// update
-	tUpdated, err := model.UpdateTimeseries(db, &t)
-	if err != nil {
+	if _, err := h.TimeseriesService.UpdateTimeseries(c.Request().Context(), t); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	// return updated instrument
-	return c.JSON(http.StatusOK, tUpdated)
+	return c.JSON(http.StatusOK, t)
 }
 
 // DeleteTimeseries deletes a single timeseries
-func (h ApiHandler) DeleteTimeseries(c echo.Context) error {
+func (h *ApiHandler) DeleteTimeseries(c echo.Context) error {
 	// id from url params
 	id, err := uuid.Parse(c.Param("timeseries_id"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	if err := model.DeleteTimeseries(db, &id); err != nil {
+	if err := h.TimeseriesService.DeleteTimeseries(c.Request().Context(), id); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return c.JSON(http.StatusOK, make(map[string]interface{}))

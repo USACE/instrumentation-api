@@ -27,6 +27,7 @@ elif [ "$1" = "test" ]; then
             -t $(docker build -q ./tests/postman) \
             -c "npm i -g newman newman-reporter-htmlextra; \
                 newman run /etc/newman/instrumentation-regression.postman_collection.json \
+                --insecure \
                 --environment=/etc/newman/postman_environment.docker-compose.json \
                 --reporter-htmlextra-browserTitle 'Instrumentation' \
                 --reporter-htmlextra-title 'Instrumentation Regression Tests' \

@@ -1,20 +1,30 @@
 package middleware
 
 import (
-	"github.com/USACE/instrumentation-api/api/internal/passwords"
+	"context"
+
+	"github.com/USACE/instrumentation-api/api/internal/password"
 
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	echomw "github.com/labstack/echo/v4/middleware"
 )
 
-// HashExtractor returns a hash (string) to be compared with user supplied key
-type HashExtractor func(keyID string) (string, error)
-type DataLoggerHashExtractor func(model, sn string) (string, error)
+func (m *mw) AppKeyAuth(next echo.HandlerFunc) echo.HandlerFunc {
+	ka := echomw.KeyAuthWithConfig(echomw.KeyAuthConfig{
+		KeyLookup: "query:key",
+		Validator: func(key string, c echo.Context) (bool, error) {
+			return key == m.cfg.ApplicationKey, nil
+		},
+	})
+	return ka(next)
+}
+
+type HashExtractorFunc func(keyID string) (string, error)
 
 // KeyAuth returns a ready-to-go key auth middleware
-func KeyAuth(isDisabled bool, appKey string, h HashExtractor) echo.MiddlewareFunc {
-	return middleware.KeyAuthWithConfig(
-		middleware.KeyAuthConfig{
+func keyAuth(isDisabled bool, appKey string, h HashExtractorFunc) echo.MiddlewareFunc {
+	return echomw.KeyAuthWithConfig(
+		echomw.KeyAuthConfig{
 			KeyLookup: "query:key",
 			// If Auth Manually Disabled via Environment Variable
 			// or "?key=..." is not in QueryParams (counting on other auth middleware
@@ -25,16 +35,14 @@ func KeyAuth(isDisabled bool, appKey string, h HashExtractor) echo.MiddlewareFun
 				}
 				return false
 			},
-			// Compare key passed via query parameters with hash stored in the database
+			// Compare key passed via query parameters with hash serviced in the database
 			Validator: func(key string, c echo.Context) (bool, error) {
 				// If Key is Master ApplicationKey; Grant Access
-				////////////////////////////////////////////////
 				if key == appKey {
 					c.Set("ApplicationKeyAuthSuccess", true)
 					return true, nil
 				}
-				// Check Key against stored hash in the database
-				////////////////////////////////////////////////
+				// Check Key against serviced hash in the database
 				// If key_id not provided as query parameter; Deny Access
 				keyID := c.QueryParam("key_id")
 				if keyID == "" {
@@ -46,7 +54,7 @@ func KeyAuth(isDisabled bool, appKey string, h HashExtractor) echo.MiddlewareFun
 					return false, nil
 				}
 				// Compare provided key with key hash; Deny Access if error
-				match, err := passwords.ComparePasswordAndHash(key, hash)
+				match, err := password.ComparePasswordAndHash(key, hash)
 				if err != nil {
 					return false, err
 				}
@@ -63,14 +71,41 @@ func KeyAuth(isDisabled bool, appKey string, h HashExtractor) echo.MiddlewareFun
 	)
 }
 
+func getHashExtractorFunc(ctx context.Context, m *mw) HashExtractorFunc {
+	return func(keyID string) (string, error) {
+		k, err := m.ProfileService.GetTokenInfoByTokenID(ctx, keyID)
+		if err != nil {
+			return "", err
+		}
+		return k.Hash, nil
+	}
+}
+
+func (m *mw) KeyAuth(next echo.HandlerFunc) echo.HandlerFunc {
+	ka := keyAuth(m.cfg.AuthDisabled, m.cfg.ApplicationKey, getHashExtractorFunc(context.TODO(), m))
+	return ka(next)
+}
+
+type DataloggerHashExtractorFunc func(modelName, sn string) (string, error)
+
+func getDataloggerHashExtractorFunc(ctx context.Context, m *mw) DataloggerHashExtractorFunc {
+	return func(modelName, sn string) (string, error) {
+		hash, err := m.DataloggerTelemetryService.GetDataloggerHashByModelSN(ctx, modelName, sn)
+		if err != nil {
+			return "", err
+		}
+		return hash, nil
+	}
+}
+
 // DataLoggerKeyAuth returns key auth for data logger model / serial number lookup
-func DataLoggerKeyAuth(h DataLoggerHashExtractor) echo.MiddlewareFunc {
-	return middleware.KeyAuthWithConfig(
-		middleware.KeyAuthConfig{
+func dataloggerKeyAuth(h DataloggerHashExtractorFunc) echo.MiddlewareFunc {
+	return echomw.KeyAuthWithConfig(
+		echomw.KeyAuthConfig{
 			KeyLookup: "header:X-Api-Key",
 			Validator: func(key string, c echo.Context) (bool, error) {
-				model := c.Param("model")
-				if model == "" {
+				modelName := c.Param("model")
+				if modelName == "" {
 					return false, nil
 				}
 				sn := c.Param("sn")
@@ -78,12 +113,12 @@ func DataLoggerKeyAuth(h DataLoggerHashExtractor) echo.MiddlewareFunc {
 					return false, nil
 				}
 
-				hash, err := h(model, sn)
+				hash, err := h(modelName, sn)
 				if err != nil {
 					return false, nil
 				}
 
-				match, err := passwords.ComparePasswordAndHash(key, hash)
+				match, err := password.ComparePasswordAndHash(key, hash)
 				if err != nil {
 					return false, err
 				}
@@ -96,4 +131,9 @@ func DataLoggerKeyAuth(h DataLoggerHashExtractor) echo.MiddlewareFunc {
 			},
 		},
 	)
+}
+
+func (m *mw) DataloggerKeyAuth(next echo.HandlerFunc) echo.HandlerFunc {
+	ka := dataloggerKeyAuth(getDataloggerHashExtractorFunc(context.TODO(), m))
+	return ka(next)
 }

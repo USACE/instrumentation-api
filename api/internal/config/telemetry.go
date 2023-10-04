@@ -8,11 +8,10 @@ import (
 
 type TelemetryConfig struct {
 	DBConfig
-	LambdaContext bool
-	RoutePrefix   string
+	ServerConfig
 }
 
-func GetTelemetryConfig() *TelemetryConfig {
+func NewTelemetryConfig() *TelemetryConfig {
 	var cfg TelemetryConfig
 	if err := envconfig.Process("instrumentation", &cfg); err != nil {
 		log.Fatal(err.Error())

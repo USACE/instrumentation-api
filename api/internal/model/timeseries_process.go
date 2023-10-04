@@ -9,8 +9,9 @@ import (
 	"time"
 
 	"github.com/Knetic/govaluate"
-	"github.com/USACE/instrumentation-api/api/internal/messages"
+	"github.com/USACE/instrumentation-api/api/internal/message"
 	"github.com/google/uuid"
+	"github.com/jmoiron/sqlx/types"
 	"github.com/tidwall/btree"
 )
 
@@ -37,6 +38,23 @@ type ProcessTimeseries struct {
 	TimeWindow          TimeWindow           `json:"time_window"`
 }
 
+type ProcessMeasurementCollection struct {
+	TimeseriesID uuid.UUID            `json:"timeseries_id" db:"timeseries_id"`
+	Items        []ProcessMeasurement `json:"items"`
+}
+
+type ProcessTimeseriesResponseCollection []ProcessTimeseries
+
+type ProcessMeasurement struct {
+	Time  time.Time `json:"time"`
+	Value float64   `json:"value"`
+	Error string    `json:"error,omitempty"`
+}
+
+func (m ProcessMeasurement) Lean() map[time.Time]float64 {
+	return map[time.Time]float64{m.Time: m.Value}
+}
+
 type ProcessInclinometerTimeseries struct {
 	ProcessTimeseriesInfo
 	Measurements        []ProcessInclinometerMeasurement `json:"measurements" db:"measurements"`
@@ -45,18 +63,35 @@ type ProcessInclinometerTimeseries struct {
 	TimeWindow          TimeWindow                       `json:"time_window"`
 }
 
-type ProcessMeasurementCollection struct {
-	TimeseriesID uuid.UUID            `json:"timeseries_id" db:"timeseries_id"`
-	Items        []ProcessMeasurement `json:"items"`
+type ProcessInclinometerMeasurement struct {
+	Time   time.Time      `json:"time"`
+	Values types.JSONText `json:"values"`
 }
 
-type ProcessMeasurement struct {
-	Time  time.Time `json:"time"`
-	Value float64   `json:"value"`
-	Error string    `json:"error,omitempty"`
+func (m ProcessInclinometerMeasurement) InclinometerLean() map[time.Time]types.JSONText {
+	return map[time.Time]types.JSONText{m.Time: m.Values}
 }
 
-type ProcessTimeseriesResponseCollection []ProcessTimeseries
+// explorerResponseFactory returns the explorer-specific JSON response format
+func explorerInclinometerResponseFactory(tt []ProcessInclinometerTimeseries) (map[uuid.UUID][]InclinometerMeasurementCollectionLean, error) {
+	response := make(map[uuid.UUID][]InclinometerMeasurementCollectionLean)
+
+	for _, t := range tt {
+		if _, hasInstrument := response[t.InstrumentID]; !hasInstrument {
+			response[t.InstrumentID] = make([]InclinometerMeasurementCollectionLean, 0)
+		}
+		mcl := InclinometerMeasurementCollectionLean{
+			TimeseriesID: t.TimeseriesID,
+			Items:        make([]InclinometerMeasurementLean, len(t.Measurements)),
+		}
+		for idx, m := range t.Measurements {
+			mcl.Items[idx] = m.InclinometerLean()
+		}
+		response[t.InstrumentID] = append(response[t.InstrumentID], mcl)
+	}
+
+	return response, nil
+}
 
 // ProcessMeasurementFilter for conveniently passsing SQL query paramters to functions
 type ProcessMeasurementFilter struct {
@@ -68,15 +103,15 @@ type ProcessMeasurementFilter struct {
 	Before            time.Time   `db:"before"`
 }
 
-// Item represents node for btree used for computing timeseries
-type Item struct {
+// BTreeNode represents node for btree used for computing timeseries
+type BTreeNode struct {
 	Key   time.Time
 	Value map[string]interface{}
 }
 
 func (mrc *ProcessTimeseriesResponseCollection) GroupByInstrument(threshold int) (map[uuid.UUID][]MeasurementCollectionLean, error) {
 	if len(*mrc) == 0 {
-		return make(map[uuid.UUID][]MeasurementCollectionLean), fmt.Errorf(messages.NotFound)
+		return make(map[uuid.UUID][]MeasurementCollectionLean), fmt.Errorf(message.NotFound)
 	}
 
 	tmp := make(map[uuid.UUID]map[uuid.UUID][]MeasurementLean)
@@ -113,7 +148,7 @@ func (mrc *ProcessTimeseriesResponseCollection) GroupByInstrument(threshold int)
 
 func (mrc *ProcessTimeseriesResponseCollection) CollectSingleTimeseries(threshold int, tsID uuid.UUID) (MeasurementCollection, error) {
 	if len(*mrc) == 0 {
-		return MeasurementCollection{}, fmt.Errorf(messages.NotFound)
+		return MeasurementCollection{}, fmt.Errorf(message.NotFound)
 	}
 
 	for _, t := range *mrc {
@@ -148,29 +183,29 @@ func (q *Queries) SelectMeasurements(ctx context.Context, f ProcessMeasurementFi
 }
 
 // collectAggregate creates a btree of all sorted times (key) and measurements (value; as variable map) from an array of Timeseries
-func collectAggregate(tss *ProcessTimeseriesResponseCollection) *btree.BTreeG[Item] {
+func collectAggregate(tss *ProcessTimeseriesResponseCollection) *btree.BTreeG[BTreeNode] {
 	// Get unique set of all measurement times of timeseries dependencies for non-regularized values
-	btm := btree.NewBTreeG(func(a, b Item) bool { return a.Key.Before(b.Key) })
+	btm := btree.NewBTreeG(func(a, b BTreeNode) bool { return a.Key.Before(b.Key) })
 	for _, ts := range *tss {
 		if ts.NextMeasurementLow != nil {
-			if item, exists := btm.Get(Item{Key: ts.NextMeasurementLow.Time}); !exists {
-				btm.Set(Item{Key: ts.NextMeasurementLow.Time, Value: map[string]interface{}{ts.Variable: ts.NextMeasurementLow.Value}})
+			if item, exists := btm.Get(BTreeNode{Key: ts.NextMeasurementLow.Time}); !exists {
+				btm.Set(BTreeNode{Key: ts.NextMeasurementLow.Time, Value: map[string]interface{}{ts.Variable: ts.NextMeasurementLow.Value}})
 			} else {
 				item.Value[ts.Variable] = ts.NextMeasurementLow.Value
 				btm.Set(item)
 			}
 		}
 		for _, m := range ts.Measurements {
-			if item, exists := btm.Get(Item{Key: m.Time}); !exists {
-				btm.Set(Item{Key: m.Time, Value: map[string]interface{}{ts.Variable: m.Value}})
+			if item, exists := btm.Get(BTreeNode{Key: m.Time}); !exists {
+				btm.Set(BTreeNode{Key: m.Time, Value: map[string]interface{}{ts.Variable: m.Value}})
 			} else {
 				item.Value[ts.Variable] = m.Value
 				btm.Set(item)
 			}
 		}
 		if ts.NextMeasurementHigh != nil {
-			if item, exists := btm.Get(Item{Key: ts.NextMeasurementHigh.Time}); !exists {
-				btm.Set(Item{Key: ts.NextMeasurementHigh.Time, Value: map[string]interface{}{ts.Variable: ts.NextMeasurementHigh.Value}})
+			if item, exists := btm.Get(BTreeNode{Key: ts.NextMeasurementHigh.Time}); !exists {
+				btm.Set(BTreeNode{Key: ts.NextMeasurementHigh.Time, Value: map[string]interface{}{ts.Variable: ts.NextMeasurementHigh.Value}})
 			} else {
 				item.Value[ts.Variable] = ts.NextMeasurementHigh.Value
 				btm.Set(item)
@@ -183,7 +218,7 @@ func collectAggregate(tss *ProcessTimeseriesResponseCollection) *btree.BTreeG[It
 // processLOCF calculates computed timeseries using "Last-Observation-Carried-Forward" algorithm
 func processLOCF(tss ProcessTimeseriesResponseCollection) (ProcessTimeseriesResponseCollection, error) {
 	tssFinal := make(ProcessTimeseriesResponseCollection, 0)
-	var variableMap *btree.BTreeG[Item]
+	var variableMap *btree.BTreeG[BTreeNode]
 	// Check if any computed timeseries present, collect aggregates used for calculations if so
 	for _, ts := range tss {
 		if ts.IsComputed {
@@ -291,7 +326,7 @@ func queryTimeseriesMeasurements(ctx context.Context, q *Queries, f ProcessMeasu
 	} else {
 		return nil, fmt.Errorf("must supply valid filter for timeseries_measurement query")
 	}
-	c := `
+	listTimeseriesMeasurments := `
 	WITH required_timeseries AS (
 		(
 			SELECT id
@@ -359,7 +394,7 @@ func queryTimeseriesMeasurements(ctx context.Context, q *Queries, f ProcessMeasu
 	)
 	ORDER BY is_computed
 	`
-	query, args, err := sqlIn(c, filterArg, filterArg, f.After, f.Before, f.After, f.Before, filterArg)
+	query, args, err := sqlIn(listTimeseriesMeasurments, filterArg, filterArg, f.After, f.Before, f.After, f.Before, filterArg)
 	if err != nil {
 		return nil, err
 	}
@@ -393,9 +428,9 @@ func queryTimeseriesMeasurements(ctx context.Context, q *Queries, f ProcessMeasu
 }
 
 // ComputedInclinometerTimeseries returns computed and stored inclinometer timeseries for a specified array of instrument IDs
-func computedInclinometerTimeseries(ctx context.Context, q *Queries, instrumentIDs []uuid.UUID, tw TimeWindow, interval time.Duration) ([]ProcessInclinometerTimeseries, error) {
+func queryInclinometerTimeseriesMeasurements(ctx context.Context, q *Queries, f ProcessMeasurementFilter) ([]ProcessInclinometerTimeseries, error) {
 	tt := make([]DBProcessTimeseries, 0)
-	c := `
+	listInclinometerTimeseriesMeasurements := `
 	-- Get Timeseries and Dependencies for Calculations
 	-- timeseries required based on requested instrument
 	WITH requested_instruments AS (
@@ -444,7 +479,7 @@ func computedInclinometerTimeseries(ctx context.Context, q *Queries, instrumentI
 	ORDER BY is_computed
 	`
 
-	query, args, err := sqlIn(c, instrumentIDs, tw.Start, tw.End)
+	query, args, err := sqlIn(listInclinometerTimeseriesMeasurements, f.InstrumentIDs, f.After, f.Before)
 	if err != nil {
 		return make([]ProcessInclinometerTimeseries, 0), err
 	}
@@ -459,7 +494,7 @@ func computedInclinometerTimeseries(ctx context.Context, q *Queries, instrumentI
 		tt2[idx] = ProcessInclinometerTimeseries{
 			ProcessTimeseriesInfo: t.ProcessTimeseriesInfo,
 			Measurements:          make([]ProcessInclinometerMeasurement, 0),
-			TimeWindow:            tw,
+			TimeWindow:            TimeWindow{Start: f.After, End: f.Before},
 		}
 		cm, err := q.GetTimeseriesConstantMeasurement(ctx, t.TimeseriesID, "inclinometer-constant")
 		if err != nil {

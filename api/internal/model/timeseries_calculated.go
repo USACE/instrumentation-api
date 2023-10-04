@@ -2,33 +2,18 @@ package model
 
 import (
 	"context"
-	"time"
 
 	"github.com/google/uuid"
-	"github.com/jmoiron/sqlx/types"
 )
-
-type ProcessInclinometerMeasurement struct {
-	Time   time.Time      `json:"time"`
-	Values types.JSONText `json:"values"`
-}
-
-func (m ProcessMeasurement) Lean() map[time.Time]float64 {
-	return map[time.Time]float64{m.Time: m.Value}
-}
-
-func (m ProcessInclinometerMeasurement) InclinometerLean() map[time.Time]types.JSONText {
-	return map[time.Time]types.JSONText{m.Time: m.Values}
-}
 
 type CalculatedTimeseries struct {
 	ID           uuid.UUID `json:"id" db:"id"`
-	InstrumentID uuid.UUID `json:"instrument_id"`
-	ParameterID  uuid.UUID `json:"parameter_id"`
-	UnitID       uuid.UUID `json:"unit_id"`
-	Slug         string    `json:"slug"`
-	FormulaName  string    `json:"formula_name"`
-	Formula      string    `json:"formula"`
+	InstrumentID uuid.UUID `json:"instrument_id" db:"instrument_id"`
+	ParameterID  uuid.UUID `json:"parameter_id" db:"parameter_id"`
+	UnitID       uuid.UUID `json:"unit_id" db:"unit_id"`
+	Slug         string    `json:"slug" db:"slug"`
+	FormulaName  string    `json:"formula_name" db:"formula_name"`
+	Formula      string    `json:"formula" db:"formula"`
 }
 
 const listCalculatedTimeseriesSQL = `
@@ -100,7 +85,7 @@ const getOneCalculation = listCalculatedTimeseriesSQL + `
 
 func (q *Queries) GetOneCalculation(ctx context.Context, calculationID *uuid.UUID) (CalculatedTimeseries, error) {
 	var defaultCc CalculatedTimeseries
-	err := q.db.GetContext(ctx, &defaultCc, getOneCalculation, uuid.Nil)
+	err := q.db.GetContext(ctx, &defaultCc, getOneCalculation, calculationID)
 	return defaultCc, err
 }
 
@@ -138,13 +123,6 @@ const createOrUpdateCalculatedTimeseries = `
 		unit_id = COALESCE(EXCLUDED.unit_id, $9),
 		slug = COALESCE(EXCLUDED.slug, $10),
 		name = COALESCE(EXCLUDED.name, $11)
-	RETURNING
-		id,
-		instrument_id,
-		parameter_id,
-		unit_id,
-		slug,
-		name
 `
 
 func (q *Queries) CreateOrUpdateCalculatedTimeseries(ctx context.Context, cc CalculatedTimeseries, defaultCc CalculatedTimeseries) error {
