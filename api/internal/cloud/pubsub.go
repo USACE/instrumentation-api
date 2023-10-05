@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"net/http"
 
 	"github.com/USACE/instrumentation-api/api/internal/config"
 	"github.com/aws/aws-lambda-go/events"
@@ -17,12 +16,6 @@ import (
 
 type Pubsub interface {
 	ProcessMessages(ctx context.Context, handler messageHandler) error
-}
-
-type apiClientConfig struct {
-	httpClient *http.Client
-	postURL    string
-	apiKey     string
 }
 
 type SQSPubsub struct {
@@ -110,11 +103,11 @@ func (s *SQSPubsub) ProcessMessages(ctx context.Context, handler messageHandler)
 				if err != nil {
 					return err
 				}
-				defer func() {
-					if err := r.Close(); err != nil {
+				defer func(rc io.ReadCloser) {
+					if err := rc.Close(); err != nil {
 						fmt.Printf("could not close file: %s", err.Error())
 					}
-				}()
+				}(r)
 				if err := handler(ctx, r); err != nil {
 					log.Printf("message processing failed")
 					continue
