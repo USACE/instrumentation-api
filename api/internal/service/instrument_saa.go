@@ -82,10 +82,5 @@ func (s saaInstrumentService) UpdateSaaInstrument(ctx context.Context, si model.
 		return err
 	}
 
-	for _, seg := range si.Segments {
-		if err := qtx.CreateSaaSegment(ctx, seg); err != nil {
-			return err
-		}
-	}
 	return tx.Commit()
 }
