@@ -15,3 +15,5 @@ CREATE TABLE saa_segment (
     temp_timeseries_id UUID NOT NULL REFERENCES timeseries (id),
     PRIMARY KEY (instrument_id, id)
 );
+
+INSERT INTO instrument_type (id, name) VALUES ('07b91c5c-c1c5-428d-8bb9-e4c93ab2b9b9', 'SAA');
