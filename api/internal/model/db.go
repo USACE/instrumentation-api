@@ -3,13 +3,16 @@ package model
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"log"
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/internal/config"
+	"github.com/google/uuid"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
 )
 
 // DBTX includes all methods shared by sqlx.DB and sqlx.Tx, allowing
@@ -103,4 +106,41 @@ func NewDatabase(cfg *config.DBConfig) *Database {
 	db.SetConnMaxLifetime(time.Minute * 30)
 
 	return &Database{db}
+}
+
+// IDAndSlug is a UUID4 and Slug representation of something
+type IDAndSlug struct {
+	ID   uuid.UUID `json:"id"`
+	Slug string    `json:"slug"`
+}
+
+// IDAndSlugCollection is a collection of objects with ID and Slug properties
+type IDAndSlugCollection struct {
+	Items []IDAndSlug `json:"items"`
+}
+
+// Shortener allows a shorter representation of an object. Typically, ID and Slug fields only
+type Shortener interface {
+	shorten()
+}
+
+// Some generic types to help sqlx scan arrays / json
+type dbSlice[T any] []T
+
+func (d *dbSlice[T]) Scan(src interface{}) error {
+	value := make([]T, 0)
+	if err := pq.Array(&value).Scan(src); err != nil {
+		return err
+	}
+	*d = dbSlice[T](value)
+	return nil
+}
+
+type dbJSONSlice[T any] []T
+
+func (d *dbJSONSlice[T]) Scan(src interface{}) error {
+	if err := json.Unmarshal([]byte(src.(string)), d); err != nil {
+		return err
+	}
+	return nil
 }

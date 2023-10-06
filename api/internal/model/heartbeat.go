@@ -42,7 +42,7 @@ const listHeartbeats = `
 
 // ListHeartbeats returns all system heartbeats
 func (q *Queries) ListHeartbeats(ctx context.Context) ([]Heartbeat, error) {
-	var hh []Heartbeat
+	hh := make([]Heartbeat, 0)
 	if err := q.db.SelectContext(ctx, &hh, listHeartbeats); err != nil {
 		return nil, err
 	}

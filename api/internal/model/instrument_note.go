@@ -27,7 +27,6 @@ type InstrumentNoteCollection struct {
 // UnmarshalJSON implements UnmarshalJSON interface
 // Allows unpacking object or array of objects into array of objects
 func (c *InstrumentNoteCollection) UnmarshalJSON(b []byte) error {
-
 	switch util.JSONType(b) {
 	case "ARRAY":
 		if err := json.Unmarshal(b, &c.Items); err != nil {

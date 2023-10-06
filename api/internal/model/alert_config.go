@@ -3,7 +3,6 @@ package model
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -12,40 +11,31 @@ import (
 )
 
 type AlertConfig struct {
-	ID                      uuid.UUID                         `json:"id" db:"id"`
-	Name                    string                            `json:"name" db:"name"`
-	Body                    string                            `json:"body" db:"body"`
-	ProjectID               uuid.UUID                         `json:"project_id" db:"project_id"`
-	ProjectName             string                            `json:"project_name" db:"project_name"`
-	AlertTypeID             uuid.UUID                         `json:"alert_type_id" db:"alert_type_id"`
-	AlertType               string                            `json:"alert_type" db:"alert_type"`
-	StartDate               time.Time                         `json:"start_date" db:"start_date"`
-	ScheduleInterval        string                            `json:"schedule_interval" db:"schedule_interval"`
-	RemindInterval          string                            `json:"remind_interval" db:"remind_interval"`
-	WarningInterval         string                            `json:"warning_interval" db:"warning_interval"`
-	LastChecked             *time.Time                        `json:"last_checked" db:"last_checked"`
-	LastReminded            *time.Time                        `json:"last_reminded" db:"last_reminded"`
-	Instruments             AlertConfigInstrumentCollection   `json:"instruments" db:"instruments"`
-	AlertEmailSubscriptions EmailAutocompleteResultCollection `json:"alert_email_subscriptions" db:"alert_email_subscriptions"`
-	CreatorUsername         string                            `json:"creator_username" db:"creator_username"`
-	UpdaterUsername         *string                           `json:"updater_username" db:"updater_username"`
-	MuteConsecutiveAlerts   bool                              `json:"mute_consecutive_alerts" db:"mute_consecutive_alerts"`
-	CreateNextSubmittalFrom *time.Time                        `json:"-" db:"-"`
+	ID                      uuid.UUID                            `json:"id" db:"id"`
+	Name                    string                               `json:"name" db:"name"`
+	Body                    string                               `json:"body" db:"body"`
+	ProjectID               uuid.UUID                            `json:"project_id" db:"project_id"`
+	ProjectName             string                               `json:"project_name" db:"project_name"`
+	AlertTypeID             uuid.UUID                            `json:"alert_type_id" db:"alert_type_id"`
+	AlertType               string                               `json:"alert_type" db:"alert_type"`
+	StartDate               time.Time                            `json:"start_date" db:"start_date"`
+	ScheduleInterval        string                               `json:"schedule_interval" db:"schedule_interval"`
+	RemindInterval          string                               `json:"remind_interval" db:"remind_interval"`
+	WarningInterval         string                               `json:"warning_interval" db:"warning_interval"`
+	LastChecked             *time.Time                           `json:"last_checked" db:"last_checked"`
+	LastReminded            *time.Time                           `json:"last_reminded" db:"last_reminded"`
+	Instruments             dbJSONSlice[AlertConfigInstrument]   `json:"instruments" db:"instruments"`
+	AlertEmailSubscriptions dbJSONSlice[EmailAutocompleteResult] `json:"alert_email_subscriptions" db:"alert_email_subscriptions"`
+	CreatorUsername         string                               `json:"creator_username" db:"creator_username"`
+	UpdaterUsername         *string                              `json:"updater_username" db:"updater_username"`
+	MuteConsecutiveAlerts   bool                                 `json:"mute_consecutive_alerts" db:"mute_consecutive_alerts"`
+	CreateNextSubmittalFrom *time.Time                           `json:"-" db:"-"`
 	AuditInfo
 }
 
 type AlertConfigInstrument struct {
 	InstrumentID   uuid.UUID `json:"instrument_id" db:"instrument_id"`
 	InstrumentName string    `json:"instrument_name" db:"instrument_name"`
-}
-
-type AlertConfigInstrumentCollection []AlertConfigInstrument
-
-func (a *AlertConfigInstrumentCollection) Scan(src interface{}) error {
-	if err := json.Unmarshal([]byte(src.(string)), a); err != nil {
-		return err
-	}
-	return nil
 }
 
 func (a *AlertConfig) GetToAddresses() []string {

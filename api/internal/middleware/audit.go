@@ -65,7 +65,7 @@ func (m *mw) AttachProfile(next echo.HandlerFunc) echo.HandlerFunc {
 		// If a User was authenticated via KeyAuth, lookup the user's profile using key_id
 		if c.Get("KeyAuthSuccess") == true {
 			keyID := c.Get("KeyAuthKeyID").(string)
-			p, err := m.ProfileService.GetProfileFromTokenID(ctx, keyID)
+			p, err := m.ProfileService.GetProfileWithTokensFromTokenID(ctx, keyID)
 			if err != nil {
 				return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
 			}

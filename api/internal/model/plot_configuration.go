@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/lib/pq"
 )
 
 // PlotConfigSettings describes options for displaying the plot consistently.
@@ -24,11 +23,11 @@ type PlotConfigSettings struct {
 
 // PlotConfig holds information for entity PlotConfig
 type PlotConfig struct {
-	ID           uuid.UUID   `json:"id"`
-	Name         string      `json:"name"`
-	Slug         string      `json:"slug"`
-	ProjectID    uuid.UUID   `json:"project_id" db:"project_id"`
-	TimeseriesID []uuid.UUID `json:"timeseries_id" db:"timeseries_id"`
+	ID           uuid.UUID          `json:"id"`
+	Name         string             `json:"name"`
+	Slug         string             `json:"slug"`
+	ProjectID    uuid.UUID          `json:"project_id" db:"project_id"`
+	TimeseriesID dbSlice[uuid.UUID] `json:"timeseries_id" db:"timeseries_id"`
 	AuditInfo
 	PlotConfigSettings
 }
@@ -78,37 +77,6 @@ const listPlotConfigsSQL = `
 	FROM v_plot_configuration
 `
 
-// plotConfigFactory converts database rows to PlotConfiguration objects
-func plotConfigFactory(rows DBRows) ([]PlotConfig, error) {
-	defer rows.Close()
-	pp := make([]PlotConfig, 0) // PlotConfigurations
-	var p PlotConfig
-	for rows.Next() {
-		err := rows.Scan(
-			&p.ID,
-			&p.Slug,
-			&p.Name,
-			&p.ProjectID,
-			pq.Array(&p.TimeseriesID),
-			&p.Creator,
-			&p.CreateDate,
-			&p.Updater,
-			&p.UpdateDate,
-			&p.ShowMasked,
-			&p.ShowNonValidated,
-			&p.ShowComments,
-			&p.AutoRange,
-			&p.DateRange,
-			&p.Threshold,
-		)
-		if err != nil {
-			return nil, err
-		}
-		pp = append(pp, p)
-	}
-	return pp, nil
-}
-
 const listPlotConfigSlugs = `
 	SELECT slug FROM plot_configuration
 `
@@ -128,11 +96,11 @@ const listPlotConfigs = listPlotConfigsSQL + `
 
 // ListPlotConfigs returns a list of Plot groups
 func (q *Queries) ListPlotConfigs(ctx context.Context, projectID uuid.UUID) ([]PlotConfig, error) {
-	rows, err := q.db.QueryxContext(ctx, listPlotConfigs, projectID)
-	if err != nil {
+	ppc := make([]PlotConfig, 0)
+	if err := q.db.SelectContext(ctx, &ppc, listPlotConfigs, projectID); err != nil {
 		return make([]PlotConfig, 0), err
 	}
-	return plotConfigFactory(rows)
+	return ppc, nil
 }
 
 const getPlotConfig = listPlotConfigsSQL + `
@@ -141,19 +109,9 @@ const getPlotConfig = listPlotConfigsSQL + `
 
 // GetPlotConfig returns a single plot configuration
 func (q *Queries) GetPlotConfig(ctx context.Context, plotconfigID uuid.UUID) (PlotConfig, error) {
-	var a PlotConfig
-	rows, err := q.db.QueryxContext(ctx, getPlotConfig, plotconfigID)
-	if err != nil {
-		return a, err
-	}
-	pp, err := plotConfigFactory(rows)
-	if err != nil {
-		return a, err
-	}
-	if len(pp) == 0 {
-		return a, nil
-	}
-	return pp[0], nil
+	var pc PlotConfig
+	err := q.db.GetContext(ctx, &pc, getPlotConfig, plotconfigID)
+	return pc, err
 }
 
 const createPlotConfig = `

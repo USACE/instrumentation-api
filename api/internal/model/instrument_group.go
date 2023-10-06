@@ -159,19 +159,19 @@ func (q *Queries) DeleteFlagInstrumentGroup(ctx context.Context, instrumentGroup
 }
 
 const listInstrumentGroupInstruments = `
-	SELECT B.*
-	FROM   instrument_group_instruments A
-	INNER JOIN (` + listInstrumentsSQL + `) B ON A.instrument_id = B.id
-	WHERE A.instrument_group_id = $1 and B.deleted = false
+	SELECT inst.*
+	FROM   instrument_group_instruments igi
+	INNER JOIN (` + listInstrumentsSQL + `) inst ON igi.instrument_id = inst.id
+	WHERE igi.instrument_group_id = $1 and inst.deleted = false
 `
 
 // ListInstrumentGroupInstruments returns a list of instrument group instruments for a given instrument
 func (q *Queries) ListInstrumentGroupInstruments(ctx context.Context, groupID uuid.UUID) ([]Instrument, error) {
-	rows, err := q.db.QueryxContext(ctx, listInstrumentGroupInstruments, groupID)
-	if err != nil {
+	ii := make([]Instrument, 0)
+	if err := q.db.SelectContext(ctx, &ii, listInstrumentGroupInstruments, groupID); err != nil {
 		return nil, err
 	}
-	return instrumentFactory(rows)
+	return ii, nil
 }
 
 const createInstrumentGroupInstruments = `

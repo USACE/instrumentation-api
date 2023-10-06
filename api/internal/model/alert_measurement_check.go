@@ -2,7 +2,6 @@ package model
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/USACE/instrumentation-api/api/internal/config"
@@ -15,7 +14,7 @@ type AlertConfigMeasurementCheck struct {
 }
 
 type MeasurementCheck struct {
-	AffectedTimeseries MeasurementSubmittalTimeseriesCollection `db:"affected_timeseries"`
+	AffectedTimeseries dbJSONSlice[MeasurementSubmittalTimeseries] `db:"affected_timeseries"`
 	AlertCheck
 }
 
@@ -23,15 +22,6 @@ type MeasurementSubmittalTimeseries struct {
 	InstrumentName string `json:"instrument_name"`
 	TimeseriesName string `json:"timeseries_name"`
 	Status         string `json:"status"`
-}
-
-type MeasurementSubmittalTimeseriesCollection []MeasurementSubmittalTimeseries
-
-func (a *MeasurementSubmittalTimeseriesCollection) Scan(src interface{}) error {
-	if err := json.Unmarshal([]byte(src.(string)), a); err != nil {
-		return err
-	}
-	return nil
 }
 
 func (a AlertConfigMeasurementCheck) GetAlertConfig() AlertConfig {

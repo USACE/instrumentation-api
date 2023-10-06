@@ -42,7 +42,6 @@ type Email struct {
 
 // UnmarshalJSON implements the UnmarshalJSON Interface for AlertSubscription
 func (c *AlertSubscriptionCollection) UnmarshalJSON(b []byte) error {
-
 	switch util.JSONType(b) {
 	case "ARRAY":
 		if err := json.Unmarshal(b, &c.Items); err != nil {

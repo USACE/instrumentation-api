@@ -2,12 +2,10 @@ package model
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/internal/password"
 	"github.com/google/uuid"
-	"github.com/lib/pq"
 )
 
 // Profile is a user profile
@@ -16,7 +14,7 @@ type Profile struct {
 	ProfileInfo
 	Tokens  []TokenInfoProfile `json:"tokens"`
 	IsAdmin bool               `json:"is_admin" db:"is_admin"`
-	Roles   []string           `json:"roles"`
+	Roles   dbSlice[string]    `json:"roles" db:"roles"`
 }
 
 // TokenInfoProfile is token information embedded in Profile
@@ -48,24 +46,6 @@ type Token struct {
 	TokenInfo
 }
 
-func profileFactory(rows DBRows) ([]Profile, error) {
-	defer rows.Close()
-	pp := make([]Profile, 0)
-	for rows.Next() {
-		var p Profile
-		p.Tokens = make([]TokenInfoProfile, 0)
-		p.Roles = make([]string, 0)
-		err := rows.Scan(
-			&p.ID, &p.EDIPI, &p.Username, &p.Email, &p.IsAdmin, pq.Array(&p.Roles),
-		)
-		if err != nil {
-			return make([]Profile, 0), err
-		}
-		pp = append(pp, p)
-	}
-	return pp, nil
-}
-
 const getProfileFromEDIPI = `
 	SELECT id, edipi, username, email, is_admin, roles FROM v_profile WHERE edipi = $1
 `
@@ -73,18 +53,8 @@ const getProfileFromEDIPI = `
 // GetProfileFromEDIPI returns a profile given an edipi
 func (q *Queries) GetProfileFromEDIPI(ctx context.Context, edipi int) (Profile, error) {
 	var p Profile
-	rows, err := q.db.Queryx(getProfileFromEDIPI, edipi)
-	if err != nil {
-		return p, err
-	}
-	pp, err := profileFactory(rows)
-	if err != nil {
-		return p, err
-	}
-	if len(pp) == 0 {
-		return p, fmt.Errorf("Profile Does Not Exist for User")
-	}
-	return pp[0], nil
+	err := q.db.GetContext(ctx, &p, getProfileFromEDIPI, edipi)
+	return p, err
 }
 
 const getIssuedTokens = `
@@ -106,18 +76,8 @@ const getProfileFromTokenID = `
 
 func (q *Queries) GetProfileFromTokenID(ctx context.Context, tokenID string) (Profile, error) {
 	var p Profile
-	rows, err := q.db.QueryxContext(ctx, getProfileFromTokenID, tokenID)
-	if err != nil {
-		return p, err
-	}
-	pp, err := profileFactory(rows)
-	if err != nil {
-		return p, err
-	}
-	if len(pp) == 0 {
-		return p, fmt.Errorf("Profile Does Not Exist for User")
-	}
-	return pp[0], nil
+	err := q.db.GetContext(ctx, getProfileFromTokenID, tokenID)
+	return p, err
 }
 
 const createProfile = `
