@@ -7,52 +7,69 @@ import (
 	"github.com/google/uuid"
 )
 
-type SaaInstrument struct {
-	Instrument
-	NumSegments     int
-	BottomElevation float32
-	InitialTime     *time.Time
-}
-
-type SaaInstrumentWithSegments struct {
-	SaaInstrument
-	Segments []SaaSegment
+type SaaOpts struct {
+	InstrumentID    uuid.UUID  `json:"-" db:"instrument_id"`
+	NumSegments     int        `json:"num_segments" db:"num_segments"`
+	BottomElevation float32    `json:"bottom_elevation" db:"bottom_elevation"`
+	InitialTime     *time.Time `json:"initial_time" db:"initial_time"`
 }
 
 type SaaSegment struct {
-	ID               int
-	InstrumentID     uuid.UUID
-	Length           float32
-	XTimeseriesID    uuid.UUID
-	YTimeseriesID    uuid.UUID
-	ZTimeseriesID    uuid.UUID
-	TempTimeseriesID uuid.UUID
+	ID               int        `json:"id" db:"id"`
+	InstrumentID     uuid.UUID  `json:"instrument_id" db:"instrument_id"`
+	Length           *float32   `json:"length" db:"length"`
+	XTimeseriesID    *uuid.UUID `json:"x_timeseries_id" db:"x_timeseries_id"`
+	YTimeseriesID    *uuid.UUID `json:"y_timeseries_id" db:"y_timeseries_id"`
+	ZTimeseriesID    *uuid.UUID `json:"z_timeseries_id" db:"z_timeseries_id"`
+	TempTimeseriesID *uuid.UUID `json:"temp_timeseries_id" db:"temp_timeseries_id"`
 }
 
-type SaaInstrumentMeasurements struct {
-	InstrumentID uuid.UUID
-	Time         time.Time
-	Measurements dbJSONSlice[SAASegmentMeasurement]
+type SaaMeasurements struct {
+	InstrumentID uuid.UUID                          `json:"-" db:"instrument_id"`
+	Time         time.Time                          `json:"time" db:"time"`
+	Measurements dbJSONSlice[SaaSegmentMeasurement] `json:"measurements" db:"measurements"`
 }
 
-type SAASegmentMeasurement struct {
-	SegmentID uuid.UUID
-	X         *float64
-	Y         *float64
-	Z         *float64
-	Temp      *float64
+type SaaSegmentMeasurement struct {
+	SegmentID int      `json:"segment_id" db:"segment_id"`
+	X         *float64 `json:"x" db:"x"`
+	Y         *float64 `json:"y" db:"y"`
+	Z         *float64 `json:"z" db:"z"`
+	Temp      *float64 `json:"temp" db:"temp"`
 }
 
 // TODO: when creating new timeseries, any depth based instruments should not be available for assignment
 
-const createSaaInstrument = `
-	INSERT INTO saa_instrument (instrument_id, num_segments, bottom_elevation, initial_time)
+const createSaaOpts = `
+	INSERT INTO saa_opts (instrument_id, num_segments, bottom_elevation, initial_time)
 	VALUES ($1, $2, $3, $4)
 `
 
-func (q *Queries) CreateSaaInstrument(ctx context.Context, si SaaInstrument) error {
-	_, err := q.db.ExecContext(ctx, createSaaInstrument, si.ID, si.NumSegments, si.BottomElevation, si.InitialTime)
+func (q *Queries) CreateSaaOpts(ctx context.Context, instrumentID uuid.UUID, si SaaOpts) error {
+	_, err := q.db.ExecContext(ctx, createSaaOpts, instrumentID, si.NumSegments, si.BottomElevation, si.InitialTime)
 	return err
+}
+
+const updateSaaOpts = `
+	UPDATE saa_opts SET
+		bottom_elevation = $2,
+		initial_time = $3
+	WHERE instrument_id = $1
+`
+
+func (q *Queries) UpdateSaaOpts(ctx context.Context, instrumentID uuid.UUID, si SaaOpts) error {
+	_, err := q.db.ExecContext(ctx, updateSaaOpts, si.InstrumentID, si.BottomElevation, si.InitialTime)
+	return err
+}
+
+const getAllSaaSegmentsForInstrument = `
+	SELECT * FROM v_saa_segment WHERE instrument_id = $1
+`
+
+func (q *Queries) GetAllSaaSegmentsForInstrument(ctx context.Context, instrumentID uuid.UUID) ([]SaaSegment, error) {
+	ssi := make([]SaaSegment, 0)
+	err := q.db.SelectContext(ctx, &ssi, getAllSaaSegmentsForInstrument, instrumentID)
+	return ssi, err
 }
 
 const createSaaSegment = `
@@ -78,40 +95,7 @@ func (q *Queries) CreateSaaSegment(ctx context.Context, seg SaaSegment) error {
 	return err
 }
 
-const getOneSaaInstrumentWithSegments = `
-	SELECT * FROM v_saa_instrument WHERE id = $1
-`
-
-func (q *Queries) GetOneSaaInstrumentWithSegments(ctx context.Context, instrumentID uuid.UUID) (SaaInstrumentWithSegments, error) {
-	var si SaaInstrumentWithSegments
-	err := q.db.GetContext(ctx, &si, createSaaSegment, instrumentID)
-	return si, err
-}
-
-const getAllSaaInstrumentsWithSegmentsForProject = `
-	SELECT * FROM v_saa_instrument WHERE project_id = $1
-`
-
-func (q *Queries) GetAllSaaInstrumentsWithSegmentsForProject(ctx context.Context, projectID uuid.UUID) ([]SaaInstrumentWithSegments, error) {
-	ssi := make([]SaaInstrumentWithSegments, 0)
-	err := q.db.SelectContext(ctx, &ssi, createSaaSegment, projectID)
-	return ssi, err
-}
-
-const updateSaaInstrument = `
-	UPDATE saa_instrument SET
-		num_segments = $2,
-		bottom_elevation = $3,
-		initial_time = $4
-	WHERE instrument_id = $1
-`
-
-func (q *Queries) UpdateSaaInstrument(ctx context.Context, si SaaInstrument) error {
-	_, err := q.db.ExecContext(ctx, createSaaInstrument, si.ID, si.NumSegments, si.BottomElevation, si.InitialTime)
-	return err
-}
-
-const updateSaaInstrumentSegment = `
+const updateSaaSegment = `
 	UPDATE saa_segment SET
 		length = $3,
 		x_timeseries_id = $4,
@@ -121,8 +105,9 @@ const updateSaaInstrumentSegment = `
 	WHERE id = $1 AND instrument_id = $2
 `
 
-func (q *Queries) UpdateSaaInstrumentSegment(ctx context.Context, seg SaaSegment) error {
-	_, err := q.db.ExecContext(ctx, createSaaSegment,
+func (q *Queries) UpdateSaaSegment(ctx context.Context, seg SaaSegment) error {
+	_, err := q.db.ExecContext(ctx, updateSaaSegment,
+		seg.ID,
 		seg.InstrumentID,
 		seg.Length,
 		seg.XTimeseriesID,
@@ -131,4 +116,16 @@ func (q *Queries) UpdateSaaInstrumentSegment(ctx context.Context, seg SaaSegment
 		seg.TempTimeseriesID,
 	)
 	return err
+}
+
+const getSaaMeasurementsForInstrument = `
+	SELECT instrument_id, time, measurements
+	FROM v_saa_measurement
+	WHERE instrument_id = $1 AND time >= $2 AND time <= $3
+`
+
+func (q *Queries) GetSaaMeasurementsForInstrument(ctx context.Context, instrumentID uuid.UUID, tw TimeWindow) ([]SaaMeasurements, error) {
+	mm := make([]SaaMeasurements, 0)
+	err := q.db.SelectContext(ctx, &mm, getSaaMeasurementsForInstrument, instrumentID, tw.Start, tw.End)
+	return mm, err
 }

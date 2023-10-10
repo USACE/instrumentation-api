@@ -1,13 +1,3 @@
-DROP VIEW IF EXISTS v_saa_instrument;
-CREATE VIEW v_saa_instrument AS (
-    SELECT
-        inst.*,
-        saa.num_segments,
-        saa.bottom_elevation
-    FROM v_instrument inst
-    INNER JOIN saa_instrument saa ON inst.id = saa.instrument_id
-);
-
 DROP VIEW IF EXISTS v_saa_segment;
 CREATE VIEW v_saa_segment AS (
     SELECT
@@ -38,48 +28,32 @@ CREATE VIEW v_saa_measurement AS (
         SELECT sq.time, sq.x, sq.y, sq.z, sq.temp
         FROM (
             SELECT
-                timeseries_id,
-                time,
-                value                  AS x,
-                NULL::DOUBLE PRECISION AS y,
-                NULL::DOUBLE PRECISION AS z,
-                NULL::DOUBLE PRECISION AS "temp"
-            FROM timeseries_measurement
-            WHERE timeseries_id = seg.x_timeseries_id
-            UNION ALL
-            SELECT
-                timeseries_id,
-                time,
-                NULL::DOUBLE PRECISION AS x,
-                value                  AS y,
-                NULL::DOUBLE PRECISION AS z,
-                NULL::DOUBLE PRECISION AS "temp"
-            FROM timeseries_measurement
-            WHERE timeseries_id = seg.y_timeseries_id
-            UNION ALL
-            SELECT
-                timeseries_id,
-                time,
-                NULL::DOUBLE PRECISION AS x,
-                NULL::DOUBLE PRECISION AS y,
-                value                  AS z,
-                NULL::DOUBLE PRECISION AS "temp"
-            FROM timeseries_measurement
-            WHERE timeseries_id = seg.z_timeseries_id
-            UNION ALL
-            SELECT
-                timeseries_id,
-                time,
-                NULL::DOUBLE PRECISION AS x,
-                NULL::DOUBLE PRECISION AS y,
-                NULL::DOUBLE PRECISION AS z,
-                value                  AS "temp"
-            FROM timeseries_measurement
-            WHERE timeseries_id = seg.temp_timeseries_id
+                a.time,
+                x.value AS x,
+                y.value AS y,
+                z.value AS z,
+                t.value AS "temp"
+            FROM (SELECT DISTINCT time FROM timeseries_measurement WHERE timeseries_id IN (
+                SELECT id FROM timeseries WHERE instrument_id = seg.instrument_id
+            )) a
+            LEFT JOIN (
+                SELECT * FROM timeseries_measurement WHERE timeseries_id = seg.x_timeseries_id
+            ) x ON x.time = a.time
+            LEFT JOIN (
+                SELECT * FROM timeseries_measurement WHERE timeseries_id = seg.y_timeseries_id
+            ) y ON y.time = a.time
+            LEFT JOIN (
+                SELECT * FROM timeseries_measurement WHERE timeseries_id = seg.z_timeseries_id
+            ) z ON z.time = a.time
+            LEFT JOIN (
+                SELECT * FROM timeseries_measurement WHERE timeseries_id = seg.temp_timeseries_id
+            ) t ON t.time = a.time
         ) sq
-        WHERE sq.timeseries_id IN (
-            SELECT id FROM timeseries WHERE instrument_id = seg.instrument_id
-        )
     ) q ON true
     GROUP BY seg.instrument_id, q.time
 );
+
+GRANT SELECT ON
+    v_saa_segment,
+    v_saa_measurement
+TO instrumentation_reader;

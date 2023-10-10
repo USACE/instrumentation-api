@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/USACE/instrumentation-api/api/internal/message"
 	"github.com/USACE/instrumentation-api/api/internal/model"
@@ -9,72 +10,52 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// UpdateSaaInstrument(ctx context.Context, si model.SaaInstrument) error
-// UpdateSaaInstrumentSegment(ctx context.Context, seg model.SaaSegment) error
-
-func (h *ApiHandler) CreateSaaInstrument(c echo.Context) error {
-	var si model.SaaInstrumentWithSegments
-	if err := c.Bind(&si); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-	if err := h.SaaInstrumentService.CreateSaaInstrument(c.Request().Context(), si); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-	return c.JSON(http.StatusOK, make(map[string]interface{}))
-}
-
-func (h *ApiHandler) CreateSaaSegments(c echo.Context) error {
-	var segs []model.SaaSegment
-	if err := c.Bind(&segs); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-	if err := h.SaaInstrumentService.CreateSaaSegments(c.Request().Context(), segs); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-	return c.JSON(http.StatusOK, make(map[string]interface{}))
-}
-
-func (h *ApiHandler) GetOneSaaInstrumentWithSegments(c echo.Context) error {
+func (h *ApiHandler) GetAllSaaSegmentsForInstrument(c echo.Context) error {
 	iID, err := uuid.Parse(c.Param("instrument_id"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
 	}
-	ss, err := h.SaaInstrumentService.GetOneSaaInstrumentWithSegments(c.Request().Context(), iID)
+	ss, err := h.SaaInstrumentService.GetAllSaaSegmentsForInstrument(c.Request().Context(), iID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, ss)
 }
 
-func (h *ApiHandler) GetAllSaaInstrumentsWithSegmentsForProject(c echo.Context) error {
-	pID, err := uuid.Parse(c.Param("project_id"))
+func (h *ApiHandler) GetSaaMeasurementsForInstrument(c echo.Context) error {
+	iID, err := uuid.Parse(c.Param("instrument_id"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
 	}
-	ss, err := h.SaaInstrumentService.GetAllSaaInstrumentsWithSegmentsForProject(c.Request().Context(), pID)
+	var tw model.TimeWindow
+	a, b := c.QueryParam("after"), c.QueryParam("before")
+	if err := tw.SetWindow(a, b, time.Now().AddDate(0, 0, -7), time.Now()); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	mm, err := h.SaaInstrumentService.GetSaaMeasurementsForInstrument(c.Request().Context(), iID, tw)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
-	return c.JSON(http.StatusOK, ss)
+	return c.JSON(http.StatusOK, mm)
 }
 
-func (h *ApiHandler) UpdateSaaInstrument(c echo.Context) error {
-	var si model.SaaInstrumentWithSegments
-	if err := c.Bind(&si); err != nil {
+func (h *ApiHandler) UpdateSaaSegments(c echo.Context) error {
+	segs := make([]model.SaaSegment, 0)
+	if err := c.Bind(&segs); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	if err := h.SaaInstrumentService.UpdateSaaInstrument(c.Request().Context(), si); err != nil {
+	if err := h.SaaInstrumentService.UpdateSaaSegments(c.Request().Context(), segs); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
-	return c.JSON(http.StatusOK, si)
+	return c.JSON(http.StatusOK, segs)
 }
 
-func (h *ApiHandler) UpdateSaaInstrumentSegment(c echo.Context) error {
+func (h *ApiHandler) UpdateSaaSegment(c echo.Context) error {
 	var seg model.SaaSegment
 	if err := c.Bind(&seg); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	if err := h.SaaInstrumentService.UpdateSaaInstrumentSegment(c.Request().Context(), seg); err != nil {
+	if err := h.SaaInstrumentService.UpdateSaaSegment(c.Request().Context(), seg); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, seg)

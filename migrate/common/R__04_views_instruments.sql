@@ -12,71 +12,82 @@ CREATE OR REPLACE VIEW v_instrument_telemetry AS (
 
 -- v_instrument
 CREATE OR REPLACE VIEW v_instrument AS (
-    SELECT I.id,
-        I.deleted,
-        S.status_id,
-        S.status,
-        S.status_time,
-        I.slug,
-        I.name,
-        I.type_id,
-        T.name AS type,
-        ST_AsBinary(I.geometry) AS geometry,
-        I.station,
-        I.station_offset,
-        I.creator,
-        I.create_date,
-        I.updater,
-        I.update_date,
-        I.project_id,
-        I.nid_id,
-        I.usgs_id,
-        TEL.telemetry AS telemetry,
-        COALESCE(C.constants, '{}') AS constants,
-        COALESCE(G.groups, '{}') AS groups,
-        COALESCE(A.alert_configs, '{}') AS alert_configs
-    FROM instrument I
-    INNER JOIN instrument_type T ON T.id = I.type_id
+    SELECT
+        i.id,
+        i.deleted,
+        s.status_id,
+        s.status,
+        s.status_time,
+        i.slug,
+        i.name,
+        i.type_id,
+        t.name AS type,
+        ST_AsBinary(i.geometry) AS geometry,
+        i.station,
+        i.station_offset,
+        i.creator,
+        i.create_date,
+        i.updater,
+        i.update_date,
+        i.project_id,
+        i.nid_id,
+        i.usgs_id,
+        tel.telemetry AS telemetry,
+        COALESCE(c.constants, '{}') AS constants,
+        COALESCE(g.groups, '{}') AS groups,
+        COALESCE(a.alert_configs, '{}') AS alert_configs,
+        COALESCE(o.opts, '{}'::JSON)::TEXT AS opts
+    FROM instrument i
+    INNER JOIN instrument_type t ON t.id = i.type_id
     INNER JOIN (
-        SELECT DISTINCT ON (instrument_id) instrument_id,
-            a.time AS status_time,
-            a.status_id AS status_id,
+        SELECT
+            DISTINCT ON (instrument_id) instrument_id,
+            ss.time AS status_time,
+            ss.status_id AS status_id,
             d.name AS status
-        FROM instrument_status a
-        INNER JOIN status d ON d.id = a.status_id
-        WHERE a.time <= now()
-        ORDER BY instrument_id, a.time DESC
-    ) S ON S.instrument_id = I.id
+        FROM instrument_status ss
+        INNER JOIN status d ON d.id = ss.status_id
+        WHERE ss.time <= NOW()
+        ORDER BY instrument_id, ss.time DESC
+    ) s ON s.instrument_id = i.id
     LEFT JOIN (
-        SELECT array_agg(timeseries_id) as constants,
+        SELECT
+            ARRAY_AGG(timeseries_id) as constants,
             instrument_id
         FROM instrument_constants
         GROUP BY instrument_id
-    ) C on C.instrument_id = I.id
+    ) c ON c.instrument_id = i.id
     LEFT JOIN (
-        SELECT array_agg(instrument_group_id) as groups,
+        SELECT
+            ARRAY_AGG(instrument_group_id) as groups,
             instrument_id
         FROM instrument_group_instruments
         GROUP BY instrument_id
-    ) G on G.instrument_id = I.id
+    ) g ON g.instrument_id = i.id
     LEFT JOIN (
-        SELECT array_agg(alert_config_id) as alert_configs,
+        SELECT
+            ARRAY_AGG(alert_config_id) as alert_configs,
             instrument_id
         FROM alert_config_instrument
         GROUP BY instrument_id
-    ) A on A.instrument_id = I.id
+    ) a ON a.instrument_id = i.id
     LEFT JOIN (
-        SELECT instrument_id,
-                json_agg(
-                    json_build_object(
-                        'id', v.id,
-                        'slug', v.telemetry_type_slug,
-                        'name', v.telemetry_type_name
-                    )
-                ) AS telemetry
+        SELECT
+            instrument_id,
+            JSON_AGG(JSON_BUILD_OBJECT(
+                'id', v.id,
+                'slug', v.telemetry_type_slug,
+                'name', v.telemetry_type_name
+            )) AS telemetry
         FROM v_instrument_telemetry v
         GROUP BY instrument_id
-    ) TEL ON TEL.instrument_id = I.id
+    ) tel ON tel.instrument_id = i.id
+    LEFT JOIN (
+        -- optional properties that vary per
+        -- instrument can be added here via union
+        SELECT x.instrument_id, ROW_TO_JSON(x) AS opts
+        FROM saa_opts x
+    ) o ON o.instrument_id = i.id
 );
 
 -- v_instrument_groups

@@ -37,7 +37,20 @@ type Instrument struct {
 	ProjectID     *uuid.UUID         `json:"project_id" db:"project_id"`
 	NIDID         *string            `json:"nid_id" db:"nid_id"`
 	USGSID        *string            `json:"usgs_id" db:"usgs_id"`
+	Opts          Opts               `json:"opts" db:"opts"`
 	AuditInfo
+}
+
+// Optional instrument metadata based on type
+// If there are no options defined for the instrument type, the object will be empty
+type Opts map[string]interface{}
+
+func (o *Opts) Scan(src interface{}) error {
+	b, ok := src.(string)
+	if !ok {
+		return fmt.Errorf("type assertion failed")
+	}
+	return json.Unmarshal([]byte(b), o)
 }
 
 // CreateInstrumentsValidationResult holds results of checking InstrumentCollection POST
@@ -137,7 +150,8 @@ const listInstrumentsSQL = `
 		groups,
 		alert_configs,
 		nid_id,
-		usgs_id
+		usgs_id,
+		opts
 	FROM v_instrument
 `
 
@@ -201,8 +215,7 @@ func (q *Queries) CreateInstrument(ctx context.Context, i Instrument) (IDAndSlug
 	var aa IDAndSlug
 	if err := q.db.GetContext(
 		ctx, &aa, createInstrument,
-		i.Slug, i.Name, i.TypeID, i.Geometry,
-		i.Station, i.StationOffset, i.Creator, i.CreateDate, i.ProjectID, i.NIDID, i.USGSID,
+		i.Slug, i.Name, i.TypeID, i.Geometry, i.Station, i.StationOffset, i.Creator, i.CreateDate, i.ProjectID, i.NIDID, i.USGSID,
 	); err != nil {
 		return aa, err
 	}

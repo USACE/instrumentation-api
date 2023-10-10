@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"time"
 
@@ -139,8 +140,21 @@ func (d *dbSlice[T]) Scan(src interface{}) error {
 type dbJSONSlice[T any] []T
 
 func (d *dbJSONSlice[T]) Scan(src interface{}) error {
-	if err := json.Unmarshal([]byte(src.(string)), d); err != nil {
-		return err
+	b, ok := src.(string)
+	if !ok {
+		return fmt.Errorf("failed type assertion")
 	}
-	return nil
+	return json.Unmarshal([]byte(b), d)
+}
+
+func MapToStruct[T any](v map[string]interface{}) (T, error) {
+	var o T
+	s, err := json.Marshal(v)
+	if err != nil {
+		return o, err
+	}
+	if err := json.Unmarshal(s, &o); err != nil {
+		return o, err
+	}
+	return o, nil
 }

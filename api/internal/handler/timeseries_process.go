@@ -26,9 +26,7 @@ func (h *ApiHandler) ListTimeseriesMeasurementsByTimeseries(c echo.Context) erro
 		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
 	}
 
-	// Not ideal making 2 calls to database here, but need to check if timeseries
-	// is computed to know when to return timeseries notes
-	// Also, returning only stored timeseries is much faster with the current query
+	// TODO: move business logic to service layer
 
 	isStored, err := h.TimeseriesService.GetStoredTimeseriesExists(c.Request().Context(), tsID)
 	if err != nil {
