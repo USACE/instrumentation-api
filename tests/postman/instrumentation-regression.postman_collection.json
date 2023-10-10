@@ -382,7 +382,8 @@
 									"        \"update_date\": { \"type\": [\"string\", \"null\"], \"format\": \"date-time\" },",
 									"        \"project_id\": { \"type\": [\"string\", \"null\"] },",
 									"        \"nid_id\": { \"type\": [\"string\", \"null\"] },",
-									"        \"usgs_id\": { \"type\": [\"string\", \"null\"] }",
+									"        \"usgs_id\": { \"type\": [\"string\", \"null\"] },",
+									"        \"opts\": { \"type\": [\"object\", \"null\"] },",
 									"    },",
 									"    \"required\": [\"id\", \"slug\", \"name\", \"type_id\", \"type\", \"status_id\", \"status\", \"status_time\", \"geometry\", \"creator\", \"create_date\", \"updater\", \"update_date\", \"project_id\", \"station\", \"offset\", \"constants\", \"alert_configs\", \"nid_id\", \"usgs_id\"],",
 									"    \"additionalProperties\": false",
@@ -6911,6 +6912,201 @@
 								{
 									"key": "datalogger_id",
 									"value": "c0b65315-f802-4ca5-a4dd-7e0cfcffd057"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "SAA Instrument",
+			"item": [
+				{
+					"name": "GetAllSaaSegmentsForInstrument",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// validate JSON schema",
+									"var schema = {",
+									"    \"type\": \"array\",",
+									"    \"properties\": {",
+									"        \"id\": { \"type\": \"string\" },",
+									"        \"instrument_id\": { \"type\": \"string\" },",
+									"        \"length\": { \"type\": [ \"number\", \"null\" ] },",
+									"        \"x_timeseries_id\": { \"type\": [ \"string\", \"null\" ] },",
+									"        \"y_timeseries_id\": { \"type\": [ \"string\", \"null\" ] },",
+									"        \"z_timeseries_id\": { \"type\": [ \"string\", \"null\" ] },",
+									"        \"temp_timeseries_id\": { \"type\": [ \"string\", \"null\" ] },",
+									"    },",
+									"    \"additionalProperties\": false",
+									"}",
+									"",
+									"pm.globals.set('SAA_INSTRUMENT_ARRAY_SCHEMA', JSON.stringify(schema));",
+									"",
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// validate schema",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(schema)",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/instruments/saa/:instrument_id/segments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instruments",
+								"saa",
+								":instrument_id",
+								"segments"
+							],
+							"variable": [
+								{
+									"key": "instrument_id",
+									"value": "eca4040e-aecb-4cd3-bcde-3e308f0356a6"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetSaaMeasurementsForInstrument",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// validate JSON schema",
+									"var schema = {",
+									"    \"type\": \"array\",",
+									"    \"properties\": {",
+									"        \"segment_id\": { \"type\": \"number\" },",
+									"        \"instrument_id\": { \"type\": \"string\" },",
+									"        \"x\": { \"type\": [ \"number\", \"null\" ] },",
+									"        \"y\": { \"type\": [ \"number\", \"null\" ] },",
+									"        \"z\": { \"type\": [ \"number\", \"null\" ] },",
+									"        \"temp\": { \"type\": [ \"number\", \"null\" ] },",
+									"    },",
+									"    \"additionalProperties\": false",
+									"}",
+									"",
+									"pm.globals.set('SAA_MEASUREMENTS_ARRAY_SCHEMA', JSON.stringify(schema));",
+									"",
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// validate schema",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(schema)",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/instruments/saa/:instrument_id/measurements?after=1900-01-01T00:00:00.00Z&before=2030-01-01T00:00:00.00Z",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instruments",
+								"saa",
+								":instrument_id",
+								"measurements"
+							],
+							"query": [
+								{
+									"key": "after",
+									"value": "1900-01-01T00:00:00.00Z"
+								},
+								{
+									"key": "before",
+									"value": "2030-01-01T00:00:00.00Z"
+								}
+							],
+							"variable": [
+								{
+									"key": "instrument_id",
+									"value": "eca4040e-aecb-4cd3-bcde-3e308f0356a6"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateSaaSegments",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// status code is 200",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"var s = pm.globals.get('SAA_INSTRUMENT_ARRAY_SCHEMA')",
+									"",
+									"// validate schema",
+									"pm.test(\"Schema validation\", function () {",
+									"    pm.response.to.have.jsonSchema(JSON.parse(s))",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[\n    {\n        \"id\": 0,\n        \"instrument_id\": \"eca4040e-aecb-4cd3-bcde-3e308f0356a6\",\n        \"length\": 1,\n        \"x_timeseries_id\": \"eec831d1-56a5-47ef-85eb-02c7622d6cb8\",\n        \"y_timeseries_id\": \"8b3762ef-a852-4edc-8e87-746a92eaac9d\",\n        \"z_timeseries_id\": \"ecfa267b-339b-4bb8-b7ae-eda550257878\",\n        \"temp_timeseries_id\": \"a31a24c4-aa8e-4e52-9895-43cdb69fe703\"\n    },\n    {\n        \"id\": 1,\n        \"instrument_id\": \"eca4040e-aecb-4cd3-bcde-3e308f0356a6\",\n        \"length\": 200,\n        \"x_timeseries_id\": \"23bda2f6-c479-48e0-a0c2-db48c3b08c3c\",\n        \"y_timeseries_id\": \"eb25ab9f-af8b-4383-839a-7d24899e02c4\",\n        \"z_timeseries_id\": \"8e641473-d7bf-433c-a24b-55fa065ca0c3\",\n        \"temp_timeseries_id\": \"21cfe121-d29d-40a2-b04f-6be71ba479fe\"\n    }\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/instruments/saa/:instrument_id/segments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instruments",
+								"saa",
+								":instrument_id",
+								"segments"
+							],
+							"variable": [
+								{
+									"key": "instrument_id",
+									"value": "eca4040e-aecb-4cd3-bcde-3e308f0356a6"
 								}
 							]
 						}

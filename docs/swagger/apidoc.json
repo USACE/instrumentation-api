@@ -87,6 +87,9 @@
             "name": "Data Logger"
         },
         {
+            "name": "SAA Instrument"
+        },
+        {
             "name": "Equivalency Table"
         }
     ],
@@ -4040,6 +4043,130 @@
                         },
                         "required": true,
                         "example": "c0b65315-f802-4ca5-a4dd-7e0cfcffd057"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/instruments/saa/{instrument_id}/segments": {
+            "get": {
+                "tags": [
+                    "SAA Instrument"
+                ],
+                "summary": "GetAllSaaSegmentsForInstrument",
+                "parameters": [
+                    {
+                        "name": "instrument_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "example": "eca4040e-aecb-4cd3-bcde-3e308f0356a6"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "SAA Instrument"
+                ],
+                "summary": "UpdateSaaSegments",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": [
+                                    {
+                                        "id": 0,
+                                        "instrument_id": "eca4040e-aecb-4cd3-bcde-3e308f0356a6",
+                                        "length": 1,
+                                        "x_timeseries_id": "eec831d1-56a5-47ef-85eb-02c7622d6cb8",
+                                        "y_timeseries_id": "8b3762ef-a852-4edc-8e87-746a92eaac9d",
+                                        "z_timeseries_id": "ecfa267b-339b-4bb8-b7ae-eda550257878",
+                                        "temp_timeseries_id": "a31a24c4-aa8e-4e52-9895-43cdb69fe703"
+                                    },
+                                    {
+                                        "id": 1,
+                                        "instrument_id": "eca4040e-aecb-4cd3-bcde-3e308f0356a6",
+                                        "length": 200,
+                                        "x_timeseries_id": "23bda2f6-c479-48e0-a0c2-db48c3b08c3c",
+                                        "y_timeseries_id": "eb25ab9f-af8b-4383-839a-7d24899e02c4",
+                                        "z_timeseries_id": "8e641473-d7bf-433c-a24b-55fa065ca0c3",
+                                        "temp_timeseries_id": "21cfe121-d29d-40a2-b04f-6be71ba479fe"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "instrument_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "example": "eca4040e-aecb-4cd3-bcde-3e308f0356a6"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/instruments/saa/{instrument_id}/measurements": {
+            "get": {
+                "tags": [
+                    "SAA Instrument"
+                ],
+                "summary": "GetSaaMeasurementsForInstrument",
+                "parameters": [
+                    {
+                        "name": "after",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "1900-01-01T00:00:00.00Z"
+                    },
+                    {
+                        "name": "before",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2030-01-01T00:00:00.00Z"
+                    },
+                    {
+                        "name": "instrument_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "example": "eca4040e-aecb-4cd3-bcde-3e308f0356a6"
                     }
                 ],
                 "responses": {

@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"database/sql"
+	"errors"
 	"net/http"
 
 	"github.com/USACE/instrumentation-api/api/internal/message"
@@ -33,7 +35,10 @@ func (h *ApiHandler) GetInstrumentStatus(c echo.Context) error {
 
 	s, err := h.InstrumentStatusService.GetInstrumentStatus(c.Request().Context(), id)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		if errors.Is(err, sql.ErrNoRows) {
+			return echo.NewHTTPError(http.StatusNotFound, message.NotFound)
+		}
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, s)
 }
