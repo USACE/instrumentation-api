@@ -39,6 +39,9 @@ elif [ "$1" = "test" ]; then
             -t $(docker build -q ./tests/postman) run /etc/newman/instrumentation-regression.postman_collection.json \
             --environment=/etc/newman/postman_environment.docker-compose.json
     fi
+elif [ "$1" = "mkdocs" ]; then
+    # TODO: this could possibly be added in CI, just run locally for now
+    (cd api && swag init --pd -g cmd/core/main.go --parseInternal true --dir internal)
 else
     echo -e "usage:\n\t./compose.sh up\n\t./compose.sh down\n\t./compose.sh clean\n\t./compose.sh test"
 fi

@@ -1,0 +1,5503 @@
+definitions:
+  echo.HTTPError:
+    properties:
+      message: {}
+    type: object
+  geojson.Geometry:
+    properties:
+      coordinates: {}
+      geometries:
+        items:
+          $ref: '#/definitions/geojson.Geometry'
+        type: array
+      type:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.Alert:
+    properties:
+      alert_config_id:
+        type: string
+      body:
+        type: string
+      create_date:
+        type: string
+      id:
+        type: string
+      instruments:
+        items:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfigInstrument'
+        type: array
+      name:
+        type: string
+      project_id:
+        type: string
+      project_name:
+        type: string
+      read:
+        type: boolean
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.AlertConfig:
+    properties:
+      alert_email_subscriptions:
+        items:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EmailAutocompleteResult'
+        type: array
+      alert_type:
+        type: string
+      alert_type_id:
+        type: string
+      body:
+        type: string
+      create_date:
+        type: string
+      creator:
+        type: string
+      creator_username:
+        type: string
+      id:
+        type: string
+      instruments:
+        items:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfigInstrument'
+        type: array
+      last_checked:
+        type: string
+      last_reminded:
+        type: string
+      mute_consecutive_alerts:
+        type: boolean
+      name:
+        type: string
+      project_id:
+        type: string
+      project_name:
+        type: string
+      remind_interval:
+        type: string
+      schedule_interval:
+        type: string
+      start_date:
+        type: string
+      update_date:
+        type: string
+      updater:
+        type: string
+      updater_username:
+        type: string
+      warning_interval:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.AlertConfigInstrument:
+    properties:
+      instrument_id:
+        type: string
+      instrument_name:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.AlertSubscription:
+    properties:
+      alert_config_id:
+        type: string
+      id:
+        type: string
+      mute_notify:
+        type: boolean
+      mute_ui:
+        type: boolean
+      profile_id:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.AwareParameter:
+    properties:
+      id:
+        type: string
+      key:
+        type: string
+      parameter_id:
+        type: string
+      unit_id:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.AwarePlatformParameterConfig:
+    properties:
+      aware_id:
+        type: string
+      aware_parameters:
+        additionalProperties:
+          type: string
+        type: object
+      instrument_id:
+        type: string
+      project_id:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.CalculatedTimeseries:
+    properties:
+      formula:
+        type: string
+      formula_name:
+        type: string
+      id:
+        type: string
+      instrument_id:
+        type: string
+      parameter_id:
+        type: string
+      slug:
+        type: string
+      unit_id:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.CollectionGroup:
+    properties:
+      create_date:
+        type: string
+      creator:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      project_id:
+        type: string
+      slug:
+        type: string
+      update_date:
+        type: string
+      updater:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.CollectionGroupDetails:
+    properties:
+      create_date:
+        type: string
+      creator:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      project_id:
+        type: string
+      slug:
+        type: string
+      timeseries:
+        items:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.collectionGroupDetailsTimeseries'
+        type: array
+      update_date:
+        type: string
+      updater:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.Datalogger:
+    properties:
+      create_date:
+        type: string
+      creator:
+        type: string
+      creator_username:
+        type: string
+      errors:
+        items:
+          type: string
+        type: array
+      id:
+        type: string
+      model:
+        type: string
+      model_id:
+        type: string
+      name:
+        type: string
+      project_id:
+        type: string
+      slug:
+        type: string
+      sn:
+        type: string
+      update_date:
+        type: string
+      updater:
+        type: string
+      updater_username:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.DataloggerPreview:
+    properties:
+      datalogger_id:
+        type: string
+      model:
+        type: string
+      preview:
+        $ref: '#/definitions/pgtype.JSON'
+      sn:
+        type: string
+      update_date:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.DataloggerWithKey:
+    properties:
+      create_date:
+        type: string
+      creator:
+        type: string
+      creator_username:
+        type: string
+      errors:
+        items:
+          type: string
+        type: array
+      id:
+        type: string
+      key:
+        type: string
+      model:
+        type: string
+      model_id:
+        type: string
+      name:
+        type: string
+      project_id:
+        type: string
+      slug:
+        type: string
+      sn:
+        type: string
+      update_date:
+        type: string
+      updater:
+        type: string
+      updater_username:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.District:
+    properties:
+      division_initials:
+        type: string
+      division_name:
+        type: string
+      id:
+        type: string
+      initials:
+        type: string
+      name:
+        type: string
+      office_id:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.DistrictRollup:
+    properties:
+      actual_total_submittals:
+        type: integer
+      alert_type_id:
+        type: string
+      district_initials:
+        type: string
+      expected_total_submittals:
+        type: integer
+      green_submittals:
+        type: integer
+      month:
+        type: string
+      office_id:
+        type: string
+      project_id:
+        type: string
+      project_name:
+        type: string
+      red_submittals:
+        type: integer
+      yellow_submittals:
+        type: integer
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.Domain:
+    properties:
+      description:
+        type: string
+      group:
+        type: string
+      id:
+        type: string
+      value:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.EmailAutocompleteResult:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      user_type:
+        type: string
+      username:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable:
+    properties:
+      datalogger_id:
+        type: string
+      rows:
+        items:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTableRow'
+        type: array
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTableRow:
+    properties:
+      display_name:
+        type: string
+      field_name:
+        type: string
+      id:
+        type: string
+      instrument_id:
+        type: string
+      timeseries_id:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.Evaluation:
+    properties:
+      alert_config_id:
+        type: string
+      alert_config_name:
+        type: string
+      body:
+        type: string
+      create_date:
+        type: string
+      creator:
+        type: string
+      creator_username:
+        type: string
+      end_date:
+        type: string
+      id:
+        type: string
+      instruments:
+        items:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EvaluationInstrument'
+        type: array
+      name:
+        type: string
+      project_id:
+        type: string
+      project_name:
+        type: string
+      start_date:
+        type: string
+      submittal_id:
+        type: string
+      update_date:
+        type: string
+      updater:
+        type: string
+      updater_username:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.EvaluationInstrument:
+    properties:
+      instrument_id:
+        type: string
+      instrument_name:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.Home:
+    properties:
+      instrument_count:
+        type: integer
+      instrument_group_count:
+        type: integer
+      new_instruments_7d:
+        type: integer
+      new_measurements_2h:
+        type: integer
+      project_count:
+        type: integer
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.IDAndSlug:
+    properties:
+      id:
+        type: string
+      slug:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.InclinometerMeasurement:
+    properties:
+      create_date:
+        type: string
+      creator:
+        type: string
+      time:
+        type: string
+      values:
+        items:
+          type: integer
+        type: array
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.InclinometerMeasurementCollection:
+    properties:
+      inclinometers:
+        items:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InclinometerMeasurement'
+        type: array
+      timeseries_id:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.InclinometerMeasurementCollectionCollection:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InclinometerMeasurementCollection'
+        type: array
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.Instrument:
+    properties:
+      alert_configs:
+        items:
+          type: string
+        type: array
+      aware_id:
+        type: string
+      constants:
+        items:
+          type: string
+        type: array
+      create_date:
+        type: string
+      creator:
+        type: string
+      geometry:
+        $ref: '#/definitions/geojson.Geometry'
+      groups:
+        items:
+          type: string
+        type: array
+      id:
+        type: string
+      name:
+        type: string
+      nid_id:
+        type: string
+      offset:
+        type: integer
+      project_id:
+        type: string
+      slug:
+        type: string
+      station:
+        type: integer
+      status:
+        type: string
+      status_id:
+        type: string
+      status_time:
+        type: string
+      type:
+        type: string
+      type_id:
+        type: string
+      update_date:
+        type: string
+      updater:
+        type: string
+      usgs_id:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.InstrumentCollection:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Instrument'
+        type: array
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.InstrumentGroup:
+    properties:
+      create_date:
+        type: string
+      creator:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      instrument_count:
+        type: integer
+      name:
+        type: string
+      project_id:
+        type: string
+      slug:
+        type: string
+      timeseries_count:
+        type: integer
+      update_date:
+        type: string
+      updater:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.InstrumentNote:
+    properties:
+      body:
+        type: string
+      create_date:
+        type: string
+      creator:
+        type: string
+      id:
+        type: string
+      instrument_id:
+        type: string
+      time:
+        type: string
+      title:
+        type: string
+      update_date:
+        type: string
+      updater:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.InstrumentNoteCollection:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentNote'
+        type: array
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.InstrumentStatus:
+    properties:
+      id:
+        type: string
+      status:
+        type: string
+      status_id:
+        type: string
+      time:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.InstrumentStatusCollection:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentStatus'
+        type: array
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.Measurement:
+    properties:
+      annotation:
+        type: string
+      error:
+        type: string
+      masked:
+        type: boolean
+      time:
+        type: string
+      validated:
+        type: boolean
+      value:
+        type: number
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.MeasurementCollection:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Measurement'
+        type: array
+      timeseries_id:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.MeasurementCollectionLean:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.MeasurementLean'
+        type: array
+      timeseries_id:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.MeasurementLean:
+    additionalProperties:
+      type: number
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.PlotConfig:
+    properties:
+      auto_range:
+        type: boolean
+      create_date:
+        type: string
+      creator:
+        type: string
+      date_range:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      project_id:
+        type: string
+      show_comments:
+        type: boolean
+      show_masked:
+        type: boolean
+      show_nonvalidated:
+        type: boolean
+      slug:
+        type: string
+      threshold:
+        type: integer
+      timeseries_id:
+        items:
+          type: string
+        type: array
+      update_date:
+        type: string
+      updater:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.Profile:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      is_admin:
+        type: boolean
+      roles:
+        items:
+          type: string
+        type: array
+      tokens:
+        items:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.TokenInfoProfile'
+        type: array
+      username:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.Project:
+    properties:
+      create_date:
+        type: string
+      creator:
+        type: string
+      federal_id:
+        type: string
+      id:
+        type: string
+      image:
+        type: string
+      instrument_count:
+        type: integer
+      instrument_group_count:
+        type: integer
+      name:
+        type: string
+      office_id:
+        type: string
+      slug:
+        type: string
+      timeseries:
+        items:
+          type: string
+        type: array
+      update_date:
+        type: string
+      updater:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.ProjectCollection:
+    properties:
+      projects:
+        items:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Project'
+        type: array
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.ProjectMembership:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      profile_id:
+        type: string
+      role:
+        type: string
+      role_id:
+        type: string
+      username:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.SearchResult:
+    properties:
+      id:
+        type: string
+      item: {}
+      type:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.Site:
+    properties:
+      description:
+        type: string
+      elevation:
+        type: string
+      elevationUnits:
+        type: string
+      siteName:
+        $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.SiteName'
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.SiteName:
+    properties:
+      id:
+        type: string
+      nameType:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.Submittal:
+    properties:
+      alert_config_id:
+        type: string
+      alert_config_name:
+        type: string
+      alert_type_id:
+        type: string
+      alert_type_name:
+        type: string
+      completion_date:
+        type: string
+      create_date:
+        type: string
+      due_date:
+        type: string
+      id:
+        type: string
+      marked_as_missing:
+        type: boolean
+      project_id:
+        type: string
+      submittal_status_id:
+        type: string
+      submittal_status_name:
+        type: string
+      warning_sent:
+        type: boolean
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.Timeseries:
+    properties:
+      id:
+        type: string
+      instrument:
+        type: string
+      instrument_id:
+        type: string
+      instrument_slug:
+        type: string
+      is_computed:
+        type: boolean
+      name:
+        type: string
+      parameter:
+        type: string
+      parameter_id:
+        type: string
+      project:
+        type: string
+      project_id:
+        type: string
+      project_slug:
+        type: string
+      slug:
+        type: string
+      unit:
+        type: string
+      unit_id:
+        type: string
+      values:
+        items:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Measurement'
+        type: array
+      variable:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.TimeseriesCollectionItems:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Timeseries'
+        type: array
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.TimeseriesMeasurementCollectionCollection:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.MeasurementCollection'
+        type: array
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.Token:
+    properties:
+      issued:
+        type: string
+      profile_id:
+        type: string
+      secret_token:
+        type: string
+      token_id:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.TokenInfoProfile:
+    properties:
+      issued:
+        type: string
+      token_id:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.Unit:
+    properties:
+      abbreviation:
+        type: string
+      id:
+        type: string
+      measure:
+        type: string
+      measure_id:
+        type: string
+      name:
+        type: string
+      unit_family:
+        type: string
+      unit_family_id:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.collectionGroupDetailsTimeseries:
+    properties:
+      id:
+        type: string
+      instrument:
+        type: string
+      instrument_id:
+        type: string
+      instrument_slug:
+        type: string
+      is_computed:
+        type: boolean
+      latest_time:
+        type: string
+      latest_value:
+        type: number
+      name:
+        type: string
+      parameter:
+        type: string
+      parameter_id:
+        type: string
+      project:
+        type: string
+      project_id:
+        type: string
+      project_slug:
+        type: string
+      slug:
+        type: string
+      unit:
+        type: string
+      unit_id:
+        type: string
+      values:
+        items:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Measurement'
+        type: array
+      variable:
+        type: string
+    type: object
+  pgtype.JSON:
+    properties:
+      bytes:
+        items:
+          type: integer
+        type: array
+      status:
+        $ref: '#/definitions/pgtype.Status'
+    type: object
+  pgtype.Status:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - Undefined
+    - "Null"
+    - Present
+info:
+  contact: {}
+  description: Monitoring Instrumentation Data Acquisition Systems (MIDAS) Web API
+  license:
+    name: MIT
+    url: https://github.com/USACE/instrumentation-api/blob/555ea51191ff1245fe5910a295862be7514aaec6/LICENSE.md
+  title: MIDAS Web API
+  version: "2.0"
+paths:
+  /alert_configs/{alert_config_id}/submittals:
+    get:
+      parameters:
+      - description: alert config uuid
+        format: uuid
+        in: path
+        name: alert_config_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Submittal'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: lists all submittals for an instrument
+      tags:
+      - submittal
+  /alert_configs/{alert_config_id}/submittals/verify_missing:
+    put:
+      parameters:
+      - description: alert config uuid
+        format: uuid
+        in: path
+        name: alert_config_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: verifies all current submittals for the alert config are "missing"
+        and will not be completed
+      tags:
+      - submittal
+  /alert_subscriptions/{alert_subscription_id}:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: alert subscription id
+        format: uuid
+        in: path
+        name: alert_subscription_id
+        required: true
+        type: string
+      - description: alert subscription payload
+        in: body
+        name: alert_subscription
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertSubscription'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfig'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: updates settings for an alert subscription
+      tags:
+      - alert-subscription
+  /aware/data_acquisition_config:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AwarePlatformParameterConfig'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: lists alert configs for a project
+      tags:
+      - aware
+  /aware/parameters:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AwareParameter'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: lists alert configs for a project
+      tags:
+      - aware
+  /datalogger:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: instrument uuid
+        format: uuid
+        in: path
+        name: instrument_id
+        required: true
+        type: string
+      - description: datalogger payload
+        in: body
+        name: datalogger
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Datalogger'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerWithKey'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: creates a datalogger
+      tags:
+      - datalogger
+  /datalogger/{datalogger_id}:
+    delete:
+      parameters:
+      - description: datalogger uuid
+        format: uuid
+        in: path
+        name: datalogger_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: deletes a datalogger by id
+      tags:
+      - datalogger
+    get:
+      parameters:
+      - description: datalogger uuid
+        format: uuid
+        in: path
+        name: datalogger_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Datalogger'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: gets a datalogger by id
+      tags:
+      - datalogger
+    put:
+      parameters:
+      - description: datalogger uuid
+        format: uuid
+        in: path
+        name: datalogger_id
+        required: true
+        type: string
+      - description: datalogger payload
+        in: body
+        name: datalogger
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Datalogger'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Datalogger'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: updates a datalogger
+      tags:
+      - datalogger
+  /datalogger/{datalogger_id}/equivalency_table:
+    delete:
+      parameters:
+      - description: datalogger uuid
+        format: uuid
+        in: path
+        name: datalogger_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: deletes an equivalency table
+      tags:
+      - equivalency-table
+    get:
+      parameters:
+      - description: datalogger uuid
+        format: uuid
+        in: path
+        name: datalogger_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: gets an equivalency table for a datalogger
+      tags:
+      - equivalency-table
+    post:
+      parameters:
+      - description: datalogger uuid
+        format: uuid
+        in: path
+        name: datalogger_id
+        required: true
+        type: string
+      - description: equivalency table payload
+        in: body
+        name: equivalency_table
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: creates an equivalency table for a datalogger
+      tags:
+      - equivalency-table
+    put:
+      parameters:
+      - description: datalogger uuid
+        format: uuid
+        in: path
+        name: datalogger_id
+        required: true
+        type: string
+      - description: equivalency table payload
+        in: body
+        name: equivalency_table
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: updates an equivalency table for a datalogger
+      tags:
+      - equivalency-table
+  /datalogger/{datalogger_id}/equivalency_table/row:
+    delete:
+      parameters:
+      - description: datalogger uuid
+        format: uuid
+        in: path
+        name: datalogger_id
+        required: true
+        type: string
+      - description: equivalency table row uuid
+        format: uuid
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: deletes an equivalency table row
+      tags:
+      - equivalency-table
+  /datalogger/{datalogger_id}/key:
+    put:
+      parameters:
+      - description: datalogger uuid
+        format: uuid
+        in: path
+        name: datalogger_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerWithKey'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: deletes and recreates a datalogger api key
+      tags:
+      - datalogger
+  /datalogger/{datalogger_id}/preview:
+    get:
+      parameters:
+      - description: datalogger uuid
+        format: uuid
+        in: path
+        name: datalogger_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerPreview'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: gets the most recent datalogger preview by by datalogger id
+      tags:
+      - datalogger
+  /dataloggers:
+    get:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Datalogger'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: lists dataloggers for a project
+      tags:
+      - datalogger
+  /districts:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.District'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: lists all districts
+      tags:
+      - project
+  /domains:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Domain'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: lists all domains
+      tags:
+      - domain
+  /email_autocomplete:
+    get:
+      parameters:
+      - description: search query string
+        in: query
+        name: q
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EmailAutocompleteResult'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: lists results of email autocomplete
+      tags:
+      - autocomplete
+  /explorer:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: array of instrument uuids
+        in: body
+        name: instrument_ids
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              additionalProperties:
+                $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.MeasurementCollectionLean'
+              type: object
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: list timeseries measurements for explorer page
+      tags:
+      - explorer
+  /formulas:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.CalculatedTimeseries'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: lists calculations associated with an instrument
+      tags:
+      - formula
+    post:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: creates a calculation
+      tags:
+      - formula
+  /formulas/{formula_id}:
+    delete:
+      parameters:
+      - description: formula uuid
+        format: uuid
+        in: path
+        name: formula_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: deletes a calculation
+      tags:
+      - formula
+    put:
+      parameters:
+      - description: formula uuid
+        format: uuid
+        in: path
+        name: formula_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.CalculatedTimeseries'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: updates a calculation
+      tags:
+      - formula
+  /health:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+      summary: checks the health of the api server
+      tags:
+      - heartbeat
+  /home:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Home'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: gets information for the homepage
+      tags:
+      - home
+  /instrument_groups:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentGroup'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: lists all instrument groups
+      tags:
+      - instrument-group
+    post:
+      parameters:
+      - description: instrument group payload
+        in: body
+        name: instrument_group
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentGroup'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentGroup'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: creats an instrument group from an array of instruments
+      tags:
+      - instrument-group
+  /instrument_groups/{instrument_group_id}:
+    delete:
+      parameters:
+      - description: instrument group uuid
+        format: uuid
+        in: path
+        name: instrument_group_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentGroup'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: soft deletes an instrument
+      tags:
+      - instrument-group
+    get:
+      parameters:
+      - description: instrument group uuid
+        format: uuid
+        in: path
+        name: instrument_group_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentGroup'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: gets a single instrument group
+      tags:
+      - instrument-group
+    put:
+      parameters:
+      - description: instrument group uuid
+        format: uuid
+        in: path
+        name: instrument_group_id
+        required: true
+        type: string
+      - description: instrument group payload
+        in: body
+        name: instrument_group
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentGroup'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentGroup'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: updates an existing instrument group
+      tags:
+      - instrument-group
+  /instrument_groups/{instrument_group_id}/instruments:
+    get:
+      parameters:
+      - description: instrument group uuid
+        format: uuid
+        in: path
+        name: instrument_group_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Instrument'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: lists instruments in an instrument group
+      tags:
+      - instrument-group
+    post:
+      parameters:
+      - description: instrument group uuid
+        format: uuid
+        in: path
+        name: instrument_group_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: adds an instrument to an instrument group
+      tags:
+      - instrument-group
+  /instrument_groups/{instrument_group_id}/instruments/{instrument_id}:
+    delete:
+      parameters:
+      - description: instrument group uuid
+        format: uuid
+        in: path
+        name: instrument_group_id
+        required: true
+        type: string
+      - description: instrument uuid
+        format: uuid
+        in: path
+        name: instrument_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: removes an instrument from an instrument group
+      tags:
+      - instrument-group
+  /instrument_groups/{instrument_group_id}/timeseries:
+    get:
+      parameters:
+      - description: instrument group uuid
+        format: uuid
+        in: path
+        name: instrument_group_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Timeseries'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: lists timeseries for instruments in an instrument group
+      tags:
+      - timeseries
+  /instrument_groups/{instrument_group_id}/timeseries_measurements:
+    get:
+      parameters:
+      - description: instrument group uuid
+        format: uuid
+        in: path
+        name: instrument_group_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.MeasurementCollection'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: lists timeseries measurements by instrument group id
+      tags:
+      - timeseries
+  /instruments:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Instrument'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: lists all instruments
+      tags:
+      - instrument
+    post:
+      parameters:
+      - description: instrument collection payload
+        in: body
+        name: instrument
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentCollection'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IDAndSlug'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: accepts an array of instruments for bulk upload to the database
+      tags:
+      - instrument
+  /instruments/{instrument_id}:
+    get:
+      parameters:
+      - description: instrument uuid
+        format: uuid
+        in: path
+        name: instrument_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Instrument'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: gets a single instrument by id
+      tags:
+      - instrument
+  /instruments/{instrument_id}/notes:
+    get:
+      parameters:
+      - description: instrument uuid
+        format: uuid
+        in: path
+        name: instrument_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentNote'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: gets instrument notes for a single instrument
+      tags:
+      - instrument-note
+  /instruments/{instrument_id}/notes/{note_id}:
+    delete:
+      parameters:
+      - description: instrument uuid
+        format: uuid
+        in: path
+        name: instrument_id
+        type: string
+      - description: note uuid
+        format: uuid
+        in: path
+        name: note_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: obejct
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: deletes an instrument note
+      tags:
+      - instrument-note
+  /instruments/{instrument_id}/status:
+    get:
+      parameters:
+      - description: instrument uuid
+        format: uuid
+        in: path
+        name: instrument_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentStatus'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: lists all Status for an instrument
+      tags:
+      - instrument-status
+    post:
+      parameters:
+      - description: instrument uuid
+        format: uuid
+        in: path
+        name: instrument_id
+        required: true
+        type: string
+      - description: instrument status collection paylaod
+        in: body
+        name: instrument_status
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentStatusCollection'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: creates a status for an instrument
+      tags:
+      - instrument-status
+  /instruments/{instrument_id}/status/{status_id}:
+    delete:
+      parameters:
+      - description: instrument uuid
+        format: uuid
+        in: path
+        name: instrument_id
+        required: true
+        type: string
+      - description: project uuid
+        format: uuid
+        in: path
+        name: status_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: deletes a status for an instrument
+      tags:
+      - instrument-status
+    get:
+      parameters:
+      - description: instrument uuid
+        format: uuid
+        in: path
+        name: instrument_id
+        required: true
+        type: string
+      - description: status uuid
+        format: uuid
+        in: path
+        name: status_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfig'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: gets a single status
+      tags:
+      - instrument-status
+  /instruments/{instrument_id}/submittals:
+    get:
+      parameters:
+      - description: instrument uuid
+        format: uuid
+        in: path
+        name: instrument_id
+        required: true
+        type: string
+      - description: filter by missing projects only
+        in: query
+        name: missing
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Submittal'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: lists all submittals for an instrument
+      tags:
+      - submittal
+  /instruments/{instrument_id}/timeseries/{timeseries_id}:
+    get:
+      parameters:
+      - description: timeseries uuid
+        format: uuid
+        in: path
+        name: timeseries_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Timeseries'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: gets a single timeseries by id
+      tags:
+      - timeseries
+  /instruments/{instrument_id}/timeseries/{timeseries_id}/measurements:
+    get:
+      parameters:
+      - description: timeseries uuid
+        format: uuid
+        in: path
+        name: timeseries_id
+        required: true
+        type: string
+      - description: after time
+        format: date-time
+        in: query
+        name: after
+        type: string
+      - description: before time
+        format: date-time
+        in: query
+        name: before
+        type: string
+      - description: downsample threshold
+        in: query
+        name: threshold
+        type: number
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.MeasurementCollection'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: lists timeseries by timeseries uuid
+      tags:
+      - timeseries
+  /instruments/{instrument_id}/timeseries_measurements:
+    get:
+      parameters:
+      - description: instrument uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: after time
+        format: date-time
+        in: query
+        name: after
+        type: string
+      - description: before time
+        format: date-time
+        in: query
+        name: before
+        type: string
+      - description: downsample threshold
+        in: query
+        name: threshold
+        type: number
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.MeasurementCollection'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: lists timeseries measurements by instrument id
+      tags:
+      - timeseries
+  /instruments/count:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: gets the total number of non deleted instruments in the system
+      tags:
+      - instrument
+  /instruments/notes:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentNote'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: gets all instrument notes
+      tags:
+      - instrument-note
+    post:
+      parameters:
+      - description: instrument note collection payload
+        in: body
+        name: instrument_note
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentNoteCollection'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentNote'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      tags:
+      - instrument-note
+  /instruments/notes/{note_id}:
+    get:
+      parameters:
+      - description: note uuid
+        format: uuid
+        in: path
+        name: note_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentNote'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: gets a single instrument note by id
+      tags:
+      - instrument-note
+    put:
+      parameters:
+      - description: note uuid
+        format: uuid
+        in: path
+        name: note_id
+        required: true
+        type: string
+      - description: instrument note collection payload
+        in: body
+        name: instrument_note
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentNote'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfig'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: updates an instrument note by id
+      tags:
+      - instrument-note
+  /my_alert_subscriptions:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertSubscription'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: lists all alerts subscribed to by the current profile
+      tags:
+      - alert-subscription
+  /my_alerts:
+    get:
+      description: list all alerts a profile is subscribed to
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Alert'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: lists subscribed alerts for a single user
+      tags:
+      - alert
+  /my_alerts/{alert_id}/read:
+    post:
+      description: |-
+        marks an alert as read for a profile
+        returning the updated alert
+      parameters:
+      - description: alert uuid
+        format: uuid
+        in: path
+        name: alert_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Alert'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: marks an alert as read
+      tags:
+      - alert
+  /my_alerts/{alert_id}/unread:
+    post:
+      description: |-
+        marks an alert as unread based on provided profile ID and alert ID.
+        returning the updated alert
+      parameters:
+      - description: alert uuid
+        format: uuid
+        in: path
+        name: alert_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Alert'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: marks an alert as unread for a profile
+      tags:
+      - alert
+  /my_profile:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Profile'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: gets profile for current authenticated user
+      tags:
+      - profile
+  /my_projects:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Project'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: lists projects for current profile
+      tags:
+      - project
+  /my_tokens:
+    post:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Token'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: creates token for a profile
+      tags:
+      - profile
+  /my_tokens/{token_id}:
+    delete:
+      parameters:
+      - description: token uuid
+        format: uuid
+        in: path
+        name: token_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: deletes a token for a profile
+      tags:
+      - profile
+  /opendcs/sites:
+    get:
+      produces:
+      - text/xml
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Site'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: lists all instruments, represented as opendcs sites
+      tags:
+      - opendcs
+  /profiles:
+    post:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Profile'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: creates a user profile
+      tags:
+      - profile
+  /projects:
+    get:
+      parameters:
+      - description: federal id
+        in: query
+        name: federal_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Project'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: lists all projects optionally filtered by federal id
+      tags:
+      - project
+    post:
+      parameters:
+      - description: project collection payload
+        in: body
+        name: project_collection
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.ProjectCollection'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IDAndSlug'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: accepts an array of instruments for bulk upload to the database
+      tags:
+      - project
+  /projects/{project_id}:
+    delete:
+      parameters:
+      - description: project id
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: soft deletes a project
+      tags:
+      - project
+    get:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Project'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: gets a single project
+      tags:
+      - project
+    put:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: project payload
+        in: body
+        name: project
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Project'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Project'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: updates an existing project
+      tags:
+      - project
+  /projects/{project_id}/alert_configs:
+    get:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfig'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: lists alert configs for a project
+      tags:
+      - alert-config
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: alert config payload
+        in: body
+        name: alert_config
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfig'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfig'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: creates one alert config
+      tags:
+      - alert-config
+  /projects/{project_id}/alert_configs/{alert_config_id}:
+    delete:
+      parameters:
+      - description: Project ID
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: instrument uuid
+        format: uuid
+        in: path
+        name: alert_config_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfig'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: deletes an alert config
+      tags:
+      - alert-config
+    get:
+      parameters:
+      - description: alert config uuid
+        format: uuid
+        in: path
+        name: alert_config_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfig'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: gets a single alert
+      tags:
+      - alert-config
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: alert config uuid
+        format: uuid
+        in: path
+        name: alert_config_id
+        required: true
+        type: string
+      - description: alert config payload
+        in: body
+        name: alert_config
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfig'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfig'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: updates an existing alert config
+      tags:
+      - alert-config
+  /projects/{project_id}/collection_groups:
+    get:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfig'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: lists instrument groups
+      tags:
+      - collection-groups
+    post:
+      description: lists alert configs for a single project optionally filtered by
+        alert_type_id
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: collection group payload
+        in: body
+        name: collection_group
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.CollectionGroup'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.CollectionGroup'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: creates a new collection group
+      tags:
+      - collection-groups
+  /projects/{project_id}/collection_groups/{collection_group_id}:
+    delete:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: collection group uuid
+        format: uuid
+        in: path
+        name: collection_group_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: deletes a collection group using the id of the collection group
+      tags:
+      - collection-groups
+    get:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: collection group uuid
+        format: uuid
+        in: path
+        name: collection_group_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.CollectionGroupDetails'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: gets all data needed to render collection group form
+      tags:
+      - collection-groups
+    put:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: collection group uuid
+        in: path
+        name: collection_group_id
+        required: true
+        type: string
+      - description: collection group payload
+        in: body
+        name: collection_group
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.CollectionGroup'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.CollectionGroup'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: updates an existing collection group
+      tags:
+      - collection-groups
+  /projects/{project_id}/collection_groups/{collection_group_id}/timeseries/{timeseries_id}:
+    delete:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: collection group uuid
+        format: uuid
+        in: path
+        name: collection_group_id
+        required: true
+        type: string
+      - description: timeseries uuid
+        format: uuid
+        in: path
+        name: timeseries_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: removes a timeseries from a collection group
+      tags:
+      - collection-groups
+    post:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: collection group uuid
+        format: uuid
+        in: path
+        name: collection_group_id
+        required: true
+        type: string
+      - description: timeseries uuid
+        format: uuid
+        in: path
+        name: timeseries_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: adds a timeseries to a collection group
+      tags:
+      - collection-groups
+  /projects/{project_id}/district_rollup/evaluation_submittals:
+    get:
+      parameters:
+      - description: project id
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DistrictRollup'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: lists monthly evaluation statistics for a district by project id
+      tags:
+      - district-rollup
+  /projects/{project_id}/district_rollup/measurement_submittals:
+    get:
+      parameters:
+      - description: project id
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DistrictRollup'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: lists monthly measurement statistics for a district by project id
+      tags:
+      - district-rollup
+  /projects/{project_id}/evaluations:
+    get:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        type: string
+      - description: alert config uuid
+        format: uuid
+        in: path
+        name: alert_config_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Evaluation'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: lists evaluations for a single project optionally filtered by alert_config_id
+      tags:
+      - evaluation
+    post:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: evaluation payload
+        in: body
+        name: evaluation
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Evaluation'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Evaluation'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: creates one evaluation
+      tags:
+      - evaluation
+  /projects/{project_id}/evaluations/{evaluation_id}:
+    delete:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        type: string
+      - description: evaluation uuid
+        format: uuid
+        in: path
+        name: evaluation_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfig'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: deletes an evaluation
+      tags:
+      - evaluation
+    get:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        type: string
+      - description: instrument uuid
+        format: uuid
+        in: path
+        name: instrument_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Evaluation'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: gets a single evaluation by id
+      tags:
+      - evaluation
+    put:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        type: string
+      - description: evaluation uuid
+        format: uuid
+        in: path
+        name: evaluation_id
+        required: true
+        type: string
+      - description: evaluation payload
+        in: body
+        name: evaluation
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Evaluation'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Evaluation'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: updates an existing evaluation
+      tags:
+      - evaluation
+  /projects/{project_id}/inclinometer_measurements:
+    post:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: inclinometer measurement collections
+        in: body
+        name: timeseries_measurement_collections
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InclinometerMeasurementCollectionCollection'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InclinometerMeasurementCollection'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: creates or updates one or more inclinometer measurements
+      tags:
+      - measurement-inclinometer
+  /projects/{project_id}/instrument_groups:
+    get:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentGroup'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: lists instrument groups associated with a project
+      tags:
+      - project
+  /projects/{project_id}/instruments:
+    get:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Project'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: lists instruments associated with a project
+      tags:
+      - project
+    post:
+      parameters:
+      - description: project id
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: instrument collection payload
+        in: body
+        name: instrument
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentCollection'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IDAndSlug'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: accepts an array of instruments for bulk upload to the database
+      tags:
+      - instrument
+  /projects/{project_id}/instruments/{instrument_id}:
+    delete:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: instrument uuid
+        format: uuid
+        in: path
+        name: instrument_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: soft deletes an instrument
+      tags:
+      - instrument
+    put:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: instrument uuid
+        format: uuid
+        in: path
+        name: instrument_id
+        required: true
+        type: string
+      - description: instrument payload
+        in: body
+        name: instrument
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Instrument'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Instrument'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: updates an existing instrument
+      tags:
+      - instrument
+  /projects/{project_id}/instruments/{instrument_id}/alert_configs:
+    get:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        type: string
+      - description: instrument uuid
+        format: uuid
+        in: path
+        name: instrument_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfig'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: lists alerts for a single instrument
+      tags:
+      - alert-config
+  /projects/{project_id}/instruments/{instrument_id}/alert_configs/{alert_config_id}/subscribe:
+    post:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: instrument uuid
+        format: uuid
+        in: path
+        name: instrument_id
+        required: true
+        type: string
+      - description: alert config uuid
+        format: uuid
+        in: path
+        name: alert_config_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertSubscription'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: subscribes a profile to an alert
+      tags:
+      - alert-subscription
+  /projects/{project_id}/instruments/{instrument_id}/alert_configs/{alert_config_id}/unsubscribe:
+    post:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: instrument uuid
+        format: uuid
+        in: path
+        name: instrument_id
+        required: true
+        type: string
+      - description: alert config uuid
+        format: uuid
+        in: path
+        name: alert_config_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: unsubscribes a profile to an alert
+      tags:
+      - alert-subscription
+  /projects/{project_id}/instruments/{instrument_id}/alerts:
+    get:
+      description: list all alerts associated an instrument
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: instrument uuid
+        format: uuid
+        in: path
+        name: instrument_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Alert'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: lists alerts for a single instrument
+      tags:
+      - alert
+  /projects/{project_id}/instruments/{instrument_id}/constants:
+    get:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        type: string
+      - description: instrument uuid
+        format: uuid
+        in: path
+        name: instrument_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Timeseries'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: lists constants for a given instrument
+      tags:
+      - instrument-constant
+    post:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        type: string
+      - description: instrument uuid
+        format: uuid
+        in: path
+        name: instrument_id
+        required: true
+        type: string
+      - description: timeseries collection items payload
+        in: body
+        name: timeseries_collection_items
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.TimeseriesCollectionItems'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Timeseries'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: creates instrument constants (i.e. timeseries)
+      tags:
+      - instrument-constant
+  /projects/{project_id}/instruments/{instrument_id}/constants/{timeseries_id}:
+    delete:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        type: string
+      - description: instrument uuid
+        format: uuid
+        in: path
+        name: instrument_id
+        required: true
+        type: string
+      - description: timeseries uuid
+        format: uuid
+        in: path
+        name: timeseries_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: removes a timeseries as an instrument constant
+      tags:
+      - instrument-constant
+  /projects/{project_id}/instruments/{instrument_id}/evaluations:
+    get:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: instrument uuid
+        format: uuid
+        in: path
+        name: instrument_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Evaluation'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: lists evaluations for a single instrument
+      tags:
+      - evaluation
+  /projects/{project_id}/instruments/{instrument_id}/geometry:
+    put:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: instrument uuid
+        format: uuid
+        in: path
+        name: instrument_id
+        required: true
+        type: string
+      - description: instrument payload
+        in: body
+        name: instrument
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Instrument'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Instrument'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: updates the geometry of an instrument
+      tags:
+      - instrument
+  /projects/{project_id}/instruments/{instrument_id}/timeseries:
+    get:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        type: string
+      - description: instrument uuid
+        format: uuid
+        in: path
+        name: instrument_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Timeseries'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: lists timeseries for an instrument
+      tags:
+      - timeseries
+  /projects/{project_id}/instruments/names:
+    get:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: lists names of all instruments associated with a project
+      tags:
+      - project
+  /projects/{project_id}/members:
+    get:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.ProjectMembership'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: lists project members and their role information
+      tags:
+      - project-role
+  /projects/{project_id}/members/{profile_id}/roles/{role_id}:
+    delete:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: profile uuid
+        format: uuid
+        in: path
+        name: profile_id
+        required: true
+        type: string
+      - description: role uuid
+        format: uuid
+        in: path
+        name: role_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: removes project members and their role information
+      tags:
+      - project-role
+    post:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: profile uuid
+        format: uuid
+        in: path
+        name: profile_id
+        required: true
+        type: string
+      - description: role uuid
+        format: uuid
+        in: path
+        name: role_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.ProjectMembership'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: adds project members and their role information
+      tags:
+      - project-role
+  /projects/{project_id}/plot_configurations:
+    get:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.PlotConfig'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: lists plot configs
+      tags:
+      - plot-config
+    post:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: plot config payload
+        in: body
+        name: plot_config
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.PlotConfig'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.PlotConfig'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      tags:
+      - plot-config
+  /projects/{project_id}/plot_configurations/{plot_configuration_id}:
+    delete:
+      parameters:
+      - description: plot config uuid
+        format: uuid
+        in: path
+        name: plot_configuration_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      tags:
+      - plot-config
+    get:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: plot config uuid
+        format: uuid
+        in: path
+        name: plot_configuration_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.PlotConfig'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      tags:
+      - plot-config
+    put:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: plot config payload
+        in: body
+        name: plot_config
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.PlotConfig'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.PlotConfig'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      tags:
+      - plot-config
+  /projects/{project_id}/submittals:
+    get:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: filter by missing projects only
+        in: query
+        name: missing
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Submittal'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: lists all submittals for a project
+      tags:
+      - submittal
+  /projects/{project_id}/timeseries:
+    get:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Timeseries'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: lists all timeseries for a single project
+      tags:
+      - timeseries
+  /projects/{project_id}/timeseries/{timeseries_id}:
+    delete:
+      parameters:
+      - description: project id
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: timeseries uuid
+        format: uuid
+        in: path
+        name: instrument_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: removes a timeseries from the project level
+      tags:
+      - project
+    post:
+      parameters:
+      - description: project id
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: timeseries uuid
+        format: uuid
+        in: path
+        name: instrument_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: exposes a timeseries at the project level
+      tags:
+      - project
+  /projects/{project_id}/timeseries_measurements:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: array of timeseries measurement collections
+        in: body
+        name: timeseries_measurement_collections
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.TimeseriesMeasurementCollectionCollection'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.MeasurementCollection'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: creates or updates one or more timeseries measurements
+      tags:
+      - measurement
+    put:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: after timestamp
+        format: date-time
+        in: query
+        name: after
+        type: string
+      - description: before timestamp
+        format: date-time
+        in: query
+        name: before
+        type: string
+      - description: array of timeseries measurement collections
+        in: body
+        name: timeseries_measurement_collections
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.TimeseriesMeasurementCollectionCollection'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.MeasurementCollection'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: overwrites all measurements witin date range with the supplied payload
+      tags:
+      - measurement
+  /projects/{project_slug}/images/{uri_path}:
+    get:
+      parameters:
+      - description: uri path of requested resource
+        in: path
+        name: uri_path
+        required: true
+        type: string
+      produces:
+      - image/jpeg
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: serves media, files, etc for a given project
+      tags:
+      - media
+  /projects/count:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: gets the total number of non-deleted projects in the system
+      tags:
+      - project
+  /search/{entity}:
+    get:
+      parameters:
+      - description: entity to search (i.e. projects, etc.)
+        in: path
+        name: entity
+        required: true
+        type: string
+      - description: search string
+        in: query
+        name: q
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.SearchResult'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: allows searching using a string on different entities
+      tags:
+      - search
+  /submittals/{submittal_id}/verify_missing:
+    put:
+      parameters:
+      - description: submittal uuid
+        format: uuid
+        in: path
+        name: submittal_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: verifies the specified submittal is "missing" and will not be completed
+      tags:
+      - submittal
+  /timeseries:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Timeseries'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: lists all timeseries
+      tags:
+      - timeseries
+    post:
+      parameters:
+      - description: timeseries collection items payload
+        in: body
+        name: timeseries_collection_items
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.TimeseriesCollectionItems'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Timeseries'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: creates one or more timeseries
+      tags:
+      - timeseries
+  /timeseries/{timeseries_id}:
+    delete:
+      parameters:
+      - description: timeseries uuid
+        format: uuid
+        in: path
+        name: timeseries_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: deletes a single timeseries by id
+      tags:
+      - timeseries
+    get:
+      parameters:
+      - description: timeseries uuid
+        format: uuid
+        in: path
+        name: timeseries_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Timeseries'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: gets a single timeseries by id
+      tags:
+      - timeseries
+    put:
+      parameters:
+      - description: timeseries uuid
+        format: uuid
+        in: path
+        name: timeseries_id
+        required: true
+        type: string
+      - description: timeseries payload
+        in: body
+        name: timeseries
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Timeseries'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Timeseries'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: updates a single timeseries by id
+      tags:
+      - timeseries
+  /timeseries/{timeseries_id}/inclinometer_measurements:
+    delete:
+      parameters:
+      - description: timeseries uuid
+        format: uuid
+        in: path
+        name: timeseries_id
+        required: true
+        type: string
+      - description: timestamp of measurement to delete
+        format: date-time
+        in: query
+        name: time
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: deletes a single inclinometer measurement by timestamp
+      tags:
+      - measurement-inclinometer
+    get:
+      parameters:
+      - description: timeseries uuid
+        format: uuid
+        in: path
+        name: timeseries_id
+        required: true
+        type: string
+      - description: after timestamp
+        format: date-time
+        in: query
+        name: after
+        type: string
+      - description: before timestamp
+        format: date-time
+        in: query
+        name: before
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InclinometerMeasurementCollection'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: lists all measurements for an inclinometer
+      tags:
+      - measurement-inclinometer
+  /timeseries/{timeseries_id}/measurements:
+    delete:
+      parameters:
+      - description: timeseries uuid
+        format: uuid
+        in: path
+        name: timeseries_id
+        required: true
+        type: string
+      - description: timestamp of measurement to delete
+        format: date-time
+        in: query
+        name: time
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: deletes a single timeseries measurement by timestamp
+      tags:
+      - measurement
+  /timeseries_measurements:
+    post:
+      parameters:
+      - description: array of timeseries measurement collections
+        in: body
+        name: timeseries_measurement_collections
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.TimeseriesMeasurementCollectionCollection'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.MeasurementCollection'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: creates or updates one or more timeseries measurements
+      tags:
+      - measurement
+  /units:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Unit'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: lists the available units
+      tags:
+      - unit
+securityDefinitions:
+  Bearer:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

@@ -10,7 +10,17 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// ListInstrumentStatus lists all Status for an instrument
+// ListInstrumentStatus godoc
+//
+//	@Summary lists all Status for an instrument
+//	@Tags instrument-status
+//	@Produce json
+//	@Param instrument_id path string true "instrument uuid" Format(uuid)
+//	@Success 200 {array} model.InstrumentStatus
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /instruments/{instrument_id}/status [get]
 func (h *ApiHandler) ListInstrumentStatus(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("instrument_id"))
 	if err != nil {
@@ -24,7 +34,18 @@ func (h *ApiHandler) ListInstrumentStatus(c echo.Context) error {
 	return c.JSON(http.StatusOK, ss)
 }
 
-// GetInstrumentStatus returns a single Status
+// GetInstrumentStatus godoc
+//
+//	@Summary gets a single status
+//	@Tags instrument-status
+//	@Produce json
+//	@Param instrument_id path string true "instrument uuid" Format(uuid)
+//	@Param status_id path string true "status uuid" Format(uuid)
+//	@Success 200 {array} model.AlertConfig
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /instruments/{instrument_id}/status/{status_id} [get]
 func (h *ApiHandler) GetInstrumentStatus(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("status_id"))
 	if err != nil {
@@ -38,7 +59,18 @@ func (h *ApiHandler) GetInstrumentStatus(c echo.Context) error {
 	return c.JSON(http.StatusOK, s)
 }
 
-// CreateOrUpdateInstrumentStatus creates a Status for an instrument
+// CreateOrUpdateInstrumentStatus godoc
+//
+//	@Summary creates a status for an instrument
+//	@Tags instrument-status
+//	@Produce json
+//	@Param instrument_id path string true "instrument uuid" Format(uuid)
+//	@Param instrument_status body model.InstrumentStatusCollection true "instrument status collection paylaod"
+//	@Success 200 {object} map[string]interface{}
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /instruments/{instrument_id}/status [post]
 func (h *ApiHandler) CreateOrUpdateInstrumentStatus(c echo.Context) error {
 	instrumentID, err := uuid.Parse(c.Param("instrument_id"))
 	if err != nil {
@@ -64,7 +96,18 @@ func (h *ApiHandler) CreateOrUpdateInstrumentStatus(c echo.Context) error {
 	return c.JSON(http.StatusCreated, make(map[string]interface{}))
 }
 
-// DeleteInstrumentStatus deletes a Status for an instrument
+// DeleteInstrumentStatus godoc
+//
+//	@Summary deletes a status for an instrument
+//	@Tags instrument-status
+//	@Produce json
+//	@Param instrument_id path string true "instrument uuid" Format(uuid)
+//	@Param status_id path string true "project uuid" Format(uuid)
+//	@Success 200 {object} map[string]interface{}
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /instruments/{instrument_id}/status/{status_id} [delete]
 func (h *ApiHandler) DeleteInstrumentStatus(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("status_id"))
 	if err != nil {

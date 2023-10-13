@@ -20,15 +20,27 @@ const (
 	explorerRequest
 )
 
+// ListTimeseriesMeasurementsByTimeseries godoc
+//
+//	@Summary lists timeseries by timeseries uuid
+//	@Tags timeseries
+//	@Produce json
+//	@Param timeseries_id path string true "timeseries uuid" Format(uuid)
+//	@Param after query string false "after time" Format(date-time)
+//	@param before query string false "before time" Format(date-time)
+//	@Param threshold query number false "downsample threshold"
+//	@Success 200 {object} model.MeasurementCollection
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /instruments/{instrument_id}/timeseries/{timeseries_id}/measurements [get]
 func (h *ApiHandler) ListTimeseriesMeasurementsByTimeseries(c echo.Context) error {
 	tsID, err := uuid.Parse(c.Param("timeseries_id"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
 	}
 
-	// Not ideal making 2 calls to database here, but need to check if timeseries
-	// is computed to know when to return timeseries notes
-	// Also, returning only stored timeseries is much faster with the current query
+	// TODO: move business logic to service layer
 
 	isStored, err := h.TimeseriesService.GetStoredTimeseriesExists(c.Request().Context(), tsID)
 	if err != nil {
@@ -66,6 +78,20 @@ func (h *ApiHandler) ListTimeseriesMeasurementsByTimeseries(c echo.Context) erro
 	return selectMeasurements(c)
 }
 
+// ListTimeseriesMeasurementsByInstrument godoc
+//
+//	@Summary lists timeseries measurements by instrument id
+//	@Tags timeseries
+//	@Produce json
+//	@Param project_id path string true "instrument uuid" Format(uuid)
+//	@Param after query string false "after time" Format(date-time)
+//	@Param before query string false "before time" Format(date-time)
+//	@Param threshold query number false "downsample threshold"
+//	@Success 200 {object} model.MeasurementCollection
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /instruments/{instrument_id}/timeseries_measurements [get]
 func (h *ApiHandler) ListTimeseriesMeasurementsByInstrument(c echo.Context) error {
 	iID, err := uuid.Parse(c.Param("instrument_id"))
 	if err != nil {
@@ -77,6 +103,17 @@ func (h *ApiHandler) ListTimeseriesMeasurementsByInstrument(c echo.Context) erro
 	return selectMeasurements(c)
 }
 
+// ListTimeseriesMeasurementsByInstrumentGroup godoc
+//
+//	@Summary lists timeseries measurements by instrument group id
+//	@Tags timeseries
+//	@Produce json
+//	@Param instrument_group_id path string true "instrument group uuid" Format(uuid)
+//	@Success 200 {object} model.MeasurementCollection
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /instrument_groups/{instrument_group_id}/timeseries_measurements [get]
 func (h *ApiHandler) ListTimeseriesMeasurementsByInstrumentGroup(c echo.Context) error {
 	igID, err := uuid.Parse(c.Param("instrument_group_id"))
 	if err != nil {
@@ -88,6 +125,18 @@ func (h *ApiHandler) ListTimeseriesMeasurementsByInstrumentGroup(c echo.Context)
 	return selectMeasurements(c)
 }
 
+// ListTimeseriesMeasurementsExplorer godoc
+//
+//	@Summary list timeseries measurements for explorer page
+//	@Tags explorer
+//	@Accept json
+//	@Produce json
+//	@Param instrument_ids body []uuid.UUID true "array of instrument uuids"
+//	@Success 200 {array} map[uuid.UUID]model.MeasurementCollectionLean
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /explorer [post]
 func (h *ApiHandler) ListTimeseriesMeasurementsExplorer(c echo.Context) error {
 	var iIDs []uuid.UUID
 	if err := (&echo.DefaultBinder{}).BindBody(c, &iIDs); err != nil {

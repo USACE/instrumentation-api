@@ -8,7 +8,6 @@ on:
       - ".github/workflows/api-develop.yml"
 
 jobs:
-
   TestBuildPush:
     name: Test Build Push
     runs-on: ubuntu-latest

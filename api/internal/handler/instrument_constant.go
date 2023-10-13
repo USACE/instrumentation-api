@@ -10,37 +10,66 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// CreateInstrumentConstants creates instrument constants (i.e. timeseries)
-func (h *ApiHandler) CreateInstrumentConstants(c echo.Context) error {
-	ctx := c.Request().Context()
-	// Get action information from context
-	var tc model.TimeseriesCollectionItems
-	if err := c.Bind(&tc); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-	// InstrumentID From RouteParams
+// ListInstrumentConstants godoc
+//
+//	@Summary lists constants for a given instrument
+//	@Tags instrument-constant
+//	@Produce json
+//	@Param project_id path string false "project uuid" Format(uuid)
+//	@Param instrument_id path string true "instrument uuid" Format(uuid)
+//	@Success 200 {array} model.Timeseries
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /projects/{project_id}/instruments/{instrument_id}/constants [get]
+func (h *ApiHandler) ListInstrumentConstants(c echo.Context) error {
 	instrumentID, err := uuid.Parse(c.Param("instrument_id"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	// slugs already taken in the database
+	cc, err := h.InstrumentConstantService.ListInstrumentConstants(c.Request().Context(), instrumentID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, cc)
+}
+
+// CreateInstrumentConstants godoc
+//
+//	@Summary creates instrument constants (i.e. timeseries)
+//	@Tags instrument-constant
+//	@Produce json
+//	@Param project_id path string false "project uuid" Format(uuid)
+//	@Param instrument_id path string true "instrument uuid" Format(uuid)
+//	@Param timeseries_collection_items body model.TimeseriesCollectionItems true "timeseries collection items payload"
+//	@Success 200 {array} model.Timeseries
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /projects/{project_id}/instruments/{instrument_id}/constants [post]
+func (h *ApiHandler) CreateInstrumentConstants(c echo.Context) error {
+	ctx := c.Request().Context()
+	var tc model.TimeseriesCollectionItems
+	if err := c.Bind(&tc); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	instrumentID, err := uuid.Parse(c.Param("instrument_id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
 	slugsTaken, err := h.TimeseriesService.ListTimeseriesSlugsForInstrument(ctx, instrumentID)
 	if err != nil {
 		return err
 	}
 	for idx := range tc.Items {
-		// Verify object instrument_id matches routeParam
 		if instrumentID != tc.Items[idx].InstrumentID {
 			return echo.NewHTTPError(http.StatusBadRequest, message.MatchRouteParam("`instrument_id`"))
 		}
-		// Assign Slug
 		s, err := util.NextUniqueSlug(tc.Items[idx].Name, slugsTaken)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		tc.Items[idx].Slug = s
-		// Add slug to array of slugs originally fetched from the database
-		// to catch duplicate names/slugs from the same bulk upload
 		slugsTaken = append(slugsTaken, s)
 	}
 	tt, err := h.InstrumentConstantService.CreateInstrumentConstants(ctx, tc.Items)
@@ -50,7 +79,19 @@ func (h *ApiHandler) CreateInstrumentConstants(c echo.Context) error {
 	return c.JSON(http.StatusCreated, tt)
 }
 
-// DeleteInstrumentConstant removes a timeseries as an Instrument Constant
+// DeleteInstrumentConstant godoc
+//
+//	@Summary removes a timeseries as an instrument constant
+//	@Tags instrument-constant
+//	@Produce json
+//	@Param project_id path string false "project uuid" Format(uuid)
+//	@Param instrument_id path string true "instrument uuid" Format(uuid)
+//	@Param timeseries_id path string true "timeseries uuid" Format(uuid)
+//	@Success 200 {object} map[string]interface{}
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /projects/{project_id}/instruments/{instrument_id}/constants/{timeseries_id} [delete]
 func (h *ApiHandler) DeleteInstrumentConstant(c echo.Context) error {
 	instrumentID, err := uuid.Parse(c.Param("instrument_id"))
 	if err != nil {
@@ -65,17 +106,4 @@ func (h *ApiHandler) DeleteInstrumentConstant(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, make(map[string]interface{}))
-}
-
-// ListInstrumentConstants lists constants for a given instrument
-func (h *ApiHandler) ListInstrumentConstants(c echo.Context) error {
-	instrumentID, err := uuid.Parse(c.Param("instrument_id"))
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-	cc, err := h.InstrumentConstantService.ListInstrumentConstants(c.Request().Context(), instrumentID)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-	return c.JSON(http.StatusOK, cc)
 }

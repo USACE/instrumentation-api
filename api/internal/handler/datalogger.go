@@ -12,11 +12,20 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// ListDataloggers
+// ListDataloggers godoc
+//
+//	@Summary lists dataloggers for a project
+//	@Tags datalogger
+//	@Produce json
+//	@Param project_id path string true "project uuid" Format(uuid)
+//	@Success 200 {array} model.Datalogger
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /dataloggers [get]
 func (h *ApiHandler) ListDataloggers(c echo.Context) error {
 	pID := c.QueryParam("project_id")
 	if pID != "" {
-
 		pID, err := uuid.Parse(pID)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
@@ -38,7 +47,20 @@ func (h *ApiHandler) ListDataloggers(c echo.Context) error {
 	return c.JSON(http.StatusOK, dls)
 }
 
-// CreateDatalogger
+// CreateDatalogger godoc
+//
+//	@Summary creates a datalogger
+//	@Tags datalogger
+//	@Accept json
+//	@Produce json
+//	@Param project_id path string true "project uuid" Format(uuid)
+//	@Param instrument_id path string true "instrument uuid" Format(uuid)
+//	@Param datalogger body model.Datalogger true "datalogger payload"
+//	@Success 200 {array} model.DataloggerWithKey
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /datalogger [post]
 func (h *ApiHandler) CreateDatalogger(c echo.Context) error {
 	ctx := c.Request().Context()
 	n := model.Datalogger{}
@@ -88,7 +110,17 @@ func (h *ApiHandler) CreateDatalogger(c echo.Context) error {
 	return c.JSON(http.StatusCreated, dl)
 }
 
-// CycleDataloggerKey
+// CycleDataloggerKey godoc
+//
+//	@Summary deletes and recreates a datalogger api key
+//	@Tags datalogger
+//	@Produce json
+//	@Param datalogger_id path string true "datalogger uuid" Format(uuid)
+//	@Success 200 {object} model.DataloggerWithKey
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /datalogger/{datalogger_id}/key [put]
 func (h *ApiHandler) CycleDataloggerKey(c echo.Context) error {
 	ctx := c.Request().Context()
 	dlID, err := uuid.Parse(c.Param("datalogger_id"))
@@ -114,7 +146,17 @@ func (h *ApiHandler) CycleDataloggerKey(c echo.Context) error {
 	return c.JSON(http.StatusOK, dl)
 }
 
-// GetDatalogger
+// GetDatalogger godoc
+//
+//	@Summary gets a datalogger by id
+//	@Tags datalogger
+//	@Produce json
+//	@Param datalogger_id path string true "datalogger uuid" Format(uuid)
+//	@Success 200 {object} model.Datalogger
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /datalogger/{datalogger_id} [get]
 func (h *ApiHandler) GetDatalogger(c echo.Context) error {
 	dlID, err := uuid.Parse(c.Param("datalogger_id"))
 	if err != nil {
@@ -128,7 +170,18 @@ func (h *ApiHandler) GetDatalogger(c echo.Context) error {
 	return c.JSON(http.StatusOK, dl)
 }
 
-// UpdateDatalogger
+// UpdateDatalogger godoc
+//
+//	@Summary updates a datalogger
+//	@Tags datalogger
+//	@Produce json
+//	@Param datalogger_id path string true "datalogger uuid" Format(uuid)
+//	@Param datalogger body model.Datalogger true "datalogger payload"
+//	@Success 200 {object} model.Datalogger
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /datalogger/{datalogger_id} [put]
 func (h *ApiHandler) UpdateDatalogger(c echo.Context) error {
 	ctx := c.Request().Context()
 	dlID, err := uuid.Parse(c.Param("datalogger_id"))
@@ -161,7 +214,17 @@ func (h *ApiHandler) UpdateDatalogger(c echo.Context) error {
 	return c.JSON(http.StatusOK, dlUpdated)
 }
 
-// DeleteDatalogger
+// DeleteDatalogger godoc
+//
+//	@Summary deletes a datalogger by id
+//	@Tags datalogger
+//	@Produce json
+//	@Param datalogger_id path string true "datalogger uuid" Format(uuid)
+//	@Success 200 {object} map[string]interface{}
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /datalogger/{datalogger_id} [delete]
 func (h *ApiHandler) DeleteDatalogger(c echo.Context) error {
 	ctx := c.Request().Context()
 	dlID, err := uuid.Parse(c.Param("datalogger_id"))
@@ -185,6 +248,17 @@ func (h *ApiHandler) DeleteDatalogger(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]interface{}{"id": dlID})
 }
 
+// GetDataloggerPreview godoc
+//
+//	@Summary gets the most recent datalogger preview by by datalogger id
+//	@Tags datalogger
+//	@Produce json
+//	@Param datalogger_id path string true "datalogger uuid" Format(uuid)
+//	@Success 200 {object} model.DataloggerPreview
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /datalogger/{datalogger_id}/preview [get]
 func (h *ApiHandler) GetDataloggerPreview(c echo.Context) error {
 	dlID, err := uuid.Parse(c.Param("datalogger_id"))
 	if err != nil {

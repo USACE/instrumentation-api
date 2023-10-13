@@ -12,7 +12,16 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// ListInstrumentGroups returns instrument groups
+// ListInstrumentGroups godoc
+//
+//	@Summary lists all instrument groups
+//	@Tags instrument-group
+//	@Produce json
+//	@Success 200 {array} model.InstrumentGroup
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /instrument_groups [get]
 func (h *ApiHandler) ListInstrumentGroups(c echo.Context) error {
 	groups, err := h.InstrumentGroupService.ListInstrumentGroups(c.Request().Context())
 	if err != nil {
@@ -21,7 +30,17 @@ func (h *ApiHandler) ListInstrumentGroups(c echo.Context) error {
 	return c.JSON(http.StatusOK, groups)
 }
 
-// GetInstrumentGroup returns single instrument group
+// GetInstrumentGroup godoc
+//
+//	@Summary gets a single instrument group
+//	@Tags instrument-group
+//	@Produce json
+//	@Param instrument_group_id path string true "instrument group uuid" Format(uuid)
+//	@Success 200 {object} model.InstrumentGroup
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /instrument_groups/{instrument_group_id} [get]
 func (h *ApiHandler) GetInstrumentGroup(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("instrument_group_id"))
 	if err != nil {
@@ -34,7 +53,17 @@ func (h *ApiHandler) GetInstrumentGroup(c echo.Context) error {
 	return c.JSON(http.StatusOK, g)
 }
 
-// CreateInstrumentGroup accepts an array of instruments for bulk upload to the database
+// CreateInstrumentGroup godoc
+//
+//	@Summary creats an instrument group from an array of instruments
+//	@Tags instrument-group
+//	@Produce json
+//	@Param instrument_group body model.InstrumentGroup true "instrument group payload"
+//	@Success 200 {object} model.InstrumentGroup
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /instrument_groups [post]
 func (h *ApiHandler) CreateInstrumentGroup(c echo.Context) error {
 
 	gc := model.InstrumentGroupCollection{}
@@ -78,7 +107,18 @@ func (h *ApiHandler) CreateInstrumentGroup(c echo.Context) error {
 	return c.JSON(http.StatusCreated, gg)
 }
 
-// UpdateInstrumentGroup modifies an existing instrument_group
+// UpdateInstrumentGroup godoc
+//
+//	@Summary updates an existing instrument group
+//	@Tags instrument-group
+//	@Produce json
+//	@Param instrument_group_id path string true "instrument group uuid" Format(uuid)
+//	@Param instrument_group body model.InstrumentGroup true "instrument group payload"
+//	@Success 200 {object} model.InstrumentGroup
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /instrument_groups/{instrument_group_id} [put]
 func (h *ApiHandler) UpdateInstrumentGroup(c echo.Context) error {
 
 	// id from url params
@@ -111,7 +151,17 @@ func (h *ApiHandler) UpdateInstrumentGroup(c echo.Context) error {
 	return c.JSON(http.StatusOK, gUpdated)
 }
 
-// DeleteFlagInstrumentGroup sets the instrument group deleted flag true
+// DeleteFlagInstrumentGroup godoc
+//
+//	@Summary soft deletes an instrument
+//	@Tags instrument-group
+//	@Produce json
+//	@Param instrument_group_id path string true "instrument group uuid" Format(uuid)
+//	@Success 200 {array} model.InstrumentGroup
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /instrument_groups/{instrument_group_id} [delete]
 func (h *ApiHandler) DeleteFlagInstrumentGroup(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("instrument_group_id"))
 	if err != nil {
@@ -123,7 +173,17 @@ func (h *ApiHandler) DeleteFlagInstrumentGroup(c echo.Context) error {
 	return c.JSON(http.StatusOK, make(map[string]interface{}))
 }
 
-// ListInstrumentGroupInstruments returns a list of instruments for a provided instrument group
+// ListInstrumentGroupInstruments godoc
+//
+//	@Summary lists instruments in an instrument group
+//	@Tags instrument-group
+//	@Produce json
+//	@Param instrument_group_id path string true "instrument group uuid" Format(uuid)
+//	@Success 200 {array} model.Instrument
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /instrument_groups/{instrument_group_id}/instruments [get]
 func (h *ApiHandler) ListInstrumentGroupInstruments(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("instrument_group_id"))
 	if err != nil {
@@ -136,27 +196,44 @@ func (h *ApiHandler) ListInstrumentGroupInstruments(c echo.Context) error {
 	return c.JSON(http.StatusOK, nn)
 }
 
-// CreateInstrumentGroupInstruments adds an instrument to an instrument group
+// CreateInstrumentGroupInstruments godoc
+//
+//	@Summary adds an instrument to an instrument group
+//	@Tags instrument-group
+//	@Produce json
+//	@Param instrument_group_id path string true "instrument group uuid" Format(uuid)
+//	@Success 200 {object} map[string]interface{}
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /instrument_groups/{instrument_group_id}/instruments [post]
 func (h *ApiHandler) CreateInstrumentGroupInstruments(c echo.Context) error {
-	// instrument_group_id
 	instrumentGroupID, err := uuid.Parse(c.Param("instrument_group_id"))
-
 	if err != nil || instrumentGroupID == uuid.Nil {
 		return echo.NewHTTPError(http.StatusBadRequest, message.BadRequest)
 	}
-	// Instrument
 	i := new(model.Instrument)
 	if err := c.Bind(i); err != nil || i.ID == uuid.Nil {
 		return echo.NewHTTPError(http.StatusBadRequest, message.BadRequest)
 	}
-
 	if err := h.InstrumentGroupService.CreateInstrumentGroupInstruments(c.Request().Context(), instrumentGroupID, i.ID); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusCreated, make(map[string]interface{}))
 }
 
-// DeleteInstrumentGroupInstruments removes an instrument from an instrument group
+// DeleteInstrumentGroupInstruments godoc
+//
+//	@Summary removes an instrument from an instrument group
+//	@Tags instrument-group
+//	@Produce json
+//	@Param instrument_group_id path string true "instrument group uuid" Format(uuid)
+//	@Param instrument_id path string true "instrument uuid" Format(uuid)
+//	@Success 200 {object} map[string]interface{}
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /instrument_groups/{instrument_group_id}/instruments/{instrument_id} [delete]
 func (h *ApiHandler) DeleteInstrumentGroupInstruments(c echo.Context) error {
 	// instrument_group_id
 	instrumentGroupID, err := uuid.Parse(c.Param("instrument_group_id"))

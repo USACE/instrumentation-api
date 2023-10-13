@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+// Entrypoint for Dcs Loader service queue
 func (h *DcsLoaderHandler) Start() error {
 	handler := func(ctx context.Context, r io.Reader) error {
 		mcs, mCount, err := h.DcsLoaderService.ParseCsvMeasurementCollection(r)

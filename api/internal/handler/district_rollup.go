@@ -10,7 +10,17 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// ListEvaluationDistrictRollup returns monthly evaluation statistics for the past year
+// ListEvaluationDistrictRollup godoc
+//
+//	@Summary lists monthly evaluation statistics for a district by project id
+//	@Tags district-rollup
+//	@Produce json
+//	@Param project_id path string true "project id" Format(uuid)
+//	@Success 200 {array} model.DistrictRollup
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /projects/{project_id}/district_rollup/evaluation_submittals [get]
 func (h *ApiHandler) ListProjectEvaluationDistrictRollup(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
@@ -33,7 +43,17 @@ func (h *ApiHandler) ListProjectEvaluationDistrictRollup(c echo.Context) error {
 	return c.JSON(http.StatusOK, project)
 }
 
-// ListMeasurementDistrictRollup returns monthly measurement statistics for the past year
+// ListMeasurementDistrictRollup godoc
+//
+//	@Summary lists monthly measurement statistics for a district by project id
+//	@Tags district-rollup
+//	@Produce json
+//	@Param project_id path string true "project id" Format(uuid)
+//	@Success 200 {array} model.DistrictRollup
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /projects/{project_id}/district_rollup/measurement_submittals [get]
 func (h *ApiHandler) ListProjectMeasurementDistrictRollup(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {

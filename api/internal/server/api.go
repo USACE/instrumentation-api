@@ -3,9 +3,11 @@ package server
 import (
 	"net/http"
 
+	_ "github.com/USACE/instrumentation-api/api/docs"
 	"github.com/USACE/instrumentation-api/api/internal/config"
 	"github.com/USACE/instrumentation-api/api/internal/handler"
 	"github.com/labstack/echo/v4"
+	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
 type ApiServer struct {
@@ -41,6 +43,8 @@ func NewApiServer(cfg *config.ApiConfig, h *handler.ApiHandler) *ApiServer {
 		cacOnly,
 		app,
 	}}
+
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	server.RegisterRoutes(h)
 	return server

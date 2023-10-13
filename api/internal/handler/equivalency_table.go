@@ -9,6 +9,17 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// GetEquivalencyTable godoc
+//
+//	@Summary gets an equivalency table for a datalogger
+//	@Tags equivalency-table
+//	@Produce json
+//	@Param datalogger_id path string true "datalogger uuid" Format(uuid)
+//	@Success 200 {array} model.EquivalencyTable
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /datalogger/{datalogger_id}/equivalency_table [get]
 func (h *ApiHandler) GetEquivalencyTable(c echo.Context) error {
 	dlID, err := uuid.Parse(c.Param("datalogger_id"))
 	if err != nil {
@@ -27,6 +38,18 @@ func (h *ApiHandler) GetEquivalencyTable(c echo.Context) error {
 	return c.JSON(http.StatusOK, t)
 }
 
+// CreateEquivalencyTable godoc
+//
+//	@Summary creates an equivalency table for a datalogger
+//	@Tags equivalency-table
+//	@Produce json
+//	@Param datalogger_id path string true "datalogger uuid" Format(uuid)
+//	@Param equivalency_table body model.EquivalencyTable true "equivalency table payload"
+//	@Success 200 {object} map[string]interface{}
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /datalogger/{datalogger_id}/equivalency_table [post]
 func (h *ApiHandler) CreateEquivalencyTable(c echo.Context) error {
 	dlID, err := uuid.Parse(c.Param("datalogger_id"))
 	if err != nil {
@@ -53,6 +76,18 @@ func (h *ApiHandler) CreateEquivalencyTable(c echo.Context) error {
 	return c.JSON(http.StatusCreated, map[string]interface{}{"datalogger_id": dlID})
 }
 
+// UpdateEquivalencyTable godoc
+//
+//	@Summary updates an equivalency table for a datalogger
+//	@Tags equivalency-table
+//	@Produce json
+//	@Param datalogger_id path string true "datalogger uuid" Format(uuid)
+//	@Param equivalency_table body model.EquivalencyTable true "equivalency table payload"
+//	@Success 200 {object} model.EquivalencyTable
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /datalogger/{datalogger_id}/equivalency_table [put]
 func (h *ApiHandler) UpdateEquivalencyTable(c echo.Context) error {
 	dlID, err := uuid.Parse(c.Param("datalogger_id"))
 	if err != nil {
@@ -84,6 +119,17 @@ func (h *ApiHandler) UpdateEquivalencyTable(c echo.Context) error {
 	return c.JSON(http.StatusOK, eqt)
 }
 
+// DeleteEquivalencyTable godoc
+//
+//	@Summary deletes an equivalency table
+//	@Tags equivalency-table
+//	@Produce json
+//	@Param datalogger_id path string true "datalogger uuid" Format(uuid)
+//	@Success 200 {object} map[string]interface{}
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /datalogger/{datalogger_id}/equivalency_table [delete]
 func (h *ApiHandler) DeleteEquivalencyTable(c echo.Context) error {
 	dlID, err := uuid.Parse(c.Param("datalogger_id"))
 	if err != nil {
@@ -101,6 +147,18 @@ func (h *ApiHandler) DeleteEquivalencyTable(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]interface{}{"datalogger_id": dlID})
 }
 
+// DeleteEquivalencyTableRow godoc
+//
+//	@Summary deletes an equivalency table row
+//	@Tags equivalency-table
+//	@Produce json
+//	@Param datalogger_id path string true "datalogger uuid" Format(uuid)
+//	@Param id query string true "equivalency table row uuid" Format(uuid)
+//	@Success 200 {object} map[string]interface{}
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /datalogger/{datalogger_id}/equivalency_table/row [delete]
 func (h *ApiHandler) DeleteEquivalencyTableRow(c echo.Context) error {
 	dlID, err := uuid.Parse(c.Param("datalogger_id"))
 	if err != nil {
