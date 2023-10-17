@@ -54,6 +54,10 @@ func (server *ApiServer) Start() error {
 	return http.ListenAndServe(":80", server.e)
 }
 
+func (server *ApiServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	server.e.ServeHTTP(w, r)
+}
+
 func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 	// Alert
 	r.public.GET("/projects/:project_id/instruments/:instrument_id/alerts", h.ListAlertsForInstrument)
