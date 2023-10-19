@@ -113,6 +113,7 @@ func (h *ApiHandler) ListAlertConfigSubmittals(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /submittals/{submittal_id}/verify_missing [put]
+//	@Security Bearer
 func (h *ApiHandler) VerifyMissingSubmittal(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("submittal_id"))
 	if err != nil {
@@ -135,6 +136,7 @@ func (h *ApiHandler) VerifyMissingSubmittal(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /alert_configs/{alert_config_id}/submittals/verify_missing [put]
+//	@Security Bearer
 func (h *ApiHandler) VerifyMissingAlertConfigSubmittals(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("alert_config_id"))
 	if err != nil {

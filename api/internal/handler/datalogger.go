@@ -23,6 +23,7 @@ import (
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /dataloggers [get]
+//	@Security Bearer
 func (h *ApiHandler) ListDataloggers(c echo.Context) error {
 	pID := c.QueryParam("project_id")
 	if pID != "" {
@@ -61,6 +62,7 @@ func (h *ApiHandler) ListDataloggers(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /datalogger [post]
+//	@Security Bearer
 func (h *ApiHandler) CreateDatalogger(c echo.Context) error {
 	ctx := c.Request().Context()
 	n := model.Datalogger{}
@@ -121,6 +123,7 @@ func (h *ApiHandler) CreateDatalogger(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /datalogger/{datalogger_id}/key [put]
+//	@Security Bearer
 func (h *ApiHandler) CycleDataloggerKey(c echo.Context) error {
 	ctx := c.Request().Context()
 	dlID, err := uuid.Parse(c.Param("datalogger_id"))
@@ -157,6 +160,7 @@ func (h *ApiHandler) CycleDataloggerKey(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /datalogger/{datalogger_id} [get]
+//	@Security Bearer
 func (h *ApiHandler) GetDatalogger(c echo.Context) error {
 	dlID, err := uuid.Parse(c.Param("datalogger_id"))
 	if err != nil {
@@ -182,6 +186,7 @@ func (h *ApiHandler) GetDatalogger(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /datalogger/{datalogger_id} [put]
+//	@Security Bearer
 func (h *ApiHandler) UpdateDatalogger(c echo.Context) error {
 	ctx := c.Request().Context()
 	dlID, err := uuid.Parse(c.Param("datalogger_id"))
@@ -225,6 +230,7 @@ func (h *ApiHandler) UpdateDatalogger(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /datalogger/{datalogger_id} [delete]
+//	@Security Bearer
 func (h *ApiHandler) DeleteDatalogger(c echo.Context) error {
 	ctx := c.Request().Context()
 	dlID, err := uuid.Parse(c.Param("datalogger_id"))
@@ -259,6 +265,7 @@ func (h *ApiHandler) DeleteDatalogger(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /datalogger/{datalogger_id}/preview [get]
+//	@Security Bearer
 func (h *ApiHandler) GetDataloggerPreview(c echo.Context) error {
 	dlID, err := uuid.Parse(c.Param("datalogger_id"))
 	if err != nil {

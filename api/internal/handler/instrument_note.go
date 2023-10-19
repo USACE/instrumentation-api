@@ -86,6 +86,7 @@ func (h *ApiHandler) GetInstrumentNote(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /instruments/notes [post]
+//	@Security Bearer
 func (h *ApiHandler) CreateInstrumentNote(c echo.Context) error {
 	nc := model.InstrumentNoteCollection{}
 	if err := c.Bind(&nc); err != nil {
@@ -119,6 +120,8 @@ func (h *ApiHandler) CreateInstrumentNote(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /instruments/notes/{note_id} [put]
+//	@Security Bearer
+//	@Security Bearer
 func (h *ApiHandler) UpdateInstrumentNote(c echo.Context) error {
 	noteID, err := uuid.Parse(c.Param("note_id"))
 	if err != nil {
@@ -149,11 +152,13 @@ func (h *ApiHandler) UpdateInstrumentNote(c echo.Context) error {
 //	@Produce json
 //	@Param instrument_id path string false "instrument uuid" Format(uuid)
 //	@Param note_id path string true "note uuid" Format(uuid)
-//	@Success 200 {obejct} map[string]interface{}
+//	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /instruments/{instrument_id}/notes/{note_id} [delete]
+//	@Security Bearer
+//	@Security Bearer
 func (h *ApiHandler) DeleteInstrumentNote(c echo.Context) error {
 	noteID, err := uuid.Parse(c.Param("note_id"))
 	if err != nil {

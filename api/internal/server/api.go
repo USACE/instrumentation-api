@@ -44,7 +44,7 @@ func NewApiServer(cfg *config.ApiConfig, h *handler.ApiHandler) *ApiServer {
 		app,
 	}}
 
-	cacOnly.GET("/swagger/*", echoSwagger.WrapHandler, h.Middleware.IsApplicationAdmin)
+	public.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	server.RegisterRoutes(h)
 	return server

@@ -117,6 +117,7 @@ func (h *ApiHandler) GetAlertConfig(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id}/alert_configs [post]
+//	@Security Bearer
 func (h *ApiHandler) CreateAlertConfig(c echo.Context) error {
 	ac := model.AlertConfig{}
 	if err := c.Bind(&ac); err != nil {
@@ -150,6 +151,7 @@ func (h *ApiHandler) CreateAlertConfig(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id}/alert_configs/{alert_config_id} [put]
+//	@Security Bearer
 func (h *ApiHandler) UpdateAlertConfig(c echo.Context) error {
 	var ac model.AlertConfig
 	if err := c.Bind(&ac); err != nil {
@@ -184,6 +186,7 @@ func (h *ApiHandler) UpdateAlertConfig(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id}/alert_configs/{alert_config_id} [delete]
+//	@Security Bearer
 func (h *ApiHandler) DeleteAlertConfig(c echo.Context) error {
 	acID, err := uuid.Parse(c.Param("alert_config_id"))
 	if err != nil {

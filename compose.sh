@@ -1,6 +1,7 @@
 #!/bin/bash
 
 if [ "$1" = "up" ]; then
+    (cd api && swag init -q --pd -g cmd/core/main.go --parseInternal true --dir internal)
     if [ "$2" = "mock" ]; then
         env DOCKER_BUILDKIT=1 docker-compose --profile=local --profile=mock up -d --build
     else
@@ -8,6 +9,7 @@ if [ "$1" = "up" ]; then
     fi
 
 elif [ "$1" = "down" ]; then
+    (cd api && swag init -q --pd -g cmd/core/main.go --parseInternal true --dir internal)
     if [ "$2" = "mock" ]; then
         docker-compose --profile=local --profile=mock down
     else
@@ -26,7 +28,7 @@ elif [ "$1" = "test" ]; then
     docker-compose run -d alert
 
     if [ "$REPORT" = true ]; then
-        docker-compose -f docker-compose.yml -f docker-compose.dev.yml run --entrypoint="go test -json github.com/USACE/instrumentation-api/api/internal/handler" api > $(pwd)/report/api_test.log
+        docker-compose -f docker-compose.yml -f docker-compose.dev.yml run --entrypoint="go test -json github.com/USACE/instrumentation-api/api/internal/handler" api > $(pwd)/report/api-test.log
     else
         docker-compose -f docker-compose.yml -f docker-compose.dev.yml run --entrypoint="go test github.com/USACE/instrumentation-api/api/internal/handler" api
     fi
@@ -37,7 +39,7 @@ elif [ "$1" = "test" ]; then
 
 elif [ "$1" = "mkdocs" ]; then
     # TODO: this could possibly be added in CI, just run locally for now
-    (cd api && swag init --pd -g cmd/core/main.go --parseInternal true --dir internal)
+    (cd api && swag init -q --pd -g cmd/core/main.go --parseInternal true --dir internal)
 
 else
     echo -e "usage:\n\t./compose.sh up\n\t./compose.sh down\n\t./compose.sh clean\n\t./compose.sh test\n\t./compose.sh mkdocs"

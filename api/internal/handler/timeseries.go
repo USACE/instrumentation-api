@@ -134,6 +134,7 @@ func (h *ApiHandler) ListProjectTimeseries(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /timeseries [post]
+//	@Security Bearer
 func (h *ApiHandler) CreateTimeseries(c echo.Context) error {
 	var tc model.TimeseriesCollectionItems
 	if err := c.Bind(&tc); err != nil {
@@ -173,6 +174,8 @@ func (h *ApiHandler) CreateTimeseries(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /timeseries/{timeseries_id} [put]
+//	@Security Bearer
+//	@Security Bearer
 func (h *ApiHandler) UpdateTimeseries(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("timeseries_id"))
 	if err != nil {
@@ -202,6 +205,7 @@ func (h *ApiHandler) UpdateTimeseries(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /timeseries/{timeseries_id} [delete]
+//	@Security Bearer
 func (h *ApiHandler) DeleteTimeseries(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("timeseries_id"))
 	if err != nil {

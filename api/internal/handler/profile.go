@@ -20,6 +20,7 @@ import (
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /profiles [post]
+//	@Security CacOnly
 func (h *ApiHandler) CreateProfile(c echo.Context) error {
 	var n model.ProfileInfo
 	if err := c.Bind(&n); err != nil {
@@ -44,6 +45,7 @@ func (h *ApiHandler) CreateProfile(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /my_profile [get]
+//	@Security CacOnly
 func (h *ApiHandler) GetMyProfile(c echo.Context) error {
 	edipi := c.Get("EDIPI").(int)
 	p, err := h.ProfileService.GetProfileWithTokensFromEDIPI(c.Request().Context(), edipi)
@@ -66,6 +68,7 @@ func (h *ApiHandler) GetMyProfile(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /my_tokens [post]
+//	@Security CacOnly
 func (h *ApiHandler) CreateToken(c echo.Context) error {
 	edipi := c.Get("EDIPI").(int)
 	ctx := c.Request().Context()
@@ -91,6 +94,7 @@ func (h *ApiHandler) CreateToken(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /my_tokens/{token_id} [delete]
+//	@Security CacOnly
 func (h *ApiHandler) DeleteToken(c echo.Context) error {
 	// Get ProfileID
 	edipi := c.Get("EDIPI").(int)

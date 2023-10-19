@@ -47,6 +47,7 @@ func (h *ApiHandler) GetInstrumentCalculations(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /formulas [post]
+//	@Security Bearer
 func (h *ApiHandler) CreateCalculation(c echo.Context) error {
 	var formula model.CalculatedTimeseries
 	if err := c.Bind(&formula); err != nil {
@@ -87,6 +88,7 @@ func (h *ApiHandler) CreateCalculation(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /formulas/{formula_id} [put]
+//	@Security Bearer
 func (h *ApiHandler) UpdateCalculation(c echo.Context) error {
 	formulaID, err := uuid.Parse(c.Param("formula_id"))
 	if err != nil {
@@ -136,6 +138,7 @@ func (h *ApiHandler) UpdateCalculation(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /formulas/{formula_id} [delete]
+//	@Security Bearer
 func (h *ApiHandler) DeleteCalculation(c echo.Context) error {
 	calculationID, err := uuid.Parse(c.Param("formula_id"))
 	if err != nil {

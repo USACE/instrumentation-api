@@ -71,6 +71,7 @@ func (h *ApiHandler) GetInstrumentStatus(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /instruments/{instrument_id}/status [post]
+//	@Security Bearer
 func (h *ApiHandler) CreateOrUpdateInstrumentStatus(c echo.Context) error {
 	instrumentID, err := uuid.Parse(c.Param("instrument_id"))
 	if err != nil {
@@ -108,6 +109,7 @@ func (h *ApiHandler) CreateOrUpdateInstrumentStatus(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /instruments/{instrument_id}/status/{status_id} [delete]
+//	@Security Bearer
 func (h *ApiHandler) DeleteInstrumentStatus(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("status_id"))
 	if err != nil {

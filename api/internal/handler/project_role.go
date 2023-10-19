@@ -21,6 +21,7 @@ import (
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id}/members [get]
+//	@Security Bearer
 func (h *ApiHandler) ListProjectMembers(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
@@ -46,6 +47,7 @@ func (h *ApiHandler) ListProjectMembers(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id}/members/{profile_id}/roles/{role_id} [post]
+//	@Security Bearer
 func (h *ApiHandler) AddProjectMemberRole(c echo.Context) error {
 	projectID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
@@ -84,6 +86,7 @@ func (h *ApiHandler) AddProjectMemberRole(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id}/members/{profile_id}/roles/{role_id} [delete]
+//	@Security Bearer
 func (h *ApiHandler) RemoveProjectMemberRole(c echo.Context) error {
 
 	projectID, err := uuid.Parse(c.Param("project_id"))

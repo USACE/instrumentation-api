@@ -68,6 +68,7 @@ func (h *ApiHandler) ListProjects(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /my_projects [get]
+//	@Security CacOnly
 func (h *ApiHandler) ListMyProjects(c echo.Context) error {
 	p := c.Get("profile").(model.Profile)
 	profileID := p.ID
@@ -199,8 +200,8 @@ func (h *ApiHandler) GetProject(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects [post]
+//	@Security Bearer[admin]
 func (h *ApiHandler) CreateProjectBulk(c echo.Context) error {
-
 	pc := model.ProjectCollection{}
 	if err := c.Bind(&pc); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -253,6 +254,7 @@ func (h *ApiHandler) CreateProjectBulk(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id} [put]
+//	@Security Bearer
 func (h *ApiHandler) UpdateProject(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
@@ -289,6 +291,7 @@ func (h *ApiHandler) UpdateProject(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id} [delete]
+//	@Security Bearer
 func (h *ApiHandler) DeleteFlagProject(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
@@ -312,6 +315,7 @@ func (h *ApiHandler) DeleteFlagProject(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id}/timeseries/{timeseries_id} [post]
+//	@Security Bearer
 func (h *ApiHandler) CreateProjectTimeseries(c echo.Context) error {
 	projectID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
@@ -340,6 +344,7 @@ func (h *ApiHandler) CreateProjectTimeseries(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id}/timeseries/{timeseries_id} [delete]
+//	@Security Bearer
 func (h *ApiHandler) DeleteProjectTimeseries(c echo.Context) error {
 	projectID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {

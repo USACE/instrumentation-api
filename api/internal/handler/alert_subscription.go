@@ -23,6 +23,7 @@ import (
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id}/instruments/{instrument_id}/alert_configs/{alert_config_id}/subscribe [post]
+//	@Security Bearer
 func (h *ApiHandler) SubscribeProfileToAlerts(c echo.Context) error {
 	p := c.Get("profile").(model.Profile)
 	profileID := p.ID
@@ -51,6 +52,7 @@ func (h *ApiHandler) SubscribeProfileToAlerts(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id}/instruments/{instrument_id}/alert_configs/{alert_config_id}/unsubscribe [post]
+//	@Security Bearer
 func (h *ApiHandler) UnsubscribeProfileToAlerts(c echo.Context) error {
 	p := c.Get("profile").(model.Profile)
 	profileID := p.ID
@@ -75,6 +77,7 @@ func (h *ApiHandler) UnsubscribeProfileToAlerts(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /my_alert_subscriptions [get]
+//	@Security Bearer
 func (h *ApiHandler) ListMyAlertSubscriptions(c echo.Context) error {
 	p := c.Get("profile").(model.Profile)
 	profileID := p.ID
@@ -98,6 +101,7 @@ func (h *ApiHandler) ListMyAlertSubscriptions(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /alert_subscriptions/{alert_subscription_id} [put]
+//	@Security Bearer
 func (h *ApiHandler) UpdateMyAlertSubscription(c echo.Context) error {
 	var s model.AlertSubscription
 	if err := c.Bind(&s); err != nil {

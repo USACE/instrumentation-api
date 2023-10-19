@@ -111,6 +111,7 @@ func (h *ApiHandler) GetEvaluation(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id}/evaluations [post]
+//	@Security Bearer
 func (h *ApiHandler) CreateEvaluation(c echo.Context) error {
 	ev := model.Evaluation{}
 	if err := c.Bind(&ev); err != nil {
@@ -143,6 +144,7 @@ func (h *ApiHandler) CreateEvaluation(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id}/evaluations/{evaluation_id} [put]
+//	@Security Bearer
 func (h *ApiHandler) UpdateEvaluation(c echo.Context) error {
 	var ev model.Evaluation
 	if err := c.Bind(&ev); err != nil {
@@ -174,6 +176,7 @@ func (h *ApiHandler) UpdateEvaluation(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id}/evaluations/{evaluation_id} [delete]
+//	@Security Bearer
 func (h *ApiHandler) DeleteEvaluation(c echo.Context) error {
 	acID, err := uuid.Parse(c.Param("evaluation_id"))
 	if err != nil {

@@ -23,6 +23,7 @@ import (
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id}/timeseries_measurements [post]
+//	@Security Bearer
 func (h *ApiHandler) CreateOrUpdateProjectTimeseriesMeasurements(c echo.Context) error {
 	ctx := c.Request().Context()
 	var mcc model.TimeseriesMeasurementCollectionCollection
@@ -93,6 +94,7 @@ func (h *ApiHandler) CreateOrUpdateTimeseriesMeasurements(c echo.Context) error 
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id}/timeseries_measurements [put]
+//	@Security Bearer
 func (h *ApiHandler) UpdateTimeseriesMeasurements(c echo.Context) error {
 	var tw model.TimeWindow
 	a, b := c.QueryParam("after"), c.QueryParam("before")
@@ -122,6 +124,7 @@ func (h *ApiHandler) UpdateTimeseriesMeasurements(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /timeseries/{timeseries_id}/measurements [delete]
+//	@Security Bearer
 func (h *ApiHandler) DeleteTimeserieMeasurements(c echo.Context) error {
 	// id from url params
 	id, err := uuid.Parse(c.Param("timeseries_id"))

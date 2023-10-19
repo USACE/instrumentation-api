@@ -71,6 +71,7 @@ func (h *ApiHandler) GetPlotConfig(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id}/plot_configurations [post]
+//	@Security Bearer
 func (h *ApiHandler) CreatePlotConfig(c echo.Context) error {
 	var pc model.PlotConfig
 	if err := c.Bind(&pc); err != nil {
@@ -122,6 +123,7 @@ func (h *ApiHandler) CreatePlotConfig(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id}/plot_configurations/{plot_configuration_id} [put]
+//	@Security Bearer
 func (h *ApiHandler) UpdatePlotConfig(c echo.Context) error {
 	var pc model.PlotConfig
 	if err := c.Bind(&pc); err != nil {
@@ -163,6 +165,7 @@ func (h *ApiHandler) UpdatePlotConfig(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id}/plot_configurations/{plot_configuration_id} [delete]
+//	@Security Bearer
 func (h *ApiHandler) DeletePlotConfig(c echo.Context) error {
 	pID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {

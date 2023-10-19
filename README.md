@@ -1,10 +1,12 @@
-# Instrumentation API
+# MIDAS API
 
 A REST API to manage instrumentation data for the MIDAS (Monitoring Instrumentation Data Acquisition System) web application. Built with Go, using the [Echo](https://github.com/labstack/echo) web framework.
 
+MIDAS project management is tracked in https://github.com/USACE/instrumentation
+
 ## Documentation
 
-A [Postman](https://www.postman.com/api-documentation-tool/) documentation and testing environment is maintained at [`tests/postman/postman_environment.local`](./tests/postman/postman_environment.local.json). An [OpenAPI Doc](./docs/swagger/apidoc.json) is [automatically generated](https://github.com/USACE/instrumentation-api/blob/423e257f2a4fead223ec53e39008324e81345eb3/docker-compose.yml#L148) when running Swagger locally with docker-compose. See the "Running the Swagger UI to access API documentation locally" section below for more information.
+"[swag](https://github.com/swaggo/swag)" code annotations are used in [./api/internal/handler/](./api/internal/handler/) to generate OpenApi 2.0 docs that are available via `$API_HOSTNAME/swagger/index.html` on the API server. Generating documnetation can be done using the compose script: `./compose.sh mkdocs`
 
 ## How to Develop
 
@@ -22,20 +24,6 @@ A [Postman](https://www.postman.com/api-documentation-tool/) documentation and t
 ./compose.sh up    # or ./compose.sh up mock
 ./compose.sh down  # or ./compose.sh down mock
 ```
-
-### Running a Database for Local Development
-
-After starting up Docker Compose, you will find these two services (among others) on `localhost`
-
-1. A Postgres database with postgis schema installed using the Docker image [mdillon/postgis](https://hub.docker.com/r/mdillon/postgis/)
-
-2. [pgAdmin4](https://www.pgadmin.org/) using the Docker image [dpage/pgadmin4](https://hub.docker.com/r/dpage/pgadmin4/)
-
-To modify the database using pgAdmin4, open a web browser and go to `http://localhost:8081`, or whichever port number is the value set to variable `PGADMIN_PORT` in `.env`.
-
-Login with `Email:postgres@postgres.com` and `Password:postgres` respectively.
-
-Create a database connection to the Postgres database by right-clicking `servers --> register --> server` in the left menu tree. Enter the following information and click `save`.
 
 #### General Tab
 
@@ -80,27 +68,13 @@ Note: When running the API locally, make sure environment variable `INSTRUMENTAT
 
 ## Running Tests
 
-Regression tests are maintained for the project in the [aforementioned](#documentation) [Postman](https://www.postman.com/api-documentation-tool/) environments. They are run automatically by GitHub Actions through the [./compose.sh](./compose.sh) script using `./compose.sh test`.
-
-In both cases, the Postman environment regression tests are run, then output. If the environment variable `REPORT` is set to `true`, then this output is sent to an HTML file. Otherwise, it is printed to the caller's stdout.
-
-## Running the Swagger UI to access API documentation locally
-
-An API Document conforming to the OpenAPI 3.0.0 specification is generated from the most recent Postman Collection saved to [`tests/postman/instrumentation-regression.postman_collection.json`](./tests/postman/instrumentation-regression.postman_collection.json). When the collection file is modified and overwritten, an updated apidoc.json will be automatically created by a `swagger_init` docker service at [docs/swagger/apidoc.json](./docs/swagger/apidoc.json). To start the Swagger UI server and sync the apidoc.json with the Postman Collection, run `docker compose -f docker-compose.swagger.yml up -d`. This command is also executed in [./startup.sh](./startup.sh).
-
-Note:
-
-- This service will need to be restarted if any changes are made to the Postman Collection file (i.e. when it is manually exported and overwritten).
-
-- Unlike the postman collection, the `.env.json` file supplied to the migration script is **NOT** automatically generated. If you make any changes or additions to the Postman environment used [tests/postman/postman_environment.docker-compose.json](./tests/postman/postman_environment.docker-compose.json), these changes must also be made to the configuration supplied to the apidoc generation script, [docs/swagger/postman-compose.env.json](./docs/swagger/postman-compose.env.json).
-
-- Swagger UI configuration can be adjusted with [docs/swagger/swagger-config.json](./docs/swagger/swagger-config.json). See [swagger-ui/docs/usage/configuration.md](https://github.com/swagger-api/swagger-ui/blob/0b8de2c1796e67602bcbbc6d35c99cb167acf388/docs/usage/configuration.md) for the full list of configuration options.
+Regression tests are maintained for the project using Go [httptest](https://pkg.go.dev/net/http/httptest) from the standard library. These are integration tests that run inside of the `api` docker container. Tests are located in the handlers folder, using the virtual package (not compiled to production binary) `handler_test`. Each test is an instance of `HTTPTest` struct with relavent properties. (test name, url path, etc.). A notable property is the `ExpectedSchema`, which accepts a `gojsonschema.Schema`. This is used to validate the response body matches the json schema string, otherwise, the test will fail. All tests are run against a test database seeded with SQL scripts locally; see the [./migrate/local/](./migrate/local/) folder.
 
 ## How To Deploy
 
 ### Deploying Develop and Stable Core API & Telemetry API
 
-Deployments are done though [CI (Continuous Integration) scripts](./.github) using [Github Actions](https://docs.github.com/en/actions). The [core api](./api) and [telemetry api](./telemetry) are tested, built, and pushed to AWS ECR, where they **should** re-deploy on container push when the CI pipelines successfully finish (please check the redployment actually happens and force new deployment if not, it has been the case before that the deployment trigger config gets overwritten...).
+Deployments are done though [CI (Continuous Integration) scripts](./.github) using [Github Actions](https://docs.github.com/en/actions). The [core api](./api) and [telemetry api](./telemetry) are tested, built, and pushed to AWS ECR, where they should re-deploy on container push when the CI pipelines successfully finish. If the container does not automattically re-deploy on ECR push, it can be manually deployed from the AWS console.
 
 ### Postgres Database on AWS Relational Database Service (RDS)
 

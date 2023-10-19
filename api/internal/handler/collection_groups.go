@@ -78,6 +78,7 @@ func (h *ApiHandler) GetCollectionGroupDetails(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id}/collection_groups [post]
+//	@Security Bearer
 func (h *ApiHandler) CreateCollectionGroup(c echo.Context) error {
 	var cg model.CollectionGroup
 	// Bind Information Provided
@@ -124,6 +125,7 @@ func (h *ApiHandler) CreateCollectionGroup(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id}/collection_groups/{collection_group_id} [put]
+//	@Security Bearer
 func (h *ApiHandler) UpdateCollectionGroup(c echo.Context) error {
 	var cg model.CollectionGroup
 	if err := c.Bind(&cg); err != nil {
@@ -163,6 +165,7 @@ func (h *ApiHandler) UpdateCollectionGroup(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id}/collection_groups/{collection_group_id} [delete]
+//	@Security Bearer
 func (h *ApiHandler) DeleteCollectionGroup(c echo.Context) error {
 	pID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
@@ -191,6 +194,7 @@ func (h *ApiHandler) DeleteCollectionGroup(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id}/collection_groups/{collection_group_id}/timeseries/{timeseries_id} [post]
+//	@Security Bearer
 func (h *ApiHandler) AddTimeseriesToCollectionGroup(c echo.Context) error {
 	cgID, err := uuid.Parse(c.Param("collection_group_id"))
 	if err != nil {
@@ -219,6 +223,7 @@ func (h *ApiHandler) AddTimeseriesToCollectionGroup(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id}/collection_groups/{collection_group_id}/timeseries/{timeseries_id} [delete]
+//	@Security Bearer
 func (h *ApiHandler) RemoveTimeseriesFromCollectionGroup(c echo.Context) error {
 	cgID, err := uuid.Parse(c.Param("collection_group_id"))
 	if err != nil {

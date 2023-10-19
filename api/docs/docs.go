@@ -71,6 +71,11 @@ const docTemplate = `{
         },
         "/alert_configs/{alert_config_id}/submittals/verify_missing": {
             "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -119,6 +124,11 @@ const docTemplate = `{
         },
         "/alert_subscriptions/{alert_subscription_id}": {
             "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -261,6 +271,11 @@ const docTemplate = `{
         },
         "/datalogger": {
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -331,6 +346,11 @@ const docTemplate = `{
         },
         "/datalogger/{datalogger_id}": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -376,6 +396,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -430,6 +455,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -478,6 +508,11 @@ const docTemplate = `{
         },
         "/datalogger/{datalogger_id}/equivalency_table": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -526,6 +561,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -580,6 +620,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -635,6 +680,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -683,6 +733,11 @@ const docTemplate = `{
         },
         "/datalogger/{datalogger_id}/equivalency_table/row": {
             "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -739,6 +794,11 @@ const docTemplate = `{
         },
         "/datalogger/{datalogger_id}/key": {
             "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -786,6 +846,11 @@ const docTemplate = `{
         },
         "/datalogger/{datalogger_id}/preview": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -833,6 +898,11 @@ const docTemplate = `{
         },
         "/dataloggers": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -1110,6 +1180,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -1148,6 +1223,11 @@ const docTemplate = `{
         },
         "/formulas/{formula_id}": {
             "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -1196,6 +1276,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -1330,6 +1415,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -1423,6 +1513,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -1477,6 +1572,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -1575,6 +1675,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -1623,6 +1728,11 @@ const docTemplate = `{
         },
         "/instrument_groups/{instrument_group_id}/instruments/{instrument_id}": {
             "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -1814,6 +1924,14 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    },
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -1940,6 +2058,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -2035,6 +2158,14 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    },
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -2191,6 +2322,14 @@ const docTemplate = `{
         },
         "/instruments/{instrument_id}/notes/{note_id}": {
             "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    },
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -2219,7 +2358,8 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "obejct"
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     },
                     "400": {
@@ -2293,6 +2433,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -2406,6 +2551,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -2699,6 +2849,11 @@ const docTemplate = `{
         },
         "/my_alert_subscriptions": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -2780,6 +2935,11 @@ const docTemplate = `{
         },
         "/my_alerts/{alert_id}/read": {
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "marks an alert as read for a profile\nreturning the updated alert",
                 "produces": [
                     "application/json"
@@ -2828,6 +2988,11 @@ const docTemplate = `{
         },
         "/my_alerts/{alert_id}/unread": {
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "marks an alert as unread based on provided profile ID and alert ID.\nreturning the updated alert",
                 "produces": [
                     "application/json"
@@ -2876,6 +3041,11 @@ const docTemplate = `{
         },
         "/my_profile": {
             "get": {
+                "security": [
+                    {
+                        "CacOnly": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -2913,6 +3083,11 @@ const docTemplate = `{
         },
         "/my_projects": {
             "get": {
+                "security": [
+                    {
+                        "CacOnly": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -2953,6 +3128,11 @@ const docTemplate = `{
         },
         "/my_tokens": {
             "post": {
+                "security": [
+                    {
+                        "CacOnly": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -2990,6 +3170,11 @@ const docTemplate = `{
         },
         "/my_tokens/{token_id}": {
             "delete": {
+                "security": [
+                    {
+                        "CacOnly": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -3078,6 +3263,11 @@ const docTemplate = `{
         },
         "/profiles": {
             "post": {
+                "security": [
+                    {
+                        "CacOnly": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -3161,6 +3351,13 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "Bearer": [
+                            "admin"
+                        ]
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -3294,6 +3491,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -3348,6 +3550,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -3444,6 +3651,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -3548,6 +3760,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -3616,6 +3833,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -3722,6 +3944,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "lists alert configs for a single project optionally filtered by alert_type_id",
                 "produces": [
                     "application/json"
@@ -3835,6 +4062,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -3896,6 +4128,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -3952,6 +4189,11 @@ const docTemplate = `{
         },
         "/projects/{project_id}/collection_groups/{collection_group_id}/timeseries/{timeseries_id}": {
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -4014,6 +4256,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -4232,6 +4479,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -4340,6 +4592,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -4401,6 +4658,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -4458,6 +4720,11 @@ const docTemplate = `{
         },
         "/projects/{project_id}/inclinometer_measurements": {
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -4615,6 +4882,14 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    },
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -4724,6 +4999,11 @@ const docTemplate = `{
         },
         "/projects/{project_id}/instruments/{instrument_id}": {
             "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -4786,6 +5066,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -4899,6 +5184,11 @@ const docTemplate = `{
         },
         "/projects/{project_id}/instruments/{instrument_id}/alert_configs/{alert_config_id}/subscribe": {
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -4962,6 +5252,11 @@ const docTemplate = `{
         },
         "/projects/{project_id}/instruments/{instrument_id}/alert_configs/{alert_config_id}/unsubscribe": {
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -5026,6 +5321,11 @@ const docTemplate = `{
         },
         "/projects/{project_id}/instruments/{instrument_id}/alerts": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "list all alerts associated an instrument",
                 "produces": [
                     "application/json"
@@ -5140,6 +5440,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -5206,6 +5511,11 @@ const docTemplate = `{
         },
         "/projects/{project_id}/instruments/{instrument_id}/constants/{timeseries_id}": {
             "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -5327,6 +5637,11 @@ const docTemplate = `{
         },
         "/projects/{project_id}/instruments/{instrument_id}/geometry": {
             "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -5448,6 +5763,11 @@ const docTemplate = `{
         },
         "/projects/{project_id}/members": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -5498,6 +5818,11 @@ const docTemplate = `{
         },
         "/projects/{project_id}/members/{profile_id}/roles/{role_id}": {
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -5559,6 +5884,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -5671,6 +6001,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -5778,6 +6113,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -5831,6 +6171,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -5984,6 +6329,11 @@ const docTemplate = `{
         },
         "/projects/{project_id}/timeseries/{timeseries_id}": {
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -6038,6 +6388,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -6094,6 +6449,11 @@ const docTemplate = `{
         },
         "/projects/{project_id}/timeseries_measurements": {
             "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -6165,6 +6525,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -6325,6 +6690,11 @@ const docTemplate = `{
         },
         "/submittals/{submittal_id}/verify_missing": {
             "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -6411,6 +6781,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -6507,6 +6882,14 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    },
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -6561,6 +6944,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -6668,6 +7056,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -6724,6 +7117,11 @@ const docTemplate = `{
         },
         "/timeseries/{timeseries_id}/measurements": {
             "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -8292,10 +8690,21 @@ const docTemplate = `{
     },
     "securityDefinitions": {
         "Bearer": {
-            "description": "Type \"Bearer\" followed by a space and JWT token.",
+            "description": "Type \"Bearer\" followed by a space and access token.",
             "type": "apiKey",
             "name": "Authorization",
             "in": "header"
+        },
+        "CacOnly": {
+            "description": "CAC-Only routes",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header",
+            "scopes": {
+                "admin": " Grants read and write access to administrative information",
+                "project_admin": " Grants project members read and write access to projects",
+                "project_member": " Read and write permissions per-project granted by project admin"
+            }
         }
     }
 }`

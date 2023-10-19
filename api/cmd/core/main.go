@@ -18,7 +18,15 @@ import (
 // @securityDefinitions.apikey Bearer
 // @in header
 // @name Authorization
-// @description Type "Bearer" followed by a space and JWT token.
+// @description Type "Bearer" followed by a space and access token.
+
+// @securityDefinitions.apikey CacOnly
+// @in header
+// @name Authorization
+// @description CAC-Only routes
+// @scope.admin Grants read and write access to administrative information
+// @scope.project_admin Grants project members read and write access to projects
+// @scope.project_member Read and write permissions per-project granted by project admin
 func main() {
 	cfg := config.NewApiConfig()
 

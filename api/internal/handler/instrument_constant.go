@@ -47,6 +47,7 @@ func (h *ApiHandler) ListInstrumentConstants(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id}/instruments/{instrument_id}/constants [post]
+//	@Security Bearer
 func (h *ApiHandler) CreateInstrumentConstants(c echo.Context) error {
 	ctx := c.Request().Context()
 	var tc model.TimeseriesCollectionItems
@@ -92,6 +93,7 @@ func (h *ApiHandler) CreateInstrumentConstants(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id}/instruments/{instrument_id}/constants/{timeseries_id} [delete]
+//	@Security Bearer
 func (h *ApiHandler) DeleteInstrumentConstant(c echo.Context) error {
 	instrumentID, err := uuid.Parse(c.Param("instrument_id"))
 	if err != nil {

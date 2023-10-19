@@ -25,6 +25,7 @@ import (
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id}/instruments/{instrument_id}/alerts [get]
+//	@Security Bearer
 func (h *ApiHandler) ListAlertsForInstrument(c echo.Context) error {
 	instrumentID, err := uuid.Parse(c.Param("instrument_id"))
 	if err != nil {
@@ -71,6 +72,7 @@ func (h *ApiHandler) ListMyAlerts(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /my_alerts/{alert_id}/read [post]
+//	@Security Bearer
 func (h *ApiHandler) DoAlertRead(c echo.Context) error {
 	p := c.Get("profile").(model.Profile)
 	profileID := p.ID
@@ -101,6 +103,7 @@ func (h *ApiHandler) DoAlertRead(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /my_alerts/{alert_id}/unread [post]
+//	@Security Bearer
 func (h *ApiHandler) DoAlertUnread(c echo.Context) error {
 	p := c.Get("profile").(model.Profile)
 	profileID := p.ID

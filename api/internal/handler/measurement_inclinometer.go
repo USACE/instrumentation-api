@@ -77,6 +77,7 @@ func (h *ApiHandler) ListInclinometerMeasurements(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id}/inclinometer_measurements [post]
+//	@Security Bearer
 func (h *ApiHandler) CreateOrUpdateProjectInclinometerMeasurements(c echo.Context) error {
 	var mcc model.InclinometerMeasurementCollectionCollection
 	if err := c.Bind(&mcc); err != nil {
@@ -141,6 +142,7 @@ func (h *ApiHandler) CreateOrUpdateProjectInclinometerMeasurements(c echo.Contex
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /timeseries/{timeseries_id}/inclinometer_measurements [delete]
+//	@Security Bearer
 func (h *ApiHandler) DeleteInclinometerMeasurements(c echo.Context) error {
 	// id from url params
 	id, err := uuid.Parse(c.Param("timeseries_id"))

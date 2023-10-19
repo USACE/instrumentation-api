@@ -64,6 +64,7 @@ func (h *ApiHandler) GetInstrumentGroup(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /instrument_groups [post]
+//	@Security Bearer
 func (h *ApiHandler) CreateInstrumentGroup(c echo.Context) error {
 
 	gc := model.InstrumentGroupCollection{}
@@ -119,6 +120,7 @@ func (h *ApiHandler) CreateInstrumentGroup(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /instrument_groups/{instrument_group_id} [put]
+//	@Security Bearer
 func (h *ApiHandler) UpdateInstrumentGroup(c echo.Context) error {
 
 	// id from url params
@@ -162,6 +164,7 @@ func (h *ApiHandler) UpdateInstrumentGroup(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /instrument_groups/{instrument_group_id} [delete]
+//	@Security Bearer
 func (h *ApiHandler) DeleteFlagInstrumentGroup(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("instrument_group_id"))
 	if err != nil {
@@ -207,6 +210,7 @@ func (h *ApiHandler) ListInstrumentGroupInstruments(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /instrument_groups/{instrument_group_id}/instruments [post]
+//	@Security Bearer
 func (h *ApiHandler) CreateInstrumentGroupInstruments(c echo.Context) error {
 	instrumentGroupID, err := uuid.Parse(c.Param("instrument_group_id"))
 	if err != nil || instrumentGroupID == uuid.Nil {
@@ -234,6 +238,7 @@ func (h *ApiHandler) CreateInstrumentGroupInstruments(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /instrument_groups/{instrument_group_id}/instruments/{instrument_id} [delete]
+//	@Security Bearer
 func (h *ApiHandler) DeleteInstrumentGroupInstruments(c echo.Context) error {
 	// instrument_group_id
 	instrumentGroupID, err := uuid.Parse(c.Param("instrument_group_id"))

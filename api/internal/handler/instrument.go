@@ -90,6 +90,8 @@ func (h *ApiHandler) GetInstrument(c echo.Context) error {
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id}/instruments [post]
 //	@Router /instruments [post]
+//	@Security Bearer
+//	@Security Bearer
 func (h *ApiHandler) CreateInstruments(c echo.Context) error {
 	newInstrumentCollection := func(c echo.Context) (model.InstrumentCollection, error) {
 		ic := model.InstrumentCollection{}
@@ -164,6 +166,7 @@ func (h *ApiHandler) CreateInstruments(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id}/instruments/{instrument_id} [put]
+//	@Security Bearer
 func (h *ApiHandler) UpdateInstrument(c echo.Context) error {
 
 	// instrument_id from url params
@@ -219,6 +222,7 @@ func (h *ApiHandler) UpdateInstrument(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id}/instruments/{instrument_id}/geometry [put]
+//	@Security Bearer
 func (h *ApiHandler) UpdateInstrumentGeometry(c echo.Context) error {
 	projectID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
@@ -257,6 +261,7 @@ func (h *ApiHandler) UpdateInstrumentGeometry(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id}/instruments/{instrument_id} [delete]
+//	@Security Bearer
 func (h *ApiHandler) DeleteFlagInstrument(c echo.Context) error {
 	pID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {

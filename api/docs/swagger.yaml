@@ -1007,6 +1007,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: verifies all current submittals for the alert config are "missing"
         and will not be completed
       tags:
@@ -1049,6 +1051,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: updates settings for an alert subscription
       tags:
       - alert-subscription
@@ -1148,6 +1152,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: creates a datalogger
       tags:
       - datalogger
@@ -1180,6 +1186,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: deletes a datalogger by id
       tags:
       - datalogger
@@ -1210,6 +1218,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: gets a datalogger by id
       tags:
       - datalogger
@@ -1246,6 +1256,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: updates a datalogger
       tags:
       - datalogger
@@ -1278,6 +1290,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: deletes an equivalency table
       tags:
       - equivalency-table
@@ -1310,6 +1324,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: gets an equivalency table for a datalogger
       tags:
       - equivalency-table
@@ -1347,6 +1363,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: creates an equivalency table for a datalogger
       tags:
       - equivalency-table
@@ -1383,6 +1401,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: updates an equivalency table for a datalogger
       tags:
       - equivalency-table
@@ -1421,6 +1441,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: deletes an equivalency table row
       tags:
       - equivalency-table
@@ -1452,6 +1474,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: deletes and recreates a datalogger api key
       tags:
       - datalogger
@@ -1483,6 +1507,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: gets the most recent datalogger preview by by datalogger id
       tags:
       - datalogger
@@ -1516,6 +1542,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: lists dataloggers for a project
       tags:
       - datalogger
@@ -1689,6 +1717,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: creates a calculation
       tags:
       - formula
@@ -1721,6 +1751,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: deletes a calculation
       tags:
       - formula
@@ -1753,6 +1785,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: updates a calculation
       tags:
       - formula
@@ -1840,6 +1874,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: creats an instrument group from an array of instruments
       tags:
       - instrument-group
@@ -1873,6 +1909,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: soft deletes an instrument
       tags:
       - instrument-group
@@ -1939,6 +1977,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: updates an existing instrument group
       tags:
       - instrument-group
@@ -2003,6 +2043,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: adds an instrument to an instrument group
       tags:
       - instrument-group
@@ -2041,6 +2083,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: removes an instrument from an instrument group
       tags:
       - instrument-group
@@ -2163,6 +2207,9 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
+      - Bearer: []
       summary: accepts an array of instruments for bulk upload to the database
       tags:
       - instrument
@@ -2250,7 +2297,8 @@ paths:
         "200":
           description: OK
           schema:
-            type: obejct
+            additionalProperties: true
+            type: object
         "400":
           description: Bad Request
           schema:
@@ -2263,6 +2311,9 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
+      - Bearer: []
       summary: deletes an instrument note
       tags:
       - instrument-note
@@ -2333,6 +2384,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: creates a status for an instrument
       tags:
       - instrument-status
@@ -2371,6 +2424,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: deletes a status for an instrument
       tags:
       - instrument-status
@@ -2649,6 +2704,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       tags:
       - instrument-note
   /instruments/notes/{note_id}:
@@ -2717,6 +2774,9 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
+      - Bearer: []
       summary: updates an instrument note by id
       tags:
       - instrument-note
@@ -2743,6 +2803,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: lists all alerts subscribed to by the current profile
       tags:
       - alert-subscription
@@ -2804,6 +2866,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: marks an alert as read
       tags:
       - alert
@@ -2838,6 +2902,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: marks an alert as unread for a profile
       tags:
       - alert
@@ -2862,6 +2928,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - CacOnly: []
       summary: gets profile for current authenticated user
       tags:
       - profile
@@ -2888,6 +2956,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - CacOnly: []
       summary: lists projects for current profile
       tags:
       - project
@@ -2912,6 +2982,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - CacOnly: []
       summary: creates token for a profile
       tags:
       - profile
@@ -2944,6 +3016,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - CacOnly: []
       summary: deletes a token for a profile
       tags:
       - profile
@@ -2994,6 +3068,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - CacOnly: []
       summary: creates a user profile
       tags:
       - profile
@@ -3057,6 +3133,9 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer:
+        - admin
       summary: accepts an array of instruments for bulk upload to the database
       tags:
       - project
@@ -3089,6 +3168,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: soft deletes a project
       tags:
       - project
@@ -3155,6 +3236,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: updates an existing project
       tags:
       - project
@@ -3226,6 +3309,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: creates one alert config
       tags:
       - alert-config
@@ -3265,6 +3350,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: deletes an alert config
       tags:
       - alert-config
@@ -3341,6 +3428,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: updates an existing alert config
       tags:
       - alert-config
@@ -3414,6 +3503,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: creates a new collection group
       tags:
       - collection-groups
@@ -3452,6 +3543,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: deletes a collection group using the id of the collection group
       tags:
       - collection-groups
@@ -3529,6 +3622,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: updates an existing collection group
       tags:
       - collection-groups
@@ -3573,6 +3668,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: removes a timeseries from a collection group
       tags:
       - collection-groups
@@ -3616,6 +3713,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: adds a timeseries to a collection group
       tags:
       - collection-groups
@@ -3755,6 +3854,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: creates one evaluation
       tags:
       - evaluation
@@ -3793,6 +3894,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: deletes an evaluation
       tags:
       - evaluation
@@ -3869,6 +3972,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: updates an existing evaluation
       tags:
       - evaluation
@@ -3908,6 +4013,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: creates or updates one or more inclinometer measurements
       tags:
       - measurement-inclinometer
@@ -4012,6 +4119,9 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
+      - Bearer: []
       summary: accepts an array of instruments for bulk upload to the database
       tags:
       - instrument
@@ -4050,6 +4160,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: soft deletes an instrument
       tags:
       - instrument
@@ -4092,6 +4204,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: updates an existing instrument
       tags:
       - instrument
@@ -4173,6 +4287,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: subscribes a profile to an alert
       tags:
       - alert-subscription
@@ -4217,6 +4333,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: unsubscribes a profile to an alert
       tags:
       - alert-subscription
@@ -4257,6 +4375,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: lists alerts for a single instrument
       tags:
       - alert
@@ -4338,6 +4458,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: creates instrument constants (i.e. timeseries)
       tags:
       - instrument-constant
@@ -4381,6 +4503,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: removes a timeseries as an instrument constant
       tags:
       - instrument-constant
@@ -4463,6 +4587,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: updates the geometry of an instrument
       tags:
       - instrument
@@ -4567,6 +4693,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: lists project members and their role information
       tags:
       - project-role
@@ -4611,6 +4739,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: removes project members and their role information
       tags:
       - project-role
@@ -4653,6 +4783,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: adds project members and their role information
       tags:
       - project-role
@@ -4722,6 +4854,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       tags:
       - plot-config
   /projects/{project_id}/plot_configurations/{plot_configuration_id}:
@@ -4753,6 +4887,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       tags:
       - plot-config
     get:
@@ -4823,6 +4959,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       tags:
       - plot-config
   /projects/{project_id}/submittals:
@@ -4930,6 +5068,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: removes a timeseries from the project level
       tags:
       - project
@@ -4967,6 +5107,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: exposes a timeseries at the project level
       tags:
       - project
@@ -5008,6 +5150,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: creates or updates one or more timeseries measurements
       tags:
       - measurement
@@ -5056,6 +5200,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: overwrites all measurements witin date range with the supplied payload
       tags:
       - measurement
@@ -5176,6 +5322,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: verifies the specified submittal is "missing" and will not be completed
       tags:
       - submittal
@@ -5234,6 +5382,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: creates one or more timeseries
       tags:
       - timeseries
@@ -5266,6 +5416,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: deletes a single timeseries by id
       tags:
       - timeseries
@@ -5332,6 +5484,9 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
+      - Bearer: []
       summary: updates a single timeseries by id
       tags:
       - timeseries
@@ -5370,6 +5525,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: deletes a single inclinometer measurement by timestamp
       tags:
       - measurement-inclinometer
@@ -5448,6 +5605,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: deletes a single timeseries measurement by timestamp
       tags:
       - measurement
@@ -5504,8 +5663,18 @@ paths:
       - unit
 securityDefinitions:
   Bearer:
-    description: Type "Bearer" followed by a space and JWT token.
+    description: Type "Bearer" followed by a space and access token.
     in: header
     name: Authorization
+    type: apiKey
+  CacOnly:
+    description: CAC-Only routes
+    in: header
+    name: Authorization
+    scopes:
+      admin: ' Grants read and write access to administrative information'
+      project_admin: ' Grants project members read and write access to projects'
+      project_member: ' Read and write permissions per-project granted by project
+        admin'
     type: apiKey
 swagger: "2.0"
