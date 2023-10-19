@@ -5,8 +5,78 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/USACE/instrumentation-api/api/internal/model"
+	"github.com/stretchr/testify/assert"
+	"github.com/xeipuuv/gojsonschema"
 )
+
+const instrumentSchema = `{
+    "type": "object",
+    "properties": {
+        "id": { "type": "string" },
+        "groups": {
+            "type": "array",
+            "items": { "type": "string" }
+        },
+        "constants": {
+            "type": "array",
+            "items": { "type": "string" }
+        },
+        "alert_configs": {
+            "type": "array",
+            "items": { "type": "string" }
+        },
+        "slug": { "type": "string" },
+        "name": { "type": "string" },
+        "type_id": { "type": "string" },
+        "type": { "type": "string" },
+        "status_id": { "type": "string" },
+        "status": { "type": "string" },
+        "status_time": { "type": "string" },
+        "geometry": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "pattern": "Point"
+                },
+                "coordinates": {
+                    "type": "array",
+                    "minItems": 2,
+                    "maxItems": 2,
+                    "items": { "type": "number" }
+                }
+            },
+            "required": ["type", "coordinates"]
+        },
+        "station": { "type": ["number", "null"] },
+        "offset": { "type": ["number", "null"] },
+        "creator": { "type": "string" },
+        "create_date": { "type": "string", "format": "date-time" },
+        "updater": {  "type": ["string", "null"] },
+        "update_date": { "type": ["string", "null"], "format": "date-time" },
+        "project_id": { "type": ["string", "null"] },
+        "nid_id": { "type": ["string", "null"] },
+        "usgs_id": { "type": ["string", "null"] }
+    },
+    "required": ["id", "slug", "name", "type_id", "type", "status_id", "status", "status_time", "geometry", "creator", "create_date", "updater", "update_date", "project_id", "station", "offset", "constants", "alert_configs", "nid_id", "usgs_id"],
+    "additionalProperties": false
+}`
+
+var instrumentObjectLoader = gojsonschema.NewStringLoader(instrumentSchema)
+
+var instrumentArrayLoader = gojsonschema.NewStringLoader(fmt.Sprintf(`{
+    "type": "array",
+    "items": %s
+}`, instrumentSchema))
+
+var instrumentCountObjectLoader = gojsonschema.NewStringLoader(`{
+    "type": "object",
+    "properties": {
+        "instrument_count": { "type": "number" }
+    },
+    "required": ["instrument_count"],
+    "additionalProperties": false
+}`)
 
 const (
 	testInstrumentID = "a7540f69-c41e-43b3-b655-6e44097edb7e"
@@ -221,58 +291,64 @@ const validateCreateInstrumentBulkObjectBody = `{
 }`
 
 func TestInstruments(t *testing.T) {
-	countTest := []HTTPTest[model.InstrumentCount]{{
-		Name:                 "GetInstrumentCount",
-		URL:                  "/instruments/count",
-		Method:               http.MethodGet,
-		ExpectedStatus:       http.StatusOK,
-		ExpectedResponseType: jsonObj,
-	}}
+	countObjSchema, err := gojsonschema.NewSchema(instrumentCountObjectLoader)
+	assert.Nil(t, err)
+	objSchema, err := gojsonschema.NewSchema(instrumentObjectLoader)
+	assert.Nil(t, err)
+	arrSchema, err := gojsonschema.NewSchema(instrumentArrayLoader)
+	assert.Nil(t, err)
 
-	tests := []HTTPTest[model.Instrument]{
+	tests := []HTTPTest{
 		{
-			Name:                 "GetInstrument",
-			URL:                  fmt.Sprintf("/instruments/%s", testInstrumentID),
-			Method:               http.MethodGet,
-			ExpectedStatus:       http.StatusOK,
-			ExpectedResponseType: jsonObj,
+			Name:           "GetInstrumentCount",
+			URL:            "/instruments/count",
+			Method:         http.MethodGet,
+			ExpectedStatus: http.StatusOK,
+			ExpectedSchema: countObjSchema,
 		},
 		{
-			Name:                 "UpdateInstrument",
-			URL:                  fmt.Sprintf("/projects/%s/instruments/%s", testProjectID, testInstrumentID),
-			Method:               http.MethodPut,
-			Body:                 updateInstrumentBody,
-			ExpectedStatus:       http.StatusOK,
-			ExpectedResponseType: jsonObj,
+			Name:           "GetInstrument",
+			URL:            fmt.Sprintf("/instruments/%s", testInstrumentID),
+			Method:         http.MethodGet,
+			ExpectedStatus: http.StatusOK,
+			ExpectedSchema: objSchema,
 		},
 		{
-			Name:                 "UpdateInstrumentGeometry",
-			URL:                  fmt.Sprintf("/projects/%s/instruments/%s/geometry", testProjectID, testInstrumentID),
-			Method:               http.MethodPut,
-			Body:                 updateInstrumentGeometryBody,
-			ExpectedStatus:       http.StatusOK,
-			ExpectedResponseType: jsonObj,
+			Name:           "UpdateInstrument",
+			URL:            fmt.Sprintf("/projects/%s/instruments/%s", testProjectID, testInstrumentID),
+			Method:         http.MethodPut,
+			Body:           updateInstrumentBody,
+			ExpectedStatus: http.StatusOK,
+			ExpectedSchema: objSchema,
 		},
 		{
-			Name:                 "ListInstruments",
-			URL:                  "/instruments",
-			Method:               http.MethodGet,
-			ExpectedStatus:       http.StatusOK,
-			ExpectedResponseType: jsonArr,
+			Name:           "UpdateInstrumentGeometry",
+			URL:            fmt.Sprintf("/projects/%s/instruments/%s/geometry", testProjectID, testInstrumentID),
+			Method:         http.MethodPut,
+			Body:           updateInstrumentGeometryBody,
+			ExpectedStatus: http.StatusOK,
+			ExpectedSchema: objSchema,
 		},
 		{
-			Name:                 "ListProjectInstruments",
-			URL:                  fmt.Sprintf("/projects/%s/instruments", testProjectID),
-			Method:               http.MethodGet,
-			ExpectedStatus:       http.StatusOK,
-			ExpectedResponseType: jsonArr,
+			Name:           "ListInstruments",
+			URL:            "/instruments",
+			Method:         http.MethodGet,
+			ExpectedStatus: http.StatusOK,
+			ExpectedSchema: arrSchema,
 		},
 		{
-			Name:                 "ListInstrumentGroupInstruments",
-			URL:                  fmt.Sprintf("/instrument_groups/%s/instruments", testInstrumentGroupID),
-			Method:               http.MethodGet,
-			ExpectedStatus:       http.StatusOK,
-			ExpectedResponseType: jsonArr,
+			Name:           "ListProjectInstruments",
+			URL:            fmt.Sprintf("/projects/%s/instruments", testProjectID),
+			Method:         http.MethodGet,
+			ExpectedStatus: http.StatusOK,
+			ExpectedSchema: arrSchema,
+		},
+		{
+			Name:           "ListInstrumentGroupInstruments",
+			URL:            fmt.Sprintf("/instrument_groups/%s/instruments", testInstrumentGroupID),
+			Method:         http.MethodGet,
+			ExpectedStatus: http.StatusOK,
+			ExpectedSchema: arrSchema,
 		},
 		{
 			Name:           "CreateInstrumentBulk_Array",
@@ -309,6 +385,5 @@ func TestInstruments(t *testing.T) {
 			ExpectedStatus: http.StatusOK,
 		}}
 
-	RunAll(t, countTest)
 	RunAll(t, tests)
 }

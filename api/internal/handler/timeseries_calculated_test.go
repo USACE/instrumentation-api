@@ -5,9 +5,35 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/USACE/instrumentation-api/api/internal/model"
-	"github.com/google/uuid"
+	"github.com/stretchr/testify/assert"
+	"github.com/xeipuuv/gojsonschema"
 )
+
+const calculationArraySchema = `{
+    "type": "array",
+    "properties": {
+        "id": { "type": "string" },
+        "instrument_id": { "type": "string" },
+        "parameter_id": { "type": "string" },
+        "unit_id": { "type": "string" },
+        "slug": { "type": "string" },
+        "formula_name": { "type": "string" },
+        "formula": { "type": "string" }
+    },
+    "required": ["id", "instrument_id", "parameter_id", "unit_id", "slug", "formula_name", "formula"]
+}`
+
+var calculationArrayLoader = gojsonschema.NewStringLoader(calculationArraySchema)
+
+const calculationIDsObjectSchema = `{
+    "type": "object",
+    "properties": {
+        "id": { "type": "string" }
+    },
+    "required": ["id"]
+}`
+
+var calculationIDsObjectLoader = gojsonschema.NewStringLoader(calculationIDsObjectSchema)
 
 const (
 	testCalculationID           = "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
@@ -30,33 +56,34 @@ const updateCalculationBody = `{
 }`
 
 func TestFormulas(t *testing.T) {
-	idTests := []HTTPTest[struct{ id uuid.UUID }]{
-		{
-			Name:                 "CreateCalculation",
-			URL:                  "/formulas",
-			Method:               http.MethodPost,
-			Body:                 createCalculationBody,
-			ExpectedStatus:       http.StatusOK,
-			ExpectedResponseType: jsonObj,
-		},
-		{
-			Name:                 "UpdateCalculation",
-			URL:                  fmt.Sprintf("/formulas/%s", testCalculationID),
-			Method:               http.MethodPut,
-			Body:                 updateCalculationBody,
-			ExpectedStatus:       http.StatusOK,
-			ExpectedResponseType: jsonObj,
-		},
-	}
-	RunAll(t, idTests)
+	objSchema, err := gojsonschema.NewSchema(calculationIDsObjectLoader)
+	assert.Nil(t, err)
+	arrSchema, err := gojsonschema.NewSchema(calculationArrayLoader)
+	assert.Nil(t, err)
 
-	tests := []HTTPTest[model.CalculatedTimeseries]{
+	tests := []HTTPTest{
 		{
-			Name:                 "GetInstrumentCalculations",
-			URL:                  fmt.Sprintf("/formulas?instrument_id=%s", testCalculationInstrumentID),
-			Method:               http.MethodGet,
-			ExpectedStatus:       http.StatusOK,
-			ExpectedResponseType: jsonArr,
+			Name:           "CreateCalculation",
+			URL:            "/formulas",
+			Method:         http.MethodPost,
+			Body:           createCalculationBody,
+			ExpectedStatus: http.StatusOK,
+			ExpectedSchema: objSchema,
+		},
+		{
+			Name:           "UpdateCalculation",
+			URL:            fmt.Sprintf("/formulas/%s", testCalculationID),
+			Method:         http.MethodPut,
+			Body:           updateCalculationBody,
+			ExpectedStatus: http.StatusOK,
+			ExpectedSchema: objSchema,
+		},
+		{
+			Name:           "GetInstrumentCalculations",
+			URL:            fmt.Sprintf("/formulas?instrument_id=%s", testCalculationInstrumentID),
+			Method:         http.MethodGet,
+			ExpectedStatus: http.StatusOK,
+			ExpectedSchema: arrSchema,
 		},
 		{
 			Name:           "DeleteCalculation",

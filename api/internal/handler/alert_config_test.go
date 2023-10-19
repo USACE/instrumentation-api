@@ -5,8 +5,63 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/USACE/instrumentation-api/api/internal/model"
+	"github.com/stretchr/testify/assert"
+	"github.com/xeipuuv/gojsonschema"
 )
+
+const alertConfigInstrumentSchema = `{
+    "type": "object",
+    "properties": {
+        "instrument_id": { "type": "string" },
+        "instrument_name": { "type": "string" }
+    }
+}`
+
+const alertConfigEmailSchema = `{
+    "type": "object",
+    "properties": {
+        "id": { "type": "string" },
+        "user_type": { "type": "string" },
+        "username": { "type": ["string", "null"] },
+        "email": { "type": "string" }
+    }
+}`
+
+var alertConfigSchema = fmt.Sprintf(`{
+    "type": "object",
+    "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "body": { "type": "string" },
+        "project_id": { "type": "string" },
+        "alert_type_id": { "type": "string" },
+        "alert_type": { "type": "string" },
+        "start_date": { "type": "string" },
+        "schedule_interval": { "type": "string" },
+        "mute_consecutive_alerts": { "type": "boolean" },
+        "remind_interval": { "type": ["string", "null"] },
+        "warning_interval": { "type": ["string", "null"] },
+        "last_checked": { "type": ["string", "null"], "format": "date-time" },
+        "last_reminded": { "type": ["string", "null"], "format": "date-time" },
+        "instruments": { "type": "array", "items": %s },
+        "alert_email_subscriptions": { "type": "array", "items": %s },
+        "alert_status": { "type": "string" },
+        "creator": { "type": "string" },
+        "creator_username": { "type": "string" },
+        "create_date": { "type": "string", "format": "date-time" },
+        "updater": { "type": ["string", "null"] },
+        "updater_username": { "type": ["string", "null"] },
+        "update_date": { "type": ["string", "null"], "format": "date-time" }
+    },
+    "additionalProperties": true
+}`, alertConfigInstrumentSchema, alertConfigEmailSchema)
+
+var alertConfigObjectLoader = gojsonschema.NewStringLoader(alertConfigSchema)
+
+var alertConfigArrayLoader = gojsonschema.NewStringLoader(fmt.Sprintf(`{
+    "type": "array",
+    "items": %s
+}`, alertConfigSchema))
 
 const (
 	testAlertConfigID           = "1efd2d85-d3ee-4388-85a0-f824a761ff8b"
@@ -68,43 +123,48 @@ const updateAlertConfigBody = `{
 }`
 
 func TestAlertConfigs(t *testing.T) {
-	tests := []HTTPTest[model.AlertConfig]{
+	objSchema, err := gojsonschema.NewSchema(alertConfigObjectLoader)
+	assert.Nil(t, err)
+	arrSchema, err := gojsonschema.NewSchema(alertConfigArrayLoader)
+	assert.Nil(t, err)
+
+	tests := []HTTPTest{
 		{
-			Name:                 "GetAlertConfig",
-			URL:                  fmt.Sprintf("/projects/%s/alert_configs/%s", testProjectID, testAlertConfigID),
-			Method:               http.MethodGet,
-			ExpectedStatus:       http.StatusOK,
-			ExpectedResponseType: jsonObj,
+			Name:           "GetAlertConfig",
+			URL:            fmt.Sprintf("/projects/%s/alert_configs/%s", testProjectID, testAlertConfigID),
+			Method:         http.MethodGet,
+			ExpectedStatus: http.StatusOK,
+			ExpectedSchema: objSchema,
 		},
 		{
-			Name:                 "ListInstrumentAlertConfigs",
-			URL:                  fmt.Sprintf("/projects/%s/instruments/%s/alert_configs", testProjectID, testAlertConfigInstrumentID),
-			Method:               http.MethodGet,
-			ExpectedStatus:       http.StatusOK,
-			ExpectedResponseType: jsonArr,
+			Name:           "ListInstrumentAlertConfigs",
+			URL:            fmt.Sprintf("/projects/%s/instruments/%s/alert_configs", testProjectID, testAlertConfigInstrumentID),
+			Method:         http.MethodGet,
+			ExpectedStatus: http.StatusOK,
+			ExpectedSchema: arrSchema,
 		},
 		{
-			Name:                 "ListProjectAlertConfigs",
-			URL:                  fmt.Sprintf("/projects/%s/alert_configs?alert_type_id=", testProjectID),
-			Method:               http.MethodGet,
-			ExpectedStatus:       http.StatusOK,
-			ExpectedResponseType: jsonArr,
+			Name:           "ListProjectAlertConfigs",
+			URL:            fmt.Sprintf("/projects/%s/alert_configs?alert_type_id=", testProjectID),
+			Method:         http.MethodGet,
+			ExpectedStatus: http.StatusOK,
+			ExpectedSchema: arrSchema,
 		},
 		{
-			Name:                 "CreateAlertConfig",
-			URL:                  fmt.Sprintf("/projects/%s/alert_configs", testProjectID),
-			Method:               http.MethodPost,
-			Body:                 createAlertConfigBody,
-			ExpectedStatus:       http.StatusCreated,
-			ExpectedResponseType: jsonObj,
+			Name:           "CreateAlertConfig",
+			URL:            fmt.Sprintf("/projects/%s/alert_configs", testProjectID),
+			Method:         http.MethodPost,
+			Body:           createAlertConfigBody,
+			ExpectedStatus: http.StatusCreated,
+			ExpectedSchema: objSchema,
 		},
 		{
-			Name:                 "UpdateAlertConfig",
-			URL:                  fmt.Sprintf("/projects/%s/alert_configs/%s", testProjectID, testAlertConfigID),
-			Method:               http.MethodPut,
-			Body:                 updateAlertConfigBody,
-			ExpectedStatus:       http.StatusOK,
-			ExpectedResponseType: jsonObj,
+			Name:           "UpdateAlertConfig",
+			URL:            fmt.Sprintf("/projects/%s/alert_configs/%s", testProjectID, testAlertConfigID),
+			Method:         http.MethodPut,
+			Body:           updateAlertConfigBody,
+			ExpectedStatus: http.StatusOK,
+			ExpectedSchema: objSchema,
 		},
 		{
 			Name:           "DeleteAlertConfig",

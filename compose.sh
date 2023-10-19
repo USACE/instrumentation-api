@@ -26,6 +26,10 @@ elif [ "$1" = "test" ]; then
     docker-compose run -d alert
     docker-compose -f docker-compose.yml -f docker-compose.dev.yml run --entrypoint="go test github.com/USACE/instrumentation-api/api/internal/handler" api
 
+    if [ "$2" = "-rm" ]; then
+        docker-compose --profile=local --profile=mock down -v
+    fi
+
 elif [ "$1" = "mkdocs" ]; then
     # TODO: this could possibly be added in CI, just run locally for now
     (cd api && swag init --pd -g cmd/core/main.go --parseInternal true --dir internal)

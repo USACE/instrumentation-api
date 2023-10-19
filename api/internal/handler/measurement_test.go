@@ -5,8 +5,42 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/USACE/instrumentation-api/api/internal/model"
+	"github.com/stretchr/testify/assert"
+	"github.com/xeipuuv/gojsonschema"
 )
+
+const measurementSchema = `{
+    "type": "object",
+    "properties": {
+        "id": { "type": "string" },
+        "time": { "type": "string" },
+        "value": { "type": "number" }
+    },
+    "required": ["time", "value"],
+    "additionalProperties": true
+}`
+
+var measurementCollectionSchema = fmt.Sprintf(`{
+    "type": "object",
+    "properties": {
+        "timeseries_id": {"type": "string"},
+        "items": { 
+            "type": "array",
+            "items": %s
+        }
+    },
+    "required": ["items", "timeseries_id"],
+    "additionalProperties": false
+}`, measurementSchema)
+
+var measurementObjectLoader = gojsonschema.NewStringLoader(measurementSchema)
+
+var measurementCollectionObjectLoader = gojsonschema.NewStringLoader(measurementCollectionSchema)
+
+var measurementCollectionArrayLoader = gojsonschema.NewStringLoader(fmt.Sprintf(`{
+	"type": "array",
+	"items": %s
+}`, measurementCollectionSchema))
 
 const (
 	testMeasurementTimeAfter  = "1900-01-01T00:00:00.00Z"
@@ -71,13 +105,16 @@ const updateMeasurementsBody = `{
 }`
 
 func TestMeasurements(t *testing.T) {
-	tests := []HTTPTest[model.MeasurementCollection]{
+	objSchema, err := gojsonschema.NewSchema(measurementCollectionObjectLoader)
+	assert.Nil(t, err)
+
+	tests := []HTTPTest{
 		{
-			Name:                 "ListTimeseriesMeasurements",
-			URL:                  fmt.Sprintf("/timeseries/%s/measurements?after=%s&before=%s", testTimeseriesID, testMeasurementTimeAfter, testMeasurementTimeBefore),
-			Method:               http.MethodGet,
-			ExpectedStatus:       http.StatusOK,
-			ExpectedResponseType: jsonObj,
+			Name:           "ListTimeseriesMeasurements",
+			URL:            fmt.Sprintf("/timeseries/%s/measurements?after=%s&before=%s", testTimeseriesID, testMeasurementTimeAfter, testMeasurementTimeBefore),
+			Method:         http.MethodGet,
+			ExpectedStatus: http.StatusOK,
+			ExpectedSchema: objSchema,
 		},
 		{
 			Name:           "CreateTimeseriesMeasurements_Object",

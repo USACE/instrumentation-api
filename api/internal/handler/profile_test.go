@@ -4,8 +4,20 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/USACE/instrumentation-api/api/internal/model"
+	"github.com/stretchr/testify/assert"
+	"github.com/xeipuuv/gojsonschema"
 )
+
+var profileObjectLoader = gojsonschema.NewStringLoader(`{
+    "type": "object",
+    "properties": {
+        "id": { "type": "string" },
+        "username": { "type": "string" },
+        "email": { "type": "string" }
+    },
+    "required": ["id", "username", "email"],
+    "additionalProperties": true
+}`)
 
 const testCreateProfileBody = `{
     "username": "testuser",
@@ -15,7 +27,10 @@ const testCreateProfileBody = `{
 const mockJwtNewUser = `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwibmFtZSI6IlVzZXIuTmV3IiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjIwMDAwMDAwMDAsInJvbGVzIjpbIlBVQkxJQy5VU0VSIl19._WR_s6AGyq2FwHA980M8XoFbhVInvgTqstauxUfcmYs`
 
 func TestProfiles(t *testing.T) {
-	tests := []HTTPTest[model.Profile]{
+	objSchema, err := gojsonschema.NewSchema(profileObjectLoader)
+	assert.Nil(t, err)
+
+	tests := []HTTPTest{
 		{
 			Name:           "CreateProfile",
 			URL:            "/profiles",
@@ -25,11 +40,11 @@ func TestProfiles(t *testing.T) {
 			authHeader:     mockJwtNewUser,
 		},
 		{
-			Name:                 "GetMyProfile",
-			URL:                  "/my_profile",
-			Method:               http.MethodGet,
-			ExpectedStatus:       http.StatusOK,
-			ExpectedResponseType: jsonObj,
+			Name:           "GetMyProfile",
+			URL:            "/my_profile",
+			Method:         http.MethodGet,
+			ExpectedStatus: http.StatusOK,
+			ExpectedSchema: objSchema,
 		},
 		{
 			Name:           "CreateToken",

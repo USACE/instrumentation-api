@@ -5,7 +5,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/USACE/instrumentation-api/api/internal/model"
+	"github.com/stretchr/testify/assert"
+	"github.com/xeipuuv/gojsonschema"
 )
 
 const (
@@ -30,29 +31,34 @@ const updateInstrumentConstantBody = `{
 }`
 
 func TestInstrumentConstants(t *testing.T) {
-	tests := []HTTPTest[model.Timeseries]{
+	objSchema, err := gojsonschema.NewSchema(timeseriesObjectLoader)
+	assert.Nil(t, err)
+	arrSchema, err := gojsonschema.NewSchema(timeseriesArrayLoader)
+	assert.Nil(t, err)
+
+	tests := []HTTPTest{
 		{
-			Name:                 "ListInstrumentConstants",
-			URL:                  fmt.Sprintf("/projects/%s/instruments/%s/constants", testProjectID, testInstrumentConstantInstrumentID),
-			Method:               http.MethodGet,
-			ExpectedStatus:       http.StatusOK,
-			ExpectedResponseType: jsonArr,
+			Name:           "ListInstrumentConstants",
+			URL:            fmt.Sprintf("/projects/%s/instruments/%s/constants", testProjectID, testInstrumentConstantInstrumentID),
+			Method:         http.MethodGet,
+			ExpectedStatus: http.StatusOK,
+			ExpectedSchema: arrSchema,
 		},
 		{
-			Name:                 "CreateInstrumentConstant",
-			URL:                  fmt.Sprintf("/projects/%s/instruments/%s/constants", testProjectID, testInstrumentConstantInstrumentID),
-			Method:               http.MethodPost,
-			Body:                 createInstrumentConstantBody,
-			ExpectedStatus:       http.StatusCreated,
-			ExpectedResponseType: jsonArr,
+			Name:           "CreateInstrumentConstant",
+			URL:            fmt.Sprintf("/projects/%s/instruments/%s/constants", testProjectID, testInstrumentConstantInstrumentID),
+			Method:         http.MethodPost,
+			Body:           createInstrumentConstantBody,
+			ExpectedStatus: http.StatusCreated,
+			ExpectedSchema: arrSchema,
 		},
 		{
-			Name:                 "UpdateInstrumentConstant",
-			URL:                  fmt.Sprintf("/projects/%s/instruments/%s/constants/%s", testProjectID, testInstrumentConstantInstrumentID, testInstrumentConstantTimeseriesID1),
-			Method:               http.MethodPut,
-			Body:                 updateInstrumentConstantBody,
-			ExpectedStatus:       http.StatusOK,
-			ExpectedResponseType: jsonObj},
+			Name:           "UpdateInstrumentConstant",
+			URL:            fmt.Sprintf("/projects/%s/instruments/%s/constants/%s", testProjectID, testInstrumentConstantInstrumentID, testInstrumentConstantTimeseriesID1),
+			Method:         http.MethodPut,
+			Body:           updateInstrumentConstantBody,
+			ExpectedStatus: http.StatusOK,
+			ExpectedSchema: objSchema},
 		{
 			Name:           "DeleteInstrumentConstant",
 			URL:            fmt.Sprintf("/projects/%s/instruments/%s/constants/%s", testProjectID, testInstrumentConstantInstrumentID, testInstrumentConstantTimeseriesID2),

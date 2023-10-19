@@ -3,12 +3,10 @@ package handler_test
 import (
 	"net/http"
 	"testing"
-
-	"github.com/USACE/instrumentation-api/api/internal/model"
 )
 
 func TestHeartbeat(t *testing.T) {
-	tests := []HTTPTest[model.Heartbeat]{
+	tests := []HTTPTest{
 		{
 			Name:           "DoHeartbeat",
 			URL:            "/heartbeat?key=appkey",

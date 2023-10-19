@@ -5,8 +5,29 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/USACE/instrumentation-api/api/internal/model"
+	"github.com/stretchr/testify/assert"
+	"github.com/xeipuuv/gojsonschema"
 )
+
+const alertSubSchema = `{
+    "type": "object",
+    "properties": {
+        "id": { "type": "string" },
+        "alert_config_id": { "type": "string" },
+        "profile_id": { "type": "string" },
+        "mute_ui": { "type": "boolean" },
+        "mute_notify": { "type": "boolean" }
+    },
+    "required": ["id", "alert_config_id", "profile_id", "mute_ui", "mute_notify"],
+    "additionalProperties": false
+}`
+
+var alertSubObjectLoader = gojsonschema.NewStringLoader(alertSubSchema)
+
+var alertSubArrayLoader = gojsonschema.NewStringLoader(fmt.Sprintf(`{
+    "type": "array",
+    "items": %s
+}`, alertSubSchema))
 
 const (
 	testAlertSubID            = "197d6140-f273-4c50-a87f-dec3f809663b"
@@ -24,28 +45,33 @@ const updateInstrumentAlertSubscriptionBody = `{
 }`
 
 func TestAlertSubscriptions(t *testing.T) {
-	tests := []HTTPTest[model.AlertSubscription]{
+	objSchema, err := gojsonschema.NewSchema(alertSubObjectLoader)
+	assert.Nil(t, err)
+	arrSchema, err := gojsonschema.NewSchema(alertSubArrayLoader)
+	assert.Nil(t, err)
+
+	tests := []HTTPTest{
 		{
-			Name:                 "SubscribeProfileToInstrumentAlert",
-			URL:                  fmt.Sprintf("/projects/%s/instruments/%s/alert_configs/%s/subscribe", testProjectID, testAlertSubInstrumentID, testAlertSubAlertConfigID),
-			Method:               http.MethodPost,
-			ExpectedStatus:       http.StatusOK,
-			ExpectedResponseType: jsonObj,
+			Name:           "SubscribeProfileToInstrumentAlert",
+			URL:            fmt.Sprintf("/projects/%s/instruments/%s/alert_configs/%s/subscribe", testProjectID, testAlertSubInstrumentID, testAlertSubAlertConfigID),
+			Method:         http.MethodPost,
+			ExpectedStatus: http.StatusOK,
+			ExpectedSchema: objSchema,
 		},
 		{
-			Name:                 "ListMyInstrumentAlertSubscriptions",
-			URL:                  "/my_alert_subscriptions",
-			Method:               http.MethodGet,
-			ExpectedStatus:       http.StatusOK,
-			ExpectedResponseType: jsonArr,
+			Name:           "ListMyInstrumentAlertSubscriptions",
+			URL:            "/my_alert_subscriptions",
+			Method:         http.MethodGet,
+			ExpectedStatus: http.StatusOK,
+			ExpectedSchema: arrSchema,
 		},
 		{
-			Name:                 "UpdateMyAlertSubscription",
-			URL:                  fmt.Sprintf("/alert_subscriptions/%s", testAlertSubID),
-			Method:               http.MethodPut,
-			Body:                 updateInstrumentAlertSubscriptionBody,
-			ExpectedStatus:       http.StatusOK,
-			ExpectedResponseType: jsonObj,
+			Name:           "UpdateMyAlertSubscription",
+			URL:            fmt.Sprintf("/alert_subscriptions/%s", testAlertSubID),
+			Method:         http.MethodPut,
+			Body:           updateInstrumentAlertSubscriptionBody,
+			ExpectedStatus: http.StatusOK,
+			ExpectedSchema: objSchema,
 		},
 		{
 			Name:           "UnsubscribeProfileToInstrumentAlert",

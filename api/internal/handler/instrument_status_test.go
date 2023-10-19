@@ -5,8 +5,28 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/USACE/instrumentation-api/api/internal/model"
+	"github.com/stretchr/testify/assert"
+	"github.com/xeipuuv/gojsonschema"
 )
+
+const instrumentStatusSchema = `{
+    "type": "object",
+    "properties": {
+        "id": { "type": "string" },
+        "time": { "type": "string" },
+        "status_id": { "type": "string" },
+        "status": { "type": "string" }
+    },
+    "required": ["id", "time", "status_id", "status"],
+    "additionalProperties": false
+}`
+
+var instrumentStatusObjectLoader = gojsonschema.NewStringLoader(instrumentStatusSchema)
+
+var instrumentStatusArrayLoader = gojsonschema.NewStringLoader(fmt.Sprintf(`{
+    "type": "array",
+    "items": %s
+}`, instrumentStatusSchema))
 
 const testInstrumentStatusID = "4ed5e9ac-40dc-4bca-b44f-7b837ec1b0fc"
 
@@ -33,20 +53,25 @@ const createInstrumentStatusObjectBody = `{
 }`
 
 func TestInstrumentStatus(t *testing.T) {
-	tests := []HTTPTest[model.InstrumentStatus]{
+	objSchema, err := gojsonschema.NewSchema(instrumentStatusObjectLoader)
+	assert.Nil(t, err)
+	arrSchema, err := gojsonschema.NewSchema(instrumentStatusArrayLoader)
+	assert.Nil(t, err)
+
+	tests := []HTTPTest{
 		{
-			Name:                 "GetInstrumentStatus",
-			URL:                  fmt.Sprintf("/instruments/%s/status/%s", testInstrumentID, testInstrumentStatusID),
-			Method:               http.MethodGet,
-			ExpectedStatus:       http.StatusOK,
-			ExpectedResponseType: jsonObj,
+			Name:           "GetInstrumentStatus",
+			URL:            fmt.Sprintf("/instruments/%s/status/%s", testInstrumentID, testInstrumentStatusID),
+			Method:         http.MethodGet,
+			ExpectedStatus: http.StatusOK,
+			ExpectedSchema: objSchema,
 		},
 		{
-			Name:                 "ListInstrumentStatus",
-			URL:                  fmt.Sprintf("/instruments/%s/status", testInstrumentID),
-			Method:               http.MethodGet,
-			ExpectedStatus:       http.StatusOK,
-			ExpectedResponseType: jsonArr,
+			Name:           "ListInstrumentStatus",
+			URL:            fmt.Sprintf("/instruments/%s/status", testInstrumentID),
+			Method:         http.MethodGet,
+			ExpectedStatus: http.StatusOK,
+			ExpectedSchema: arrSchema,
 		},
 		{
 			Name:           "CreateInstrumentStatus_Array",

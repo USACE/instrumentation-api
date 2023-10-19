@@ -5,8 +5,42 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/USACE/instrumentation-api/api/internal/model"
+	"github.com/stretchr/testify/assert"
+	"github.com/xeipuuv/gojsonschema"
 )
+
+const plotConfigSchema = `{
+    "type": "object",
+    "properties": {
+        "id": { "type": "string" },
+        "timeseries_id": {
+            "type": "array",
+            "items": { "type": "string" }
+        },
+        "slug": { "type": "string" },
+        "name": { "type": "string" },
+        "creator": { "type": "string" },
+        "create_date": { "type": "string", "format": "date-time" },
+        "updater": {  "type": ["string", "null"] },
+        "update_date": { "type": ["string", "null"], "format": "date-time" },
+        "project_id": { "type": ["string", "null"] },
+        "show_masked": { "type": "boolean" },
+        "show_nonvalidated": { "type": "boolean" },
+        "show_comments": { "type": "boolean" },
+        "auto_range": { "type": "boolean" },
+        "date_range": { "type": "string" },
+        "threshold": { "type": "number" }
+    },
+    "required": ["id", "slug", "name", "creator", "create_date", "updater", "update_date", "project_id", "timeseries_id"],
+    "additionalProperties": false
+}`
+
+var plotConfigObjectLoader = gojsonschema.NewStringLoader(plotConfigSchema)
+
+var plotConfigArrayLoader = gojsonschema.NewStringLoader(fmt.Sprintf(`{
+    "type": "array",
+    "items": %s
+}`, plotConfigSchema))
 
 const testPlotConfigID = "64879f68-6a2c-4d78-8e8b-5e9b9d2e0d6a"
 
@@ -57,44 +91,49 @@ const createPlotConfigBody = `{
 }`
 
 func TestPlotConfigurations(t *testing.T) {
-	tests := []HTTPTest[model.PlotConfig]{
+	objSchema, err := gojsonschema.NewSchema(plotConfigObjectLoader)
+	assert.Nil(t, err)
+	arrSchema, err := gojsonschema.NewSchema(plotConfigArrayLoader)
+	assert.Nil(t, err)
+
+	tests := []HTTPTest{
 		{
-			Name:                 "GetPlotConfiguration",
-			URL:                  fmt.Sprintf("/projects/%s/plot_configurations/%s", testProjectID, testPlotConfigID),
-			Method:               http.MethodGet,
-			ExpectedStatus:       http.StatusOK,
-			ExpectedResponseType: jsonObj,
+			Name:           "GetPlotConfiguration",
+			URL:            fmt.Sprintf("/projects/%s/plot_configurations/%s", testProjectID, testPlotConfigID),
+			Method:         http.MethodGet,
+			ExpectedStatus: http.StatusOK,
+			ExpectedSchema: objSchema,
 		},
 		{
-			Name:                 "ListPlotConfigurations",
-			URL:                  fmt.Sprintf("/projects/%s/plot_configurations", testProjectID),
-			Method:               http.MethodGet,
-			ExpectedStatus:       http.StatusOK,
-			ExpectedResponseType: jsonArr,
+			Name:           "ListPlotConfigurations",
+			URL:            fmt.Sprintf("/projects/%s/plot_configurations", testProjectID),
+			Method:         http.MethodGet,
+			ExpectedStatus: http.StatusOK,
+			ExpectedSchema: arrSchema,
 		},
 		{
-			Name:                 "UpdatePlotConfiguration - Remove Timeseries",
-			URL:                  fmt.Sprintf("/projects/%s/plot_configurations/%s", testProjectID, testPlotConfigID),
-			Method:               http.MethodPut,
-			Body:                 updatePlotConfigRemoveTimeseriesBody,
-			ExpectedStatus:       http.StatusOK,
-			ExpectedResponseType: jsonObj,
+			Name:           "UpdatePlotConfiguration - Remove Timeseries",
+			URL:            fmt.Sprintf("/projects/%s/plot_configurations/%s", testProjectID, testPlotConfigID),
+			Method:         http.MethodPut,
+			Body:           updatePlotConfigRemoveTimeseriesBody,
+			ExpectedStatus: http.StatusOK,
+			ExpectedSchema: objSchema,
 		},
 		{
-			Name:                 "UpdatePlotConfiguration - Add Many Timeseries",
-			URL:                  fmt.Sprintf("/projects/%s/plot_configurations/%s", testProjectID, testPlotConfigID),
-			Method:               http.MethodPut,
-			Body:                 updatePlotConfigAddManyTimeseriesBody,
-			ExpectedStatus:       http.StatusOK,
-			ExpectedResponseType: jsonObj,
+			Name:           "UpdatePlotConfiguration - Add Many Timeseries",
+			URL:            fmt.Sprintf("/projects/%s/plot_configurations/%s", testProjectID, testPlotConfigID),
+			Method:         http.MethodPut,
+			Body:           updatePlotConfigAddManyTimeseriesBody,
+			ExpectedStatus: http.StatusOK,
+			ExpectedSchema: objSchema,
 		},
 		{
-			Name:                 "CreatePlotConfiguration",
-			URL:                  fmt.Sprintf("/projects/%s/plot_configurations", testProjectID),
-			Method:               http.MethodPost,
-			Body:                 createPlotConfigBody,
-			ExpectedStatus:       http.StatusCreated,
-			ExpectedResponseType: jsonObj,
+			Name:           "CreatePlotConfiguration",
+			URL:            fmt.Sprintf("/projects/%s/plot_configurations", testProjectID),
+			Method:         http.MethodPost,
+			Body:           createPlotConfigBody,
+			ExpectedStatus: http.StatusCreated,
+			ExpectedSchema: objSchema,
 		},
 		{
 			Name:           "DeletePlotConfiguration",

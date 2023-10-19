@@ -5,8 +5,19 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/USACE/instrumentation-api/api/internal/model"
+	"github.com/stretchr/testify/assert"
+	"github.com/xeipuuv/gojsonschema"
 )
+
+const dataloggerSchema = `{
+    "type": "object",
+    "properties": {
+        "id": { "type": "string" }
+    },
+    "required": ["id"]
+}`
+
+var dataloggerObjectLoader = gojsonschema.NewStringLoader(dataloggerSchema)
 
 // datalogger 1 for read-only tests since it's used with the mock datalogger service
 const (
@@ -30,14 +41,17 @@ const updateDataloggerBody = `{
 }`
 
 func TestDatalogger(t *testing.T) {
-	tests := []HTTPTest[model.Datalogger]{
+	objSchema, err := gojsonschema.NewSchema(dataloggerObjectLoader)
+	assert.Nil(t, err)
+
+	tests := []HTTPTest{
 		{
-			Name:                 "CreateDatalogger",
-			URL:                  "/datalogger",
-			Method:               http.MethodPost,
-			Body:                 createDataloggerBody,
-			ExpectedStatus:       http.StatusCreated,
-			ExpectedResponseType: jsonObj,
+			Name:           "CreateDatalogger",
+			URL:            "/datalogger",
+			Method:         http.MethodPost,
+			Body:           createDataloggerBody,
+			ExpectedStatus: http.StatusCreated,
+			ExpectedSchema: objSchema,
 		},
 		{
 			Name:           "ListProjectDataloggers",
