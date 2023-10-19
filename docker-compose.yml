@@ -188,7 +188,7 @@ services:
 
   mock_datalogger:
     build:
-      context: tests/mock/datalogger
+      context: mock/telemetry
     restart: unless-stopped
     profiles:
       - mock

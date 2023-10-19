@@ -24,7 +24,12 @@ elif [ "$1" = "clean" ]; then
 elif [ "$1" = "test" ]; then
     docker-compose -f docker-compose.yml -f docker-compose.dev.yml build --build-arg dev
     docker-compose run -d alert
-    docker-compose -f docker-compose.yml -f docker-compose.dev.yml run --entrypoint="go test github.com/USACE/instrumentation-api/api/internal/handler" api
+
+    if [ "$REPORT" = true ]; then
+        docker-compose -f docker-compose.yml -f docker-compose.dev.yml run --entrypoint="go test -json github.com/USACE/instrumentation-api/api/internal/handler" api > $(pwd)/report/api_test.log
+    else
+        docker-compose -f docker-compose.yml -f docker-compose.dev.yml run --entrypoint="go test github.com/USACE/instrumentation-api/api/internal/handler" api
+    fi
 
     if [ "$2" = "-rm" ]; then
         docker-compose --profile=local --profile=mock down -v

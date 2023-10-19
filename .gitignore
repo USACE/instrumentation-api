@@ -25,9 +25,9 @@ __debug*
 
 **/.DS_Store
 
-# regression test results
-tests/postman/instrumentation.html
-
 **/.direnv
 
 **/.tool-versions
+
+# reports from regression tests
+report
