@@ -31,12 +31,14 @@ INSERT INTO alert_config_instrument (alert_config_id, instrument_id) VALUES
     ('15c106f5-a293-4a0e-b45a-6a4c7206ac6a', '9e8f2ca4-4037-45a4-aaca-d9e598877439');
 
 INSERT INTO alert_profile_subscription (alert_config_id, profile_id) VALUES
-    ('1efd2d85-d3ee-4388-85a0-f824a761ff8b', '57329df6-9f7a-4dad-9383-4633b452efab'),
     ('90ff91d6-ab39-40db-9160-34ce17416281', '57329df6-9f7a-4dad-9383-4633b452efab'),
     ('15c106f5-a293-4a0e-b45a-6a4c7206ac6a', '57329df6-9f7a-4dad-9383-4633b452efab'),
     ('c07165de-71ec-40c4-b25b-c42deefea636', '57329df6-9f7a-4dad-9383-4633b452efab'),
     ('d3738f72-4c0b-47f8-8ff9-8bea46022309', '57329df6-9f7a-4dad-9383-4633b452efab'),
     ('5f9555df-c616-4530-bdcd-6b664fc91255', '57329df6-9f7a-4dad-9383-4633b452efab');
+
+INSERT INTO alert_profile_subscription (id, alert_config_id, profile_id, mute_ui, mute_notify) VALUES
+('197d6140-f273-4c50-a87f-dec3f809663b', '1efd2d85-d3ee-4388-85a0-f824a761ff8b', '57329df6-9f7a-4dad-9383-4633b452efab', true, false);
 
 INSERT INTO email (id, email) VALUES
     ('1ebf9e14-2b1c-404e-9535-6c2ee24944b6', 'no.profile@fake.usace.army.mil');

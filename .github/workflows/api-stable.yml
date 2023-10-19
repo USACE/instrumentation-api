@@ -1,4 +1,4 @@
-name: API Image Stable
+name: Build and push MIDAS API images stable
 
 on:
   push:
@@ -6,26 +6,18 @@ on:
     paths:
       - "api/**"
       - ".github/workflows/api-stable.yml"
-  workflow_dispatch:
+
 jobs:
-  APIDockerImage:
-    name: API Image Stable
-    # The type of runner that the job will run on
+  TestBuildPush:
+    name: Test Build Push
     runs-on: ubuntu-latest
 
     env:
       DOCKER_BUILDKIT: 1
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
+    
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-
-      - name: Run Tests
-        env:
-          REPORT: true
-        run: ./compose.sh test
-
+        
       - name: Configure AWS credentials
         if: ${{ always() }}
         uses: aws-actions/configure-aws-credentials@v1
@@ -33,12 +25,16 @@ jobs:
           aws-access-key-id: ${{ secrets.CWBICI_DEVELOP_AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.CWBICI_DEVELOP_AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.CWBICI_DEVELOP_AWS_REGION }}
+  
+      - name: Run Tests
+        env:
+          REPORT: true
+        run: ./compose.sh test
 
       - name: Upload Test Results
         if: ${{ always() }}
         run: |
-          aws s3 rm s3://corpsmap-appz/api_test_results/midas-api-stable.html
-          aws s3 cp ./tests/postman/instrumentation.html s3://corpsmap-appz/api_test_results/midas-api-stable.html
+          aws s3 cp ./report/api_test.log s3://corpsmap-appz/api_test_results/midas-api-stable.log
 
       - name: Login to Amazon ECR
         if: ${{ success() }}
@@ -49,12 +45,20 @@ jobs:
         if: ${{ success() }}
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: midas-api
           IMAGE_TAG: ${{ github.sha }}
+          API_ECR_REPOSITORY: midas-api
+          TELEMETRY_ECR_REPOSITORY: midas-telemetry
+          ALERT_ECR_REPOSITORY: midas-alert
+          DCSLOADER_ECR_REPOSITORY: midas-dcs-loader
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:stable api
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:stable
+          docker build --target core -t $ECR_REGISTRY/$API_ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$API_ECR_REPOSITORY:stable api
+          docker build --target telemetry -t $ECR_REGISTRY/$TELEMETRY_ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$TELEMETRY_ECR_REPOSITORY:stable api
+          docker build --target alert -t $ECR_REGISTRY/$ALERT_ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ALERT_ECR_REPOSITORY:stable api
+          docker build --target dcs-loader -t $ECR_REGISTRY/$DCSLOADER_ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$DCSLOADER_ECR_REPOSITORY:stable api
+          docker push -a $ECR_REGISTRY/$API_ECR_REPOSITORY
+          docker push -a $ECR_REGISTRY/$TELEMETRY_ECR_REPOSITORY
+          docker push -a $ECR_REGISTRY/$ALERT_ECR_REPOSITORY
+          docker push -a $ECR_REGISTRY/$DCSLOADER_ECR_REPOSITORY
 
       - name: Logout of Amazon ECR
         if: ${{ always() }}
