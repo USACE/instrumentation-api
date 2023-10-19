@@ -47,14 +47,15 @@ type FloatNanInf float64
 
 func (j *FloatNanInf) UnmarshalJSON(v []byte) error {
 	switch string(v) {
-	case `"NAN"`:
+	case `"NAN"`, "NAN":
 		*j = FloatNanInf(math.NaN())
-	case `"INF"`:
+	case `"INF"`, "INF":
 		*j = FloatNanInf(math.Inf(1))
 	default:
 		var fv float64
 		if err := json.Unmarshal(v, &fv); err != nil {
-			return err
+			*j = FloatNanInf(math.NaN())
+			return nil
 		}
 		*j = FloatNanInf(fv)
 	}
