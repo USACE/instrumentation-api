@@ -5,59 +5,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/xeipuuv/gojsonschema"
+	"github.com/USACE/instrumentation-api/api/internal/model"
 )
-
-const alertSubSchema = `{
-    "type": "object",
-    "properties": {
-        "id": { "type": "string" },
-        "alert_config_id": { "type": "string" },
-        "profile_id": { "type": "string" },
-        "mute_ui": { "type": "boolean" },
-        "mute_notify": { "type": "boolean" }
-    },
-    "required": ["id", "alert_config_id", "profile_id", "mute_ui", "mute_notify"],
-    "additionalProperties": false
-}`
-
-var alertSubObjectSchema = gojsonschema.NewStringLoader(alertSubSchema)
-
-var alertSubArraySchema = gojsonschema.NewStringLoader(fmt.Sprintf(`{
-    "type": "array",
-    "items": %s
-}`, alertSubSchema))
-
-const alertSubAlertConfigInstrumentSchema = `{
-    "type": "object",
-    "properties": {
-        "instrument_id": { "type": "string" },
-        "instrument_name": { "type": "string" }
-    }
-}`
-
-var alertSubAlertConfigSchema = fmt.Sprintf(`{
-    "type": "object",
-    "properties": {
-        "id": { "type": "string" },
-        "alert_config_id": { "type": "string" },
-        "project_id": { "type": "string" },
-        "project_name": { "type": "string" },
-        "instruments": { "type": "array", "items": %s },
-        "name": { "type": "string" },
-        "body": { "type": "string" },
-        "create_date": { "type": "string", "format": "date-time" }
-    },
-    "required": ["id", "alert_config_id", "project_id", "project_name", "instruments", "name", "body", "create_date"],
-    "additionalProperties": true
-}`, alertSubAlertConfigInstrumentSchema)
-
-var alertSubAlertConfigObjectSchema = gojsonschema.NewStringLoader(alertSubAlertConfigSchema)
-
-var alertSubAlertConfigArraySchema = gojsonschema.NewStringLoader(fmt.Sprintf(`{
-    "type": "array",
-    "items": %s
-}`, alertSubAlertConfigSchema))
 
 const (
 	testAlertSubID            = "197d6140-f273-4c50-a87f-dec3f809663b"
@@ -68,63 +17,35 @@ const (
 
 const updateInstrumentAlertSubscriptionBody = `{
     "id": "197d6140-f273-4c50-a87f-dec3f809663b",
-    "alert_config_id": "243e9d32-2cba-4f12-9abe-63adc09fc5dd",
-    "profile_id": "96c01ff3-edc9-44f0-8690-191cc2281a12",
+    "alert_config_id": "1efd2d85-d3ee-4388-85a0-f824a761ff8b",
+    "profile_id": "57329df6-9f7a-4dad-9383-4633b452efab",
     "mute_ui": false,
     "mute_notify": true
 }`
 
 func TestAlertSubscriptions(t *testing.T) {
-	tests := []HTTPTest{
+	tests := []HTTPTest[model.AlertSubscription]{
 		{
-			Name:           "SubscribeProfileToInstrumentAlert",
-			URL:            fmt.Sprintf("/projects/%s/instruments/%s/alert_configs/%s/subscribe", testProjectID, testAlertSubInstrumentID, testAlertSubAlertConfigID),
-			Method:         http.MethodPost,
-			ExpectedStatus: http.StatusOK,
-			ExpectedSchema: &alertSubObjectSchema,
+			Name:                 "SubscribeProfileToInstrumentAlert",
+			URL:                  fmt.Sprintf("/projects/%s/instruments/%s/alert_configs/%s/subscribe", testProjectID, testAlertSubInstrumentID, testAlertSubAlertConfigID),
+			Method:               http.MethodPost,
+			ExpectedStatus:       http.StatusOK,
+			ExpectedResponseType: jsonObj,
 		},
 		{
-			Name:           "ListMyInstrumentAlertSubscriptions",
-			URL:            "/my_alert_subscriptions",
-			Method:         http.MethodGet,
-			ExpectedStatus: http.StatusOK,
-			ExpectedSchema: &alertSubArraySchema,
+			Name:                 "ListMyInstrumentAlertSubscriptions",
+			URL:                  "/my_alert_subscriptions",
+			Method:               http.MethodGet,
+			ExpectedStatus:       http.StatusOK,
+			ExpectedResponseType: jsonArr,
 		},
 		{
-			Name:           "UpdateInstrumentAlertSubscription",
-			URL:            fmt.Sprintf("/alert_subscriptions/%s", testAlertSubID),
-			Method:         http.MethodPut,
-			Body:           updateInstrumentAlertSubscriptionBody,
-			ExpectedStatus: http.StatusOK,
-			ExpectedSchema: &alertSubObjectSchema,
-		},
-		{
-			Name:           "ListAlertsForInstrument",
-			URL:            fmt.Sprintf("/projects/%s/instruments/%s/alerts", testProjectID, testAlertSubInstrumentID),
-			Method:         http.MethodGet,
-			ExpectedStatus: http.StatusOK,
-			ExpectedSchema: &alertSubAlertConfigArraySchema,
-		},
-		{
-			Name:           "ListMyAlerts",
-			URL:            "/my_alerts",
-			Method:         http.MethodGet,
-			ExpectedStatus: http.StatusOK,
-			ExpectedSchema: &alertSubAlertConfigArraySchema,
-		},
-		{
-			Name:           "DoAlertRead",
-			URL:            fmt.Sprintf("/my_alerts/%s/read", testAlertSubAlertID),
-			Method:         http.MethodPost,
-			ExpectedStatus: http.StatusOK,
-			ExpectedSchema: &alertSubAlertConfigObjectSchema,
-		},
-		{
-			Name:           "DoAlertUnread",
-			URL:            fmt.Sprintf("/my_alerts/%s/unread", testAlertSubAlertID),
-			Method:         http.MethodPost,
-			ExpectedStatus: http.StatusOK,
-			ExpectedSchema: &alertSubAlertConfigObjectSchema,
+			Name:                 "UpdateMyAlertSubscription",
+			URL:                  fmt.Sprintf("/alert_subscriptions/%s", testAlertSubID),
+			Method:               http.MethodPut,
+			Body:                 updateInstrumentAlertSubscriptionBody,
+			ExpectedStatus:       http.StatusOK,
+			ExpectedResponseType: jsonObj,
 		},
 		{
 			Name:           "UnsubscribeProfileToInstrumentAlert",

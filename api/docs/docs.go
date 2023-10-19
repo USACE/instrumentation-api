@@ -154,7 +154,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfig"
+                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertSubscription"
                             }
                         }
                     },
@@ -1876,8 +1876,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentCount"
                         }
                     },
                     "400": {
@@ -3224,8 +3223,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.ProjectCount"
                         }
                     },
                     "400": {
@@ -7641,6 +7639,14 @@ const docTemplate = `{
                 }
             }
         },
+        "github_com_USACE_instrumentation-api_api_internal_model.InstrumentCount": {
+            "type": "object",
+            "properties": {
+                "instrument_count": {
+                    "type": "integer"
+                }
+            }
+        },
         "github_com_USACE_instrumentation-api_api_internal_model.InstrumentGroup": {
             "type": "object",
             "properties": {
@@ -7944,6 +7950,14 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Project"
                     }
+                }
+            }
+        },
+        "github_com_USACE_instrumentation-api_api_internal_model.ProjectCount": {
+            "type": "object",
+            "properties": {
+                "project_count": {
+                    "type": "integer"
                 }
             }
         },

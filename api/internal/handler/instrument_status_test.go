@@ -5,27 +5,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/xeipuuv/gojsonschema"
+	"github.com/USACE/instrumentation-api/api/internal/model"
 )
-
-const instrumentStatusSchema = `{
-    "type": "object",
-    "properties": {
-        "id": { "type": "string" },
-        "time": { "type": "string" },
-        "status_id": { "type": "string" },
-        "status": { "type": "string" }
-    },
-    "required": ["id", "time", "status_id", "status"],
-    "additionalProperties": false
-}`
-
-var instrumentStatusObjectSchema = gojsonschema.NewStringLoader(instrumentStatusSchema)
-
-var instrumentStatusArraySchema = gojsonschema.NewStringLoader(fmt.Sprintf(`{
-    "type": "array",
-    "items": %s
-}`, instrumentStatusSchema))
 
 const testInstrumentStatusID = "4ed5e9ac-40dc-4bca-b44f-7b837ec1b0fc"
 
@@ -52,20 +33,20 @@ const createInstrumentStatusObjectBody = `{
 }`
 
 func TestInstrumentStatus(t *testing.T) {
-	tests := []HTTPTest{
+	tests := []HTTPTest[model.InstrumentStatus]{
 		{
-			Name:           "GetInstrumentStatus",
-			URL:            fmt.Sprintf("/instruments/%s/status/%s", testInstrumentID, testInstrumentStatusID),
-			Method:         http.MethodGet,
-			ExpectedStatus: http.StatusOK,
-			ExpectedSchema: &instrumentStatusObjectSchema,
+			Name:                 "GetInstrumentStatus",
+			URL:                  fmt.Sprintf("/instruments/%s/status/%s", testInstrumentID, testInstrumentStatusID),
+			Method:               http.MethodGet,
+			ExpectedStatus:       http.StatusOK,
+			ExpectedResponseType: jsonObj,
 		},
 		{
-			Name:           "ListInstrumentStatus",
-			URL:            fmt.Sprintf("/instruments/%s/status", testInstrumentID),
-			Method:         http.MethodGet,
-			ExpectedStatus: http.StatusOK,
-			ExpectedSchema: &instrumentArraySchema,
+			Name:                 "ListInstrumentStatus",
+			URL:                  fmt.Sprintf("/instruments/%s/status", testInstrumentID),
+			Method:               http.MethodGet,
+			ExpectedStatus:       http.StatusOK,
+			ExpectedResponseType: jsonArr,
 		},
 		{
 			Name:           "CreateInstrumentStatus_Array",

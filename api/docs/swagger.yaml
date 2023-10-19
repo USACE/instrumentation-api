@@ -510,6 +510,11 @@ definitions:
           $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Instrument'
         type: array
     type: object
+  github_com_USACE_instrumentation-api_api_internal_model.InstrumentCount:
+    properties:
+      instrument_count:
+        type: integer
+    type: object
   github_com_USACE_instrumentation-api_api_internal_model.InstrumentGroup:
     properties:
       create_date:
@@ -709,6 +714,11 @@ definitions:
         items:
           $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Project'
         type: array
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.ProjectCount:
+    properties:
+      project_count:
+        type: integer
     type: object
   github_com_USACE_instrumentation-api_api_internal_model.ProjectMembership:
     properties:
@@ -1025,7 +1035,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfig'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertSubscription'
             type: array
         "400":
           description: Bad Request
@@ -2568,8 +2578,7 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentCount'
         "400":
           description: Bad Request
           schema:
@@ -5086,8 +5095,7 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.ProjectCount'
         "400":
           description: Bad Request
           schema:

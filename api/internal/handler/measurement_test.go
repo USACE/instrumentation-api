@@ -5,41 +5,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/xeipuuv/gojsonschema"
+	"github.com/USACE/instrumentation-api/api/internal/model"
 )
-
-const measurementSchema = `{
-    "type": "object",
-    "properties": {
-        "id": { "type": "string" },
-        "time": { "type": "string" },
-        "value": { "type": "number" }
-    },
-    "required": ["time", "value"],
-    "additionalProperties": true
-}`
-
-var measurementCollectionSchema = fmt.Sprintf(`{
-    "type": "object",
-    "properties": {
-        "timeseries_id": {"type": "string"},
-        "items": { 
-            "type": "array",
-            "items": %s
-        }
-    },
-    "required": ["items", "timeseries_id"],
-    "additionalProperties": false
-}`, measurementSchema)
-
-var measurementObjectSchema = gojsonschema.NewStringLoader(measurementSchema)
-
-var measurementCollectionObjectSchema = gojsonschema.NewStringLoader(measurementCollectionSchema)
-
-var measurementCollectionArraySchema = gojsonschema.NewStringLoader(fmt.Sprintf(`{
-	"type": "array",
-	"items": %s
-}`, measurementCollectionSchema))
 
 const (
 	testMeasurementTimeAfter  = "1900-01-01T00:00:00.00Z"
@@ -104,13 +71,13 @@ const updateMeasurementsBody = `{
 }`
 
 func TestMeasurements(t *testing.T) {
-	tests := []HTTPTest{
+	tests := []HTTPTest[model.MeasurementCollection]{
 		{
-			Name:           "ListTimeseriesMeasurements",
-			URL:            fmt.Sprintf("timeseries/%s/measurements?after=%s&before=%s", testTimeseriesID, testMeasurementTimeAfter, testMeasurementTimeBefore),
-			Method:         http.MethodGet,
-			ExpectedStatus: http.StatusOK,
-			ExpectedSchema: &measurementCollectionObjectSchema,
+			Name:                 "ListTimeseriesMeasurements",
+			URL:                  fmt.Sprintf("/timeseries/%s/measurements?after=%s&before=%s", testTimeseriesID, testMeasurementTimeAfter, testMeasurementTimeBefore),
+			Method:               http.MethodGet,
+			ExpectedStatus:       http.StatusOK,
+			ExpectedResponseType: jsonObj,
 		},
 		{
 			Name:           "CreateTimeseriesMeasurements_Object",

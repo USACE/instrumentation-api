@@ -4,19 +4,15 @@ package message
 // Used in cases where error cannot be sent back to client;
 // when it potentially contains information about resouces for which a user is unauthorized
 
-// Unauthorized is the a default unauthorized (403) message
-var Unauthorized = "User is not authorized to use this resource"
+const Unauthorized = "User is not authorized to use this resource"
 
-// NotFound is the a default not found (404) message
-var NotFound = "Not Found"
+const NotFound = "Not Found"
 
-// BadRequest is the a default not found (404) message
-var BadRequest = "Bad Request"
+const BadRequest = "Bad Request"
 
-// InternalServerError is the a default not found (404) message
-var InternalServerError = "Internal Server Error"
+const InternalServerError = "Internal Server Error"
 
-var MalformedID = "Malformed ID"
+const MalformedID = "Malformed ID"
 
 func MissingQueryParameter(param string) string {
 	return "Missing query parameter " + param

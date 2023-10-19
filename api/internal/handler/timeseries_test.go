@@ -5,38 +5,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/xeipuuv/gojsonschema"
+	"github.com/USACE/instrumentation-api/api/internal/model"
 )
-
-const timeseriesSchema = `{
-    "type": "object",
-    "properties": {
-        "id": { "type": "string" },
-        "slug": { "type": "string" },
-        "name": { "type": "string" },
-        "variable": {"type": "string"},
-        "project_id": {"type": "string"},
-        "project": {"type": "string"},
-        "project_slug": {"type": "string"},
-        "instrument_id": { "type": "string" },
-        "instrument": { "type": "string"  },
-        "instrument_slug": {"type": "string"},
-        "parameter_id": { "type": "string" },
-        "parameter": { "type": "string"  },
-        "unit_id": { "type": "string" },
-        "unit": { "type": "string"  },
-        "is_computed": { "type": "boolean" }
-    },
-    "required": ["id", "slug", "name", "variable", "instrument_id", "parameter_id", "unit_id", "is_computed"],
-    "additionalProperties": false
-}`
-
-var timeseriesObjectSchema = gojsonschema.NewStringLoader(timeseriesSchema)
-
-var timeseriesArraySchema = gojsonschema.NewStringLoader(fmt.Sprintf(`{
-    "type": "array",
-    "items": %s
-}`, timeseriesSchema))
 
 const (
 	testTimeseriesID = "869465fc-dc1e-445e-81f4-9979b5fadda9"
@@ -81,58 +51,58 @@ const updateTimeseriesBody = `{
 }`
 
 func TestTimeseries(t *testing.T) {
-	tests := []HTTPTest{
+	tests := []HTTPTest[model.Timeseries]{
 		{
-			Name:           "GetTimeseries",
-			URL:            fmt.Sprintf("/timeseries/%s", testTimeseriesID),
-			Method:         http.MethodGet,
-			ExpectedStatus: http.StatusOK,
-			ExpectedSchema: &timeseriesObjectSchema,
+			Name:                 "GetTimeseries",
+			URL:                  fmt.Sprintf("/timeseries/%s", testTimeseriesID),
+			Method:               http.MethodGet,
+			ExpectedStatus:       http.StatusOK,
+			ExpectedResponseType: jsonObj,
 		},
 		{
-			Name:           "ListTimeseries",
-			URL:            "/timeseries",
-			Method:         http.MethodGet,
-			ExpectedStatus: http.StatusOK,
-			ExpectedSchema: &timeseriesArraySchema,
+			Name:                 "ListTimeseries",
+			URL:                  "/timeseries",
+			Method:               http.MethodGet,
+			ExpectedStatus:       http.StatusOK,
+			ExpectedResponseType: jsonArr,
 		},
 		{
-			Name:           "ListProjectTimeseries",
-			URL:            fmt.Sprintf("/projects/%s/timeseries", testProjectID),
-			Method:         http.MethodGet,
-			ExpectedStatus: http.StatusOK,
-			ExpectedSchema: &timeseriesArraySchema,
+			Name:                 "ListProjectTimeseries",
+			URL:                  fmt.Sprintf("/projects/%s/timeseries", testProjectID),
+			Method:               http.MethodGet,
+			ExpectedStatus:       http.StatusOK,
+			ExpectedResponseType: jsonArr,
 		},
 		{
-			Name:           "ListInstrumentGroupTimeseries",
-			URL:            fmt.Sprintf("/instrument_groups/%s/timeseries", testInstrumentGroupID),
-			Method:         http.MethodGet,
-			ExpectedStatus: http.StatusOK,
-			ExpectedSchema: &timeseriesArraySchema,
+			Name:                 "ListInstrumentGroupTimeseries",
+			URL:                  fmt.Sprintf("/instrument_groups/%s/timeseries", testInstrumentGroupID),
+			Method:               http.MethodGet,
+			ExpectedStatus:       http.StatusOK,
+			ExpectedResponseType: jsonArr,
 		},
 		{
-			Name:           "CreateTimeseries_Object",
-			URL:            "/timeseries",
-			Method:         http.MethodPost,
-			Body:           createTimeseriesObjectBody,
-			ExpectedStatus: http.StatusCreated,
-			ExpectedSchema: &timeseriesArraySchema,
+			Name:                 "CreateTimeseries_Object",
+			URL:                  "/timeseries",
+			Method:               http.MethodPost,
+			Body:                 createTimeseriesObjectBody,
+			ExpectedStatus:       http.StatusCreated,
+			ExpectedResponseType: jsonArr,
 		},
 		{
-			Name:           "CreateTimeseries_Array",
-			URL:            "/timeseries",
-			Method:         http.MethodPost,
-			Body:           createTimeseriesArrayBody,
-			ExpectedStatus: http.StatusCreated,
-			ExpectedSchema: &timeseriesArraySchema,
+			Name:                 "CreateTimeseries_Array",
+			URL:                  "/timeseries",
+			Method:               http.MethodPost,
+			Body:                 createTimeseriesArrayBody,
+			ExpectedStatus:       http.StatusCreated,
+			ExpectedResponseType: jsonArr,
 		},
 		{
-			Name:           "UpdateTimeseries",
-			URL:            fmt.Sprintf("/timeseries/%s", testTimeseriesID),
-			Method:         http.MethodPut,
-			Body:           updateTimeseriesBody,
-			ExpectedStatus: http.StatusOK,
-			ExpectedSchema: &timeseriesObjectSchema,
+			Name:                 "UpdateTimeseries",
+			URL:                  fmt.Sprintf("/timeseries/%s", testTimeseriesID),
+			Method:               http.MethodPut,
+			Body:                 updateTimeseriesBody,
+			ExpectedStatus:       http.StatusOK,
+			ExpectedResponseType: jsonObj,
 		},
 		{
 			Name:           "DeleteTimeseries",

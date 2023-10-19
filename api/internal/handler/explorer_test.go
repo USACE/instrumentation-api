@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"net/http"
 	"testing"
+
+	"github.com/USACE/instrumentation-api/api/internal/model"
+	"github.com/google/uuid"
 )
 
 const (
@@ -14,7 +17,7 @@ const (
 const postExplorerBody = `["9e8f2ca4-4037-45a4-aaca-d9e598877439", "a7540f69-c41e-43b3-b655-6e44097edb7e"]`
 
 func TestExplorer(t *testing.T) {
-	tests := []HTTPTest{
+	tests := []HTTPTest[map[uuid.UUID]model.MeasurementCollectionLean]{
 		{
 			Name:           "PostExplorer Query By InstrumetID",
 			URL:            "/explorer",

@@ -5,33 +5,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/xeipuuv/gojsonschema"
+	"github.com/USACE/instrumentation-api/api/internal/model"
 )
-
-const submittalSchema = `{
-    "type": "object",
-    "properties": {
-        "id": { "type": "string" },
-        "alert_config_id": { "type": "string" },
-        "alert_config_name": { "type": "string" },
-        "alert_type_id": { "type": "string" },
-        "alert_type_name": { "type": "string" },
-        "project_id": { "type": "string" },
-        "submittal_status_id": { "type": "string" },
-        "submittal_status_name": { "type": "string" },
-        "create_date": { "type": "string", "format": "date-time" },
-        "due_date": { "type": "string", "format": "date-time" },
-        "completion_date": { "type": ["string", "null"], "format": "date-time" },
-        "marked_as_missing": { "type": "boolean" },
-        "warning_sent": { "type": "boolean" }
-    },
-    "additionalProperties": true
-}`
-
-var submittalArraySchema = gojsonschema.NewStringLoader(fmt.Sprintf(`{
-    "type": "array",
-    "items": %s
-}`, submittalSchema))
 
 const (
 	testSubmittalID            = "b8c1c297-d1d5-4cee-b949-72299b330617"
@@ -40,27 +15,27 @@ const (
 )
 
 func TestSubmittals(t *testing.T) {
-	tests := []HTTPTest{
+	tests := []HTTPTest[model.Submittal]{
 		{
-			Name:           "ListProjectSubmittals",
-			URL:            fmt.Sprintf("/projects/%s/submittals?missing=false", testProjectID),
-			Method:         http.MethodGet,
-			ExpectedStatus: http.StatusOK,
-			ExpectedSchema: &submittalArraySchema,
+			Name:                 "ListProjectSubmittals",
+			URL:                  fmt.Sprintf("/projects/%s/submittals?missing=false", testProjectID),
+			Method:               http.MethodGet,
+			ExpectedStatus:       http.StatusOK,
+			ExpectedResponseType: jsonArr,
 		},
 		{
-			Name:           "ListInstrumentSubmittals",
-			URL:            fmt.Sprintf("/instruments/%s/submittals?missing=false", testSubmittalInstrumentID),
-			Method:         http.MethodGet,
-			ExpectedStatus: http.StatusOK,
-			ExpectedSchema: &submittalArraySchema,
+			Name:                 "ListInstrumentSubmittals",
+			URL:                  fmt.Sprintf("/instruments/%s/submittals?missing=false", testSubmittalInstrumentID),
+			Method:               http.MethodGet,
+			ExpectedStatus:       http.StatusOK,
+			ExpectedResponseType: jsonArr,
 		},
 		{
-			Name:           "ListAlertConfigSubmittals",
-			URL:            fmt.Sprintf("/alert_configs/%s/submittals?missing=false", testSubmittalAlertConfigID),
-			Method:         http.MethodGet,
-			ExpectedStatus: http.StatusOK,
-			ExpectedSchema: &submittalArraySchema,
+			Name:                 "ListAlertConfigSubmittals",
+			URL:                  fmt.Sprintf("/alert_configs/%s/submittals?missing=false", testSubmittalAlertConfigID),
+			Method:               http.MethodGet,
+			ExpectedStatus:       http.StatusOK,
+			ExpectedResponseType: jsonArr,
 		},
 		{
 			Name:           "VerifyMissingSubmittal",

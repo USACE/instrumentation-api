@@ -93,7 +93,7 @@ func (h *ApiHandler) ListMyAlertSubscriptions(c echo.Context) error {
 //	@Produce json
 //	@Param alert_subscription_id path string true "alert subscription id" Format(uuid)
 //	@Param alert_subscription body model.AlertSubscription true "alert subscription payload"
-//	@Success 200 {array} model.AlertConfig
+//	@Success 200 {array} model.AlertSubscription
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError

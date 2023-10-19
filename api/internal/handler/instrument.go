@@ -36,17 +36,17 @@ func (h *ApiHandler) ListInstruments(c echo.Context) error {
 //	@Summary gets the total number of non deleted instruments in the system
 //	@Tags instrument
 //	@Produce json
-//	@Success 200 {object} map[string]interface{}
+//	@Success 200 {object} model.InstrumentCount
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /instruments/count [get]
 func (h *ApiHandler) GetInstrumentCount(c echo.Context) error {
-	count, err := h.InstrumentService.GetInstrumentCount(c.Request().Context())
+	ic, err := h.InstrumentService.GetInstrumentCount(c.Request().Context())
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
-	return c.JSON(http.StatusOK, map[string]interface{}{"instrument_count": count})
+	return c.JSON(http.StatusOK, ic)
 }
 
 // GetInstrument godoc

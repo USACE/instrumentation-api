@@ -5,32 +5,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/xeipuuv/gojsonschema"
+	"github.com/USACE/instrumentation-api/api/internal/model"
 )
-
-const instrumentNoteSchema = `{
-    "type": "object",
-    "properties": {
-        "id": { "type": "string" },
-        "instrument_id": { "type": "string" },
-        "title": { "type": "string" },
-        "body": { "type": "string" },
-        "time": { "type": "string" },
-        "creator": { "type": "string" },
-        "create_date": { "type": "string", "format": "date-time" },
-        "updater": {  "type": ["string", "null"] },
-        "update_date": { "type": ["string", "null"], "format": "date-time" },
-    },
-    "required": ["id", "instrument_id", "title", "body", "time", "creator", "create_date", "updater", "update_date"],
-    "additionalProperties": false
-}`
-
-var instrumentNoteObjectSchema = gojsonschema.NewStringLoader(instrumentNoteSchema)
-
-var instrumentNoteArraySchema = gojsonschema.NewStringLoader(fmt.Sprintf(`{
-    "type": "array",
-    "items": %s
-}`, instrumentNoteSchema))
 
 const (
 	testInstrumentNoteID          = "90a3f8de-de65-48a7-8286-024c13162958"
@@ -74,51 +50,51 @@ const createInstrumentNoteObjectBody = `{
     }`
 
 func TestInstrumentNotes(t *testing.T) {
-	tests := []HTTPTest{
+	tests := []HTTPTest[model.InstrumentNote]{
 		{
-			Name:           "GetInstrumentNote",
-			URL:            fmt.Sprintf("/instruments/%s/notes/%s", testInstrumentNoteIntrumentID, testInstrumentNoteID),
-			Method:         http.MethodGet,
-			ExpectedStatus: http.StatusOK,
-			ExpectedSchema: &instrumentNoteObjectSchema,
+			Name:                 "GetInstrumentNote",
+			URL:                  fmt.Sprintf("/instruments/%s/notes/%s", testInstrumentNoteIntrumentID, testInstrumentNoteID),
+			Method:               http.MethodGet,
+			ExpectedStatus:       http.StatusOK,
+			ExpectedResponseType: jsonObj,
 		},
 		{
-			Name:           "ListInstrumentNotes",
-			URL:            "/instruments/notes",
-			Method:         http.MethodGet,
-			ExpectedStatus: http.StatusOK,
-			ExpectedSchema: &instrumentNoteArraySchema,
+			Name:                 "ListInstrumentNotes",
+			URL:                  "/instruments/notes",
+			Method:               http.MethodGet,
+			ExpectedStatus:       http.StatusOK,
+			ExpectedResponseType: jsonArr,
 		},
 		{
-			Name:           "ListInstrumentInstrumentNotes",
-			URL:            fmt.Sprintf("/instruments/%s/notes", testInstrumentNoteIntrumentID),
-			Method:         http.MethodGet,
-			ExpectedStatus: http.StatusOK,
-			ExpectedSchema: &instrumentNoteArraySchema,
+			Name:                 "ListInstrumentInstrumentNotes",
+			URL:                  fmt.Sprintf("/instruments/%s/notes", testInstrumentNoteIntrumentID),
+			Method:               http.MethodGet,
+			ExpectedStatus:       http.StatusOK,
+			ExpectedResponseType: jsonArr,
 		},
 		{
-			Name:           "PutInstrumentNote",
-			URL:            fmt.Sprintf("/instruments/%s/notes/%s", testInstrumentNoteIntrumentID, testInstrumentNoteID),
-			Method:         http.MethodPut,
-			Body:           putInstrumentNoteBody,
-			ExpectedStatus: http.StatusOK,
-			ExpectedSchema: &instrumentNoteObjectSchema,
+			Name:                 "PutInstrumentNote",
+			URL:                  fmt.Sprintf("/instruments/%s/notes/%s", testInstrumentNoteIntrumentID, testInstrumentNoteID),
+			Method:               http.MethodPut,
+			Body:                 putInstrumentNoteBody,
+			ExpectedStatus:       http.StatusOK,
+			ExpectedResponseType: jsonObj,
 		},
 		{
-			Name:           "CreateInstrumentNote_Array",
-			URL:            "/instruments/notes",
-			Method:         http.MethodPost,
-			Body:           createInstrumentNoteArrayBody,
-			ExpectedStatus: http.StatusCreated,
-			ExpectedSchema: &instrumentNoteArraySchema,
+			Name:                 "CreateInstrumentNote_Array",
+			URL:                  "/instruments/notes",
+			Method:               http.MethodPost,
+			Body:                 createInstrumentNoteArrayBody,
+			ExpectedStatus:       http.StatusCreated,
+			ExpectedResponseType: jsonArr,
 		},
 		{
-			Name:           "CreateInstrumentNote_Object",
-			URL:            "/instruments/notes",
-			Method:         http.MethodPost,
-			Body:           createInstrumentNoteObjectBody,
-			ExpectedStatus: http.StatusCreated,
-			ExpectedSchema: &instrumentNoteArraySchema,
+			Name:                 "CreateInstrumentNote_Object",
+			URL:                  "/instruments/notes",
+			Method:               http.MethodPost,
+			Body:                 createInstrumentNoteObjectBody,
+			ExpectedStatus:       http.StatusCreated,
+			ExpectedResponseType: jsonArr,
 		},
 		{
 			Name:           "DeleteInstrumentNote",

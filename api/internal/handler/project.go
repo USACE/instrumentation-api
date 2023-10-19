@@ -152,17 +152,17 @@ func (h *ApiHandler) ListProjectInstrumentGroups(c echo.Context) error {
 //	@Summary gets the total number of non-deleted projects in the system
 //	@Tags project
 //	@Produce json
-//	@Success 200 {object} map[string]interface{}
+//	@Success 200 {object} model.ProjectCount
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/count [get]
 func (h *ApiHandler) GetProjectCount(c echo.Context) error {
-	count, err := h.ProjectService.GetProjectCount(c.Request().Context())
+	pc, err := h.ProjectService.GetProjectCount(c.Request().Context())
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
-	return c.JSON(http.StatusOK, map[string]interface{}{"project_count": count})
+	return c.JSON(http.StatusOK, pc)
 }
 
 // GetProject godoc

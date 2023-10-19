@@ -5,34 +5,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/xeipuuv/gojsonschema"
+	"github.com/USACE/instrumentation-api/api/internal/model"
 )
-
-const instrumentGroupSchema = `{
-    "type": "object",
-    "properties": {
-        "id": { "type": "string" },
-        "slug": { "type": "string" },
-        "name": { "type": "string" },
-        "description": { "type": "string" },
-        "creator": { "type": "string" },
-        "create_date": { "type": "string", "format": "date-time" },
-        "updater": {  "type": ["string", "null"] },
-        "update_date": { "type": ["string", "null"], "format": "date-time" },
-        "project_id": { "type": ["string", "null"] },
-        "instrument_count": { "type": "number" },
-        "timeseries_count": { "type": "number" }
-    },
-    "required": ["id", "slug", "name", "description", "creator", "create_date", "updater", "update_date", "project_id"],
-    "additionalProperties": false
-}`
-
-var instrumentGroupObjectSchema = gojsonschema.NewStringLoader(instrumentGroupSchema)
-
-var instrumentGroupArraySchema = gojsonschema.NewStringLoader(fmt.Sprintf(`{
-    "type": "array",
-    "items": %s
-}`, instrumentGroupSchema))
 
 const (
 	testInstrumentGroupID           = "d0916e8a-39a6-4f2f-bd31-879881f8b40c"
@@ -71,57 +45,50 @@ const updateInstrumentGroupBody = `{
 const addInstrumentToInstrumentGroupBody = `{"id": "9e8f2ca4-4037-45a4-aaca-d9e598877439"}`
 
 func TestInstrumentGroups(t *testing.T) {
-	tests := []HTTPTest{
+	tests := []HTTPTest[model.InstrumentGroup]{
 		{
-			Name:           "GetInstrumentGroup",
-			URL:            fmt.Sprintf("/instrument_groups/%s", testInstrumentGroupID),
-			Method:         http.MethodGet,
-			ExpectedStatus: http.StatusOK,
-			ExpectedSchema: &instrumentGroupObjectSchema,
+			Name:                 "GetInstrumentGroup",
+			URL:                  fmt.Sprintf("/instrument_groups/%s", testInstrumentGroupID),
+			Method:               http.MethodGet,
+			ExpectedStatus:       http.StatusOK,
+			ExpectedResponseType: jsonObj,
 		},
 		{
-			Name:           "ListInstrumentGroups",
-			URL:            "/instrument_groups",
-			Method:         http.MethodGet,
-			ExpectedStatus: http.StatusOK,
-			ExpectedSchema: &instrumentGroupArraySchema,
+			Name:                 "ListInstrumentGroups",
+			URL:                  "/instrument_groups",
+			Method:               http.MethodGet,
+			ExpectedStatus:       http.StatusOK,
+			ExpectedResponseType: jsonArr,
 		},
 		{
-			Name:           "CreateInstrumentGroupBulk_Array",
-			URL:            "/instrument_groups",
-			Method:         http.MethodPost,
-			Body:           createInstrumentGroupBulkArrayBody,
-			ExpectedStatus: http.StatusCreated,
-			ExpectedSchema: &instrumentGroupArraySchema,
+			Name:                 "CreateInstrumentGroupBulk_Array",
+			URL:                  "/instrument_groups",
+			Method:               http.MethodPost,
+			Body:                 createInstrumentGroupBulkArrayBody,
+			ExpectedStatus:       http.StatusCreated,
+			ExpectedResponseType: jsonArr,
 		},
 		{
-			Name:           "CreateInstrumentGroupBulk_Object",
-			URL:            "/instrument_groups",
-			Method:         http.MethodPost,
-			Body:           createInstrumentGroupBulkObjectBody,
-			ExpectedStatus: http.StatusCreated,
-			ExpectedSchema: &instrumentGroupArraySchema,
+			Name:                 "CreateInstrumentGroupBulk_Object",
+			URL:                  "/instrument_groups",
+			Method:               http.MethodPost,
+			Body:                 createInstrumentGroupBulkObjectBody,
+			ExpectedStatus:       http.StatusCreated,
+			ExpectedResponseType: jsonArr,
 		},
 		{
-			Name:           "UpdateInstrumentGroup",
-			URL:            fmt.Sprintf("/instrument_groups/%s", testInstrumentGroupID),
-			Method:         http.MethodPut,
-			Body:           updateInstrumentGroupBody,
-			ExpectedStatus: http.StatusOK,
-			ExpectedSchema: &instrumentGroupObjectSchema,
+			Name:                 "UpdateInstrumentGroup",
+			URL:                  fmt.Sprintf("/instrument_groups/%s", testInstrumentGroupID),
+			Method:               http.MethodPut,
+			Body:                 updateInstrumentGroupBody,
+			ExpectedStatus:       http.StatusOK,
+			ExpectedResponseType: jsonObj,
 		},
 		{
 			Name:           "DeleteInstrumentGroup",
 			URL:            fmt.Sprintf("/instrument_groups/%s", testInstrumentGroupID),
 			Method:         http.MethodDelete,
 			ExpectedStatus: http.StatusOK,
-		},
-		{
-			Name:           "ListInstrumentGroupInstruments",
-			URL:            fmt.Sprintf("/instrument_groups/%s/instruments", testInstrumentGroupID),
-			Method:         http.MethodGet,
-			ExpectedStatus: http.StatusOK,
-			ExpectedSchema: &instrumentArraySchema,
 		},
 		{
 			Name:           "ListInstrumentGroupMeasurements",

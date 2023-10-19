@@ -83,6 +83,10 @@ func (c *InstrumentCollection) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+type InstrumentCount struct {
+	InstrumentCount int `json:"instrument_count"`
+}
+
 // instrumentFactory converts database rows to Instrument objects
 func instrumentFactory(rows DBRows) ([]Instrument, error) {
 	defer rows.Close()
@@ -183,12 +187,12 @@ const getInstrumentCount = `
 `
 
 // GetInstrumentCount returns the number of instruments in the database
-func (q *Queries) GetInstrumentCount(ctx context.Context) (int, error) {
-	var count int
-	if err := q.db.GetContext(ctx, &count, getInstrumentCount); err != nil {
-		return 0, err
+func (q *Queries) GetInstrumentCount(ctx context.Context) (InstrumentCount, error) {
+	var ic InstrumentCount
+	if err := q.db.GetContext(ctx, &ic.InstrumentCount, getInstrumentCount); err != nil {
+		return ic, err
 	}
-	return count, nil
+	return ic, nil
 }
 
 const createInstrument = `

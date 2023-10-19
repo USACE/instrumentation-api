@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"testing"
+
+	"github.com/USACE/instrumentation-api/api/internal/model"
 )
 
 const testEquivalencyTableRowID = "2f1f7c3d-8b6f-4b11-917e-8f049eb6c62b"
@@ -35,13 +37,13 @@ const updateEquivalencyTableBody = `{
             "field_name": "changed field name",
             "display_name": "changed display name",
             "instrument_id": "a7540f69-c41e-43b3-b655-6e44097edb7e",
-            "timeseries_id": "d9697351-3a38-4194-9ac4-41541927e475"
+            "timeseries_id": "869465fc-dc1e-445e-81f4-9979b5fadda9"
         }
     ]
 }`
 
 func TestEquivalencyTable(t *testing.T) {
-	tests := []HTTPTest{
+	tests := []HTTPTest[model.EquivalencyTable]{
 		{
 			Name:           "CreateEquivalencyTable",
 			URL:            fmt.Sprintf("/datalogger/%s/equivalency_table", testDataloggerID1),

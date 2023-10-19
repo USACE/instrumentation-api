@@ -12,7 +12,7 @@ type InstrumentService interface {
 	ListInstrumentSlugs(ctx context.Context) ([]string, error)
 	ListInstruments(ctx context.Context) ([]model.Instrument, error)
 	GetInstrument(ctx context.Context, instrumentID uuid.UUID) (model.Instrument, error)
-	GetInstrumentCount(ctx context.Context) (int, error)
+	GetInstrumentCount(ctx context.Context) (model.InstrumentCount, error)
 	CreateInstrument(ctx context.Context, i model.Instrument) (model.IDAndSlug, error)
 	CreateInstruments(ctx context.Context, instruments []model.Instrument) ([]model.IDAndSlug, error)
 	ValidateCreateInstruments(ctx context.Context, instruments []model.Instrument) (model.CreateInstrumentsValidationResult, error)

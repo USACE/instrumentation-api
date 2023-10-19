@@ -5,18 +5,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/xeipuuv/gojsonschema"
+	"github.com/USACE/instrumentation-api/api/internal/model"
 )
-
-const dataloggerSchema = `{
-    "type": "object",
-    "properties": {
-        "id": { "type": "string" },
-    },
-    "required": ["id"]
-}`
-
-var dataloggerObjectSchema = gojsonschema.NewStringLoader(dataloggerSchema)
 
 // datalogger 1 for read-only tests since it's used with the mock datalogger service
 const (
@@ -40,48 +30,48 @@ const updateDataloggerBody = `{
 }`
 
 func TestDatalogger(t *testing.T) {
-	tests := []HTTPTest{
+	tests := []HTTPTest[model.Datalogger]{
 		{
-			Name:           "CreateDataLogger",
-			URL:            "/datalogger",
-			Method:         http.MethodPost,
-			Body:           createDataloggerBody,
-			ExpectedStatus: http.StatusOK,
-			ExpectedSchema: &dataloggerObjectSchema,
+			Name:                 "CreateDatalogger",
+			URL:                  "/datalogger",
+			Method:               http.MethodPost,
+			Body:                 createDataloggerBody,
+			ExpectedStatus:       http.StatusCreated,
+			ExpectedResponseType: jsonObj,
 		},
 		{
-			Name:           "ListProjectDataLoggers",
+			Name:           "ListProjectDataloggers",
 			URL:            fmt.Sprintf("/dataloggers?project_id=%s", testProjectID),
 			Method:         http.MethodGet,
 			ExpectedStatus: http.StatusOK,
 		},
 		{
-			Name:           "GetDataLogger",
+			Name:           "GetDatalogger",
 			URL:            fmt.Sprintf("/datalogger/%s", testDataloggerID1),
 			Method:         http.MethodGet,
 			ExpectedStatus: http.StatusOK,
 		},
 		{
-			Name:           "GetDataLoggerPreview",
+			Name:           "GetDataloggerPreview",
 			URL:            fmt.Sprintf("/datalogger/%s/preview", testDataloggerID1),
 			Method:         http.MethodGet,
 			ExpectedStatus: http.StatusOK,
 		},
 		{
-			Name:           "UpdateDataLogger",
+			Name:           "UpdateDatalogger",
 			URL:            fmt.Sprintf("/datalogger/%s", testDataloggerID2),
 			Method:         http.MethodPut,
 			Body:           updateDataloggerBody,
 			ExpectedStatus: http.StatusOK,
 		},
 		{
-			Name:           "CycleDataLoggerKey",
+			Name:           "CycleDataloggerKey",
 			URL:            fmt.Sprintf("/datalogger/%s/key", testDataloggerID2),
 			Method:         http.MethodPut,
 			ExpectedStatus: http.StatusOK,
 		},
 		{
-			Name:           "DeleteDataLogger",
+			Name:           "DeleteDatalogger",
 			URL:            fmt.Sprintf("/datalogger/%s", testDataloggerID2),
 			Method:         http.MethodDelete,
 			ExpectedStatus: http.StatusOK,

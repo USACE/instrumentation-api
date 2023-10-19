@@ -39,6 +39,10 @@ type Project struct {
 	AuditInfo
 }
 
+type ProjectCount struct {
+	ProjectCount int `json:"project_count"`
+}
+
 type ProjectCollection struct {
 	Projects []Project
 }
@@ -213,12 +217,12 @@ const getProjectCount = `
 `
 
 // GetProjectCount returns the number of projects in the database that are not deleted
-func (q *Queries) GetProjectCount(ctx context.Context) (int, error) {
-	var count int
-	if err := q.db.GetContext(ctx, &count, getProjectCount); err != nil {
-		return 0, err
+func (q *Queries) GetProjectCount(ctx context.Context) (ProjectCount, error) {
+	var pc ProjectCount
+	if err := q.db.GetContext(ctx, &pc.ProjectCount, getProjectCount); err != nil {
+		return pc, err
 	}
-	return count, nil
+	return pc, nil
 }
 
 const getProject = listProjectsSQL + `
