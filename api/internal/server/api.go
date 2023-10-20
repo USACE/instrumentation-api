@@ -242,7 +242,6 @@ func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 	r.public.GET("/instruments/saa/:instrument_id/segments", h.GetAllSaaSegmentsForInstrument)
 	r.public.GET("/instruments/saa/:instrument_id/measurements", h.GetSaaMeasurementsForInstrument)
 	r.private.PUT("/instruments/saa/:instrument_id/segments", h.UpdateSaaSegments)
-	r.private.PUT("/instruments/saa/:instrument_id/segments/:segment_id", h.UpdateSaaSegment)
 
 	// Submittal
 	r.public.GET("/projects/:project_id/submittals", h.ListProjectSubmittals)

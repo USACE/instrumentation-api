@@ -77,7 +77,7 @@ func (h *ApiHandler) GetInstrumentNote(c echo.Context) error {
 
 // CreateInstrumentNote godoc
 //
-//	@Sum@Summary creates instrument notes
+//	@Summary creates instrument notes
 //	@Tags instrument-note
 //	@Produce json
 //	@Param instrument_note body model.InstrumentNoteCollection true "instrument note collection payload"

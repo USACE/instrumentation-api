@@ -56,7 +56,8 @@ const instrumentSchema = `{
         "update_date": { "type": ["string", "null"], "format": "date-time" },
         "project_id": { "type": ["string", "null"] },
         "nid_id": { "type": ["string", "null"] },
-        "usgs_id": { "type": ["string", "null"] }
+        "usgs_id": { "type": ["string", "null"] },
+	"opts": { "type": ["object", "null"] }
     },
     "required": ["id", "slug", "name", "type_id", "type", "status_id", "status", "status_time", "geometry", "creator", "create_date", "updater", "update_date", "project_id", "station", "offset", "constants", "alert_configs", "nid_id", "usgs_id"],
     "additionalProperties": false

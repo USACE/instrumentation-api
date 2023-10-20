@@ -401,6 +401,16 @@ definitions:
       instrument_name:
         type: string
     type: object
+  github_com_USACE_instrumentation-api_api_internal_model.Geometry:
+    properties:
+      coordinates: {}
+      geometries:
+        items:
+          $ref: '#/definitions/geojson.Geometry'
+        type: array
+      type:
+        type: string
+    type: object
   github_com_USACE_instrumentation-api_api_internal_model.Home:
     properties:
       instrument_count:
@@ -467,7 +477,7 @@ definitions:
       creator:
         type: string
       geometry:
-        $ref: '#/definitions/geojson.Geometry'
+        $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Geometry'
       groups:
         items:
           type: string
@@ -480,6 +490,8 @@ definitions:
         type: string
       offset:
         type: integer
+      opts:
+        $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Opts'
       project_id:
         type: string
       slug:
@@ -623,6 +635,9 @@ definitions:
     additionalProperties:
       type: number
     type: object
+  github_com_USACE_instrumentation-api_api_internal_model.Opts:
+    additionalProperties: true
+    type: object
   github_com_USACE_instrumentation-api_api_internal_model.PlotConfig:
     properties:
       auto_range:
@@ -734,6 +749,45 @@ definitions:
         type: string
       username:
         type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.SaaMeasurements:
+    properties:
+      measurements:
+        items:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.SaaSegmentMeasurement'
+        type: array
+      time:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.SaaSegment:
+    properties:
+      id:
+        type: integer
+      instrument_id:
+        type: string
+      length:
+        type: number
+      temp_timeseries_id:
+        type: string
+      x_timeseries_id:
+        type: string
+      y_timeseries_id:
+        type: string
+      z_timeseries_id:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.SaaSegmentMeasurement:
+    properties:
+      segment_id:
+        type: integer
+      temp:
+        type: number
+      x:
+        type: number
+      "y":
+        type: number
+      z:
+        type: number
     type: object
   github_com_USACE_instrumentation-api_api_internal_model.SearchResult:
     properties:
@@ -2706,6 +2760,7 @@ paths:
             $ref: '#/definitions/echo.HTTPError'
       security:
       - Bearer: []
+      summary: creates instrument notes
       tags:
       - instrument-note
   /instruments/notes/{note_id}:
@@ -2780,6 +2835,118 @@ paths:
       summary: updates an instrument note by id
       tags:
       - instrument-note
+  /instruments/saa/{instrument_id}/measurements:
+    get:
+      parameters:
+      - description: instrument uuid
+        format: uuid
+        in: path
+        name: instrument_id
+        required: true
+        type: string
+      - description: after time
+        format: date-time
+        in: query
+        name: after
+        type: string
+      - description: before time
+        format: date-time
+        in: path
+        name: before
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.SaaMeasurements'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: creates instrument notes
+      tags:
+      - instrument-saa
+  /instruments/saa/{instrument_id}/segments:
+    get:
+      parameters:
+      - description: instrument uuid
+        format: uuid
+        in: path
+        name: instrument_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.SaaSegment'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: gets all saa segments for an instrument
+      tags:
+      - instrument-saa
+    put:
+      parameters:
+      - description: saa instrument segments payload
+        in: body
+        name: instrument_segments
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.SaaSegment'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.SaaSegment'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
+      summary: updates multiple segments for an saa instrument
+      tags:
+      - instrument-saa
   /my_alert_subscriptions:
     get:
       produces:
