@@ -1375,6 +1375,66 @@ const docTemplate = `{
                 }
             }
         },
+        "/inclinometer_explorer": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "explorer"
+                ],
+                "summary": "list inclinometer timeseries measurements for explorer page",
+                "parameters": [
+                    {
+                        "description": "array of inclinometer instrument uuids",
+                        "name": "instrument_ids",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "additionalProperties": {
+                                    "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InclinometerMeasurementCollectionLean"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/instrument_groups": {
             "get": {
                 "produces": [
@@ -7943,6 +8003,29 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InclinometerMeasurementCollection"
                     }
+                }
+            }
+        },
+        "github_com_USACE_instrumentation-api_api_internal_model.InclinometerMeasurementCollectionLean": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InclinometerMeasurementLean"
+                    }
+                },
+                "timeseries_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_USACE_instrumentation-api_api_internal_model.InclinometerMeasurementLean": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "array",
+                "items": {
+                    "type": "integer"
                 }
             }
         },

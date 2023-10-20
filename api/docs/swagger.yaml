@@ -450,6 +450,21 @@ definitions:
           $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InclinometerMeasurementCollection'
         type: array
     type: object
+  github_com_USACE_instrumentation-api_api_internal_model.InclinometerMeasurementCollectionLean:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InclinometerMeasurementLean'
+        type: array
+      timeseries_id:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.InclinometerMeasurementLean:
+    additionalProperties:
+      items:
+        type: integer
+      type: array
+    type: object
   github_com_USACE_instrumentation-api_api_internal_model.Instrument:
     properties:
       alert_configs:
@@ -1821,6 +1836,45 @@ paths:
       summary: gets information for the homepage
       tags:
       - home
+  /inclinometer_explorer:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: array of inclinometer instrument uuids
+        in: body
+        name: instrument_ids
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              additionalProperties:
+                $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InclinometerMeasurementCollectionLean'
+              type: object
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: list inclinometer timeseries measurements for explorer page
+      tags:
+      - explorer
   /instrument_groups:
     get:
       produces:
