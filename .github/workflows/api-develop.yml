@@ -27,14 +27,7 @@ jobs:
           aws-region: ${{ secrets.CWBICI_DEVELOP_AWS_REGION }}
   
       - name: Run Tests
-        env:
-          REPORT: true
         run: ./compose.sh test
-
-      - name: Upload Test Results
-        if: ${{ always() }}
-        run: |
-          aws s3 cp ./report/api_test.log s3://corpsmap-appz/api_test_results/midas-api-develop.log
 
       - name: Login to Amazon ECR
         if: ${{ success() }}
