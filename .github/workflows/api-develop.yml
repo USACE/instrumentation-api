@@ -8,7 +8,6 @@ on:
       - ".github/workflows/api-develop.yml"
 
 jobs:
-
   TestBuildPush:
     name: Test Build Push
     runs-on: ubuntu-latest
@@ -35,8 +34,7 @@ jobs:
       - name: Upload Test Results
         if: ${{ always() }}
         run: |
-          aws s3 rm s3://corpsmap-appz/api_test_results/midas-api-develop.html
-          aws s3 cp ./tests/postman/instrumentation.html s3://corpsmap-appz/api_test_results/midas-api-develop.html
+          aws s3 cp ./report/api_test.log s3://corpsmap-appz/api_test_results/midas-api-develop.log
 
       - name: Login to Amazon ECR
         if: ${{ success() }}

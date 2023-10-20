@@ -11,7 +11,16 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// ListInstrumentNotes returns instrument notes
+// ListInstrumentNotes godoc
+//
+//	@Summary gets all instrument notes
+//	@Tags instrument-note
+//	@Produce json
+//	@Success 200 {array} model.InstrumentNote
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /instruments/notes [get]
 func (h *ApiHandler) ListInstrumentNotes(c echo.Context) error {
 	notes, err := h.InstrumentNoteService.ListInstrumentNotes(c.Request().Context())
 	if err != nil {
@@ -20,7 +29,17 @@ func (h *ApiHandler) ListInstrumentNotes(c echo.Context) error {
 	return c.JSON(http.StatusOK, notes)
 }
 
-// ListInstrumentInstrumentNotes returns instrument notes for a single instrument
+// ListInstrumentInstrumentNotes godoc
+//
+//	@Summary gets instrument notes for a single instrument
+//	@Tags instrument-note
+//	@Produce json
+//	@Param instrument_id path string true "instrument uuid" Format(uuid)
+//	@Success 200 {array} model.InstrumentNote
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /instruments/{instrument_id}/notes [get]
 func (h *ApiHandler) ListInstrumentInstrumentNotes(c echo.Context) error {
 	iID, err := uuid.Parse(c.Param("instrument_id"))
 	if err != nil {
@@ -33,7 +52,17 @@ func (h *ApiHandler) ListInstrumentInstrumentNotes(c echo.Context) error {
 	return c.JSON(http.StatusOK, notes)
 }
 
-// GetInstrumentNote returns a single instrument note
+// GetInstrumentNote godoc
+//
+//	@Summary gets a single instrument note by id
+//	@Tags instrument-note
+//	@Produce json
+//	@Param note_id path string true "note uuid" Format(uuid)
+//	@Success 200 {object} model.InstrumentNote
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /instruments/notes/{note_id} [get]
 func (h *ApiHandler) GetInstrumentNote(c echo.Context) error {
 	nID, err := uuid.Parse(c.Param("note_id"))
 	if err != nil {
@@ -46,7 +75,18 @@ func (h *ApiHandler) GetInstrumentNote(c echo.Context) error {
 	return c.JSON(http.StatusOK, note)
 }
 
-// CreateInstrumentNote creates instrument notes
+// CreateInstrumentNote godoc
+//
+//	@Sum@Summary creates instrument notes
+//	@Tags instrument-note
+//	@Produce json
+//	@Param instrument_note body model.InstrumentNoteCollection true "instrument note collection payload"
+//	@Success 200 {array} model.InstrumentNote
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /instruments/notes [post]
+//	@Security Bearer
 func (h *ApiHandler) CreateInstrumentNote(c echo.Context) error {
 	nc := model.InstrumentNoteCollection{}
 	if err := c.Bind(&nc); err != nil {
@@ -68,7 +108,20 @@ func (h *ApiHandler) CreateInstrumentNote(c echo.Context) error {
 	return c.JSON(http.StatusCreated, nn)
 }
 
-// UpdateInstrumentNote updates an instrument note
+// UpdateInstrumentNote godoc
+//
+//	@Summary updates an instrument note by id
+//	@Tags instrument-note
+//	@Produce json
+//	@Param note_id path string true "note uuid" Format(uuid)
+//	@Param instrument_note body model.InstrumentNote true "instrument note collection payload"
+//	@Success 200 {array} model.AlertConfig
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /instruments/notes/{note_id} [put]
+//	@Security Bearer
+//	@Security Bearer
 func (h *ApiHandler) UpdateInstrumentNote(c echo.Context) error {
 	noteID, err := uuid.Parse(c.Param("note_id"))
 	if err != nil {
@@ -78,25 +131,34 @@ func (h *ApiHandler) UpdateInstrumentNote(c echo.Context) error {
 	if err := c.Bind(&n); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	// check :id in url params matches id in request body
 	if noteID != n.ID {
 		return echo.NewHTTPError(http.StatusBadRequest, message.MatchRouteParam("`note_id`"))
 	}
-	// profile and timestamp
 	p := c.Get("profile").(model.Profile)
 	t := time.Now()
 	n.Updater, n.UpdateDate = &p.ID, &t
 
-	// update
 	nUpdated, err := h.InstrumentNoteService.UpdateInstrumentNote(c.Request().Context(), n)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	// return updated instrument note
 	return c.JSON(http.StatusOK, nUpdated)
 }
 
-// DeleteInstrumentNote deletes an instrument note
+// DeleteInstrumentNote godoc
+//
+//	@Summary deletes an instrument note
+//	@Tags instrument-note
+//	@Produce json
+//	@Param instrument_id path string false "instrument uuid" Format(uuid)
+//	@Param note_id path string true "note uuid" Format(uuid)
+//	@Success 200 {object} map[string]interface{}
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /instruments/{instrument_id}/notes/{note_id} [delete]
+//	@Security Bearer
+//	@Security Bearer
 func (h *ApiHandler) DeleteInstrumentNote(c echo.Context) error {
 	noteID, err := uuid.Parse(c.Param("note_id"))
 	if err != nil {

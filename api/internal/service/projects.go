@@ -17,7 +17,7 @@ type ProjectService interface {
 	ListProjectInstruments(ctx context.Context, projectID uuid.UUID) ([]model.Instrument, error)
 	ListProjectInstrumentNames(ctx context.Context, projectID uuid.UUID) ([]string, error)
 	ListProjectInstrumentGroups(ctx context.Context, projectID uuid.UUID) ([]model.InstrumentGroup, error)
-	GetProjectCount(ctx context.Context) (int, error)
+	GetProjectCount(ctx context.Context) (model.ProjectCount, error)
 	GetProject(ctx context.Context, projectID uuid.UUID) (model.Project, error)
 	CreateProject(ctx context.Context, p model.Project) (model.IDAndSlug, error)
 	CreateProjectBulk(ctx context.Context, projects []model.Project) ([]model.IDAndSlug, error)

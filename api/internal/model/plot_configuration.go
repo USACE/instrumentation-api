@@ -127,7 +127,7 @@ func (q *Queries) CreatePlotConfig(ctx context.Context, pc PlotConfig) (uuid.UUI
 
 const createPlotConfigTimeseries = `
 	INSERT INTO plot_configuration_timeseries (plot_configuration_id, timeseries_id) VALUES ($1, $2)
-	ON CONFLICT ON CONSTRAINT plot_configuration_unique_timeseries DO NOTHING
+	ON CONFLICT DO NOTHING
 `
 
 func (q *Queries) CreatePlotConfigTimeseries(ctx context.Context, pcID, timeseriesID uuid.UUID) error {

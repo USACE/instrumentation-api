@@ -13,18 +13,17 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// ListProjectAlertConfigs godoc
-// @Summary lists alert configs for a project
-// @Description lists alert configs for a single project optionally filtered by alert_type_id
-// @Tags alert-config
-// @Produce json
-// @Param project_id path UUID true "Project ID"
-// @Param instrument_id path UUID true "Instrument ID"
-// @Success 200	{array} model.AlertConfig
-// @Failure 400 {object} echo.HTTPError
-// @Failure 404 {object} echo.HTTPError
-// @Failure 500 {object} echo.HTTPError
-// @Router /projects/{project_id}/alert_configs [get]
+// GetAllAlertConfigsForProject godoc
+//
+//	@Summary lists alert configs for a project
+//	@Tags alert-config
+//	@Produce json
+//	@Param project_id path string true "project uuid" Format(uuid)
+//	@Success 200 {array} model.AlertConfig
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /projects/{project_id}/alert_configs [get]
 func (h *ApiHandler) GetAllAlertConfigsForProject(c echo.Context) error {
 	projectID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
@@ -52,7 +51,18 @@ func (h *ApiHandler) GetAllAlertConfigsForProject(c echo.Context) error {
 	return c.JSON(http.StatusOK, aa)
 }
 
-// ListInstrumentAlertConfigs lists alerts for a single instrument
+// ListInstrumentAlertConfigs godoc
+//
+//	@Summary lists alerts for a single instrument
+//	@Tags alert-config
+//	@Produce json
+//	@Param project_id path string false "project uuid" Format(uuid)
+//	@Param instrument_id path string true "instrument uuid" Format(uuid)
+//	@Success 200 {array} model.AlertConfig
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /projects/{project_id}/instruments/{instrument_id}/alert_configs [get]
 func (h *ApiHandler) ListInstrumentAlertConfigs(c echo.Context) error {
 	instrumentID, err := uuid.Parse(c.Param("instrument_id"))
 	if err != nil {
@@ -68,7 +78,17 @@ func (h *ApiHandler) ListInstrumentAlertConfigs(c echo.Context) error {
 	return c.JSON(http.StatusOK, aa)
 }
 
-// GetAlertConfig gets a single alert
+// GetAlertConfig godoc
+//
+//	@Summary gets a single alert
+//	@Tags alert-config
+//	@Produce json
+//	@Param alert_config_id path string true "alert config uuid" Format(uuid)
+//	@Success 200 {object} model.AlertConfig
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /projects/{project_id}/alert_configs/{alert_config_id} [get]
 func (h *ApiHandler) GetAlertConfig(c echo.Context) error {
 	acID, err := uuid.Parse(c.Param("alert_config_id"))
 	if err != nil {
@@ -84,7 +104,20 @@ func (h *ApiHandler) GetAlertConfig(c echo.Context) error {
 	return c.JSON(http.StatusOK, a)
 }
 
-// CreateAlertConfig creates one alert config
+// CreateAlertConfig godoc
+//
+//	@Summary creates one alert config
+//	@Tags alert-config
+//	@Accept json
+//	@Produce json
+//	@Param project_id path string true "project uuid" Format(uuid)
+//	@Param alert_config body model.AlertConfig true "alert config payload"
+//	@Success 200 {object} model.AlertConfig
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /projects/{project_id}/alert_configs [post]
+//	@Security Bearer
 func (h *ApiHandler) CreateAlertConfig(c echo.Context) error {
 	ac := model.AlertConfig{}
 	if err := c.Bind(&ac); err != nil {
@@ -97,14 +130,28 @@ func (h *ApiHandler) CreateAlertConfig(c echo.Context) error {
 	profile := c.Get("profile").(model.Profile)
 	ac.ProjectID, ac.Creator, ac.CreateDate = projectID, profile.ID, time.Now()
 
-	aa, err := h.AlertConfigService.CreateAlertConfig(c.Request().Context(), ac)
+	acNew, err := h.AlertConfigService.CreateAlertConfig(c.Request().Context(), ac)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	return c.JSON(http.StatusCreated, aa)
+	return c.JSON(http.StatusCreated, acNew)
 }
 
-// UpdateAlertConfig updates an existing alert
+// UpdateAlertConfig godoc
+//
+//	@Summary updates an existing alert config
+//	@Tags alert-config
+//	@Accept json
+//	@Produce json
+//	@Param project_id path string true "project uuid" Format(uuid)
+//	@Param alert_config_id path string true "alert config uuid" Format(uuid)
+//	@Param alert_config body model.AlertConfig true "alert config payload"
+//	@Success 200 {array} model.AlertConfig
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /projects/{project_id}/alert_configs/{alert_config_id} [put]
+//	@Security Bearer
 func (h *ApiHandler) UpdateAlertConfig(c echo.Context) error {
 	var ac model.AlertConfig
 	if err := c.Bind(&ac); err != nil {
@@ -124,10 +171,22 @@ func (h *ApiHandler) UpdateAlertConfig(c echo.Context) error {
 		}
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	return c.JSON(http.StatusOK, &aUpdated)
+	return c.JSON(http.StatusOK, aUpdated)
 }
 
-// DeleteAlertConfig Deletes an Alert Config
+// DeleteAlertConfig godoc
+//
+//	@Summary deletes an alert config
+//	@Tags alert-config
+//	@Produce json
+//	@Param project_id path string true "Project ID" Format(uuid)
+//	@Param alert_config_id path string true "instrument uuid" Format(uuid)
+//	@Success 200 {array} model.AlertConfig
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /projects/{project_id}/alert_configs/{alert_config_id} [delete]
+//	@Security Bearer
 func (h *ApiHandler) DeleteAlertConfig(c echo.Context) error {
 	acID, err := uuid.Parse(c.Param("alert_config_id"))
 	if err != nil {

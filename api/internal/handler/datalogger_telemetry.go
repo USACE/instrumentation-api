@@ -12,11 +12,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// CreateOrUpdateDataloggerMeasurements creates or updates measurements for a timeseires
-// that a datalogger is mapped to using the DataloggerEquivalencyTable
-//
-// DataloggerKeyAuth middleware is applied to the group where the corresponding route
-// to this handler is configured
+// CreateOrUpdateDataloggerMeasurements creates or updates measurements for a timeseries using an equivalency table
 func (h *TelemetryHandler) CreateOrUpdateDataloggerMeasurements(c echo.Context) error {
 	modelName := c.Param("model")
 	if modelName == "" {

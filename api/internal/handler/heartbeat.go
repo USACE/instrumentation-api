@@ -3,9 +3,17 @@ package handler
 import (
 	"net/http"
 
+	_ "github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/labstack/echo/v4"
 )
 
+// Healthcheck godoc
+//
+//	@Summary checks the health of the api server
+//	@Tags heartbeat
+//	@Produce json
+//	@Success 200 {array} map[string]interface{}
+//	@Router /health [get]
 func (h *ApiHandler) Healthcheck(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]interface{}{"status": "healthy"})
 }
@@ -16,7 +24,6 @@ func (h *TelemetryHandler) Healthcheck(c echo.Context) error {
 
 // DoHeartbeat triggers regular-interval tasks
 func (h *ApiHandler) DoHeartbeat(c echo.Context) error {
-	// Create a Record of Heartbeat
 	hb, err := h.HeartbeatService.DoHeartbeat(c.Request().Context())
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())

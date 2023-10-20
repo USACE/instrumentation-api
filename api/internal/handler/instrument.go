@@ -13,25 +13,53 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// ListInstruments returns instruments
+// ListInstruments godoc
+//
+//	@Summary lists all instruments
+//	@Tags instrument
+//	@Produce json
+//	@Success 200 {array} model.Instrument
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /instruments [get]
 func (h *ApiHandler) ListInstruments(c echo.Context) error {
 	nn, err := h.InstrumentService.ListInstruments(c.Request().Context())
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, nn)
 }
 
-// GetInstrumentCount returns the total number of non deleted instruments in the system
+// GetInstrumentCount godoc
+//
+//	@Summary gets the total number of non deleted instruments in the system
+//	@Tags instrument
+//	@Produce json
+//	@Success 200 {object} model.InstrumentCount
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /instruments/count [get]
 func (h *ApiHandler) GetInstrumentCount(c echo.Context) error {
-	count, err := h.InstrumentService.GetInstrumentCount(c.Request().Context())
+	ic, err := h.InstrumentService.GetInstrumentCount(c.Request().Context())
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
-	return c.JSON(http.StatusOK, map[string]interface{}{"instrument_count": count})
+	return c.JSON(http.StatusOK, ic)
 }
 
-// GetInstrument returns a single instrument
+// GetInstrument godoc
+//
+//	@Summary gets a single instrument by id
+//	@Tags instrument
+//	@Produce json
+//	@Param instrument_id path string true "instrument uuid" Format(uuid)
+//	@Success 200 {object} model.Instrument
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /instruments/{instrument_id} [get]
 func (h *ApiHandler) GetInstrument(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("instrument_id"))
 	if err != nil {
@@ -48,10 +76,23 @@ func (h *ApiHandler) GetInstrument(c echo.Context) error {
 	return c.JSON(http.StatusOK, n)
 }
 
-// CreateInstruments accepts an array of instruments for bulk upload to the database
+// CreateInstruments godoc
+//
+//	@Summary accepts an array of instruments for bulk upload to the database
+//	@Tags instrument
+//	@Produce json
+//	@Param project_id path string true "project id" Format(uuid)
+//	@Param instrument_id path string true "instrument id" Format(uuid)
+//	@Param instrument body model.InstrumentCollection true "instrument collection payload"
+//	@Success 200 {array} model.IDAndSlug
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /projects/{project_id}/instruments [post]
+//	@Router /instruments [post]
+//	@Security Bearer
+//	@Security Bearer
 func (h *ApiHandler) CreateInstruments(c echo.Context) error {
-
-	// Sanatized instruments with ID, projectID, and slug assigned
 	newInstrumentCollection := func(c echo.Context) (model.InstrumentCollection, error) {
 		ic := model.InstrumentCollection{}
 		if err := c.Bind(&ic); err != nil {
@@ -77,33 +118,25 @@ func (h *ApiHandler) CreateInstruments(c echo.Context) error {
 		t := time.Now()
 
 		for idx := range ic.Items {
-			// Assign ProjectID
 			ic.Items[idx].ProjectID = &projectID
-			// Assign Slug
 			s, err := util.NextUniqueSlug(ic.Items[idx].Name, slugsTaken)
 			if err != nil {
 				return model.InstrumentCollection{}, err
 			}
 			ic.Items[idx].Slug = s
-			// Assign Creator
 			ic.Items[idx].Creator = p.ID
-			// Assign CreateDate
 			ic.Items[idx].CreateDate = t
-			// Add slug to array of slugs originally fetched from the database
-			// to catch duplicate names/slugs from the same bulk upload
 			slugsTaken = append(slugsTaken, s)
 		}
 
 		return ic, nil
 	}
 
-	// Instruments
 	ic, err := newInstrumentCollection(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	// Validate POST
 	if c.QueryParam("dry_run") == "true" {
 		v, err := h.InstrumentService.ValidateCreateInstruments(c.Request().Context(), ic.Items)
 		if err != nil {
@@ -112,7 +145,6 @@ func (h *ApiHandler) CreateInstruments(c echo.Context) error {
 		return c.JSON(http.StatusOK, v)
 	}
 
-	// Actually POST
 	nn, err := h.InstrumentService.CreateInstruments(c.Request().Context(), ic.Items)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -121,7 +153,20 @@ func (h *ApiHandler) CreateInstruments(c echo.Context) error {
 	return c.JSON(http.StatusCreated, nn)
 }
 
-// UpdateInstrument modifies an existing instrument
+// UpdateInstrument godoc
+//
+//	@Summary updates an existing instrument
+//	@Tags instrument
+//	@Produce json
+//	@Param project_id path string true "project uuid" Format(uuid)
+//	@Param instrument_id path string true "instrument uuid" Format(uuid)
+//	@Param instrument body model.Instrument true "instrument payload"
+//	@Success 200 {object} model.Instrument
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /projects/{project_id}/instruments/{instrument_id} [put]
+//	@Security Bearer
 func (h *ApiHandler) UpdateInstrument(c echo.Context) error {
 
 	// instrument_id from url params
@@ -164,7 +209,20 @@ func (h *ApiHandler) UpdateInstrument(c echo.Context) error {
 	return c.JSON(http.StatusOK, iUpdated)
 }
 
-// UpdateInstrumentGeometry updates only the geometry property of an instrument
+// UpdateInstrumentGeometry godoc
+//
+//	@Summary updates the geometry of an instrument
+//	@Tags instrument
+//	@Produce json
+//	@Param project_id path string true "project uuid" Format(uuid)
+//	@Param instrument_id path string true "instrument uuid" Format(uuid)
+//	@Param instrument body model.Instrument true "instrument payload"
+//	@Success 200 {object} model.Instrument
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /projects/{project_id}/instruments/{instrument_id}/geometry [put]
+//	@Security Bearer
 func (h *ApiHandler) UpdateInstrumentGeometry(c echo.Context) error {
 	projectID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
@@ -191,7 +249,19 @@ func (h *ApiHandler) UpdateInstrumentGeometry(c echo.Context) error {
 	return c.JSON(http.StatusOK, instrument)
 }
 
-// DeleteFlagInstrument changes deleted flag true for an instrument
+// DeleteFlagInstrument godoc
+//
+//	@Summary soft deletes an instrument
+//	@Tags instrument
+//	@Produce json
+//	@Param project_id path string true "project uuid" Format(uuid)
+//	@Param instrument_id path string true "instrument uuid" Format(uuid)
+//	@Success 200 {object} map[string]interface{}
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /projects/{project_id}/instruments/{instrument_id} [delete]
+//	@Security Bearer
 func (h *ApiHandler) DeleteFlagInstrument(c echo.Context) error {
 	pID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {

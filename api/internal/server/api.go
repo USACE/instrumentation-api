@@ -3,9 +3,11 @@ package server
 import (
 	"net/http"
 
+	_ "github.com/USACE/instrumentation-api/api/docs"
 	"github.com/USACE/instrumentation-api/api/internal/config"
 	"github.com/USACE/instrumentation-api/api/internal/handler"
 	"github.com/labstack/echo/v4"
+	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
 type ApiServer struct {
@@ -42,12 +44,18 @@ func NewApiServer(cfg *config.ApiConfig, h *handler.ApiHandler) *ApiServer {
 		app,
 	}}
 
+	public.GET("/swagger/*", echoSwagger.WrapHandler)
+
 	server.RegisterRoutes(h)
 	return server
 }
 
 func (server *ApiServer) Start() error {
 	return http.ListenAndServe(":80", server.e)
+}
+
+func (server *ApiServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	server.e.ServeHTTP(w, r)
 }
 
 func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {

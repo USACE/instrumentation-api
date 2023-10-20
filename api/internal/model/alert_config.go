@@ -223,7 +223,7 @@ func (q *Queries) UpdateFutureSubmittalForAlertConfig(ctx context.Context, alert
 	var updatedSubID uuid.UUID
 	if err := q.db.GetContext(ctx, &updatedSubID, updateFutureSubmittalForAlertConfig, alertConfigID); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return fmt.Errorf("updated alert config new due date must be in the futute! complete the current submittal before updating")
+			return fmt.Errorf("updated alert config new due date must be in the future! complete the current submittal before updating")
 		}
 		return err
 	}

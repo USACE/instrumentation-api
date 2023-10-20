@@ -12,6 +12,16 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// ListDistricts godoc
+//
+//	@Summary lists all districts
+//	@Tags project
+//	@Produce json
+//	@Success 200 {array} model.District
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /districts [get]
 func (h *ApiHandler) ListDistricts(c echo.Context) error {
 	dd, err := h.ProjectService.ListDistricts(c.Request().Context())
 	if err != nil {
@@ -20,7 +30,17 @@ func (h *ApiHandler) ListDistricts(c echo.Context) error {
 	return c.JSON(http.StatusOK, dd)
 }
 
-// ListProjects returns projects
+// ListProjects godoc
+//
+//	@Summary lists all projects optionally filtered by federal id
+//	@Tags project
+//	@Produce json
+//	@Param federal_id query string false "federal id"
+//	@Success 200 {array} model.Project
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /projects [get]
 func (h *ApiHandler) ListProjects(c echo.Context) error {
 	id := c.QueryParam("federal_id")
 	if id != "" {
@@ -38,6 +58,17 @@ func (h *ApiHandler) ListProjects(c echo.Context) error {
 	return c.JSON(http.StatusOK, projects)
 }
 
+// ListMyProjects godoc
+//
+//	@Summary lists projects for current profile
+//	@Tags project
+//	@Produce json
+//	@Success 200 {array} model.Project
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /my_projects [get]
+//	@Security CacOnly
 func (h *ApiHandler) ListMyProjects(c echo.Context) error {
 	p := c.Get("profile").(model.Profile)
 	profileID := p.ID
@@ -48,7 +79,17 @@ func (h *ApiHandler) ListMyProjects(c echo.Context) error {
 	return c.JSON(http.StatusOK, projects)
 }
 
-// ListProjectInstruments returns instruments associated with a project
+// ListProjectInstruments godoc
+//
+//	@Summary lists instruments associated with a project
+//	@Tags project
+//	@Produce json
+//	@Param project_id path string true "project uuid" Format(uuid)
+//	@Success 200 {array} model.Project
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /projects/{project_id}/instruments [get]
 func (h *ApiHandler) ListProjectInstruments(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
@@ -61,7 +102,17 @@ func (h *ApiHandler) ListProjectInstruments(c echo.Context) error {
 	return c.JSON(http.StatusOK, nn)
 }
 
-// ListProjectInstrumentNames returns names of all instruments associated with a project
+// ListProjectInstrumentNames godoc
+//
+//	@Summary lists names of all instruments associated with a project
+//	@Tags project
+//	@Produce json
+//	@Param project_id path string true "project uuid" Format(uuid)
+//	@Success 200 {array} string
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /projects/{project_id}/instruments/names [get]
 func (h *ApiHandler) ListProjectInstrumentNames(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
@@ -74,7 +125,17 @@ func (h *ApiHandler) ListProjectInstrumentNames(c echo.Context) error {
 	return c.JSON(http.StatusOK, names)
 }
 
-// ListProjectInstrumentGroups returns instrument groups associated with a project
+// ListProjectInstrumentGroups godoc
+//
+//	@Summary lists instrument groups associated with a project
+//	@Tags project
+//	@Produce json
+//	@Param project_id path string true "project uuid" Format(uuid)
+//	@Success 200 {array} model.InstrumentGroup
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /projects/{project_id}/instrument_groups [get]
 func (h *ApiHandler) ListProjectInstrumentGroups(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
@@ -87,16 +148,35 @@ func (h *ApiHandler) ListProjectInstrumentGroups(c echo.Context) error {
 	return c.JSON(http.StatusOK, gg)
 }
 
-// GetProjectCount returns the total number of non deleted projects in the system
+// GetProjectCount godoc
+//
+//	@Summary gets the total number of non-deleted projects in the system
+//	@Tags project
+//	@Produce json
+//	@Success 200 {object} model.ProjectCount
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /projects/count [get]
 func (h *ApiHandler) GetProjectCount(c echo.Context) error {
-	count, err := h.ProjectService.GetProjectCount(c.Request().Context())
+	pc, err := h.ProjectService.GetProjectCount(c.Request().Context())
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
-	return c.JSON(http.StatusOK, map[string]interface{}{"project_count": count})
+	return c.JSON(http.StatusOK, pc)
 }
 
-// GetProject returns single project
+// GetProject godoc
+//
+//	@Summary gets a single project
+//	@Tags project
+//	@Produce json
+//	@Param project_id path string true "project uuid" Format(uuid)
+//	@Success 200 {object} model.Project
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /projects/{project_id} [get]
 func (h *ApiHandler) GetProject(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
@@ -109,9 +189,19 @@ func (h *ApiHandler) GetProject(c echo.Context) error {
 	return c.JSON(http.StatusOK, project)
 }
 
-// CreateProjectBulk accepts an array of instruments for bulk upload to the database
+// CreateProjectBulk godoc
+//
+//	@Summary accepts an array of instruments for bulk upload to the database
+//	@Tags project
+//	@Produce json
+//	@Param project_collection body model.ProjectCollection true "project collection payload"
+//	@Success 200 {array} model.IDAndSlug
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /projects [post]
+//	@Security Bearer[admin]
 func (h *ApiHandler) CreateProjectBulk(c echo.Context) error {
-
 	pc := model.ProjectCollection{}
 	if err := c.Bind(&pc); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -149,13 +239,23 @@ func (h *ApiHandler) CreateProjectBulk(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	// Send Project
 	return c.JSON(http.StatusCreated, pp)
 }
 
-// UpdateProject updates an existing project
+// UpdateProject godoc
+//
+//	@Summary updates an existing project
+//	@Tags project
+//	@Produce json
+//	@Param project_id path string true "project uuid" Format(uuid)
+//	@Param project body model.Project true "project payload"
+//	@Success 200 {object} model.Project
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /projects/{project_id} [put]
+//	@Security Bearer
 func (h *ApiHandler) UpdateProject(c echo.Context) error {
-	// id from url params
 	id, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
@@ -177,11 +277,21 @@ func (h *ApiHandler) UpdateProject(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	// return whole instrument
 	return c.JSON(http.StatusOK, pUpdated)
 }
 
-// DeleteFlagProject sets the instrument group deleted flag true
+// DeleteFlagProject godoc
+//
+//	@Summary soft deletes a project
+//	@Tags project
+//	@Produce json
+//	@Param project_id path string true "project id" Format(uuid)
+//	@Success 200 {object} map[string]interface{}
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /projects/{project_id} [delete]
+//	@Security Bearer
 func (h *ApiHandler) DeleteFlagProject(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
@@ -193,7 +303,19 @@ func (h *ApiHandler) DeleteFlagProject(c echo.Context) error {
 	return c.JSON(http.StatusOK, make(map[string]interface{}))
 }
 
-// CreateProjectTimeseries exposes a timeseries at the project level
+// CreateProjectTimeseries godoc
+//
+//	@Summary exposes a timeseries at the project level
+//	@Tags project
+//	@Produce json
+//	@Param project_id path string true "project id" Format(uuid)
+//	@Param instrument_id path string true "timeseries uuid" Format(uuid)
+//	@Success 200 {object} map[string]interface{}
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /projects/{project_id}/timeseries/{timeseries_id} [post]
+//	@Security Bearer
 func (h *ApiHandler) CreateProjectTimeseries(c echo.Context) error {
 	projectID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
@@ -210,7 +332,19 @@ func (h *ApiHandler) CreateProjectTimeseries(c echo.Context) error {
 	return c.JSON(http.StatusCreated, make(map[string]interface{}))
 }
 
-// DeleteProjectTimeseries removes a timeseries from the project level
+// DeleteProjectTimeseries godoc
+//
+//	@Summary removes a timeseries from the project level
+//	@Tags project
+//	@Produce json
+//	@Param project_id path string true "project id" Format(uuid)
+//	@Param instrument_id path string true "timeseries uuid" Format(uuid)
+//	@Success 200 {object} map[string]interface{}
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /projects/{project_id}/timeseries/{timeseries_id} [delete]
+//	@Security Bearer
 func (h *ApiHandler) DeleteProjectTimeseries(c echo.Context) error {
 	projectID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {

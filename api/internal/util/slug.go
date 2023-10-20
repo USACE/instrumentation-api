@@ -6,6 +6,7 @@ import (
 	"github.com/gosimple/slug"
 )
 
+// TODO: move all slug generation to the database
 // Slugify removes spaces and converts to lower case
 func Slugify(name string) string {
 	slug := slug.Make(name)

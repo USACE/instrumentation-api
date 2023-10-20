@@ -12,7 +12,17 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// ListPlotConfigs returns plot groups
+// ListPlotConfigs godoc
+//
+//	@Summary lists plot configs
+//	@Tags plot-config
+//	@Produce json
+//	@Param project_id path string true "project uuid" Format(uuid)
+//	@Success 200 {array} model.PlotConfig
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /projects/{project_id}/plot_configurations [get]
 func (h *ApiHandler) ListPlotConfigs(c echo.Context) error {
 	pID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
@@ -22,10 +32,21 @@ func (h *ApiHandler) ListPlotConfigs(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
-	return c.JSON(http.StatusOK, &cc)
+	return c.JSON(http.StatusOK, cc)
 }
 
-// GetPlotConfig returns single instrument group
+// GetPlotConfig godoc
+//
+//	@Sumary gets a single plot configuration by id
+//	@Tags plot-config
+//	@Produce json
+//	@Param project_id path string true "project uuid" Format(uuid)
+//	@Param plot_configuration_id path string true "plot config uuid" Format(uuid)
+//	@Success 200 {object} model.PlotConfig
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /projects/{project_id}/plot_configurations/{plot_configuration_id} [get]
 func (h *ApiHandler) GetPlotConfig(c echo.Context) error {
 	cID, err := uuid.Parse(c.Param("plot_configuration_id"))
 	if err != nil {
@@ -38,7 +59,19 @@ func (h *ApiHandler) GetPlotConfig(c echo.Context) error {
 	return c.JSON(http.StatusOK, g)
 }
 
-// CreatePlotConfig add plot configuration for a project
+// CreatePlotConfig godoc
+//
+//	@Sumary adds a plot configuration to a project
+//	@Tags plot-config
+//	@Produce json
+//	@Param project_id path string true "project uuid" Format(uuid)
+//	@Param plot_config body model.PlotConfig true "plot config payload"
+//	@Success 200 {object} model.PlotConfig
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /projects/{project_id}/plot_configurations [post]
+//	@Security Bearer
 func (h *ApiHandler) CreatePlotConfig(c echo.Context) error {
 	var pc model.PlotConfig
 	if err := c.Bind(&pc); err != nil {
@@ -78,7 +111,19 @@ func (h *ApiHandler) CreatePlotConfig(c echo.Context) error {
 	return c.JSON(http.StatusCreated, pcNew)
 }
 
-// UpdatePlotConfig updates a plot configuration for a project
+// UpdatePlotConfig godoc
+//
+//	@Sumary updates a plot configuration in a project
+//	@Tags plot-config
+//	@Produce json
+//	@Param project_id path string true "project uuid" Format(uuid)
+//	@Param plot_config body model.PlotConfig true "plot config payload"
+//	@Success 200 {object} model.PlotConfig
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /projects/{project_id}/plot_configurations/{plot_configuration_id} [put]
+//	@Security Bearer
 func (h *ApiHandler) UpdatePlotConfig(c echo.Context) error {
 	var pc model.PlotConfig
 	if err := c.Bind(&pc); err != nil {
@@ -109,7 +154,18 @@ func (h *ApiHandler) UpdatePlotConfig(c echo.Context) error {
 	return c.JSON(http.StatusOK, pc)
 }
 
-// DeletePlotConfig delete plot configuration for a project
+// DeletePlotConfig godoc
+//
+//	@Sumary deletes a plot configuration in a project
+//	@Tags plot-config
+//	@Produce json
+//	@Param plot_configuration_id path string true "plot config uuid" Format(uuid)
+//	@Success 200 {object} map[string]interface{}
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /projects/{project_id}/plot_configurations/{plot_configuration_id} [delete]
+//	@Security Bearer
 func (h *ApiHandler) DeletePlotConfig(c echo.Context) error {
 	pID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {

@@ -41,13 +41,14 @@ func (s plotConfigService) CreatePlotConfig(ctx context.Context, pc model.PlotCo
 	if err != nil {
 		return a, err
 	}
-	pc.ID = pcID
 
 	for _, tsid := range pc.TimeseriesID {
 		if err := qtx.CreatePlotConfigTimeseries(ctx, pcID, tsid); err != nil {
 			return a, err
 		}
 	}
+
+	pc.ID = pcID
 	if err := qtx.CreatePlotConfigSettings(ctx, pc); err != nil {
 		return a, err
 	}
@@ -74,10 +75,6 @@ func (s plotConfigService) UpdatePlotConfiguration(ctx context.Context, pc model
 	defer model.TxDo(tx.Rollback)
 
 	qtx := s.WithTx(tx)
-
-	if err != nil {
-		return a, err
-	}
 
 	if err := qtx.UpdatePlotConfig(ctx, pc); err != nil {
 		return a, err

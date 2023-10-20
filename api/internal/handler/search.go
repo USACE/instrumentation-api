@@ -13,9 +13,19 @@ import (
 
 type searchFunc func(ctx context.Context, searchText string, limit int) ([]model.SearchResult, error)
 
-// Search allows searching using a string on different entities
+// Search godoc
+//
+//	@Summary allows searching using a string on different entities
+//	@Tags search
+//	@Produce json
+//	@Param entity path string true "entity to search (i.e. projects, etc.)"
+//	@Param q query string false "search string"
+//	@Success 200 {array} model.SearchResult
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /search/{entity} [get]
 func (h *ApiHandler) Search(c echo.Context) error {
-	// Search Function
 	var fn searchFunc
 	pfn := &fn
 	switch entity := c.Param("entity"); entity {
@@ -25,7 +35,6 @@ func (h *ApiHandler) Search(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("search not implemented for entity: %s", entity))
 	}
 
-	// Get Search String
 	searchText := c.QueryParam("q")
 	if searchText == "" {
 		return c.JSON(http.StatusOK, make([]model.SearchResult, 0))

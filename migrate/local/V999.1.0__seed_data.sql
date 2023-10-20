@@ -2,6 +2,8 @@
 -- basic seed data to demo the app and run API tests
 -- -------------------------------------------------
 
+INSERT INTO heartbeat (time) VALUES (NOW());
+
 -- Profile (Faked with: https://homepage.net/name_generator/)
 -- NOTE: EDIPI 1 should not be used; test user with EDIPI = 1 created by integration tests
 INSERT INTO profile (id, edipi, is_admin, username, email) VALUES

@@ -102,7 +102,7 @@ func NewDatabase(cfg *config.DBConfig) *Database {
 		log.Panicf("database is nil")
 	}
 
-	db.SetMaxOpenConns(15)
+	db.SetMaxOpenConns(50)
 	db.SetMaxIdleConns(5)
 	db.SetConnMaxLifetime(time.Minute * 30)
 

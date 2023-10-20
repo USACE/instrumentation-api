@@ -12,7 +12,19 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// ListInclinometerMeasurements returns a timeseries with inclinometer measurements
+// ListInclinometerMeasurements godoc
+//
+//	@Summary lists all measurements for an inclinometer
+//	@Tags measurement-inclinometer
+//	@Produce json
+//	@Param timeseries_id path string true "timeseries uuid" Format(uuid)
+//	@Param after query string false "after timestamp" Format(date-time)
+//	@Param before query string false "before timestamp" Format(date-time)
+//	@Success 200 {object} model.InclinometerMeasurementCollection
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /timeseries/{timeseries_id}/inclinometer_measurements [get]
 func (h *ApiHandler) ListInclinometerMeasurements(c echo.Context) error {
 
 	tsID, err := uuid.Parse(c.Param("timeseries_id"))
@@ -20,7 +32,6 @@ func (h *ApiHandler) ListInclinometerMeasurements(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
 	}
 
-	// Time Window
 	var tw model.TimeWindow
 	a, b := c.QueryParam("after"), c.QueryParam("before")
 	if err = tw.SetWindow(a, b, time.Now().AddDate(0, 0, -7), time.Now()); err != nil {
@@ -54,8 +65,19 @@ func (h *ApiHandler) ListInclinometerMeasurements(c echo.Context) error {
 	return c.JSON(http.StatusOK, im)
 }
 
-// CreateOrUpdateProjectInclinometerMeasurements Creates or Updates a InclinometerMeasurement object or array of objects
-// All timeseries must belong to the same project
+// CreateOrUpdateProjectInclinometerMeasurements godoc
+//
+//	@Summary creates or updates one or more inclinometer measurements
+//	@Tags measurement-inclinometer
+//	@Produce json
+//	@Param project_id path string true "project uuid" Format(uuid)
+//	@Param timeseries_measurement_collections body model.InclinometerMeasurementCollectionCollection true "inclinometer measurement collections"
+//	@Success 200 {array} model.InclinometerMeasurementCollection
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /projects/{project_id}/inclinometer_measurements [post]
+//	@Security Bearer
 func (h *ApiHandler) CreateOrUpdateProjectInclinometerMeasurements(c echo.Context) error {
 	var mcc model.InclinometerMeasurementCollectionCollection
 	if err := c.Bind(&mcc); err != nil {
@@ -66,8 +88,11 @@ func (h *ApiHandler) CreateOrUpdateProjectInclinometerMeasurements(c echo.Contex
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
+
+	ctx := c.Request().Context()
+
 	dd := mcc.InclinometerTimeseriesIDs()
-	m, err := h.TimeseriesService.GetTimeseriesProjectMap(c.Request().Context(), dd)
+	m, err := h.TimeseriesService.GetTimeseriesProjectMap(ctx, dd)
 	if err != nil {
 		return err
 	}
@@ -82,20 +107,20 @@ func (h *ApiHandler) CreateOrUpdateProjectInclinometerMeasurements(c echo.Contex
 		return echo.NewHTTPError(http.StatusBadRequest, "could not get profile")
 	}
 
-	stored, err := h.InclinometerMeasurementService.CreateOrUpdateInclinometerMeasurements(c.Request().Context(), mcc.Items, p, time.Now())
+	stored, err := h.InclinometerMeasurementService.CreateOrUpdateInclinometerMeasurements(ctx, mcc.Items, p, time.Now())
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	//create inclinometer constant if doesn't exist
 	if len(mcc.Items) > 0 {
-		cm, err := h.MeasurementService.GetTimeseriesConstantMeasurement(c.Request().Context(), mcc.Items[0].TimeseriesID, "inclinometer-constant")
+		cm, err := h.MeasurementService.GetTimeseriesConstantMeasurement(ctx, mcc.Items[0].TimeseriesID, "inclinometer-constant")
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
 		if cm.TimeseriesID == uuid.Nil {
-			err := h.InclinometerMeasurementService.CreateTimeseriesConstant(c.Request().Context(), mcc.Items[0].TimeseriesID, "inclinometer-constant", "Meters", 20000)
+			err := h.InclinometerMeasurementService.CreateTimeseriesConstant(ctx, mcc.Items[0].TimeseriesID, "inclinometer-constant", "Meters", 20000)
 			if err != nil {
 				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 			}
@@ -105,7 +130,19 @@ func (h *ApiHandler) CreateOrUpdateProjectInclinometerMeasurements(c echo.Contex
 	return c.JSON(http.StatusCreated, stored)
 }
 
-// DeleteInclinometerMeasurements deletes a single inclinometer measurement
+// DeleteInclinometerMeasurements godoc
+//
+//	@Summary deletes a single inclinometer measurement by timestamp
+//	@Tags measurement-inclinometer
+//	@Produce json
+//	@Param timeseries_id path string true "timeseries uuid" Format(uuid)
+//	@Param time query string true "timestamp of measurement to delete" Format(date-time)
+//	@Success 200 {object} map[string]interface{}
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /timeseries/{timeseries_id}/inclinometer_measurements [delete]
+//	@Security Bearer
 func (h *ApiHandler) DeleteInclinometerMeasurements(c echo.Context) error {
 	// id from url params
 	id, err := uuid.Parse(c.Param("timeseries_id"))

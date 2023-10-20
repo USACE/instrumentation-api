@@ -6,6 +6,7 @@ services:
       context: db
       args:
         - POSTGRES_VERSION=${POSTGRES_VERSION:-14}
+    command: -c fsync=off
     ports:
       - 5432:5432
     shm_size: 512mb
@@ -153,17 +154,6 @@ services:
 
   # ---------------------- local profile services ---------------------- #
 
-  pgadmin:
-    image: dpage/pgadmin4
-    restart: unless-stopped
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL:-postgres@postgres.com}
-      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD:-postgres}
-    ports:
-      - "${PGADMIN_PORT:-8081}:80"
-    profiles:
-      - local
-
   minio:
     image: minio/minio
     environment:
@@ -196,34 +186,9 @@ services:
     profiles:
       - local
 
-  swagger:
-    image: swaggerapi/swagger-ui
-    environment:
-      - API_URL=swagger/apidoc.json
-      - CONFIG_URL=swagger/swagger-config.json
-    ports:
-      - "${INSTRUMENTATION_SWAGGER_PORT:-8002}:8080"
-    volumes:
-      - ${INSTRUMENTATION_SWAGGER_APIDOC_VOLUME:-./docs/swagger}:/usr/share/nginx/html/swagger
-    restart: unless-stopped
-    profiles:
-      - local
-
-  swagger_init:
-    image: node:current-alpine
-    restart: on-failure
-    ports:
-      - "${INSTRUMENTATION_SWAGGER_INIT_PORT:-8003}:8080"
-    volumes:
-      - ${INSTRUMENTATION_SWAGGER_APIDOC_VOLUME:-./docs/swagger}:/docs/swagger
-      - ${INSTRUMENTATION_SWAGGER_TESTS_VOLUME:-./tests/postman}:/tests/postman
-    entrypoint: ["/bin/sh", "/docs/swagger/postman2apidoc.sh"]
-    profiles:
-      - local
-
   mock_datalogger:
     build:
-      context: tests/mock/datalogger
+      context: mock/telemetry
     restart: unless-stopped
     profiles:
       - mock
