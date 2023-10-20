@@ -1,10 +1,16 @@
 version: "3.9"
 
 services:
-  postgres:
-    image: postgis/postgis:${POSTGIS_VERSION:-14-3.1}
+  db:
+    build:
+      context: db
+      args:
+        - POSTGRES_VERSION=${POSTGRES_VERSION:-14}
+    command: -c fsync=off
+    ports:
+      - 5432:5432
     shm_size: 512mb
-    restart: always
+    restart: unless-stopped
     environment:
       - POSTGRES_USER=${POSTGRES_USER:-postgres}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
@@ -15,28 +21,29 @@ services:
       timeout: 5s
       retries: 5
 
-  flyway:
+  migrate:
     build:
-      context: sql
+      context: migrate
     restart: on-failure
     environment:
       - FLYWAY_LOCATIONS=${FLYWAY_LOCATIONS:-filesystem:/flyway/sql/common,filesystem:/flyway/sql/local}
       - FLYWAY_USER=postgres
       - FLYWAY_PASSWORD=postgres
-      - FLYWAY_URL=jdbc:postgresql://postgres:5432/postgres
+      - FLYWAY_URL=jdbc:postgresql://db:5432/postgres
     command: migrate
     volumes:
-      - ./sql:/flyway/sql
+      - ./migrate:/flyway/sql
     depends_on:
-      postgres:
+      db:
         condition: service_healthy
 
   api:
     build:
       context: api
+      target: core
       labels:
         - com.host.description=instrumentation-api
-    restart: always
+    restart: unless-stopped
     environment:
       # NOTE: AWS_ Variables provided by execution role in deployed version
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-AKIAIOSFODNN7EXAMPLE}
@@ -54,42 +61,44 @@ services:
       - INSTRUMENTATION_DBUSER=${INSTRUMENTATION_DBUSER:-instrumentation_user}
       - INSTRUMENTATION_DBPASS=${INSTRUMENTATION_DBPASS:-password}
       - INSTRUMENTATION_DBNAME=${INSTRUMENTATION_DBNAME:-postgres}
-      - INSTRUMENTATION_DBHOST=${INSTRUMENTATION_DBHOST:-postgres}
+      - INSTRUMENTATION_DBHOST=${INSTRUMENTATION_DBHOST:-db}
       - INSTRUMENTATION_DBSSLMODE=${INSTRUMENTATION_DBSSLMODE:-disable}
       - INSTRUMENTATION_HEARTBEATKEY=${INSTRUMENTATION_HEARTBEATKEY:-password}
       - INSTRUMENTATION_ROUTE_PREFIX=${INSTRUMENTATION_ROUTE_PREFIX:-}
     ports:
       - "${API_PORT:-80}:80"
     depends_on:
-      postgres:
+      db:
         condition: service_healthy
-      flyway:
+      migrate:
         condition: service_completed_successfully
 
   telemetry:
     build:
-      context: telemetry
+      context: api
+      target: telemetry
     restart: on-failure
     environment:
       - INSTRUMENTATION_LAMBDACONTEXT=${INSTRUMENTATION_LAMBDACONTEXT:-false}
       - INSTRUMENTATION_DBUSER=${INSTRUMENTATION_DBUSER:-instrumentation_user}
       - INSTRUMENTATION_DBPASS=${INSTRUMENTATION_DBPASS:-password}
       - INSTRUMENTATION_DBNAME=${INSTRUMENTATION_DBNAME:-postgres}
-      - INSTRUMENTATION_DBHOST=${INSTRUMENTATION_DBHOST:-postgres}
+      - INSTRUMENTATION_DBHOST=${INSTRUMENTATION_DBHOST:-db}
       - INSTRUMENTATION_DBSSLMODE=${INSTRUMENTATION_DBSSLMODE:-disable}
       - INSTRUMENTATION_HEARTBEATKEY=${INSTRUMENTATION_HEARTBEATKEY:-password}
       - INSTRUMENTATION_ROUTE_PREFIX=${INSTRUMENTATION_ROUTE_PREFIX:-}
     ports:
       - "${TELEMETRY_PORT:-9090}:80"
     depends_on:
-      postgres:
+      db:
         condition: service_healthy
-      flyway:
+      migrate:
         condition: service_completed_successfully
 
   alert:
     build:
-      context: alert
+      context: api
+      target: alert
     environment:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-AKIAIOSFODNN7EXAMPLE}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY}
@@ -97,7 +106,7 @@ services:
       - INSTRUMENTATION_DBUSER=${INSTRUMENTATION_DBUSER:-instrumentation_user}
       - INSTRUMENTATION_DBPASS=${INSTRUMENTATION_DBPASS:-password}
       - INSTRUMENTATION_DBNAME=${INSTRUMENTATION_DBNAME:-postgres}
-      - INSTRUMENTATION_DBHOST=${INSTRUMENTATION_DBHOST:-postgres}
+      - INSTRUMENTATION_DBHOST=${INSTRUMENTATION_DBHOST:-db}
       - INSTRUMENTATION_DBSSLMODE=${INSTRUMENTATION_DBSSLMODE:-disable}
       - INSTRUMENTATION_AWS_ECS_TRIGGER_MOCKED=${INSTRUMENTATION_AWS_ECS_TRIGGER_MOCKED:-True}
       - INSTRUMENTATION_EMAIL_SEND_MOCKED=${INSTRUMENTATION_EMAIL_SEND_MOCKED:-True}
@@ -107,22 +116,43 @@ services:
       - INSTRUMENTATION_SMTP_AUTH_USER=${INSTRUMENTATION_SMTP_AUTH_USER:-}
       - INSTRUMENTATION_SMTP_AUTH_PASS=${INSTRUMENTATION_SMTP_AUTH_PASS:-}
     depends_on:
-      postgres:
+      db:
         condition: service_healthy
-      flyway:
+      migrate:
         condition: service_completed_successfully
 
-  # ---------------------- local profile services ---------------------- #
-
-  pgadmin:
-    image: dpage/pgadmin4
+  dcs-loader:
+    build:
+      context: api
+      target: dcs-loader
     environment:
-      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL:-postgres@postgres.com}
-      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD:-postgres}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-AKIAIOSFODNN7EXAMPLE}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-east-1}
+      - AWS_REGION=${AWS_DEFAULT_REGION:-us-east-1}
+      - LOADER_POST_URL=${LOADER_POST_URL:-http://api/timeseries_measurements}
+      - LOADER_API_KEY=${LOADER_API_KEY:-appkey}
+      - LOADER_AWS_S3_ENDPOINT=${LOADER_AWS_S3_ENDPOINT:-http://minio:9000}
+      - LOADER_AWS_S3_DISABLE_SSL=${LOADER_AWS_S3_DISABLE_SSL:-True}
+      - LOADER_AWS_S3_FORCE_PATH_STYLE=${LOADER_AWS_S3_FORCE_PATH_STYLE:-True}
+      - LOADER_AWS_SQS_ENDPOINT=${LOADER_AWS_SQS_ENDPOINT:-http://elasticmq:9324}
+      - LOADER_AWS_SQS_REGION=${LOADER_AWS_SQS_REGION:-elasticmq}
+      - LOADER_AWS_SQS_QUEUE_NAME=${LOADER_AWS_SQS_QUEUE_NAME:-instrumentation-dcs-goes}
+      - LOADER_AWS_SQS_QUEUE_URL=${LOADER_AWS_SQS_QUEUE_URL:-http://elasticmq:9324/queue/instrumentation-dcs-goes}
+    restart: unless-stopped
+    depends_on:
+      elasticmq:
+        condition: service_started
+
+  elasticmq:
+    image: softwaremill/elasticmq
+    volumes:
+      - ./elasticmq.conf:/opt/elasticmq.conf
     ports:
-      - "${PGADMIN_PORT:-8081}:80"
-    profiles:
-      - local
+      - "9324:9324"
+    restart: unless-stopped
+
+  # ---------------------- local profile services ---------------------- #
 
   minio:
     image: minio/minio
@@ -156,33 +186,10 @@ services:
     profiles:
       - local
 
-  swagger:
-    image: swaggerapi/swagger-ui
-    environment:
-      - API_URL=swagger/apidoc.json
-      - CONFIG_URL=swagger/swagger-config.json
-    ports:
-      - "${INSTRUMENTATION_SWAGGER_PORT:-8002}:8080"
-    volumes:
-      - ${INSTRUMENTATION_SWAGGER_APIDOC_VOLUME:-./docs/swagger}:/usr/share/nginx/html/swagger
-    restart: always
-    profiles:
-      - local
-
-  swagger_init:
-    image: node:current-alpine
-    ports:
-      - "${INSTRUMENTATION_SWAGGER_INIT_PORT:-8003}:8080"
-    volumes:
-      - ${INSTRUMENTATION_SWAGGER_APIDOC_VOLUME:-./docs/swagger}:/docs/swagger
-      - ${INSTRUMENTATION_SWAGGER_TESTS_VOLUME:-./tests/postman}:/tests
-    entrypoint: ["/bin/sh", "/docs/swagger/postman2apidoc.sh"]
-    profiles:
-      - local
-
   mock_datalogger:
     build:
-      context: tests/mock/datalogger
+      context: mock/telemetry
+    restart: unless-stopped
     profiles:
       - mock
     depends_on:
