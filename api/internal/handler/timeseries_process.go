@@ -148,6 +148,29 @@ func (h *ApiHandler) ListTimeseriesMeasurementsExplorer(c echo.Context) error {
 	return selectMeasurements(c)
 }
 
+// ListInclinometerTimeseriesMeasurementsExplorer godoc
+//
+//	@Summary list inclinometer timeseries measurements for explorer page
+//	@Tags explorer
+//	@Accept json
+//	@Produce json
+//	@Param instrument_ids body []uuid.UUID true "array of inclinometer instrument uuids"
+//	@Success 200 {array} map[uuid.UUID]model.InclinometerMeasurementCollectionLean
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /inclinometer_explorer [post]
+func (h *ApiHandler) ListInclinometerTimeseriesMeasurementsExplorer(c echo.Context) error {
+	var iIDs []uuid.UUID
+	if err := (&echo.DefaultBinder{}).BindBody(c, &iIDs); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	f := model.ProcessMeasurementFilter{InstrumentIDs: iIDs}
+
+	selectMeasurements := selectInclinometerMeasurementsHandler(h, f)
+	return selectMeasurements(c)
+}
+
 func selectMeasurementsHandler(h *ApiHandler, f model.ProcessMeasurementFilter, requestType processTimeseriesType) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var tw model.TimeWindow
@@ -201,5 +224,27 @@ func selectMeasurementsHandler(h *ApiHandler, f model.ProcessMeasurementFilter, 
 			}
 			return c.JSON(http.StatusOK, resBody)
 		}
+	}
+}
+
+func selectInclinometerMeasurementsHandler(h *ApiHandler, f model.ProcessMeasurementFilter) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		var tw model.TimeWindow
+		a, b := c.QueryParam("after"), c.QueryParam("before")
+		if err := tw.SetWindow(a, b, time.Now().AddDate(0, 0, -7), time.Now()); err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+
+		f.After = tw.Start
+		f.Before = tw.End
+
+		mrc, err := h.ProcessTimeseriesService.SelectInclinometerMeasurements(c.Request().Context(), f)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+
+		resBody, err := mrc.GroupByInstrument()
+
+		return c.JSON(http.StatusOK, resBody)
 	}
 }

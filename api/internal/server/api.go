@@ -128,6 +128,7 @@ func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 
 	// Explorer
 	r.public.POST("/explorer", h.ListTimeseriesMeasurementsExplorer)
+	r.public.POST("/inclinometer_explorer", h.ListInclinometerTimeseriesMeasurementsExplorer)
 
 	// Heartbeat
 	r.public.GET("/health", h.Healthcheck)

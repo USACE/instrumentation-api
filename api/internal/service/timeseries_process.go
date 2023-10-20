@@ -8,6 +8,7 @@ import (
 
 type ProcessTimeseriesService interface {
 	SelectMeasurements(ctx context.Context, f model.ProcessMeasurementFilter) (model.ProcessTimeseriesResponseCollection, error)
+	SelectInclinometerMeasurements(ctx context.Context, f model.ProcessMeasurementFilter) (model.ProcessInclinometerTimeseriesResponseCollection, error)
 }
 
 type processTimeseriesService struct {

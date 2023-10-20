@@ -68,6 +68,8 @@ type ProcessInclinometerMeasurement struct {
 	Values types.JSONText `json:"values"`
 }
 
+type ProcessInclinometerTimeseriesResponseCollection []ProcessInclinometerTimeseries
+
 func (m ProcessInclinometerMeasurement) InclinometerLean() map[time.Time]types.JSONText {
 	return map[time.Time]types.JSONText{m.Time: m.Values}
 }
@@ -146,6 +148,29 @@ func (mrc *ProcessTimeseriesResponseCollection) GroupByInstrument(threshold int)
 	return res, nil
 }
 
+func (mrc *ProcessInclinometerTimeseriesResponseCollection) GroupByInstrument() (map[uuid.UUID][]InclinometerMeasurementCollectionLean, error) {
+	if len(*mrc) == 0 {
+		return make(map[uuid.UUID][]InclinometerMeasurementCollectionLean), fmt.Errorf(message.NotFound)
+	}
+
+	res := make(map[uuid.UUID][]InclinometerMeasurementCollectionLean)
+
+	for _, t := range *mrc {
+		if _, hasInstrument := res[t.InstrumentID]; !hasInstrument {
+			res[t.InstrumentID] = make([]InclinometerMeasurementCollectionLean, 0)
+		}
+		mcl := InclinometerMeasurementCollectionLean{
+			TimeseriesID: t.TimeseriesID,
+			Items:        make([]InclinometerMeasurementLean, len(t.Measurements)),
+		}
+		for idx, m := range t.Measurements {
+			mcl.Items[idx] = m.InclinometerLean()
+		}
+		res[t.InstrumentID] = append(res[t.InstrumentID], mcl)
+	}
+	return res, nil
+}
+
 func (mrc *ProcessTimeseriesResponseCollection) CollectSingleTimeseries(threshold int, tsID uuid.UUID) (MeasurementCollection, error) {
 	if len(*mrc) == 0 {
 		return MeasurementCollection{}, fmt.Errorf(message.NotFound)
@@ -176,6 +201,15 @@ func (q *Queries) SelectMeasurements(ctx context.Context, f ProcessMeasurementFi
 		return tss, err
 	}
 	tss, err = processLOCF(tss)
+	if err != nil {
+		return tss, err
+	}
+	return tss, nil
+}
+
+// SelectInclinometerMeasurements returns inclinometer measurements for the instruments specified in the filter
+func (q *Queries) SelectInclinometerMeasurements(ctx context.Context, f ProcessMeasurementFilter) (ProcessInclinometerTimeseriesResponseCollection, error) {
+	tss, err := queryInclinometerTimeseriesMeasurements(ctx, q, f)
 	if err != nil {
 		return tss, err
 	}
