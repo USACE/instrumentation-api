@@ -8,7 +8,7 @@ FROM golang:${GO_VERSION}-alpine AS builder
 ARG GOARCH=amd64
 ARG BUILD_ENV
 
-RUN apk update && apk add --no-cache git
+RUN apk update && apk add --no-cache git ca-certificates
 WORKDIR /go/src/app
 
 ENV CGO_ENABLED=0
@@ -42,4 +42,5 @@ ENTRYPOINT ["/go/bin/midas-alert"]
 
 FROM build_${BUILD_ENV} AS dcs-loader
 COPY --from=builder /go/bin/dcs-loader /go/bin/midas-dcs-loader
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 ENTRYPOINT ["/go/bin/midas-dcs-loader"]
