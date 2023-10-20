@@ -175,7 +175,7 @@ const listInstrumentGroupTimeseries = listTimeseries + `
 
 // ListInstrumentGroupTimeseries returns an array of timeseries for instruments that belong to an instrument_group
 func (q *Queries) ListInstrumentGroupTimeseries(ctx context.Context, instrumentGroupID uuid.UUID) ([]Timeseries, error) {
-	var tt []Timeseries
+	tt := make([]Timeseries, 0)
 	if err := q.db.SelectContext(ctx, &tt, listInstrumentGroupTimeseries, instrumentGroupID); err != nil {
 		return nil, err
 	}

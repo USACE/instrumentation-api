@@ -3,7 +3,6 @@ package model
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"time"
 
@@ -11,34 +10,25 @@ import (
 )
 
 type Evaluation struct {
-	ID              uuid.UUID                      `json:"id" db:"id"`
-	ProjectID       uuid.UUID                      `json:"project_id" db:"project_id"`
-	ProjectName     string                         `json:"project_name" db:"project_name"`
-	AlertConfigID   *uuid.UUID                     `json:"alert_config_id" db:"alert_config_id"`
-	AlertConfigName *string                        `json:"alert_config_name" db:"alert_config_name"`
-	SubmittalID     *uuid.UUID                     `json:"submittal_id" db:"submittal_id"`
-	Name            string                         `json:"name" db:"name"`
-	Body            string                         `json:"body" db:"body"`
-	StartDate       time.Time                      `json:"start_date" db:"start_date"`
-	EndDate         time.Time                      `json:"end_date" db:"end_date"`
-	Instruments     EvaluationInstrumentCollection `json:"instruments" db:"instruments"`
-	CreatorUsername string                         `json:"creator_username" db:"creator_username"`
-	UpdaterUsername *string                        `json:"updater_username" db:"updater_username"`
+	ID              uuid.UUID                         `json:"id" db:"id"`
+	ProjectID       uuid.UUID                         `json:"project_id" db:"project_id"`
+	ProjectName     string                            `json:"project_name" db:"project_name"`
+	AlertConfigID   *uuid.UUID                        `json:"alert_config_id" db:"alert_config_id"`
+	AlertConfigName *string                           `json:"alert_config_name" db:"alert_config_name"`
+	SubmittalID     *uuid.UUID                        `json:"submittal_id" db:"submittal_id"`
+	Name            string                            `json:"name" db:"name"`
+	Body            string                            `json:"body" db:"body"`
+	StartDate       time.Time                         `json:"start_date" db:"start_date"`
+	EndDate         time.Time                         `json:"end_date" db:"end_date"`
+	Instruments     dbJSONSlice[EvaluationInstrument] `json:"instruments" db:"instruments"`
+	CreatorUsername string                            `json:"creator_username" db:"creator_username"`
+	UpdaterUsername *string                           `json:"updater_username" db:"updater_username"`
 	AuditInfo
 }
 
 type EvaluationInstrument struct {
 	InstrumentID   uuid.UUID `json:"instrument_id" db:"instrument_id"`
 	InstrumentName string    `json:"instrument_name" db:"instrument_name"`
-}
-
-type EvaluationInstrumentCollection []EvaluationInstrument
-
-func (a *EvaluationInstrumentCollection) Scan(src interface{}) error {
-	if err := json.Unmarshal([]byte(src.(string)), a); err != nil {
-		return err
-	}
-	return nil
 }
 
 const listProjectEvaluations = `
@@ -48,11 +38,11 @@ const listProjectEvaluations = `
 `
 
 func (q *Queries) ListProjectEvaluations(ctx context.Context, projectID uuid.UUID) ([]Evaluation, error) {
-	var aa []Evaluation
-	if err := q.db.SelectContext(ctx, &aa, listProjectEvaluations, projectID); err != nil {
+	ee := make([]Evaluation, 0)
+	if err := q.db.SelectContext(ctx, &ee, listProjectEvaluations, projectID); err != nil {
 		return nil, err
 	}
-	return aa, nil
+	return ee, nil
 }
 
 const listProjectEvaluationsByAlertConfig = `
@@ -63,12 +53,12 @@ const listProjectEvaluationsByAlertConfig = `
 `
 
 func (q *Queries) ListProjectEvaluationsByAlertConfig(ctx context.Context, projectID, alertConfigID uuid.UUID) ([]Evaluation, error) {
-	var aa []Evaluation
-	err := q.db.SelectContext(ctx, &aa, listProjectEvaluationsByAlertConfig, projectID, alertConfigID)
+	ee := make([]Evaluation, 0)
+	err := q.db.SelectContext(ctx, &ee, listProjectEvaluationsByAlertConfig, projectID, alertConfigID)
 	if err != nil {
 		return make([]Evaluation, 0), err
 	}
-	return aa, nil
+	return ee, nil
 }
 
 const listInstrumentEvaluations = `
@@ -81,11 +71,11 @@ const listInstrumentEvaluations = `
 `
 
 func (q *Queries) ListInstrumentEvaluations(ctx context.Context, instrumentID uuid.UUID) ([]Evaluation, error) {
-	aa := make([]Evaluation, 0)
-	if err := q.db.SelectContext(ctx, &aa, listInstrumentEvaluations, instrumentID); err != nil {
+	ee := make([]Evaluation, 0)
+	if err := q.db.SelectContext(ctx, &ee, listInstrumentEvaluations, instrumentID); err != nil {
 		return nil, err
 	}
-	return aa, nil
+	return ee, nil
 }
 
 const getEvaluation = `
@@ -93,11 +83,11 @@ const getEvaluation = `
 `
 
 func (q *Queries) GetEvaluation(ctx context.Context, evaluationID uuid.UUID) (Evaluation, error) {
-	var a Evaluation
-	if err := q.db.GetContext(ctx, &a, getEvaluation, evaluationID); err != nil {
-		return a, err
+	var e Evaluation
+	if err := q.db.GetContext(ctx, &e, getEvaluation, evaluationID); err != nil {
+		return e, err
 	}
-	return a, nil
+	return e, nil
 }
 
 const completeEvaluationSubmittal = `

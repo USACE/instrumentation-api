@@ -9,7 +9,7 @@ import (
 
 type ProfileService interface {
 	GetProfileWithTokensFromEDIPI(ctx context.Context, edipi int) (model.Profile, error)
-	GetProfileFromTokenID(ctx context.Context, tokenID string) (model.Profile, error)
+	GetProfileWithTokensFromTokenID(ctx context.Context, tokenID string) (model.Profile, error)
 	CreateProfile(ctx context.Context, n model.ProfileInfo) (model.Profile, error)
 	CreateProfileToken(ctx context.Context, profileID uuid.UUID) (model.Token, error)
 	GetTokenInfoByTokenID(ctx context.Context, tokenID string) (model.TokenInfo, error)
@@ -39,7 +39,7 @@ func (s profileService) GetProfileWithTokensFromEDIPI(ctx context.Context, edipi
 }
 
 // GetProfileFromTokenID returns a profile given a token ID
-func (s profileService) GetProfileFromTokenID(ctx context.Context, tokenID string) (model.Profile, error) {
+func (s profileService) GetProfileWithTokensFromTokenID(ctx context.Context, tokenID string) (model.Profile, error) {
 	p, err := s.GetProfileFromTokenID(ctx, tokenID)
 	if err != nil {
 		return model.Profile{}, err

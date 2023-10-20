@@ -2129,6 +2129,7 @@ const docTemplate = `{
                 "tags": [
                     "instrument-note"
                 ],
+                "summary": "creates instrument notes",
                 "parameters": [
                     {
                         "description": "instrument note collection payload",
@@ -2259,6 +2260,177 @@ const docTemplate = `{
                             "type": "array",
                             "items": {
                                 "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfig"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/instruments/saa/{instrument_id}/measurements": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "instrument-saa"
+                ],
+                "summary": "creates instrument notes",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "instrument uuid",
+                        "name": "instrument_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "after time",
+                        "name": "after",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "before time",
+                        "name": "before",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.SaaMeasurements"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/instruments/saa/{instrument_id}/segments": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "instrument-saa"
+                ],
+                "summary": "gets all saa segments for an instrument",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "instrument uuid",
+                        "name": "instrument_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.SaaSegment"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "instrument-saa"
+                ],
+                "summary": "updates multiple segments for an saa instrument",
+                "parameters": [
+                    {
+                        "description": "saa instrument segments payload",
+                        "name": "instrument_segments",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.SaaSegment"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.SaaSegment"
                             }
                         }
                     },
@@ -7930,6 +8102,21 @@ const docTemplate = `{
                 }
             }
         },
+        "github_com_USACE_instrumentation-api_api_internal_model.Geometry": {
+            "type": "object",
+            "properties": {
+                "coordinates": {},
+                "geometries": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/geojson.Geometry"
+                    }
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
         "github_com_USACE_instrumentation-api_api_internal_model.Home": {
             "type": "object",
             "properties": {
@@ -8054,7 +8241,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "geometry": {
-                    "$ref": "#/definitions/geojson.Geometry"
+                    "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Geometry"
                 },
                 "groups": {
                     "type": "array",
@@ -8073,6 +8260,9 @@ const docTemplate = `{
                 },
                 "offset": {
                     "type": "integer"
+                },
+                "opts": {
+                    "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Opts"
                 },
                 "project_id": {
                     "type": "string"
@@ -8294,6 +8484,10 @@ const docTemplate = `{
                 "type": "number"
             }
         },
+        "github_com_USACE_instrumentation-api_api_internal_model.Opts": {
+            "type": "object",
+            "additionalProperties": true
+        },
         "github_com_USACE_instrumentation-api_api_internal_model.PlotConfig": {
             "type": "object",
             "properties": {
@@ -8462,6 +8656,66 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string"
+                }
+            }
+        },
+        "github_com_USACE_instrumentation-api_api_internal_model.SaaMeasurements": {
+            "type": "object",
+            "properties": {
+                "measurements": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.SaaSegmentMeasurement"
+                    }
+                },
+                "time": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_USACE_instrumentation-api_api_internal_model.SaaSegment": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "instrument_id": {
+                    "type": "string"
+                },
+                "length": {
+                    "type": "number"
+                },
+                "temp_timeseries_id": {
+                    "type": "string"
+                },
+                "x_timeseries_id": {
+                    "type": "string"
+                },
+                "y_timeseries_id": {
+                    "type": "string"
+                },
+                "z_timeseries_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_USACE_instrumentation-api_api_internal_model.SaaSegmentMeasurement": {
+            "type": "object",
+            "properties": {
+                "segment_id": {
+                    "type": "integer"
+                },
+                "temp": {
+                    "type": "number"
+                },
+                "x": {
+                    "type": "number"
+                },
+                "y": {
+                    "type": "number"
+                },
+                "z": {
+                    "type": "number"
                 }
             }
         },

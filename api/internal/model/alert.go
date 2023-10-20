@@ -9,15 +9,15 @@ import (
 
 // Alert is an alert, triggered by an AlertConfig evaluating to true
 type Alert struct {
-	Read          *bool                           `json:"read,omitempty"`
-	ID            uuid.UUID                       `json:"id"`
-	AlertConfigID uuid.UUID                       `json:"alert_config_id" db:"alert_config_id"`
-	ProjectID     uuid.UUID                       `json:"project_id" db:"project_id"`
-	ProjectName   string                          `json:"project_name" db:"project_name"`
-	Name          string                          `json:"name"`
-	Body          string                          `json:"body"`
-	CreateDate    time.Time                       `json:"create_date" db:"create_date"`
-	Instruments   AlertConfigInstrumentCollection `json:"instruments" db:"instruments"`
+	Read          *bool                              `json:"read,omitempty"`
+	ID            uuid.UUID                          `json:"id"`
+	AlertConfigID uuid.UUID                          `json:"alert_config_id" db:"alert_config_id"`
+	ProjectID     uuid.UUID                          `json:"project_id" db:"project_id"`
+	ProjectName   string                             `json:"project_name" db:"project_name"`
+	Name          string                             `json:"name"`
+	Body          string                             `json:"body"`
+	CreateDate    time.Time                          `json:"create_date" db:"create_date"`
+	Instruments   dbJSONSlice[AlertConfigInstrument] `json:"instruments" db:"instruments"`
 }
 
 const createAlerts = `

@@ -104,7 +104,9 @@ GRANT SELECT ON
     submittal_status,
     alert_type,
     alert_config_instrument,
-    submittal
+    submittal,
+    saa_opts,
+    saa_segment
 TO instrumentation_reader;
 
 -- Role instrumentation_writer
@@ -162,7 +164,9 @@ GRANT INSERT,UPDATE,DELETE ON
     evaluation,
     evaluation_instrument,
     alert_config_instrument,
-    submittal
+    submittal,
+    saa_opts,
+    saa_segment
 TO instrumentation_writer;
 
 -- Role postgis_reader

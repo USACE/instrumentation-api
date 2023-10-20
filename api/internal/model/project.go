@@ -6,7 +6,6 @@ import (
 
 	"github.com/USACE/instrumentation-api/api/internal/util"
 	"github.com/google/uuid"
-	"github.com/lib/pq"
 )
 
 const listProjectsSQL = `
@@ -26,16 +25,16 @@ type District struct {
 }
 
 type Project struct {
-	ID                   uuid.UUID   `json:"id"`
-	FederalID            *string     `json:"federal_id" db:"federal_id"`
-	OfficeID             *uuid.UUID  `json:"office_id" db:"office_id"`
-	Image                *string     `json:"image" db:"image"`
-	Deleted              bool        `json:"-"`
-	Slug                 string      `json:"slug"`
-	Name                 string      `json:"name"`
-	Timeseries           []uuid.UUID `json:"timeseries" db:"timeseries"`
-	InstrumentCount      int         `json:"instrument_count" db:"instrument_count"`
-	InstrumentGroupCount int         `json:"instrument_group_count" db:"instrument_group_count"`
+	ID                   uuid.UUID          `json:"id"`
+	FederalID            *string            `json:"federal_id" db:"federal_id"`
+	OfficeID             *uuid.UUID         `json:"office_id" db:"office_id"`
+	Image                *string            `json:"image" db:"image"`
+	Deleted              bool               `json:"-"`
+	Slug                 string             `json:"slug"`
+	Name                 string             `json:"name"`
+	Timeseries           dbSlice[uuid.UUID] `json:"timeseries" db:"timeseries"`
+	InstrumentCount      int                `json:"instrument_count" db:"instrument_count"`
+	InstrumentGroupCount int                `json:"instrument_group_count" db:"instrument_group_count"`
 	AuditInfo
 }
 
@@ -65,40 +64,18 @@ func (c *ProjectCollection) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-// projectFactory converts database rows to Project objects
-func projectFactory(rows DBRows) ([]Project, error) {
-	defer rows.Close()
-	pp := make([]Project, 0)
-	var p Project
-	for rows.Next() {
-		err := rows.Scan(
-			&p.ID, &p.FederalID, &p.Image, &p.OfficeID, &p.Deleted, &p.Slug, &p.Name, &p.Creator, &p.CreateDate,
-			&p.Updater, &p.UpdateDate, &p.InstrumentCount, &p.InstrumentGroupCount, pq.Array(&p.Timeseries),
-		)
-		if err != nil {
-			return make([]Project, 0), err
-		}
-		pp = append(pp, p)
-	}
-	return pp, nil
-}
-
 const projectSearch = listProjectsSQL + `
 	WHERE NOT deleted AND name ILIKE '%' || $1 || '%' LIMIT $2 ORDER BY name
 `
 
 // SearchProjects returns search result for projects
 func (q *Queries) SearchProjects(ctx context.Context, searchInput string, limit int) ([]SearchResult, error) {
-	rows, err := q.db.QueryxContext(ctx, projectSearch, searchInput, limit)
-	if err != nil {
-		return make([]SearchResult, 0), err
+	ss := make([]SearchResult, 0)
+	if err := q.db.SelectContext(ctx, &ss, projectSearch, searchInput, limit); err != nil {
+		return nil, err
 	}
-	projects, err := projectFactory(rows)
-	if err != nil {
-		return make([]SearchResult, 0), err
-	}
-	rr := make([]SearchResult, len(projects))
-	for idx, p := range projects {
+	rr := make([]SearchResult, len(ss))
+	for idx, p := range ss {
 		rr[idx] = SearchResult{ID: p.ID, Type: "project", Item: p}
 	}
 	return rr, nil
@@ -135,11 +112,11 @@ const listProjects = listProjectsSQL + `
 
 // ListProjects returns a slice of projects
 func (q *Queries) ListProjects(ctx context.Context) ([]Project, error) {
-	rows, err := q.db.QueryxContext(ctx, listProjects)
-	if err != nil {
-		return make([]Project, 0), err
+	pp := make([]Project, 0)
+	if err := q.db.SelectContext(ctx, &pp, listProjects); err != nil {
+		return nil, err
 	}
-	return projectFactory(rows)
+	return pp, nil
 }
 
 const listProjectsByFederalID = listProjectsSQL + `
@@ -148,11 +125,11 @@ const listProjectsByFederalID = listProjectsSQL + `
 
 // ListProjects returns a slice of projects
 func (q *Queries) ListProjectsByFederalID(ctx context.Context, federalID string) ([]Project, error) {
-	rows, err := q.db.QueryxContext(ctx, listProjectsByFederalID, federalID)
-	if err != nil {
+	pp := make([]Project, 0)
+	if err := q.db.SelectContext(ctx, &pp, listProjectsByFederalID, federalID); err != nil {
 		return nil, err
 	}
-	return projectFactory(rows)
+	return pp, nil
 }
 
 const listProjectsForProfile = `
@@ -166,11 +143,11 @@ const listProjectsForProfile = `
 `
 
 func (q *Queries) ListProjectsForProfile(ctx context.Context, profileID uuid.UUID) ([]Project, error) {
-	rows, err := q.db.QueryxContext(ctx, listProjectsForProfile, profileID)
-	if err != nil {
-		return make([]Project, 0), err
+	pp := make([]Project, 0)
+	if err := q.db.SelectContext(ctx, &pp, listProjectsForProfile, profileID); err != nil {
+		return nil, err
 	}
-	return projectFactory(rows)
+	return pp, nil
 }
 
 const listProjectInstruments = listInstrumentsSQL + `
@@ -179,11 +156,11 @@ const listProjectInstruments = listInstrumentsSQL + `
 
 // ListProjectInstruments returns a slice of instruments for a project
 func (q *Queries) ListProjectInstruments(ctx context.Context, projectID uuid.UUID) ([]Instrument, error) {
-	rows, err := q.db.QueryxContext(ctx, listProjectInstruments, projectID)
-	if err != nil {
-		return make([]Instrument, 0), err
+	ii := make([]Instrument, 0)
+	if err := q.db.SelectContext(ctx, &ii, listProjectInstruments, projectID); err != nil {
+		return nil, err
 	}
-	return instrumentFactory(rows)
+	return ii, nil
 }
 
 const listProjectInstrumentNames = `
@@ -192,7 +169,7 @@ const listProjectInstrumentNames = `
 
 // ListProjectInstrumentNames returns a slice of instrument names for a project
 func (q *Queries) ListProjectInstrumentNames(ctx context.Context, projectID uuid.UUID) ([]string, error) {
-	var names []string
+	names := make([]string, 0)
 	if err := q.db.SelectContext(ctx, &names, listProjectInstrumentNames, projectID); err != nil {
 		return nil, err
 	}
@@ -232,15 +209,8 @@ const getProject = listProjectsSQL + `
 // GetProject returns a pointer to a project
 func (q *Queries) GetProject(ctx context.Context, id uuid.UUID) (Project, error) {
 	var p Project
-	rows, err := q.db.QueryxContext(ctx, getProject, id)
-	if err != nil {
-		return p, err
-	}
-	pp, err := projectFactory(rows)
-	if err != nil {
-		return p, err
-	}
-	return pp[0], nil
+	err := q.db.GetContext(ctx, &p, getProject, id)
+	return p, err
 }
 
 const createProject = `

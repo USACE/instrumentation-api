@@ -2,44 +2,55 @@ package model
 
 import (
 	"context"
+	"database/sql/driver"
 	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
 
-	"github.com/USACE/instrumentation-api/api/internal/message"
 	"github.com/USACE/instrumentation-api/api/internal/util"
 	"github.com/google/uuid"
-	"github.com/lib/pq"
 
 	"github.com/paulmach/orb"
 	"github.com/paulmach/orb/encoding/wkb"
-	"github.com/paulmach/orb/encoding/wkt"
 	"github.com/paulmach/orb/geojson"
 )
 
 // Instrument is an instrument
 type Instrument struct {
-	ID            uuid.UUID        `json:"id"`
-	AwareID       *uuid.UUID       `json:"aware_id,omitempty"`
-	Groups        []uuid.UUID      `json:"groups"`
-	Constants     []uuid.UUID      `json:"constants"`
-	AlertConfigs  []uuid.UUID      `json:"alert_configs"`
-	StatusID      uuid.UUID        `json:"status_id" db:"status_id"`
-	Status        string           `json:"status"`
-	StatusTime    time.Time        `json:"status_time" db:"status_time"`
-	Deleted       bool             `json:"-"`
-	Slug          string           `json:"slug"`
-	Name          string           `json:"name"`
-	TypeID        uuid.UUID        `json:"type_id" db:"type_id"`
-	Type          string           `json:"type"`
-	Geometry      geojson.Geometry `json:"geometry,omitempty"`
-	Station       *int             `json:"station"`
-	StationOffset *int             `json:"offset" db:"station_offset"`
-	ProjectID     *uuid.UUID       `json:"project_id" db:"project_id"`
-	NIDID         *string          `json:"nid_id" db:"nid_id"`
-	USGSID        *string          `json:"usgs_id" db:"usgs_id"`
+	ID            uuid.UUID          `json:"id"`
+	AwareID       *uuid.UUID         `json:"aware_id,omitempty"`
+	Groups        dbSlice[uuid.UUID] `json:"groups" db:"groups"`
+	Constants     dbSlice[uuid.UUID] `json:"constants" db:"constants"`
+	AlertConfigs  dbSlice[uuid.UUID] `json:"alert_configs" db:"alert_configs"`
+	StatusID      uuid.UUID          `json:"status_id" db:"status_id"`
+	Status        string             `json:"status"`
+	StatusTime    time.Time          `json:"status_time" db:"status_time"`
+	Deleted       bool               `json:"-"`
+	Slug          string             `json:"slug"`
+	Name          string             `json:"name"`
+	TypeID        uuid.UUID          `json:"type_id" db:"type_id"`
+	Type          string             `json:"type"`
+	Geometry      Geometry           `json:"geometry,omitempty"`
+	Station       *int               `json:"station"`
+	StationOffset *int               `json:"offset" db:"station_offset"`
+	ProjectID     *uuid.UUID         `json:"project_id" db:"project_id"`
+	NIDID         *string            `json:"nid_id" db:"nid_id"`
+	USGSID        *string            `json:"usgs_id" db:"usgs_id"`
+	Opts          Opts               `json:"opts" db:"opts"`
 	AuditInfo
+}
+
+// Optional instrument metadata based on type
+// If there are no options defined for the instrument type, the object will be empty
+type Opts map[string]interface{}
+
+func (o *Opts) Scan(src interface{}) error {
+	b, ok := src.(string)
+	if !ok {
+		return fmt.Errorf("type assertion failed")
+	}
+	return json.Unmarshal([]byte(b), o)
 }
 
 // CreateInstrumentsValidationResult holds results of checking InstrumentCollection POST
@@ -87,25 +98,37 @@ type InstrumentCount struct {
 	InstrumentCount int `json:"instrument_count"`
 }
 
-// instrumentFactory converts database rows to Instrument objects
-func instrumentFactory(rows DBRows) ([]Instrument, error) {
-	defer rows.Close()
-	ii := make([]Instrument, 0)
-	for rows.Next() {
-		var i Instrument
-		var p orb.Point
-		err := rows.Scan(
-			&i.ID, &i.Deleted, &i.StatusID, &i.Status, &i.StatusTime, &i.Slug, &i.Name, &i.TypeID, &i.Type, wkb.Scanner(&p), &i.Station, &i.StationOffset,
-			&i.Creator, &i.CreateDate, &i.Updater, &i.UpdateDate, &i.ProjectID, pq.Array(&i.Constants), pq.Array(&i.Groups), pq.Array(&i.AlertConfigs),
-			&i.NIDID, &i.USGSID,
-		)
-		if err != nil {
-			return nil, err
-		}
-		i.Geometry = *geojson.NewGeometry(p)
-		ii = append(ii, i)
+type Geometry geojson.Geometry
+
+func (g Geometry) Value() (driver.Value, error) {
+	og := geojson.Geometry(g)
+	return wkb.Value(og.Geometry()), nil
+}
+
+func (g *Geometry) Scan(src interface{}) error {
+	var p orb.Point
+	if err := wkb.Scanner(&p).Scan(src); err != nil {
+		return err
 	}
-	return ii, nil
+	*g = Geometry(*geojson.NewGeometry(p))
+	return nil
+}
+
+func (g Geometry) MarshalJSON() ([]byte, error) {
+	gj := geojson.Geometry(g)
+	return gj.MarshalJSON()
+}
+
+func (g *Geometry) UnmarshalJSON(data []byte) error {
+	gj, err := geojson.UnmarshalGeometry(data)
+	if err != nil {
+		return err
+	}
+	if gj == nil {
+		return fmt.Errorf("unable to unmarshal: geojson geometry is nil")
+	}
+	*g = Geometry(*gj)
+	return nil
 }
 
 const listInstrumentsSQL = `
@@ -131,7 +154,8 @@ const listInstrumentsSQL = `
 		groups,
 		alert_configs,
 		nid_id,
-		usgs_id
+		usgs_id,
+		opts
 	FROM v_instrument
 `
 
@@ -154,11 +178,11 @@ const listInstruments = listInstrumentsSQL + `
 
 // ListInstruments returns an array of instruments from the database
 func (q *Queries) ListInstruments(ctx context.Context) ([]Instrument, error) {
-	rows, err := q.db.QueryxContext(ctx, listInstruments)
-	if err != nil {
+	ii := make([]Instrument, 0)
+	if err := q.db.SelectContext(ctx, &ii, listInstruments); err != nil {
 		return nil, err
 	}
-	return instrumentFactory(rows)
+	return ii, nil
 }
 
 const getInstrument = listInstrumentsSQL + `
@@ -167,19 +191,9 @@ const getInstrument = listInstrumentsSQL + `
 
 // GetInstrument returns a single instrument
 func (q *Queries) GetInstrument(ctx context.Context, instrumentID uuid.UUID) (Instrument, error) {
-	e := Instrument{}
-	rows, err := q.db.QueryxContext(ctx, getInstrument, instrumentID)
-	if err != nil {
-		return e, err
-	}
-	ii, err := instrumentFactory(rows)
-	if err != nil {
-		return e, err
-	}
-	if len(ii) == 0 {
-		return e, fmt.Errorf(message.NotFound)
-	}
-	return ii[0], nil
+	var i Instrument
+	err := q.db.GetContext(ctx, &i, getInstrument, instrumentID)
+	return i, err
 }
 
 const getInstrumentCount = `
@@ -197,7 +211,7 @@ func (q *Queries) GetInstrumentCount(ctx context.Context) (InstrumentCount, erro
 
 const createInstrument = `
 	INSERT INTO instrument (slug, name, type_id, geometry, station, station_offset, creator, create_date, project_id, nid_id, usgs_id)
-	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+	VALUES ($1, $2, $3, ST_GeomFromWKB($4), $5, $6, $7, $8, $9, $10, $11)
 	RETURNING id, slug
 `
 
@@ -205,8 +219,7 @@ func (q *Queries) CreateInstrument(ctx context.Context, i Instrument) (IDAndSlug
 	var aa IDAndSlug
 	if err := q.db.GetContext(
 		ctx, &aa, createInstrument,
-		i.Slug, i.Name, i.TypeID, wkt.MarshalString(i.Geometry.Geometry()),
-		i.Station, i.StationOffset, i.Creator, i.CreateDate, i.ProjectID, i.NIDID, i.USGSID,
+		i.Slug, i.Name, i.TypeID, i.Geometry, i.Station, i.StationOffset, i.Creator, i.CreateDate, i.ProjectID, i.NIDID, i.USGSID,
 	); err != nil {
 		return aa, err
 	}
@@ -263,8 +276,7 @@ func (q *Queries) ValidateCreateInstruments(ctx context.Context, instruments []I
 }
 
 const updateInstrument = `
-	UPDATE instrument
-	SET
+	UPDATE instrument SET
 		name = $3,
 		type_id = $4,
 		geometry = ST_GeomFromWKB($5),
@@ -281,14 +293,17 @@ const updateInstrument = `
 func (q *Queries) UpdateInstrument(ctx context.Context, i Instrument) error {
 	_, err := q.db.ExecContext(
 		ctx, updateInstrument,
-		i.ProjectID, i.ID, i.Name, i.TypeID, wkb.Value(i.Geometry.Geometry()),
+		i.ProjectID, i.ID, i.Name, i.TypeID, i.Geometry,
 		i.Updater, i.UpdateDate, i.ProjectID, i.Station, i.StationOffset, i.NIDID, i.USGSID,
 	)
 	return err
 }
 
 const updateInstrumentGeometry = `
-	UPDATE instrument SET geometry=ST_GeomFromWKB($3), updater= $4, update_date=now()
+	UPDATE instrument SET
+		geometry = ST_GeomFromWKB($3),
+		updater = $4,
+		update_date = NOW()
 	WHERE project_id = $1 AND id = $2
 	RETURNING id
 `

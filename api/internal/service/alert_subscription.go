@@ -21,8 +21,8 @@ type AlertSubscriptionService interface {
 	GetAlertSubscriptionByID(ctx context.Context, subscriptionID uuid.UUID) (model.AlertSubscription, error)
 	ListMyAlertSubscriptions(ctx context.Context, profileID uuid.UUID) ([]model.AlertSubscription, error)
 	UpdateMyAlertSubscription(ctx context.Context, s model.AlertSubscription) (model.AlertSubscription, error)
-	SubscribeEmailsToAlertConfig(ctx context.Context, alertConfigID uuid.UUID, emails model.EmailAutocompleteResultCollection) (model.AlertConfig, error)
-	UnsubscribeEmailsFromAlertConfig(ctx context.Context, alertConfigID uuid.UUID, emails model.EmailAutocompleteResultCollection) (model.AlertConfig, error)
+	SubscribeEmailsToAlertConfig(ctx context.Context, alertConfigID uuid.UUID, emails []model.EmailAutocompleteResult) (model.AlertConfig, error)
+	UnsubscribeEmailsFromAlertConfig(ctx context.Context, alertConfigID uuid.UUID, emails []model.EmailAutocompleteResult) (model.AlertConfig, error)
 	UnsubscribeAllFromAlertConfig(ctx context.Context, alertConfigID uuid.UUID) error
 	UnregisterEmail(ctx context.Context, emailID uuid.UUID) error
 }
@@ -90,7 +90,7 @@ func (s alertSubscriptionService) UpdateMyAlertSubscription(ctx context.Context,
 	return updated, nil
 }
 
-func (s alertSubscriptionService) SubscribeEmailsToAlertConfig(ctx context.Context, alertConfigID uuid.UUID, emails model.EmailAutocompleteResultCollection) (model.AlertConfig, error) {
+func (s alertSubscriptionService) SubscribeEmailsToAlertConfig(ctx context.Context, alertConfigID uuid.UUID, emails []model.EmailAutocompleteResult) (model.AlertConfig, error) {
 	var a model.AlertConfig
 	tx, err := s.db.BeginTxx(ctx, nil)
 	if err != nil {
@@ -142,7 +142,7 @@ func (s alertSubscriptionService) SubscribeEmailsToAlertConfig(ctx context.Conte
 	return acUpdated, nil
 }
 
-func (s alertSubscriptionService) UnsubscribeEmailsFromAlertConfig(ctx context.Context, alertConfigID uuid.UUID, emails model.EmailAutocompleteResultCollection) (model.AlertConfig, error) {
+func (s alertSubscriptionService) UnsubscribeEmailsFromAlertConfig(ctx context.Context, alertConfigID uuid.UUID, emails []model.EmailAutocompleteResult) (model.AlertConfig, error) {
 	var a model.AlertConfig
 	tx, err := s.db.BeginTxx(ctx, nil)
 	if err != nil {
@@ -203,7 +203,7 @@ func (s alertSubscriptionService) UnsubscribeAllFromAlertConfig(ctx context.Cont
 	return nil
 }
 
-func registerAndSubscribe(ctx context.Context, q *model.Queries, alertConfigID uuid.UUID, emails model.EmailAutocompleteResultCollection) error {
+func registerAndSubscribe(ctx context.Context, q *model.Queries, alertConfigID uuid.UUID, emails []model.EmailAutocompleteResult) error {
 	for idx, em := range emails {
 		if em.UserType == unknown || em.UserType == email {
 			newID, err := q.RegisterEmail(ctx, em.Email)
