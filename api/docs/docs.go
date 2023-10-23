@@ -8708,13 +8708,37 @@ const docTemplate = `{
                 "temp": {
                     "type": "number"
                 },
+                "temp_cum_dev": {
+                    "type": "number"
+                },
+                "temp_increment": {
+                    "type": "number"
+                },
                 "x": {
+                    "type": "number"
+                },
+                "x_cum_dev": {
+                    "type": "number"
+                },
+                "x_increment": {
                     "type": "number"
                 },
                 "y": {
                     "type": "number"
                 },
+                "y_cum_dev": {
+                    "type": "number"
+                },
+                "y_increment": {
+                    "type": "number"
+                },
                 "z": {
+                    "type": "number"
+                },
+                "z_cum_dev": {
+                    "type": "number"
+                },
+                "z_increment": {
                     "type": "number"
                 }
             }

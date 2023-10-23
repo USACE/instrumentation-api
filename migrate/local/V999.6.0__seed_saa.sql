@@ -39,7 +39,7 @@ INSERT INTO timeseries (id, instrument_id, parameter_id, unit_id, slug, name) VA
 
 
 INSERT INTO saa_opts (instrument_id, num_segments, bottom_elevation, initial_time) VALUES
-('eca4040e-aecb-4cd3-bcde-3e308f0356a6', 8, 0, NULL);
+('eca4040e-aecb-4cd3-bcde-3e308f0356a6', 8, 0, NOW() - INTERVAL '1 month');
 
 
 INSERT INTO saa_segment (instrument_id, id, length, x_timeseries_id, y_timeseries_id, z_timeseries_id, temp_timeseries_id) VALUES

@@ -33,7 +33,15 @@ const saaMeasurementsArraySchema = `{
         "x": { "type": [ "number", "null" ] },
         "y": { "type": [ "number", "null" ] },
         "z": { "type": [ "number", "null" ] },
-        "temp": { "type": [ "number", "null" ] }
+        "temp": { "type": [ "number", "null" ] },
+        "x_increment": { "type": [ "number", "null" ] },
+        "y_increment": { "type": [ "number", "null" ] },
+        "z_increment": { "type": [ "number", "null" ] },
+        "temp_increment": { "type": [ "number", "null" ] },
+        "x_cum_dev": { "type": [ "number", "null" ] },
+        "y_cum_dev": { "type": [ "number", "null" ] },
+        "z_cum_dev": { "type": [ "number", "null" ] },
+        "temp_cum_dev": { "type": [ "number", "null" ] }
     },
     "additionalProperties": false
 }`

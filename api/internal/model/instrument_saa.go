@@ -31,11 +31,19 @@ type SaaMeasurements struct {
 }
 
 type SaaSegmentMeasurement struct {
-	SegmentID int      `json:"segment_id" db:"segment_id"`
-	X         *float64 `json:"x" db:"x"`
-	Y         *float64 `json:"y" db:"y"`
-	Z         *float64 `json:"z" db:"z"`
-	Temp      *float64 `json:"temp" db:"temp"`
+	SegmentID     int      `json:"segment_id" db:"segment_id"`
+	X             *float64 `json:"x" db:"x"`
+	Y             *float64 `json:"y" db:"y"`
+	Z             *float64 `json:"z" db:"z"`
+	Temp          *float64 `json:"temp" db:"temp"`
+	XIncrement    *float64 `json:"x_increment" db:"x_increment"`
+	YIncrement    *float64 `json:"y_increment" db:"y_increment"`
+	ZIncrement    *float64 `json:"z_increment" db:"z_increment"`
+	TempIncrement *float64 `json:"temp_increment" db:"temp_increment"`
+	XCumDev       *float64 `json:"x_cum_dev" db:"x_cum_dev"`
+	YCumDev       *float64 `json:"y_cum_dev" db:"y_cum_dev"`
+	ZCumDev       *float64 `json:"z_cum_dev" db:"z_cum_dev"`
+	TempCumDev    *float64 `json:"temp_cum_dev" db:"temp_cum_dev"`
 }
 
 // TODO: when creating new timeseries, any depth based instruments should not be available for assignment
@@ -122,6 +130,7 @@ const getSaaMeasurementsForInstrument = `
 	SELECT instrument_id, time, measurements
 	FROM v_saa_measurement
 	WHERE instrument_id = $1 AND time >= $2 AND time <= $3
+	OR time IN (SELECT initial_time FROM saa_opts WHERE instrument_id = $1)
 `
 
 func (q *Queries) GetSaaMeasurementsForInstrument(ctx context.Context, instrumentID uuid.UUID, tw TimeWindow) ([]SaaMeasurements, error) {
