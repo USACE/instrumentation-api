@@ -2070,6 +2070,177 @@
                 }
             }
         },
+        "/instruments/ipi/{instrument_id}/measurements": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "instrument-ipi"
+                ],
+                "summary": "creates instrument notes",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "instrument uuid",
+                        "name": "instrument_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "after time",
+                        "name": "after",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "before time",
+                        "name": "before",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IpiMeasurements"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/instruments/ipi/{instrument_id}/segments": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "instrument-ipi"
+                ],
+                "summary": "gets all ipi segments for an instrument",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "instrument uuid",
+                        "name": "instrument_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IpiSegment"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "instrument-ipi"
+                ],
+                "summary": "updates multiple segments for an ipi instrument",
+                "parameters": [
+                    {
+                        "description": "ipi instrument segments payload",
+                        "name": "instrument_segments",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IpiSegment"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IpiSegment"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/instruments/notes": {
             "get": {
                 "produces": [
@@ -8416,6 +8587,54 @@
                     "items": {
                         "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentStatus"
                     }
+                }
+            }
+        },
+        "github_com_USACE_instrumentation-api_api_internal_model.IpiMeasurements": {
+            "type": "object",
+            "properties": {
+                "measurements": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IpiSegmentMeasurement"
+                    }
+                },
+                "time": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_USACE_instrumentation-api_api_internal_model.IpiSegment": {
+            "type": "object",
+            "properties": {
+                "cum_dev_timeseries_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "instrument_id": {
+                    "type": "string"
+                },
+                "length": {
+                    "type": "number"
+                },
+                "tilt_timeseries_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_USACE_instrumentation-api_api_internal_model.IpiSegmentMeasurement": {
+            "type": "object",
+            "properties": {
+                "cum_dev": {
+                    "type": "number"
+                },
+                "segment_id": {
+                    "type": "integer"
+                },
+                "tilt": {
+                    "type": "number"
                 }
             }
         },

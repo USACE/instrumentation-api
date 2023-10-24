@@ -32,6 +32,7 @@ func NewInstrumentService(db *model.Database, q *model.Queries) *instrumentServi
 
 var (
 	saaTypeID = uuid.MustParse("07b91c5c-c1c5-428d-8bb9-e4c93ab2b9b9")
+	ipiTypeID = uuid.MustParse("c81f3a5d-fc5f-47fd-b545-401fe6ee63bb")
 )
 
 type requestType int
@@ -60,6 +61,26 @@ func handleOpts(ctx context.Context, q *model.Queries, inst model.Instrument, rt
 		}
 		if rt == update {
 			if err := q.UpdateSaaOpts(ctx, inst.ID, opts); err != nil {
+				return err
+			}
+		}
+	case ipiTypeID:
+		opts, err := model.MapToStruct[model.IpiOpts](inst.Opts)
+		if err != nil {
+			return err
+		}
+		if rt == create {
+			if err := q.CreateIpiOpts(ctx, inst.ID, opts); err != nil {
+				return err
+			}
+			for i := 1; i <= opts.NumSegments; i++ {
+				if err := q.CreateIpiSegment(ctx, model.IpiSegment{ID: i, InstrumentID: inst.ID}); err != nil {
+					return err
+				}
+			}
+		}
+		if rt == update {
+			if err := q.UpdateIpiOpts(ctx, inst.ID, opts); err != nil {
 				return err
 			}
 		}

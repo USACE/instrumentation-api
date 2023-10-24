@@ -186,6 +186,11 @@ func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 	r.private.POST("/instruments/:instrument_id/status", h.CreateOrUpdateInstrumentStatus)
 	r.private.DELETE("/instruments/:instrument_id/status/:status_id", h.DeleteInstrumentStatus)
 
+	// IpiInstruemnt
+	r.public.GET("/instruments/ipi/:instrument_id/segments", h.GetAllIpiSegmentsForInstrument)
+	r.public.GET("/instruments/ipi/:instrument_id/measurements", h.GetIpiMeasurementsForInstrument)
+	r.private.PUT("/instruments/ipi/:instrument_id/segments", h.UpdateIpiSegments)
+
 	// Measurement
 	r.private.POST("/projects/:project_id/timeseries_measurements", h.CreateOrUpdateProjectTimeseriesMeasurements)
 	r.app.POST("/timeseries_measurements", h.CreateOrUpdateTimeseriesMeasurements)
