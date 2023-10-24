@@ -88,7 +88,7 @@ const createSaaSegment = `
 		y_timeseries_id,
 		z_timeseries_id,
 		temp_timeseries_id
-	) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+	) VALUES ($1, $2, $3, $4, $5, $6)
 `
 
 func (q *Queries) CreateSaaSegment(ctx context.Context, seg SaaSegment) error {
