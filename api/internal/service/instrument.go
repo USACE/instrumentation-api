@@ -102,6 +102,7 @@ func createInstrument(ctx context.Context, q *model.Queries, instrument model.In
 			return model.IDAndSlug{}, err
 		}
 	}
+	instrument.ID = newInstrument.ID
 	if err := handleOpts(ctx, q, instrument, create); err != nil {
 		return model.IDAndSlug{}, err
 	}
