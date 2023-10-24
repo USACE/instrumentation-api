@@ -110,7 +110,7 @@ func (h *ApiHandler) UpdateEquivalencyTable(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, err.Error())
 	}
 
-	if err := h.EquivalencyTableService.UpdateEquivalencyTable(c.Request().Context(), &t); err != nil {
+	if err := h.EquivalencyTableService.UpdateEquivalencyTable(c.Request().Context(), t); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
