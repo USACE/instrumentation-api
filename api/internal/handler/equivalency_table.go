@@ -106,20 +106,18 @@ func (h *ApiHandler) UpdateEquivalencyTable(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, message.MatchRouteParam("`datalogger_id`"))
 	}
 
-	if err := h.DataloggerService.VerifyDataloggerExists(c.Request().Context(), dlID); err != nil {
+	ctx := c.Request().Context()
+
+	if err := h.DataloggerService.VerifyDataloggerExists(ctx, dlID); err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, err.Error())
 	}
 
-	if err := h.EquivalencyTableService.UpdateEquivalencyTable(c.Request().Context(), &t); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	eqt, err := h.EquivalencyTableService.GetEquivalencyTable(c.Request().Context(), dlID)
+	eqtUpdated, err := h.EquivalencyTableService.UpdateEquivalencyTable(ctx, dlID, t)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, eqt)
+	return c.JSON(http.StatusOK, eqtUpdated)
 }
 
 // DeleteEquivalencyTable godoc

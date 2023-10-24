@@ -10,7 +10,7 @@ import (
 type EquivalencyTableService interface {
 	GetEquivalencyTable(ctx context.Context, dlID uuid.UUID) (model.EquivalencyTable, error)
 	CreateEquivalencyTable(ctx context.Context, t model.EquivalencyTable) error
-	UpdateEquivalencyTable(ctx context.Context, t *model.EquivalencyTable) error
+	UpdateEquivalencyTable(ctx context.Context, dataloggerID uuid.UUID, t model.EquivalencyTable) (model.EquivalencyTable, error)
 	DeleteEquivalencyTable(ctx context.Context, dataloggerID uuid.UUID) error
 	DeleteEquivalencyTableRow(ctx context.Context, dataloggerID, rowID uuid.UUID) error
 }
@@ -49,25 +49,31 @@ func (s equivalencyTableService) CreateEquivalencyTable(ctx context.Context, t m
 }
 
 // UpdateEquivalencyTable updates rows of an EquivalencyTable
-func (s equivalencyTableService) UpdateEquivalencyTable(ctx context.Context, t *model.EquivalencyTable) error {
+func (s equivalencyTableService) UpdateEquivalencyTable(ctx context.Context, dataloggerID uuid.UUID, t model.EquivalencyTable) (model.EquivalencyTable, error) {
 	tx, err := s.db.BeginTxx(ctx, nil)
 	if err != nil {
-		return err
+		return model.EquivalencyTable{}, err
 	}
 	defer model.TxDo(tx.Rollback)
 
 	qtx := s.WithTx(tx)
 
 	for _, r := range t.Rows {
-		if r.TimeseriesID == nil {
-			continue
+		if r.TimeseriesID != nil {
+			if err = qtx.GetIsValidEquivalencyTableTimeseries(ctx, *r.TimeseriesID); err != nil {
+				return model.EquivalencyTable{}, err
+			}
 		}
-		if err = qtx.GetIsValidEquivalencyTableTimeseries(ctx, *r.TimeseriesID); err != nil {
-			return err
-		}
-		if err := qtx.UpdateEquivalencyTableRow(ctx, r); err != nil {
-			return err
+		if err := qtx.UpdateEquivalencyTableRow(ctx, dataloggerID, r); err != nil {
+			return model.EquivalencyTable{}, err
 		}
 	}
-	return tx.Commit()
+
+	eqt, err := qtx.GetEquivalencyTable(ctx, dataloggerID)
+
+	if err := tx.Commit(); err != nil {
+		return model.EquivalencyTable{}, err
+	}
+
+	return eqt, nil
 }

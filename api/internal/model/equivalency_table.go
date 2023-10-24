@@ -43,7 +43,7 @@ func (q *Queries) GetIsValidEquivalencyTableTimeseries(ctx context.Context, tsID
 		return err
 	}
 	if !isValid {
-		return fmt.Errorf("timeseries '%s' must not be computed", tsID)
+		return fmt.Errorf("timeseries '%s' must not be computed or constant", tsID)
 	}
 	return nil
 }
@@ -105,9 +105,9 @@ const updateEquivalencyTableRow = `
 	AND id = $2
 `
 
-func (q *Queries) UpdateEquivalencyTableRow(ctx context.Context, tr EquivalencyTableRow) error {
+func (q *Queries) UpdateEquivalencyTableRow(ctx context.Context, dataloggerID uuid.UUID, tr EquivalencyTableRow) error {
 	if _, err := q.db.ExecContext(ctx, updateEquivalencyTableRow,
-		tr.DataloggerID,
+		dataloggerID,
 		tr.ID,
 		tr.FieldName,
 		tr.DisplayName,
