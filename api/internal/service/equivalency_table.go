@@ -36,11 +36,10 @@ func (s equivalencyTableService) CreateEquivalencyTable(ctx context.Context, t m
 	qtx := s.WithTx(tx)
 
 	for _, r := range t.Rows {
-		if r.TimeseriesID == nil {
-			continue
-		}
-		if err = qtx.GetIsValidEquivalencyTableTimeseries(ctx, *r.TimeseriesID); err != nil {
-			return err
+		if r.TimeseriesID != nil {
+			if err = qtx.GetIsValidEquivalencyTableTimeseries(ctx, *r.TimeseriesID); err != nil {
+				return err
+			}
 		}
 		if err := qtx.CreateEquivalencyTableRow(ctx, t.DataloggerID, r); err != nil {
 			return err
