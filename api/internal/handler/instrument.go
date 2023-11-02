@@ -93,6 +93,7 @@ func (h *ApiHandler) GetInstrument(c echo.Context) error {
 //	@Security Bearer
 //	@Security Bearer
 func (h *ApiHandler) CreateInstruments(c echo.Context) error {
+	ctx := c.Request().Context()
 	newInstrumentCollection := func(c echo.Context) (model.InstrumentCollection, error) {
 		ic := model.InstrumentCollection{}
 		if err := c.Bind(&ic); err != nil {
@@ -106,7 +107,7 @@ func (h *ApiHandler) CreateInstruments(c echo.Context) error {
 		}
 
 		// slugs already taken in the database
-		slugsTaken, err := h.InstrumentService.ListInstrumentSlugs(c.Request().Context())
+		slugsTaken, err := h.InstrumentService.ListInstrumentSlugs(ctx)
 		if err != nil {
 			return model.InstrumentCollection{}, err
 		}
@@ -138,14 +139,14 @@ func (h *ApiHandler) CreateInstruments(c echo.Context) error {
 	}
 
 	if c.QueryParam("dry_run") == "true" {
-		v, err := h.InstrumentService.ValidateCreateInstruments(c.Request().Context(), ic.Items)
+		v, err := h.InstrumentService.ValidateCreateInstruments(ctx, ic.Items)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		return c.JSON(http.StatusOK, v)
 	}
 
-	nn, err := h.InstrumentService.CreateInstruments(c.Request().Context(), ic.Items)
+	nn, err := h.InstrumentService.CreateInstruments(ctx, ic.Items)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}

@@ -85,8 +85,23 @@ CREATE OR REPLACE VIEW v_instrument AS (
     LEFT JOIN (
         -- optional properties that vary per
         -- instrument can be added here via union
-        SELECT x.instrument_id, ROW_TO_JSON(x) AS opts
-        FROM saa_opts x
+    SELECT o1.instrument_id, (ROW_TO_JSON(o1)::JSONB || ROW_TO_JSON(b1)::JSONB)::JSON AS opts
+        FROM saa_opts o1
+        LEFT JOIN LATERAL (
+            SELECT value AS bottom_elevation FROM timeseries_measurement m
+            WHERE m.timeseries_id = o1.bottom_elevation_timeseries_id
+            ORDER BY m.time DESC
+            LIMIT 1
+        ) b1 ON true
+        UNION ALL
+    SELECT o2.instrument_id, (ROW_TO_JSON(o2)::JSONB || ROW_TO_JSON(b2)::JSONB)::JSON AS opts
+        FROM ipi_opts o2
+        LEFT JOIN LATERAL (
+            SELECT value AS bottom_elevation FROM timeseries_measurement m
+            WHERE m.timeseries_id = o2.bottom_elevation_timeseries_id
+            ORDER BY m.time DESC
+            LIMIT 1
+        ) b2 ON true
     ) o ON o.instrument_id = i.id
 );
 

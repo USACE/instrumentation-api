@@ -106,7 +106,9 @@ GRANT SELECT ON
     alert_config_instrument,
     submittal,
     saa_opts,
-    saa_segment
+    saa_segment,
+    ipi_opts,
+    ipi_segment
 TO instrumentation_reader;
 
 -- Role instrumentation_writer
@@ -166,7 +168,9 @@ GRANT INSERT,UPDATE,DELETE ON
     alert_config_instrument,
     submittal,
     saa_opts,
-    saa_segment
+    saa_segment,
+    ipi_opts,
+    ipi_segment
 TO instrumentation_writer;
 
 -- Role postgis_reader

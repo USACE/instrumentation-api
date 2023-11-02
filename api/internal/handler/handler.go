@@ -31,6 +31,7 @@ type ApiHandler struct {
 	InstrumentGroupService         service.InstrumentGroupService
 	InstrumentNoteService          service.InstrumentNoteService
 	InstrumentStatusService        service.InstrumentStatusService
+	IpiInstrumentService           service.IpiInstrumentService
 	MeasurementService             service.MeasurementService
 	InclinometerMeasurementService service.InclinometerMeasurementService
 	OpendcsService                 service.OpendcsService
@@ -76,6 +77,7 @@ func NewApi(cfg *config.ApiConfig) *ApiHandler {
 		InstrumentGroupService:         service.NewInstrumentGroupService(db, q),
 		InstrumentNoteService:          service.NewInstrumentNoteService(db, q),
 		InstrumentStatusService:        service.NewInstrumentStatusService(db, q),
+		IpiInstrumentService:           service.NewIpiInstrumentService(db, q),
 		MeasurementService:             service.NewMeasurementService(db, q),
 		InclinometerMeasurementService: service.NewInclinometerMeasurementService(db, q),
 		OpendcsService:                 service.NewOpendcsService(db, q),
