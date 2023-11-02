@@ -47,15 +47,15 @@ CREATE VIEW v_saa_measurement AS (
         q.y,
         q.z,
         q.t,
-        CASE WHEN q.initial_x IS NULL THEN NULL ELSE (q.initial_x - q.x) END x_increment,
-        CASE WHEN q.initial_y IS NULL THEN NULL ELSE (q.initial_y - q.y) END y_increment,
-        CASE WHEN q.initial_z IS NULL THEN NULL ELSE (q.initial_z - q.z) END z_increment,
-        CASE WHEN q.initial_t IS NULL THEN NULL ELSE (q.initial_t - q.t) END temp_increment,
-        CASE WHEN q.initial_x IS NULL THEN NULL ELSE SUM(q.initial_x - q.x) FILTER (WHERE q.time >= q.initial_time) OVER (ORDER BY seg.id DESC) END x_cum_dev,
-        CASE WHEN q.initial_y IS NULL THEN NULL ELSE SUM(q.initial_y - q.y) FILTER (WHERE q.time >= q.initial_time) OVER (ORDER BY seg.id DESC) END y_cum_dev,
-        CASE WHEN q.initial_z IS NULL THEN NULL ELSE SUM(q.initial_z - q.z) FILTER (WHERE q.time >= q.initial_time) OVER (ORDER BY seg.id DESC) END z_cum_dev,
-        CASE WHEN q.initial_t IS NULL THEN NULL ELSE SUM(q.initial_t - q.t) FILTER (WHERE q.time >= q.initial_time) OVER (ORDER BY seg.id DESC) END temp_cum_dev,
-        CASE WHEN q.bottom IS NULL THEN NULL ELSE SUM(q.bottom + q.seg_length) OVER (ORDER BY seg.id DESC) END elevation
+        q.initial_x - q.x x_increment,
+        q.initial_y - q.y y_increment,
+        q.initial_z - q.z z_increment,
+        q.initial_t - q.t temp_increment,
+        SUM(q.initial_x - q.x) FILTER (WHERE q.time >= q.initial_time) OVER (ORDER BY seg.id DESC) x_cum_dev,
+        SUM(q.initial_y - q.y) FILTER (WHERE q.time >= q.initial_time) OVER (ORDER BY seg.id DESC) y_cum_dev,
+        SUM(q.initial_z - q.z) FILTER (WHERE q.time >= q.initial_time) OVER (ORDER BY seg.id DESC) z_cum_dev,
+        SUM(q.initial_t - q.t) FILTER (WHERE q.time >= q.initial_time) OVER (ORDER BY seg.id DESC) temp_cum_dev,
+        SUM(q.bottom + q.seg_length) OVER (ORDER BY seg.id DESC) elevation
     FROM saa_segment seg
     INNER JOIN saa_opts opts ON opts.instrument_id = seg.instrument_id
     LEFT JOIN LATERAL (
@@ -123,8 +123,8 @@ CREATE VIEW v_ipi_measurement AS (
         q.seg_length,
         q.time,
         q.tilt,
-        CASE WHEN q.tilt IS NULL THEN q.cum_dev ELSE COALESCE(q.cum_dev, SIN(q.tilt * PI() / 180) * q.seg_length) END cum_dev,
-        CASE WHEN q.bottom IS NULL THEN NULL ELSE SUM(q.bottom + q.seg_length) OVER (ORDER BY seg.id DESC) END elevation
+        COALESCE(q.cum_dev, SIN(q.tilt * PI() / 180) * q.seg_length) cum_dev,
+        SUM(q.bottom + q.seg_length) OVER (ORDER BY seg.id DESC) elevation
     FROM ipi_segment seg
     INNER JOIN ipi_opts opts ON opts.instrument_id = seg.instrument_id
     LEFT JOIN LATERAL (
