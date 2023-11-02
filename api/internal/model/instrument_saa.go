@@ -73,7 +73,7 @@ const updateSaaOpts = `
 `
 
 func (q *Queries) UpdateSaaOpts(ctx context.Context, instrumentID uuid.UUID, si SaaOpts) error {
-	_, err := q.db.ExecContext(ctx, updateSaaOpts, si.InstrumentID, si.BottomElevationTimeseriesID, si.InitialTime)
+	_, err := q.db.ExecContext(ctx, updateSaaOpts, instrumentID, si.BottomElevationTimeseriesID, si.InitialTime)
 	return err
 }
 

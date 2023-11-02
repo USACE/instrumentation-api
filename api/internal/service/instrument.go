@@ -122,12 +122,12 @@ func (s instrumentService) UpdateInstrument(ctx context.Context, i model.Instrum
 		return model.Instrument{}, err
 	}
 
-	aa, err := qtx.GetInstrument(ctx, i.ID)
-	if err != nil {
+	if err := handleOpts(ctx, qtx, i, update); err != nil {
 		return model.Instrument{}, err
 	}
 
-	if err := handleOpts(ctx, qtx, i, update); err != nil {
+	aa, err := qtx.GetInstrument(ctx, i.ID)
+	if err != nil {
 		return model.Instrument{}, err
 	}
 

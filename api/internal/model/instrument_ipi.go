@@ -61,7 +61,7 @@ const updateIpiOpts = `
 `
 
 func (q *Queries) UpdateIpiOpts(ctx context.Context, instrumentID uuid.UUID, si IpiOpts) error {
-	_, err := q.db.ExecContext(ctx, updateIpiOpts, si.InstrumentID, si.BottomElevationTimeseriesID, si.InitialTime)
+	_, err := q.db.ExecContext(ctx, updateIpiOpts, instrumentID, si.BottomElevationTimeseriesID, si.InitialTime)
 	return err
 }
 
