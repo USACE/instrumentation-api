@@ -42,53 +42,6 @@ const (
 	update
 )
 
-func handleOpts(ctx context.Context, q *model.Queries, inst model.Instrument, rt requestType) error {
-	switch inst.TypeID {
-	case saaTypeID:
-		opts, err := model.MapToStruct[model.SaaOpts](inst.Opts)
-		if err != nil {
-			return err
-		}
-		if rt == create {
-			if err := q.CreateSaaOpts(ctx, inst.ID, opts); err != nil {
-				return err
-			}
-			for i := 1; i <= opts.NumSegments; i++ {
-				if err := q.CreateSaaSegment(ctx, model.SaaSegment{ID: i, InstrumentID: inst.ID}); err != nil {
-					return err
-				}
-			}
-		}
-		if rt == update {
-			if err := q.UpdateSaaOpts(ctx, inst.ID, opts); err != nil {
-				return err
-			}
-		}
-	case ipiTypeID:
-		opts, err := model.MapToStruct[model.IpiOpts](inst.Opts)
-		if err != nil {
-			return err
-		}
-		if rt == create {
-			if err := q.CreateIpiOpts(ctx, inst.ID, opts); err != nil {
-				return err
-			}
-			for i := 1; i <= opts.NumSegments; i++ {
-				if err := q.CreateIpiSegment(ctx, model.IpiSegment{ID: i, InstrumentID: inst.ID}); err != nil {
-					return err
-				}
-			}
-		}
-		if rt == update {
-			if err := q.UpdateIpiOpts(ctx, inst.ID, opts); err != nil {
-				return err
-			}
-		}
-	default:
-	}
-	return nil
-}
-
 func createInstrument(ctx context.Context, q *model.Queries, instrument model.Instrument) (model.IDAndSlug, error) {
 	newInstrument, err := q.CreateInstrument(ctx, instrument)
 	if err != nil {

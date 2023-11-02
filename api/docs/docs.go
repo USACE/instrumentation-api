@@ -8627,6 +8627,9 @@ const docTemplate = `{
                 "length": {
                     "type": "number"
                 },
+                "length_timeseries_id": {
+                    "type": "string"
+                },
                 "tilt_timeseries_id": {
                     "type": "string"
                 }
@@ -8636,6 +8639,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "cum_dev": {
+                    "type": "number"
+                },
+                "elevation": {
                     "type": "number"
                 },
                 "segment_id": {
@@ -8904,6 +8910,9 @@ const docTemplate = `{
                 "length": {
                     "type": "number"
                 },
+                "length_timeseries_id": {
+                    "type": "string"
+                },
                 "temp_timeseries_id": {
                     "type": "string"
                 },
@@ -8921,6 +8930,9 @@ const docTemplate = `{
         "github_com_USACE_instrumentation-api_api_internal_model.SaaSegmentMeasurement": {
             "type": "object",
             "properties": {
+                "elevation": {
+                    "type": "number"
+                },
                 "segment_id": {
                     "type": "integer"
                 },

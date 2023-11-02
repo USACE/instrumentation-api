@@ -1,14 +1,21 @@
 DROP VIEW IF EXISTS v_saa_segment;
 CREATE VIEW v_saa_segment AS (
     SELECT
-        id,
-        instrument_id,
-        length,
-        x_timeseries_id,
-        y_timeseries_id,
-        z_timeseries_id,
-        temp_timeseries_id
-    FROM saa_segment
+        seg.id,
+        seg.instrument_id,
+        seg.length_timeseries_id,
+        sub.length,
+        seg.x_timeseries_id,
+        seg.y_timeseries_id,
+        seg.z_timeseries_id,
+        seg.temp_timeseries_id
+    FROM saa_segment seg
+    LEFT JOIN LATERAL (
+        SELECT value AS length FROM timeseries_measurement
+        WHERE timeseries_id = seg.length_timeseries_id
+        ORDER BY time DESC
+        LIMIT 1
+    ) sub ON true
 );
 
 DROP VIEW IF EXISTS v_saa_measurement;
@@ -29,7 +36,8 @@ CREATE VIEW v_saa_measurement AS (
             'x_cum_dev',        r.x_cum_dev,
             'y_cum_dev',        r.y_cum_dev,
             'z_cum_dev',        r.z_cum_dev,
-            'temp_cum_dev',     r.temp_cum_dev
+            'temp_cum_dev',     r.temp_cum_dev,
+            'elevation',        r.elevation
         ) ORDER BY r.segment_id)::TEXT AS measurements
     FROM (SELECT DISTINCT
         seg.instrument_id,
@@ -46,7 +54,8 @@ CREATE VIEW v_saa_measurement AS (
         CASE WHEN q.initial_x IS NULL THEN NULL ELSE SUM(q.initial_x - q.x) FILTER (WHERE q.time >= q.initial_time) OVER (ORDER BY seg.id DESC) END x_cum_dev,
         CASE WHEN q.initial_y IS NULL THEN NULL ELSE SUM(q.initial_y - q.y) FILTER (WHERE q.time >= q.initial_time) OVER (ORDER BY seg.id DESC) END y_cum_dev,
         CASE WHEN q.initial_z IS NULL THEN NULL ELSE SUM(q.initial_z - q.z) FILTER (WHERE q.time >= q.initial_time) OVER (ORDER BY seg.id DESC) END z_cum_dev,
-        CASE WHEN q.initial_t IS NULL THEN NULL ELSE SUM(q.initial_t - q.t) FILTER (WHERE q.time >= q.initial_time) OVER (ORDER BY seg.id DESC) END temp_cum_dev
+        CASE WHEN q.initial_t IS NULL THEN NULL ELSE SUM(q.initial_t - q.t) FILTER (WHERE q.time >= q.initial_time) OVER (ORDER BY seg.id DESC) END temp_cum_dev,
+        CASE WHEN q.bottom IS NULL THEN NULL ELSE SUM(q.bottom + q.seg_length) OVER (ORDER BY seg.id DESC) END elevation
     FROM saa_segment seg
     INNER JOIN saa_opts opts ON opts.instrument_id = seg.instrument_id
     LEFT JOIN LATERAL (
@@ -60,17 +69,21 @@ CREATE VIEW v_saa_measurement AS (
             ix.value AS initial_x,
             iy.value AS initial_y,
             iz.value AS initial_z,
-            it.value AS initial_t
+            it.value AS initial_t,
+            locf(b.value) OVER (ORDER BY a.time ASC) AS bottom,
+            locf(l.value) OVER (ORDER BY a.time ASC) AS seg_length
         FROM (SELECT DISTINCT time FROM timeseries_measurement WHERE timeseries_id IN (SELECT id FROM timeseries WHERE instrument_id = seg.instrument_id)) a
         LEFT JOIN LATERAL (SELECT time FROM timeseries_measurement WHERE time = opts.initial_time) ia ON true
-        LEFT JOIN (SELECT * FROM timeseries_measurement WHERE timeseries_id = seg.x_timeseries_id) x ON x.time = a.time
-        LEFT JOIN (SELECT * FROM timeseries_measurement WHERE timeseries_id = seg.y_timeseries_id) y ON y.time = a.time
-        LEFT JOIN (SELECT * FROM timeseries_measurement WHERE timeseries_id = seg.z_timeseries_id) z ON z.time = a.time
-        LEFT JOIN (SELECT * FROM timeseries_measurement WHERE timeseries_id = seg.temp_timeseries_id) t ON t.time = a.time
-        LEFT JOIN (SELECT * FROM timeseries_measurement WHERE timeseries_id = seg.x_timeseries_id) ix ON ix.time = ia.time
-        LEFT JOIN (SELECT * FROM timeseries_measurement WHERE timeseries_id = seg.y_timeseries_id) iy ON iy.time = ia.time
-        LEFT JOIN (SELECT * FROM timeseries_measurement WHERE timeseries_id = seg.z_timeseries_id) iz ON iz.time = ia.time
-        LEFT JOIN (SELECT * FROM timeseries_measurement WHERE timeseries_id = seg.temp_timeseries_id) it ON it.time = ia.time
+        LEFT JOIN (SELECT time, value FROM timeseries_measurement WHERE timeseries_id = seg.x_timeseries_id) x ON x.time = a.time
+        LEFT JOIN (SELECT time, value FROM timeseries_measurement WHERE timeseries_id = seg.y_timeseries_id) y ON y.time = a.time
+        LEFT JOIN (SELECT time, value FROM timeseries_measurement WHERE timeseries_id = seg.z_timeseries_id) z ON z.time = a.time
+        LEFT JOIN (SELECT time, value FROM timeseries_measurement WHERE timeseries_id = seg.temp_timeseries_id) t ON t.time = a.time
+        LEFT JOIN (SELECT time, value FROM timeseries_measurement WHERE timeseries_id = seg.x_timeseries_id) ix ON ix.time = ia.time
+        LEFT JOIN (SELECT time, value FROM timeseries_measurement WHERE timeseries_id = seg.y_timeseries_id) iy ON iy.time = ia.time
+        LEFT JOIN (SELECT time, value FROM timeseries_measurement WHERE timeseries_id = seg.z_timeseries_id) iz ON iz.time = ia.time
+        LEFT JOIN (SELECT time, value FROM timeseries_measurement WHERE timeseries_id = seg.temp_timeseries_id) it ON it.time = ia.time
+        LEFT JOIN (SELECT time, value FROM timeseries_measurement WHERE timeseries_id = opts.bottom_elevation_timeseries_id) b ON b.time = a.time
+        LEFT JOIN (SELECT time, value FROM timeseries_measurement WHERE timeseries_id = seg.length_timeseries_id) l ON l.time = a.time
     ) q ON true) r
     GROUP BY r.instrument_id, r.time
 );
@@ -78,12 +91,19 @@ CREATE VIEW v_saa_measurement AS (
 DROP VIEW IF EXISTS v_ipi_segment;
 CREATE VIEW v_ipi_segment AS (
     SELECT
-        id,
-        instrument_id,
-        length,
-        tilt_timeseries_id,
-        cum_dev_timeseries_id
-    FROM ipi_segment
+        seg.id,
+        seg.instrument_id,
+        seg.length_timeseries_id,
+        sub.length,
+        seg.tilt_timeseries_id,
+        seg.cum_dev_timeseries_id
+    FROM ipi_segment seg
+    LEFT JOIN LATERAL (
+        SELECT value AS length FROM timeseries_measurement
+        WHERE timeseries_id = seg.length_timeseries_id
+        ORDER BY time DESC
+        LIMIT 1
+    ) sub ON true
 );
 
 DROP VIEW IF EXISTS v_ipi_measurement;
@@ -94,26 +114,32 @@ CREATE VIEW v_ipi_measurement AS (
         JSON_AGG(JSON_BUILD_OBJECT(
             'segment_id',   r.segment_id,
             'tilt',         r.tilt,
-            'cum_dev',      CASE WHEN r.tilt IS NULL THEN r.cum_dev ELSE COALESCE(r.cum_dev, SIN(r.tilt * PI() / 180) * r.length) END
+            'cum_dev',      r.cum_dev,
+            'elevation',    r.elevation
         ) ORDER BY r.segment_id)::TEXT AS measurements
     FROM (SELECT DISTINCT
         seg.instrument_id,
         seg.id AS segment_id,
-        seg.length,
+        q.seg_length,
         q.time,
         q.tilt,
-        q.cum_dev
+        CASE WHEN q.tilt IS NULL THEN q.cum_dev ELSE COALESCE(q.cum_dev, SIN(q.tilt * PI() / 180) * q.seg_length) END cum_dev,
+        CASE WHEN q.bottom IS NULL THEN NULL ELSE SUM(q.bottom + q.seg_length) OVER (ORDER BY seg.id DESC) END elevation
     FROM ipi_segment seg
     INNER JOIN ipi_opts opts ON opts.instrument_id = seg.instrument_id
     LEFT JOIN LATERAL (
         SELECT
             a.time,
             t.value AS tilt,
-            d.value AS cum_dev
+            d.value AS cum_dev,
+            locf(b.value) OVER (ORDER BY a.time ASC) AS bottom,
+            locf(l.value) OVER (ORDER BY a.time ASC) AS seg_length
         FROM (SELECT DISTINCT time FROM timeseries_measurement WHERE timeseries_id IN (SELECT id FROM timeseries WHERE instrument_id = seg.instrument_id)) a
         LEFT JOIN LATERAL (SELECT time FROM timeseries_measurement WHERE time = opts.initial_time) ia ON true
-        LEFT JOIN (SELECT * FROM timeseries_measurement WHERE timeseries_id = seg.tilt_timeseries_id) t ON t.time = a.time
-        LEFT JOIN (SELECT * FROM timeseries_measurement WHERE timeseries_id = seg.cum_dev_timeseries_id) d ON d.time = a.time
+        LEFT JOIN (SELECT time, value FROM timeseries_measurement WHERE timeseries_id = seg.tilt_timeseries_id) t ON t.time = a.time
+        LEFT JOIN (SELECT time, value FROM timeseries_measurement WHERE timeseries_id = seg.cum_dev_timeseries_id) d ON d.time = a.time
+        LEFT JOIN (SELECT time, value FROM timeseries_measurement WHERE timeseries_id = opts.bottom_elevation_timeseries_id) b ON b.time = a.time
+        LEFT JOIN (SELECT time, value FROM timeseries_measurement WHERE timeseries_id = seg.length_timeseries_id) l ON l.time = a.time
     ) q ON true) r
     GROUP BY r.instrument_id, r.time
 );

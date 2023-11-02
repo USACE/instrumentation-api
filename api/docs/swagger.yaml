@@ -632,12 +632,16 @@ definitions:
         type: string
       length:
         type: number
+      length_timeseries_id:
+        type: string
       tilt_timeseries_id:
         type: string
     type: object
   github_com_USACE_instrumentation-api_api_internal_model.IpiSegmentMeasurement:
     properties:
       cum_dev:
+        type: number
+      elevation:
         type: number
       segment_id:
         type: integer
@@ -813,6 +817,8 @@ definitions:
         type: string
       length:
         type: number
+      length_timeseries_id:
+        type: string
       temp_timeseries_id:
         type: string
       x_timeseries_id:
@@ -824,6 +830,8 @@ definitions:
     type: object
   github_com_USACE_instrumentation-api_api_internal_model.SaaSegmentMeasurement:
     properties:
+      elevation:
+        type: number
       segment_id:
         type: integer
       temp:

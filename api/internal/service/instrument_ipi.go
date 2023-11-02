@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"time"
 
 	"github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/google/uuid"
@@ -34,6 +35,12 @@ func (s ipiInstrumentService) UpdateIpiSegments(ctx context.Context, segs []mode
 
 	for _, seg := range segs {
 		if err := qtx.UpdateIpiSegment(ctx, seg); err != nil {
+			return err
+		}
+		if seg.Length == nil {
+			continue
+		}
+		if err := qtx.CreateTimeseriesMeasurement(ctx, seg.LengthTimeseriesID, time.Now(), *seg.Length); err != nil {
 			return err
 		}
 	}

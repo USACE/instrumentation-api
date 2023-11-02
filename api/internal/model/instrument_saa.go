@@ -8,20 +8,22 @@ import (
 )
 
 type SaaOpts struct {
-	InstrumentID    uuid.UUID  `json:"-" db:"instrument_id"`
-	NumSegments     int        `json:"num_segments" db:"num_segments"`
-	BottomElevation float32    `json:"bottom_elevation" db:"bottom_elevation"`
-	InitialTime     *time.Time `json:"initial_time" db:"initial_time"`
+	InstrumentID                uuid.UUID  `json:"-" db:"instrument_id"`
+	NumSegments                 int        `json:"num_segments" db:"num_segments"`
+	BottomElevationTimeseriesID uuid.UUID  `json:"bottom_elevation_timeseries_id" db:"bottom_elevation_timeseries_id"`
+	BottomElevation             float64    `json:"bottom_elevation" db:"bottom_elevation"`
+	InitialTime                 *time.Time `json:"initial_time" db:"initial_time"`
 }
 
 type SaaSegment struct {
-	ID               int        `json:"id" db:"id"`
-	InstrumentID     uuid.UUID  `json:"instrument_id" db:"instrument_id"`
-	Length           *float32   `json:"length" db:"length"`
-	XTimeseriesID    *uuid.UUID `json:"x_timeseries_id" db:"x_timeseries_id"`
-	YTimeseriesID    *uuid.UUID `json:"y_timeseries_id" db:"y_timeseries_id"`
-	ZTimeseriesID    *uuid.UUID `json:"z_timeseries_id" db:"z_timeseries_id"`
-	TempTimeseriesID *uuid.UUID `json:"temp_timeseries_id" db:"temp_timeseries_id"`
+	ID                 int        `json:"id" db:"id"`
+	InstrumentID       uuid.UUID  `json:"instrument_id" db:"instrument_id"`
+	Length             *float64   `json:"length" db:"length"`
+	LengthTimeseriesID uuid.UUID  `json:"length_timeseries_id" db:"length_timeseries_id"`
+	XTimeseriesID      *uuid.UUID `json:"x_timeseries_id" db:"x_timeseries_id"`
+	YTimeseriesID      *uuid.UUID `json:"y_timeseries_id" db:"y_timeseries_id"`
+	ZTimeseriesID      *uuid.UUID `json:"z_timeseries_id" db:"z_timeseries_id"`
+	TempTimeseriesID   *uuid.UUID `json:"temp_timeseries_id" db:"temp_timeseries_id"`
 }
 
 type SaaMeasurements struct {
@@ -44,29 +46,34 @@ type SaaSegmentMeasurement struct {
 	YCumDev       *float64 `json:"y_cum_dev" db:"y_cum_dev"`
 	ZCumDev       *float64 `json:"z_cum_dev" db:"z_cum_dev"`
 	TempCumDev    *float64 `json:"temp_cum_dev" db:"temp_cum_dev"`
+	Elevation     *float64 `json:"elevation" db:"elevation"`
 }
+
+var (
+	SaaParameterID = uuid.MustParse("6d12ca4c-b618-41cd-87a2-a248980a0d69")
+)
 
 // TODO: when creating new timeseries, any depth based instruments should not be available for assignment
 
 const createSaaOpts = `
-	INSERT INTO saa_opts (instrument_id, num_segments, bottom_elevation, initial_time)
+	INSERT INTO saa_opts (instrument_id, num_segments, bottom_elevation_timeseries_id, initial_time)
 	VALUES ($1, $2, $3, $4)
 `
 
 func (q *Queries) CreateSaaOpts(ctx context.Context, instrumentID uuid.UUID, si SaaOpts) error {
-	_, err := q.db.ExecContext(ctx, createSaaOpts, instrumentID, si.NumSegments, si.BottomElevation, si.InitialTime)
+	_, err := q.db.ExecContext(ctx, createSaaOpts, instrumentID, si.NumSegments, si.BottomElevationTimeseriesID, si.InitialTime)
 	return err
 }
 
 const updateSaaOpts = `
 	UPDATE saa_opts SET
-		bottom_elevation = $2,
+		bottom_elevation_timeseries_id = $2,
 		initial_time = $3
 	WHERE instrument_id = $1
 `
 
 func (q *Queries) UpdateSaaOpts(ctx context.Context, instrumentID uuid.UUID, si SaaOpts) error {
-	_, err := q.db.ExecContext(ctx, updateSaaOpts, si.InstrumentID, si.BottomElevation, si.InitialTime)
+	_, err := q.db.ExecContext(ctx, updateSaaOpts, si.InstrumentID, si.BottomElevationTimeseriesID, si.InitialTime)
 	return err
 }
 
@@ -82,19 +89,21 @@ func (q *Queries) GetAllSaaSegmentsForInstrument(ctx context.Context, instrument
 
 const createSaaSegment = `
 	INSERT INTO saa_segment (
+		id,
 		instrument_id,
-		length,
+		length_timeseries_id,
 		x_timeseries_id,
 		y_timeseries_id,
 		z_timeseries_id,
 		temp_timeseries_id
-	) VALUES ($1, $2, $3, $4, $5, $6)
+	) VALUES ($1, $2, $3, $4, $5, $6, $7)
 `
 
 func (q *Queries) CreateSaaSegment(ctx context.Context, seg SaaSegment) error {
 	_, err := q.db.ExecContext(ctx, createSaaSegment,
+		seg.ID,
 		seg.InstrumentID,
-		seg.Length,
+		seg.LengthTimeseriesID,
 		seg.XTimeseriesID,
 		seg.YTimeseriesID,
 		seg.ZTimeseriesID,
@@ -105,7 +114,7 @@ func (q *Queries) CreateSaaSegment(ctx context.Context, seg SaaSegment) error {
 
 const updateSaaSegment = `
 	UPDATE saa_segment SET
-		length = $3,
+		length_timeseries_id = $3,
 		x_timeseries_id = $4,
 		y_timeseries_id = $5,
 		z_timeseries_id = $6,
@@ -117,7 +126,7 @@ func (q *Queries) UpdateSaaSegment(ctx context.Context, seg SaaSegment) error {
 	_, err := q.db.ExecContext(ctx, updateSaaSegment,
 		seg.ID,
 		seg.InstrumentID,
-		seg.Length,
+		seg.LengthTimeseriesID,
 		seg.XTimeseriesID,
 		seg.YTimeseriesID,
 		seg.ZTimeseriesID,

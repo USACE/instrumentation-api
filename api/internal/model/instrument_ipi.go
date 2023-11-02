@@ -8,16 +8,18 @@ import (
 )
 
 type IpiOpts struct {
-	InstrumentID    uuid.UUID  `json:"-" db:"instrument_id"`
-	NumSegments     int        `json:"num_segments" db:"num_segments"`
-	BottomElevation float32    `json:"bottom_elevation" db:"bottom_elevation"`
-	InitialTime     *time.Time `json:"initial_time" db:"initial_time"`
+	InstrumentID                uuid.UUID  `json:"-" db:"instrument_id"`
+	NumSegments                 int        `json:"num_segments" db:"num_segments"`
+	BottomElevationTimeseriesID uuid.UUID  `json:"bottom_elevation_timeseries_id" db:"bottom_elevation_timeseries_id"`
+	BottomElevation             float64    `json:"bottom_elevation" db:"bottom_elevation"`
+	InitialTime                 *time.Time `json:"initial_time" db:"initial_time"`
 }
 
 type IpiSegment struct {
 	ID                 int        `json:"id" db:"id"`
 	InstrumentID       uuid.UUID  `json:"instrument_id" db:"instrument_id"`
-	Length             *float32   `json:"length" db:"length"`
+	Length             *float64   `json:"length" db:"length"`
+	LengthTimeseriesID uuid.UUID  `json:"length_timeseries_id" db:"length_timeseries_id"`
 	TiltTimeseriesID   *uuid.UUID `json:"tilt_timeseries_id" db:"tilt_timeseries_id"`
 	CumDevTimeseriesID *uuid.UUID `json:"cum_dev_timeseries_id" db:"cum_dev_timeseries_id"`
 }
@@ -29,32 +31,37 @@ type IpiMeasurements struct {
 }
 
 type IpiSegmentMeasurement struct {
-	SegmentID int      `json:"segment_id" db:"segment_id"`
-	Tilt      *float64 `json:"tilt" db:"tilt"`
-	CumDev    *float64 `json:"cum_dev" db:"cum_dev"`
+	SegmentID  int      `json:"segment_id" db:"segment_id"`
+	Tilt       *float64 `json:"tilt" db:"tilt"`
+	CumDev     *float64 `json:"cum_dev" db:"cum_dev"`
+	Elelvation *float64 `json:"elevation" db:"elevation"`
 }
+
+var (
+	IpiParameterID = uuid.MustParse("a9a5ad45-b2e5-4744-816e-d3184f2c08bd")
+)
 
 // TODO: when creating new timeseries, any depth based instruments should not be available for assignment
 
 const createIpiOpts = `
-	INSERT INTO ipi_opts (instrument_id, num_segments, bottom_elevation, initial_time)
+	INSERT INTO ipi_opts (instrument_id, num_segments, bottom_elevation_timeseries_id, initial_time)
 	VALUES ($1, $2, $3, $4)
 `
 
 func (q *Queries) CreateIpiOpts(ctx context.Context, instrumentID uuid.UUID, si IpiOpts) error {
-	_, err := q.db.ExecContext(ctx, createIpiOpts, instrumentID, si.NumSegments, si.BottomElevation, si.InitialTime)
+	_, err := q.db.ExecContext(ctx, createIpiOpts, instrumentID, si.NumSegments, si.BottomElevationTimeseriesID, si.InitialTime)
 	return err
 }
 
 const updateIpiOpts = `
 	UPDATE ipi_opts SET
-		bottom_elevation = $2,
+		bottom_elevation_timeseries_id = $2,
 		initial_time = $3
 	WHERE instrument_id = $1
 `
 
 func (q *Queries) UpdateIpiOpts(ctx context.Context, instrumentID uuid.UUID, si IpiOpts) error {
-	_, err := q.db.ExecContext(ctx, updateIpiOpts, si.InstrumentID, si.BottomElevation, si.InitialTime)
+	_, err := q.db.ExecContext(ctx, updateIpiOpts, si.InstrumentID, si.BottomElevationTimeseriesID, si.InitialTime)
 	return err
 }
 
@@ -70,17 +77,19 @@ func (q *Queries) GetAllIpiSegmentsForInstrument(ctx context.Context, instrument
 
 const createIpiSegment = `
 	INSERT INTO ipi_segment (
+		id,
 		instrument_id,
-		length,
+		length_timeseries_id,
 		tilt_timeseries_id,
 		cum_dev_timeseries_id
-	) VALUES ($1, $2, $3, $4)
+	) VALUES ($1, $2, $3, $4, $5)
 `
 
 func (q *Queries) CreateIpiSegment(ctx context.Context, seg IpiSegment) error {
 	_, err := q.db.ExecContext(ctx, createIpiSegment,
+		seg.ID,
 		seg.InstrumentID,
-		seg.Length,
+		seg.LengthTimeseriesID,
 		seg.TiltTimeseriesID,
 		seg.CumDevTimeseriesID,
 	)
@@ -89,7 +98,7 @@ func (q *Queries) CreateIpiSegment(ctx context.Context, seg IpiSegment) error {
 
 const updateIpiSegment = `
 	UPDATE ipi_segment SET
-		length = $3,
+		length_timeseries_id = $3,
 		tilt_timeseries_id = $4,
 		cum_dev_timeseries_id = $5
 	WHERE id = $1 AND instrument_id = $2
@@ -99,7 +108,7 @@ func (q *Queries) UpdateIpiSegment(ctx context.Context, seg IpiSegment) error {
 	_, err := q.db.ExecContext(ctx, updateIpiSegment,
 		seg.ID,
 		seg.InstrumentID,
-		seg.Length,
+		seg.LengthTimeseriesID,
 		seg.TiltTimeseriesID,
 		seg.CumDevTimeseriesID,
 	)
