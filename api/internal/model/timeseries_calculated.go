@@ -65,6 +65,12 @@ const createCalculatedTimeseries = `
 `
 
 func (q *Queries) CreateCalculatedTimeseries(ctx context.Context, cc CalculatedTimeseries) (uuid.UUID, error) {
+	if cc.ParameterID == uuid.Nil {
+		cc.ParameterID = unknownParameterID
+	}
+	if cc.UnitID == uuid.Nil {
+		cc.UnitID = unknownUnitID
+	}
 	var tsID uuid.UUID
 	err := q.db.GetContext(ctx, &tsID, createCalculatedTimeseries, &cc.InstrumentID, &cc.ParameterID, &cc.UnitID, &cc.Slug, &cc.FormulaName)
 	return tsID, err

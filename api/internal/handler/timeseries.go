@@ -146,7 +146,6 @@ func (h *ApiHandler) CreateTimeseries(c echo.Context) error {
 		return err
 	}
 	for idx := range tc.Items {
-		tc.Items[idx].ID = uuid.Must(uuid.NewRandom())
 		s, err := util.NextUniqueSlug(tc.Items[idx].Name, slugsTaken)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())

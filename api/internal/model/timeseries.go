@@ -38,6 +38,11 @@ type TimeseriesCollectionItems struct {
 	Items []Timeseries
 }
 
+var (
+	unknownParameterID = uuid.MustParse("2b7f96e1-820f-4f61-ba8f-861640af6232")
+	unknownUnitID      = uuid.MustParse("4a999277-4cf5-4282-93ce-23b33c65e2c8")
+)
+
 // UnmarshalJSON implements UnmarshalJSON interface
 func (c *TimeseriesCollectionItems) UnmarshalJSON(b []byte) error {
 	switch util.JSONType(b) {
@@ -201,6 +206,12 @@ const createTimeseries = `
 
 // CreateTimeseries creates many timeseries from an array of timeseries
 func (q *Queries) CreateTimeseries(ctx context.Context, ts Timeseries) (Timeseries, error) {
+	if ts.ParameterID == uuid.Nil {
+		ts.ParameterID = unknownParameterID
+	}
+	if ts.UnitID == uuid.Nil {
+		ts.UnitID = unknownUnitID
+	}
 	var tsNew Timeseries
 	err := q.db.GetContext(ctx, &tsNew, createTimeseries, ts.InstrumentID, ts.Slug, ts.Name, ts.ParameterID, ts.UnitID)
 	return tsNew, err
