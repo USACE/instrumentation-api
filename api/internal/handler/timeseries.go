@@ -156,7 +156,7 @@ func (h *ApiHandler) CreateTimeseries(c echo.Context) error {
 
 	tt, err := h.TimeseriesService.CreateTimeseriesBatch(ctx, tc.Items)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusCreated, tt)
 }
@@ -173,7 +173,6 @@ func (h *ApiHandler) CreateTimeseries(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /timeseries/{timeseries_id} [put]
-//	@Security Bearer
 //	@Security Bearer
 func (h *ApiHandler) UpdateTimeseries(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("timeseries_id"))
