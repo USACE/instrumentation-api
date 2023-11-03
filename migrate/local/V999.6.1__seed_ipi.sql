@@ -60,6 +60,19 @@ INSERT INTO timeseries_measurement (timeseries_id, time, value) VALUES
 ('d28efb95-962d-4233-9002-827154bd76ad', NOW() - INTERVAL '1 month', 050);
 
 
+INSERT INTO instrument_constants (timeseries_id, instrument_id) VALUES
+('5842c707-b4be-4d10-a89c-1064e282e555','e29a8c6d-c5a4-4fcc-b269-3a60bd48f929'),
+('7d515571-d6a2-4990-a1e2-d6d42049d864','01ac435f-fe3c-4af1-9979-f5e00467e7f5'),
+('bce99683-59bd-4e4b-ad79-64a03553cfdc','eca4040e-aecb-4cd3-bcde-3e308f0356a6'),
+('e891ca7c-59b2-41bc-9d4a-43995e35b855','eca4040e-aecb-4cd3-bcde-3e308f0356a6'),
+('18f17db2-4bc8-44cb-a9fa-ba84d13b8444','eca4040e-aecb-4cd3-bcde-3e308f0356a6'),
+('d5c236cf-dca5-4a35-bc59-a9ecac4d572b','eca4040e-aecb-4cd3-bcde-3e308f0356a6'),
+('88accf78-6f41-4342-86b5-026a8880cbb4','01ac435f-fe3c-4af1-9979-f5e00467e7f5'),
+('fc332ef5-55a8-4657-9d6d-b0abeeb985f2','01ac435f-fe3c-4af1-9979-f5e00467e7f5'),
+('a86c7468-09a7-4090-98e0-f7979103bbcd','01ac435f-fe3c-4af1-9979-f5e00467e7f5'),
+('d28efb95-962d-4233-9002-827154bd76ad','01ac435f-fe3c-4af1-9979-f5e00467e7f5');
+
+
 INSERT INTO timeseries_measurement (timeseries_id, time, value)
 SELECT
     timeseries_id,

@@ -63,6 +63,18 @@ INSERT INTO timeseries_measurement (timeseries_id, time, value) VALUES
 ('df6a9cca-29fc-4ec3-9415-d497fbae1a58', NOW() - INTERVAL '1 month', 200);
 
 
+INSERT INTO instrument_constants (timeseries_id, instrument_id) VALUES
+('4affc367-ea0f-41f5-a4bc-5f387b01d7a4', 'eca4040e-aecb-4cd3-bcde-3e308f0356a6'),
+('cf2f2304-d44e-4363-bc8d-95533222efd6', 'eca4040e-aecb-4cd3-bcde-3e308f0356a6'),
+('ff2086ae-0eae-42a8-b598-2e97be2ab3b0', 'eca4040e-aecb-4cd3-bcde-3e308f0356a6'),
+('669b63d7-87b2-4aed-9b15-e19ea39789b9', 'eca4040e-aecb-4cd3-bcde-3e308f0356a6'),
+('e404e8f4-41c6-4355-9ddb-9d8c635525fc', 'eca4040e-aecb-4cd3-bcde-3e308f0356a6'),
+('ccb80fd4-8902-450f-bb3b-cc1e6718b03c', 'eca4040e-aecb-4cd3-bcde-3e308f0356a6'),
+('7f98f239-ac1e-4651-9d69-c163b2dc06a6', 'eca4040e-aecb-4cd3-bcde-3e308f0356a6'),
+('72bd19f1-23d3-4edb-b16f-9ebb121cf921', 'eca4040e-aecb-4cd3-bcde-3e308f0356a6'),
+('df6a9cca-29fc-4ec3-9415-d497fbae1a58', 'eca4040e-aecb-4cd3-bcde-3e308f0356a6');
+
+
 INSERT INTO saa_segment (instrument_id, id, length_timeseries_id, x_timeseries_id, y_timeseries_id, z_timeseries_id, temp_timeseries_id) VALUES
 ('eca4040e-aecb-4cd3-bcde-3e308f0356a6',1,'cf2f2304-d44e-4363-bc8d-95533222efd6','8b3762ef-a852-4edc-8e87-746a92eaac9d','ecfa267b-339b-4bb8-b7ae-eda550257878','a31a24c4-aa8e-4e52-9895-43cdb69fe703','eec831d1-56a5-47ef-85eb-02c7622d6cb8'),
 ('eca4040e-aecb-4cd3-bcde-3e308f0356a6',2,'ff2086ae-0eae-42a8-b598-2e97be2ab3b0','eb25ab9f-af8b-4383-839a-7d24899e02c4','8e641473-d7bf-433c-a24b-55fa065ca0c3','21cfe121-d29d-40a2-b04f-6be71ba479fe','23bda2f6-c479-48e0-a0c2-db48c3b08c3c'),
