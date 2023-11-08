@@ -10,6 +10,7 @@ const testEquivalencyTableRowID = "2f1f7c3d-8b6f-4b11-917e-8f049eb6c62b"
 
 const createEquivalencyTableBody = `{
     "datalogger_id": "83a7345c-62d8-4e29-84db-c2e36f8bc40d",
+    "datalogger_table_id": "98a77c65-e5c4-49ed-8fb4-b0ffd06add4c",
     "rows": [
         {
             "field_name": "new field name",
@@ -22,6 +23,7 @@ const createEquivalencyTableBody = `{
 
 const updateEquivalencyTableBody = `{
     "datalogger_id": "83a7345c-62d8-4e29-84db-c2e36f8bc40d",
+    "datalogger_table_id": "98a77c65-e5c4-49ed-8fb4-b0ffd06add4c",
     "rows": [
         {
             "id": "40ceff10-cdc3-4715-a4ca-c1e570fe25de",
@@ -44,33 +46,33 @@ func TestEquivalencyTable(t *testing.T) {
 	tests := []HTTPTest{
 		{
 			Name:           "CreateEquivalencyTable",
-			URL:            fmt.Sprintf("/datalogger/%s/equivalency_table", testDataloggerID1),
+			URL:            fmt.Sprintf("/datalogger/%s/table/%s/equivalency_table", testDataloggerID1, testDataloggerTableID),
 			Method:         http.MethodPost,
 			Body:           createEquivalencyTableBody,
 			ExpectedStatus: http.StatusCreated,
 		},
 		{
 			Name:           "GetEquivalencyTable",
-			URL:            fmt.Sprintf("/datalogger/%s/equivalency_table", testDataloggerID1),
+			URL:            fmt.Sprintf("/datalogger/%s/table/%s/equivalency_table", testDataloggerID1, testDataloggerTableID),
 			Method:         http.MethodGet,
 			ExpectedStatus: http.StatusOK,
 		},
 		{
 			Name:           "UpdateEquivalencyTable",
-			URL:            fmt.Sprintf("/datalogger/%s/equivalency_table", testDataloggerID1),
+			URL:            fmt.Sprintf("/datalogger/%s/table/%s/equivalency_table", testDataloggerID1, testDataloggerTableID),
 			Method:         http.MethodPut,
 			Body:           updateEquivalencyTableBody,
 			ExpectedStatus: http.StatusOK,
 		},
 		{
 			Name:           "DeleteEquivalencyTableRow",
-			URL:            fmt.Sprintf("/datalogger/%s/equivalency_table/row?id=%s", testDataloggerID1, testEquivalencyTableRowID),
+			URL:            fmt.Sprintf("/datalogger/%s/table/%s/equivalency_table/row/%s", testDataloggerID1, testDataloggerTableID, testEquivalencyTableRowID),
 			Method:         http.MethodDelete,
 			ExpectedStatus: http.StatusOK,
 		},
 		{
 			Name:           "DeleteEquivalencyTable",
-			URL:            fmt.Sprintf("/datalogger/%s/equivalency_table", testDataloggerID1),
+			URL:            fmt.Sprintf("/datalogger/%s/table/%s/equivalency_table", testDataloggerID1, testDataloggerTableID),
 			Method:         http.MethodDelete,
 			ExpectedStatus: http.StatusOK,
 		}}

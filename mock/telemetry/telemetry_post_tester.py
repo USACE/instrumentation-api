@@ -60,7 +60,7 @@ def create_test_data(interval: int, idx: int, model: str, sn: str) -> dict:
             "signature": 20883,
             "environment": {
                 "station_name": "6239",
-                "table_name": "Test",
+                "table_name": "Demo Datalogger Table",
                 "model": model,
                 "serial_no": sn,
                 "os_version": f"{model}.Std.12.01",

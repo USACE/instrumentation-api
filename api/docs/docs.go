@@ -506,7 +506,59 @@ const docTemplate = `{
                 }
             }
         },
-        "/datalogger/{datalogger_id}/equivalency_table": {
+        "/datalogger/{datalogger_id}/key": {
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "datalogger"
+                ],
+                "summary": "deletes and recreates a datalogger api key",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "datalogger uuid",
+                        "name": "datalogger_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerWithKey"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/datalogger/{datalogger_id}/table/{datalogger_table_id}/equivalency_table": {
             "get": {
                 "security": [
                     {
@@ -526,6 +578,14 @@ const docTemplate = `{
                         "format": "uuid",
                         "description": "datalogger uuid",
                         "name": "datalogger_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "datalogger table uuid",
+                        "name": "datalogger_table_id",
                         "in": "path",
                         "required": true
                     }
@@ -579,6 +639,14 @@ const docTemplate = `{
                         "format": "uuid",
                         "description": "datalogger uuid",
                         "name": "datalogger_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "datalogger table uuid",
+                        "name": "datalogger_table_id",
                         "in": "path",
                         "required": true
                     },
@@ -638,6 +706,14 @@ const docTemplate = `{
                         "format": "uuid",
                         "description": "datalogger uuid",
                         "name": "datalogger_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "datalogger table uuid",
+                        "name": "datalogger_table_id",
                         "in": "path",
                         "required": true
                     },
@@ -731,7 +807,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/datalogger/{datalogger_id}/equivalency_table/row": {
+        "/datalogger/{datalogger_id}/table/{datalogger_table_id}/equivalency_table/row/{row_id}": {
             "delete": {
                 "security": [
                     {
@@ -758,8 +834,8 @@ const docTemplate = `{
                         "type": "string",
                         "format": "uuid",
                         "description": "equivalency table row uuid",
-                        "name": "id",
-                        "in": "query",
+                        "name": "row_id",
+                        "in": "path",
                         "required": true
                     }
                 ],
@@ -792,7 +868,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/datalogger/{datalogger_id}/key": {
+        "/datalogger/{datalogger_id}/table/{datalogger_table_id}/name": {
             "put": {
                 "security": [
                     {
@@ -805,7 +881,7 @@ const docTemplate = `{
                 "tags": [
                     "datalogger"
                 ],
-                "summary": "deletes and recreates a datalogger api key",
+                "summary": "resets a datalogger table name to be renamed by incoming telemetry",
                 "parameters": [
                     {
                         "type": "string",
@@ -814,13 +890,21 @@ const docTemplate = `{
                         "name": "datalogger_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "datalogger table uuid",
+                        "name": "datalogger_table_id",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerWithKey"
+                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerPreview"
                         }
                     },
                     "400": {
@@ -844,7 +928,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/datalogger/{datalogger_id}/preview": {
+        "/datalogger/{datalogger_id}/table/{datalogger_table_id}/preview": {
             "get": {
                 "security": [
                     {
@@ -864,6 +948,14 @@ const docTemplate = `{
                         "format": "uuid",
                         "description": "datalogger uuid",
                         "name": "datalogger_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "datalogger table uuid",
+                        "name": "datalogger_table_id",
                         "in": "path",
                         "required": true
                     }
@@ -7990,6 +8082,12 @@ const docTemplate = `{
                 "sn": {
                     "type": "string"
                 },
+                "tables": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerTable"
+                    }
+                },
                 "update_date": {
                     "type": "string"
                 },
@@ -8004,22 +8102,19 @@ const docTemplate = `{
         "github_com_USACE_instrumentation-api_api_internal_model.DataloggerPreview": {
             "type": "object",
             "properties": {
-                "datalogger_id": {
-                    "type": "string"
-                },
-                "model": {
+                "datalogger_table_id": {
                     "type": "string"
                 },
                 "preview": {
                     "$ref": "#/definitions/pgtype.JSON"
                 },
-                "sn": {
-                    "type": "string"
-                },
                 "update_date": {
                     "type": "string"
                 }
             }
+        },
+        "github_com_USACE_instrumentation-api_api_internal_model.DataloggerTable": {
+            "type": "object"
         },
         "github_com_USACE_instrumentation-api_api_internal_model.DataloggerWithKey": {
             "type": "object",
@@ -8062,6 +8157,12 @@ const docTemplate = `{
                 },
                 "sn": {
                     "type": "string"
+                },
+                "tables": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerTable"
+                    }
                 },
                 "update_date": {
                     "type": "string"
@@ -8173,6 +8274,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "datalogger_id": {
+                    "type": "string"
+                },
+                "datalogger_table_id": {
                     "type": "string"
                 },
                 "rows": {

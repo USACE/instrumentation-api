@@ -1,4 +1,3 @@
--- v_datalogger
 CREATE OR REPLACE VIEW v_datalogger AS (
     SELECT
         dl.id          AS id,
@@ -15,52 +14,60 @@ CREATE OR REPLACE VIEW v_datalogger AS (
         m.id           AS model_id,
         m.model        AS model,
         COALESCE(e.errors, '{}'::TEXT[]) AS errors,
-        dl.deleted     AS deleted
+        COALESCE(t.tables, '[]'::JSON)::TEXT AS tables
     FROM datalogger dl
     INNER JOIN profile p1         ON dl.creator = p1.id
-    INNER JOIN profile p2         ON dl.creator = p2.id
+    INNER JOIN profile p2         ON dl.updater = p2.id
     INNER JOIN datalogger_model m ON dl.model_id = m.id
     LEFT JOIN (
         SELECT
-            datalogger_id,
-            array_agg(error_message) AS errors
-        FROM datalogger_error
-        GROUP BY datalogger_id
+            de.datalogger_id,
+            ARRAY_AGG(de.error_message) AS errors
+        FROM datalogger_error de
+        INNER JOIN datalogger_table dt ON dt.id = de.datalogger_table_id
+        WHERE dt.table_name = 'preparse'
+        GROUP BY de.datalogger_id
     ) e ON dl.id = e.datalogger_id
+    LEFT JOIN (
+        SELECT
+            dt.datalogger_id,
+            JSON_AGG(JSON_BUILD_OBJECT(
+                'id',         dt.id,
+                'table_name', dt.table_name
+            )) AS tables
+        FROM datalogger_table dt
+        GROUP BY dt.datalogger_id
+    ) t ON dl.id = t.datalogger_id
     WHERE NOT dl.deleted
 );
 
--- v_datalogger_preview
 CREATE OR REPLACE VIEW v_datalogger_preview AS (
     SELECT
-        p.datalogger_id                  AS datalogger_id,
-        p.preview                        AS preview,
-        p.update_date                    AS update_date,
-        m.model                          AS model,
-        dl.sn                            AS sn
+        p.datalogger_table_id,
+        p.preview,
+        p.update_date
     FROM datalogger_preview p
-    INNER JOIN datalogger dl      ON p.datalogger_id = dl.id
-    INNER JOIN datalogger_model m ON dl.model_id = m.id
+    INNER JOIN datalogger_table dt ON dt.id = p.datalogger_table_id
+    INNER JOIN datalogger dl ON dl.id = dt.datalogger_id
     WHERE NOT dl.deleted
 );
 
--- v_datalogger_equivalency_table
 CREATE OR REPLACE VIEW v_datalogger_equivalency_table AS (
     SELECT
-        t.datalogger_id AS datalogger_id,
-        t.field_name    AS field_name,
-        t.display_name  AS display_name,
-        t.instrument_id AS instrument_id,
-        t.timeseries_id AS timeseries_id,
-        m.model         AS model,
-        dl.sn           AS sn
-    FROM datalogger_equivalency_table t
-    INNER JOIN datalogger dl      ON t.datalogger_id = dl.id
-    INNER JOIN datalogger_model m ON dl.model_id = m.id
-    WHERE NOT t.datalogger_deleted
+        datalogger_id,
+        datalogger_table_id,
+        JSON_AGG(JSON_BUILD_OBJECT(
+            'id',            id,
+            'field_name',    field_name,
+            'display_name',  display_name,
+            'instrument_id', instrument_id,
+            'timeseries_id', timeseries_id
+        ))::TEXT AS fields
+    FROM datalogger_equivalency_table
+    WHERE NOT datalogger_deleted
+    GROUP BY datalogger_id, datalogger_table_id
 );
 
--- v_datalogger_hash
 CREATE OR REPLACE VIEW v_datalogger_hash AS (
     SELECT
         dh.datalogger_id AS datalogger_id,
