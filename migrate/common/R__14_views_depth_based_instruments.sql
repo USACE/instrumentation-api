@@ -51,11 +51,11 @@ CREATE VIEW v_saa_measurement AS (
         q.initial_y - q.y y_increment,
         q.initial_z - q.z z_increment,
         q.initial_t - q.t temp_increment,
-        SUM(q.initial_x - q.x) FILTER (WHERE q.time >= q.initial_time) OVER (ORDER BY seg.id DESC) x_cum_dev,
-        SUM(q.initial_y - q.y) FILTER (WHERE q.time >= q.initial_time) OVER (ORDER BY seg.id DESC) y_cum_dev,
-        SUM(q.initial_z - q.z) FILTER (WHERE q.time >= q.initial_time) OVER (ORDER BY seg.id DESC) z_cum_dev,
-        SUM(q.initial_t - q.t) FILTER (WHERE q.time >= q.initial_time) OVER (ORDER BY seg.id DESC) temp_cum_dev,
-        SUM(q.bottom + q.seg_length) OVER (ORDER BY seg.id DESC) elevation
+        SUM(q.initial_x - q.x) FILTER (WHERE q.time >= q.initial_time) OVER (ORDER BY seg.id ASC) x_cum_dev,
+        SUM(q.initial_y - q.y) FILTER (WHERE q.time >= q.initial_time) OVER (ORDER BY seg.id ASC) y_cum_dev,
+        SUM(q.initial_z - q.z) FILTER (WHERE q.time >= q.initial_time) OVER (ORDER BY seg.id ASC) z_cum_dev,
+        SUM(q.initial_t - q.t) FILTER (WHERE q.time >= q.initial_time) OVER (ORDER BY seg.id ASC) temp_cum_dev,
+        SUM(q.bottom + q.seg_length) OVER (ORDER BY seg.id ASC) elevation
     FROM saa_segment seg
     INNER JOIN saa_opts opts ON opts.instrument_id = seg.instrument_id
     LEFT JOIN LATERAL (
@@ -124,7 +124,7 @@ CREATE VIEW v_ipi_measurement AS (
         q.time,
         q.tilt,
         COALESCE(q.cum_dev, SIN(q.tilt * PI() / 180) * q.seg_length) cum_dev,
-        SUM(q.bottom + q.seg_length) OVER (ORDER BY seg.id DESC) elevation
+        SUM(q.bottom + q.seg_length) OVER (ORDER BY seg.id ASC) elevation
     FROM ipi_segment seg
     INNER JOIN ipi_opts opts ON opts.instrument_id = seg.instrument_id
     LEFT JOIN LATERAL (

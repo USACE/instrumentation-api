@@ -5945,7 +5945,6 @@ paths:
             $ref: '#/definitions/echo.HTTPError'
       security:
       - Bearer: []
-      - Bearer: []
       summary: updates a single timeseries by id
       tags:
       - timeseries

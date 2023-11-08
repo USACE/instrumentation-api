@@ -120,6 +120,7 @@ const getIpiMeasurementsForInstrument = `
 	FROM v_ipi_measurement
 	WHERE instrument_id = $1 AND time >= $2 AND time <= $3
 	OR time IN (SELECT initial_time FROM ipi_opts WHERE instrument_id = $1)
+	ORDER BY time ASC
 `
 
 func (q *Queries) GetIpiMeasurementsForInstrument(ctx context.Context, instrumentID uuid.UUID, tw TimeWindow) ([]IpiMeasurements, error) {

@@ -7372,9 +7372,6 @@
                 "security": [
                     {
                         "Bearer": []
-                    },
-                    {
-                        "Bearer": []
                     }
                 ],
                 "produces": [
