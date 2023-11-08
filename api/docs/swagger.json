@@ -7280,9 +7280,6 @@
                 "security": [
                     {
                         "Bearer": []
-                    },
-                    {
-                        "Bearer": []
                     }
                 ],
                 "produces": [

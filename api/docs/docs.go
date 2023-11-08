@@ -7288,9 +7288,6 @@ const docTemplate = `{
                 "security": [
                     {
                         "Bearer": []
-                    },
-                    {
-                        "Bearer": []
                     }
                 ],
                 "produces": [
