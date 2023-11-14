@@ -6,7 +6,7 @@ services:
       context: db
       args:
         - POSTGRES_VERSION=${POSTGRES_VERSION:-14}
-    command: -c fsync=off
+    command: "-c fsync=off -c search_path=midas,${POSTGRES_USER:-postgres},public,postgis"
     ports:
       - 5432:5432
     shm_size: 512mb
