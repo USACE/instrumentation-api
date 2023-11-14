@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/USACE/instrumentation-api/api/internal/cloud"
 	"github.com/USACE/instrumentation-api/api/internal/config"
@@ -142,6 +143,7 @@ func NewDcsLoader(cfg *config.DcsLoaderConfig) *DcsLoaderHandler {
 	blobService := cloud.NewS3Blob(&cfg.AWSS3Config, "", "")
 	ps := cloud.NewSQSPubsub(&cfg.AWSSQSConfig).WithBlob(blobService)
 	apiClient := &http.Client{
+		Timeout: time.Second * 60,
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			return nil
 		},
