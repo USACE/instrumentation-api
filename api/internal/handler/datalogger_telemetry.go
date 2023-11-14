@@ -26,7 +26,7 @@ func (h *TelemetryHandler) CreateOrUpdateDataloggerMeasurements(c echo.Context) 
 
 	ctx := c.Request().Context()
 
-	// Make sure data logger is active
+	// Make sure datalogger is active
 	dl, err := h.DataloggerTelemetryService.GetDataloggerByModelSN(ctx, modelName, sn)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -69,13 +69,13 @@ func (h *TelemetryHandler) CreateOrUpdateDataloggerMeasurements(c echo.Context) 
 // HTTPPost: https://help.campbellsci.com/crbasic/cr350/#Instructions/httppost.htm?Highlight=httppost
 func getCR6Handler(h *TelemetryHandler, dl model.Datalogger, rawJSON []byte) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		// Errors are cellected and sent to data logger preview for debugging since data logger clients cannot parse responses
+		// Errors are cellected and sent to datalogger preview for debugging since datalogger clients cannot parse responses
 		em := make([]string, 0)
 		ctx := c.Request().Context()
 		tn := "preparse"
 
-		// Since these HTTP responses will be returned to data logger clients, this operates on a "best effort" basis
-		// to collect logs to be previewed in the core web application. The error code returned to the client data logger
+		// Since these HTTP responses will be returned to datalogger clients, this operates on a "best effort" basis
+		// to collect logs to be previewed in the core web application. The error code returned to the client datalogger
 		// will sill be relavent to the arm of control flow that raised it.
 		defer func() {
 			if err := h.DataloggerTelemetryService.UpdateDataloggerTableError(ctx, dl.ID, &tn, &model.DataloggerError{Errors: em}); err != nil {
@@ -101,7 +101,18 @@ func getCR6Handler(h *TelemetryHandler, dl model.Datalogger, rawJSON []byte) ech
 			return echo.NewHTTPError(http.StatusBadRequest, message.BadRequest)
 		}
 
+		// reroute deferred errors and previews to respective table
 		tn = pl.Head.Environment.TableName
+
+		var prv model.DataloggerPreview
+		if err := prv.Preview.Set(rawJSON); err != nil {
+			return err
+		}
+		prv.UpdateDate = time.Now()
+
+		if err := h.DataloggerTelemetryService.UpdateDataloggerTablePreview(ctx, dl.ID, tn, prv); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
 
 		dataloggerTableID, err := h.DataloggerTelemetryService.GetOrCreateDataloggerTable(ctx, dl.ID, tn)
 		if err != nil {
@@ -132,7 +143,7 @@ func getCR6Handler(h *TelemetryHandler, dl model.Datalogger, rawJSON []byte) ech
 			// Map field to timeseries id
 			row, exists := eqtFields[f.Name]
 			if !exists {
-				em = append(em, fmt.Sprintf("field '%s' from data logger does not exist in equivalency table", f.Name))
+				em = append(em, fmt.Sprintf("field '%s' from datalogger does not exist in equivalency table", f.Name))
 				continue
 			}
 			if row.InstrumentID == nil {
@@ -141,7 +152,7 @@ func getCR6Handler(h *TelemetryHandler, dl model.Datalogger, rawJSON []byte) ech
 				continue
 			}
 			if row.TimeseriesID == nil {
-				em = append(em, fmt.Sprintf("field '%s' not mapped to time series in equivalency table", f.Name))
+				em = append(em, fmt.Sprintf("field '%s' not mapped to timeseries in equivalency table", f.Name))
 				delete(eqtFields, f.Name)
 				continue
 			}
@@ -174,7 +185,7 @@ func getCR6Handler(h *TelemetryHandler, dl model.Datalogger, rawJSON []byte) ech
 
 		// This map should be empty if all fields are mapped, otherwise the error is added
 		for eqtName := range eqtFields {
-			em = append(em, fmt.Sprintf("field '%s' in equivalency table does not match any fields from data logger", eqtName))
+			em = append(em, fmt.Sprintf("field '%s' in equivalency table does not match any fields from datalogger", eqtName))
 		}
 
 		if _, err = h.MeasurementService.CreateOrUpdateTimeseriesMeasurements(ctx, mcs); err != nil {

@@ -33,12 +33,12 @@ func (s dataloggerTelemetryService) UpdateDataloggerTableError(ctx context.Conte
 
 	qtx := s.WithTx(tx)
 
-	if err := qtx.DeleteDataloggerTableError(ctx, e.DataloggerTableID, tableName); err != nil {
+	if err := qtx.DeleteDataloggerTableError(ctx, e.DataloggerID, tableName); err != nil {
 		return err
 	}
 
 	for _, m := range e.Errors {
-		if err := qtx.CreateDataloggerTableError(ctx, e.DataloggerTableID, tableName, m); err != nil {
+		if err := qtx.CreateDataloggerTableError(ctx, e.DataloggerID, tableName, m); err != nil {
 			return err
 		}
 	}
