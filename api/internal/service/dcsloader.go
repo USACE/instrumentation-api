@@ -42,7 +42,8 @@ func RedactQueryParam(urlErr *url.Error, queryParam string) error {
 	}
 	q := u.Query()
 	q.Set(queryParam, "REDACTED")
-	urlErr.URL = q.Encode()
+	u.RawQuery = q.Encode()
+	urlErr.URL = u.String()
 	return urlErr
 }
 
