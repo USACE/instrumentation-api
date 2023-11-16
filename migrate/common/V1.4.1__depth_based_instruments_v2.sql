@@ -1,3 +1,7 @@
+DROP VIEW IF EXISTS v_instrument;
+DROP VIEW IF EXISTS v_saa_measurement;
+DROP VIEW IF EXISTS v_saa_segment;
+
 DROP TABLE IF EXISTS saa_opts;
 CREATE TABLE IF NOT EXISTS saa_opts (
     instrument_id UUID NOT NULL REFERENCES instrument (id) ON DELETE CASCADE,
