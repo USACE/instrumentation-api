@@ -15,11 +15,11 @@ type Home struct {
 
 const getHome = `
 	SELECT
-		(SELECT count(id) FROM instrument WHERE NOT deleted)        AS instrument_count,
-		(SELECT count(id) FROM project WHERE NOT deleted)           AS project_count,
-		(SELECT count(id) FROM instrument_group)                    AS instrument_group_count,
-		(SELECT count(id) FROM instrument WHERE NOT deleted and (now() - create_date) < '7 Days') AS new_instruments_7d,
-		(SELECT count(timeseries_id) FROM timeseries_measurement WHERE (now() - timeseries_measurement.time) < '2 Hours' ) AS new_measurements_2h
+		(SELECT COUNT(*) FROM instrument WHERE NOT deleted) AS instrument_count,
+		(SELECT COUNT(*) FROM project WHERE NOT deleted) AS project_count,
+		(SELECT COUNT(*) FROM instrument_group) AS instrument_group_count,
+		(SELECT COUNT(*) FROM instrument WHERE NOT deleted AND create_date > NOW() - '7 days'::INTERVAL) AS new_instruments_7d,
+		(SELECT COUNT(*) FROM timeseries_measurement WHERE time > NOW() - '2 hours'::INTERVAL) AS new_measurements_2h
 `
 
 // GetHome returns information for the homepage
