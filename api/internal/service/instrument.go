@@ -32,6 +32,7 @@ func NewInstrumentService(db *model.Database, q *model.Queries) *instrumentServi
 
 var (
 	saaTypeID = uuid.MustParse("07b91c5c-c1c5-428d-8bb9-e4c93ab2b9b9")
+	ipiTypeID = uuid.MustParse("c81f3a5d-fc5f-47fd-b545-401fe6ee63bb")
 )
 
 type requestType int
@@ -40,33 +41,6 @@ const (
 	create requestType = iota
 	update
 )
-
-func handleOpts(ctx context.Context, q *model.Queries, inst model.Instrument, rt requestType) error {
-	switch inst.TypeID {
-	case saaTypeID:
-		opts, err := model.MapToStruct[model.SaaOpts](inst.Opts)
-		if err != nil {
-			return err
-		}
-		if rt == create {
-			if err := q.CreateSaaOpts(ctx, inst.ID, opts); err != nil {
-				return err
-			}
-			for i := 1; i <= opts.NumSegments; i++ {
-				if err := q.CreateSaaSegment(ctx, model.SaaSegment{ID: i, InstrumentID: inst.ID}); err != nil {
-					return err
-				}
-			}
-		}
-		if rt == update {
-			if err := q.UpdateSaaOpts(ctx, inst.ID, opts); err != nil {
-				return err
-			}
-		}
-	default:
-	}
-	return nil
-}
 
 func createInstrument(ctx context.Context, q *model.Queries, instrument model.Instrument) (model.IDAndSlug, error) {
 	newInstrument, err := q.CreateInstrument(ctx, instrument)
@@ -81,6 +55,7 @@ func createInstrument(ctx context.Context, q *model.Queries, instrument model.In
 			return model.IDAndSlug{}, err
 		}
 	}
+	instrument.ID = newInstrument.ID
 	if err := handleOpts(ctx, q, instrument, create); err != nil {
 		return model.IDAndSlug{}, err
 	}
@@ -147,12 +122,12 @@ func (s instrumentService) UpdateInstrument(ctx context.Context, i model.Instrum
 		return model.Instrument{}, err
 	}
 
-	aa, err := qtx.GetInstrument(ctx, i.ID)
-	if err != nil {
+	if err := handleOpts(ctx, qtx, i, update); err != nil {
 		return model.Instrument{}, err
 	}
 
-	if err := handleOpts(ctx, qtx, i, update); err != nil {
+	aa, err := qtx.GetInstrument(ctx, i.ID)
+	if err != nil {
 		return model.Instrument{}, err
 	}
 

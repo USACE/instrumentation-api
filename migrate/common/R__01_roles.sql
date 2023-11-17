@@ -40,6 +40,9 @@ ALTER ROLE instrumentation_user SET search_path TO midas,topology,public;
 -- Set intervalstyle
 ALTER ROLE instrumentation_user SET intervalstyle TO 'iso_8601';
 
+-- Set statement timeout
+ALTER ROLE instrumentation_user SET statement_timeout TO '55s';
+
 -- Grant Schema Usage to instrumentation_user
 GRANT USAGE ON SCHEMA midas TO instrumentation_user;
 
@@ -106,7 +109,9 @@ GRANT SELECT ON
     alert_config_instrument,
     submittal,
     saa_opts,
-    saa_segment
+    saa_segment,
+    ipi_opts,
+    ipi_segment
 TO instrumentation_reader;
 
 -- Role instrumentation_writer
@@ -166,7 +171,9 @@ GRANT INSERT,UPDATE,DELETE ON
     alert_config_instrument,
     submittal,
     saa_opts,
-    saa_segment
+    saa_segment,
+    ipi_opts,
+    ipi_segment
 TO instrumentation_writer;
 
 -- Role postgis_reader

@@ -27,13 +27,6 @@ func NewCalculatedTimeseriesService(db *model.Database, q *model.Queries) *calcu
 }
 
 func (s calculatedTimeseriesService) CreateCalculatedTimeseries(ctx context.Context, cc model.CalculatedTimeseries) error {
-	if cc.ParameterID == uuid.Nil {
-		cc.ParameterID = uuid.Must(uuid.Parse("2b7f96e1-820f-4f61-ba8f-861640af6232")) // unknown parameter
-	}
-	if cc.UnitID == uuid.Nil {
-		cc.UnitID = uuid.Must(uuid.Parse("4a999277-4cf5-4282-93ce-23b33c65e2c8")) // unknown unit
-	}
-
 	tx, err := s.db.BeginTxx(ctx, nil)
 	if err != nil {
 		return err

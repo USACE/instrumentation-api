@@ -57,6 +57,11 @@ func (c *TimeseriesCollectionItems) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+var (
+	unknownParameterID = uuid.MustParse("2b7f96e1-820f-4f61-ba8f-861640af6232")
+	unknownUnitID      = uuid.MustParse("4a999277-4cf5-4282-93ce-23b33c65e2c8")
+)
+
 const listTimeseries = `
 	SELECT
 		id, slug, name, variable, project_id, project_slug, project, instrument_id,
@@ -201,6 +206,12 @@ const createTimeseries = `
 
 // CreateTimeseries creates many timeseries from an array of timeseries
 func (q *Queries) CreateTimeseries(ctx context.Context, ts Timeseries) (Timeseries, error) {
+	if ts.ParameterID == uuid.Nil {
+		ts.ParameterID = unknownParameterID
+	}
+	if ts.UnitID == uuid.Nil {
+		ts.UnitID = unknownUnitID
+	}
 	var tsNew Timeseries
 	err := q.db.GetContext(ctx, &tsNew, createTimeseries, ts.InstrumentID, ts.Slug, ts.Name, ts.ParameterID, ts.UnitID)
 	return tsNew, err
@@ -213,9 +224,15 @@ const updateTimeseries = `
 `
 
 // UpdateTimeseries updates a timeseries
-func (q *Queries) UpdateTimeseries(ctx context.Context, t Timeseries) (uuid.UUID, error) {
+func (q *Queries) UpdateTimeseries(ctx context.Context, ts Timeseries) (uuid.UUID, error) {
+	if ts.ParameterID == uuid.Nil {
+		ts.ParameterID = unknownParameterID
+	}
+	if ts.UnitID == uuid.Nil {
+		ts.UnitID = unknownUnitID
+	}
 	var tID uuid.UUID
-	err := q.db.GetContext(ctx, &tID, updateTimeseries, t.ID, t.Name, t.InstrumentID, t.ParameterID, t.UnitID)
+	err := q.db.GetContext(ctx, &tID, updateTimeseries, ts.ID, ts.Name, ts.InstrumentID, ts.ParameterID, ts.UnitID)
 	return tID, err
 }
 

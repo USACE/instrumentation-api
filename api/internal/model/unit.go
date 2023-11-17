@@ -31,3 +31,7 @@ func (q *Queries) ListUnits(ctx context.Context) ([]Unit, error) {
 	}
 	return uu, nil
 }
+
+var (
+	MeterUnitID = uuid.MustParse("ae06a7db-1e18-4994-be41-9d5a408d6cad")
+)

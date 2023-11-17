@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/USACE/instrumentation-api/api/internal/cloud"
 	"github.com/USACE/instrumentation-api/api/internal/config"
@@ -31,6 +32,7 @@ type ApiHandler struct {
 	InstrumentGroupService         service.InstrumentGroupService
 	InstrumentNoteService          service.InstrumentNoteService
 	InstrumentStatusService        service.InstrumentStatusService
+	IpiInstrumentService           service.IpiInstrumentService
 	MeasurementService             service.MeasurementService
 	InclinometerMeasurementService service.InclinometerMeasurementService
 	OpendcsService                 service.OpendcsService
@@ -76,6 +78,7 @@ func NewApi(cfg *config.ApiConfig) *ApiHandler {
 		InstrumentGroupService:         service.NewInstrumentGroupService(db, q),
 		InstrumentNoteService:          service.NewInstrumentNoteService(db, q),
 		InstrumentStatusService:        service.NewInstrumentStatusService(db, q),
+		IpiInstrumentService:           service.NewIpiInstrumentService(db, q),
 		MeasurementService:             service.NewMeasurementService(db, q),
 		InclinometerMeasurementService: service.NewInclinometerMeasurementService(db, q),
 		OpendcsService:                 service.NewOpendcsService(db, q),
@@ -140,6 +143,7 @@ func NewDcsLoader(cfg *config.DcsLoaderConfig) *DcsLoaderHandler {
 	blobService := cloud.NewS3Blob(&cfg.AWSS3Config, "", "")
 	ps := cloud.NewSQSPubsub(&cfg.AWSSQSConfig).WithBlob(blobService)
 	apiClient := &http.Client{
+		Timeout: time.Second * 60,
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			return nil
 		},
