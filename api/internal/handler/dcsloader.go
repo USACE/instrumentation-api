@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"context"
 	"io"
 	"log"
 	"time"
@@ -9,7 +8,7 @@ import (
 
 // Entrypoint for Dcs Loader service queue
 func (h *DcsLoaderHandler) Start() error {
-	handler := func(ctx context.Context, r io.Reader) error {
+	handler := func(r io.Reader) error {
 		mcs, mCount, err := h.DcsLoaderService.ParseCsvMeasurementCollection(r)
 		if err != nil {
 			return err
@@ -26,5 +25,5 @@ func (h *DcsLoaderHandler) Start() error {
 		return nil
 	}
 
-	return h.Pubsub.ProcessMessages(context.Background(), handler)
+	return h.Pubsub.ProcessMessages(handler)
 }

@@ -1,9 +1,8 @@
 package cloud
 
 import (
-	"context"
 	"encoding/json"
-	"fmt"
+	"errors"
 	"io"
 	"log"
 
@@ -15,7 +14,7 @@ import (
 )
 
 type Pubsub interface {
-	ProcessMessages(ctx context.Context, handler messageHandler) error
+	ProcessMessages(handler messageHandler) error
 }
 
 type SQSPubsub struct {
@@ -37,28 +36,28 @@ func (s *SQSPubsub) WithBlob(blob Blob) *SQSPubsub {
 	return s
 }
 
-func queueURL(ctx context.Context, s *SQSPubsub) (string, error) {
+func queueURL(s *SQSPubsub) (string, error) {
 	if s.cfg.AWSSQSQueueURL != "" {
 		return s.cfg.AWSSQSQueueURL, nil
 	}
-	urlResult, err := s.GetQueueUrlWithContext(ctx, &sqs.GetQueueUrlInput{QueueName: &s.cfg.AWSSQSQueueName})
+	urlResult, err := s.GetQueueUrl(&sqs.GetQueueUrlInput{QueueName: &s.cfg.AWSSQSQueueName})
 	if err != nil {
 		return "", err
 	}
 	if urlResult == nil || urlResult.QueueUrl == nil {
-		return "", fmt.Errorf("queue url is nil")
+		return "", errors.New("queue url is nil")
 	}
 	return *urlResult.QueueUrl, nil
 }
 
-type messageHandler func(ctx context.Context, r io.Reader) error
+type messageHandler func(r io.Reader) error
 
-func (s *SQSPubsub) ProcessMessages(ctx context.Context, handler messageHandler) error {
+func (s *SQSPubsub) ProcessMessages(handler messageHandler) error {
 	if s.blob == nil {
-		return fmt.Errorf("blob must not be nil")
+		return errors.New("blob must not be nil")
 	}
 
-	url, err := queueURL(ctx, s)
+	url, err := queueURL(s)
 	if err != nil {
 		return err
 	}
@@ -67,7 +66,7 @@ func (s *SQSPubsub) ProcessMessages(ctx context.Context, handler messageHandler)
 	var evt events.S3Event
 
 	for {
-		output, err := s.ReceiveMessageWithContext(ctx, &sqs.ReceiveMessageInput{
+		output, err := s.ReceiveMessage(&sqs.ReceiveMessageInput{
 			AttributeNames: []*string{
 				aws.String(sqs.MessageSystemAttributeNameSentTimestamp),
 			},
@@ -83,32 +82,32 @@ func (s *SQSPubsub) ProcessMessages(ctx context.Context, handler messageHandler)
 			return err
 		}
 
-		fmt.Printf("Received %d messages\n", len(output.Messages))
+		log.Printf("Received %d messages\n", len(output.Messages))
 		for _, m := range output.Messages {
-			fmt.Printf("Working on Message: %s\n", *m.MessageId)
+			log.Printf("Working on Message: %s\n", *m.MessageId)
 
 			if err := json.Unmarshal([]byte(*m.Body), &entity); err != nil {
-				fmt.Printf("Error: %s\n", err.Error())
+				log.Printf("Error: %s\n", err.Error())
 				continue
 			}
 			if err := json.Unmarshal([]byte(entity.Message), &evt); err != nil {
-				fmt.Printf("Error: %s\n", err.Error())
+				log.Printf("Error: %s\n", err.Error())
 				continue
 			}
 			for _, record := range evt.Records {
 				bucket, key := record.S3.Bucket.Name, record.S3.Object.Key
 				log.Printf("Processing File; bucket: %s; key: %s\n", bucket, key)
 
-				r, err := s.blob.NewReader(ctx, key, bucket)
+				r, err := s.blob.NewReader(key, bucket)
 				if err != nil {
 					return err
 				}
 				defer func(rc io.ReadCloser) {
 					if err := rc.Close(); err != nil {
-						fmt.Printf("could not close file: %s", err.Error())
+						log.Printf("could not close file: %s", err.Error())
 					}
 				}(r)
-				if err := handler(ctx, r); err != nil {
+				if err := handler(r); err != nil {
 					log.Printf("message processing failed")
 					continue
 				}
