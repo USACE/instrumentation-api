@@ -14,7 +14,8 @@ import (
 )
 
 type Blob interface {
-	NewReader(ctx context.Context, rawPath, bucketName string) (io.ReadCloser, error)
+	NewReader(rawPath, bucketName string) (io.ReadCloser, error)
+	NewReaderContext(ctx context.Context, rawPath, bucketName string) (io.ReadCloser, error)
 }
 
 type S3Blob struct {
@@ -52,18 +53,29 @@ func cleanFilepath(rawPath string) (string, error) {
 	return filepath.Clean("/" + p), nil
 }
 
-// GetBlob serves media from blob storage, files, etc for a given project
-func (s *S3Blob) NewReader(ctx context.Context, rawPath, bucketName string) (io.ReadCloser, error) {
+func (s *S3Blob) NewReader(rawPath, bucketName string) (io.ReadCloser, error) {
 	path, err := cleanFilepath(rawPath)
 	if err != nil {
 		return nil, err
 	}
-
-	// Remove URL Route Prefix; Prefix with bucketPrefix
-	// Example: If api hosted at /develop/<endpoint>... and images in bucket under prefix /instrumentation
-	//          S3 Key = (1) Start with URL of request (2) remove /develop (3) prepend /instrumentation
 	key := aws.String(s.cfg.bucketPrefix + strings.TrimPrefix(path, s.cfg.routePrefix))
+	if bucketName == "" {
+		bucketName = s.cfg.bucketName
+	}
 
+	output, err := s.GetObject(&s3.GetObjectInput{Bucket: aws.String(bucketName), Key: key})
+	if err != nil {
+		return nil, err
+	}
+	return output.Body, nil
+}
+
+func (s *S3Blob) NewReaderContext(ctx context.Context, rawPath, bucketName string) (io.ReadCloser, error) {
+	path, err := cleanFilepath(rawPath)
+	if err != nil {
+		return nil, err
+	}
+	key := aws.String(s.cfg.bucketPrefix + strings.TrimPrefix(path, s.cfg.routePrefix))
 	if bucketName == "" {
 		bucketName = s.cfg.bucketName
 	}
