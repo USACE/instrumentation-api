@@ -20,8 +20,7 @@ import (
 //	@Router /projects/{project_slug}/images/{uri_path} [get]
 func (h *ApiHandler) GetMedia(c echo.Context) error {
 	req := c.Request()
-
-	r, err := h.BlobService.NewReader(req.Context(), req.RequestURI, "")
+	r, err := h.BlobService.NewReaderContext(req.Context(), req.RequestURI, "")
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
