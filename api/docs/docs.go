@@ -8612,11 +8612,11 @@ const docTemplate = `{
         "github_com_USACE_instrumentation-api_api_internal_model.IpiSegment": {
             "type": "object",
             "properties": {
-                "cum_dev_timeseries_id": {
-                    "type": "string"
-                },
                 "id": {
                     "type": "integer"
+                },
+                "inc_dev_timeseries_id": {
+                    "type": "string"
                 },
                 "instrument_id": {
                     "type": "string"
@@ -8625,6 +8625,9 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "length_timeseries_id": {
+                    "type": "string"
+                },
+                "temp_timeseries_id": {
                     "type": "string"
                 },
                 "tilt_timeseries_id": {
@@ -8641,8 +8644,14 @@ const docTemplate = `{
                 "elevation": {
                     "type": "number"
                 },
+                "inc_dev": {
+                    "type": "number"
+                },
                 "segment_id": {
                     "type": "integer"
+                },
+                "temp": {
+                    "type": "number"
                 },
                 "tilt": {
                     "type": "number"
