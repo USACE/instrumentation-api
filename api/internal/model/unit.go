@@ -17,6 +17,11 @@ type Unit struct {
 	Measure      string    `json:"measure"`
 }
 
+var (
+	MeterUnitID = uuid.MustParse("ae06a7db-1e18-4994-be41-9d5a408d6cad")
+	FeetUnitID  = uuid.MustParse("f777f2e2-5e32-424e-a1ca-19d16cd8abce")
+)
+
 const listUnits = `
 	SELECT id, name, abbreviation, unit_family_id, unit_family, measure_id, measure
 	FROM v_unit
@@ -31,7 +36,3 @@ func (q *Queries) ListUnits(ctx context.Context) ([]Unit, error) {
 	}
 	return uu, nil
 }
-
-var (
-	MeterUnitID = uuid.MustParse("ae06a7db-1e18-4994-be41-9d5a408d6cad")
-)

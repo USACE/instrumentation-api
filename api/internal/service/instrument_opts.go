@@ -22,7 +22,7 @@ func handleOpts(ctx context.Context, q *model.Queries, inst model.Instrument, rt
 					Slug:         inst.Slug + fmt.Sprintf("segment-%d-length", i),
 					Name:         inst.Slug + fmt.Sprintf("segment-%d-length", i),
 					ParameterID:  model.SaaParameterID,
-					UnitID:       model.MeterUnitID,
+					UnitID:       model.FeetUnitID,
 				}
 
 				tsNew, err := q.CreateTimeseries(ctx, tsConstant)
@@ -42,7 +42,7 @@ func handleOpts(ctx context.Context, q *model.Queries, inst model.Instrument, rt
 				Slug:         inst.Slug + "-bottom-elevation",
 				Name:         inst.Slug + "-bottom-elevation",
 				ParameterID:  model.SaaParameterID,
-				UnitID:       model.MeterUnitID,
+				UnitID:       model.FeetUnitID,
 			}
 
 			tsNew, err := q.CreateTimeseries(ctx, tsConstant)
@@ -77,7 +77,7 @@ func handleOpts(ctx context.Context, q *model.Queries, inst model.Instrument, rt
 					Slug:         inst.Slug + fmt.Sprintf("segment-%d-length", i),
 					Name:         inst.Slug + fmt.Sprintf("segment-%d-length", i),
 					ParameterID:  model.IpiParameterID,
-					UnitID:       model.MeterUnitID,
+					UnitID:       model.FeetUnitID,
 				}
 
 				tsNew, err := q.CreateTimeseries(ctx, tsConstant)
@@ -97,7 +97,7 @@ func handleOpts(ctx context.Context, q *model.Queries, inst model.Instrument, rt
 				Slug:         inst.Slug + "-bottom-elevation",
 				Name:         inst.Slug + "-bottom-elevation",
 				ParameterID:  model.IpiParameterID,
-				UnitID:       model.MeterUnitID,
+				UnitID:       model.FeetUnitID,
 			}
 
 			tsNew, err := q.CreateTimeseries(ctx, tsConstant)

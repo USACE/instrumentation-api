@@ -21,7 +21,8 @@ type IpiSegment struct {
 	Length             *float64   `json:"length" db:"length"`
 	LengthTimeseriesID uuid.UUID  `json:"length_timeseries_id" db:"length_timeseries_id"`
 	TiltTimeseriesID   *uuid.UUID `json:"tilt_timeseries_id" db:"tilt_timeseries_id"`
-	CumDevTimeseriesID *uuid.UUID `json:"cum_dev_timeseries_id" db:"cum_dev_timeseries_id"`
+	IncDevTimeseriesID *uuid.UUID `json:"inc_dev_timeseries_id" db:"inc_dev_timeseries_id"`
+	TempTimeseriesID   *uuid.UUID `json:"temp_timeseries_id" db:"temp_timeseries_id"`
 }
 
 type IpiMeasurements struct {
@@ -33,7 +34,9 @@ type IpiMeasurements struct {
 type IpiSegmentMeasurement struct {
 	SegmentID  int      `json:"segment_id" db:"segment_id"`
 	Tilt       *float64 `json:"tilt" db:"tilt"`
+	IncDev     *float64 `json:"inc_dev" db:"inc_dev"`
 	CumDev     *float64 `json:"cum_dev" db:"cum_dev"`
+	Temp       *float64 `json:"temp" db:"temp"`
 	Elelvation *float64 `json:"elevation" db:"elevation"`
 }
 
@@ -81,8 +84,9 @@ const createIpiSegment = `
 		instrument_id,
 		length_timeseries_id,
 		tilt_timeseries_id,
-		cum_dev_timeseries_id
-	) VALUES ($1, $2, $3, $4, $5)
+		inc_dev_timeseries_id,
+		temp_timeseries_id
+	) VALUES ($1, $2, $3, $4, $5, $6)
 `
 
 func (q *Queries) CreateIpiSegment(ctx context.Context, seg IpiSegment) error {
@@ -91,7 +95,8 @@ func (q *Queries) CreateIpiSegment(ctx context.Context, seg IpiSegment) error {
 		seg.InstrumentID,
 		seg.LengthTimeseriesID,
 		seg.TiltTimeseriesID,
-		seg.CumDevTimeseriesID,
+		seg.IncDevTimeseriesID,
+		seg.TempTimeseriesID,
 	)
 	return err
 }
@@ -100,7 +105,8 @@ const updateIpiSegment = `
 	UPDATE ipi_segment SET
 		length_timeseries_id = $3,
 		tilt_timeseries_id = $4,
-		cum_dev_timeseries_id = $5
+		inc_dev_timeseries_id = $5,
+		temp_timeseries_id = $6
 	WHERE id = $1 AND instrument_id = $2
 `
 
@@ -110,7 +116,8 @@ func (q *Queries) UpdateIpiSegment(ctx context.Context, seg IpiSegment) error {
 		seg.InstrumentID,
 		seg.LengthTimeseriesID,
 		seg.TiltTimeseriesID,
-		seg.CumDevTimeseriesID,
+		seg.IncDevTimeseriesID,
+		seg.TempTimeseriesID,
 	)
 	return err
 }
