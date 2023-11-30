@@ -17,7 +17,8 @@ const ipiSegmentArraySchema = `{
         "length": { "type": ["number", "null"] },
         "length_timeseries_id": { "type": "string" },
         "tilt_timeseries_id": { "type": ["string", "null"] },
-        "cum_dev_timeseries_id": { "type": ["string", "null"] }
+        "inc_dev_timeseries_id": { "type": ["string", "null"] },
+        "temp_timeseries_id": { "type": ["string", "null"] }
     },
     "additionalProperties": false
 }`
@@ -31,6 +32,8 @@ const ipiMeasurementsArraySchema = `{
         "instrument_id": { "type": "string" },
         "tilt": { "type": ["number", "null"] },
         "cum_dev": { "type": ["number", "null"] },
+        "inc_dev": { "type": ["number", "null"] },
+        "temp": { "type": ["number", "null"] },
 	"elevation": { "type": ["number", "null"] }
     },
     "additionalProperties": false
@@ -51,7 +54,8 @@ const updateIpiSegmentsBody = `[
         "length": 1,
         "length_timeseries_id": "e891ca7c-59b2-41bc-9d4a-43995e35b855",
         "tilt_timeseries_id": null,
-        "cum_dev_timeseries_id": null
+        "inc_dev_timeseries_id": null,
+        "temp_timeseries_id": null
     },
     {
         "id": 3,
@@ -59,7 +63,8 @@ const updateIpiSegmentsBody = `[
         "length": 200,
         "length_timeseries_id": "18f17db2-4bc8-44cb-a9fa-ba84d13b8444",
         "tilt_timeseries_id": null,
-        "cum_dev_timeseries_id": null
+        "inc_dev_timeseries_id": null,
+        "temp_timeseries_id": null
     }
 ]`
 
