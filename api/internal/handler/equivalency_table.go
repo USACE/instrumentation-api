@@ -15,11 +15,12 @@ import (
 //	@Tags equivalency-table
 //	@Produce json
 //	@Param datalogger_id path string true "datalogger uuid" Format(uuid)
+//	@Param datalogger_table_id path string true "datalogger table uuid" Format(uuid)
 //	@Success 200 {array} model.EquivalencyTable
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
-//	@Router /datalogger/{datalogger_id}/equivalency_table [get]
+//	@Router /datalogger/{datalogger_id}/table/{datalogger_table_id}/equivalency_table [get]
 //	@Security Bearer
 func (h *ApiHandler) GetEquivalencyTable(c echo.Context) error {
 	dlID, err := uuid.Parse(c.Param("datalogger_id"))
@@ -27,13 +28,20 @@ func (h *ApiHandler) GetEquivalencyTable(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
 	}
 
-	if err := h.DataloggerService.VerifyDataloggerExists(c.Request().Context(), dlID); err != nil {
+	dataloggerTableID, err := uuid.Parse(c.Param("datalogger_table_id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+	}
+
+	ctx := c.Request().Context()
+
+	if err := h.DataloggerService.VerifyDataloggerExists(ctx, dlID); err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, err.Error())
 	}
 
-	t, err := h.EquivalencyTableService.GetEquivalencyTable(c.Request().Context(), dlID)
+	t, err := h.EquivalencyTableService.GetEquivalencyTable(ctx, dataloggerTableID)
 	if err != nil {
-		return c.JSON(http.StatusNotFound, t)
+		return c.JSON(http.StatusNotFound, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, t)
@@ -45,12 +53,13 @@ func (h *ApiHandler) GetEquivalencyTable(c echo.Context) error {
 //	@Tags equivalency-table
 //	@Produce json
 //	@Param datalogger_id path string true "datalogger uuid" Format(uuid)
+//	@Param datalogger_table_id path string true "datalogger table uuid" Format(uuid)
 //	@Param equivalency_table body model.EquivalencyTable true "equivalency table payload"
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
-//	@Router /datalogger/{datalogger_id}/equivalency_table [post]
+//	@Router /datalogger/{datalogger_id}/table/{datalogger_table_id}/equivalency_table [post]
 //	@Security Bearer
 func (h *ApiHandler) CreateEquivalencyTable(c echo.Context) error {
 	dlID, err := uuid.Parse(c.Param("datalogger_id"))
@@ -58,52 +67,21 @@ func (h *ApiHandler) CreateEquivalencyTable(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
 	}
 
-	t := model.EquivalencyTable{DataloggerID: dlID}
-	if err := c.Bind(&t); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	if dlID != t.DataloggerID {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MatchRouteParam("`datalogger_id`"))
-	}
-
-	if err := h.DataloggerService.VerifyDataloggerExists(c.Request().Context(), dlID); err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, err.Error())
-	}
-
-	if err := h.EquivalencyTableService.CreateEquivalencyTable(c.Request().Context(), t); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	return c.JSON(http.StatusCreated, map[string]interface{}{"datalogger_id": dlID})
-}
-
-// UpdateEquivalencyTable godoc
-//
-//	@Summary updates an equivalency table for a datalogger
-//	@Tags equivalency-table
-//	@Produce json
-//	@Param datalogger_id path string true "datalogger uuid" Format(uuid)
-//	@Param equivalency_table body model.EquivalencyTable true "equivalency table payload"
-//	@Success 200 {object} model.EquivalencyTable
-//	@Failure 400 {object} echo.HTTPError
-//	@Failure 404 {object} echo.HTTPError
-//	@Failure 500 {object} echo.HTTPError
-//	@Router /datalogger/{datalogger_id}/equivalency_table [put]
-//	@Security Bearer
-func (h *ApiHandler) UpdateEquivalencyTable(c echo.Context) error {
-	dlID, err := uuid.Parse(c.Param("datalogger_id"))
+	dataloggerTableID, err := uuid.Parse(c.Param("datalogger_table_id"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
 	}
 
-	t := model.EquivalencyTable{DataloggerID: dlID}
+	t := model.EquivalencyTable{DataloggerID: dlID, DataloggerTableID: dataloggerTableID}
 	if err := c.Bind(&t); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	if dlID != t.DataloggerID {
 		return echo.NewHTTPError(http.StatusBadRequest, message.MatchRouteParam("`datalogger_id`"))
+	}
+	if dataloggerTableID != t.DataloggerTableID {
+		return echo.NewHTTPError(http.StatusBadRequest, message.MatchRouteParam("`datalogger_table_id`"))
 	}
 
 	ctx := c.Request().Context()
@@ -112,7 +90,57 @@ func (h *ApiHandler) UpdateEquivalencyTable(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, err.Error())
 	}
 
-	eqtUpdated, err := h.EquivalencyTableService.UpdateEquivalencyTable(ctx, dlID, t)
+	if err := h.EquivalencyTableService.CreateEquivalencyTable(ctx, t); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusCreated, map[string]interface{}{"datalogger_id": dlID, "datalogger_table_id": dataloggerTableID})
+}
+
+// UpdateEquivalencyTable godoc
+//
+//	@Summary updates an equivalency table for a datalogger
+//	@Tags equivalency-table
+//	@Produce json
+//	@Param datalogger_id path string true "datalogger uuid" Format(uuid)
+//	@Param datalogger_table_id path string true "datalogger table uuid" Format(uuid)
+//	@Param equivalency_table body model.EquivalencyTable true "equivalency table payload"
+//	@Success 200 {object} model.EquivalencyTable
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /datalogger/{datalogger_id}/table/{datalogger_table_id}/equivalency_table [put]
+//	@Security Bearer
+func (h *ApiHandler) UpdateEquivalencyTable(c echo.Context) error {
+	dlID, err := uuid.Parse(c.Param("datalogger_id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+	}
+
+	dataloggerTableID, err := uuid.Parse(c.Param("datalogger_table_id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+	}
+
+	t := model.EquivalencyTable{DataloggerID: dlID, DataloggerTableID: dataloggerTableID}
+	if err := c.Bind(&t); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	if dlID != t.DataloggerID {
+		return echo.NewHTTPError(http.StatusBadRequest, message.MatchRouteParam("`datalogger_id`"))
+	}
+	if dataloggerTableID != t.DataloggerTableID {
+		return echo.NewHTTPError(http.StatusBadRequest, message.MatchRouteParam("`datalogger_table_id`"))
+	}
+
+	ctx := c.Request().Context()
+
+	if err := h.DataloggerService.VerifyDataloggerExists(ctx, dlID); err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, err.Error())
+	}
+
+	eqtUpdated, err := h.EquivalencyTableService.UpdateEquivalencyTable(ctx, t)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -130,7 +158,7 @@ func (h *ApiHandler) UpdateEquivalencyTable(c echo.Context) error {
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
-//	@Router /datalogger/{datalogger_id}/equivalency_table [delete]
+//	@Router /datalogger/{datalogger_id}/table/{datalogger_table_id}/equivalency_table [delete]
 //	@Security Bearer
 func (h *ApiHandler) DeleteEquivalencyTable(c echo.Context) error {
 	dlID, err := uuid.Parse(c.Param("datalogger_id"))
@@ -138,15 +166,22 @@ func (h *ApiHandler) DeleteEquivalencyTable(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
 	}
 
-	if err := h.DataloggerService.VerifyDataloggerExists(c.Request().Context(), dlID); err != nil {
+	dataloggerTableID, err := uuid.Parse(c.Param("datalogger_table_id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+	}
+
+	ctx := c.Request().Context()
+
+	if err := h.DataloggerService.VerifyDataloggerExists(ctx, dlID); err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, err.Error())
 	}
 
-	if err := h.EquivalencyTableService.DeleteEquivalencyTable(c.Request().Context(), dlID); err != nil {
+	if err := h.EquivalencyTableService.DeleteEquivalencyTable(ctx, dataloggerTableID); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{"datalogger_id": dlID})
+	return c.JSON(http.StatusOK, map[string]interface{}{"datalogger_id": dlID, "datalogger_table_id": dataloggerTableID})
 }
 
 // DeleteEquivalencyTableRow godoc
@@ -155,31 +190,36 @@ func (h *ApiHandler) DeleteEquivalencyTable(c echo.Context) error {
 //	@Tags equivalency-table
 //	@Produce json
 //	@Param datalogger_id path string true "datalogger uuid" Format(uuid)
-//	@Param id query string true "equivalency table row uuid" Format(uuid)
+//	@Param row_id path string true "equivalency table row uuid" Format(uuid)
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
-//	@Router /datalogger/{datalogger_id}/equivalency_table/row [delete]
+//	@Router /datalogger/{datalogger_id}/table/{datalogger_table_id}/equivalency_table/row/{row_id} [delete]
 //	@Security Bearer
 func (h *ApiHandler) DeleteEquivalencyTableRow(c echo.Context) error {
 	dlID, err := uuid.Parse(c.Param("datalogger_id"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
 	}
-
-	rID, err := uuid.Parse(c.QueryParam("id"))
+	_, err = uuid.Parse(c.Param("datalogger_table_id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+	}
+	rowID, err := uuid.Parse(c.Param("row_id"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
 	}
 
-	if err := h.DataloggerService.VerifyDataloggerExists(c.Request().Context(), dlID); err != nil {
+	ctx := c.Request().Context()
+
+	if err := h.DataloggerService.VerifyDataloggerExists(ctx, dlID); err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, err.Error())
 	}
 
-	if err := h.EquivalencyTableService.DeleteEquivalencyTableRow(c.Request().Context(), dlID, rID); err != nil {
+	if err := h.EquivalencyTableService.DeleteEquivalencyTableRow(ctx, rowID); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{"row_id": rID})
+	return c.JSON(http.StatusOK, map[string]interface{}{"row_id": rowID})
 }

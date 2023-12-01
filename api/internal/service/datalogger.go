@@ -19,7 +19,8 @@ type DataloggerService interface {
 	GetOneDatalogger(ctx context.Context, dataloggerID uuid.UUID) (model.Datalogger, error)
 	UpdateDatalogger(ctx context.Context, u model.Datalogger) (model.Datalogger, error)
 	DeleteDatalogger(ctx context.Context, d model.Datalogger) error
-	GetDataloggerPreview(ctx context.Context, dlID uuid.UUID) (model.DataloggerPreview, error)
+	GetDataloggerTablePreview(ctx context.Context, dataloggerTableID uuid.UUID) (model.DataloggerPreview, error)
+	ResetDataloggerTableName(ctx context.Context, dataloggerTableID uuid.UUID) error
 }
 
 type dataloggerService struct {
@@ -48,10 +49,6 @@ func (s dataloggerService) CreateDatalogger(ctx context.Context, n model.Datalog
 
 	key, err := qtx.CreateDataloggerHash(ctx, dataloggerID)
 	if err != nil {
-		return a, err
-	}
-
-	if err := qtx.CreateDataloggerPreview(ctx, dataloggerID); err != nil {
 		return a, err
 	}
 

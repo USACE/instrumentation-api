@@ -21,8 +21,9 @@ var dataloggerObjectLoader = gojsonschema.NewStringLoader(dataloggerSchema)
 
 // datalogger 1 for read-only tests since it's used with the mock datalogger service
 const (
-	testDataloggerID1 = "83a7345c-62d8-4e29-84db-c2e36f8bc40d"
-	testDataloggerID2 = "c0b65315-f802-4ca5-a4dd-7e0cfcffd057"
+	testDataloggerID1     = "83a7345c-62d8-4e29-84db-c2e36f8bc40d"
+	testDataloggerID2     = "c0b65315-f802-4ca5-a4dd-7e0cfcffd057"
+	testDataloggerTableID = "98a77c65-e5c4-49ed-8fb4-b0ffd06add4c"
 )
 
 const createDataloggerBody = `{
@@ -66,9 +67,15 @@ func TestDatalogger(t *testing.T) {
 			ExpectedStatus: http.StatusOK,
 		},
 		{
-			Name:           "GetDataloggerPreview",
-			URL:            fmt.Sprintf("/datalogger/%s/preview", testDataloggerID1),
+			Name:           "GetDataloggerTablePreview",
+			URL:            fmt.Sprintf("/datalogger/%s/table/%s/preview ", testDataloggerID1, testDataloggerTableID),
 			Method:         http.MethodGet,
+			ExpectedStatus: http.StatusOK,
+		},
+		{
+			Name:           "ResetDataloggerTableName",
+			URL:            fmt.Sprintf("/datalogger/%s/table/%s/name ", testDataloggerID1, testDataloggerTableID),
+			Method:         http.MethodPut,
 			ExpectedStatus: http.StatusOK,
 		},
 		{

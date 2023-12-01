@@ -216,6 +216,10 @@ definitions:
         type: string
       sn:
         type: string
+      tables:
+        items:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerTable'
+        type: array
       update_date:
         type: string
       updater:
@@ -225,16 +229,14 @@ definitions:
     type: object
   github_com_USACE_instrumentation-api_api_internal_model.DataloggerPreview:
     properties:
-      datalogger_id:
-        type: string
-      model:
+      datalogger_table_id:
         type: string
       preview:
         $ref: '#/definitions/pgtype.JSON'
-      sn:
-        type: string
       update_date:
         type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.DataloggerTable:
     type: object
   github_com_USACE_instrumentation-api_api_internal_model.DataloggerWithKey:
     properties:
@@ -264,6 +266,10 @@ definitions:
         type: string
       sn:
         type: string
+      tables:
+        items:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerTable'
+        type: array
       update_date:
         type: string
       updater:
@@ -336,6 +342,8 @@ definitions:
   github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable:
     properties:
       datalogger_id:
+        type: string
+      datalogger_table_id:
         type: string
       rows:
         items:
@@ -1391,7 +1399,40 @@ paths:
       summary: updates a datalogger
       tags:
       - datalogger
-  /datalogger/{datalogger_id}/equivalency_table:
+  /datalogger/{datalogger_id}/key:
+    put:
+      parameters:
+      - description: datalogger uuid
+        format: uuid
+        in: path
+        name: datalogger_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerWithKey'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
+      summary: deletes and recreates a datalogger api key
+      tags:
+      - datalogger
+  /datalogger/{datalogger_id}/table/{datalogger_table_id}/equivalency_table:
     delete:
       parameters:
       - description: datalogger uuid
@@ -1433,6 +1474,12 @@ paths:
         name: datalogger_id
         required: true
         type: string
+      - description: datalogger table uuid
+        format: uuid
+        in: path
+        name: datalogger_table_id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -1465,6 +1512,12 @@ paths:
         format: uuid
         in: path
         name: datalogger_id
+        required: true
+        type: string
+      - description: datalogger table uuid
+        format: uuid
+        in: path
+        name: datalogger_table_id
         required: true
         type: string
       - description: equivalency table payload
@@ -1506,6 +1559,12 @@ paths:
         name: datalogger_id
         required: true
         type: string
+      - description: datalogger table uuid
+        format: uuid
+        in: path
+        name: datalogger_table_id
+        required: true
+        type: string
       - description: equivalency table payload
         in: body
         name: equivalency_table
@@ -1536,7 +1595,7 @@ paths:
       summary: updates an equivalency table for a datalogger
       tags:
       - equivalency-table
-  /datalogger/{datalogger_id}/equivalency_table/row:
+  /datalogger/{datalogger_id}/table/{datalogger_table_id}/equivalency_table/row/{row_id}:
     delete:
       parameters:
       - description: datalogger uuid
@@ -1547,8 +1606,8 @@ paths:
         type: string
       - description: equivalency table row uuid
         format: uuid
-        in: query
-        name: id
+        in: path
+        name: row_id
         required: true
         type: string
       produces:
@@ -1576,7 +1635,7 @@ paths:
       summary: deletes an equivalency table row
       tags:
       - equivalency-table
-  /datalogger/{datalogger_id}/key:
+  /datalogger/{datalogger_id}/table/{datalogger_table_id}/name:
     put:
       parameters:
       - description: datalogger uuid
@@ -1585,13 +1644,19 @@ paths:
         name: datalogger_id
         required: true
         type: string
+      - description: datalogger table uuid
+        format: uuid
+        in: path
+        name: datalogger_table_id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerWithKey'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerPreview'
         "400":
           description: Bad Request
           schema:
@@ -1606,16 +1671,22 @@ paths:
             $ref: '#/definitions/echo.HTTPError'
       security:
       - Bearer: []
-      summary: deletes and recreates a datalogger api key
+      summary: resets a datalogger table name to be renamed by incoming telemetry
       tags:
       - datalogger
-  /datalogger/{datalogger_id}/preview:
+  /datalogger/{datalogger_id}/table/{datalogger_table_id}/preview:
     get:
       parameters:
       - description: datalogger uuid
         format: uuid
         in: path
         name: datalogger_id
+        required: true
+        type: string
+      - description: datalogger table uuid
+        format: uuid
+        in: path
+        name: datalogger_table_id
         required: true
         type: string
       produces:

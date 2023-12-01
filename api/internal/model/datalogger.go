@@ -21,22 +21,22 @@ type Telemetry struct {
 }
 
 type Datalogger struct {
-	ID              uuid.UUID        `json:"id" db:"id"`
-	Name            string           `json:"name" db:"name"`
-	SN              string           `json:"sn" db:"sn"`
-	ProjectID       uuid.UUID        `json:"project_id" db:"project_id"`
-	Creator         uuid.UUID        `json:"creator" db:"creator"`
-	CreatorUsername string           `json:"creator_username" db:"creator_username"`
-	CreateDate      time.Time        `json:"create_date" db:"create_date"`
-	Updater         *uuid.UUID       `json:"updater" db:"updater"`
-	UpdaterUsername string           `json:"updater_username" db:"updater_username"`
-	UpdateDate      *time.Time       `json:"update_date" db:"update_date"`
-	Slug            string           `json:"slug" db:"slug"`
-	ModelID         uuid.UUID        `json:"model_id" db:"model_id"`
-	Model           *string          `json:"model" db:"model"`
-	Deleted         bool             `json:"-" db:"deleted"`
-	Errors          []string         `json:"errors" db:"-"`
-	PgErrors        pgtype.TextArray `json:"-" db:"errors"`
+	ID              uuid.UUID                    `json:"id" db:"id"`
+	Name            string                       `json:"name" db:"name"`
+	SN              string                       `json:"sn" db:"sn"`
+	ProjectID       uuid.UUID                    `json:"project_id" db:"project_id"`
+	Creator         uuid.UUID                    `json:"creator" db:"creator"`
+	CreatorUsername string                       `json:"creator_username" db:"creator_username"`
+	CreateDate      time.Time                    `json:"create_date" db:"create_date"`
+	Updater         *uuid.UUID                   `json:"updater" db:"updater"`
+	UpdaterUsername string                       `json:"updater_username" db:"updater_username"`
+	UpdateDate      *time.Time                   `json:"update_date" db:"update_date"`
+	Slug            string                       `json:"slug" db:"slug"`
+	ModelID         uuid.UUID                    `json:"model_id" db:"model_id"`
+	Model           *string                      `json:"model" db:"model"`
+	Errors          []string                     `json:"errors" db:"-"`
+	PgErrors        pgtype.TextArray             `json:"-" db:"errors"`
+	Tables          dbJSONSlice[DataloggerTable] `json:"tables" db:"tables"`
 }
 
 type DataloggerWithKey struct {
@@ -44,17 +44,20 @@ type DataloggerWithKey struct {
 	Key string `json:"key"`
 }
 
+type DataloggerTable struct {
+	id   uuid.UUID
+	name string
+}
+
 type DataloggerPreview struct {
-	DataloggerID uuid.UUID   `json:"datalogger_id" db:"datalogger_id"`
-	UpdateDate   time.Time   `json:"update_date" db:"update_date"`
-	Preview      pgtype.JSON `json:"preview" db:"preview"`
-	Model        *string     `json:"model,omitempty"`
-	SN           *string     `json:"sn,omitempty"`
+	DataloggerTableID uuid.UUID   `json:"datalogger_table_id" db:"datalogger_table_id"`
+	UpdateDate        time.Time   `json:"update_date" db:"update_date"`
+	Preview           pgtype.JSON `json:"preview" db:"preview"`
 }
 
 type DataloggerError struct {
-	DataloggerID uuid.UUID `json:"datalogger_id" db:"datalogger_id"`
-	Errors       []string  `json:"errors" db:"errors"`
+	DataloggerTableID uuid.UUID `json:"datalogger_id" db:"datalogger_id"`
+	Errors            []string  `json:"errors" db:"errors"`
 }
 
 const getDataloggerModelName = `
@@ -144,12 +147,12 @@ func (q *Queries) CreateDataloggerHash(ctx context.Context, dataloggerID uuid.UU
 	return key, nil
 }
 
-const createDataloggerPreview = `
-	INSERT INTO datalogger_preview (datalogger_id) VALUES ($1)
+const createDataloggerTablePreview = `
+	INSERT INTO datalogger_preview (datalogger_table_id) VALUES ($1)
 `
 
-func (q *Queries) CreateDataloggerPreview(ctx context.Context, dataloggerID uuid.UUID) error {
-	_, err := q.db.ExecContext(ctx, createDataloggerPreview, dataloggerID)
+func (q *Queries) CreateDataloggerTablePreview(ctx context.Context, dataloggerTableID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, createDataloggerTablePreview, dataloggerTableID)
 	return err
 }
 
@@ -223,21 +226,6 @@ func (q *Queries) DeleteDatalogger(ctx context.Context, dl Datalogger) error {
 	return err
 }
 
-const getDataloggerPreview = `
-	SELECT * FROM v_datalogger_preview WHERE datalogger_id = $1
-`
-
-func (q *Queries) GetDataloggerPreview(ctx context.Context, dlID uuid.UUID) (DataloggerPreview, error) {
-	var dlp DataloggerPreview
-	if err := q.db.GetContext(ctx, &dlp, getDataloggerPreview, dlID); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return dlp, fmt.Errorf("preview not found")
-		}
-		return dlp, err
-	}
-	return dlp, nil
-}
-
 const listDataloggerSlugs = `
 	SELECT slug FROM datalogger
 `
@@ -246,4 +234,28 @@ func (q *Queries) ListDataloggerSlugs(ctx context.Context) ([]string, error) {
 	aa := make([]string, 0)
 	err := q.db.SelectContext(ctx, &aa, listDataloggerSlugs)
 	return aa, err
+}
+
+const getDataloggerTablePreview = `
+	SELECT * FROM v_datalogger_preview WHERE datalogger_table_id = $1
+`
+
+func (q *Queries) GetDataloggerTablePreview(ctx context.Context, dataloggerTableID uuid.UUID) (DataloggerPreview, error) {
+	var dlp DataloggerPreview
+	if err := q.db.GetContext(ctx, &dlp, getDataloggerTablePreview, dataloggerTableID); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return dlp, fmt.Errorf("preview not found")
+		}
+		return dlp, err
+	}
+	return dlp, nil
+}
+
+const resetDataloggerTableName = `
+	UPDATE datalogger_table SET table_name = '' WHERE id = $1
+`
+
+func (q *Queries) ResetDataloggerTableName(ctx context.Context, dataloggerTableID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, resetDataloggerTableName, dataloggerTableID)
+	return err
 }
