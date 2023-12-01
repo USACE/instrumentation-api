@@ -72,7 +72,12 @@ CREATE VIEW v_saa_measurement AS (
             it.value AS initial_t,
             locf(b.value) OVER (ORDER BY a.time ASC) AS bottom,
             locf(l.value) OVER (ORDER BY a.time ASC) AS seg_length
-        FROM (SELECT DISTINCT time FROM timeseries_measurement WHERE timeseries_id IN (SELECT id FROM timeseries WHERE instrument_id = seg.instrument_id)) a
+        FROM (
+            SELECT DISTINCT time FROM timeseries_measurement
+            WHERE timeseries_id IN (SELECT id FROM timeseries WHERE instrument_id = seg.instrument_id)
+            UNION
+            SELECT time FROM timeseries_measurement WHERE time = opts.initial_time
+        ) a
         LEFT JOIN LATERAL (SELECT time FROM timeseries_measurement WHERE time = opts.initial_time) ia ON true
         LEFT JOIN (SELECT time, value FROM timeseries_measurement WHERE timeseries_id = seg.x_timeseries_id) x ON x.time = a.time
         LEFT JOIN (SELECT time, value FROM timeseries_measurement WHERE timeseries_id = seg.y_timeseries_id) y ON y.time = a.time
@@ -140,8 +145,12 @@ CREATE VIEW v_ipi_measurement AS (
             temp.value AS temp,
             locf(b.value) OVER (ORDER BY a.time ASC) AS bottom,
             locf(l.value) OVER (ORDER BY a.time ASC) AS seg_length
-        FROM (SELECT DISTINCT time FROM timeseries_measurement WHERE timeseries_id IN (SELECT id FROM timeseries WHERE instrument_id = seg.instrument_id)) a
-        LEFT JOIN LATERAL (SELECT time FROM timeseries_measurement WHERE time = opts.initial_time) ia ON true
+        FROM (
+            SELECT DISTINCT time FROM timeseries_measurement
+            WHERE timeseries_id IN (SELECT id FROM timeseries WHERE instrument_id = seg.instrument_id)
+            UNION
+            SELECT time FROM timeseries_measurement WHERE time = opts.initial_time
+        ) a
         LEFT JOIN (SELECT time, value FROM timeseries_measurement WHERE timeseries_id = seg.tilt_timeseries_id) t ON t.time = a.time
         LEFT JOIN (SELECT time, value FROM timeseries_measurement WHERE timeseries_id = seg.inc_dev_timeseries_id) d ON d.time = a.time
         LEFT JOIN (SELECT time, value FROM timeseries_measurement WHERE timeseries_id = seg.temp_timeseries_id) temp ON temp.time = a.time
