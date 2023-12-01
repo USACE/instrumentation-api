@@ -23,7 +23,7 @@ DEFAULT_SN = "12345"
 DEFAULT_VERBOSE = False
 
 
-def post_data(url: str, data: str, api_key: str) -> Any | None:
+def post_data(url: str, data: dict, api_key: str) -> Any | None:
     json_data = json.dumps(data).encode("utf-8")
 
     request = Request(
