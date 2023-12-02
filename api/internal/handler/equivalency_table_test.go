@@ -4,7 +4,33 @@ import (
 	"fmt"
 	"net/http"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/xeipuuv/gojsonschema"
 )
+
+const equivalencyTableRowSchema = `{
+    "type": "object",
+    "properties": {
+	"id": { "type": "string" },
+	"field_name": { "type": "string" },
+	"display_name": { "type": "string" },
+	"instrument_id": { "type": ["string", "null"] },
+	"timeseries_id": { "type": ["string", "null"] }
+    }
+}`
+
+var equivalencyTableSchema = fmt.Sprintf(`{
+    "type": "object",
+    "properties": {
+        "datalogger_id" : { "type": "string" },
+        "datalogger_table_id": { "type": "string" },
+	"rows": { "type": "array", "items": %s }
+    },
+    "required": ["datalogger_id", "datalogger_table_id"]
+}`, equivalencyTableRowSchema)
+
+var equivalencyTableLoader = gojsonschema.NewStringLoader(equivalencyTableSchema)
 
 const testEquivalencyTableRowID = "2f1f7c3d-8b6f-4b11-917e-8f049eb6c62b"
 
@@ -43,6 +69,9 @@ const updateEquivalencyTableBody = `{
 }`
 
 func TestEquivalencyTable(t *testing.T) {
+	objSchema, err := gojsonschema.NewSchema(equivalencyTableLoader)
+	assert.Nil(t, err)
+
 	tests := []HTTPTest{
 		{
 			Name:           "CreateEquivalencyTable",
@@ -50,12 +79,14 @@ func TestEquivalencyTable(t *testing.T) {
 			Method:         http.MethodPost,
 			Body:           createEquivalencyTableBody,
 			ExpectedStatus: http.StatusCreated,
+			ExpectedSchema: objSchema,
 		},
 		{
 			Name:           "GetEquivalencyTable",
 			URL:            fmt.Sprintf("/datalogger/%s/table/%s/equivalency_table", testDataloggerID1, testDataloggerTableID),
 			Method:         http.MethodGet,
 			ExpectedStatus: http.StatusOK,
+			ExpectedSchema: objSchema,
 		},
 		{
 			Name:           "UpdateEquivalencyTable",
@@ -63,6 +94,7 @@ func TestEquivalencyTable(t *testing.T) {
 			Method:         http.MethodPut,
 			Body:           updateEquivalencyTableBody,
 			ExpectedStatus: http.StatusOK,
+			ExpectedSchema: objSchema,
 		},
 		{
 			Name:           "DeleteEquivalencyTableRow",
