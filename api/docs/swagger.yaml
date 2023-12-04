@@ -237,6 +237,11 @@ definitions:
         type: string
     type: object
   github_com_USACE_instrumentation-api_api_internal_model.DataloggerTable:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
     type: object
   github_com_USACE_instrumentation-api_api_internal_model.DataloggerWithKey:
     properties:

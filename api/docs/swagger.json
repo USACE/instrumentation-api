@@ -8103,7 +8103,15 @@
             }
         },
         "github_com_USACE_instrumentation-api_api_internal_model.DataloggerTable": {
-            "type": "object"
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
         },
         "github_com_USACE_instrumentation-api_api_internal_model.DataloggerWithKey": {
             "type": "object",
