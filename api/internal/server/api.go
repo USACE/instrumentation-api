@@ -102,7 +102,7 @@ func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 	r.private.PUT("/datalogger/:datalogger_id", h.UpdateDatalogger)
 	r.private.PUT("/datalogger/:datalogger_id/key", h.CycleDataloggerKey)
 	r.private.DELETE("/datalogger/:datalogger_id", h.DeleteDatalogger)
-	r.private.GET("/datalogger/:datalogger_id/table/:datalogger_table_id/preview ", h.GetDataloggerTablePreview)
+	r.private.GET("/datalogger/:datalogger_id/table/:datalogger_table_id/preview", h.GetDataloggerTablePreview)
 	r.private.PUT("/datalogger/:datalogger_id/table/:datalogger_table_id/name ", h.ResetDataloggerTableName)
 
 	// DistrictRollup
