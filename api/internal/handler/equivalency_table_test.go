@@ -75,7 +75,7 @@ func TestEquivalencyTable(t *testing.T) {
 	tests := []HTTPTest{
 		{
 			Name:           "CreateEquivalencyTable",
-			URL:            fmt.Sprintf("/datalogger/%s/table/%s/equivalency_table", testDataloggerID1, testDataloggerTableID),
+			URL:            fmt.Sprintf("/datalogger/%s/tables/%s/equivalency_table", testDataloggerID1, testDataloggerTableID),
 			Method:         http.MethodPost,
 			Body:           createEquivalencyTableBody,
 			ExpectedStatus: http.StatusCreated,
@@ -83,14 +83,14 @@ func TestEquivalencyTable(t *testing.T) {
 		},
 		{
 			Name:           "GetEquivalencyTable",
-			URL:            fmt.Sprintf("/datalogger/%s/table/%s/equivalency_table", testDataloggerID1, testDataloggerTableID),
+			URL:            fmt.Sprintf("/datalogger/%s/tables/%s/equivalency_table", testDataloggerID1, testDataloggerTableID),
 			Method:         http.MethodGet,
 			ExpectedStatus: http.StatusOK,
 			ExpectedSchema: objSchema,
 		},
 		{
 			Name:           "UpdateEquivalencyTable",
-			URL:            fmt.Sprintf("/datalogger/%s/table/%s/equivalency_table", testDataloggerID1, testDataloggerTableID),
+			URL:            fmt.Sprintf("/datalogger/%s/tables/%s/equivalency_table", testDataloggerID1, testDataloggerTableID),
 			Method:         http.MethodPut,
 			Body:           updateEquivalencyTableBody,
 			ExpectedStatus: http.StatusOK,
@@ -98,13 +98,13 @@ func TestEquivalencyTable(t *testing.T) {
 		},
 		{
 			Name:           "DeleteEquivalencyTableRow",
-			URL:            fmt.Sprintf("/datalogger/%s/table/%s/equivalency_table/row/%s", testDataloggerID1, testDataloggerTableID, testEquivalencyTableRowID),
+			URL:            fmt.Sprintf("/datalogger/%s/tables/%s/equivalency_table/row/%s", testDataloggerID1, testDataloggerTableID, testEquivalencyTableRowID),
 			Method:         http.MethodDelete,
 			ExpectedStatus: http.StatusOK,
 		},
 		{
 			Name:           "DeleteEquivalencyTable",
-			URL:            fmt.Sprintf("/datalogger/%s/table/%s/equivalency_table", testDataloggerID1, testDataloggerTableID),
+			URL:            fmt.Sprintf("/datalogger/%s/tables/%s/equivalency_table", testDataloggerID1, testDataloggerTableID),
 			Method:         http.MethodDelete,
 			ExpectedStatus: http.StatusOK,
 		}}

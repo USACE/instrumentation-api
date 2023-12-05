@@ -33,12 +33,10 @@ func (q *Queries) GetDataloggerHashByModelSN(ctx context.Context, modelName, sn 
 const updateDataloggerTablePreview = `
 	UPDATE datalogger_preview SET preview = $3, update_date = $4
 	WHERE datalogger_table_id IN (SELECT id FROM datalogger_table WHERE datalogger_id = $1 AND table_name = $2)
-	RETURNING datalogger_id
 `
 
 func (q *Queries) UpdateDataloggerTablePreview(ctx context.Context, dataloggerID uuid.UUID, tableName string, dlp DataloggerPreview) error {
-	var dlID uuid.UUID
-	err := q.db.GetContext(ctx, &dlID, updateDataloggerTablePreview, dataloggerID, tableName, dlp.Preview, dlp.UpdateDate)
+	_, err := q.db.ExecContext(ctx, updateDataloggerTablePreview, dataloggerID, tableName, dlp.Preview, dlp.UpdateDate)
 	return err
 }
 
@@ -54,7 +52,11 @@ func (q *Queries) DeleteDataloggerTableError(ctx context.Context, dataloggerID u
 
 const createDataloggerError = `
 	INSERT INTO datalogger_error (datalogger_table_id, error_message)
-	SELECT (SELECT id FROM datalogger_table WHERE datalogger_id = $1 AND table_name = $2), $3
+	SELECT id, $3 FROM datalogger_table
+	WHERE datalogger_id = $1 AND table_name = $2
+	AND NOT EXISTS (
+	   SELECT 1 FROM datalogger_table WHERE datalogger_id = $1 AND table_name = $2
+	);
 `
 
 func (q *Queries) CreateDataloggerTableError(ctx context.Context, dataloggerID uuid.UUID, tableName *string, errMessage string) error {
@@ -66,7 +68,9 @@ const renameEmptyDataloggerTableName = `
 	UPDATE datalogger_table
 	SET table_name = $2
 	WHERE table_name = '' AND datalogger_id = $1
-	ON CONFLICT ON CONSTRAINT datalogger_table_datalogger_id_table_name_key DO NOTHING
+	AND NOT EXISTS (
+	   SELECT 1 FROM datalogger_table WHERE datalogger_id = $1 AND table_name = $2
+	);
 `
 
 func (q *Queries) RenameEmptyDataloggerTableName(ctx context.Context, dataloggerID uuid.UUID, tableName string) error {

@@ -8,7 +8,7 @@ INSERT INTO datalogger_hash (datalogger_id, "hash") VALUES
     ('c0b65315-f802-4ca5-a4dd-7e0cfcffd057', '$argon2id$v=19$m=65536,t=3,p=2$Ud3epc4MAsAAN6pCUQxCjh$5mXpCpcc3nc46XUC7pJiAKvK9UzK1qfP6GoYDFH66zv4pjQxt88ybQJ');
 
 INSERT INTO datalogger_table (id, datalogger_id, table_name) VALUES
-    ('98a77c65-e5c4-49ed-8fb4-b0ffd06add4c', '83a7345c-62d8-4e29-84db-c2e36f8bc40d', ''),
+    ('98a77c65-e5c4-49ed-8fb4-b0ffd06add4c', '83a7345c-62d8-4e29-84db-c2e36f8bc40d', 'Demo Datalogger Table'),
     ('5b47be95-6ba9-488c-bdda-be7bdbca2909', 'c0b65315-f802-4ca5-a4dd-7e0cfcffd057', '');
 
 INSERT INTO datalogger_preview (datalogger_table_id, update_date, preview) VALUES

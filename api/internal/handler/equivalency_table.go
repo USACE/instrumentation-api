@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"database/sql"
+	"errors"
 	"net/http"
 
 	"github.com/USACE/instrumentation-api/api/internal/message"
@@ -20,7 +22,7 @@ import (
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
-//	@Router /datalogger/{datalogger_id}/table/{datalogger_table_id}/equivalency_table [get]
+//	@Router /datalogger/{datalogger_id}/tables/{datalogger_table_id}/equivalency_table [get]
 //	@Security Bearer
 func (h *ApiHandler) GetEquivalencyTable(c echo.Context) error {
 	dlID, err := uuid.Parse(c.Param("datalogger_id"))
@@ -41,7 +43,10 @@ func (h *ApiHandler) GetEquivalencyTable(c echo.Context) error {
 
 	t, err := h.EquivalencyTableService.GetEquivalencyTable(ctx, dataloggerTableID)
 	if err != nil {
-		return c.JSON(http.StatusNotFound, err.Error())
+		if errors.Is(err, sql.ErrNoRows) {
+			return echo.NewHTTPError(http.StatusNotFound, message.NotFound)
+		}
+		return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
 	}
 
 	return c.JSON(http.StatusOK, t)
@@ -59,7 +64,7 @@ func (h *ApiHandler) GetEquivalencyTable(c echo.Context) error {
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
-//	@Router /datalogger/{datalogger_id}/table/{datalogger_table_id}/equivalency_table [post]
+//	@Router /datalogger/{datalogger_id}/tables/{datalogger_table_id}/equivalency_table [post]
 //	@Security Bearer
 func (h *ApiHandler) CreateEquivalencyTable(c echo.Context) error {
 	dlID, err := uuid.Parse(c.Param("datalogger_id"))
@@ -109,7 +114,7 @@ func (h *ApiHandler) CreateEquivalencyTable(c echo.Context) error {
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
-//	@Router /datalogger/{datalogger_id}/table/{datalogger_table_id}/equivalency_table [put]
+//	@Router /datalogger/{datalogger_id}/tables/{datalogger_table_id}/equivalency_table [put]
 //	@Security Bearer
 func (h *ApiHandler) UpdateEquivalencyTable(c echo.Context) error {
 	dlID, err := uuid.Parse(c.Param("datalogger_id"))
@@ -158,7 +163,7 @@ func (h *ApiHandler) UpdateEquivalencyTable(c echo.Context) error {
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
-//	@Router /datalogger/{datalogger_id}/table/{datalogger_table_id}/equivalency_table [delete]
+//	@Router /datalogger/{datalogger_id}/tables/{datalogger_table_id}/equivalency_table [delete]
 //	@Security Bearer
 func (h *ApiHandler) DeleteEquivalencyTable(c echo.Context) error {
 	dlID, err := uuid.Parse(c.Param("datalogger_id"))
@@ -195,7 +200,7 @@ func (h *ApiHandler) DeleteEquivalencyTable(c echo.Context) error {
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
-//	@Router /datalogger/{datalogger_id}/table/{datalogger_table_id}/equivalency_table/row/{row_id} [delete]
+//	@Router /datalogger/{datalogger_id}/tables/{datalogger_table_id}/equivalency_table/row/{row_id} [delete]
 //	@Security Bearer
 func (h *ApiHandler) DeleteEquivalencyTableRow(c echo.Context) error {
 	dlID, err := uuid.Parse(c.Param("datalogger_id"))

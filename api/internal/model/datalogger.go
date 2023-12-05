@@ -45,8 +45,8 @@ type DataloggerWithKey struct {
 }
 
 type DataloggerTable struct {
-	ID   uuid.UUID `json:"id" db:"id"`
-	Name string    `json:"name" db:"name"`
+	ID        uuid.UUID `json:"id" db:"id"`
+	TableName string    `json:"table_name" db:"table_name"`
 }
 
 type DataloggerPreview struct {

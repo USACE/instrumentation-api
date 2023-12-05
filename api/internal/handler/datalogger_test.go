@@ -125,14 +125,14 @@ func TestDatalogger(t *testing.T) {
 		},
 		{
 			Name:           "GetDataloggerTablePreview",
-			URL:            fmt.Sprintf("/datalogger/%s/table/%s/preview ", testDataloggerID1, testDataloggerTableID),
+			URL:            fmt.Sprintf("/datalogger/%s/tables/%s/preview", testDataloggerID1, testDataloggerTableID),
 			Method:         http.MethodGet,
 			ExpectedStatus: http.StatusOK,
 			ExpectedSchema: previewObjSchema,
 		},
 		{
 			Name:           "ResetDataloggerTableName",
-			URL:            fmt.Sprintf("/datalogger/%s/table/%s/name ", testDataloggerID1, testDataloggerTableID),
+			URL:            fmt.Sprintf("/datalogger/%s/tables/%s/name", testDataloggerID1, testDataloggerTableID),
 			Method:         http.MethodPut,
 			ExpectedStatus: http.StatusOK,
 		},

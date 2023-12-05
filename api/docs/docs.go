@@ -558,7 +558,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/datalogger/{datalogger_id}/table/{datalogger_table_id}/equivalency_table": {
+        "/datalogger/{datalogger_id}/tables/{datalogger_table_id}/equivalency_table": {
             "get": {
                 "security": [
                     {
@@ -807,7 +807,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/datalogger/{datalogger_id}/table/{datalogger_table_id}/equivalency_table/row/{row_id}": {
+        "/datalogger/{datalogger_id}/tables/{datalogger_table_id}/equivalency_table/row/{row_id}": {
             "delete": {
                 "security": [
                     {
@@ -868,7 +868,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/datalogger/{datalogger_id}/table/{datalogger_table_id}/name": {
+        "/datalogger/{datalogger_id}/tables/{datalogger_table_id}/name": {
             "put": {
                 "security": [
                     {
@@ -928,7 +928,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/datalogger/{datalogger_id}/table/{datalogger_table_id}/preview": {
+        "/datalogger/{datalogger_id}/tables/{datalogger_table_id}/preview": {
             "get": {
                 "security": [
                     {
@@ -8116,7 +8116,7 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
-                "name": {
+                "table_name": {
                     "type": "string"
                 }
             }

@@ -54,18 +54,18 @@ CREATE OR REPLACE VIEW v_datalogger_preview AS (
 
 CREATE OR REPLACE VIEW v_datalogger_equivalency_table AS (
     SELECT
-        datalogger_id,
-        datalogger_table_id,
-        JSON_AGG(JSON_BUILD_OBJECT(
-            'id',            id,
-            'field_name',    field_name,
-            'display_name',  display_name,
-            'instrument_id', instrument_id,
-            'timeseries_id', timeseries_id
-        ))::TEXT AS fields
-    FROM datalogger_equivalency_table
-    WHERE NOT datalogger_deleted
-    GROUP BY datalogger_id, datalogger_table_id
+        dt.datalogger_id AS datalogger_id,
+        dt.id AS datalogger_table_id,
+        COALESCE(JSON_AGG(ROW_TO_JSON(eq)) FILTER (WHERE eq IS NOT NULL), '[]'::JSON)::TEXT AS fields
+    FROM datalogger_table dt
+    INNER JOIN datalogger dl ON dt.datalogger_id = dl.id
+    LEFT JOIN LATERAL (
+        SELECT id, field_name, display_name, instrument_id, timeseries_id
+        FROM datalogger_equivalency_table
+        WHERE datalogger_table_id = dt.id
+    ) eq ON true
+    WHERE NOT dl.deleted
+    GROUP BY dt.datalogger_id, dt.id
 );
 
 CREATE OR REPLACE VIEW v_datalogger_hash AS (

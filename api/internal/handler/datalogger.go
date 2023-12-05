@@ -265,7 +265,7 @@ func (h *ApiHandler) DeleteDatalogger(c echo.Context) error {
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
-//	@Router /datalogger/{datalogger_id}/table/{datalogger_table_id}/preview [get]
+//	@Router /datalogger/{datalogger_id}/tables/{datalogger_table_id}/preview [get]
 //	@Security Bearer
 func (h *ApiHandler) GetDataloggerTablePreview(c echo.Context) error {
 	_, err := uuid.Parse(c.Param("datalogger_id"))
@@ -294,7 +294,7 @@ func (h *ApiHandler) GetDataloggerTablePreview(c echo.Context) error {
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
-//	@Router /datalogger/{datalogger_id}/table/{datalogger_table_id}/name [put]
+//	@Router /datalogger/{datalogger_id}/tables/{datalogger_table_id}/name [put]
 //	@Security Bearer
 func (h *ApiHandler) ResetDataloggerTableName(c echo.Context) error {
 	_, err := uuid.Parse(c.Param("datalogger_id"))

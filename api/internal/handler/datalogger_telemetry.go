@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"math"
@@ -12,6 +14,8 @@ import (
 	"github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/labstack/echo/v4"
 )
+
+const preparse = "preparse"
 
 // CreateOrUpdateDataloggerMeasurements creates or updates measurements for a timeseries using an equivalency table
 func (h *TelemetryHandler) CreateOrUpdateDataloggerMeasurements(c echo.Context) error {
@@ -48,9 +52,17 @@ func (h *TelemetryHandler) CreateOrUpdateDataloggerMeasurements(c echo.Context) 
 	}
 	prv.UpdateDate = time.Now()
 
-	err = h.DataloggerTelemetryService.UpdateDataloggerTablePreview(ctx, dl.ID, "preparse", prv)
+	err = h.DataloggerTelemetryService.UpdateDataloggerTablePreview(ctx, dl.ID, preparse, prv)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		if !errors.Is(err, sql.ErrNoRows) {
+			return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
+		}
+		if _, err := h.DataloggerTelemetryService.GetOrCreateDataloggerTable(ctx, dl.ID, preparse); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
+		}
+		if err = h.DataloggerTelemetryService.UpdateDataloggerTablePreview(ctx, dl.ID, preparse, prv); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
+		}
 	}
 
 	if modelName == "CR6" || modelName == "CR1000X" {
@@ -111,7 +123,8 @@ func getCR6Handler(h *TelemetryHandler, dl model.Datalogger, rawJSON []byte) ech
 		prv.UpdateDate = time.Now()
 
 		if err := h.DataloggerTelemetryService.UpdateDataloggerTablePreview(ctx, dl.ID, tn, prv); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			em = append(em, fmt.Sprintf("%d: %s", http.StatusInternalServerError, err.Error()))
+			return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
 		}
 
 		dataloggerTableID, err := h.DataloggerTelemetryService.GetOrCreateDataloggerTable(ctx, dl.ID, tn)

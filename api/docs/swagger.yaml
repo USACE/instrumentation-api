@@ -240,7 +240,7 @@ definitions:
     properties:
       id:
         type: string
-      name:
+      table_name:
         type: string
     type: object
   github_com_USACE_instrumentation-api_api_internal_model.DataloggerWithKey:
@@ -1437,7 +1437,7 @@ paths:
       summary: deletes and recreates a datalogger api key
       tags:
       - datalogger
-  /datalogger/{datalogger_id}/table/{datalogger_table_id}/equivalency_table:
+  /datalogger/{datalogger_id}/tables/{datalogger_table_id}/equivalency_table:
     delete:
       parameters:
       - description: datalogger uuid
@@ -1600,7 +1600,7 @@ paths:
       summary: updates an equivalency table for a datalogger
       tags:
       - equivalency-table
-  /datalogger/{datalogger_id}/table/{datalogger_table_id}/equivalency_table/row/{row_id}:
+  /datalogger/{datalogger_id}/tables/{datalogger_table_id}/equivalency_table/row/{row_id}:
     delete:
       parameters:
       - description: datalogger uuid
@@ -1640,7 +1640,7 @@ paths:
       summary: deletes an equivalency table row
       tags:
       - equivalency-table
-  /datalogger/{datalogger_id}/table/{datalogger_table_id}/name:
+  /datalogger/{datalogger_id}/tables/{datalogger_table_id}/name:
     put:
       parameters:
       - description: datalogger uuid
@@ -1679,7 +1679,7 @@ paths:
       summary: resets a datalogger table name to be renamed by incoming telemetry
       tags:
       - datalogger
-  /datalogger/{datalogger_id}/table/{datalogger_table_id}/preview:
+  /datalogger/{datalogger_id}/tables/{datalogger_table_id}/preview:
     get:
       parameters:
       - description: datalogger uuid
