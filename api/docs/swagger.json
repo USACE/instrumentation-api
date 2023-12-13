@@ -498,6 +498,68 @@
                 }
             }
         },
+        "/datalogger/{datalogger_id}/equivalency_table": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "equivalency-table"
+                ],
+                "summary": "creates an equivalency table for a datalogger and auto create data logger table if not exists",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "datalogger uuid",
+                        "name": "datalogger_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "equivalency table payload",
+                        "name": "equivalency_table",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/datalogger/{datalogger_id}/key": {
             "put": {
                 "security": [
@@ -691,7 +753,7 @@
                 "tags": [
                     "equivalency-table"
                 ],
-                "summary": "creates an equivalency table for a datalogger",
+                "summary": "creates an equivalency table for a datalogger and auto create data logger table if not exists",
                 "parameters": [
                     {
                         "type": "string",
@@ -759,7 +821,7 @@
                 "tags": [
                     "equivalency-table"
                 ],
-                "summary": "deletes an equivalency table",
+                "summary": "deletes an equivalency table and corresponding datalogger table",
                 "parameters": [
                     {
                         "type": "string",
@@ -8274,6 +8336,9 @@
                     "type": "string"
                 },
                 "datalogger_table_id": {
+                    "type": "string"
+                },
+                "datalogger_table_name": {
                     "type": "string"
                 },
                 "rows": {

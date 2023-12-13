@@ -21,6 +21,8 @@ type DataloggerService interface {
 	DeleteDatalogger(ctx context.Context, d model.Datalogger) error
 	GetDataloggerTablePreview(ctx context.Context, dataloggerTableID uuid.UUID) (model.DataloggerPreview, error)
 	ResetDataloggerTableName(ctx context.Context, dataloggerTableID uuid.UUID) error
+	GetOrCreateDataloggerTable(ctx context.Context, dataloggerID uuid.UUID, tableName string) (uuid.UUID, error)
+	DeleteDataloggerTable(ctx context.Context, dataloggerTableID uuid.UUID) error
 }
 
 type dataloggerService struct {
@@ -129,4 +131,29 @@ func (s dataloggerService) UpdateDatalogger(ctx context.Context, u model.Datalog
 	}
 
 	return dlUpdated, nil
+}
+
+func (s dataloggerTelemetryService) GetOrCreateDataloggerTable(ctx context.Context, dataloggerID uuid.UUID, tableName string) (uuid.UUID, error) {
+	tx, err := s.db.BeginTxx(ctx, nil)
+	if err != nil {
+		return uuid.Nil, err
+	}
+	defer model.TxDo(tx.Rollback)
+
+	qtx := s.WithTx(tx)
+
+	if err := qtx.RenameEmptyDataloggerTableName(ctx, dataloggerID, tableName); err != nil {
+		return uuid.Nil, err
+	}
+
+	dataloggerTableID, err := qtx.GetOrCreateDataloggerTable(ctx, dataloggerID, tableName)
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return uuid.Nil, err
+	}
+
+	return dataloggerTableID, nil
 }

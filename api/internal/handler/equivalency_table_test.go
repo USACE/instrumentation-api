@@ -47,6 +47,19 @@ const createEquivalencyTableBody = `{
     ]
 }`
 
+const createEquivalencyTableNoDataloggerTableBody = `{
+    "datalogger_id": "83a7345c-62d8-4e29-84db-c2e36f8bc40d",
+    "datalogger_table_name": "New Test Table",
+    "rows": [
+        {
+            "field_name": "other new field name",
+            "display_name": "test 456",
+            "instrument_id": "a7540f69-c41e-43b3-b655-6e44097edb7e",
+            "timeseries_id": "844fb688-e77c-481e-bff9-81a0fff9f3f2"
+        }
+    ]
+}`
+
 const updateEquivalencyTableBody = `{
     "datalogger_id": "83a7345c-62d8-4e29-84db-c2e36f8bc40d",
     "datalogger_table_id": "98a77c65-e5c4-49ed-8fb4-b0ffd06add4c",
@@ -78,6 +91,14 @@ func TestEquivalencyTable(t *testing.T) {
 			URL:            fmt.Sprintf("/datalogger/%s/tables/%s/equivalency_table", testDataloggerID1, testDataloggerTableID),
 			Method:         http.MethodPost,
 			Body:           createEquivalencyTableBody,
+			ExpectedStatus: http.StatusCreated,
+			ExpectedSchema: objSchema,
+		},
+		{
+			Name:           "CreateEquivalencyTableAndDataloggerTable",
+			URL:            fmt.Sprintf("/datalogger/%s/equivalency_table", testDataloggerID1),
+			Method:         http.MethodPost,
+			Body:           createEquivalencyTableNoDataloggerTableBody,
 			ExpectedStatus: http.StatusCreated,
 			ExpectedSchema: objSchema,
 		},

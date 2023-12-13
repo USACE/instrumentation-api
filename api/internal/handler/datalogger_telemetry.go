@@ -57,7 +57,7 @@ func (h *TelemetryHandler) CreateOrUpdateDataloggerMeasurements(c echo.Context) 
 		if !errors.Is(err, sql.ErrNoRows) {
 			return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
 		}
-		if _, err := h.DataloggerTelemetryService.GetOrCreateDataloggerTable(ctx, dl.ID, preparse); err != nil {
+		if _, err := h.DataloggerService.GetOrCreateDataloggerTable(ctx, dl.ID, preparse); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
 		}
 		if err = h.DataloggerTelemetryService.UpdateDataloggerTablePreview(ctx, dl.ID, preparse, prv); err != nil {
@@ -127,7 +127,7 @@ func getCR6Handler(h *TelemetryHandler, dl model.Datalogger, rawJSON []byte) ech
 			return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
 		}
 
-		dataloggerTableID, err := h.DataloggerTelemetryService.GetOrCreateDataloggerTable(ctx, dl.ID, tn)
+		dataloggerTableID, err := h.DataloggerService.GetOrCreateDataloggerTable(ctx, dl.ID, tn)
 		if err != nil {
 			em = append(em, fmt.Sprintf("%d: %s", http.StatusInternalServerError, err.Error()))
 			return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)

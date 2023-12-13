@@ -93,7 +93,8 @@ INSERT INTO timeseries (id, instrument_id, parameter_id, unit_id, slug, name) VA
 ('479d90eb-3454-4f39-be9a-bfd23099a552', 'd8c66ef9-06f0-4d52-9233-f3778e0624f0', '3ea5ed77-c926-4696-a580-a3fde0f9a556', 'ae06a7db-1e18-4994-be41-9d5a408d6cad', 'inclinometer-constant', 'inclinometer-constant'),
 ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', 'a7540f69-c41e-43b3-b655-6e44097edb7e', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8', 'demo-piezometer-1.formula', 'demo-piezometer-1'),
 ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5985', '9e8f2ca4-4037-45a4-aaca-d9e598877439', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8', 'demo-staffgage-1.formula', 'demo-staffgage-1'),
-('5b6f4f37-7755-4cf9-bd02-94f1e9bc5986', 'd8c66ef9-06f0-4d52-9233-f3778e0624f0', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', '4a999277-4cf5-4282-93ce-23b33c65e2c8', 'inclinometer-1.formula', 'inclinometer-1');
+('5b6f4f37-7755-4cf9-bd02-94f1e9bc5986', 'd8c66ef9-06f0-4d52-9233-f3778e0624f0', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', '4a999277-4cf5-4282-93ce-23b33c65e2c8', 'inclinometer-1.formula', 'inclinometer-1'),
+('844fb688-e77c-481e-bff9-81a0fff9f3f2', 'd8c66ef9-06f0-4d52-9233-f3778e0624f0', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', '4a999277-4cf5-4282-93ce-23b33c65e2c8', 'test-create-datalogger-table-mapping', 'test-create-datalogger-table-mapping');
 
 INSERT INTO calculation (timeseries_id, contents) VALUES
 ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', '[demo-piezometer-1.top-of-riser] - [demo-piezometer-1.distance-to-water]'),

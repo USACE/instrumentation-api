@@ -11,9 +11,10 @@ import (
 )
 
 type EquivalencyTable struct {
-	DataloggerID      uuid.UUID                        `json:"datalogger_id" db:"datalogger_id"`
-	DataloggerTableID uuid.UUID                        `json:"datalogger_table_id" db:"datalogger_table_id"`
-	Rows              dbJSONSlice[EquivalencyTableRow] `json:"rows" db:"fields"`
+	DataloggerID        uuid.UUID                        `json:"datalogger_id" db:"datalogger_id"`
+	DataloggerTableID   uuid.UUID                        `json:"datalogger_table_id" db:"datalogger_table_id"`
+	DataloggerTableName string                           `json:"datalogger_table_name" db:"datalogger_table_name"`
+	Rows                dbJSONSlice[EquivalencyTableRow] `json:"rows" db:"fields"`
 }
 
 type EquivalencyTableRow struct {

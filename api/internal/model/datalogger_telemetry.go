@@ -63,34 +63,3 @@ func (q *Queries) CreateDataloggerTableError(ctx context.Context, dataloggerID u
 	_, err := q.db.ExecContext(ctx, createDataloggerError, dataloggerID, tableName, errMessage)
 	return err
 }
-
-const renameEmptyDataloggerTableName = `
-	UPDATE datalogger_table
-	SET table_name = $2
-	WHERE table_name = '' AND datalogger_id = $1
-	AND NOT EXISTS (
-	   SELECT 1 FROM datalogger_table WHERE datalogger_id = $1 AND table_name = $2
-	);
-`
-
-func (q *Queries) RenameEmptyDataloggerTableName(ctx context.Context, dataloggerID uuid.UUID, tableName string) error {
-	_, err := q.db.ExecContext(ctx, renameEmptyDataloggerTableName, dataloggerID, tableName)
-	return err
-}
-
-const getOrCreateDataloggerTable = `
-	WITH dt AS (
-		INSERT INTO datalogger_table (datalogger_id, table_name) VALUES ($1, $2)
-		ON CONFLICT ON CONSTRAINT datalogger_table_datalogger_id_table_name_key DO NOTHING
-		RETURNING id
-	)
-	SELECT id FROM dt
-	UNION
-	SELECT id FROM datalogger_table WHERE datalogger_id = $1 AND table_name = $2
-`
-
-func (q *Queries) GetOrCreateDataloggerTable(ctx context.Context, dataloggerID uuid.UUID, tableName string) (uuid.UUID, error) {
-	var tID uuid.UUID
-	err := q.db.GetContext(ctx, &tID, getOrCreateDataloggerTable, dataloggerID, tableName)
-	return tID, err
-}

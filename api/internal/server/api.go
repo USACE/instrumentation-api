@@ -114,6 +114,7 @@ func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 
 	// EquivalencyTable
 	r.private.GET("/datalogger/:datalogger_id/tables/:datalogger_table_id/equivalency_table", h.GetEquivalencyTable)
+	r.private.POST("/datalogger/:datalogger_id/equivalency_table", h.CreateEquivalencyTable)
 	r.private.POST("/datalogger/:datalogger_id/tables/:datalogger_table_id/equivalency_table", h.CreateEquivalencyTable)
 	r.private.PUT("/datalogger/:datalogger_id/tables/:datalogger_table_id/equivalency_table", h.UpdateEquivalencyTable)
 	r.private.DELETE("/datalogger/:datalogger_id/tables/:datalogger_table_id/equivalency_table", h.DeleteEquivalencyTable)
