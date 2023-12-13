@@ -2,8 +2,6 @@ package model
 
 import (
 	"context"
-	"database/sql"
-	"errors"
 	"fmt"
 	"time"
 
@@ -242,13 +240,8 @@ const getDataloggerTablePreview = `
 
 func (q *Queries) GetDataloggerTablePreview(ctx context.Context, dataloggerTableID uuid.UUID) (DataloggerPreview, error) {
 	var dlp DataloggerPreview
-	if err := q.db.GetContext(ctx, &dlp, getDataloggerTablePreview, dataloggerTableID); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return dlp, fmt.Errorf("preview not found")
-		}
-		return dlp, err
-	}
-	return dlp, nil
+	err := q.db.GetContext(ctx, &dlp, getDataloggerTablePreview, dataloggerTableID)
+	return dlp, err
 }
 
 const resetDataloggerTableName = `

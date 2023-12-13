@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -270,14 +272,17 @@ func (h *ApiHandler) DeleteDatalogger(c echo.Context) error {
 func (h *ApiHandler) GetDataloggerTablePreview(c echo.Context) error {
 	_, err := uuid.Parse(c.Param("datalogger_id"))
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusBadRequest, message.MissingQueryParameter("datalogger_id"))
 	}
 	dataloggerTableID, err := uuid.Parse(c.Param("datalogger_table_id"))
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusBadRequest, message.MissingQueryParameter("datalogger_table_id"))
 	}
 	preview, err := h.DataloggerService.GetDataloggerTablePreview(c.Request().Context(), dataloggerTableID)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return echo.NewHTTPError(http.StatusNotFound, message.NotFound)
+		}
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, preview)
@@ -299,11 +304,11 @@ func (h *ApiHandler) GetDataloggerTablePreview(c echo.Context) error {
 func (h *ApiHandler) ResetDataloggerTableName(c echo.Context) error {
 	_, err := uuid.Parse(c.Param("datalogger_id"))
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusBadRequest, message.MissingQueryParameter("datalogger_id"))
 	}
 	dataloggerTableID, err := uuid.Parse(c.Param("datalogger_table_id"))
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusBadRequest, message.MissingQueryParameter("datalogger_table_id"))
 	}
 	if err := h.DataloggerService.ResetDataloggerTableName(c.Request().Context(), dataloggerTableID); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
