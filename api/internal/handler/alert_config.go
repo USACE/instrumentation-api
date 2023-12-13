@@ -45,9 +45,6 @@ func (h *ApiHandler) GetAllAlertConfigsForProject(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 	}
-	if len(aa) == 0 {
-		return echo.NewHTTPError(http.StatusNotFound, message.NotFound)
-	}
 	return c.JSON(http.StatusOK, aa)
 }
 
@@ -71,9 +68,6 @@ func (h *ApiHandler) ListInstrumentAlertConfigs(c echo.Context) error {
 	aa, err := h.AlertConfigService.GetAllAlertConfigsForInstrument(c.Request().Context(), instrumentID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-	if len(aa) == 0 {
-		return echo.NewHTTPError(http.StatusNotFound, message.NotFound)
 	}
 	return c.JSON(http.StatusOK, aa)
 }

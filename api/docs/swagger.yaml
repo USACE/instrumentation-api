@@ -216,6 +216,10 @@ definitions:
         type: string
       sn:
         type: string
+      tables:
+        items:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerTable'
+        type: array
       update_date:
         type: string
       updater:
@@ -225,15 +229,18 @@ definitions:
     type: object
   github_com_USACE_instrumentation-api_api_internal_model.DataloggerPreview:
     properties:
-      datalogger_id:
-        type: string
-      model:
+      datalogger_table_id:
         type: string
       preview:
         $ref: '#/definitions/pgtype.JSON'
-      sn:
-        type: string
       update_date:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.DataloggerTable:
+    properties:
+      id:
+        type: string
+      table_name:
         type: string
     type: object
   github_com_USACE_instrumentation-api_api_internal_model.DataloggerWithKey:
@@ -264,6 +271,10 @@ definitions:
         type: string
       sn:
         type: string
+      tables:
+        items:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerTable'
+        type: array
       update_date:
         type: string
       updater:
@@ -336,6 +347,10 @@ definitions:
   github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable:
     properties:
       datalogger_id:
+        type: string
+      datalogger_table_id:
+        type: string
+      datalogger_table_name:
         type: string
       rows:
         items:
@@ -1392,73 +1407,6 @@ paths:
       tags:
       - datalogger
   /datalogger/{datalogger_id}/equivalency_table:
-    delete:
-      parameters:
-      - description: datalogger uuid
-        format: uuid
-        in: path
-        name: datalogger_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-      security:
-      - Bearer: []
-      summary: deletes an equivalency table
-      tags:
-      - equivalency-table
-    get:
-      parameters:
-      - description: datalogger uuid
-        format: uuid
-        in: path
-        name: datalogger_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-      security:
-      - Bearer: []
-      summary: gets an equivalency table for a datalogger
-      tags:
-      - equivalency-table
     post:
       parameters:
       - description: datalogger uuid
@@ -1495,85 +1443,8 @@ paths:
             $ref: '#/definitions/echo.HTTPError'
       security:
       - Bearer: []
-      summary: creates an equivalency table for a datalogger
-      tags:
-      - equivalency-table
-    put:
-      parameters:
-      - description: datalogger uuid
-        format: uuid
-        in: path
-        name: datalogger_id
-        required: true
-        type: string
-      - description: equivalency table payload
-        in: body
-        name: equivalency_table
-        required: true
-        schema:
-          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-      security:
-      - Bearer: []
-      summary: updates an equivalency table for a datalogger
-      tags:
-      - equivalency-table
-  /datalogger/{datalogger_id}/equivalency_table/row:
-    delete:
-      parameters:
-      - description: datalogger uuid
-        format: uuid
-        in: path
-        name: datalogger_id
-        required: true
-        type: string
-      - description: equivalency table row uuid
-        format: uuid
-        in: query
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-      security:
-      - Bearer: []
-      summary: deletes an equivalency table row
+      summary: creates an equivalency table for a datalogger and auto create data
+        logger table if not exists
       tags:
       - equivalency-table
   /datalogger/{datalogger_id}/key:
@@ -1609,13 +1480,262 @@ paths:
       summary: deletes and recreates a datalogger api key
       tags:
       - datalogger
-  /datalogger/{datalogger_id}/preview:
+  /datalogger/{datalogger_id}/tables/{datalogger_table_id}/equivalency_table:
+    delete:
+      parameters:
+      - description: datalogger uuid
+        format: uuid
+        in: path
+        name: datalogger_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
+      summary: deletes an equivalency table and corresponding datalogger table
+      tags:
+      - equivalency-table
     get:
       parameters:
       - description: datalogger uuid
         format: uuid
         in: path
         name: datalogger_id
+        required: true
+        type: string
+      - description: datalogger table uuid
+        format: uuid
+        in: path
+        name: datalogger_table_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
+      summary: gets an equivalency table for a datalogger
+      tags:
+      - equivalency-table
+    post:
+      parameters:
+      - description: datalogger uuid
+        format: uuid
+        in: path
+        name: datalogger_id
+        required: true
+        type: string
+      - description: datalogger table uuid
+        format: uuid
+        in: path
+        name: datalogger_table_id
+        required: true
+        type: string
+      - description: equivalency table payload
+        in: body
+        name: equivalency_table
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
+      summary: creates an equivalency table for a datalogger and auto create data
+        logger table if not exists
+      tags:
+      - equivalency-table
+    put:
+      parameters:
+      - description: datalogger uuid
+        format: uuid
+        in: path
+        name: datalogger_id
+        required: true
+        type: string
+      - description: datalogger table uuid
+        format: uuid
+        in: path
+        name: datalogger_table_id
+        required: true
+        type: string
+      - description: equivalency table payload
+        in: body
+        name: equivalency_table
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
+      summary: updates an equivalency table for a datalogger
+      tags:
+      - equivalency-table
+  /datalogger/{datalogger_id}/tables/{datalogger_table_id}/equivalency_table/row/{row_id}:
+    delete:
+      parameters:
+      - description: datalogger uuid
+        format: uuid
+        in: path
+        name: datalogger_id
+        required: true
+        type: string
+      - description: equivalency table row uuid
+        format: uuid
+        in: path
+        name: row_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
+      summary: deletes an equivalency table row
+      tags:
+      - equivalency-table
+  /datalogger/{datalogger_id}/tables/{datalogger_table_id}/name:
+    put:
+      parameters:
+      - description: datalogger uuid
+        format: uuid
+        in: path
+        name: datalogger_id
+        required: true
+        type: string
+      - description: datalogger table uuid
+        format: uuid
+        in: path
+        name: datalogger_table_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerPreview'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
+      summary: resets a datalogger table name to be renamed by incoming telemetry
+      tags:
+      - datalogger
+  /datalogger/{datalogger_id}/tables/{datalogger_table_id}/preview:
+    get:
+      parameters:
+      - description: datalogger uuid
+        format: uuid
+        in: path
+        name: datalogger_id
+        required: true
+        type: string
+      - description: datalogger table uuid
+        format: uuid
+        in: path
+        name: datalogger_table_id
         required: true
         type: string
       produces:

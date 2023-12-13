@@ -4,13 +4,14 @@ import (
 	"context"
 
 	"github.com/USACE/instrumentation-api/api/internal/model"
+	"github.com/google/uuid"
 )
 
 type DataloggerTelemetryService interface {
 	GetDataloggerByModelSN(ctx context.Context, modelName, sn string) (model.Datalogger, error)
 	GetDataloggerHashByModelSN(ctx context.Context, modelName, sn string) (string, error)
-	UpdateDataloggerPreview(ctx context.Context, dlp model.DataloggerPreview) error
-	UpdateDataloggerError(ctx context.Context, e *model.DataloggerError) error
+	UpdateDataloggerTablePreview(ctx context.Context, dataloggerID uuid.UUID, tableName string, dlp model.DataloggerPreview) error
+	UpdateDataloggerTableError(ctx context.Context, dataloggerID uuid.UUID, tableName *string, e *model.DataloggerError) error
 }
 
 type dataloggerTelemetryService struct {
@@ -22,7 +23,7 @@ func NewDataloggerTelemetryService(db *model.Database, q *model.Queries) *datalo
 	return &dataloggerTelemetryService{db, q}
 }
 
-func (s dataloggerTelemetryService) UpdateDataloggerError(ctx context.Context, e *model.DataloggerError) error {
+func (s dataloggerTelemetryService) UpdateDataloggerTableError(ctx context.Context, dataloggerID uuid.UUID, tableName *string, e *model.DataloggerError) error {
 	tx, err := s.db.BeginTxx(ctx, nil)
 	if err != nil {
 		return err
@@ -31,12 +32,12 @@ func (s dataloggerTelemetryService) UpdateDataloggerError(ctx context.Context, e
 
 	qtx := s.WithTx(tx)
 
-	if err := qtx.DeleteDataloggerError(ctx, e.DataloggerID); err != nil {
+	if err := qtx.DeleteDataloggerTableError(ctx, dataloggerID, tableName); err != nil {
 		return err
 	}
 
 	for _, m := range e.Errors {
-		if err := qtx.CreateDataloggerError(ctx, e.DataloggerID, m); err != nil {
+		if err := qtx.CreateDataloggerTableError(ctx, dataloggerID, tableName, m); err != nil {
 			return err
 		}
 	}

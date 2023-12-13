@@ -1,8 +1,11 @@
 package handler
 
 import (
+	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"log"
 	"math"
 	"net/http"
 	"time"
@@ -11,6 +14,8 @@ import (
 	"github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/labstack/echo/v4"
 )
+
+const preparse = "preparse"
 
 // CreateOrUpdateDataloggerMeasurements creates or updates measurements for a timeseries using an equivalency table
 func (h *TelemetryHandler) CreateOrUpdateDataloggerMeasurements(c echo.Context) error {
@@ -23,8 +28,10 @@ func (h *TelemetryHandler) CreateOrUpdateDataloggerMeasurements(c echo.Context) 
 		return echo.NewHTTPError(http.StatusBadRequest, "missing route param `sn`")
 	}
 
-	// Make sure data logger is active
-	dl, err := h.DataloggerTelemetryService.GetDataloggerByModelSN(c.Request().Context(), modelName, sn)
+	ctx := c.Request().Context()
+
+	// Make sure datalogger is active
+	dl, err := h.DataloggerTelemetryService.GetDataloggerByModelSN(ctx, modelName, sn)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -39,15 +46,23 @@ func (h *TelemetryHandler) CreateOrUpdateDataloggerMeasurements(c echo.Context) 
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	prv := model.DataloggerPreview{DataloggerID: dl.ID}
+	var prv model.DataloggerPreview
 	if err := prv.Preview.Set(rawJSON); err != nil {
 		return err
 	}
 	prv.UpdateDate = time.Now()
 
-	err = h.DataloggerTelemetryService.UpdateDataloggerPreview(c.Request().Context(), prv)
+	err = h.DataloggerTelemetryService.UpdateDataloggerTablePreview(ctx, dl.ID, preparse, prv)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		if !errors.Is(err, sql.ErrNoRows) {
+			return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
+		}
+		if _, err := h.DataloggerService.GetOrCreateDataloggerTable(ctx, dl.ID, preparse); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
+		}
+		if err = h.DataloggerTelemetryService.UpdateDataloggerTablePreview(ctx, dl.ID, preparse, prv); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
+		}
 	}
 
 	if modelName == "CR6" || modelName == "CR1000X" {
@@ -66,16 +81,18 @@ func (h *TelemetryHandler) CreateOrUpdateDataloggerMeasurements(c echo.Context) 
 // HTTPPost: https://help.campbellsci.com/crbasic/cr350/#Instructions/httppost.htm?Highlight=httppost
 func getCR6Handler(h *TelemetryHandler, dl model.Datalogger, rawJSON []byte) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		// Errors are cellected and sent to data logger preview for debugging since data logger clients cannot parse responses
+		// Errors are cellected and sent to datalogger preview for debugging since datalogger clients cannot parse responses
 		em := make([]string, 0)
 		ctx := c.Request().Context()
+		tn := "preparse"
 
-		// The error returned from this function is not particularly relevant. Since these actual HTTP responses
-		// will be returned to data logger clients, this operates on a "best effort" basis, to collect logs to
-		// be previewed in the core web application. Additionally, the error code returned to the client data logger
+		// Since these HTTP responses will be returned to datalogger clients, this operates on a "best effort" basis
+		// to collect logs to be previewed in the core web application. The error code returned to the client datalogger
 		// will sill be relavent to the arm of control flow that raised it.
 		defer func() {
-			h.DataloggerTelemetryService.UpdateDataloggerError(ctx, &model.DataloggerError{DataloggerID: dl.ID, Errors: em})
+			if err := h.DataloggerTelemetryService.UpdateDataloggerTableError(ctx, dl.ID, &tn, &model.DataloggerError{Errors: em}); err != nil {
+				log.Printf(err.Error())
+			}
 		}()
 
 		// Upload Datalogger Measurements
@@ -96,11 +113,30 @@ func getCR6Handler(h *TelemetryHandler, dl model.Datalogger, rawJSON []byte) ech
 			return echo.NewHTTPError(http.StatusBadRequest, message.BadRequest)
 		}
 
-		fields := pl.Head.Fields
-		eqt, err := h.EquivalencyTableService.GetEquivalencyTable(ctx, dl.ID)
+		// reroute deferred errors and previews to respective table
+		tn = pl.Head.Environment.TableName
+
+		var prv model.DataloggerPreview
+		if err := prv.Preview.Set(rawJSON); err != nil {
+			return err
+		}
+		prv.UpdateDate = time.Now()
+
+		if err := h.DataloggerTelemetryService.UpdateDataloggerTablePreview(ctx, dl.ID, tn, prv); err != nil {
+			em = append(em, fmt.Sprintf("%d: %s", http.StatusInternalServerError, err.Error()))
+			return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
+		}
+
+		dataloggerTableID, err := h.DataloggerService.GetOrCreateDataloggerTable(ctx, dl.ID, tn)
 		if err != nil {
 			em = append(em, fmt.Sprintf("%d: %s", http.StatusInternalServerError, err.Error()))
-			return echo.NewHTTPError(http.StatusNotFound, message.NotFound)
+			return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
+		}
+
+		eqt, err := h.EquivalencyTableService.GetEquivalencyTable(ctx, dataloggerTableID)
+		if err != nil {
+			em = append(em, fmt.Sprintf("%d: %s", http.StatusInternalServerError, err.Error()))
+			return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
 		}
 
 		eqtFields := make(map[string]model.EquivalencyTableRow)
@@ -111,6 +147,7 @@ func getCR6Handler(h *TelemetryHandler, dl model.Datalogger, rawJSON []byte) ech
 			}
 		}
 
+		fields := pl.Head.Fields
 		mcs := make([]model.MeasurementCollection, len(fields))
 
 		// Error if there is no field name in equivalency table to map the field name in the raw payload to
@@ -119,7 +156,7 @@ func getCR6Handler(h *TelemetryHandler, dl model.Datalogger, rawJSON []byte) ech
 			// Map field to timeseries id
 			row, exists := eqtFields[f.Name]
 			if !exists {
-				em = append(em, fmt.Sprintf("field '%s' from data logger does not exist in equivalency table", f.Name))
+				em = append(em, fmt.Sprintf("field '%s' from datalogger does not exist in equivalency table", f.Name))
 				continue
 			}
 			if row.InstrumentID == nil {
@@ -128,7 +165,7 @@ func getCR6Handler(h *TelemetryHandler, dl model.Datalogger, rawJSON []byte) ech
 				continue
 			}
 			if row.TimeseriesID == nil {
-				em = append(em, fmt.Sprintf("field '%s' not mapped to time series in equivalency table", f.Name))
+				em = append(em, fmt.Sprintf("field '%s' not mapped to timeseries in equivalency table", f.Name))
 				delete(eqtFields, f.Name)
 				continue
 			}
@@ -161,7 +198,7 @@ func getCR6Handler(h *TelemetryHandler, dl model.Datalogger, rawJSON []byte) ech
 
 		// This map should be empty if all fields are mapped, otherwise the error is added
 		for eqtName := range eqtFields {
-			em = append(em, fmt.Sprintf("field '%s' in equivalency table does not match any fields from data logger", eqtName))
+			em = append(em, fmt.Sprintf("field '%s' in equivalency table does not match any fields from datalogger", eqtName))
 		}
 
 		if _, err = h.MeasurementService.CreateOrUpdateTimeseriesMeasurements(ctx, mcs); err != nil {

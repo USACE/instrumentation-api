@@ -102,7 +102,8 @@ func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 	r.private.PUT("/datalogger/:datalogger_id", h.UpdateDatalogger)
 	r.private.PUT("/datalogger/:datalogger_id/key", h.CycleDataloggerKey)
 	r.private.DELETE("/datalogger/:datalogger_id", h.DeleteDatalogger)
-	r.private.GET("/datalogger/:datalogger_id/preview", h.GetDataloggerPreview)
+	r.private.GET("/datalogger/:datalogger_id/tables/:datalogger_table_id/preview", h.GetDataloggerTablePreview)
+	r.private.PUT("/datalogger/:datalogger_id/tables/:datalogger_table_id/name", h.ResetDataloggerTableName)
 
 	// DistrictRollup
 	r.public.GET("/projects/:project_id/district_rollup/evaluation_submittals", h.ListProjectEvaluationDistrictRollup)
@@ -112,11 +113,12 @@ func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 	r.public.GET("/domains", h.GetDomains)
 
 	// EquivalencyTable
-	r.private.GET("/datalogger/:datalogger_id/equivalency_table", h.GetEquivalencyTable)
+	r.private.GET("/datalogger/:datalogger_id/tables/:datalogger_table_id/equivalency_table", h.GetEquivalencyTable)
 	r.private.POST("/datalogger/:datalogger_id/equivalency_table", h.CreateEquivalencyTable)
-	r.private.PUT("/datalogger/:datalogger_id/equivalency_table", h.UpdateEquivalencyTable)
-	r.private.DELETE("/datalogger/:datalogger_id/equivalency_table", h.DeleteEquivalencyTable)
-	r.private.DELETE("/datalogger/:datalogger_id/equivalency_table/row", h.DeleteEquivalencyTableRow)
+	r.private.POST("/datalogger/:datalogger_id/tables/:datalogger_table_id/equivalency_table", h.CreateEquivalencyTable)
+	r.private.PUT("/datalogger/:datalogger_id/tables/:datalogger_table_id/equivalency_table", h.UpdateEquivalencyTable)
+	r.private.DELETE("/datalogger/:datalogger_id/tables/:datalogger_table_id/equivalency_table", h.DeleteEquivalencyTable)
+	r.private.DELETE("/datalogger/:datalogger_id/tables/:datalogger_table_id/equivalency_table/row/:row_id", h.DeleteEquivalencyTableRow)
 
 	// Evaluation
 	r.public.GET("/projects/:project_id/evaluations", h.ListProjectEvaluations)

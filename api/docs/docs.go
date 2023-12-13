@@ -507,118 +507,6 @@ const docTemplate = `{
             }
         },
         "/datalogger/{datalogger_id}/equivalency_table": {
-            "get": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "equivalency-table"
-                ],
-                "summary": "gets an equivalency table for a datalogger",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "format": "uuid",
-                        "description": "datalogger uuid",
-                        "name": "datalogger_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "equivalency-table"
-                ],
-                "summary": "updates an equivalency table for a datalogger",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "format": "uuid",
-                        "description": "datalogger uuid",
-                        "name": "datalogger_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "equivalency table payload",
-                        "name": "equivalency_table",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    }
-                }
-            },
             "post": {
                 "security": [
                     {
@@ -631,7 +519,7 @@ const docTemplate = `{
                 "tags": [
                     "equivalency-table"
                 ],
-                "summary": "creates an equivalency table for a datalogger",
+                "summary": "creates an equivalency table for a datalogger and auto create data logger table if not exists",
                 "parameters": [
                     {
                         "type": "string",
@@ -649,118 +537,6 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable"
                         }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "equivalency-table"
-                ],
-                "summary": "deletes an equivalency table",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "format": "uuid",
-                        "description": "datalogger uuid",
-                        "name": "datalogger_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    }
-                }
-            }
-        },
-        "/datalogger/{datalogger_id}/equivalency_table/row": {
-            "delete": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "equivalency-table"
-                ],
-                "summary": "deletes an equivalency table row",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "format": "uuid",
-                        "description": "datalogger uuid",
-                        "name": "datalogger_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "format": "uuid",
-                        "description": "equivalency table row uuid",
-                        "name": "id",
-                        "in": "query",
-                        "required": true
                     }
                 ],
                 "responses": {
@@ -844,7 +620,377 @@ const docTemplate = `{
                 }
             }
         },
-        "/datalogger/{datalogger_id}/preview": {
+        "/datalogger/{datalogger_id}/tables/{datalogger_table_id}/equivalency_table": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "equivalency-table"
+                ],
+                "summary": "gets an equivalency table for a datalogger",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "datalogger uuid",
+                        "name": "datalogger_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "datalogger table uuid",
+                        "name": "datalogger_table_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "equivalency-table"
+                ],
+                "summary": "updates an equivalency table for a datalogger",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "datalogger uuid",
+                        "name": "datalogger_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "datalogger table uuid",
+                        "name": "datalogger_table_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "equivalency table payload",
+                        "name": "equivalency_table",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "equivalency-table"
+                ],
+                "summary": "creates an equivalency table for a datalogger and auto create data logger table if not exists",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "datalogger uuid",
+                        "name": "datalogger_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "datalogger table uuid",
+                        "name": "datalogger_table_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "equivalency table payload",
+                        "name": "equivalency_table",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "equivalency-table"
+                ],
+                "summary": "deletes an equivalency table and corresponding datalogger table",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "datalogger uuid",
+                        "name": "datalogger_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/datalogger/{datalogger_id}/tables/{datalogger_table_id}/equivalency_table/row/{row_id}": {
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "equivalency-table"
+                ],
+                "summary": "deletes an equivalency table row",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "datalogger uuid",
+                        "name": "datalogger_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "equivalency table row uuid",
+                        "name": "row_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/datalogger/{datalogger_id}/tables/{datalogger_table_id}/name": {
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "datalogger"
+                ],
+                "summary": "resets a datalogger table name to be renamed by incoming telemetry",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "datalogger uuid",
+                        "name": "datalogger_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "datalogger table uuid",
+                        "name": "datalogger_table_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerPreview"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/datalogger/{datalogger_id}/tables/{datalogger_table_id}/preview": {
             "get": {
                 "security": [
                     {
@@ -864,6 +1010,14 @@ const docTemplate = `{
                         "format": "uuid",
                         "description": "datalogger uuid",
                         "name": "datalogger_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "datalogger table uuid",
+                        "name": "datalogger_table_id",
                         "in": "path",
                         "required": true
                     }
@@ -7987,6 +8141,12 @@ const docTemplate = `{
                 "sn": {
                     "type": "string"
                 },
+                "tables": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerTable"
+                    }
+                },
                 "update_date": {
                     "type": "string"
                 },
@@ -8001,19 +8161,24 @@ const docTemplate = `{
         "github_com_USACE_instrumentation-api_api_internal_model.DataloggerPreview": {
             "type": "object",
             "properties": {
-                "datalogger_id": {
-                    "type": "string"
-                },
-                "model": {
+                "datalogger_table_id": {
                     "type": "string"
                 },
                 "preview": {
                     "$ref": "#/definitions/pgtype.JSON"
                 },
-                "sn": {
+                "update_date": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_USACE_instrumentation-api_api_internal_model.DataloggerTable": {
+            "type": "object",
+            "properties": {
+                "id": {
                     "type": "string"
                 },
-                "update_date": {
+                "table_name": {
                     "type": "string"
                 }
             }
@@ -8059,6 +8224,12 @@ const docTemplate = `{
                 },
                 "sn": {
                     "type": "string"
+                },
+                "tables": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerTable"
+                    }
                 },
                 "update_date": {
                     "type": "string"
@@ -8170,6 +8341,12 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "datalogger_id": {
+                    "type": "string"
+                },
+                "datalogger_table_id": {
+                    "type": "string"
+                },
+                "datalogger_table_name": {
                     "type": "string"
                 },
                 "rows": {

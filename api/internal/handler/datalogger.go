@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -254,29 +256,62 @@ func (h *ApiHandler) DeleteDatalogger(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]interface{}{"id": dlID})
 }
 
-// GetDataloggerPreview godoc
+// GetDataloggerTablePreview godoc
 //
 //	@Summary gets the most recent datalogger preview by by datalogger id
 //	@Tags datalogger
 //	@Produce json
 //	@Param datalogger_id path string true "datalogger uuid" Format(uuid)
+//	@Param datalogger_table_id path string true "datalogger table uuid" Format(uuid)
 //	@Success 200 {object} model.DataloggerPreview
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
-//	@Router /datalogger/{datalogger_id}/preview [get]
+//	@Router /datalogger/{datalogger_id}/tables/{datalogger_table_id}/preview [get]
 //	@Security Bearer
-func (h *ApiHandler) GetDataloggerPreview(c echo.Context) error {
-	dlID, err := uuid.Parse(c.Param("datalogger_id"))
+func (h *ApiHandler) GetDataloggerTablePreview(c echo.Context) error {
+	_, err := uuid.Parse(c.Param("datalogger_id"))
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusBadRequest, message.MissingQueryParameter("datalogger_id"))
 	}
-
-	// Get preview from c.Request().Context()
-	preview, err := h.DataloggerService.GetDataloggerPreview(c.Request().Context(), dlID)
+	dataloggerTableID, err := uuid.Parse(c.Param("datalogger_table_id"))
 	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, message.MissingQueryParameter("datalogger_table_id"))
+	}
+	preview, err := h.DataloggerService.GetDataloggerTablePreview(c.Request().Context(), dataloggerTableID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return echo.NewHTTPError(http.StatusNotFound, message.NotFound)
+		}
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
-
 	return c.JSON(http.StatusOK, preview)
+}
+
+// ResetDataloggerTableName godoc
+//
+//	@Summary resets a datalogger table name to be renamed by incoming telemetry
+//	@Tags datalogger
+//	@Produce json
+//	@Param datalogger_id path string true "datalogger uuid" Format(uuid)
+//	@Param datalogger_table_id path string true "datalogger table uuid" Format(uuid)
+//	@Success 200 {object} model.DataloggerPreview
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /datalogger/{datalogger_id}/tables/{datalogger_table_id}/name [put]
+//	@Security Bearer
+func (h *ApiHandler) ResetDataloggerTableName(c echo.Context) error {
+	_, err := uuid.Parse(c.Param("datalogger_id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, message.MissingQueryParameter("datalogger_id"))
+	}
+	dataloggerTableID, err := uuid.Parse(c.Param("datalogger_table_id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, message.MissingQueryParameter("datalogger_table_id"))
+	}
+	if err := h.DataloggerService.ResetDataloggerTableName(c.Request().Context(), dataloggerTableID); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, map[string]interface{}{"datalogger_table_id": dataloggerTableID})
 }
