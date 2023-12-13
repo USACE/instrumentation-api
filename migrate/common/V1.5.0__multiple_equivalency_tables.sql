@@ -1,3 +1,7 @@
+DROP VIEW IF EXISTS v_datalogger;
+DROP VIEW IF EXISTS v_datalogger_preview;
+DROP VIEW IF EXISTS v_datalogger_equivalency_table;
+
 CREATE TABLE IF NOT EXISTS datalogger_table (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     datalogger_id UUID NOT NULL REFERENCES datalogger (id),
