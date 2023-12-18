@@ -17,4 +17,4 @@ INSERT INTO datalogger_preview (datalogger_table_id, update_date, preview) VALUE
 
 INSERT INTO datalogger_equivalency_table (id, datalogger_table_id, datalogger_id, datalogger_deleted, field_name, display_name, instrument_id, timeseries_id) VALUES
     ('40ceff10-cdc3-4715-a4ca-c1e570fe25de', '98a77c65-e5c4-49ed-8fb4-b0ffd06add4c', '83a7345c-62d8-4e29-84db-c2e36f8bc40d', false, 'batt_volt_Min', 'Battery Voltage', '9e8f2ca4-4037-45a4-aaca-d9e598877439', '8f4ca3a3-5971-4597-bd6f-332d1cf5af7c'),
-    ('2f1f7c3d-8b6f-4b11-917e-8f049eb6c62b', '98a77c65-e5c4-49ed-8fb4-b0ffd06add4c', '83a7345c-62d8-4e29-84db-c2e36f8bc40d', false, 'PanelT', 'Panel Temperature', 'a7540f69-c41e-43b3-b655-6e44097edb7e', 'd9697351-3a38-4194-9ac4-41541927e475');
+    ('2f1f7c3d-8b6f-4b11-917e-8f049eb6c62b', '98a77c65-e5c4-49ed-8fb4-b0ffd06add4c', '83a7345c-62d8-4e29-84db-c2e36f8bc40d', false, 'PanelT', 'Panel Temperature', 'a7540f69-c41e-43b3-b655-6e44097edb7e', 'da79bdb9-ded4-4f4a-8982-33e09b136815');

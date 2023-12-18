@@ -3,6 +3,7 @@ package handler
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/USACE/instrumentation-api/api/internal/message"
@@ -60,7 +61,7 @@ func (h *ApiHandler) GetEquivalencyTable(c echo.Context) error {
 //	@Param datalogger_id path string true "datalogger uuid" Format(uuid)
 //	@Param datalogger_table_id path string true "datalogger table uuid" Format(uuid)
 //	@Param equivalency_table body model.EquivalencyTable true "equivalency table payload"
-//	@Success 200 {object} map[string]interface{}
+//	@Success 200 {object} model.EquivalencyTable
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
@@ -96,25 +97,25 @@ func (h *ApiHandler) CreateEquivalencyTable(c echo.Context) error {
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
-		t.DataloggerTableID = dataloggerTableID
 	}
 
-	if dlID != t.DataloggerID {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MatchRouteParam("`datalogger_id`"))
-	}
-	if dataloggerTableID != t.DataloggerTableID {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MatchRouteParam("`datalogger_table_id`"))
-	}
+	t.DataloggerID = dlID
+	t.DataloggerTableID = dataloggerTableID
 
 	if err := h.DataloggerService.VerifyDataloggerExists(ctx, dlID); err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, err.Error())
 	}
 
-	if err := h.EquivalencyTableService.CreateEquivalencyTable(ctx, t); err != nil {
+	if err := h.EquivalencyTableService.GetIsValidDataloggerTable(ctx, dataloggerTableID); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid datalogger table %s %s", t.DataloggerID, t.DataloggerTableName))
+	}
+
+	eqt, err := h.EquivalencyTableService.CreateEquivalencyTable(ctx, t)
+	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusCreated, map[string]interface{}{"datalogger_id": dlID, "datalogger_table_id": dataloggerTableID})
+	return c.JSON(http.StatusCreated, eqt)
 }
 
 // UpdateEquivalencyTable godoc

@@ -2,6 +2,8 @@ package model
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
@@ -47,7 +49,7 @@ type DataloggerTable struct {
 	TableName string    `json:"table_name" db:"table_name"`
 }
 
-type DataloggerPreview struct {
+type DataloggerTablePreview struct {
 	DataloggerTableID uuid.UUID   `json:"datalogger_table_id" db:"datalogger_table_id"`
 	UpdateDate        time.Time   `json:"update_date" db:"update_date"`
 	Preview           pgtype.JSON `json:"preview" db:"preview"`
@@ -238,9 +240,16 @@ const getDataloggerTablePreview = `
 	SELECT * FROM v_datalogger_preview WHERE datalogger_table_id = $1
 `
 
-func (q *Queries) GetDataloggerTablePreview(ctx context.Context, dataloggerTableID uuid.UUID) (DataloggerPreview, error) {
-	var dlp DataloggerPreview
+func (q *Queries) GetDataloggerTablePreview(ctx context.Context, dataloggerTableID uuid.UUID) (DataloggerTablePreview, error) {
+	var dlp DataloggerTablePreview
 	err := q.db.GetContext(ctx, &dlp, getDataloggerTablePreview, dataloggerTableID)
+	if errors.Is(err, sql.ErrNoRows) {
+		dlp.DataloggerTableID = dataloggerTableID
+		if err := dlp.Preview.Set("null"); err != nil {
+			return DataloggerTablePreview{}, err
+		}
+		return dlp, nil
+	}
 	return dlp, err
 }
 

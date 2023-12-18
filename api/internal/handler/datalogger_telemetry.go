@@ -46,7 +46,7 @@ func (h *TelemetryHandler) CreateOrUpdateDataloggerMeasurements(c echo.Context) 
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	var prv model.DataloggerPreview
+	var prv model.DataloggerTablePreview
 	if err := prv.Preview.Set(rawJSON); err != nil {
 		return err
 	}
@@ -116,7 +116,7 @@ func getCR6Handler(h *TelemetryHandler, dl model.Datalogger, rawJSON []byte) ech
 		// reroute deferred errors and previews to respective table
 		tn = pl.Head.Environment.TableName
 
-		var prv model.DataloggerPreview
+		var prv model.DataloggerTablePreview
 		if err := prv.Preview.Set(rawJSON); err != nil {
 			return err
 		}

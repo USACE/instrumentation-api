@@ -543,8 +543,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable"
                         }
                     },
                     "400": {
@@ -793,8 +792,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable"
                         }
                     },
                     "400": {

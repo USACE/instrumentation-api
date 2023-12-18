@@ -1,4 +1,5 @@
-CREATE OR REPLACE VIEW v_datalogger AS (
+DROP VIEW IF EXISTS v_datalogger;
+CREATE VIEW v_datalogger AS (
     SELECT
         dl.id          AS id,
         dl.sn          AS sn,
@@ -41,7 +42,8 @@ CREATE OR REPLACE VIEW v_datalogger AS (
     WHERE NOT dl.deleted
 );
 
-CREATE OR REPLACE VIEW v_datalogger_preview AS (
+DROP VIEW IF EXISTS v_datalogger_preview;
+CREATE VIEW v_datalogger_preview AS (
     SELECT
         p.datalogger_table_id,
         p.preview,
@@ -52,10 +54,12 @@ CREATE OR REPLACE VIEW v_datalogger_preview AS (
     WHERE NOT dl.deleted
 );
 
-CREATE OR REPLACE VIEW v_datalogger_equivalency_table AS (
+DROP VIEW IF EXISTS v_datalogger_equivalency_table;
+CREATE VIEW v_datalogger_equivalency_table AS (
     SELECT
         dt.datalogger_id AS datalogger_id,
         dt.id AS datalogger_table_id,
+        dt.table_name AS datalogger_table_name,
         COALESCE(JSON_AGG(ROW_TO_JSON(eq)) FILTER (WHERE eq IS NOT NULL), '[]'::JSON)::TEXT AS fields
     FROM datalogger_table dt
     INNER JOIN datalogger dl ON dt.datalogger_id = dl.id
@@ -68,7 +72,8 @@ CREATE OR REPLACE VIEW v_datalogger_equivalency_table AS (
     GROUP BY dt.datalogger_id, dt.id
 );
 
-CREATE OR REPLACE VIEW v_datalogger_hash AS (
+DROP VIEW IF EXISTS v_datalogger_hash;
+CREATE VIEW v_datalogger_hash AS (
     SELECT
         dh.datalogger_id AS datalogger_id,
         dh.hash          AS "hash",
