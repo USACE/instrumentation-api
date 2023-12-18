@@ -60,7 +60,7 @@ CREATE VIEW v_datalogger_equivalency_table AS (
         dt.datalogger_id AS datalogger_id,
         dt.id AS datalogger_table_id,
         dt.table_name AS datalogger_table_name,
-        COALESCE(JSON_AGG(ROW_TO_JSON(eq)) FILTER (WHERE eq IS NOT NULL), '[]'::JSON)::TEXT AS fields
+        COALESCE(JSON_AGG(ROW_TO_JSON(eq)) FILTER (WHERE eq.id IS NOT NULL), '[]'::JSON)::TEXT AS fields
     FROM datalogger_table dt
     INNER JOIN datalogger dl ON dt.datalogger_id = dl.id
     LEFT JOIN LATERAL (
