@@ -47,7 +47,7 @@ func (h *ApiHandler) GetEquivalencyTable(c echo.Context) error {
 		if errors.Is(err, sql.ErrNoRows) {
 			return echo.NewHTTPError(http.StatusNotFound, message.NotFound)
 		}
-		return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, t)
