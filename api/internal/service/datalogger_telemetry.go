@@ -10,7 +10,7 @@ import (
 type DataloggerTelemetryService interface {
 	GetDataloggerByModelSN(ctx context.Context, modelName, sn string) (model.Datalogger, error)
 	GetDataloggerHashByModelSN(ctx context.Context, modelName, sn string) (string, error)
-	UpdateDataloggerTablePreview(ctx context.Context, dataloggerID uuid.UUID, tableName string, dlp model.DataloggerPreview) error
+	UpdateDataloggerTablePreview(ctx context.Context, dataloggerID uuid.UUID, tableName string, dlp model.DataloggerTablePreview) error
 	UpdateDataloggerTableError(ctx context.Context, dataloggerID uuid.UUID, tableName *string, e *model.DataloggerError) error
 }
 

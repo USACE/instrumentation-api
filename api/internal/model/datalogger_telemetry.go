@@ -35,7 +35,7 @@ const updateDataloggerTablePreview = `
 	WHERE datalogger_table_id IN (SELECT id FROM datalogger_table WHERE datalogger_id = $1 AND table_name = $2)
 `
 
-func (q *Queries) UpdateDataloggerTablePreview(ctx context.Context, dataloggerID uuid.UUID, tableName string, dlp DataloggerPreview) error {
+func (q *Queries) UpdateDataloggerTablePreview(ctx context.Context, dataloggerID uuid.UUID, tableName string, dlp DataloggerTablePreview) error {
 	_, err := q.db.ExecContext(ctx, updateDataloggerTablePreview, dataloggerID, tableName, dlp.Preview, dlp.UpdateDate)
 	return err
 }

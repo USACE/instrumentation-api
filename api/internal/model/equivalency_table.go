@@ -69,6 +69,7 @@ const getEquivalencyTable = `
 	SELECT
 		datalogger_id,
 		datalogger_table_id,
+		datalogger_table_name,
 		fields
 	FROM v_datalogger_equivalency_table
 	WHERE datalogger_table_id = $1

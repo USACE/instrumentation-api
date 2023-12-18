@@ -19,7 +19,7 @@ type DataloggerService interface {
 	GetOneDatalogger(ctx context.Context, dataloggerID uuid.UUID) (model.Datalogger, error)
 	UpdateDatalogger(ctx context.Context, u model.Datalogger) (model.Datalogger, error)
 	DeleteDatalogger(ctx context.Context, d model.Datalogger) error
-	GetDataloggerTablePreview(ctx context.Context, dataloggerTableID uuid.UUID) (model.DataloggerPreview, error)
+	GetDataloggerTablePreview(ctx context.Context, dataloggerTableID uuid.UUID) (model.DataloggerTablePreview, error)
 	ResetDataloggerTableName(ctx context.Context, dataloggerTableID uuid.UUID) error
 	GetOrCreateDataloggerTable(ctx context.Context, dataloggerID uuid.UUID, tableName string) (uuid.UUID, error)
 	DeleteDataloggerTable(ctx context.Context, dataloggerTableID uuid.UUID) error
