@@ -263,7 +263,7 @@ func (h *ApiHandler) DeleteDatalogger(c echo.Context) error {
 //	@Produce json
 //	@Param datalogger_id path string true "datalogger uuid" Format(uuid)
 //	@Param datalogger_table_id path string true "datalogger table uuid" Format(uuid)
-//	@Success 200 {object} model.DataloggerPreview
+//	@Success 200 {object} model.DataloggerTablePreview
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
@@ -295,7 +295,7 @@ func (h *ApiHandler) GetDataloggerTablePreview(c echo.Context) error {
 //	@Produce json
 //	@Param datalogger_id path string true "datalogger uuid" Format(uuid)
 //	@Param datalogger_table_id path string true "datalogger table uuid" Format(uuid)
-//	@Success 200 {object} model.DataloggerPreview
+//	@Success 200 {object} model.DataloggerTablePreview
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
