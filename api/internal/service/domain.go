@@ -8,6 +8,7 @@ import (
 
 type DomainService interface {
 	GetDomains(ctx context.Context) ([]model.Domain, error)
+	GetDomainMap(ctx context.Context) (model.DomainMap, error)
 }
 
 type domainService struct {

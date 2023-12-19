@@ -6,3 +6,6 @@ services:
       args:
         - BUILD_ENV=dev
       target: builder
+    depends_on:
+      alert:
+        condition: service_started
