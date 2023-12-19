@@ -964,7 +964,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerPreview"
+                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerTablePreview"
                         }
                     },
                     "400": {
@@ -1024,7 +1024,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerPreview"
+                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerTablePreview"
                         }
                     },
                     "400": {
@@ -1160,6 +1160,43 @@ const docTemplate = `{
                             "items": {
                                 "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Domain"
                             }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/domains/map": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "domain"
+                ],
+                "summary": "Get map with domain group as key",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DomainMap"
                         }
                     },
                     "400": {
@@ -8156,7 +8193,18 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.DataloggerPreview": {
+        "github_com_USACE_instrumentation-api_api_internal_model.DataloggerTable": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "table_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_USACE_instrumentation-api_api_internal_model.DataloggerTablePreview": {
             "type": "object",
             "properties": {
                 "datalogger_table_id": {
@@ -8166,17 +8214,6 @@ const docTemplate = `{
                     "$ref": "#/definitions/pgtype.JSON"
                 },
                 "update_date": {
-                    "type": "string"
-                }
-            }
-        },
-        "github_com_USACE_instrumentation-api_api_internal_model.DataloggerTable": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "table_name": {
                     "type": "string"
                 }
             }
@@ -8315,6 +8352,29 @@ const docTemplate = `{
                 },
                 "value": {
                     "type": "string"
+                }
+            }
+        },
+        "github_com_USACE_instrumentation-api_api_internal_model.DomainGroupOption": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_USACE_instrumentation-api_api_internal_model.DomainMap": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "array",
+                "items": {
+                    "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DomainGroupOption"
                 }
             }
         },

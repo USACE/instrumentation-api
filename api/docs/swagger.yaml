@@ -227,20 +227,20 @@ definitions:
       updater_username:
         type: string
     type: object
-  github_com_USACE_instrumentation-api_api_internal_model.DataloggerPreview:
+  github_com_USACE_instrumentation-api_api_internal_model.DataloggerTable:
+    properties:
+      id:
+        type: string
+      table_name:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.DataloggerTablePreview:
     properties:
       datalogger_table_id:
         type: string
       preview:
         $ref: '#/definitions/pgtype.JSON'
       update_date:
-        type: string
-    type: object
-  github_com_USACE_instrumentation-api_api_internal_model.DataloggerTable:
-    properties:
-      id:
-        type: string
-      table_name:
         type: string
     type: object
   github_com_USACE_instrumentation-api_api_internal_model.DataloggerWithKey:
@@ -332,6 +332,21 @@ definitions:
         type: string
       value:
         type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.DomainGroupOption:
+    properties:
+      description:
+        type: string
+      id:
+        type: string
+      value:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.DomainMap:
+    additionalProperties:
+      items:
+        $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DomainGroupOption'
+      type: array
     type: object
   github_com_USACE_instrumentation-api_api_internal_model.EmailAutocompleteResult:
     properties:
@@ -1703,7 +1718,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerPreview'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerTablePreview'
         "400":
           description: Bad Request
           schema:
@@ -1742,7 +1757,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerPreview'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerTablePreview'
         "400":
           description: Bad Request
           schema:
@@ -1845,6 +1860,30 @@ paths:
           schema:
             $ref: '#/definitions/echo.HTTPError'
       summary: lists all domains
+      tags:
+      - domain
+  /domains/map:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DomainMap'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Get map with domain group as key
       tags:
       - domain
   /email_autocomplete:
