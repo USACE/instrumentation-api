@@ -91,7 +91,6 @@ func (h *ApiHandler) GetInstrument(c echo.Context) error {
 //	@Router /projects/{project_id}/instruments [post]
 //	@Router /instruments [post]
 //	@Security Bearer
-//	@Security Bearer
 func (h *ApiHandler) CreateInstruments(c echo.Context) error {
 	ctx := c.Request().Context()
 	newInstrumentCollection := func(c echo.Context) (model.InstrumentCollection, error) {

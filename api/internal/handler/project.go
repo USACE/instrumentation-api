@@ -200,7 +200,7 @@ func (h *ApiHandler) GetProject(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects [post]
-//	@Security Bearer[admin]
+//	@Security Bearer
 func (h *ApiHandler) CreateProjectBulk(c echo.Context) error {
 	pc := model.ProjectCollection{}
 	if err := c.Bind(&pc); err != nil {
@@ -309,7 +309,7 @@ func (h *ApiHandler) DeleteFlagProject(c echo.Context) error {
 //	@Tags project
 //	@Produce json
 //	@Param project_id path string true "project id" Format(uuid)
-//	@Param instrument_id path string true "timeseries uuid" Format(uuid)
+//	@Param timeseries_id path string true "timeseries uuid" Format(uuid)
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -338,7 +338,7 @@ func (h *ApiHandler) CreateProjectTimeseries(c echo.Context) error {
 //	@Tags project
 //	@Produce json
 //	@Param project_id path string true "project id" Format(uuid)
-//	@Param instrument_id path string true "timeseries uuid" Format(uuid)
+//	@Param timeseries_id path string true "timeseries uuid" Format(uuid)
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError

@@ -15,7 +15,7 @@ import (
 //	@Summary lists constants for a given instrument
 //	@Tags instrument-constant
 //	@Produce json
-//	@Param project_id path string false "project uuid" Format(uuid)
+//	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param instrument_id path string true "instrument uuid" Format(uuid)
 //	@Success 200 {array} model.Timeseries
 //	@Failure 400 {object} echo.HTTPError
@@ -39,7 +39,7 @@ func (h *ApiHandler) ListInstrumentConstants(c echo.Context) error {
 //	@Summary creates instrument constants (i.e. timeseries)
 //	@Tags instrument-constant
 //	@Produce json
-//	@Param project_id path string false "project uuid" Format(uuid)
+//	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param instrument_id path string true "instrument uuid" Format(uuid)
 //	@Param timeseries_collection_items body model.TimeseriesCollectionItems true "timeseries collection items payload"
 //	@Success 200 {array} model.Timeseries
@@ -85,7 +85,7 @@ func (h *ApiHandler) CreateInstrumentConstants(c echo.Context) error {
 //	@Summary removes a timeseries as an instrument constant
 //	@Tags instrument-constant
 //	@Produce json
-//	@Param project_id path string false "project uuid" Format(uuid)
+//	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param instrument_id path string true "instrument uuid" Format(uuid)
 //	@Param timeseries_id path string true "timeseries uuid" Format(uuid)
 //	@Success 200 {object} map[string]interface{}
