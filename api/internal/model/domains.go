@@ -30,7 +30,7 @@ type DomainGroupCollection []DomainGroup
 type DomainMap map[string][]DomainGroupOption
 
 const getDomains = `
-	SELECT * FROM v_domain_v1
+	SELECT * FROM v_domain
 `
 
 // GetDomains returns a UNION of all domain tables in the database
@@ -43,7 +43,7 @@ func (q *Queries) GetDomains(ctx context.Context) ([]Domain, error) {
 }
 
 const getDomainMap = `
-	SELECT * FROM v_domain_v2
+	SELECT * FROM v_domain_group
 `
 
 // GetDomainsV2 returns all domains grouped by table

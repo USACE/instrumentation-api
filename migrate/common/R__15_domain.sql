@@ -1,5 +1,5 @@
-DROP VIEW IF EXISTS v_domain_v1;
-CREATE VIEW v_domain_v1 AS (
+DROP VIEW IF EXISTS v_domain;
+CREATE VIEW v_domain AS (
     SELECT
         id, 
         'instrument_type'   AS group, 
@@ -58,10 +58,10 @@ CREATE VIEW v_domain_v1 AS (
     ORDER BY "group", value
 );
 
-GRANT SELECT ON v_domain_v1 TO instrumentation_reader;
+GRANT SELECT ON v_domain TO instrumentation_reader;
 
-DROP VIEW IF EXISTS v_domain_v2;
-CREATE VIEW v_domain_v2 AS (
+DROP VIEW IF EXISTS v_domain_group;
+CREATE VIEW v_domain_group AS (
   SELECT
     "group",
     JSON_AGG(JSON_BUILD_OBJECT(
@@ -69,8 +69,8 @@ CREATE VIEW v_domain_v2 AS (
       'value',       value,
       'description', description
     ))::TEXT AS opts
-  FROM v_domain_v1
+  FROM v_domain
   GROUP BY "group"
 );
 
-GRANT SELECT ON v_domain_v2 TO instrumentation_reader;
+GRANT SELECT ON v_domain_group TO instrumentation_reader;
