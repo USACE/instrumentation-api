@@ -70,6 +70,10 @@ Note: When running the API locally, make sure environment variable `INSTRUMENTAT
 
 Regression tests are maintained for the project using Go [httptest](https://pkg.go.dev/net/http/httptest) from the standard library. These are integration tests that run inside of the `api` docker container. Tests are located in the handlers folder, using the virtual package (not compiled to production binary) `handler_test`. Each test is an instance of `HTTPTest` struct with relavent properties. (test name, url path, etc.). A notable property is the `ExpectedSchema`, which accepts a `gojsonschema.Schema`. This is used to validate the response body matches the json schema string, otherwise, the test will fail. All tests are run against a test database seeded with SQL scripts locally; see the [./migrate/local/](./migrate/local/) folder.
 
+To run specific tests, you can pass optional commands to the test script in `./compose.sh` like so, where `*args` are passed to `go test *args`. The `-rm` flag will automatically remove containers after they run:
+```bash
+./compose.sh test [-rm] *args
+```
 ## How To Deploy
 
 ### Deploying Develop and Stable Core API & Telemetry API
