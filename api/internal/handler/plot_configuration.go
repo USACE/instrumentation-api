@@ -117,6 +117,7 @@ func (h *ApiHandler) CreatePlotConfig(c echo.Context) error {
 //	@Tags plot-config
 //	@Produce json
 //	@Param project_id path string true "project uuid" Format(uuid)
+//	@Param plot_configuration_id path string true "plot config uuid" Format(uuid)
 //	@Param plot_config body model.PlotConfig true "plot config payload"
 //	@Success 200 {object} model.PlotConfig
 //	@Failure 400 {object} echo.HTTPError
@@ -159,6 +160,7 @@ func (h *ApiHandler) UpdatePlotConfig(c echo.Context) error {
 //	@Sumary deletes a plot configuration in a project
 //	@Tags plot-config
 //	@Produce json
+//	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param plot_configuration_id path string true "plot config uuid" Format(uuid)
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError

@@ -24,6 +24,7 @@ import (
 // @in header
 // @name Authorization
 // @description CAC-Only routes
+
 // @scope.admin Grants read and write access to administrative information
 // @scope.project_admin Grants project members read and write access to projects
 // @scope.project_member Read and write permissions per-project granted by project admin

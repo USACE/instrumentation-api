@@ -19,7 +19,6 @@ import (
 //	@Summary lists dataloggers for a project
 //	@Tags datalogger
 //	@Produce json
-//	@Param project_id path string true "project uuid" Format(uuid)
 //	@Success 200 {array} model.Datalogger
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -56,8 +55,6 @@ func (h *ApiHandler) ListDataloggers(c echo.Context) error {
 //	@Tags datalogger
 //	@Accept json
 //	@Produce json
-//	@Param project_id path string true "project uuid" Format(uuid)
-//	@Param instrument_id path string true "instrument uuid" Format(uuid)
 //	@Param datalogger body model.Datalogger true "datalogger payload"
 //	@Success 200 {array} model.DataloggerWithKey
 //	@Failure 400 {object} echo.HTTPError
@@ -263,7 +260,7 @@ func (h *ApiHandler) DeleteDatalogger(c echo.Context) error {
 //	@Produce json
 //	@Param datalogger_id path string true "datalogger uuid" Format(uuid)
 //	@Param datalogger_table_id path string true "datalogger table uuid" Format(uuid)
-//	@Success 200 {object} model.DataloggerPreview
+//	@Success 200 {object} model.DataloggerTablePreview
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
@@ -295,7 +292,7 @@ func (h *ApiHandler) GetDataloggerTablePreview(c echo.Context) error {
 //	@Produce json
 //	@Param datalogger_id path string true "datalogger uuid" Format(uuid)
 //	@Param datalogger_table_id path string true "datalogger table uuid" Format(uuid)
-//	@Success 200 {object} model.DataloggerPreview
+//	@Success 200 {object} model.DataloggerTablePreview
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError

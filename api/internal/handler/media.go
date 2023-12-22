@@ -12,6 +12,7 @@ import (
 //	@Summary serves media, files, etc for a given project
 //	@Tags media
 //	@Produce jpeg
+//	@Param project_slug path string true "project abbr"
 //	@Param uri_path path string true "uri path of requested resource"
 //	@Success 200
 //	@Failure 400 {object} echo.HTTPError

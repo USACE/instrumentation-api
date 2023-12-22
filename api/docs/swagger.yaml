@@ -333,21 +333,6 @@ definitions:
       value:
         type: string
     type: object
-  github_com_USACE_instrumentation-api_api_internal_model.DomainGroupOption:
-    properties:
-      description:
-        type: string
-      id:
-        type: string
-      value:
-        type: string
-    type: object
-  github_com_USACE_instrumentation-api_api_internal_model.DomainMap:
-    additionalProperties:
-      items:
-        $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DomainGroupOption'
-      type: array
-    type: object
   github_com_USACE_instrumentation-api_api_internal_model.EmailAutocompleteResult:
     properties:
       email:
@@ -1273,18 +1258,6 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: project uuid
-        format: uuid
-        in: path
-        name: project_id
-        required: true
-        type: string
-      - description: instrument uuid
-        format: uuid
-        in: path
-        name: instrument_id
-        required: true
-        type: string
       - description: datalogger payload
         in: body
         name: datalogger
@@ -1503,6 +1476,12 @@ paths:
         name: datalogger_id
         required: true
         type: string
+      - description: datalogger table uuid
+        format: uuid
+        in: path
+        name: datalogger_table_id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -1666,6 +1645,12 @@ paths:
         name: datalogger_id
         required: true
         type: string
+      - description: datalogger table uuid
+        format: uuid
+        in: path
+        name: datalogger_table_id
+        required: true
+        type: string
       - description: equivalency table row uuid
         format: uuid
         in: path
@@ -1777,13 +1762,6 @@ paths:
       - datalogger
   /dataloggers:
     get:
-      parameters:
-      - description: project uuid
-        format: uuid
-        in: path
-        name: project_id
-        required: true
-        type: string
       produces:
       - application/json
       responses:
@@ -1860,30 +1838,6 @@ paths:
           schema:
             $ref: '#/definitions/echo.HTTPError'
       summary: lists all domains
-      tags:
-      - domain
-  /domains/map:
-    get:
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DomainMap'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-      summary: Get map with domain group as key
       tags:
       - domain
   /email_autocomplete:
@@ -2535,7 +2489,6 @@ paths:
             $ref: '#/definitions/echo.HTTPError'
       security:
       - Bearer: []
-      - Bearer: []
       summary: accepts an array of instruments for bulk upload to the database
       tags:
       - instrument
@@ -2610,6 +2563,7 @@ paths:
         format: uuid
         in: path
         name: instrument_id
+        required: true
         type: string
       - description: note uuid
         format: uuid
@@ -2638,7 +2592,6 @@ paths:
           schema:
             $ref: '#/definitions/echo.HTTPError'
       security:
-      - Bearer: []
       - Bearer: []
       summary: deletes an instrument note
       tags:
@@ -2839,6 +2792,12 @@ paths:
         name: timeseries_id
         required: true
         type: string
+      - description: instrument uuid
+        format: uuid
+        in: path
+        name: instrument_id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -2864,6 +2823,12 @@ paths:
   /instruments/{instrument_id}/timeseries/{timeseries_id}/measurements:
     get:
       parameters:
+      - description: instrument uuid
+        format: uuid
+        in: path
+        name: instrument_id
+        required: true
+        type: string
       - description: timeseries uuid
         format: uuid
         in: path
@@ -2912,7 +2877,7 @@ paths:
       - description: instrument uuid
         format: uuid
         in: path
-        name: project_id
+        name: instrument_id
         required: true
         type: string
       - description: after time
@@ -2991,8 +2956,9 @@ paths:
         type: string
       - description: before time
         format: date-time
-        in: path
+        in: query
         name: before
+        required: true
         type: string
       produces:
       - application/json
@@ -3053,6 +3019,12 @@ paths:
       - instrument-ipi
     put:
       parameters:
+      - description: instrument uuid
+        format: uuid
+        in: path
+        name: instrument_id
+        required: true
+        type: string
       - description: ipi instrument segments payload
         in: body
         name: instrument_segments
@@ -3215,7 +3187,6 @@ paths:
             $ref: '#/definitions/echo.HTTPError'
       security:
       - Bearer: []
-      - Bearer: []
       summary: updates an instrument note by id
       tags:
       - instrument-note
@@ -3235,8 +3206,9 @@ paths:
         type: string
       - description: before time
         format: date-time
-        in: path
+        in: query
         name: before
+        required: true
         type: string
       produces:
       - application/json
@@ -3297,6 +3269,12 @@ paths:
       - instrument-saa
     put:
       parameters:
+      - description: instrument uuid
+        format: uuid
+        in: path
+        name: instrument_id
+        required: true
+        type: string
       - description: saa instrument segments payload
         in: body
         name: instrument_segments
@@ -3685,8 +3663,7 @@ paths:
           schema:
             $ref: '#/definitions/echo.HTTPError'
       security:
-      - Bearer:
-        - admin
+      - Bearer: []
       summary: accepts an array of instruments for bulk upload to the database
       tags:
       - project
@@ -3908,6 +3885,12 @@ paths:
       - alert-config
     get:
       parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
       - description: alert config uuid
         format: uuid
         in: path
@@ -4342,11 +4325,7 @@ paths:
         format: uuid
         in: path
         name: project_id
-        type: string
-      - description: alert config uuid
-        format: uuid
-        in: path
-        name: alert_config_id
+        required: true
         type: string
       produces:
       - application/json
@@ -4417,6 +4396,7 @@ paths:
         format: uuid
         in: path
         name: project_id
+        required: true
         type: string
       - description: evaluation uuid
         format: uuid
@@ -4456,11 +4436,12 @@ paths:
         format: uuid
         in: path
         name: project_id
+        required: true
         type: string
-      - description: instrument uuid
+      - description: evaluation uuid
         format: uuid
         in: path
-        name: instrument_id
+        name: evaluation_id
         required: true
         type: string
       produces:
@@ -4491,6 +4472,7 @@ paths:
         format: uuid
         in: path
         name: project_id
+        required: true
         type: string
       - description: evaluation uuid
         format: uuid
@@ -4672,7 +4654,6 @@ paths:
             $ref: '#/definitions/echo.HTTPError'
       security:
       - Bearer: []
-      - Bearer: []
       summary: accepts an array of instruments for bulk upload to the database
       tags:
       - instrument
@@ -4767,6 +4748,7 @@ paths:
         format: uuid
         in: path
         name: project_id
+        required: true
         type: string
       - description: instrument uuid
         format: uuid
@@ -4938,6 +4920,7 @@ paths:
         format: uuid
         in: path
         name: project_id
+        required: true
         type: string
       - description: instrument uuid
         format: uuid
@@ -4975,6 +4958,7 @@ paths:
         format: uuid
         in: path
         name: project_id
+        required: true
         type: string
       - description: instrument uuid
         format: uuid
@@ -5021,6 +5005,7 @@ paths:
         format: uuid
         in: path
         name: project_id
+        required: true
         type: string
       - description: instrument uuid
         format: uuid
@@ -5150,6 +5135,7 @@ paths:
         format: uuid
         in: path
         name: project_id
+        required: true
         type: string
       - description: instrument uuid
         format: uuid
@@ -5412,6 +5398,12 @@ paths:
   /projects/{project_id}/plot_configurations/{plot_configuration_id}:
     delete:
       parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
       - description: plot config uuid
         format: uuid
         in: path
@@ -5483,6 +5475,12 @@ paths:
         format: uuid
         in: path
         name: project_id
+        required: true
+        type: string
+      - description: plot config uuid
+        format: uuid
+        in: path
+        name: plot_configuration_id
         required: true
         type: string
       - description: plot config payload
@@ -5596,7 +5594,7 @@ paths:
       - description: timeseries uuid
         format: uuid
         in: path
-        name: instrument_id
+        name: timeseries_id
         required: true
         type: string
       produces:
@@ -5635,7 +5633,7 @@ paths:
       - description: timeseries uuid
         format: uuid
         in: path
-        name: instrument_id
+        name: timeseries_id
         required: true
         type: string
       produces:
@@ -5759,6 +5757,11 @@ paths:
   /projects/{project_slug}/images/{uri_path}:
     get:
       parameters:
+      - description: project abbr
+        in: path
+        name: project_slug
+        required: true
+        type: string
       - description: uri path of requested resource
         in: path
         name: uri_path
@@ -6221,10 +6224,5 @@ securityDefinitions:
     description: CAC-Only routes
     in: header
     name: Authorization
-    scopes:
-      admin: ' Grants read and write access to administrative information'
-      project_admin: ' Grants project members read and write access to projects'
-      project_member: ' Read and write permissions per-project granted by project
-        admin'
     type: apiKey
 swagger: "2.0"

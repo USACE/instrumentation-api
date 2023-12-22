@@ -288,22 +288,6 @@ const docTemplate = `{
                 "summary": "creates a datalogger",
                 "parameters": [
                     {
-                        "type": "string",
-                        "format": "uuid",
-                        "description": "project uuid",
-                        "name": "project_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "format": "uuid",
-                        "description": "instrument uuid",
-                        "name": "instrument_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
                         "description": "datalogger payload",
                         "name": "datalogger",
                         "in": "body",
@@ -836,6 +820,14 @@ const docTemplate = `{
                         "name": "datalogger_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "datalogger table uuid",
+                        "name": "datalogger_table_id",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -887,6 +879,14 @@ const docTemplate = `{
                         "format": "uuid",
                         "description": "datalogger uuid",
                         "name": "datalogger_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "datalogger table uuid",
+                        "name": "datalogger_table_id",
                         "in": "path",
                         "required": true
                     },
@@ -1062,16 +1062,6 @@ const docTemplate = `{
                     "datalogger"
                 ],
                 "summary": "lists dataloggers for a project",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "format": "uuid",
-                        "description": "project uuid",
-                        "name": "project_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1160,43 +1150,6 @@ const docTemplate = `{
                             "items": {
                                 "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Domain"
                             }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    }
-                }
-            }
-        },
-        "/domains/map": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "domain"
-                ],
-                "summary": "Get map with domain group as key",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DomainMap"
                         }
                     },
                     "400": {
@@ -2176,9 +2129,6 @@ const docTemplate = `{
                 "security": [
                     {
                         "Bearer": []
-                    },
-                    {
-                        "Bearer": []
                     }
                 ],
                 "produces": [
@@ -2297,7 +2247,8 @@ const docTemplate = `{
                         "format": "date-time",
                         "description": "before time",
                         "name": "before",
-                        "in": "path"
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -2394,6 +2345,14 @@ const docTemplate = `{
                 ],
                 "summary": "updates multiple segments for an ipi instrument",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "instrument uuid",
+                        "name": "instrument_id",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "description": "ipi instrument segments payload",
                         "name": "instrument_segments",
@@ -2582,9 +2541,6 @@ const docTemplate = `{
                 "security": [
                     {
                         "Bearer": []
-                    },
-                    {
-                        "Bearer": []
                     }
                 ],
                 "produces": [
@@ -2674,7 +2630,8 @@ const docTemplate = `{
                         "format": "date-time",
                         "description": "before time",
                         "name": "before",
-                        "in": "path"
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -2771,6 +2728,14 @@ const docTemplate = `{
                 ],
                 "summary": "updates multiple segments for an saa instrument",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "instrument uuid",
+                        "name": "instrument_id",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "description": "saa instrument segments payload",
                         "name": "instrument_segments",
@@ -2917,9 +2882,6 @@ const docTemplate = `{
                 "security": [
                     {
                         "Bearer": []
-                    },
-                    {
-                        "Bearer": []
                     }
                 ],
                 "produces": [
@@ -2935,7 +2897,8 @@ const docTemplate = `{
                         "format": "uuid",
                         "description": "instrument uuid",
                         "name": "instrument_id",
-                        "in": "path"
+                        "in": "path",
+                        "required": true
                     },
                     {
                         "type": "string",
@@ -3275,6 +3238,14 @@ const docTemplate = `{
                         "name": "timeseries_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "instrument uuid",
+                        "name": "instrument_id",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -3315,6 +3286,14 @@ const docTemplate = `{
                 ],
                 "summary": "lists timeseries by timeseries uuid",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "instrument uuid",
+                        "name": "instrument_id",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "format": "uuid",
@@ -3386,7 +3365,7 @@ const docTemplate = `{
                         "type": "string",
                         "format": "uuid",
                         "description": "instrument uuid",
-                        "name": "project_id",
+                        "name": "instrument_id",
                         "in": "path",
                         "required": true
                     },
@@ -3945,9 +3924,7 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "Bearer": [
-                            "admin"
-                        ]
+                        "Bearer": []
                     }
                 ],
                 "produces": [
@@ -4315,6 +4292,14 @@ const docTemplate = `{
                 ],
                 "summary": "gets a single alert",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "project uuid",
+                        "name": "project_id",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "format": "uuid",
@@ -5030,14 +5015,8 @@ const docTemplate = `{
                         "format": "uuid",
                         "description": "project uuid",
                         "name": "project_id",
-                        "in": "path"
-                    },
-                    {
-                        "type": "string",
-                        "format": "uuid",
-                        "description": "alert config uuid",
-                        "name": "alert_config_id",
-                        "in": "path"
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -5145,13 +5124,14 @@ const docTemplate = `{
                         "format": "uuid",
                         "description": "project uuid",
                         "name": "project_id",
-                        "in": "path"
+                        "in": "path",
+                        "required": true
                     },
                     {
                         "type": "string",
                         "format": "uuid",
-                        "description": "instrument uuid",
-                        "name": "instrument_id",
+                        "description": "evaluation uuid",
+                        "name": "evaluation_id",
                         "in": "path",
                         "required": true
                     }
@@ -5202,7 +5182,8 @@ const docTemplate = `{
                         "format": "uuid",
                         "description": "project uuid",
                         "name": "project_id",
-                        "in": "path"
+                        "in": "path",
+                        "required": true
                     },
                     {
                         "type": "string",
@@ -5268,7 +5249,8 @@ const docTemplate = `{
                         "format": "uuid",
                         "description": "project uuid",
                         "name": "project_id",
-                        "in": "path"
+                        "in": "path",
+                        "required": true
                     },
                     {
                         "type": "string",
@@ -5475,9 +5457,6 @@ const docTemplate = `{
             },
             "post": {
                 "security": [
-                    {
-                        "Bearer": []
-                    },
                     {
                         "Bearer": []
                     }
@@ -5732,7 +5711,8 @@ const docTemplate = `{
                         "format": "uuid",
                         "description": "project uuid",
                         "name": "project_id",
-                        "in": "path"
+                        "in": "path",
+                        "required": true
                     },
                     {
                         "type": "string",
@@ -5990,7 +5970,8 @@ const docTemplate = `{
                         "format": "uuid",
                         "description": "project uuid",
                         "name": "project_id",
-                        "in": "path"
+                        "in": "path",
+                        "required": true
                     },
                     {
                         "type": "string",
@@ -6050,7 +6031,8 @@ const docTemplate = `{
                         "format": "uuid",
                         "description": "project uuid",
                         "name": "project_id",
-                        "in": "path"
+                        "in": "path",
+                        "required": true
                     },
                     {
                         "type": "string",
@@ -6121,7 +6103,8 @@ const docTemplate = `{
                         "format": "uuid",
                         "description": "project uuid",
                         "name": "project_id",
-                        "in": "path"
+                        "in": "path",
+                        "required": true
                     },
                     {
                         "type": "string",
@@ -6311,7 +6294,8 @@ const docTemplate = `{
                         "format": "uuid",
                         "description": "project uuid",
                         "name": "project_id",
-                        "in": "path"
+                        "in": "path",
+                        "required": true
                     },
                     {
                         "type": "string",
@@ -6726,6 +6710,14 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "plot config uuid",
+                        "name": "plot_configuration_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
                         "description": "plot config payload",
                         "name": "plot_config",
                         "in": "body",
@@ -6775,6 +6767,14 @@ const docTemplate = `{
                     "plot-config"
                 ],
                 "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "project uuid",
+                        "name": "project_id",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "format": "uuid",
@@ -6946,7 +6946,7 @@ const docTemplate = `{
                         "type": "string",
                         "format": "uuid",
                         "description": "timeseries uuid",
-                        "name": "instrument_id",
+                        "name": "timeseries_id",
                         "in": "path",
                         "required": true
                     }
@@ -7005,7 +7005,7 @@ const docTemplate = `{
                         "type": "string",
                         "format": "uuid",
                         "description": "timeseries uuid",
-                        "name": "instrument_id",
+                        "name": "timeseries_id",
                         "in": "path",
                         "required": true
                     }
@@ -7192,6 +7192,13 @@ const docTemplate = `{
                 ],
                 "summary": "serves media, files, etc for a given project",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "project abbr",
+                        "name": "project_slug",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "uri path of requested resource",
@@ -8355,29 +8362,6 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.DomainGroupOption": {
-            "type": "object",
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            }
-        },
-        "github_com_USACE_instrumentation-api_api_internal_model.DomainMap": {
-            "type": "object",
-            "additionalProperties": {
-                "type": "array",
-                "items": {
-                    "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DomainGroupOption"
-                }
-            }
-        },
         "github_com_USACE_instrumentation-api_api_internal_model.EmailAutocompleteResult": {
             "type": "object",
             "properties": {
@@ -9532,12 +9516,7 @@ const docTemplate = `{
             "description": "CAC-Only routes",
             "type": "apiKey",
             "name": "Authorization",
-            "in": "header",
-            "scopes": {
-                "admin": " Grants read and write access to administrative information",
-                "project_admin": " Grants project members read and write access to projects",
-                "project_member": " Read and write permissions per-project granted by project admin"
-            }
+            "in": "header"
         }
     }
 }`

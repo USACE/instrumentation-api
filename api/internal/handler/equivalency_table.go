@@ -175,6 +175,7 @@ func (h *ApiHandler) UpdateEquivalencyTable(c echo.Context) error {
 //	@Tags equivalency-table
 //	@Produce json
 //	@Param datalogger_id path string true "datalogger uuid" Format(uuid)
+//	@Param datalogger_table_id path string true "datalogger table uuid" Format(uuid)
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -211,6 +212,7 @@ func (h *ApiHandler) DeleteEquivalencyTable(c echo.Context) error {
 //	@Tags equivalency-table
 //	@Produce json
 //	@Param datalogger_id path string true "datalogger uuid" Format(uuid)
+//	@Param datalogger_table_id path string true "datalogger table uuid" Format(uuid)
 //	@Param row_id path string true "equivalency table row uuid" Format(uuid)
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
