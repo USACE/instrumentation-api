@@ -24,3 +24,21 @@ func (h *ApiHandler) GetDomains(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, dd)
 }
+
+// GetDomainMap godoc
+//
+//	@Summary Get map with domain group as key
+//	@Tags domain
+//	@Produce json
+//	@Success 200 {object} model.DomainMap
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /domains/map [get]
+func (h *ApiHandler) GetDomainMap(c echo.Context) error {
+	dm, err := h.DomainService.GetDomainMap(c.Request().Context())
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	return c.JSON(http.StatusOK, dm)
+}

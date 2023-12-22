@@ -333,6 +333,21 @@ definitions:
       value:
         type: string
     type: object
+  github_com_USACE_instrumentation-api_api_internal_model.DomainGroupOption:
+    properties:
+      description:
+        type: string
+      id:
+        type: string
+      value:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.DomainMap:
+    additionalProperties:
+      items:
+        $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DomainGroupOption'
+      type: array
+    type: object
   github_com_USACE_instrumentation-api_api_internal_model.EmailAutocompleteResult:
     properties:
       email:
@@ -1838,6 +1853,30 @@ paths:
           schema:
             $ref: '#/definitions/echo.HTTPError'
       summary: lists all domains
+      tags:
+      - domain
+  /domains/map:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DomainMap'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Get map with domain group as key
       tags:
       - domain
   /email_autocomplete:

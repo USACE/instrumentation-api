@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -o pipefail
+
 if [ "$1" = "up" ]; then
     (cd api && swag init -q --pd -g cmd/core/main.go --parseInternal true --dir internal)
     if [ "$2" = "mock" ]; then
@@ -25,15 +27,33 @@ elif [ "$1" = "clean" ]; then
 
 elif [ "$1" = "test" ]; then
     docker-compose -f docker-compose.yml -f docker-compose.dev.yml build --build-arg dev
-    docker-compose run -d alert
+    shift
+
+    TEARDOWN=false
+    REST_ARGS=()
+
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            -rm)
+                TEARDOWN=true
+                shift
+                ;;
+            *)
+                REST_ARGS+=("$1")
+                shift
+                ;;
+        esac
+    done
+
+    GOCMD="go test ${REST_ARGS[@]} github.com/USACE/instrumentation-api/api/internal/handler"
 
     if [ "$REPORT" = true ]; then
-        docker-compose -f docker-compose.yml -f docker-compose.dev.yml run --entrypoint="go test -json github.com/USACE/instrumentation-api/api/internal/handler" api > $(pwd)/report/api-test.log
+        docker-compose -f docker-compose.yml -f docker-compose.dev.yml run --entrypoint="$GOCMD" api > $(pwd)/report/api-test.log
     else
-        docker-compose -f docker-compose.yml -f docker-compose.dev.yml run --entrypoint="go test github.com/USACE/instrumentation-api/api/internal/handler" api
+        docker-compose -f docker-compose.yml -f docker-compose.dev.yml run --entrypoint="$GOCMD" api
     fi
 
-    if [ "$2" = "-rm" ]; then
+    if [ $TEARDOWN = true ]; then
         docker-compose --profile=local --profile=mock down -v
     fi
 

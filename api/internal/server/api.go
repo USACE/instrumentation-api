@@ -111,6 +111,7 @@ func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 
 	// Domain
 	r.public.GET("/domains", h.GetDomains)
+	r.public.GET("/domains/map", h.GetDomainMap)
 
 	// EquivalencyTable
 	r.private.GET("/datalogger/:datalogger_id/tables/:datalogger_table_id/equivalency_table", h.GetEquivalencyTable)
