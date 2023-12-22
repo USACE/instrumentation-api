@@ -53,7 +53,7 @@ func (h *ApiHandler) GetAllAlertConfigsForProject(c echo.Context) error {
 //	@Summary lists alerts for a single instrument
 //	@Tags alert-config
 //	@Produce json
-//	@Param project_id path string false "project uuid" Format(uuid)
+//	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param instrument_id path string true "instrument uuid" Format(uuid)
 //	@Success 200 {array} model.AlertConfig
 //	@Failure 400 {object} echo.HTTPError
@@ -77,6 +77,7 @@ func (h *ApiHandler) ListInstrumentAlertConfigs(c echo.Context) error {
 //	@Summary gets a single alert
 //	@Tags alert-config
 //	@Produce json
+//	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param alert_config_id path string true "alert config uuid" Format(uuid)
 //	@Success 200 {object} model.AlertConfig
 //	@Failure 400 {object} echo.HTTPError

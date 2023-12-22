@@ -35,6 +35,7 @@ func (h *ApiHandler) ListTimeseries(c echo.Context) error {
 //	@Tags timeseries
 //	@Produce json
 //	@Param timeseries_id path string true "timeseries uuid" Format(uuid)
+//	@Param instrument_id path string true "instrument uuid" Format(uuid)
 //	@Success 200 {object} model.Timeseries
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -58,7 +59,7 @@ func (h *ApiHandler) GetTimeseries(c echo.Context) error {
 //	@Summary lists timeseries for an instrument
 //	@Tags timeseries
 //	@Produce json
-//	@Param project_id path string false "project uuid" Format(uuid)
+//	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param instrument_id path string true "instrument uuid" Format(uuid)
 //	@Success 200 {array} model.Timeseries
 //	@Failure 400 {object} echo.HTTPError

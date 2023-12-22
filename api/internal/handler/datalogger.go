@@ -19,7 +19,6 @@ import (
 //	@Summary lists dataloggers for a project
 //	@Tags datalogger
 //	@Produce json
-//	@Param project_id path string true "project uuid" Format(uuid)
 //	@Success 200 {array} model.Datalogger
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -56,8 +55,6 @@ func (h *ApiHandler) ListDataloggers(c echo.Context) error {
 //	@Tags datalogger
 //	@Accept json
 //	@Produce json
-//	@Param project_id path string true "project uuid" Format(uuid)
-//	@Param instrument_id path string true "instrument uuid" Format(uuid)
 //	@Param datalogger body model.Datalogger true "datalogger payload"
 //	@Success 200 {array} model.DataloggerWithKey
 //	@Failure 400 {object} echo.HTTPError
