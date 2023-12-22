@@ -99,15 +99,12 @@ Works with ElasticMQ for local testing with a SQS-compatible interface. Variable
 | AWS_ACCESS_KEY_ID              | AKIAIOSFODNN7EXAMPLE                                                     | Used for local testing |
 | AWS_SECRET_ACCESS_KEY          | wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY                                 | Used for local testing |
 | AWS_DEFAULT_REGION             | us-east-1                                                                | Used for local testing |
-| ------------------------------ | ------------------------------------------------------------------------ | ---------------------- |
 | LOADER_POST_URL                | http://instrumentation-api_api_1/instrumentation/timeseries_measurements |                        |
 | LOADER_API_KEY                 | appkey                                                                   |                        |
-| ------------------------------ | ------------------------------------------------------------------------ | ---------------------- |
 | LOADER_AWS_S3_ENDPOINT         | http://minio:9000                                                        | Used for local testing |
 | LOADER_AWS_S3_REGION           | us-east-1                                                                |                        |
 | LOADER_AWS_S3_DISABLE_SSL      | False                                                                    |                        |
 | LOADER_AWS_S3_FORCE_PATH_STYLE | True                                                                     |                        |
-| ------------------------------ | ------------------------------------------------------------------------ | ---------------------- |
 | LOADER_AWS_SQS_QUEUE_NAME      | instrumentation-dcs-goes                                                 |                        |
 | LOADER_AWS_SQS_ENDPOINT        | http://elasticmq:9324                                                    | Used for local testing |
 | LOADER_AWS_SQS_QUEUE_URL       | http://elasticmq:9324/queue/instrumentation-dcs-goes                     | Used for local testing |
