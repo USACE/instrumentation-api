@@ -149,10 +149,11 @@ func (h *ApiHandler) UpdatePlotConfig(c echo.Context) error {
 	tNow := time.Now()
 	pc.Updater, pc.UpdateDate = &p.ID, &tNow
 
-	if err := h.PlotConfigService.UpdatePlotConfig(c.Request().Context(), pc); err != nil {
+	pcUpdated, err := h.PlotConfigService.UpdatePlotConfig(c.Request().Context(), pc)
+	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
-	return c.JSON(http.StatusOK, pc)
+	return c.JSON(http.StatusOK, pcUpdated)
 }
 
 // DeletePlotConfig godoc
