@@ -23,11 +23,11 @@ type PlotConfigSettings struct {
 
 // PlotConfig holds information for entity PlotConfig
 type PlotConfig struct {
-	ID           uuid.UUID          `json:"id"`
-	Name         string             `json:"name"`
-	Slug         string             `json:"slug"`
-	ProjectID    uuid.UUID          `json:"project_id" db:"project_id"`
-	TimeseriesID dbSlice[uuid.UUID] `json:"timeseries_id" db:"timeseries_id"`
+	ID            uuid.UUID          `json:"id"`
+	Name          string             `json:"name"`
+	Slug          string             `json:"slug"`
+	ProjectID     uuid.UUID          `json:"project_id" db:"project_id"`
+	TimeseriesIDs dbSlice[uuid.UUID] `json:"timeseries_id" db:"timeseries_id"`
 	AuditInfo
 	PlotConfigSettings
 }
@@ -165,18 +165,12 @@ func (q *Queries) DeletePlotConfig(ctx context.Context, projectID, plotConfigID 
 }
 
 const deletePlotConfigTimeseries = `
-	DELETE FROM plot_configuration_timeseries WHERE plot_configuration_id = ? AND timeseries_id NOT IN (?)
+	DELETE FROM plot_configuration_timeseries WHERE plot_configuration_id = $1
 `
 
-func (q *Queries) DeletePlotConfigTimeseries(ctx context.Context, plotConfigID uuid.UUID, timeseriesIDs []uuid.UUID) error {
-	query, args, err := sqlIn(deletePlotConfigTimeseries, plotConfigID, timeseriesIDs)
-	if err != nil {
-		return err
-	}
-	if _, err := q.db.ExecContext(ctx, query, args...); err != nil {
-		return err
-	}
-	return nil
+func (q *Queries) DeletePlotConfigTimeseries(ctx context.Context, plotConfigID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deletePlotConfigTimeseries, plotConfigID)
+	return err
 }
 
 const deletePlotConfigSettings = `

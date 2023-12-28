@@ -69,8 +69,7 @@ const updatePlotConfigAddManyTimeseriesBody = `{
         "9a3864a8-8766-4bfa-bad1-0328b166f6a8",
         "7ee902a3-56d0-4acf-8956-67ac82c03a96",
         "d9697351-3a38-4194-9ac4-41541927e475",
-        "22a734d6-dc24-451d-a462-43a32f335ae8",
-        "14247bc8-b264-4857-836f-182d47ebb39d"
+        "22a734d6-dc24-451d-a462-43a32f335ae8"
     ],
     "creator": "00000000-0000-0000-0000-000000000000",
     "create_date": "2021-02-26T16:21:07.925124Z",
@@ -112,18 +111,18 @@ func TestPlotConfigurations(t *testing.T) {
 			ExpectedSchema: arrSchema,
 		},
 		{
-			Name:           "UpdatePlotConfiguration - Remove Timeseries",
-			URL:            fmt.Sprintf("/projects/%s/plot_configurations/%s", testProjectID, testPlotConfigID),
-			Method:         http.MethodPut,
-			Body:           updatePlotConfigRemoveTimeseriesBody,
-			ExpectedStatus: http.StatusOK,
-			ExpectedSchema: objSchema,
-		},
-		{
 			Name:           "UpdatePlotConfiguration - Add Many Timeseries",
 			URL:            fmt.Sprintf("/projects/%s/plot_configurations/%s", testProjectID, testPlotConfigID),
 			Method:         http.MethodPut,
 			Body:           updatePlotConfigAddManyTimeseriesBody,
+			ExpectedStatus: http.StatusOK,
+			ExpectedSchema: objSchema,
+		},
+		{
+			Name:           "UpdatePlotConfiguration - Remove Timeseries",
+			URL:            fmt.Sprintf("/projects/%s/plot_configurations/%s", testProjectID, testPlotConfigID),
+			Method:         http.MethodPut,
+			Body:           updatePlotConfigRemoveTimeseriesBody,
 			ExpectedStatus: http.StatusOK,
 			ExpectedSchema: objSchema,
 		},
