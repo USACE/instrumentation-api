@@ -238,11 +238,12 @@ func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 	r.public.GET("/projects/:project_id/instruments", h.ListProjectInstruments)
 	r.public.GET("/projects/:project_id/instruments/names", h.ListProjectInstrumentNames)
 	r.public.GET("/projects/:project_id/instrument_groups", h.ListProjectInstrumentGroups)
-	r.private.POST("/projects", h.CreateProjectBulk, h.Middleware.IsApplicationAdmin)
-	r.private.PUT("/projects/:project_id", h.UpdateProject)
-	r.private.DELETE("/projects/:project_id", h.DeleteFlagProject)
 	r.private.POST("/projects/:project_id/timeseries/:timeseries_id", h.CreateProjectTimeseries)
 	r.private.DELETE("/projects/:project_id/timeseries/:timeseries_id", h.DeleteProjectTimeseries)
+	// Application Admin Only
+	r.private.POST("/projects", h.CreateProjectBulk, h.Middleware.IsApplicationAdmin)
+	r.private.PUT("/projects/:project_id", h.UpdateProject, h.Middleware.IsApplicationAdmin)
+	r.private.DELETE("/projects/:project_id", h.DeleteFlagProject, h.Middleware.IsApplicationAdmin)
 
 	// Search
 	r.public.GET("/search/:entity", h.Search)
