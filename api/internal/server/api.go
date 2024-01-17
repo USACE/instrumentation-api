@@ -59,6 +59,8 @@ func (server *ApiServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
+	mw := h.Middleware
+
 	// Alert
 	r.public.GET("/projects/:project_id/instruments/:instrument_id/alerts", h.ListAlertsForInstrument)
 	r.private.GET("/my_alerts", h.ListMyAlerts)
@@ -148,6 +150,8 @@ func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 	r.public.GET("/instruments/:instrument_id", h.GetInstrument)
 	r.public.GET("/instruments/:instrument_id/timeseries_measurements", h.ListTimeseriesMeasurementsByInstrument)
 	r.private.POST("/projects/:project_id/instruments", h.CreateInstruments)
+	r.private.POST("/projects/:project_id/instruments/:instrument_id/assignments", h.AssignInstrumentToProject, mw.IsProjectAdmin)
+	r.private.DELETE("/projects/:project_id/instruments/:instrument_id/assignments", h.UnassignInstrumentFromProject, mw.IsProjectAdmin)
 	r.private.PUT("/projects/:project_id/instruments/:instrument_id", h.UpdateInstrument)
 	r.private.PUT("/projects/:project_id/instruments/:instrument_id/geometry", h.UpdateInstrumentGeometry)
 	r.private.DELETE("/projects/:project_id/instruments/:instrument_id", h.DeleteFlagInstrument)
@@ -236,9 +240,9 @@ func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 	r.public.GET("/projects/:project_id/instruments", h.ListProjectInstruments)
 	r.public.GET("/projects/:project_id/instrument_groups", h.ListProjectInstrumentGroups)
 	// Application Admin Only
-	r.private.POST("/projects", h.CreateProjectBulk, h.Middleware.IsApplicationAdmin)
-	r.private.PUT("/projects/:project_id", h.UpdateProject, h.Middleware.IsApplicationAdmin)
-	r.private.DELETE("/projects/:project_id", h.DeleteFlagProject, h.Middleware.IsApplicationAdmin)
+	r.private.POST("/projects", h.CreateProjectBulk, mw.IsApplicationAdmin)
+	r.private.PUT("/projects/:project_id", h.UpdateProject, mw.IsApplicationAdmin)
+	r.private.DELETE("/projects/:project_id", h.DeleteFlagProject, mw.IsApplicationAdmin)
 
 	// Search
 	r.public.GET("/search/:entity", h.Search)

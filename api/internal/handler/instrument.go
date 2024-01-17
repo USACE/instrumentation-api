@@ -129,6 +129,80 @@ func (h *ApiHandler) CreateInstruments(c echo.Context) error {
 	return c.JSON(http.StatusCreated, nn)
 }
 
+// AssignInstrumentToProject godoc
+//
+//	@Summary assigns an instrument to a project.
+//	@Tags instrument
+//	@Description must be Project (or Application) Admin of all existing instrument projects and project to be assigned
+//	@Produce json
+//	@Param project_id path string true "project uuid" Format(uuid)
+//	@Param instrument_id path string true "instrument uuid" Format(uuid)
+//	@Success 200 {object} map[string]interface{}
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /projects/{project_id}/instruments/{instrument_id}/assignments [post]
+//	@Security Bearer
+func (h *ApiHandler) AssignInstrumentToProject(c echo.Context) error {
+	pID, err := uuid.Parse(c.Param("project_id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+	}
+	iID, err := uuid.Parse(c.Param("instrument_id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+	}
+
+	ctx := c.Request().Context()
+	p := c.Get("profile").(model.Profile)
+	if !p.IsAdmin {
+		autorized, err := h.InstrumentService.AssignerIsAuthorized(ctx, iID, p.ID)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
+		}
+		if !autorized {
+			return echo.NewHTTPError(http.StatusUnauthorized, message.Unauthorized)
+		}
+	}
+
+	if err := h.InstrumentService.AssignInstrumentToProject(ctx, pID, iID); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, make(map[string]interface{}))
+}
+
+// UnassignInstrumentFromProject godoc
+//
+//	@Summary unassigns an instrument from a project.
+//	@Tags instrument
+//	@Description must be Project Admin of project to be unassigned
+//	@Produce json
+//	@Param project_id path string true "project uuid" Format(uuid)
+//	@Param instrument_id path string true "instrument uuid" Format(uuid)
+//	@Success 200 {object} map[string]interface{}
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /projects/{project_id}/instruments/{instrument_id}/assignments [delete]
+//	@Security Bearer
+func (h *ApiHandler) UnassignInstrumentFromProject(c echo.Context) error {
+	pID, err := uuid.Parse(c.Param("project_id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+	}
+	iID, err := uuid.Parse(c.Param("instrument_id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+	}
+
+	if err := h.InstrumentService.UnassignInstrumentFromProject(c.Request().Context(), pID, iID); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, make(map[string]interface{}))
+}
+
 // UpdateInstrument godoc
 //
 //	@Summary updates an existing instrument

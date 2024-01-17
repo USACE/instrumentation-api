@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/google/uuid"
@@ -14,6 +15,9 @@ type InstrumentService interface {
 	GetInstrumentCount(ctx context.Context) (model.InstrumentCount, error)
 	CreateInstrument(ctx context.Context, i model.Instrument) (model.IDSlugName, error)
 	CreateInstruments(ctx context.Context, instruments []model.Instrument) ([]model.IDSlugName, error)
+	AssignerIsAuthorized(ctx context.Context, profileID, instrumentID uuid.UUID) (bool, error)
+	AssignInstrumentToProject(ctx context.Context, projectID, instrumentID uuid.UUID) error
+	UnassignInstrumentFromProject(ctx context.Context, projectID, instrumentID uuid.UUID) error
 	ValidateCreateInstruments(ctx context.Context, instruments []model.Instrument) (model.CreateInstrumentsValidationResult, error)
 	UpdateInstrument(ctx context.Context, projectID uuid.UUID, i model.Instrument) (model.Instrument, error)
 	UpdateInstrumentGeometry(ctx context.Context, projectID, instrumentID uuid.UUID, geom geojson.Geometry, p model.Profile) (model.Instrument, error)
@@ -102,6 +106,36 @@ func (s instrumentService) CreateInstruments(ctx context.Context, instruments []
 		return nil, err
 	}
 	return ii, nil
+}
+
+func (s instrumentService) AssignerIsAuthorized(ctx context.Context, profileID, instrumentID uuid.UUID) (bool, error) {
+	q := s.db.Queries()
+
+	instrumentProjectIDs, err := q.ListInstrumentProjects(ctx, instrumentID)
+	if err != nil {
+		return false, err
+	}
+	if len(instrumentProjectIDs) == 0 {
+		return false, fmt.Errorf("invalid instrument %s has no projects assigned (instrument may be deleted or not exist)", instrumentID)
+	}
+
+	adminProjectIDs, err := q.ListAdminProjects(ctx, profileID)
+	if err != nil {
+		return false, err
+	}
+
+	pIDSet := make(map[uuid.UUID]struct{})
+	for _, pID := range adminProjectIDs {
+		pIDSet[pID] = struct{}{}
+	}
+
+	for _, ipID := range instrumentProjectIDs {
+		if _, exists := pIDSet[ipID]; !exists {
+			return false, nil
+		}
+	}
+
+	return true, nil
 }
 
 // UpdateInstrument updates a single instrument

@@ -10,7 +10,7 @@ DROP VIEW IF EXISTS v_aware_platform_parameter_enabled;
 CREATE TABLE IF NOT EXISTS project_instrument (
   project_id UUID NOT NULL REFERENCES project (id),
   instrument_id UUID NOT NULL REFERENCES instrument (id),
-  CONSTRAINT project_instrument_project_id_instrument_id UNIQUE (project_id, instrument_id)
+  CONSTRAINT project_instrument_project_id_instrument_id_key UNIQUE (project_id, instrument_id)
 );
 
 INSERT INTO project_instrument (project_id, instrument_id)

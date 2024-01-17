@@ -67,3 +67,35 @@ func (q *Queries) RemoveProjectMemberRole(ctx context.Context, projectID, profil
 	_, err := q.db.ExecContext(ctx, removeProjectMemberRole, projectID, profileID, roleID)
 	return err
 }
+
+const isProjectAdmin = `
+	SELECT EXISTS (
+		SELECT 1 FROM profile_project_roles pr
+		INNER JOIN role r ON r.id = pr.role_id
+		WHERE pr.profile_id = $1
+		AND pr.project_id = $2
+		AND r.name = 'ADMIN'
+	)
+`
+
+func (q *Queries) IsProjectAdmin(ctx context.Context, profileID, projectID uuid.UUID) (bool, error) {
+	var isAdmin bool
+	err := q.db.GetContext(ctx, &isAdmin, isProjectAdmin, projectID)
+	return isAdmin, err
+}
+
+const isProjectMember = `
+	SELECT EXISTS (
+		SELECT 1 FROM profile_project_roles pr
+		INNER JOIN role r ON r.id = pr.role_id
+		WHERE pr.profile_id = $1
+		AND pr.project_id = $2
+		AND (r.name = 'MEMBER' OR r.name = 'ADMIN')
+	)
+`
+
+func (q *Queries) IsProjectMember(ctx context.Context, profileID, projectID uuid.UUID) (bool, error) {
+	var isMember bool
+	err := q.db.GetContext(ctx, &isMember, isProjectMember, projectID)
+	return isMember, err
+}

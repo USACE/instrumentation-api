@@ -26,12 +26,12 @@ type Middleware interface {
 type mw struct {
 	cfg                        *config.ServerConfig
 	ProfileService             service.ProfileService
-	ProjectService             service.ProjectService
+	ProjectRoleService         service.ProjectRoleService
 	DataloggerTelemetryService service.DataloggerTelemetryService
 }
 
 var _ Middleware = (*mw)(nil)
 
-func NewMiddleware(cfg *config.ServerConfig, profileService service.ProfileService, projectService service.ProjectService, dataloggerTelemetryService service.DataloggerTelemetryService) *mw {
-	return &mw{cfg, profileService, projectService, dataloggerTelemetryService}
+func NewMiddleware(cfg *config.ServerConfig, profileService service.ProfileService, projectRoleService service.ProjectRoleService, dataloggerTelemetryService service.DataloggerTelemetryService) *mw {
+	return &mw{cfg, profileService, projectRoleService, dataloggerTelemetryService}
 }

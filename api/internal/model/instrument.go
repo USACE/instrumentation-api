@@ -191,8 +191,32 @@ func (q *Queries) CreateInstrument(ctx context.Context, i Instrument) (IDSlugNam
 	return aa, nil
 }
 
+const listAdminProjects = `
+	SELECT pr.project_id FROM profile_project_roles pr
+	INNER JOIN role ro ON ro.id = pr.role_id
+	WHERE pr.profile_id = $1
+	AND ro.name = 'ADMIN'
+`
+
+func (q *Queries) ListAdminProjects(ctx context.Context, profileID uuid.UUID) ([]uuid.UUID, error) {
+	projectIDs := make([]uuid.UUID, 0)
+	err := q.db.SelectContext(ctx, &projectIDs, listAdminProjects, profileID)
+	return projectIDs, err
+}
+
+const listInstrumentProjects = `
+	SELECT project_id FROM project_instrument WHERE instrument_id = $1
+`
+
+func (q *Queries) ListInstrumentProjects(ctx context.Context, instrumentID uuid.UUID) ([]uuid.UUID, error) {
+	projectIDs := make([]uuid.UUID, 0)
+	err := q.db.SelectContext(ctx, &projectIDs, listInstrumentProjects, instrumentID)
+	return projectIDs, err
+}
+
 const assignInstrumentToProject = `
 	INSERT INTO project_instrument (project_id, instrument_id) VALUES ($1, $2)
+	ON CONFLICT ON CONSTRAINT project_instrument_project_id_instrument_id_key DO NOTHING
 `
 
 func (q *Queries) AssignInstrumentToProject(ctx context.Context, projectID, instrumentID uuid.UUID) error {

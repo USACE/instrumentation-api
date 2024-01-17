@@ -184,7 +184,6 @@ const getProject = selectProjectsSQL + `
 	WHERE id = $1
 `
 
-// GetProject returns a pointer to a project
 func (q *Queries) GetProject(ctx context.Context, id uuid.UUID) (Project, error) {
 	var p Project
 	err := q.db.GetContext(ctx, &p, getProject, id)

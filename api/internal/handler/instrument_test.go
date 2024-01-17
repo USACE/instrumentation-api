@@ -80,7 +80,8 @@ var instrumentCountObjectLoader = gojsonschema.NewStringLoader(`{
 }`)
 
 const (
-	testInstrumentID = "a7540f69-c41e-43b3-b655-6e44097edb7e"
+	testInstrumentID    = "a7540f69-c41e-43b3-b655-6e44097edb7e"
+	testAssignProjectID = "d559abfd-7ec7-4d0d-97bd-a04018f01e4c"
 )
 
 const updateInstrumentBody = `{
@@ -307,17 +308,29 @@ func TestInstruments(t *testing.T) {
 			ExpectedSchema: arrSchema,
 		},
 		{
-			Name:           "CreateInstrumentBulk_Array",
+			Name:           "CreateInstrumentBulk",
 			URL:            fmt.Sprintf("/projects/%s/instruments", testProjectID),
 			Method:         http.MethodPost,
 			Body:           createInstrumentBulkBody,
 			ExpectedStatus: http.StatusCreated,
 		},
 		{
-			Name:           "ValidateCreateInstrument_Array",
+			Name:           "ValidateCreateInstrument",
 			URL:            fmt.Sprintf("/projects/%s/instruments?dry_run=true", testProjectID),
 			Method:         http.MethodPost,
 			Body:           validateCreateInstrumentBulkBody,
+			ExpectedStatus: http.StatusOK,
+		},
+		{
+			Name:           "AssignInstrumentToProject",
+			URL:            fmt.Sprintf("/projects/%s/instruments/%s/assignments", testAssignProjectID, testInstrumentID),
+			Method:         http.MethodPost,
+			ExpectedStatus: http.StatusOK,
+		},
+		{
+			Name:           "UnssignInstrumentFromProject",
+			URL:            fmt.Sprintf("/projects/%s/instruments/%s/assignments", testAssignProjectID, testInstrumentID),
+			Method:         http.MethodDelete,
 			ExpectedStatus: http.StatusOK,
 		},
 		{
