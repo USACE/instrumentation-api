@@ -173,13 +173,13 @@ func (q *Queries) GetOneDatalogger(ctx context.Context, dataloggerID uuid.UUID) 
 
 const createDatalogger = `
 	INSERT INTO datalogger (name, sn, project_id, creator, updater, slug, model_id)
-	VALUES ($1, $2, $3, $4, $4, $5, $6)
+	VALUES ($1, $2, $3, $4, $4, slugify($1, 'datalogger'), $5)
 	RETURNING id
 `
 
 func (q *Queries) CreateDatalogger(ctx context.Context, dl Datalogger) (uuid.UUID, error) {
 	var dlID uuid.UUID
-	err := q.db.GetContext(ctx, &dlID, createDatalogger, dl.Name, dl.SN, dl.ProjectID, dl.Creator, dl.Slug, dl.ModelID)
+	err := q.db.GetContext(ctx, &dlID, createDatalogger, dl.Name, dl.SN, dl.ProjectID, dl.Creator, dl.ModelID)
 	return dlID, err
 }
 
@@ -224,16 +224,6 @@ const deleteDatalogger = `
 func (q *Queries) DeleteDatalogger(ctx context.Context, dl Datalogger) error {
 	_, err := q.db.ExecContext(ctx, deleteDatalogger, dl.ID, dl.Updater, dl.UpdateDate)
 	return err
-}
-
-const listDataloggerSlugs = `
-	SELECT slug FROM datalogger
-`
-
-func (q *Queries) ListDataloggerSlugs(ctx context.Context) ([]string, error) {
-	aa := make([]string, 0)
-	err := q.db.SelectContext(ctx, &aa, listDataloggerSlugs)
-	return aa, err
 }
 
 const getDataloggerTablePreview = `

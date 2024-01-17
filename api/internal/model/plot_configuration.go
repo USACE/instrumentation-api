@@ -77,19 +77,6 @@ const listPlotConfigsSQL = `
 	FROM v_plot_configuration
 `
 
-const listPlotConfigSlugs = `
-	SELECT slug FROM plot_configuration
-`
-
-// ListPlotConfigSlugs lists used instrument group slugs in the database
-func (q *Queries) ListPlotConfigSlugs(ctx context.Context) ([]string, error) {
-	ss := make([]string, 0)
-	if err := q.db.SelectContext(ctx, &ss, listPlotConfigSlugs); err != nil {
-		return nil, err
-	}
-	return ss, nil
-}
-
 const listPlotConfigs = listPlotConfigsSQL + `
 	WHERE project_id = $1
 `
@@ -115,13 +102,13 @@ func (q *Queries) GetPlotConfig(ctx context.Context, plotconfigID uuid.UUID) (Pl
 }
 
 const createPlotConfig = `
-	INSERT INTO plot_configuration (slug, name, project_id, creator, create_date) VALUES ($1, $2, $3, $4, $5)
+	INSERT INTO plot_configuration (slug, name, project_id, creator, create_date) VALUES (slugify($1, 'plot_configuration'), $1, $2, $3, $4)
 	RETURNING id
 `
 
 func (q *Queries) CreatePlotConfig(ctx context.Context, pc PlotConfig) (uuid.UUID, error) {
 	var pcID uuid.UUID
-	err := q.db.GetContext(ctx, &pcID, createPlotConfig, pc.Slug, pc.Name, pc.ProjectID, pc.Creator, pc.CreateDate)
+	err := q.db.GetContext(ctx, &pcID, createPlotConfig, pc.Name, pc.ProjectID, pc.Creator, pc.CreateDate)
 	return pcID, err
 }
 

@@ -19,11 +19,11 @@ func handleOpts(ctx context.Context, q *model.Queries, inst model.Instrument, rt
 			for i := 1; i <= opts.NumSegments; i++ {
 				tsConstant := model.Timeseries{
 					InstrumentID: inst.ID,
-					Slug:         inst.Slug + fmt.Sprintf("segment-%d-length", i),
-					Name:         inst.Slug + fmt.Sprintf("segment-%d-length", i),
 					ParameterID:  model.SaaParameterID,
 					UnitID:       model.FeetUnitID,
 				}
+				tsConstant.Slug = inst.Slug + fmt.Sprintf("segment-%d-length", i)
+				tsConstant.Name = inst.Slug + fmt.Sprintf("segment-%d-length", i)
 
 				tsNew, err := q.CreateTimeseries(ctx, tsConstant)
 				if err != nil {
@@ -39,11 +39,11 @@ func handleOpts(ctx context.Context, q *model.Queries, inst model.Instrument, rt
 
 			tsConstant := model.Timeseries{
 				InstrumentID: inst.ID,
-				Slug:         inst.Slug + "-bottom-elevation",
-				Name:         inst.Slug + "-bottom-elevation",
 				ParameterID:  model.SaaParameterID,
 				UnitID:       model.FeetUnitID,
 			}
+			tsConstant.Slug = inst.Slug + "-bottom-elevation"
+			tsConstant.Name = inst.Slug + "-bottom-elevation"
 
 			tsNew, err := q.CreateTimeseries(ctx, tsConstant)
 			if err != nil {
@@ -74,11 +74,11 @@ func handleOpts(ctx context.Context, q *model.Queries, inst model.Instrument, rt
 			for i := 1; i <= opts.NumSegments; i++ {
 				tsConstant := model.Timeseries{
 					InstrumentID: inst.ID,
-					Slug:         inst.Slug + fmt.Sprintf("segment-%d-length", i),
-					Name:         inst.Slug + fmt.Sprintf("segment-%d-length", i),
 					ParameterID:  model.IpiParameterID,
 					UnitID:       model.FeetUnitID,
 				}
+				tsConstant.Slug = inst.Slug + fmt.Sprintf("segment-%d-length", i)
+				tsConstant.Name = inst.Slug + fmt.Sprintf("segment-%d-length", i)
 
 				tsNew, err := q.CreateTimeseries(ctx, tsConstant)
 				if err != nil {
@@ -94,11 +94,11 @@ func handleOpts(ctx context.Context, q *model.Queries, inst model.Instrument, rt
 
 			tsConstant := model.Timeseries{
 				InstrumentID: inst.ID,
-				Slug:         inst.Slug + "-bottom-elevation",
-				Name:         inst.Slug + "-bottom-elevation",
 				ParameterID:  model.IpiParameterID,
 				UnitID:       model.FeetUnitID,
 			}
+			tsConstant.Slug = inst.Slug + "-bottom-elevation"
+			tsConstant.Name = inst.Slug + "-bottom-elevation"
 
 			tsNew, err := q.CreateTimeseries(ctx, tsConstant)
 			if err != nil {

@@ -8,15 +8,11 @@ import (
 	"github.com/google/uuid"
 )
 
-// Timeseries is a timeseries data structure
 type Timeseries struct {
 	ID             uuid.UUID     `json:"id"`
 	Slug           string        `json:"slug"`
 	Name           string        `json:"name"`
 	Variable       string        `json:"variable"`
-	ProjectID      uuid.UUID     `json:"project_id" db:"project_id"`
-	ProjectSlug    string        `json:"project_slug" db:"project_slug"`
-	Project        string        `json:"project,omitempty" db:"project"`
 	InstrumentID   uuid.UUID     `json:"instrument_id" db:"instrument_id"`
 	InstrumentSlug string        `json:"instrument_slug" db:"instrument_slug"`
 	Instrument     string        `json:"instrument,omitempty"`
@@ -38,7 +34,6 @@ type TimeseriesCollectionItems struct {
 	Items []Timeseries
 }
 
-// UnmarshalJSON implements UnmarshalJSON interface
 func (c *TimeseriesCollectionItems) UnmarshalJSON(b []byte) error {
 	switch util.JSONType(b) {
 	case "ARRAY":
@@ -64,19 +59,10 @@ var (
 
 const listTimeseries = `
 	SELECT
-		id, slug, name, variable, project_id, project_slug, project, instrument_id,
+		id, slug, name, variable, instrument_id,
 		instrument_slug, instrument, parameter_id, parameter, unit_id, unit, is_computed
 	FROM v_timeseries
 `
-
-// ListTimeseries lists all timeseries
-func (q *Queries) ListTimeseries(ctx context.Context) ([]Timeseries, error) {
-	tt := make([]Timeseries, 0)
-	if err := q.db.SelectContext(ctx, &tt, listTimeseries); err != nil {
-		return make([]Timeseries, 0), err
-	}
-	return tt, nil
-}
 
 const getStoredTimeseriesExists = `
 	SELECT EXISTS (SELECT id FROM v_timeseries_stored WHERE id = $1)
@@ -89,19 +75,6 @@ func (q *Queries) GetStoredTimeseriesExists(ctx context.Context, timeseriesID uu
 		return false, err
 	}
 	return isStored, nil
-}
-
-const listTimeseriesSlugs = `
-	SELECT slug FROM v_timeseries
-`
-
-// ListTimeseriesSlugs lists used timeseries slugs in the database
-func (q *Queries) ListTimeseriesSlugs(ctx context.Context) ([]string, error) {
-	ss := make([]string, 0)
-	if err := q.db.SelectContext(ctx, &ss, listTimeseriesSlugs); err != nil {
-		return make([]string, 0), err
-	}
-	return ss, nil
 }
 
 const getTimeseriesProjectMap = `
@@ -131,21 +104,12 @@ func (q *Queries) GetTimeseriesProjectMap(ctx context.Context, timeseriesIDs []u
 	return m, nil
 }
 
-const listTimeseriesSlugsForInstrument = `
-	SELECT slug FROM v_timeseries WHERE instrument_id = $1
-`
-
-// ListTimeseriesSlugsForInstrument lists used timeseries slugs for a given instrument
-func (q *Queries) ListTimeseriesSlugsForInstrument(ctx context.Context, instrumentID uuid.UUID) ([]string, error) {
-	ss := make([]string, 0)
-	if err := q.db.SelectContext(ctx, &ss, listTimeseriesSlugsForInstrument, instrumentID); err != nil {
-		return nil, err
-	}
-	return ss, nil
-}
-
 const listProjectTimeseries = listTimeseries + `
-	WHERE project_id = $1
+	WHERE instrument_id = ANY(
+		SELECT instrument_id
+		FROM project_instrument
+		WHERE project_id = $1
+	)
 `
 
 // ListProjectTimeseries lists all timeseries for a given project
@@ -154,6 +118,7 @@ func (q *Queries) ListProjectTimeseries(ctx context.Context, projectID uuid.UUID
 	if err := q.db.SelectContext(ctx, &tt, listProjectTimeseries, projectID); err != nil {
 		return make([]Timeseries, 0), err
 	}
+
 	return tt, nil
 }
 
@@ -200,7 +165,7 @@ func (q *Queries) GetTimeseries(ctx context.Context, timeseriesID uuid.UUID) (Ti
 
 const createTimeseries = `
 	INSERT INTO timeseries (instrument_id, slug, name, parameter_id, unit_id)
-	VALUES ($1, $2, $3, $4, $5)
+	VALUES ($1, slugify($2, 'timeseries'), $2, $3, $4)
 	RETURNING id, instrument_id, slug, name, parameter_id, unit_id
 `
 
@@ -213,7 +178,7 @@ func (q *Queries) CreateTimeseries(ctx context.Context, ts Timeseries) (Timeseri
 		ts.UnitID = unknownUnitID
 	}
 	var tsNew Timeseries
-	err := q.db.GetContext(ctx, &tsNew, createTimeseries, ts.InstrumentID, ts.Slug, ts.Name, ts.ParameterID, ts.UnitID)
+	err := q.db.GetContext(ctx, &tsNew, createTimeseries, ts.InstrumentID, ts.Name, ts.ParameterID, ts.UnitID)
 	return tsNew, err
 }
 

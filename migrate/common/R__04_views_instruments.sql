@@ -28,16 +28,30 @@ CREATE OR REPLACE VIEW v_instrument AS (
         i.create_date,
         i.updater,
         i.update_date,
-        i.project_id,
         i.nid_id,
         i.usgs_id,
         tel.telemetry AS telemetry,
+        COALESCE(op.parr::TEXT, '[]'::TEXT) AS projects,
         COALESCE(c.constants, '{}') AS constants,
         COALESCE(g.groups, '{}') AS groups,
         COALESCE(a.alert_configs, '{}') AS alert_configs,
         COALESCE(o.opts, '{}'::JSON)::TEXT AS opts
     FROM instrument i
     INNER JOIN instrument_type t ON t.id = i.type_id
+    LEFT JOIN LATERAL (
+        SELECT
+            JSON_AGG(JSON_BUILD_OBJECT(
+                'id', p.id,
+                'name', p.name,
+                'slug', p.slug
+            )) AS parr
+        FROM project p
+        WHERE p.id = ANY(
+            SELECT project_id
+            FROM project_instrument
+            WHERE instrument_id = i.id
+        )
+    ) op ON true
     INNER JOIN (
         SELECT
             DISTINCT ON (instrument_id) instrument_id,
@@ -92,7 +106,7 @@ CREATE OR REPLACE VIEW v_instrument AS (
             ORDER BY m.time DESC
             LIMIT 1
         ) b1 ON true
-        UNION ALL
+    UNION ALL
     SELECT o2.instrument_id, (ROW_TO_JSON(o2)::JSONB || ROW_TO_JSON(b2)::JSONB)::JSON AS opts
         FROM ipi_opts o2
         LEFT JOIN LATERAL (

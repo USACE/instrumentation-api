@@ -6,7 +6,6 @@ import (
 
 	"github.com/USACE/instrumentation-api/api/internal/message"
 	"github.com/USACE/instrumentation-api/api/internal/model"
-	"github.com/USACE/instrumentation-api/api/internal/util"
 	"github.com/paulmach/orb/geojson"
 
 	"github.com/google/uuid"
@@ -89,65 +88,42 @@ func (h *ApiHandler) GetInstrument(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id}/instruments [post]
-//	@Router /instruments [post]
 //	@Security Bearer
 func (h *ApiHandler) CreateInstruments(c echo.Context) error {
 	ctx := c.Request().Context()
-	newInstrumentCollection := func(c echo.Context) (model.InstrumentCollection, error) {
-		ic := model.InstrumentCollection{}
-		if err := c.Bind(&ic); err != nil {
-			return model.InstrumentCollection{}, err
-		}
 
-		// Get ProjectID of Instruments
-		projectID, err := uuid.Parse(c.Param("project_id"))
-		if err != nil {
-			return model.InstrumentCollection{}, err
-		}
-
-		// slugs already taken in the database
-		slugsTaken, err := h.InstrumentService.ListInstrumentSlugs(ctx)
-		if err != nil {
-			return model.InstrumentCollection{}, err
-		}
-
-		// profile of user creating instruments
-		p := c.Get("profile").(model.Profile)
-
-		// timestamp
-		t := time.Now()
-
-		for idx := range ic.Items {
-			ic.Items[idx].ProjectID = &projectID
-			s, err := util.NextUniqueSlug(ic.Items[idx].Name, slugsTaken)
-			if err != nil {
-				return model.InstrumentCollection{}, err
-			}
-			ic.Items[idx].Slug = s
-			ic.Items[idx].Creator = p.ID
-			ic.Items[idx].CreateDate = t
-			slugsTaken = append(slugsTaken, s)
-		}
-
-		return ic, nil
-	}
-
-	ic, err := newInstrumentCollection(c)
+	projectID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
+	ic := model.InstrumentCollection{}
+	if err := c.Bind(&ic); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	p := c.Get("profile").(model.Profile)
+	t := time.Now()
+
+	for idx := range ic {
+		var prj model.IDSlugName
+		prj.ID = projectID
+		ic[idx].Projects = []model.IDSlugName{prj}
+		ic[idx].Creator = p.ID
+		ic[idx].CreateDate = t
+	}
+
 	if c.QueryParam("dry_run") == "true" {
-		v, err := h.InstrumentService.ValidateCreateInstruments(ctx, ic.Items)
+		v, err := h.InstrumentService.ValidateCreateInstruments(ctx, ic)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, v)
 	}
 
-	nn, err := h.InstrumentService.CreateInstruments(ctx, ic.Items)
+	nn, err := h.InstrumentService.CreateInstruments(ctx, ic)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusCreated, nn)
@@ -168,40 +144,28 @@ func (h *ApiHandler) CreateInstruments(c echo.Context) error {
 //	@Router /projects/{project_id}/instruments/{instrument_id} [put]
 //	@Security Bearer
 func (h *ApiHandler) UpdateInstrument(c echo.Context) error {
-
-	// instrument_id from url params
 	iID, err := uuid.Parse(c.Param("instrument_id"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
 	}
-	// project_id from url params
 	pID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
 	}
-	// instrument from request payload
-	i := model.Instrument{ID: iID, ProjectID: &pID}
+
+	var i model.Instrument
 	if err := c.Bind(&i); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	// check project_id in url params matches project_id in request body
-	if pID != *i.ProjectID {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MatchRouteParam("`project_id`"))
-	}
-	// check instrument_id in url params matches instrument_id in request body
-	if iID != i.ID {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MatchRouteParam("`instrument_id`"))
-	}
+	i.ID = iID
 
-	// profile of user creating instruments
 	p := c.Get("profile").(model.Profile)
 
-	// timestamp
 	t := time.Now()
 	i.Updater, i.UpdateDate = &p.ID, &t
 
 	// update
-	iUpdated, err := h.InstrumentService.UpdateInstrument(c.Request().Context(), i)
+	iUpdated, err := h.InstrumentService.UpdateInstrument(c.Request().Context(), pID, i)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -274,7 +238,7 @@ func (h *ApiHandler) DeleteFlagInstrument(c echo.Context) error {
 	}
 
 	if err := h.InstrumentService.DeleteFlagInstrument(c.Request().Context(), pID, iID); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.BadRequest)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, make(map[string]interface{}))

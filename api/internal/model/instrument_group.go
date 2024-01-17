@@ -27,10 +27,10 @@ type InstrumentGroupCollection struct {
 }
 
 // Shorten returns an instrument collection with individual objects limited to ID and Struct fields
-func (c InstrumentGroupCollection) Shorten() IDAndSlugCollection {
-	ss := IDAndSlugCollection{Items: make([]IDAndSlug, 0)}
+func (c InstrumentGroupCollection) Shorten() IDSlugCollection {
+	ss := IDSlugCollection{Items: make([]IDSlug, 0)}
 	for _, n := range c.Items {
-		s := IDAndSlug{ID: n.ID, Slug: n.Slug}
+		s := IDSlug{ID: n.ID, Slug: n.Slug}
 		ss.Items = append(ss.Items, s)
 	}
 	return ss
@@ -72,19 +72,6 @@ const listInstrumentGroupsSQL = `
 	FROM  v_instrument_group
 `
 
-const listInstrumentGroupSlugs = `
-	SELECT slug FROM instrument_group
-`
-
-// ListInstrumentGroupSlugs lists used instrument group slugs in the database
-func (q *Queries) ListInstrumentGroupSlugs(ctx context.Context) ([]string, error) {
-	ss := make([]string, 0)
-	if err := q.db.SelectContext(ctx, &ss, listInstrumentGroupSlugs); err != nil {
-		return ss, err
-	}
-	return ss, nil
-}
-
 const listInstrumentGroups = listInstrumentGroupsSQL + `
 	WHERE NOT deleted
 `
@@ -113,7 +100,7 @@ func (q *Queries) GetInstrumentGroup(ctx context.Context, instrumentGroupID uuid
 
 const createInstrumentGroup = `
 	INSERT INTO instrument_group (slug, name, description, creator, create_date, project_id)
-	VALUES ($1, $2, $3, $4, $5, $6)
+	VALUES (slugify($1, 'instrument_group'), $1, $2, $3, $4, $5)
 	RETURNING id, slug, name, description, creator, create_date, updater, update_date, project_id
 `
 
@@ -121,7 +108,7 @@ func (q *Queries) CreateInstrumentGroup(ctx context.Context, group InstrumentGro
 	var groupNew InstrumentGroup
 	err := q.db.GetContext(
 		ctx, &groupNew, createInstrumentGroup,
-		group.Slug, group.Name, group.Description, group.Creator, group.CreateDate, group.ProjectID,
+		group.Name, group.Description, group.Creator, group.CreateDate, group.ProjectID,
 	)
 	return groupNew, err
 }

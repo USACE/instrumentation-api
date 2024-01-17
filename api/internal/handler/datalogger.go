@@ -9,7 +9,6 @@ import (
 
 	"github.com/USACE/instrumentation-api/api/internal/message"
 	"github.com/USACE/instrumentation-api/api/internal/model"
-	"github.com/USACE/instrumentation-api/api/internal/util"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
@@ -75,15 +74,6 @@ func (h *ApiHandler) CreateDatalogger(c echo.Context) error {
 	if n.Name == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "valid `name` field required")
 	}
-
-	slugsTaken, err := h.DataloggerService.ListDataloggerSlugs(ctx)
-
-	// Generate unique slug
-	slug, err := util.NextUniqueSlug(n.Name, slugsTaken)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
-	}
-	n.Slug = slug
 
 	model, err := h.DataloggerService.GetDataloggerModelName(ctx, n.ModelID)
 	if err != nil {

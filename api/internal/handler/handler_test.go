@@ -22,6 +22,18 @@ const (
 	mockJwt = `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwibmFtZSI6IlVzZXIuQWRtaW4iLCJpYXQiOjE1MTYyMzkwMjIsImV4cCI6MjAwMDAwMDAwMCwicm9sZXMiOlsiUFVCTElDLlVTRVIiXX0.4VAMamtH92GiIb5CpGKpP6LKwU6IjIfw5wS4qc8O8VM`
 )
 
+const IDSlugNameArrSchema = `{
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "id": { "type": "string" },
+      "slug": { "type": "string" },
+      "name": { "type": "string" }
+    }
+  }
+}`
+
 // HTTPTest contains parameters for HTTP Integration Tests
 type HTTPTest struct {
 	Name           string

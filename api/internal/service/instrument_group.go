@@ -8,7 +8,6 @@ import (
 )
 
 type InstrumentGroupService interface {
-	ListInstrumentGroupSlugs(ctx context.Context) ([]string, error)
 	ListInstrumentGroups(ctx context.Context) ([]model.InstrumentGroup, error)
 	GetInstrumentGroup(ctx context.Context, instrumentGroupID uuid.UUID) (model.InstrumentGroup, error)
 	CreateInstrumentGroup(ctx context.Context, groups []model.InstrumentGroup) ([]model.InstrumentGroup, error)

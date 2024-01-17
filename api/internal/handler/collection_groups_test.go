@@ -49,10 +49,7 @@ const collectionGroupDetailsSchema = `{
                     "id": { "type": "string" },
                     "slug": { "type": "string" },
                     "name": { "type": "string" },
-                    "variable": {"type": "string" },
-                    "project_id": {"type": "string" },
-                    "project": {"type": "string" },
-                    "project_slug": {"type": "string" },
+                    "variable": { "type": "string" },
                     "instrument_id": { "type": "string" },
                     "instrument": { "type": "string" },
                     "instrument_slug": {"type": "string" },
@@ -64,7 +61,7 @@ const collectionGroupDetailsSchema = `{
                     "latest_value": {"type": "number" },
                     "is_computed": {"type": "boolean" }
                 },
-                "required": ["id", "slug", "name", "variable", "project_id", "project", "project_slug", "instrument_id", "instrument", "instrument_slug", "parameter_id", "parameter", "unit_id", "unit", "latest_time", "latest_value", "is_computed"],
+                "required": ["id", "slug", "name", "variable", "instrument_id", "instrument", "instrument_slug", "parameter_id", "parameter", "unit_id", "unit", "latest_time", "latest_value", "is_computed"],
                 "additionalProperties": false
             }
         }

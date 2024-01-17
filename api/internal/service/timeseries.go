@@ -8,11 +8,8 @@ import (
 )
 
 type TimeseriesService interface {
-	ListTimeseries(ctx context.Context) ([]model.Timeseries, error)
 	GetStoredTimeseriesExists(ctx context.Context, timeseriesID uuid.UUID) (bool, error)
-	ListTimeseriesSlugs(ctx context.Context) ([]string, error)
 	GetTimeseriesProjectMap(ctx context.Context, timeseriesIDs []uuid.UUID) (map[uuid.UUID]uuid.UUID, error)
-	ListTimeseriesSlugsForInstrument(ctx context.Context, instrumentID uuid.UUID) ([]string, error)
 	ListProjectTimeseries(ctx context.Context, projectID uuid.UUID) ([]model.Timeseries, error)
 	ListInstrumentTimeseries(ctx context.Context, instrumentID uuid.UUID) ([]model.Timeseries, error)
 	ListInstrumentGroupTimeseries(ctx context.Context, instrumentGroupID uuid.UUID) ([]model.Timeseries, error)

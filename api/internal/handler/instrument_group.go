@@ -6,7 +6,6 @@ import (
 
 	"github.com/USACE/instrumentation-api/api/internal/message"
 	"github.com/USACE/instrumentation-api/api/internal/model"
-	"github.com/USACE/instrumentation-api/api/internal/util"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -72,32 +71,12 @@ func (h *ApiHandler) CreateInstrumentGroup(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	// slugs already taken in the database
-	slugsTaken, err := h.InstrumentGroupService.ListInstrumentGroupSlugs(c.Request().Context())
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	// profile
 	p := c.Get("profile").(model.Profile)
-
-	// timestamp
 	t := time.Now()
 
 	for idx := range gc.Items {
-		// Creator
 		gc.Items[idx].Creator = p.ID
-		// CreateDate
 		gc.Items[idx].CreateDate = t
-		// Assign Slug
-		s, err := util.NextUniqueSlug(gc.Items[idx].Name, slugsTaken)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-		}
-		gc.Items[idx].Slug = s
-		// Add slug to array of slugs originally fetched from the database
-		// to catch duplicate names/slugs from the same bulk upload
-		slugsTaken = append(slugsTaken, s)
 	}
 
 	gg, err := h.InstrumentGroupService.CreateInstrumentGroup(c.Request().Context(), gc.Items)
@@ -216,8 +195,8 @@ func (h *ApiHandler) CreateInstrumentGroupInstruments(c echo.Context) error {
 	if err != nil || instrumentGroupID == uuid.Nil {
 		return echo.NewHTTPError(http.StatusBadRequest, message.BadRequest)
 	}
-	i := new(model.Instrument)
-	if err := c.Bind(i); err != nil || i.ID == uuid.Nil {
+	var i model.Instrument
+	if err := c.Bind(&i); err != nil || i.ID == uuid.Nil {
 		return echo.NewHTTPError(http.StatusBadRequest, message.BadRequest)
 	}
 	if err := h.InstrumentGroupService.CreateInstrumentGroupInstruments(c.Request().Context(), instrumentGroupID, i.ID); err != nil {

@@ -148,8 +148,6 @@ func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 	r.public.GET("/instruments/:instrument_id", h.GetInstrument)
 	r.public.GET("/instruments/:instrument_id/timeseries_measurements", h.ListTimeseriesMeasurementsByInstrument)
 	r.private.POST("/projects/:project_id/instruments", h.CreateInstruments)
-	// TODO: Remove endpoint POST /instruments (no project context)
-	r.private.POST("/instruments", h.CreateInstruments)
 	r.private.PUT("/projects/:project_id/instruments/:instrument_id", h.UpdateInstrument)
 	r.private.PUT("/projects/:project_id/instruments/:instrument_id/geometry", h.UpdateInstrumentGeometry)
 	r.private.DELETE("/projects/:project_id/instruments/:instrument_id", h.DeleteFlagInstrument)
@@ -236,10 +234,7 @@ func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 	r.public.GET("/projects/:project_id", h.GetProject)
 	r.public.GET("/projects/count", h.GetProjectCount)
 	r.public.GET("/projects/:project_id/instruments", h.ListProjectInstruments)
-	r.public.GET("/projects/:project_id/instruments/names", h.ListProjectInstrumentNames)
 	r.public.GET("/projects/:project_id/instrument_groups", h.ListProjectInstrumentGroups)
-	r.private.POST("/projects/:project_id/timeseries/:timeseries_id", h.CreateProjectTimeseries)
-	r.private.DELETE("/projects/:project_id/timeseries/:timeseries_id", h.DeleteProjectTimeseries)
 	// Application Admin Only
 	r.private.POST("/projects", h.CreateProjectBulk, h.Middleware.IsApplicationAdmin)
 	r.private.PUT("/projects/:project_id", h.UpdateProject, h.Middleware.IsApplicationAdmin)
@@ -262,7 +257,6 @@ func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 
 	// Timeseries
 	// TODO: Delete timeseries endpoints without project context in URL
-	r.public.GET("/timeseries", h.ListTimeseries)
 	r.public.GET("/timeseries/:timeseries_id", h.GetTimeseries)
 	r.public.GET("/instruments/:instrument_id/timeseries/:timeseries_id", h.GetTimeseries)
 	r.public.GET("/projects/:project_id/timeseries", h.ListProjectTimeseries)

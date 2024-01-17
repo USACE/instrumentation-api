@@ -41,13 +41,9 @@ const projectSchema = `{
         "updater": {  "type": ["string", "null"] },
         "update_date": { "type": ["string", "null"], "format": "date-time" },
         "instrument_count": {"type": "number"},
-        "instrument_group_count": {"type": "number"},
-        "timeseries": {
-            "type": "array",
-            "items": { "type": "string" }
-        }
+        "instrument_group_count": {"type": "number"}
     },
-    "required": ["id", "federal_id", "image", "office_id", "slug", "name", "creator", "create_date", "updater", "update_date", "instrument_count", "instrument_group_count", "timeseries"],
+    "required": ["id", "federal_id", "image", "office_id", "slug", "name", "creator", "create_date", "updater", "update_date", "instrument_count", "instrument_group_count"],
     "additionalProperties": false
 }`
 
@@ -68,11 +64,6 @@ const projectCountSchema = `{
 }`
 
 var projectCountObjectLoader = gojsonschema.NewStringLoader(projectCountSchema)
-
-var projectInstrumentNamesArrayLoader = gojsonschema.NewStringLoader(`{
-    "type": "array",
-    "items": { "type": "string" }
-}`)
 
 const (
 	testProjectID           = "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
@@ -109,8 +100,6 @@ func TestProjects(t *testing.T) {
 	assert.Nil(t, err)
 	countObjSchema, err := gojsonschema.NewSchema(projectCountObjectLoader)
 	assert.Nil(t, err)
-	namesArrSchema, err := gojsonschema.NewSchema(projectInstrumentNamesArrayLoader)
-	assert.Nil(t, err)
 	objSchema, err := gojsonschema.NewSchema(projectObjectLoader)
 	assert.Nil(t, err)
 	arrSchema, err := gojsonschema.NewSchema(projectArrayLoader)
@@ -132,30 +121,11 @@ func TestProjects(t *testing.T) {
 			ExpectedSchema: countObjSchema,
 		},
 		{
-			Name:           "ListProjectInstrumentNames",
-			URL:            fmt.Sprintf("/projects/%s/instruments/names", testProjectID),
-			Method:         http.MethodGet,
-			ExpectedStatus: http.StatusOK,
-			ExpectedSchema: namesArrSchema,
-		},
-		{
 			Name:           "GetProject",
 			URL:            fmt.Sprintf("/projects/%s", testProjectID),
 			Method:         http.MethodGet,
 			ExpectedStatus: http.StatusOK,
 			ExpectedSchema: objSchema,
-		},
-		{
-			Name:           "CreateProjectTimeseries",
-			URL:            fmt.Sprintf("/projects/%s/timeseries/%s", testProjectID, testProjectTimeseriesID),
-			Method:         http.MethodPost,
-			ExpectedStatus: http.StatusCreated,
-		},
-		{
-			Name:           "DeleteProjectTimeseries",
-			URL:            fmt.Sprintf("/projects/%s/timeseries/%s", testProjectID, testProjectTimeseriesID),
-			Method:         http.MethodDelete,
-			ExpectedStatus: http.StatusOK,
 		},
 		{
 			Name:           "ListProjects",

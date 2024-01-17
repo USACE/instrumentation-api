@@ -68,7 +68,7 @@ const updateIpiSegmentsBody = `[
     }
 ]`
 
-const createIpiInstrumentBulkObjectBody = `{
+const createIpiInstrumentBulkBody = `[{
     "status_id": "94578354-ffdf-4119-9663-6bd4323e58f5",
     "status": "destroyed",
     "status_time": "2001-01-01T00:00:00Z",
@@ -91,7 +91,7 @@ const createIpiInstrumentBulkObjectBody = `{
 	"num_segments": 10,
 	"bottom_elevation": 1000
     }
-}`
+}]`
 
 func TestIpiInstruments(t *testing.T) {
 	segArrSchema, err := gojsonschema.NewSchema(ipiSegmentArrayLoader)
@@ -122,10 +122,10 @@ func TestIpiInstruments(t *testing.T) {
 			ExpectedSchema: segArrSchema,
 		},
 		{
-			Name:           "CreateIpiInstrumentBulk_Object",
+			Name:           "CreateIpiInstrumentBulk",
 			URL:            fmt.Sprintf("/projects/%s/instruments", testProjectID),
 			Method:         http.MethodPost,
-			Body:           createIpiInstrumentBulkObjectBody,
+			Body:           createIpiInstrumentBulkBody,
 			ExpectedStatus: http.StatusCreated,
 		}}
 

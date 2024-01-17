@@ -46,19 +46,6 @@ func (q *Queries) ListCollectionGroups(ctx context.Context, projectID uuid.UUID)
 	return aa, nil
 }
 
-const listCollectionGroupSlugs = `
-	SELECT slug FROM instrument_group WHERE project_id = $1
-`
-
-// ListCollectionGroupSlugs lists all collection group slugs for a project
-func (q *Queries) ListCollectionGroupSlugs(ctx context.Context, projectID uuid.UUID) ([]string, error) {
-	aa := make([]string, 0)
-	if err := q.db.SelectContext(ctx, &aa, listCollectionGroupSlugs, projectID); err != nil {
-		return nil, err
-	}
-	return aa, nil
-}
-
 const getCollectionGroupDetails = listCollectionGroups + `
 	AND id = $2
 `
@@ -82,7 +69,12 @@ const getCollectionGroupDetailsTimeseries = `
 		WHERE timeseries_id = t.id 
 		ORDER BY time DESC LIMIT 1
 	) 
-	WHERE t.project_id = $1 AND cgt.collection_group_id = $2 
+	WHERE t.instrument_id = ANY(
+		SELECT instrument_id
+		FROM project_instrument
+		WHERE project_id = $1
+	)
+	AND cgt.collection_group_id = $2 
 `
 
 // GetCollectionGroupDetails returns details for a single CollectionGroup
@@ -96,14 +88,14 @@ func (q *Queries) GetCollectionGroupDetailsTimeseries(ctx context.Context, proje
 
 const createCollectionGroup = `
 	INSERT INTO collection_group (project_id, name, slug, creator, create_date, updater, update_date)
-	VALUES ($1,$2,$3,$4,$5,$6,$7)
+	VALUES ($1, $2, slugify($2, 'collection_group'), $3, $4, $5, $6)
 	RETURNING id, project_id, name, slug, creator, create_date, updater, update_date
 `
 
 // CreateCollectionGroup creates a new collection group
 func (q *Queries) CreateCollectionGroup(ctx context.Context, cg CollectionGroup) (CollectionGroup, error) {
 	var cgNew CollectionGroup
-	if err := q.db.GetContext(ctx, &cgNew, createCollectionGroup, cg.ProjectID, cg.Name, cg.Slug, cg.Creator, cg.CreateDate, cg.Updater, cg.UpdateDate); err != nil {
+	if err := q.db.GetContext(ctx, &cgNew, createCollectionGroup, cg.ProjectID, cg.Name, cg.Creator, cg.CreateDate, cg.Updater, cg.UpdateDate); err != nil {
 		return cgNew, err
 	}
 	return cgNew, nil

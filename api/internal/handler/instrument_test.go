@@ -9,7 +9,7 @@ import (
 	"github.com/xeipuuv/gojsonschema"
 )
 
-const instrumentSchema = `{
+var instrumentSchema = fmt.Sprintf(`{
     "type": "object",
     "properties": {
         "id": { "type": "string" },
@@ -54,14 +54,14 @@ const instrumentSchema = `{
         "create_date": { "type": "string", "format": "date-time" },
         "updater": {  "type": ["string", "null"] },
         "update_date": { "type": ["string", "null"], "format": "date-time" },
-        "project_id": { "type": ["string", "null"] },
+        "projects": %s,
         "nid_id": { "type": ["string", "null"] },
         "usgs_id": { "type": ["string", "null"] },
 	"opts": { "type": ["object", "null"] }
     },
-    "required": ["id", "slug", "name", "type_id", "type", "status_id", "status", "status_time", "geometry", "creator", "create_date", "updater", "update_date", "project_id", "station", "offset", "constants", "alert_configs", "nid_id", "usgs_id"],
+    "required": ["id", "slug", "name", "type_id", "type", "status_id", "status", "status_time", "geometry", "creator", "create_date", "updater", "update_date", "projects", "station", "offset", "constants", "alert_configs", "nid_id", "usgs_id"],
     "additionalProperties": false
-}`
+}`, IDSlugNameArrSchema)
 
 var instrumentObjectLoader = gojsonschema.NewStringLoader(instrumentSchema)
 
@@ -101,7 +101,7 @@ const updateInstrumentBody = `{
     },
     "station": null,
     "offset": null,
-    "project_id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+    "projects": [{"id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"}],
     "zreference": 44.5,
     "zreference_datum_id": "72113f9a-982d-44e5-8fc1-8e595dafd344",
     "zreference_datum": "North American Vertical Datum of 1988 (NAVD 88)",
@@ -116,7 +116,7 @@ const updateInstrumentGeometryBody = `{
     ]
 }`
 
-const createInstrumentBulkArrayBody = `[{
+const createInstrumentBulkBody = `[{
     "status_id": "94578354-ffdf-4119-9663-6bd4323e58f5",
     "status": "destroyed",
     "status_time": "2001-01-01T00:00:00Z",
@@ -134,7 +134,7 @@ const createInstrumentBulkArrayBody = `[{
     },
     "station": null,
     "offset": null,
-    "project_id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+    "projects": [{"id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"}]
 },
 {
     "status_id": "94578354-ffdf-4119-9663-6bd4323e58f5",
@@ -154,7 +154,7 @@ const createInstrumentBulkArrayBody = `[{
     "formula": null,
     "station": null,
     "offset": null,
-    "project_id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+    "projects": [{"id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"}]
 },
 {
     "status_id": "94578354-ffdf-4119-9663-6bd4323e58f5",
@@ -173,10 +173,10 @@ const createInstrumentBulkArrayBody = `[{
     },
     "station": null,
     "offset": null,
-    "project_id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
+    "projects": [{"id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"}]
 }]`
 
-const validateCreateInstrumentArrayBody = `[{
+const validateCreateInstrumentBulkBody = `[{
     "status_id": "94578354-ffdf-4119-9663-6bd4323e58f5",
     "status": "destroyed",
     "status_time": "2001-01-01T00:00:00Z",
@@ -193,7 +193,7 @@ const validateCreateInstrumentArrayBody = `[{
     },
     "station": null,
     "offset": null,
-    "project_id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+    "projects": [{"id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"}],
     "zreference": 44.5,
     "zreference_datum_id": "72113f9a-982d-44e5-8fc1-8e595dafd344",
     "zreference_datum": "North American Vertical Datum of 1988 (NAVD 88)",
@@ -216,7 +216,7 @@ const validateCreateInstrumentArrayBody = `[{
     },
     "station": null,
     "offset": null,
-    "project_id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+    "projects": [{"id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"}],
     "zreference": 44.5,
     "zreference_datum_id": "72113f9a-982d-44e5-8fc1-8e595dafd344",
     "zreference_datum": "North American Vertical Datum of 1988 (NAVD 88)",
@@ -239,57 +239,12 @@ const validateCreateInstrumentArrayBody = `[{
     },
     "station": null,
     "offset": null,
-    "project_id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+    "projects": [{"id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"}],
     "zreference": 44.5,
     "zreference_datum_id": "72113f9a-982d-44e5-8fc1-8e595dafd344",
     "zreference_datum": "North American Vertical Datum of 1988 (NAVD 88)",
     "zreference_time": "2006-06-01T00:00:00Z"
 }]`
-
-const createInstrumentBulkObjectBody = `{
-    "status_id": "94578354-ffdf-4119-9663-6bd4323e58f5",
-    "status": "destroyed",
-    "status_time": "2001-01-01T00:00:00Z",
-    "slug": "demo-piezometer-5",
-    "name": "Demo Piezometer 5",
-    "type_id": "1bb4bf7c-f5f8-44eb-9805-43b07ffadbef",
-    "type": "Piezometer",
-    "geometry": {
-        "type": "Point",
-        "coordinates": [
-            -80.8,
-            26.7
-        ]
-    },
-    "formula": null,
-    "station": null,
-    "offset": null,
-    "project_id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
-}`
-
-const validateCreateInstrumentBulkObjectBody = `{
-    "status_id": "94578354-ffdf-4119-9663-6bd4323e58f5",
-    "status": "destroyed",
-    "status_time": "2001-01-01T00:00:00Z",
-    "slug": "demo-piezometer-5",
-    "name": "Demo Piezometer 5",
-    "type_id": "1bb4bf7c-f5f8-44eb-9805-43b07ffadbef",
-    "type": "Piezometer",
-    "geometry": {
-        "type": "Point",
-        "coordinates": [
-            -80.8,
-            26.7
-        ]
-    },
-    "station": null,
-    "offset": null,
-    "project_id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
-    "zreference": 44.5,
-    "zreference_datum_id": "72113f9a-982d-44e5-8fc1-8e595dafd344",
-    "zreference_datum": "North American Vertical Datum of 1988 (NAVD 88)",
-    "zreference_time": "2006-06-01T00:00:00Z"
-}`
 
 func TestInstruments(t *testing.T) {
 	countObjSchema, err := gojsonschema.NewSchema(instrumentCountObjectLoader)
@@ -355,28 +310,14 @@ func TestInstruments(t *testing.T) {
 			Name:           "CreateInstrumentBulk_Array",
 			URL:            fmt.Sprintf("/projects/%s/instruments", testProjectID),
 			Method:         http.MethodPost,
-			Body:           createInstrumentBulkArrayBody,
+			Body:           createInstrumentBulkBody,
 			ExpectedStatus: http.StatusCreated,
 		},
 		{
 			Name:           "ValidateCreateInstrument_Array",
 			URL:            fmt.Sprintf("/projects/%s/instruments?dry_run=true", testProjectID),
 			Method:         http.MethodPost,
-			Body:           validateCreateInstrumentArrayBody,
-			ExpectedStatus: http.StatusOK,
-		},
-		{
-			Name:           "CreateInstrumentBulk_Object",
-			URL:            fmt.Sprintf("/projects/%s/instruments", testProjectID),
-			Method:         http.MethodPost,
-			Body:           createInstrumentBulkObjectBody,
-			ExpectedStatus: http.StatusCreated,
-		},
-		{
-			Name:           "ValidateCreateInstrument_Object",
-			URL:            fmt.Sprintf("/projects/%s/instruments?dry_run=true", testProjectID),
-			Method:         http.MethodPost,
-			Body:           validateCreateInstrumentBulkObjectBody,
+			Body:           validateCreateInstrumentBulkBody,
 			ExpectedStatus: http.StatusOK,
 		},
 		{
