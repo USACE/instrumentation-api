@@ -2,9 +2,7 @@ package model
 
 import (
 	"context"
-	"encoding/json"
 
-	"github.com/USACE/instrumentation-api/api/internal/util"
 	"github.com/google/uuid"
 )
 
@@ -20,7 +18,7 @@ type District struct {
 type Project struct {
 	ID                   uuid.UUID  `json:"id"`
 	Slug                 string     `json:"slug"`
-	Name                 string     `json:"name,omitempty"`
+	Name                 string     `json:"name"`
 	FederalID            *string    `json:"federal_id" db:"federal_id"`
 	OfficeID             *uuid.UUID `json:"office_id" db:"office_id"`
 	Image                *string    `json:"image" db:"image"`
@@ -34,27 +32,7 @@ type ProjectCount struct {
 	ProjectCount int `json:"project_count"`
 }
 
-type ProjectCollection struct {
-	Projects []Project
-}
-
-func (c *ProjectCollection) UnmarshalJSON(b []byte) error {
-	switch util.JSONType(b) {
-	case "ARRAY":
-		if err := json.Unmarshal(b, &c.Projects); err != nil {
-			return err
-		}
-	case "OBJECT":
-		var p Project
-		if err := json.Unmarshal(b, &p); err != nil {
-			return err
-		}
-		c.Projects = []Project{p}
-	default:
-		c.Projects = make([]Project, 0)
-	}
-	return nil
-}
+type ProjectCollection []Project
 
 const selectProjectsSQL = `
 	SELECT

@@ -71,7 +71,7 @@ const (
 	testProjectFederalID    = "NIST001"
 )
 
-const createProjectBulkArrayBody = `[{
+const createProjectBulkBody = `[{
     "name": "Test Project 100000",
     "federal_id": null
 },
@@ -83,11 +83,6 @@ const createProjectBulkArrayBody = `[{
     "name": "Test Project 100002",
     "federal_id": null
 }]`
-
-const createProjectBulkObjectBody = `{
-    "name": "Test Project 500000",
-    "federal_id": null
-}`
 
 const updateProjectBody = `{
     "id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
@@ -142,17 +137,10 @@ func TestProjects(t *testing.T) {
 			ExpectedSchema: arrSchema,
 		},
 		{
-			Name:           "CreateProjectBulk_Array",
+			Name:           "CreateProjectBulk",
 			URL:            "/projects",
 			Method:         http.MethodPost,
-			Body:           createProjectBulkArrayBody,
-			ExpectedStatus: http.StatusCreated,
-		},
-		{
-			Name:           "CreateProjectBulk_Object",
-			URL:            "/projects",
-			Method:         http.MethodPost,
-			Body:           createProjectBulkObjectBody,
+			Body:           createProjectBulkBody,
 			ExpectedStatus: http.StatusCreated,
 		},
 		{

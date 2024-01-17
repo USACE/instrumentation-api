@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 	"time"
 
@@ -186,12 +187,15 @@ func (h *ApiHandler) CreateProjectBulk(c echo.Context) error {
 	p := c.Get("profile").(model.Profile)
 	t := time.Now()
 
-	for idx := range pc.Projects {
-		pc.Projects[idx].Creator = p.ID
-		pc.Projects[idx].CreateDate = t
+	for idx := range pc {
+		if pc[idx].Name == "" {
+			return echo.NewHTTPError(http.StatusBadRequest, errors.New("project name required"))
+		}
+		pc[idx].Creator = p.ID
+		pc[idx].CreateDate = t
 	}
 
-	pp, err := h.ProjectService.CreateProjectBulk(c.Request().Context(), pc.Projects)
+	pp, err := h.ProjectService.CreateProjectBulk(c.Request().Context(), pc)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
