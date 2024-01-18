@@ -12,6 +12,7 @@ import (
 const districtSchema = `{
     "type": "object",
     "properties": {
+	"agency": { "type": "string" },
         "id": { "type": "string" },
         "name": { "type": "string" },
         "initials": { "type": "string" },
@@ -32,16 +33,17 @@ const projectSchema = `{
     "properties": {
         "id": { "type": "string" },
         "federal_id": { "type": ["string", "null"] },
-        "image": { "type": ["string", "null"]},
-        "office_id": { "type": [ "string", "null"]},
+        "image": { "type": ["string", "null"] },
+        "office_id": { "type": [ "string", "null"] },
+        "district_id": { "type": [ "string", "null"] },
         "slug": { "type": "string" },
         "name": { "type": "string" },
         "creator": { "type": "string" },
         "create_date": { "type": "string", "format": "date-time" },
         "updater": {  "type": ["string", "null"] },
         "update_date": { "type": ["string", "null"], "format": "date-time" },
-        "instrument_count": {"type": "number"},
-        "instrument_group_count": {"type": "number"}
+        "instrument_count": { "type": "number" },
+        "instrument_group_count": { "type": "number" }
     },
     "required": ["id", "federal_id", "image", "office_id", "slug", "name", "creator", "create_date", "updater", "update_date", "instrument_count", "instrument_group_count"],
     "additionalProperties": false

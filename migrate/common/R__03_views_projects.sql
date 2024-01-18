@@ -6,7 +6,8 @@ CREATE OR REPLACE VIEW v_project AS (
             THEN cfg.static_host || '/projects/' || p.slug || '/images/' || p.image
             ELSE NULL
         END AS image,
-        p.office_id,
+        p.district_id,
+        d.office_id,
         p.deleted,
         p.slug,
         p.name,
@@ -30,11 +31,15 @@ CREATE OR REPLACE VIEW v_project AS (
         WHERE NOT deleted
         GROUP BY project_id
     ) g ON g.project_id = p.id
+    LEFT JOIN (
+        SELECT id, office_id FROM district
+    ) d ON d.id = p.district_id
     CROSS JOIN config cfg
 );
 
 CREATE OR REPLACE VIEW v_district AS (
     SELECT
+        ag.name         AS agency,
         dis.id          AS id,
         dis.name        AS name,
         dis.initials    AS initials,
@@ -43,6 +48,7 @@ CREATE OR REPLACE VIEW v_district AS (
         dis.office_id   AS office_id
     FROM district dis
     INNER JOIN division div ON dis.division_id = div.id
+    INNER JOIN agency ag ON ag.id = div.agency_id
 );
 
 GRANT SELECT ON

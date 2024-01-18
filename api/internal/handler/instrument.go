@@ -83,7 +83,7 @@ func (h *ApiHandler) GetInstrument(c echo.Context) error {
 //	@Param project_id path string true "project id" Format(uuid)
 //	@Param instrument_id path string true "instrument id" Format(uuid)
 //	@Param instrument body model.InstrumentCollection true "instrument collection payload"
-//	@Success 200 {array} model.IDAndSlug
+//	@Success 200 {array} model.IDSlugName
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError

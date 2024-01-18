@@ -2161,60 +2161,6 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
-            "post": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "instrument"
-                ],
-                "summary": "accepts an array of instruments for bulk upload to the database",
-                "parameters": [
-                    {
-                        "description": "instrument collection payload",
-                        "name": "instrument",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentCollection"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IDAndSlug"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    }
-                }
             }
         },
         "/instruments/count": {
@@ -3978,7 +3924,10 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.ProjectCollection"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Project"
+                            }
                         }
                     }
                 ],
@@ -3988,7 +3937,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IDAndSlug"
+                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IDSlugName"
                             }
                         }
                     },
@@ -5515,63 +5464,24 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "instrument id",
+                        "name": "instrument_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
                         "description": "instrument collection payload",
                         "name": "instrument",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentCollection"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IDAndSlug"
+                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Instrument"
                             }
                         }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    }
-                }
-            }
-        },
-        "/projects/{project_id}/instruments/names": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "project"
-                ],
-                "summary": "lists names of all instruments associated with a project",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "format": "uuid",
-                        "description": "project uuid",
-                        "name": "project_id",
-                        "in": "path",
-                        "required": true
                     }
                 ],
                 "responses": {
@@ -5580,7 +5490,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "type": "string"
+                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IDSlugName"
                             }
                         }
                     },
@@ -5969,6 +5879,128 @@ const docTemplate = `{
                             "items": {
                                 "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Alert"
                             }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/instruments/{instrument_id}/assignments": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "must be Project (or Application) Admin of all existing instrument projects and project to be assigned",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "instrument"
+                ],
+                "summary": "assigns an instrument to a project.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "project uuid",
+                        "name": "project_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "instrument uuid",
+                        "name": "instrument_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "must be Project Admin of project to be unassigned",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "instrument"
+                ],
+                "summary": "unassigns an instrument from a project.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "project uuid",
+                        "name": "project_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "instrument uuid",
+                        "name": "instrument_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     },
                     "400": {
@@ -6956,126 +6988,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/projects/{project_id}/timeseries/{timeseries_id}": {
-            "post": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "project"
-                ],
-                "summary": "exposes a timeseries at the project level",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "format": "uuid",
-                        "description": "project id",
-                        "name": "project_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "format": "uuid",
-                        "description": "timeseries uuid",
-                        "name": "timeseries_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "project"
-                ],
-                "summary": "removes a timeseries from the project level",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "format": "uuid",
-                        "description": "project id",
-                        "name": "project_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "format": "uuid",
-                        "description": "timeseries uuid",
-                        "name": "timeseries_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    }
-                }
-            }
-        },
         "/projects/{project_id}/timeseries_measurements": {
             "put": {
                 "security": [
@@ -7378,44 +7290,6 @@ const docTemplate = `{
             }
         },
         "/timeseries": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "timeseries"
-                ],
-                "summary": "lists all timeseries",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Timeseries"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    }
-                }
-            },
             "post": {
                 "security": [
                     {
@@ -7446,7 +7320,10 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Timeseries"
+                                "type": "object",
+                                "additionalProperties": {
+                                    "type": "string"
+                                }
                             }
                         }
                     },
@@ -7553,7 +7430,10 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Timeseries"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "400": {
@@ -8085,9 +7965,6 @@ const docTemplate = `{
                 },
                 "instrument_id": {
                     "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
                 }
             }
         },
@@ -8324,6 +8201,9 @@ const docTemplate = `{
         "github_com_USACE_instrumentation-api_api_internal_model.District": {
             "type": "object",
             "properties": {
+                "agency": {
+                    "type": "string"
+                },
                 "division_initials": {
                     "type": "string"
                 },
@@ -8584,10 +8464,13 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.IDAndSlug": {
+        "github_com_USACE_instrumentation-api_api_internal_model.IDSlugName": {
             "type": "object",
             "properties": {
                 "id": {
+                    "type": "string"
+                },
+                "name": {
                     "type": "string"
                 },
                 "slug": {
@@ -8711,8 +8594,11 @@ const docTemplate = `{
                 "opts": {
                     "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Opts"
                 },
-                "project_id": {
-                    "type": "string"
+                "projects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IDSlugName"
+                    }
                 },
                 "slug": {
                     "type": "string"
@@ -8743,17 +8629,6 @@ const docTemplate = `{
                 },
                 "usgs_id": {
                     "type": "string"
-                }
-            }
-        },
-        "github_com_USACE_instrumentation-api_api_internal_model.InstrumentCollection": {
-            "type": "object",
-            "properties": {
-                "items": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Instrument"
-                    }
                 }
             }
         },
@@ -9089,6 +8964,9 @@ const docTemplate = `{
                 "creator": {
                     "type": "string"
                 },
+                "district_id": {
+                    "type": "string"
+                },
                 "federal_id": {
                     "type": "string"
                 },
@@ -9113,28 +8991,11 @@ const docTemplate = `{
                 "slug": {
                     "type": "string"
                 },
-                "timeseries": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
                 "update_date": {
                     "type": "string"
                 },
                 "updater": {
                     "type": "string"
-                }
-            }
-        },
-        "github_com_USACE_instrumentation-api_api_internal_model.ProjectCollection": {
-            "type": "object",
-            "properties": {
-                "projects": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Project"
-                    }
                 }
             }
         },
@@ -9370,15 +9231,6 @@ const docTemplate = `{
                 "parameter_id": {
                     "type": "string"
                 },
-                "project": {
-                    "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "project_slug": {
-                    "type": "string"
-                },
                 "slug": {
                     "type": "string"
                 },
@@ -9506,15 +9358,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "parameter_id": {
-                    "type": "string"
-                },
-                "project": {
-                    "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "project_slug": {
                     "type": "string"
                 },
                 "slug": {

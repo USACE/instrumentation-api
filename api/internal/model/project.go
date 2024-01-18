@@ -7,6 +7,7 @@ import (
 )
 
 type District struct {
+	Agency           string     `json:"agency" db:"agency"`
 	ID               uuid.UUID  `json:"id" db:"id"`
 	Name             string     `json:"name" db:"name"`
 	Initials         string     `json:"initials" db:"initials"`
@@ -20,6 +21,7 @@ type Project struct {
 	Slug                 string     `json:"slug"`
 	Name                 string     `json:"name"`
 	FederalID            *string    `json:"federal_id" db:"federal_id"`
+	DistrictID           *uuid.UUID `json:"district_id" db:"district_id"`
 	OfficeID             *uuid.UUID `json:"office_id" db:"office_id"`
 	Image                *string    `json:"image" db:"image"`
 	Deleted              bool       `json:"-"`
@@ -36,7 +38,7 @@ type ProjectCollection []Project
 
 const selectProjectsSQL = `
 	SELECT
-		id, federal_id, image, office_id, deleted, slug, name, creator, create_date,
+		id, federal_id, image, office_id, district_id, deleted, slug, name, creator, create_date,
 		updater, update_date, instrument_count, instrument_group_count
 	FROM v_project
 `
@@ -169,24 +171,24 @@ func (q *Queries) GetProject(ctx context.Context, id uuid.UUID) (Project, error)
 }
 
 const createProject = `
-	INSERT INTO project (federal_id, slug, name, office_id, creator, create_date)
+	INSERT INTO project (federal_id, slug, name, district_id, creator, create_date)
 	VALUES ($1, slugify($2, 'project'), $2, $3, $4, $5)
 	RETURNING id, slug
 `
 
 func (q *Queries) CreateProject(ctx context.Context, p Project) (IDSlugName, error) {
 	var aa IDSlugName
-	err := q.db.GetContext(ctx, &aa, createProject, p.FederalID, p.Name, p.OfficeID, p.Creator, p.CreateDate)
+	err := q.db.GetContext(ctx, &aa, createProject, p.FederalID, p.Name, p.DistrictID, p.Creator, p.CreateDate)
 	return aa, err
 }
 
 const updateProject = `
-	UPDATE project SET name=$2, updater=$3, update_date=$4, office_id=$5, federal_id=$6 WHERE id=$1 RETURNING id
+	UPDATE project SET name=$2, updater=$3, update_date=$4, district_id=$5, federal_id=$6 WHERE id=$1 RETURNING id
 `
 
 // UpdateProject updates a project
 func (q *Queries) UpdateProject(ctx context.Context, p Project) error {
-	_, err := q.db.ExecContext(ctx, updateProject, p.ID, p.Name, p.Updater, p.UpdateDate, p.OfficeID, p.FederalID)
+	_, err := q.db.ExecContext(ctx, updateProject, p.ID, p.Name, p.Updater, p.UpdateDate, p.DistrictID, p.FederalID)
 	return err
 }
 

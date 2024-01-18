@@ -172,7 +172,7 @@ func (h *ApiHandler) GetProject(c echo.Context) error {
 //	@Tags project
 //	@Produce json
 //	@Param project_collection body model.ProjectCollection true "project collection payload"
-//	@Success 200 {array} model.IDAndSlug
+//	@Success 200 {array} model.IDSlugName
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
