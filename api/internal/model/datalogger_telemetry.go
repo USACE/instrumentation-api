@@ -2,6 +2,7 @@ package model
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/google/uuid"
 )
@@ -30,13 +31,29 @@ func (q *Queries) GetDataloggerHashByModelSN(ctx context.Context, modelName, sn 
 	return hash, nil
 }
 
+const createDataloggerTablePreview = `
+	INSERT INTO datalogger_preview (datalogger_table_id, preview, update_date) VALUES ($1, $2, $3)
+`
+
+func (q *Queries) CreateDataloggerTablePreview(ctx context.Context, prv DataloggerTablePreview) error {
+	_, err := q.db.ExecContext(ctx, createDataloggerTablePreview, prv.DataloggerTableID, prv.Preview, prv.UpdateDate)
+	return err
+}
+
 const updateDataloggerTablePreview = `
 	UPDATE datalogger_preview SET preview = $3, update_date = $4
 	WHERE datalogger_table_id IN (SELECT id FROM datalogger_table WHERE datalogger_id = $1 AND table_name = $2)
 `
 
-func (q *Queries) UpdateDataloggerTablePreview(ctx context.Context, dataloggerID uuid.UUID, tableName string, dlp DataloggerTablePreview) error {
-	_, err := q.db.ExecContext(ctx, updateDataloggerTablePreview, dataloggerID, tableName, dlp.Preview, dlp.UpdateDate)
+func (q *Queries) UpdateDataloggerTablePreview(ctx context.Context, dataloggerID uuid.UUID, tableName string, prv DataloggerTablePreview) error {
+	result, err := q.db.ExecContext(ctx, updateDataloggerTablePreview, dataloggerID, tableName, prv.Preview, prv.UpdateDate)
+	r, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if r == 0 {
+		return sql.ErrNoRows
+	}
 	return err
 }
 
