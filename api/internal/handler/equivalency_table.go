@@ -110,7 +110,7 @@ func (h *ApiHandler) CreateEquivalencyTable(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid datalogger table %s %s", t.DataloggerID, t.DataloggerTableName))
 	}
 
-	eqt, err := h.EquivalencyTableService.CreateEquivalencyTable(ctx, t)
+	eqt, err := h.EquivalencyTableService.CreateOrUpdateEquivalencyTable(ctx, t)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
