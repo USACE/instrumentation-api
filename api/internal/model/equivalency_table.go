@@ -82,14 +82,16 @@ func (q *Queries) GetEquivalencyTable(ctx context.Context, dataloggerTableID uui
 	return et, err
 }
 
-const createEquivalencyTableRow = `
+const createOrUpdateEquivalencyTableRow = `
 	INSERT INTO datalogger_equivalency_table
 	(datalogger_id, datalogger_table_id, field_name, display_name, instrument_id, timeseries_id)
 	VALUES ($1, $2, $3, $4, $5, $6)
+	ON CONFLICT ON CONSTRAINT datalogger_equivalency_table_datalogger_table_id_field_name_key
+	DO UPDATE SET display_name = EXCLUDED.display_name, instrument_id = EXCLUDED.instrument_id, timeseries_id = EXCLUDED.timeseries_id
 `
 
-func (q *Queries) CreateEquivalencyTableRow(ctx context.Context, dataloggerID, dataloggerTableID uuid.UUID, tr EquivalencyTableRow) error {
-	if _, err := q.db.ExecContext(ctx, createEquivalencyTableRow,
+func (q *Queries) CreateOrUpdateEquivalencyTableRow(ctx context.Context, dataloggerID, dataloggerTableID uuid.UUID, tr EquivalencyTableRow) error {
+	if _, err := q.db.ExecContext(ctx, createOrUpdateEquivalencyTableRow,
 		dataloggerID,
 		dataloggerTableID,
 		tr.FieldName,
