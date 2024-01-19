@@ -147,15 +147,6 @@ func (q *Queries) CreateDataloggerHash(ctx context.Context, dataloggerID uuid.UU
 	return key, nil
 }
 
-const createDataloggerTablePreview = `
-	INSERT INTO datalogger_preview (datalogger_table_id) VALUES ($1)
-`
-
-func (q *Queries) CreateDataloggerTablePreview(ctx context.Context, dataloggerTableID uuid.UUID) error {
-	_, err := q.db.ExecContext(ctx, createDataloggerTablePreview, dataloggerTableID)
-	return err
-}
-
 const getOneDatalogger = `
 	SELECT * FROM v_datalogger WHERE id = $1
 `

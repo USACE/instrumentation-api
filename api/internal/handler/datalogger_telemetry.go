@@ -1,9 +1,7 @@
 package handler
 
 import (
-	"database/sql"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"math"
@@ -52,17 +50,8 @@ func (h *TelemetryHandler) CreateOrUpdateDataloggerMeasurements(c echo.Context) 
 	}
 	prv.UpdateDate = time.Now()
 
-	err = h.DataloggerTelemetryService.UpdateDataloggerTablePreview(ctx, dl.ID, preparse, prv)
-	if err != nil {
-		if !errors.Is(err, sql.ErrNoRows) {
-			return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
-		}
-		if _, err := h.DataloggerService.GetOrCreateDataloggerTable(ctx, dl.ID, preparse); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
-		}
-		if err = h.DataloggerTelemetryService.UpdateDataloggerTablePreview(ctx, dl.ID, preparse, prv); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
-		}
+	if _, err := h.DataloggerTelemetryService.UpdateDataloggerTablePreview(ctx, dl.ID, preparse, prv); err != nil {
+		return err
 	}
 
 	if modelName == "CR6" || modelName == "CR1000X" {
@@ -122,18 +111,13 @@ func getCR6Handler(h *TelemetryHandler, dl model.Datalogger, rawJSON []byte) ech
 		}
 		prv.UpdateDate = time.Now()
 
-		if err := h.DataloggerTelemetryService.UpdateDataloggerTablePreview(ctx, dl.ID, tn, prv); err != nil {
-			em = append(em, fmt.Sprintf("%d: %s", http.StatusInternalServerError, err.Error()))
-			return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
-		}
-
-		dataloggerTableID, err := h.DataloggerService.GetOrCreateDataloggerTable(ctx, dl.ID, tn)
+		tableID, err := h.DataloggerTelemetryService.UpdateDataloggerTablePreview(ctx, dl.ID, tn, prv)
 		if err != nil {
 			em = append(em, fmt.Sprintf("%d: %s", http.StatusInternalServerError, err.Error()))
 			return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
 		}
 
-		eqt, err := h.EquivalencyTableService.GetEquivalencyTable(ctx, dataloggerTableID)
+		eqt, err := h.EquivalencyTableService.GetEquivalencyTable(ctx, tableID)
 		if err != nil {
 			em = append(em, fmt.Sprintf("%d: %s", http.StatusInternalServerError, err.Error()))
 			return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
