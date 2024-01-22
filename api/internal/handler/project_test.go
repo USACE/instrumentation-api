@@ -38,14 +38,14 @@ const projectSchema = `{
         "district_id": { "type": [ "string", "null"] },
         "slug": { "type": "string" },
         "name": { "type": "string" },
-        "creator": { "type": "string" },
+        "creator_id": { "type": "string" },
         "create_date": { "type": "string", "format": "date-time" },
-        "updater": {  "type": ["string", "null"] },
+        "updater_id": {  "type": ["string", "null"] },
         "update_date": { "type": ["string", "null"], "format": "date-time" },
         "instrument_count": { "type": "number" },
         "instrument_group_count": { "type": "number" }
     },
-    "required": ["id", "federal_id", "image", "office_id", "slug", "name", "creator", "create_date", "updater", "update_date", "instrument_count", "instrument_group_count"],
+    "required": ["id", "federal_id", "image", "office_id", "slug", "name", "creator_id", "create_date", "updater_id", "update_date", "instrument_count", "instrument_group_count"],
     "additionalProperties": false
 }`
 

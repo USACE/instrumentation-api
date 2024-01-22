@@ -75,7 +75,7 @@ func (h *ApiHandler) CreateInstrumentGroup(c echo.Context) error {
 	t := time.Now()
 
 	for idx := range gc.Items {
-		gc.Items[idx].Creator = p.ID
+		gc.Items[idx].CreatorID = p.ID
 		gc.Items[idx].CreateDate = t
 	}
 
@@ -121,7 +121,7 @@ func (h *ApiHandler) UpdateInstrumentGroup(c echo.Context) error {
 	p := c.Get("profile").(model.Profile)
 
 	t := time.Now()
-	g.Updater, g.UpdateDate = &p.ID, &t
+	g.UpdaterID, g.UpdateDate = &p.ID, &t
 
 	// update
 	gUpdated, err := h.InstrumentGroupService.UpdateInstrumentGroup(c.Request().Context(), g)

@@ -16,12 +16,12 @@ const collectionGroupSchema = `{
         "project_id": { "type": "string" },
         "slug": { "type": "string" },
         "name": { "type": "string" },
-        "creator": { "type": "string" },
+        "creator_id": { "type": "string" },
         "create_date": { "type": "string", "format": "date-time" },
-        "updater": {  "type": ["string", "null"] },
+        "updater_id": {  "type": ["string", "null"] },
         "update_date": { "type": ["string", "null"], "format": "date-time" }
     },
-    "required": ["id", "project_id", "name", "slug", "creator", "create_date", "updater", "update_date"],
+    "required": ["id", "project_id", "name", "slug", "creator_id", "create_date", "updater_id", "update_date"],
     "additionalProperties": false
 }`
 
@@ -37,9 +37,9 @@ const collectionGroupDetailsSchema = `{
         "project_id": { "type": "string" },
         "slug": { "type": "string" },
         "name": { "type": "string" },
-        "creator": { "type": "string" },
+        "creator_id": { "type": "string" },
         "create_date": { "type": "string", "format": "date-time" },
-        "updater": {  "type": ["string", "null"] },
+        "updater_id": {  "type": ["string", "null"] },
         "update_date": { "type": ["string", "null"], "format": "date-time" },
         "timeseries": {
             "type": "array",
@@ -66,7 +66,7 @@ const collectionGroupDetailsSchema = `{
             }
         }
     },
-    "required": ["id", "project_id", "name", "slug", "creator", "create_date", "updater", "update_date", "timeseries"],
+    "required": ["id", "project_id", "name", "slug", "creator_id", "create_date", "updater_id", "update_date", "timeseries"],
     "additionalProperties": false
 }`
 

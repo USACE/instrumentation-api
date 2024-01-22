@@ -91,7 +91,7 @@ func (h *ApiHandler) CreateCollectionGroup(c echo.Context) error {
 	}
 	cg.ProjectID = pID
 	p := c.Get("profile").(model.Profile)
-	cg.Creator, cg.CreateDate = p.ID, time.Now()
+	cg.CreatorID, cg.CreateDate = p.ID, time.Now()
 
 	cgNew, err := h.CollectionGroupService.CreateCollectionGroup(c.Request().Context(), cg)
 	if err != nil {
@@ -133,7 +133,7 @@ func (h *ApiHandler) UpdateCollectionGroup(c echo.Context) error {
 	}
 	p := c.Get("profile").(model.Profile)
 	t := time.Now()
-	cg.Updater, cg.UpdateDate = &p.ID, &t
+	cg.UpdaterID, cg.UpdateDate = &p.ID, &t
 	cgUpdated, err := h.CollectionGroupService.UpdateCollectionGroup(c.Request().Context(), cg)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())

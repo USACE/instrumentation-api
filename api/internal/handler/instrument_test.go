@@ -50,16 +50,16 @@ var instrumentSchema = fmt.Sprintf(`{
         },
         "station": { "type": ["number", "null"] },
         "offset": { "type": ["number", "null"] },
-        "creator": { "type": "string" },
+        "creator_id": { "type": "string" },
         "create_date": { "type": "string", "format": "date-time" },
-        "updater": {  "type": ["string", "null"] },
+        "updater_id": {  "type": ["string", "null"] },
         "update_date": { "type": ["string", "null"], "format": "date-time" },
         "projects": %s,
         "nid_id": { "type": ["string", "null"] },
         "usgs_id": { "type": ["string", "null"] },
 	"opts": { "type": ["object", "null"] }
     },
-    "required": ["id", "slug", "name", "type_id", "type", "status_id", "status", "status_time", "geometry", "creator", "create_date", "updater", "update_date", "projects", "station", "offset", "constants", "alert_configs", "nid_id", "usgs_id"],
+    "required": ["id", "slug", "name", "type_id", "type", "status_id", "status", "status_time", "geometry", "creator_id", "create_date", "updater_id", "update_date", "projects", "station", "offset", "constants", "alert_configs", "nid_id", "usgs_id"],
     "additionalProperties": false
 }`, IDSlugNameArrSchema)
 

@@ -95,7 +95,7 @@ const createCollectionGroup = `
 // CreateCollectionGroup creates a new collection group
 func (q *Queries) CreateCollectionGroup(ctx context.Context, cg CollectionGroup) (CollectionGroup, error) {
 	var cgNew CollectionGroup
-	if err := q.db.GetContext(ctx, &cgNew, createCollectionGroup, cg.ProjectID, cg.Name, cg.Creator, cg.CreateDate, cg.Updater, cg.UpdateDate); err != nil {
+	if err := q.db.GetContext(ctx, &cgNew, createCollectionGroup, cg.ProjectID, cg.Name, cg.CreatorID, cg.CreateDate, cg.UpdaterID, cg.UpdateDate); err != nil {
 		return cgNew, err
 	}
 	return cgNew, nil
@@ -110,7 +110,7 @@ const updateCollectionGroup = `
 // UpdateCollectionGroup updates an existing collection group's metadata
 func (q *Queries) UpdateCollectionGroup(ctx context.Context, cg CollectionGroup) (CollectionGroup, error) {
 	var cgUpdated CollectionGroup
-	if err := q.db.GetContext(ctx, &cgUpdated, updateCollectionGroup, cg.ProjectID, cg.ID, cg.Name, cg.Updater, cg.UpdateDate); err != nil {
+	if err := q.db.GetContext(ctx, &cgUpdated, updateCollectionGroup, cg.ProjectID, cg.ID, cg.Name, cg.UpdaterID, cg.UpdateDate); err != nil {
 		return cgUpdated, err
 	}
 	return cgUpdated, nil

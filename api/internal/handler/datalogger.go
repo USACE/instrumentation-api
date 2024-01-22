@@ -69,7 +69,7 @@ func (h *ApiHandler) CreateDatalogger(c echo.Context) error {
 	}
 
 	p := c.Get("profile").(model.Profile)
-	n.Creator = p.ID
+	n.CreatorID = p.ID
 
 	if n.Name == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "valid `name` field required")
@@ -128,7 +128,7 @@ func (h *ApiHandler) CycleDataloggerKey(c echo.Context) error {
 
 	profile := c.Get("profile").(model.Profile)
 	t := time.Now()
-	u.Updater, u.UpdateDate = &profile.ID, &t
+	u.UpdaterID, u.UpdateDate = &profile.ID, &t
 
 	dl, err := h.DataloggerService.CycleDataloggerKey(ctx, u)
 	if err != nil {
@@ -198,7 +198,7 @@ func (h *ApiHandler) UpdateDatalogger(c echo.Context) error {
 
 	profile := c.Get("profile").(model.Profile)
 	t := time.Now()
-	u.Updater, u.UpdateDate = &profile.ID, &t
+	u.UpdaterID, u.UpdateDate = &profile.ID, &t
 
 	dlUpdated, err := h.DataloggerService.UpdateDatalogger(ctx, u)
 	if err != nil {
@@ -234,7 +234,7 @@ func (h *ApiHandler) DeleteDatalogger(c echo.Context) error {
 	d := model.Datalogger{ID: dlID}
 	profile := c.Get("profile").(model.Profile)
 	t := time.Now()
-	d.Updater, d.UpdateDate = &profile.ID, &t
+	d.UpdaterID, d.UpdateDate = &profile.ID, &t
 
 	if err := h.DataloggerService.DeleteDatalogger(ctx, d); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())

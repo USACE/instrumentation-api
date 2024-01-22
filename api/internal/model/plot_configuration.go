@@ -108,7 +108,7 @@ const createPlotConfig = `
 
 func (q *Queries) CreatePlotConfig(ctx context.Context, pc PlotConfig) (uuid.UUID, error) {
 	var pcID uuid.UUID
-	err := q.db.GetContext(ctx, &pcID, createPlotConfig, pc.Name, pc.ProjectID, pc.Creator, pc.CreateDate)
+	err := q.db.GetContext(ctx, &pcID, createPlotConfig, pc.Name, pc.ProjectID, pc.CreatorID, pc.CreateDate)
 	return pcID, err
 }
 
@@ -137,7 +137,7 @@ const updatePlotConfig = `
 `
 
 func (q *Queries) UpdatePlotConfig(ctx context.Context, pc PlotConfig) error {
-	_, err := q.db.ExecContext(ctx, updatePlotConfig, pc.ProjectID, pc.ID, pc.Name, pc.Updater, pc.UpdateDate)
+	_, err := q.db.ExecContext(ctx, updatePlotConfig, pc.ProjectID, pc.ID, pc.Name, pc.UpdaterID, pc.UpdateDate)
 	return err
 }
 

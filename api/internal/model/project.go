@@ -178,7 +178,7 @@ const createProject = `
 
 func (q *Queries) CreateProject(ctx context.Context, p Project) (IDSlugName, error) {
 	var aa IDSlugName
-	err := q.db.GetContext(ctx, &aa, createProject, p.FederalID, p.Name, p.DistrictID, p.Creator, p.CreateDate)
+	err := q.db.GetContext(ctx, &aa, createProject, p.FederalID, p.Name, p.DistrictID, p.CreatorID, p.CreateDate)
 	return aa, err
 }
 
@@ -188,7 +188,7 @@ const updateProject = `
 
 // UpdateProject updates a project
 func (q *Queries) UpdateProject(ctx context.Context, p Project) error {
-	_, err := q.db.ExecContext(ctx, updateProject, p.ID, p.Name, p.Updater, p.UpdateDate, p.DistrictID, p.FederalID)
+	_, err := q.db.ExecContext(ctx, updateProject, p.ID, p.Name, p.UpdaterID, p.UpdateDate, p.DistrictID, p.FederalID)
 	return err
 }
 

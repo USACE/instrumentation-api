@@ -7839,7 +7839,7 @@
                 "create_date": {
                     "type": "string"
                 },
-                "creator": {
+                "creator_id": {
                     "type": "string"
                 },
                 "creator_username": {
@@ -7884,7 +7884,7 @@
                 "update_date": {
                     "type": "string"
                 },
-                "updater": {
+                "updater_id": {
                     "type": "string"
                 },
                 "updater_username": {
@@ -7992,7 +7992,10 @@
                 "create_date": {
                     "type": "string"
                 },
-                "creator": {
+                "creator_id": {
+                    "type": "string"
+                },
+                "creator_username": {
                     "type": "string"
                 },
                 "id": {
@@ -8010,7 +8013,10 @@
                 "update_date": {
                     "type": "string"
                 },
-                "updater": {
+                "updater_id": {
+                    "type": "string"
+                },
+                "updater_username": {
                     "type": "string"
                 }
             }
@@ -8021,7 +8027,10 @@
                 "create_date": {
                     "type": "string"
                 },
-                "creator": {
+                "creator_id": {
+                    "type": "string"
+                },
+                "creator_username": {
                     "type": "string"
                 },
                 "id": {
@@ -8045,7 +8054,10 @@
                 "update_date": {
                     "type": "string"
                 },
-                "updater": {
+                "updater_id": {
+                    "type": "string"
+                },
+                "updater_username": {
                     "type": "string"
                 }
             }
@@ -8056,7 +8068,7 @@
                 "create_date": {
                     "type": "string"
                 },
-                "creator": {
+                "creator_id": {
                     "type": "string"
                 },
                 "creator_username": {
@@ -8098,7 +8110,7 @@
                 "update_date": {
                     "type": "string"
                 },
-                "updater": {
+                "updater_id": {
                     "type": "string"
                 },
                 "updater_username": {
@@ -8137,7 +8149,7 @@
                 "create_date": {
                     "type": "string"
                 },
-                "creator": {
+                "creator_id": {
                     "type": "string"
                 },
                 "creator_username": {
@@ -8182,7 +8194,7 @@
                 "update_date": {
                     "type": "string"
                 },
-                "updater": {
+                "updater_id": {
                     "type": "string"
                 },
                 "updater_username": {
@@ -8366,7 +8378,7 @@
                 "create_date": {
                     "type": "string"
                 },
-                "creator": {
+                "creator_id": {
                     "type": "string"
                 },
                 "creator_username": {
@@ -8402,7 +8414,7 @@
                 "update_date": {
                     "type": "string"
                 },
-                "updater": {
+                "updater_id": {
                     "type": "string"
                 },
                 "updater_username": {
@@ -8559,7 +8571,10 @@
                 "create_date": {
                     "type": "string"
                 },
-                "creator": {
+                "creator_id": {
+                    "type": "string"
+                },
+                "creator_username": {
                     "type": "string"
                 },
                 "geometry": {
@@ -8616,7 +8631,10 @@
                 "update_date": {
                     "type": "string"
                 },
-                "updater": {
+                "updater_id": {
+                    "type": "string"
+                },
+                "updater_username": {
                     "type": "string"
                 },
                 "usgs_id": {
@@ -8638,7 +8656,10 @@
                 "create_date": {
                     "type": "string"
                 },
-                "creator": {
+                "creator_id": {
+                    "type": "string"
+                },
+                "creator_username": {
                     "type": "string"
                 },
                 "description": {
@@ -8665,7 +8686,10 @@
                 "update_date": {
                     "type": "string"
                 },
-                "updater": {
+                "updater_id": {
+                    "type": "string"
+                },
+                "updater_username": {
                     "type": "string"
                 }
             }
@@ -8679,7 +8703,10 @@
                 "create_date": {
                     "type": "string"
                 },
-                "creator": {
+                "creator_id": {
+                    "type": "string"
+                },
+                "creator_username": {
                     "type": "string"
                 },
                 "id": {
@@ -8697,7 +8724,10 @@
                 "update_date": {
                     "type": "string"
                 },
-                "updater": {
+                "updater_id": {
+                    "type": "string"
+                },
+                "updater_username": {
                     "type": "string"
                 }
             }
@@ -8874,7 +8904,10 @@
                 "create_date": {
                     "type": "string"
                 },
-                "creator": {
+                "creator_id": {
+                    "type": "string"
+                },
+                "creator_username": {
                     "type": "string"
                 },
                 "date_range": {
@@ -8913,7 +8946,10 @@
                 "update_date": {
                     "type": "string"
                 },
-                "updater": {
+                "updater_id": {
+                    "type": "string"
+                },
+                "updater_username": {
                     "type": "string"
                 }
             }
@@ -8953,7 +8989,10 @@
                 "create_date": {
                     "type": "string"
                 },
-                "creator": {
+                "creator_id": {
+                    "type": "string"
+                },
+                "creator_username": {
                     "type": "string"
                 },
                 "district_id": {
@@ -8986,7 +9025,10 @@
                 "update_date": {
                     "type": "string"
                 },
-                "updater": {
+                "updater_id": {
+                    "type": "string"
+                },
+                "updater_username": {
                     "type": "string"
                 }
             }

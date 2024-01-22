@@ -91,7 +91,7 @@ func (h *ApiHandler) CreatePlotConfig(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "route parameter project_id does not match project_id in JSON payload")
 	}
 	p := c.Get("profile").(model.Profile)
-	pc.Creator, pc.CreateDate = p.ID, time.Now()
+	pc.CreatorID, pc.CreateDate = p.ID, time.Now()
 
 	pcNew, err := h.PlotConfigService.CreatePlotConfig(c.Request().Context(), pc)
 	if err != nil {
@@ -136,7 +136,7 @@ func (h *ApiHandler) UpdatePlotConfig(c echo.Context) error {
 
 	p := c.Get("profile").(model.Profile)
 	tNow := time.Now()
-	pc.Updater, pc.UpdateDate = &p.ID, &tNow
+	pc.UpdaterID, pc.UpdateDate = &p.ID, &tNow
 
 	pcUpdated, err := h.PlotConfigService.UpdatePlotConfig(c.Request().Context(), pc)
 	if err != nil {

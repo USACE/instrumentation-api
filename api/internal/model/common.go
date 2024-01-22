@@ -8,10 +8,12 @@ import (
 
 // AuditInfo holds common information about object creator and updater
 type AuditInfo struct {
-	Creator    uuid.UUID  `json:"creator"`
-	CreateDate time.Time  `json:"create_date" db:"create_date"`
-	Updater    *uuid.UUID `json:"updater"`
-	UpdateDate *time.Time `json:"update_date" db:"update_date"`
+	CreatorID       uuid.UUID  `json:"creator_id" db:"creator"`
+	CreatorUsername *string    `json:"creator_username,omitempty" db:"creator_username"`
+	CreateDate      time.Time  `json:"create_date" db:"create_date"`
+	UpdaterID       *uuid.UUID `json:"updater_id" db:"updater"`
+	UpdaterUsername *string    `json:"updater_username,omitempty" db:"updater_username"`
+	UpdateDate      *time.Time `json:"update_date" db:"update_date"`
 }
 
 type IDSlug struct {

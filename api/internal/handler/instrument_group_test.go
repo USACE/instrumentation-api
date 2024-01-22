@@ -16,15 +16,15 @@ const instrumentGroupSchema = `{
         "slug": { "type": "string" },
         "name": { "type": "string" },
         "description": { "type": "string" },
-        "creator": { "type": "string" },
+        "creator_id": { "type": "string" },
         "create_date": { "type": "string", "format": "date-time" },
-        "updater": {  "type": ["string", "null"] },
+        "updater_id": {  "type": ["string", "null"] },
         "update_date": { "type": ["string", "null"], "format": "date-time" },
         "project_id": { "type": ["string", "null"] },
         "instrument_count": { "type": "number" },
         "timeseries_count": { "type": "number" }
     },
-    "required": ["id", "slug", "name", "description", "creator", "create_date", "updater", "update_date", "project_id"],
+    "required": ["id", "slug", "name", "description", "creator_id", "create_date", "updater_id", "update_date", "project_id"],
     "additionalProperties": false
 }`
 

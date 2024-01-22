@@ -21,8 +21,6 @@ type Evaluation struct {
 	StartDate       time.Time                         `json:"start_date" db:"start_date"`
 	EndDate         time.Time                         `json:"end_date" db:"end_date"`
 	Instruments     dbJSONSlice[EvaluationInstrument] `json:"instruments" db:"instruments"`
-	CreatorUsername string                            `json:"creator_username" db:"creator_username"`
-	UpdaterUsername *string                           `json:"updater_username" db:"updater_username"`
 	AuditInfo
 }
 
@@ -165,7 +163,7 @@ func (q *Queries) CreateEvaluation(ctx context.Context, ev Evaluation) (uuid.UUI
 		ev.Body,
 		ev.StartDate,
 		ev.EndDate,
-		ev.Creator,
+		ev.CreatorID,
 		ev.CreateDate,
 	)
 	return evaluationID, err
@@ -201,7 +199,7 @@ func (q *Queries) UpdateEvaluation(ctx context.Context, ev Evaluation) error {
 		ev.Body,
 		ev.StartDate,
 		ev.EndDate,
-		ev.Updater,
+		ev.UpdaterID,
 		ev.UpdateDate,
 	)
 	return err

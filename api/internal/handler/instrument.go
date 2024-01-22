@@ -109,7 +109,7 @@ func (h *ApiHandler) CreateInstruments(c echo.Context) error {
 		var prj model.IDSlugName
 		prj.ID = projectID
 		ic[idx].Projects = []model.IDSlugName{prj}
-		ic[idx].Creator = p.ID
+		ic[idx].CreatorID = p.ID
 		ic[idx].CreateDate = t
 	}
 
@@ -236,7 +236,7 @@ func (h *ApiHandler) UpdateInstrument(c echo.Context) error {
 	p := c.Get("profile").(model.Profile)
 
 	t := time.Now()
-	i.Updater, i.UpdateDate = &p.ID, &t
+	i.UpdaterID, i.UpdateDate = &p.ID, &t
 
 	// update
 	iUpdated, err := h.InstrumentService.UpdateInstrument(c.Request().Context(), pID, i)

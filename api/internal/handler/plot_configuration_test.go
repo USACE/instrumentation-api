@@ -19,9 +19,9 @@ const plotConfigSchema = `{
         },
         "slug": { "type": "string" },
         "name": { "type": "string" },
-        "creator": { "type": "string" },
+        "creator_id": { "type": "string" },
         "create_date": { "type": "string", "format": "date-time" },
-        "updater": {  "type": ["string", "null"] },
+        "updater_id": {  "type": ["string", "null"] },
         "update_date": { "type": ["string", "null"], "format": "date-time" },
         "project_id": { "type": ["string", "null"] },
         "show_masked": { "type": "boolean" },
@@ -31,7 +31,7 @@ const plotConfigSchema = `{
         "date_range": { "type": "string" },
         "threshold": { "type": "number" }
     },
-    "required": ["id", "slug", "name", "creator", "create_date", "updater", "update_date", "project_id", "timeseries_id"],
+    "required": ["id", "slug", "name", "creator_id", "create_date", "updater_id", "update_date", "project_id", "timeseries_id"],
     "additionalProperties": false
 }`
 
@@ -52,9 +52,9 @@ const updatePlotConfigRemoveTimeseriesBody = `{
     "timeseries_id": [
         "9a3864a8-8766-4bfa-bad1-0328b166f6a8"
     ],
-    "creator": "00000000-0000-0000-0000-000000000000",
+    "creator_id": "00000000-0000-0000-0000-000000000000",
     "create_date": "2021-02-26T15:54:18.982835Z",
-    "updater": null,
+    "updater_id": null,
     "update_date": null
 }`
 
@@ -71,9 +71,9 @@ const updatePlotConfigAddManyTimeseriesBody = `{
         "d9697351-3a38-4194-9ac4-41541927e475",
         "22a734d6-dc24-451d-a462-43a32f335ae8"
     ],
-    "creator": "00000000-0000-0000-0000-000000000000",
+    "creator_id": "00000000-0000-0000-0000-000000000000",
     "create_date": "2021-02-26T16:21:07.925124Z",
-    "updater": null,
+    "updater_id": null,
     "update_date": null
 }`
 

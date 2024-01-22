@@ -184,7 +184,7 @@ func (q *Queries) CreateInstrument(ctx context.Context, i Instrument) (IDSlugNam
 	var aa IDSlugName
 	if err := q.db.GetContext(
 		ctx, &aa, createInstrument,
-		i.Name, i.TypeID, i.Geometry, i.Station, i.StationOffset, i.Creator, i.CreateDate, i.NIDID, i.USGSID,
+		i.Name, i.TypeID, i.Geometry, i.Station, i.StationOffset, i.CreatorID, i.CreateDate, i.NIDID, i.USGSID,
 	); err != nil {
 		return aa, err
 	}
@@ -310,7 +310,7 @@ func (q *Queries) UpdateInstrument(ctx context.Context, projectID uuid.UUID, i I
 	_, err := q.db.ExecContext(
 		ctx, updateInstrument,
 		projectID, i.ID, i.Name, i.TypeID, i.Geometry,
-		i.Updater, i.UpdateDate, i.Station, i.StationOffset, i.NIDID, i.USGSID,
+		i.UpdaterID, i.UpdateDate, i.Station, i.StationOffset, i.NIDID, i.USGSID,
 	)
 	return err
 }

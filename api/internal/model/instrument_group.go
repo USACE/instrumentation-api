@@ -108,7 +108,7 @@ func (q *Queries) CreateInstrumentGroup(ctx context.Context, group InstrumentGro
 	var groupNew InstrumentGroup
 	err := q.db.GetContext(
 		ctx, &groupNew, createInstrumentGroup,
-		group.Name, group.Description, group.Creator, group.CreateDate, group.ProjectID,
+		group.Name, group.Description, group.CreatorID, group.CreateDate, group.ProjectID,
 	)
 	return groupNew, err
 }
@@ -130,7 +130,7 @@ func (q *Queries) UpdateInstrumentGroup(ctx context.Context, group InstrumentGro
 	var groupUpdated InstrumentGroup
 	err := q.db.GetContext(
 		ctx, &groupUpdated, updateInstrumentGroup,
-		group.ID, group.Name, group.Deleted, group.Description, group.Updater, group.UpdateDate, group.ProjectID,
+		group.ID, group.Name, group.Deleted, group.Description, group.UpdaterID, group.UpdateDate, group.ProjectID,
 	)
 	return groupUpdated, err
 }

@@ -123,7 +123,7 @@ func (h *ApiHandler) CreateAlertConfig(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	profile := c.Get("profile").(model.Profile)
-	ac.ProjectID, ac.Creator, ac.CreateDate = projectID, profile.ID, time.Now()
+	ac.ProjectID, ac.CreatorID, ac.CreateDate = projectID, profile.ID, time.Now()
 
 	acNew, err := h.AlertConfigService.CreateAlertConfig(c.Request().Context(), ac)
 	if err != nil {
@@ -158,7 +158,7 @@ func (h *ApiHandler) UpdateAlertConfig(c echo.Context) error {
 	}
 	p := c.Get("profile").(model.Profile)
 	t := time.Now()
-	ac.Updater, ac.UpdateDate = &p.ID, &t
+	ac.UpdaterID, ac.UpdateDate = &p.ID, &t
 	aUpdated, err := h.AlertConfigService.UpdateAlertConfig(c.Request().Context(), acID, ac)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {

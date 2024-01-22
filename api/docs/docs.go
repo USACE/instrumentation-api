@@ -7847,7 +7847,7 @@ const docTemplate = `{
                 "create_date": {
                     "type": "string"
                 },
-                "creator": {
+                "creator_id": {
                     "type": "string"
                 },
                 "creator_username": {
@@ -7892,7 +7892,7 @@ const docTemplate = `{
                 "update_date": {
                     "type": "string"
                 },
-                "updater": {
+                "updater_id": {
                     "type": "string"
                 },
                 "updater_username": {
@@ -8000,7 +8000,10 @@ const docTemplate = `{
                 "create_date": {
                     "type": "string"
                 },
-                "creator": {
+                "creator_id": {
+                    "type": "string"
+                },
+                "creator_username": {
                     "type": "string"
                 },
                 "id": {
@@ -8018,7 +8021,10 @@ const docTemplate = `{
                 "update_date": {
                     "type": "string"
                 },
-                "updater": {
+                "updater_id": {
+                    "type": "string"
+                },
+                "updater_username": {
                     "type": "string"
                 }
             }
@@ -8029,7 +8035,10 @@ const docTemplate = `{
                 "create_date": {
                     "type": "string"
                 },
-                "creator": {
+                "creator_id": {
+                    "type": "string"
+                },
+                "creator_username": {
                     "type": "string"
                 },
                 "id": {
@@ -8053,7 +8062,10 @@ const docTemplate = `{
                 "update_date": {
                     "type": "string"
                 },
-                "updater": {
+                "updater_id": {
+                    "type": "string"
+                },
+                "updater_username": {
                     "type": "string"
                 }
             }
@@ -8064,7 +8076,7 @@ const docTemplate = `{
                 "create_date": {
                     "type": "string"
                 },
-                "creator": {
+                "creator_id": {
                     "type": "string"
                 },
                 "creator_username": {
@@ -8106,7 +8118,7 @@ const docTemplate = `{
                 "update_date": {
                     "type": "string"
                 },
-                "updater": {
+                "updater_id": {
                     "type": "string"
                 },
                 "updater_username": {
@@ -8145,7 +8157,7 @@ const docTemplate = `{
                 "create_date": {
                     "type": "string"
                 },
-                "creator": {
+                "creator_id": {
                     "type": "string"
                 },
                 "creator_username": {
@@ -8190,7 +8202,7 @@ const docTemplate = `{
                 "update_date": {
                     "type": "string"
                 },
-                "updater": {
+                "updater_id": {
                     "type": "string"
                 },
                 "updater_username": {
@@ -8374,7 +8386,7 @@ const docTemplate = `{
                 "create_date": {
                     "type": "string"
                 },
-                "creator": {
+                "creator_id": {
                     "type": "string"
                 },
                 "creator_username": {
@@ -8410,7 +8422,7 @@ const docTemplate = `{
                 "update_date": {
                     "type": "string"
                 },
-                "updater": {
+                "updater_id": {
                     "type": "string"
                 },
                 "updater_username": {
@@ -8567,7 +8579,10 @@ const docTemplate = `{
                 "create_date": {
                     "type": "string"
                 },
-                "creator": {
+                "creator_id": {
+                    "type": "string"
+                },
+                "creator_username": {
                     "type": "string"
                 },
                 "geometry": {
@@ -8624,7 +8639,10 @@ const docTemplate = `{
                 "update_date": {
                     "type": "string"
                 },
-                "updater": {
+                "updater_id": {
+                    "type": "string"
+                },
+                "updater_username": {
                     "type": "string"
                 },
                 "usgs_id": {
@@ -8646,7 +8664,10 @@ const docTemplate = `{
                 "create_date": {
                     "type": "string"
                 },
-                "creator": {
+                "creator_id": {
+                    "type": "string"
+                },
+                "creator_username": {
                     "type": "string"
                 },
                 "description": {
@@ -8673,7 +8694,10 @@ const docTemplate = `{
                 "update_date": {
                     "type": "string"
                 },
-                "updater": {
+                "updater_id": {
+                    "type": "string"
+                },
+                "updater_username": {
                     "type": "string"
                 }
             }
@@ -8687,7 +8711,10 @@ const docTemplate = `{
                 "create_date": {
                     "type": "string"
                 },
-                "creator": {
+                "creator_id": {
+                    "type": "string"
+                },
+                "creator_username": {
                     "type": "string"
                 },
                 "id": {
@@ -8705,7 +8732,10 @@ const docTemplate = `{
                 "update_date": {
                     "type": "string"
                 },
-                "updater": {
+                "updater_id": {
+                    "type": "string"
+                },
+                "updater_username": {
                     "type": "string"
                 }
             }
@@ -8882,7 +8912,10 @@ const docTemplate = `{
                 "create_date": {
                     "type": "string"
                 },
-                "creator": {
+                "creator_id": {
+                    "type": "string"
+                },
+                "creator_username": {
                     "type": "string"
                 },
                 "date_range": {
@@ -8921,7 +8954,10 @@ const docTemplate = `{
                 "update_date": {
                     "type": "string"
                 },
-                "updater": {
+                "updater_id": {
+                    "type": "string"
+                },
+                "updater_username": {
                     "type": "string"
                 }
             }
@@ -8961,7 +8997,10 @@ const docTemplate = `{
                 "create_date": {
                     "type": "string"
                 },
-                "creator": {
+                "creator_id": {
+                    "type": "string"
+                },
+                "creator_username": {
                     "type": "string"
                 },
                 "district_id": {
@@ -8994,7 +9033,10 @@ const docTemplate = `{
                 "update_date": {
                     "type": "string"
                 },
-                "updater": {
+                "updater_id": {
+                    "type": "string"
+                },
+                "updater_username": {
                     "type": "string"
                 }
             }

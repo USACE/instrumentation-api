@@ -97,7 +97,7 @@ func (h *ApiHandler) CreateInstrumentNote(c echo.Context) error {
 
 	t := time.Now()
 	for idx := range nc.Items {
-		nc.Items[idx].Creator = p.ID
+		nc.Items[idx].CreatorID = p.ID
 		nc.Items[idx].CreateDate = t
 	}
 	nn, err := h.InstrumentNoteService.CreateInstrumentNote(c.Request().Context(), nc.Items)
@@ -135,7 +135,7 @@ func (h *ApiHandler) UpdateInstrumentNote(c echo.Context) error {
 	}
 	p := c.Get("profile").(model.Profile)
 	t := time.Now()
-	n.Updater, n.UpdateDate = &p.ID, &t
+	n.UpdaterID, n.UpdateDate = &p.ID, &t
 
 	nUpdated, err := h.InstrumentNoteService.UpdateInstrumentNote(c.Request().Context(), n)
 	if err != nil {

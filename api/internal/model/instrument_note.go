@@ -101,7 +101,7 @@ const createInstrumentNote = `
 
 func (q *Queries) CreateInstrumentNote(ctx context.Context, note InstrumentNote) (InstrumentNote, error) {
 	var noteNew InstrumentNote
-	err := q.db.GetContext(ctx, &noteNew, createInstrumentNote, note.InstrumentID, note.Title, note.Body, note.Time, note.Creator, note.CreateDate)
+	err := q.db.GetContext(ctx, &noteNew, createInstrumentNote, note.InstrumentID, note.Title, note.Body, note.Time, note.CreatorID, note.CreateDate)
 	return noteNew, err
 }
 
@@ -119,7 +119,7 @@ const updateInstrumentNote = `
 // UpdateInstrumentNote updates a single instrument note
 func (q *Queries) UpdateInstrumentNote(ctx context.Context, n InstrumentNote) (InstrumentNote, error) {
 	var nUpdated InstrumentNote
-	err := q.db.GetContext(ctx, &nUpdated, updateInstrumentNote, n.ID, n.Title, n.Body, n.Time, n.Updater, n.UpdateDate)
+	err := q.db.GetContext(ctx, &nUpdated, updateInstrumentNote, n.ID, n.Title, n.Body, n.Time, n.UpdaterID, n.UpdateDate)
 	return nUpdated, err
 }
 

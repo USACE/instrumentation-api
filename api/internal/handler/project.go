@@ -191,7 +191,7 @@ func (h *ApiHandler) CreateProjectBulk(c echo.Context) error {
 		if pc[idx].Name == "" {
 			return echo.NewHTTPError(http.StatusBadRequest, errors.New("project name required"))
 		}
-		pc[idx].Creator = p.ID
+		pc[idx].CreatorID = p.ID
 		pc[idx].CreateDate = t
 	}
 
@@ -228,7 +228,7 @@ func (h *ApiHandler) UpdateProject(c echo.Context) error {
 	profile := c.Get("profile").(model.Profile)
 
 	t := time.Now()
-	p.Updater, p.UpdateDate = &profile.ID, &t
+	p.UpdaterID, p.UpdateDate = &profile.ID, &t
 
 	pUpdated, err := h.ProjectService.UpdateProject(c.Request().Context(), p)
 	if err != nil {

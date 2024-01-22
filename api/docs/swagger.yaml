@@ -50,7 +50,7 @@ definitions:
         type: string
       create_date:
         type: string
-      creator:
+      creator_id:
         type: string
       creator_username:
         type: string
@@ -80,7 +80,7 @@ definitions:
         type: string
       update_date:
         type: string
-      updater:
+      updater_id:
         type: string
       updater_username:
         type: string
@@ -150,7 +150,9 @@ definitions:
     properties:
       create_date:
         type: string
-      creator:
+      creator_id:
+        type: string
+      creator_username:
         type: string
       id:
         type: string
@@ -162,14 +164,18 @@ definitions:
         type: string
       update_date:
         type: string
-      updater:
+      updater_id:
+        type: string
+      updater_username:
         type: string
     type: object
   github_com_USACE_instrumentation-api_api_internal_model.CollectionGroupDetails:
     properties:
       create_date:
         type: string
-      creator:
+      creator_id:
+        type: string
+      creator_username:
         type: string
       id:
         type: string
@@ -185,14 +191,16 @@ definitions:
         type: array
       update_date:
         type: string
-      updater:
+      updater_id:
+        type: string
+      updater_username:
         type: string
     type: object
   github_com_USACE_instrumentation-api_api_internal_model.Datalogger:
     properties:
       create_date:
         type: string
-      creator:
+      creator_id:
         type: string
       creator_username:
         type: string
@@ -220,7 +228,7 @@ definitions:
         type: array
       update_date:
         type: string
-      updater:
+      updater_id:
         type: string
       updater_username:
         type: string
@@ -245,7 +253,7 @@ definitions:
     properties:
       create_date:
         type: string
-      creator:
+      creator_id:
         type: string
       creator_username:
         type: string
@@ -275,7 +283,7 @@ definitions:
         type: array
       update_date:
         type: string
-      updater:
+      updater_id:
         type: string
       updater_username:
         type: string
@@ -395,7 +403,7 @@ definitions:
         type: string
       create_date:
         type: string
-      creator:
+      creator_id:
         type: string
       creator_username:
         type: string
@@ -419,7 +427,7 @@ definitions:
         type: string
       update_date:
         type: string
-      updater:
+      updater_id:
         type: string
       updater_username:
         type: string
@@ -521,7 +529,9 @@ definitions:
         type: array
       create_date:
         type: string
-      creator:
+      creator_id:
+        type: string
+      creator_username:
         type: string
       geometry:
         $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Geometry'
@@ -559,7 +569,9 @@ definitions:
         type: string
       update_date:
         type: string
-      updater:
+      updater_id:
+        type: string
+      updater_username:
         type: string
       usgs_id:
         type: string
@@ -573,7 +585,9 @@ definitions:
     properties:
       create_date:
         type: string
-      creator:
+      creator_id:
+        type: string
+      creator_username:
         type: string
       description:
         type: string
@@ -591,7 +605,9 @@ definitions:
         type: integer
       update_date:
         type: string
-      updater:
+      updater_id:
+        type: string
+      updater_username:
         type: string
     type: object
   github_com_USACE_instrumentation-api_api_internal_model.InstrumentNote:
@@ -600,7 +616,9 @@ definitions:
         type: string
       create_date:
         type: string
-      creator:
+      creator_id:
+        type: string
+      creator_username:
         type: string
       id:
         type: string
@@ -612,7 +630,9 @@ definitions:
         type: string
       update_date:
         type: string
-      updater:
+      updater_id:
+        type: string
+      updater_username:
         type: string
     type: object
   github_com_USACE_instrumentation-api_api_internal_model.InstrumentNoteCollection:
@@ -727,7 +747,9 @@ definitions:
         type: boolean
       create_date:
         type: string
-      creator:
+      creator_id:
+        type: string
+      creator_username:
         type: string
       date_range:
         type: string
@@ -753,7 +775,9 @@ definitions:
         type: array
       update_date:
         type: string
-      updater:
+      updater_id:
+        type: string
+      updater_username:
         type: string
     type: object
   github_com_USACE_instrumentation-api_api_internal_model.Profile:
@@ -779,7 +803,9 @@ definitions:
     properties:
       create_date:
         type: string
-      creator:
+      creator_id:
+        type: string
+      creator_username:
         type: string
       district_id:
         type: string
@@ -801,7 +827,9 @@ definitions:
         type: string
       update_date:
         type: string
-      updater:
+      updater_id:
+        type: string
+      updater_username:
         type: string
     type: object
   github_com_USACE_instrumentation-api_api_internal_model.ProjectCount:
