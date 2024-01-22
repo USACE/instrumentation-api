@@ -39,9 +39,11 @@ const projectSchema = `{
         "slug": { "type": "string" },
         "name": { "type": "string" },
         "creator_id": { "type": "string" },
+        "creator_username": { "type": "string" },
         "create_date": { "type": "string", "format": "date-time" },
         "updater_id": {  "type": ["string", "null"] },
-        "update_date": { "type": ["string", "null"], "format": "date-time" },
+        "updater_username": {  "type": ["string", "null"] },
+	"update_date": { "type": ["string", "null"], "format": "date-time" },
         "instrument_count": { "type": "number" },
         "instrument_group_count": { "type": "number" }
     },

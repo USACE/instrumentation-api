@@ -12,12 +12,16 @@ CREATE OR REPLACE VIEW v_project AS (
         p.slug,
         p.name,
         p.creator,
+        u.username AS creator_username,
         p.create_date,
         p.updater,
+        u.username AS updater_username,
         p.update_date,
         COALESCE(i.count, 0) AS instrument_count,
         COALESCE(g.count, 0) AS instrument_group_count
     FROM project p
+    LEFT JOIN profile c ON p.creator = c.id
+    LEFT JOIN profile u ON p.updater = c.id
     LEFT JOIN (
         SELECT pi.project_id, COUNT(pi.*) as count
         FROM project_instrument pi

@@ -38,8 +38,8 @@ type ProjectCollection []Project
 
 const selectProjectsSQL = `
 	SELECT
-		id, federal_id, image, office_id, district_id, deleted, slug, name, creator, create_date,
-		updater, update_date, instrument_count, instrument_group_count
+		id, federal_id, image, office_id, district_id, deleted, slug, name, creator, creator_username, create_date,
+		updater, updater_username, update_date, instrument_count, instrument_group_count
 	FROM v_project
 `
 
