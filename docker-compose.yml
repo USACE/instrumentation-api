@@ -72,8 +72,6 @@ services:
         condition: service_healthy
       migrate:
         condition: service_completed_successfully
-      alert:
-        condition: service_started
 
   telemetry:
     build:
