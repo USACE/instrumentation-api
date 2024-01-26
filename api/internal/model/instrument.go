@@ -30,6 +30,7 @@ type Instrument struct {
 	Deleted       bool                    `json:"-"`
 	TypeID        uuid.UUID               `json:"type_id" db:"type_id"`
 	Type          string                  `json:"type"`
+	Icon          *string                 `json:"icon" db:"icon"`
 	Geometry      Geometry                `json:"geometry,omitempty"`
 	Station       *int                    `json:"station"`
 	StationOffset *int                    `json:"offset" db:"station_offset"`
@@ -120,6 +121,7 @@ const listInstrumentsSQL = `
 		name,
 		type_id,
 		type,
+		icon,
 		geometry,
 		station,
 		station_offset,

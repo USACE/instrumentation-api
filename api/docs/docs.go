@@ -8594,6 +8594,9 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
+                "icon": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },
