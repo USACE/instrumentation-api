@@ -98,6 +98,22 @@ func (q *Queries) ListProjectsByFederalID(ctx context.Context, federalID string)
 	return pp, nil
 }
 
+const listProjectsByRole = selectProjectsSQL + `
+	WHERE id = ANY(
+		SELECT project_id FROM profile_project_roles pr
+		INNER JOIN role r ON r.id = pr.role_id
+		WHERE r.name = $1
+	)
+`
+
+func (q *Queries) ListProjectsByRole(ctx context.Context, profileID uuid.UUID) ([]Project, error) {
+	pp := make([]Project, 0)
+	if err := q.db.SelectContext(ctx, &pp, listProjectsByRole, profileID); err != nil {
+		return nil, err
+	}
+	return pp, nil
+}
+
 const listProjectsForProfile = `
 	SELECT DISTINCT
 		p.id, p.federal_id, p.image, p.office_id, p.deleted, p.slug, p.name, p.creator, p.create_date,

@@ -3,6 +3,7 @@ package handler
 import (
 	"errors"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/internal/message"
@@ -42,16 +43,32 @@ func (h *ApiHandler) ListDistricts(c echo.Context) error {
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects [get]
 func (h *ApiHandler) ListProjects(c echo.Context) error {
-	id := c.QueryParam("federal_id")
-	if id != "" {
-		projects, err := h.ProjectService.ListProjectsByFederalID(c.Request().Context(), id)
+	ctx := c.Request().Context()
+
+	fedID := c.QueryParam("federal_id")
+	if fedID != "" {
+		projects, err := h.ProjectService.ListProjectsByFederalID(ctx, fedID)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
 		}
 		return c.JSON(http.StatusOK, projects)
 	}
 
-	projects, err := h.ProjectService.ListProjects(c.Request().Context())
+	role := c.QueryParam("role")
+	if role != "" {
+		role = strings.ToLower(role)
+		if role == "admin" || role == "member" {
+			p := c.Get("profile").(model.Profile)
+			projects, err := h.ProjectService.ListProjectsByRole(ctx, p.ID)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
+			}
+			return c.JSON(http.StatusOK, projects)
+		}
+		return echo.NewHTTPError(http.StatusBadRequest, "role parameter must be 'admin' or 'member'")
+	}
+
+	projects, err := h.ProjectService.ListProjects(ctx)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

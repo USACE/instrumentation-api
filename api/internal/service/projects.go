@@ -12,6 +12,7 @@ type ProjectService interface {
 	ListDistricts(ctx context.Context) ([]model.District, error)
 	ListProjects(ctx context.Context) ([]model.Project, error)
 	ListProjectsByFederalID(ctx context.Context, federalID string) ([]model.Project, error)
+	ListProjectsByRole(ctx context.Context, profileID uuid.UUID) ([]model.Project, error)
 	ListProjectsForProfile(ctx context.Context, profileID uuid.UUID) ([]model.Project, error)
 	ListProjectInstruments(ctx context.Context, projectID uuid.UUID) ([]model.Instrument, error)
 	ListProjectInstrumentGroups(ctx context.Context, projectID uuid.UUID) ([]model.InstrumentGroup, error)
