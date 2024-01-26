@@ -192,6 +192,15 @@ func (q *Queries) UpdateProject(ctx context.Context, p Project) error {
 	return err
 }
 
+const updateProjectImage = `
+	UPDATE project SET image = $1 WHERE project_id = $2
+`
+
+func (q *Queries) UpdateProjectImage(ctx context.Context, fileName string, projectID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, updateProjectImage, fileName, projectID)
+	return err
+}
+
 const deleteFlagProject = `
 	UPDATE project SET deleted=true WHERE id = $1
 `

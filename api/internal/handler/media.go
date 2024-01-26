@@ -29,30 +29,3 @@ func (h *ApiHandler) GetMedia(c echo.Context) error {
 	c.Response().Header().Set("Cache-Control", "public, max-age=31536000")
 	return c.Stream(http.StatusOK, "image/jpg", r)
 }
-
-// func (h *ApiHandler) UploadMedia(c echo.Context) error {
-// 	file, err := c.FormFile("image")
-// 	if err != nil {
-// 		return echo.NewHTTPError(http.StatusBadRequest, "attached form file 'image' required")
-// 	}
-// 	src, err := file.Open()
-// 	if err != nil {
-// 		return err
-// 	}
-// 	defer src.Close()
-// 	dst, err := os.Create(file.Filename)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	defer dst.Close()
-//
-// 	if err := img.Resize(src, dst, image.Rect(0, 0, 480, 480)); err != nil {
-// 		return err
-// 	}
-//
-// 	if err := h.BlobService.UploadContext(c.Request().Context(), src, "uploads/images/"+file.Filename, ""); err != nil {
-// 		return err
-// 	}
-//
-// 	return c.JSON(http.StatusOK, make(map[string]interface{}))
-// }
