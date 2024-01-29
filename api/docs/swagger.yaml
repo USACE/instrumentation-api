@@ -3473,6 +3473,11 @@ paths:
       - profile
   /my_projects:
     get:
+      parameters:
+      - description: role
+        in: query
+        name: role
+        type: string
       produces:
       - application/json
       responses:
@@ -3496,7 +3501,8 @@ paths:
             $ref: '#/definitions/echo.HTTPError'
       security:
       - CacOnly: []
-      summary: lists projects for current profile
+      summary: lists projects where current profile is an admin or member with optional
+        filter by project role
       tags:
       - project
   /my_tokens:

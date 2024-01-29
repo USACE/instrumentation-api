@@ -63,9 +63,10 @@ func (h *ApiHandler) ListProjects(c echo.Context) error {
 
 // ListMyProjects godoc
 //
-//	@Summary lists projects for current profile
+//	@Summary lists projects where current profile is an admin or member with optional filter by project role
 //	@Tags project
 //	@Produce json
+//	@Param role query string false "role"
 //	@Success 200 {array} model.Project
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError

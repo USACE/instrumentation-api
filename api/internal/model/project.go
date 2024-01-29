@@ -98,7 +98,7 @@ func (q *Queries) ListProjectsByFederalID(ctx context.Context, federalID string)
 	return pp, nil
 }
 
-var listProjectsForProfile = selectProjectsSQL + `
+const listProjectsForProfile = selectProjectsSQL + `
 	WHERE id = ANY(
 		SELECT project_id FROM profile_project_roles
 		WHERE profile_id = $1
@@ -115,7 +115,7 @@ func (q *Queries) ListProjectsForProfile(ctx context.Context, profileID uuid.UUI
 	return pp, nil
 }
 
-var listProjectsForProfileRole = selectProjectsSQL + `
+const listProjectsForProfileRole = selectProjectsSQL + `
 	WHERE id = ANY(
 		SELECT project_id FROM profile_project_roles pr
 		INNER JOIN role r ON r.id = pr.role_id
