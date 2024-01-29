@@ -9,7 +9,6 @@ import (
 
 	"github.com/USACE/instrumentation-api/api/internal/message"
 	"github.com/USACE/instrumentation-api/api/internal/model"
-	"github.com/USACE/instrumentation-api/api/internal/util"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
@@ -70,20 +69,11 @@ func (h *ApiHandler) CreateDatalogger(c echo.Context) error {
 	}
 
 	p := c.Get("profile").(model.Profile)
-	n.Creator = p.ID
+	n.CreatorID = p.ID
 
 	if n.Name == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "valid `name` field required")
 	}
-
-	slugsTaken, err := h.DataloggerService.ListDataloggerSlugs(ctx)
-
-	// Generate unique slug
-	slug, err := util.NextUniqueSlug(n.Name, slugsTaken)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
-	}
-	n.Slug = slug
 
 	model, err := h.DataloggerService.GetDataloggerModelName(ctx, n.ModelID)
 	if err != nil {
@@ -138,7 +128,7 @@ func (h *ApiHandler) CycleDataloggerKey(c echo.Context) error {
 
 	profile := c.Get("profile").(model.Profile)
 	t := time.Now()
-	u.Updater, u.UpdateDate = &profile.ID, &t
+	u.UpdaterID, u.UpdateDate = &profile.ID, &t
 
 	dl, err := h.DataloggerService.CycleDataloggerKey(ctx, u)
 	if err != nil {
@@ -208,7 +198,7 @@ func (h *ApiHandler) UpdateDatalogger(c echo.Context) error {
 
 	profile := c.Get("profile").(model.Profile)
 	t := time.Now()
-	u.Updater, u.UpdateDate = &profile.ID, &t
+	u.UpdaterID, u.UpdateDate = &profile.ID, &t
 
 	dlUpdated, err := h.DataloggerService.UpdateDatalogger(ctx, u)
 	if err != nil {
@@ -244,7 +234,7 @@ func (h *ApiHandler) DeleteDatalogger(c echo.Context) error {
 	d := model.Datalogger{ID: dlID}
 	profile := c.Get("profile").(model.Profile)
 	t := time.Now()
-	d.Updater, d.UpdateDate = &profile.ID, &t
+	d.UpdaterID, d.UpdateDate = &profile.ID, &t
 
 	if err := h.DataloggerService.DeleteDatalogger(ctx, d); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())

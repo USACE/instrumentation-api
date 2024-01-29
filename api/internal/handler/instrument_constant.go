@@ -5,7 +5,6 @@ import (
 
 	"github.com/USACE/instrumentation-api/api/internal/message"
 	"github.com/USACE/instrumentation-api/api/internal/model"
-	"github.com/USACE/instrumentation-api/api/internal/util"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
@@ -58,20 +57,10 @@ func (h *ApiHandler) CreateInstrumentConstants(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	slugsTaken, err := h.TimeseriesService.ListTimeseriesSlugsForInstrument(ctx, instrumentID)
-	if err != nil {
-		return err
-	}
 	for idx := range tc.Items {
 		if instrumentID != tc.Items[idx].InstrumentID {
 			return echo.NewHTTPError(http.StatusBadRequest, message.MatchRouteParam("`instrument_id`"))
 		}
-		s, err := util.NextUniqueSlug(tc.Items[idx].Name, slugsTaken)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-		}
-		tc.Items[idx].Slug = s
-		slugsTaken = append(slugsTaken, s)
 	}
 	tt, err := h.InstrumentConstantService.CreateInstrumentConstants(ctx, tc.Items)
 	if err != nil {

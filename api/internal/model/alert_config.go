@@ -26,8 +26,6 @@ type AlertConfig struct {
 	LastReminded            *time.Time                           `json:"last_reminded" db:"last_reminded"`
 	Instruments             dbJSONSlice[AlertConfigInstrument]   `json:"instruments" db:"instruments"`
 	AlertEmailSubscriptions dbJSONSlice[EmailAutocompleteResult] `json:"alert_email_subscriptions" db:"alert_email_subscriptions"`
-	CreatorUsername         string                               `json:"creator_username" db:"creator_username"`
-	UpdaterUsername         *string                              `json:"updater_username" db:"updater_username"`
 	MuteConsecutiveAlerts   bool                                 `json:"mute_consecutive_alerts" db:"mute_consecutive_alerts"`
 	CreateNextSubmittalFrom *time.Time                           `json:"-" db:"-"`
 	AuditInfo
@@ -133,7 +131,7 @@ func (q *Queries) CreateAlertConfig(ctx context.Context, ac AlertConfig) (uuid.U
 		ac.MuteConsecutiveAlerts,
 		ac.RemindInterval,
 		ac.WarningInterval,
-		ac.Creator,
+		ac.CreatorID,
 		ac.CreateDate,
 	)
 	return alertConfigID, err
@@ -194,7 +192,7 @@ func (q *Queries) UpdateAlertConfig(ctx context.Context, ac AlertConfig) error {
 		ac.MuteConsecutiveAlerts,
 		ac.RemindInterval,
 		ac.WarningInterval,
-		ac.Updater,
+		ac.UpdaterID,
 		ac.UpdateDate,
 	)
 	return err

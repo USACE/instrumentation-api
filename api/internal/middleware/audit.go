@@ -1,10 +1,8 @@
 package middleware
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/USACE/instrumentation-api/api/internal/message"
 	"github.com/USACE/instrumentation-api/api/internal/model"
@@ -87,6 +85,7 @@ func (m *mw) AttachProfile(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
+// IsApplicationAdmin checks that a profile is an application admin
 func (m *mw) IsApplicationAdmin(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		p, ok := c.Get("profile").(model.Profile)
@@ -100,55 +99,48 @@ func (m *mw) IsApplicationAdmin(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
+// IsProjectAdmin checks that a profile is an admin for the project_id URL path parameter
+// ApplicationAdmin has automatic member/admin status for all projects
 func (m *mw) IsProjectAdmin(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		p, ok := c.Get("profile").(model.Profile)
 		if !ok {
 			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
 		}
-		// Application Admins Automatic Admin Status for All Projects
 		if p.IsAdmin {
 			return next(c)
 		}
-		// Lookup project from URL Route Parameter
 		projectID, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
 			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
 		}
-		project, err := m.ProjectService.GetProject(c.Request().Context(), projectID)
-		if err != nil {
+		authorized, err := m.ProjectRoleService.IsProjectAdmin(c.Request().Context(), p.ID, projectID)
+		if err != nil || !authorized {
 			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
 		}
-		grantingRole := fmt.Sprintf("%s.ADMIN", strings.ToUpper(project.Slug))
-		for _, r := range p.Roles {
-			if r == grantingRole {
-				return next(c)
-			}
-		}
-		return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
+		return next(c)
 	}
 }
 
+// IsProjectMember checks that a profile is a member or admin for the project_id URL path parameter
+// ApplicationAdmin has automatic member/admin status for all projects
 func (m *mw) IsProjectMember(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		p, ok := c.Get("profile").(model.Profile)
 		if !ok {
 			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
 		}
+		if p.IsAdmin {
+			return next(c)
+		}
 		projectID, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
 			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
 		}
-		project, err := m.ProjectService.GetProject(c.Request().Context(), projectID)
-		if err != nil {
+		authorized, err := m.ProjectRoleService.IsProjectMember(c.Request().Context(), p.ID, projectID)
+		if err != nil || !authorized {
 			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
 		}
-		grantingRole := fmt.Sprintf("%s.MEMBER", strings.ToUpper(project.Slug))
-		for _, r := range p.Roles {
-			if r == grantingRole {
-				return next(c)
-			}
-		}
-		return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
+		return next(c)
 	}
 }

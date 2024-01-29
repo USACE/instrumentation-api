@@ -12,6 +12,7 @@ import (
 const districtSchema = `{
     "type": "object",
     "properties": {
+	"agency": { "type": "string" },
         "id": { "type": "string" },
         "name": { "type": "string" },
         "initials": { "type": "string" },
@@ -32,22 +33,21 @@ const projectSchema = `{
     "properties": {
         "id": { "type": "string" },
         "federal_id": { "type": ["string", "null"] },
-        "image": { "type": ["string", "null"]},
-        "office_id": { "type": [ "string", "null"]},
+        "image": { "type": ["string", "null"] },
+        "office_id": { "type": [ "string", "null"] },
+        "district_id": { "type": [ "string", "null"] },
         "slug": { "type": "string" },
         "name": { "type": "string" },
-        "creator": { "type": "string" },
+        "creator_id": { "type": "string" },
+        "creator_username": { "type": "string" },
         "create_date": { "type": "string", "format": "date-time" },
-        "updater": {  "type": ["string", "null"] },
-        "update_date": { "type": ["string", "null"], "format": "date-time" },
-        "instrument_count": {"type": "number"},
-        "instrument_group_count": {"type": "number"},
-        "timeseries": {
-            "type": "array",
-            "items": { "type": "string" }
-        }
+        "updater_id": {  "type": ["string", "null"] },
+        "updater_username": {  "type": ["string", "null"] },
+	"update_date": { "type": ["string", "null"], "format": "date-time" },
+        "instrument_count": { "type": "number" },
+        "instrument_group_count": { "type": "number" }
     },
-    "required": ["id", "federal_id", "image", "office_id", "slug", "name", "creator", "create_date", "updater", "update_date", "instrument_count", "instrument_group_count", "timeseries"],
+    "required": ["id", "federal_id", "image", "office_id", "slug", "name", "creator_id", "create_date", "updater_id", "update_date", "instrument_count", "instrument_group_count"],
     "additionalProperties": false
 }`
 
@@ -69,18 +69,13 @@ const projectCountSchema = `{
 
 var projectCountObjectLoader = gojsonschema.NewStringLoader(projectCountSchema)
 
-var projectInstrumentNamesArrayLoader = gojsonschema.NewStringLoader(`{
-    "type": "array",
-    "items": { "type": "string" }
-}`)
-
 const (
 	testProjectID           = "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984"
 	testProjectTimeseriesID = "8f4ca3a3-5971-4597-bd6f-332d1cf5af7c"
 	testProjectFederalID    = "NIST001"
 )
 
-const createProjectBulkArrayBody = `[{
+const createProjectBulkBody = `[{
     "name": "Test Project 100000",
     "federal_id": null
 },
@@ -93,11 +88,6 @@ const createProjectBulkArrayBody = `[{
     "federal_id": null
 }]`
 
-const createProjectBulkObjectBody = `{
-    "name": "Test Project 500000",
-    "federal_id": null
-}`
-
 const updateProjectBody = `{
     "id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
     "federal_id": null,
@@ -108,8 +98,6 @@ func TestProjects(t *testing.T) {
 	districtArrSchema, err := gojsonschema.NewSchema(districtArrayLoader)
 	assert.Nil(t, err)
 	countObjSchema, err := gojsonschema.NewSchema(projectCountObjectLoader)
-	assert.Nil(t, err)
-	namesArrSchema, err := gojsonschema.NewSchema(projectInstrumentNamesArrayLoader)
 	assert.Nil(t, err)
 	objSchema, err := gojsonschema.NewSchema(projectObjectLoader)
 	assert.Nil(t, err)
@@ -132,30 +120,11 @@ func TestProjects(t *testing.T) {
 			ExpectedSchema: countObjSchema,
 		},
 		{
-			Name:           "ListProjectInstrumentNames",
-			URL:            fmt.Sprintf("/projects/%s/instruments/names", testProjectID),
-			Method:         http.MethodGet,
-			ExpectedStatus: http.StatusOK,
-			ExpectedSchema: namesArrSchema,
-		},
-		{
 			Name:           "GetProject",
 			URL:            fmt.Sprintf("/projects/%s", testProjectID),
 			Method:         http.MethodGet,
 			ExpectedStatus: http.StatusOK,
 			ExpectedSchema: objSchema,
-		},
-		{
-			Name:           "CreateProjectTimeseries",
-			URL:            fmt.Sprintf("/projects/%s/timeseries/%s", testProjectID, testProjectTimeseriesID),
-			Method:         http.MethodPost,
-			ExpectedStatus: http.StatusCreated,
-		},
-		{
-			Name:           "DeleteProjectTimeseries",
-			URL:            fmt.Sprintf("/projects/%s/timeseries/%s", testProjectID, testProjectTimeseriesID),
-			Method:         http.MethodDelete,
-			ExpectedStatus: http.StatusOK,
 		},
 		{
 			Name:           "ListProjects",
@@ -172,17 +141,17 @@ func TestProjects(t *testing.T) {
 			ExpectedSchema: arrSchema,
 		},
 		{
-			Name:           "CreateProjectBulk_Array",
-			URL:            "/projects",
-			Method:         http.MethodPost,
-			Body:           createProjectBulkArrayBody,
-			ExpectedStatus: http.StatusCreated,
+			Name:           "ListProjectsForProfileRole",
+			URL:            fmt.Sprintf("/my_projects?role=%s", "admin"),
+			Method:         http.MethodGet,
+			ExpectedStatus: http.StatusOK,
+			ExpectedSchema: arrSchema,
 		},
 		{
-			Name:           "CreateProjectBulk_Object",
+			Name:           "CreateProjectBulk",
 			URL:            "/projects",
 			Method:         http.MethodPost,
-			Body:           createProjectBulkObjectBody,
+			Body:           createProjectBulkBody,
 			ExpectedStatus: http.StatusCreated,
 		},
 		{

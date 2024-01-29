@@ -53,9 +53,9 @@ func NewApi(cfg *config.ApiConfig) *ApiHandler {
 	q := db.Queries()
 
 	profileService := service.NewProfileService(db, q)
-	projectService := service.NewProjectService(db, q)
+	projectRoleService := service.NewProjectRoleService(db, q)
 	dataloggerTelemetryService := service.NewDataloggerTelemetryService(db, q)
-	mw := middleware.NewMiddleware(&cfg.ServerConfig, profileService, projectService, dataloggerTelemetryService)
+	mw := middleware.NewMiddleware(&cfg.ServerConfig, profileService, projectRoleService, dataloggerTelemetryService)
 
 	return &ApiHandler{
 		Middleware:                     mw,
@@ -85,7 +85,7 @@ func NewApi(cfg *config.ApiConfig) *ApiHandler {
 		PlotConfigService:              service.NewPlotConfigService(db, q),
 		ProfileService:                 profileService,
 		ProjectRoleService:             service.NewProjectRoleService(db, q),
-		ProjectService:                 projectService,
+		ProjectService:                 service.NewProjectService(db, q),
 		SaaInstrumentService:           service.NewSaaInstrumentService(db, q),
 		SubmittalService:               service.NewSubmittalService(db, q),
 		TimeseriesService:              service.NewTimeseriesService(db, q),
@@ -108,9 +108,9 @@ func NewTelemetry(cfg *config.TelemetryConfig) *TelemetryHandler {
 	q := db.Queries()
 
 	profileService := service.NewProfileService(db, q)
-	projectService := service.NewProjectService(db, q)
+	projectRoleService := service.NewProjectRoleService(db, q)
 	dataloggerTelemetryService := service.NewDataloggerTelemetryService(db, q)
-	mw := middleware.NewMiddleware(&cfg.ServerConfig, profileService, projectService, dataloggerTelemetryService)
+	mw := middleware.NewMiddleware(&cfg.ServerConfig, profileService, projectRoleService, dataloggerTelemetryService)
 
 	return &TelemetryHandler{
 		Middleware:                 mw,

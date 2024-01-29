@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/internal/message"
-	"github.com/USACE/instrumentation-api/api/internal/util"
 
 	"github.com/google/uuid"
 
@@ -91,20 +90,9 @@ func (h *ApiHandler) CreateCollectionGroup(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	cg.ProjectID = pID
-	// Generate Unique Slug
-	slugsTaken, err := h.CollectionGroupService.ListCollectionGroupSlugs(c.Request().Context(), pID)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-	slug, err := util.NextUniqueSlug(cg.Name, slugsTaken)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-	cg.Slug = slug
-	// Profile of user creating collection group
 	p := c.Get("profile").(model.Profile)
-	cg.Creator, cg.CreateDate = p.ID, time.Now()
-	// Create Collection Group
+	cg.CreatorID, cg.CreateDate = p.ID, time.Now()
+
 	cgNew, err := h.CollectionGroupService.CreateCollectionGroup(c.Request().Context(), cg)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -145,7 +133,7 @@ func (h *ApiHandler) UpdateCollectionGroup(c echo.Context) error {
 	}
 	p := c.Get("profile").(model.Profile)
 	t := time.Now()
-	cg.Updater, cg.UpdateDate = &p.ID, &t
+	cg.UpdaterID, cg.UpdateDate = &p.ID, &t
 	cgUpdated, err := h.CollectionGroupService.UpdateCollectionGroup(c.Request().Context(), cg)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())

@@ -8,7 +8,6 @@ import (
 )
 
 type PlotConfigService interface {
-	ListPlotConfigSlugs(ctx context.Context) ([]string, error)
 	ListPlotConfigs(ctx context.Context, projectID uuid.UUID) ([]model.PlotConfig, error)
 	GetPlotConfig(ctx context.Context, plotconfigID uuid.UUID) (model.PlotConfig, error)
 	CreatePlotConfig(ctx context.Context, pc model.PlotConfig) (model.PlotConfig, error)

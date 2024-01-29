@@ -6,7 +6,6 @@ import (
 
 	"github.com/USACE/instrumentation-api/api/internal/message"
 	"github.com/USACE/instrumentation-api/api/internal/model"
-	"github.com/USACE/instrumentation-api/api/internal/util"
 	"github.com/paulmach/orb/geojson"
 
 	"github.com/google/uuid"
@@ -84,73 +83,124 @@ func (h *ApiHandler) GetInstrument(c echo.Context) error {
 //	@Param project_id path string true "project id" Format(uuid)
 //	@Param instrument_id path string true "instrument id" Format(uuid)
 //	@Param instrument body model.InstrumentCollection true "instrument collection payload"
-//	@Success 200 {array} model.IDAndSlug
+//	@Success 200 {array} model.IDSlugName
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id}/instruments [post]
-//	@Router /instruments [post]
 //	@Security Bearer
 func (h *ApiHandler) CreateInstruments(c echo.Context) error {
 	ctx := c.Request().Context()
-	newInstrumentCollection := func(c echo.Context) (model.InstrumentCollection, error) {
-		ic := model.InstrumentCollection{}
-		if err := c.Bind(&ic); err != nil {
-			return model.InstrumentCollection{}, err
-		}
 
-		// Get ProjectID of Instruments
-		projectID, err := uuid.Parse(c.Param("project_id"))
-		if err != nil {
-			return model.InstrumentCollection{}, err
-		}
-
-		// slugs already taken in the database
-		slugsTaken, err := h.InstrumentService.ListInstrumentSlugs(ctx)
-		if err != nil {
-			return model.InstrumentCollection{}, err
-		}
-
-		// profile of user creating instruments
-		p := c.Get("profile").(model.Profile)
-
-		// timestamp
-		t := time.Now()
-
-		for idx := range ic.Items {
-			ic.Items[idx].ProjectID = &projectID
-			s, err := util.NextUniqueSlug(ic.Items[idx].Name, slugsTaken)
-			if err != nil {
-				return model.InstrumentCollection{}, err
-			}
-			ic.Items[idx].Slug = s
-			ic.Items[idx].Creator = p.ID
-			ic.Items[idx].CreateDate = t
-			slugsTaken = append(slugsTaken, s)
-		}
-
-		return ic, nil
-	}
-
-	ic, err := newInstrumentCollection(c)
+	projectID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
+	ic := model.InstrumentCollection{}
+	if err := c.Bind(&ic); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	p := c.Get("profile").(model.Profile)
+	t := time.Now()
+
+	for idx := range ic {
+		var prj model.IDSlugName
+		prj.ID = projectID
+		ic[idx].Projects = []model.IDSlugName{prj}
+		ic[idx].CreatorID = p.ID
+		ic[idx].CreateDate = t
+	}
+
 	if c.QueryParam("dry_run") == "true" {
-		v, err := h.InstrumentService.ValidateCreateInstruments(ctx, ic.Items)
+		v, err := h.InstrumentService.ValidateCreateInstruments(ctx, ic)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		return c.JSON(http.StatusOK, v)
 	}
 
-	nn, err := h.InstrumentService.CreateInstruments(ctx, ic.Items)
+	nn, err := h.InstrumentService.CreateInstruments(ctx, ic)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusCreated, nn)
+}
+
+// AssignInstrumentToProject godoc
+//
+//	@Summary assigns an instrument to a project.
+//	@Tags instrument
+//	@Description must be Project (or Application) Admin of all existing instrument projects and project to be assigned
+//	@Produce json
+//	@Param project_id path string true "project uuid" Format(uuid)
+//	@Param instrument_id path string true "instrument uuid" Format(uuid)
+//	@Success 200 {object} map[string]interface{}
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /projects/{project_id}/instruments/{instrument_id}/assignments [post]
+//	@Security Bearer
+func (h *ApiHandler) AssignInstrumentToProject(c echo.Context) error {
+	pID, err := uuid.Parse(c.Param("project_id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+	}
+	iID, err := uuid.Parse(c.Param("instrument_id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+	}
+
+	ctx := c.Request().Context()
+	p := c.Get("profile").(model.Profile)
+	if !p.IsAdmin {
+		autorized, err := h.InstrumentService.AssignerIsAuthorized(ctx, iID, p.ID)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
+		}
+		if !autorized {
+			return echo.NewHTTPError(http.StatusUnauthorized, message.Unauthorized)
+		}
+	}
+
+	if err := h.InstrumentService.AssignInstrumentToProject(ctx, pID, iID); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, make(map[string]interface{}))
+}
+
+// UnassignInstrumentFromProject godoc
+//
+//	@Summary unassigns an instrument from a project.
+//	@Tags instrument
+//	@Description must be Project Admin of project to be unassigned
+//	@Produce json
+//	@Param project_id path string true "project uuid" Format(uuid)
+//	@Param instrument_id path string true "instrument uuid" Format(uuid)
+//	@Success 200 {object} map[string]interface{}
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /projects/{project_id}/instruments/{instrument_id}/assignments [delete]
+//	@Security Bearer
+func (h *ApiHandler) UnassignInstrumentFromProject(c echo.Context) error {
+	pID, err := uuid.Parse(c.Param("project_id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+	}
+	iID, err := uuid.Parse(c.Param("instrument_id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+	}
+
+	if err := h.InstrumentService.UnassignInstrumentFromProject(c.Request().Context(), pID, iID); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, make(map[string]interface{}))
 }
 
 // UpdateInstrument godoc
@@ -168,40 +218,28 @@ func (h *ApiHandler) CreateInstruments(c echo.Context) error {
 //	@Router /projects/{project_id}/instruments/{instrument_id} [put]
 //	@Security Bearer
 func (h *ApiHandler) UpdateInstrument(c echo.Context) error {
-
-	// instrument_id from url params
 	iID, err := uuid.Parse(c.Param("instrument_id"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
 	}
-	// project_id from url params
 	pID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
 	}
-	// instrument from request payload
-	i := model.Instrument{ID: iID, ProjectID: &pID}
+
+	var i model.Instrument
 	if err := c.Bind(&i); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	// check project_id in url params matches project_id in request body
-	if pID != *i.ProjectID {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MatchRouteParam("`project_id`"))
-	}
-	// check instrument_id in url params matches instrument_id in request body
-	if iID != i.ID {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MatchRouteParam("`instrument_id`"))
-	}
+	i.ID = iID
 
-	// profile of user creating instruments
 	p := c.Get("profile").(model.Profile)
 
-	// timestamp
 	t := time.Now()
-	i.Updater, i.UpdateDate = &p.ID, &t
+	i.UpdaterID, i.UpdateDate = &p.ID, &t
 
 	// update
-	iUpdated, err := h.InstrumentService.UpdateInstrument(c.Request().Context(), i)
+	iUpdated, err := h.InstrumentService.UpdateInstrument(c.Request().Context(), pID, i)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -274,7 +312,7 @@ func (h *ApiHandler) DeleteFlagInstrument(c echo.Context) error {
 	}
 
 	if err := h.InstrumentService.DeleteFlagInstrument(c.Request().Context(), pID, iID); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.BadRequest)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, make(map[string]interface{}))

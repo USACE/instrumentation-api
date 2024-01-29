@@ -79,7 +79,7 @@ const updateSaaSegmentsBody = `[
     }
 ]`
 
-const createSaaInstrumentBulkObjectBody = `{
+const createSaaInstrumentBulkBody = `[{
     "status_id": "94578354-ffdf-4119-9663-6bd4323e58f5",
     "status": "destroyed",
     "status_time": "2001-01-01T00:00:00Z",
@@ -102,7 +102,7 @@ const createSaaInstrumentBulkObjectBody = `{
 	"num_segments": 10,
 	"bottom_elevation": 1000
     }
-}`
+}]`
 
 func TestSaaInstruments(t *testing.T) {
 	segArrSchema, err := gojsonschema.NewSchema(saaSegmentArrayLoader)
@@ -133,10 +133,10 @@ func TestSaaInstruments(t *testing.T) {
 			ExpectedSchema: segArrSchema,
 		},
 		{
-			Name:           "CreateSaaInstrumentBulk_Object",
+			Name:           "CreateSaaInstrumentBulk",
 			URL:            fmt.Sprintf("/projects/%s/instruments", testProjectID),
 			Method:         http.MethodPost,
-			Body:           createSaaInstrumentBulkObjectBody,
+			Body:           createSaaInstrumentBulkBody,
 			ExpectedStatus: http.StatusCreated,
 		}}
 

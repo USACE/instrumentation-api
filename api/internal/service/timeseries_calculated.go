@@ -11,7 +11,6 @@ import (
 
 type CalculatedTimeseriesService interface {
 	GetAllCalculatedTimeseriesForInstrument(ctx context.Context, instrumentID uuid.UUID) ([]model.CalculatedTimeseries, error)
-	ListCalculatedTimeseriesSlugs(ctx context.Context) ([]string, error)
 	CreateCalculatedTimeseries(ctx context.Context, cc model.CalculatedTimeseries) error
 	UpdateCalculatedTimeseries(ctx context.Context, cts model.CalculatedTimeseries) error
 	DeleteCalculatedTimeseries(ctx context.Context, ctsID uuid.UUID) error

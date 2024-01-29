@@ -1,47 +1,49 @@
 CREATE OR REPLACE VIEW v_project AS (
-    SELECT  p.id,
-            p.federal_id,
-            CASE WHEN p.image IS NOT NULL
-                THEN cfg.static_host || '/projects/' || p.slug || '/images/' || p.image
-                ELSE NULL
-            END AS image,
-            p.office_id,
-            p.deleted,
-            p.slug,
-            p.name,
-            p.creator,
-            p.create_date,
-            p.updater,
-            p.update_date,
-            COALESCE(t.timeseries, '{}') AS timeseries,
-            COALESCE(i.count, 0) AS instrument_count,
-            COALESCE(g.count, 0) AS instrument_group_count
-        FROM project p
-            LEFT JOIN (
-                SELECT project_id,
-                    COUNT(instrument) as count
-                FROM instrument
-                WHERE NOT instrument.deleted
-                GROUP BY project_id
-            ) i ON i.project_id = p.id
-            LEFT JOIN (
-                SELECT project_id,
-                    COUNT(instrument_group) as count
-                FROM instrument_group
-                WHERE NOT instrument_group.deleted
-                GROUP BY project_id
-            ) g ON g.project_id = p.id
-            LEFT JOIN (
-                SELECT array_agg(timeseries_id) as timeseries,
-                    project_id
-                FROM project_timeseries
-                GROUP BY project_id
-            ) t on t.project_id = p.id
-			CROSS JOIN config cfg
+    SELECT
+        p.id,
+        p.federal_id,
+        CASE WHEN p.image IS NOT NULL
+            THEN cfg.static_host || '/projects/' || p.slug || '/images/' || p.image
+            ELSE NULL
+        END AS image,
+        p.district_id,
+        d.office_id,
+        p.deleted,
+        p.slug,
+        p.name,
+        p.creator,
+        u.username AS creator_username,
+        p.create_date,
+        p.updater,
+        u.username AS updater_username,
+        p.update_date,
+        COALESCE(i.count, 0) AS instrument_count,
+        COALESCE(g.count, 0) AS instrument_group_count
+    FROM project p
+    LEFT JOIN profile c ON p.creator = c.id
+    LEFT JOIN profile u ON p.updater = c.id
+    LEFT JOIN (
+        SELECT pi.project_id, COUNT(pi.*) as count
+        FROM project_instrument pi
+        INNER JOIN instrument i ON i.id = pi.instrument_id
+        WHERE NOT i.deleted
+        GROUP BY pi.project_id
+    ) i ON i.project_id = p.id
+    LEFT JOIN (
+        SELECT project_id, COUNT(*) as count
+        FROM instrument_group
+        WHERE NOT deleted
+        GROUP BY project_id
+    ) g ON g.project_id = p.id
+    LEFT JOIN (
+        SELECT id, office_id FROM district
+    ) d ON d.id = p.district_id
+    CROSS JOIN config cfg
 );
 
 CREATE OR REPLACE VIEW v_district AS (
     SELECT
+        ag.name         AS agency,
         dis.id          AS id,
         dis.name        AS name,
         dis.initials    AS initials,
@@ -50,6 +52,7 @@ CREATE OR REPLACE VIEW v_district AS (
         dis.office_id   AS office_id
     FROM district dis
     INNER JOIN division div ON dis.division_id = div.id
+    INNER JOIN agency ag ON ag.id = div.agency_id
 );
 
 GRANT SELECT ON

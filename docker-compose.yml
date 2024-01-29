@@ -152,8 +152,6 @@ services:
       - "9324:9324"
     restart: unless-stopped
 
-  # ---------------------- local profile services ---------------------- #
-
   minio:
     image: minio/minio
     environment:

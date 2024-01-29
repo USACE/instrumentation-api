@@ -21,22 +21,17 @@ type Telemetry struct {
 }
 
 type Datalogger struct {
-	ID              uuid.UUID                    `json:"id" db:"id"`
-	Name            string                       `json:"name" db:"name"`
-	SN              string                       `json:"sn" db:"sn"`
-	ProjectID       uuid.UUID                    `json:"project_id" db:"project_id"`
-	Creator         uuid.UUID                    `json:"creator" db:"creator"`
-	CreatorUsername string                       `json:"creator_username" db:"creator_username"`
-	CreateDate      time.Time                    `json:"create_date" db:"create_date"`
-	Updater         *uuid.UUID                   `json:"updater" db:"updater"`
-	UpdaterUsername string                       `json:"updater_username" db:"updater_username"`
-	UpdateDate      *time.Time                   `json:"update_date" db:"update_date"`
-	Slug            string                       `json:"slug" db:"slug"`
-	ModelID         uuid.UUID                    `json:"model_id" db:"model_id"`
-	Model           *string                      `json:"model" db:"model"`
-	Errors          []string                     `json:"errors" db:"-"`
-	PgErrors        pgtype.TextArray             `json:"-" db:"errors"`
-	Tables          dbJSONSlice[DataloggerTable] `json:"tables" db:"tables"`
+	ID        uuid.UUID                    `json:"id" db:"id"`
+	Name      string                       `json:"name" db:"name"`
+	SN        string                       `json:"sn" db:"sn"`
+	ProjectID uuid.UUID                    `json:"project_id" db:"project_id"`
+	Slug      string                       `json:"slug" db:"slug"`
+	ModelID   uuid.UUID                    `json:"model_id" db:"model_id"`
+	Model     *string                      `json:"model" db:"model"`
+	Errors    []string                     `json:"errors" db:"-"`
+	PgErrors  pgtype.TextArray             `json:"-" db:"errors"`
+	Tables    dbJSONSlice[DataloggerTable] `json:"tables" db:"tables"`
+	AuditInfo
 }
 
 type DataloggerWithKey struct {
@@ -164,13 +159,13 @@ func (q *Queries) GetOneDatalogger(ctx context.Context, dataloggerID uuid.UUID) 
 
 const createDatalogger = `
 	INSERT INTO datalogger (name, sn, project_id, creator, updater, slug, model_id)
-	VALUES ($1, $2, $3, $4, $4, $5, $6)
+	VALUES ($1, $2, $3, $4, $4, slugify($1, 'datalogger'), $5)
 	RETURNING id
 `
 
 func (q *Queries) CreateDatalogger(ctx context.Context, dl Datalogger) (uuid.UUID, error) {
 	var dlID uuid.UUID
-	err := q.db.GetContext(ctx, &dlID, createDatalogger, dl.Name, dl.SN, dl.ProjectID, dl.Creator, dl.Slug, dl.ModelID)
+	err := q.db.GetContext(ctx, &dlID, createDatalogger, dl.Name, dl.SN, dl.ProjectID, dl.CreatorID, dl.ModelID)
 	return dlID, err
 }
 
@@ -183,7 +178,7 @@ const updateDatalogger = `
 `
 
 func (q *Queries) UpdateDatalogger(ctx context.Context, dl Datalogger) error {
-	_, err := q.db.ExecContext(ctx, updateDatalogger, dl.ID, dl.Name, dl.Updater, dl.UpdateDate)
+	_, err := q.db.ExecContext(ctx, updateDatalogger, dl.ID, dl.Name, dl.UpdaterID, dl.UpdateDate)
 	return err
 }
 
@@ -204,7 +199,7 @@ const updateDataloggerUpdater = `
 `
 
 func (q *Queries) UpdateDataloggerUpdater(ctx context.Context, dl Datalogger) error {
-	_, err := q.db.ExecContext(ctx, updateDataloggerUpdater, dl.ID, dl.Updater, dl.UpdateDate)
+	_, err := q.db.ExecContext(ctx, updateDataloggerUpdater, dl.ID, dl.UpdaterID, dl.UpdateDate)
 	return err
 }
 
@@ -213,18 +208,8 @@ const deleteDatalogger = `
 `
 
 func (q *Queries) DeleteDatalogger(ctx context.Context, dl Datalogger) error {
-	_, err := q.db.ExecContext(ctx, deleteDatalogger, dl.ID, dl.Updater, dl.UpdateDate)
+	_, err := q.db.ExecContext(ctx, deleteDatalogger, dl.ID, dl.UpdaterID, dl.UpdateDate)
 	return err
-}
-
-const listDataloggerSlugs = `
-	SELECT slug FROM datalogger
-`
-
-func (q *Queries) ListDataloggerSlugs(ctx context.Context) ([]string, error) {
-	aa := make([]string, 0)
-	err := q.db.SelectContext(ctx, &aa, listDataloggerSlugs)
-	return aa, err
 }
 
 const getDataloggerTablePreview = `

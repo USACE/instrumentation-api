@@ -11,7 +11,6 @@ type DataloggerService interface {
 	GetDataloggerModelName(ctx context.Context, modelID uuid.UUID) (string, error)
 	ListProjectDataloggers(ctx context.Context, projectID uuid.UUID) ([]model.Datalogger, error)
 	ListAllDataloggers(ctx context.Context) ([]model.Datalogger, error)
-	ListDataloggerSlugs(ctx context.Context) ([]string, error)
 	GetDataloggerIsActive(ctx context.Context, modelName, sn string) (bool, error)
 	VerifyDataloggerExists(ctx context.Context, dlID uuid.UUID) error
 	CreateDatalogger(ctx context.Context, n model.Datalogger) (model.DataloggerWithKey, error)

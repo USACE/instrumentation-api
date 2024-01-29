@@ -18,14 +18,12 @@ type AwareParameter struct {
 // { projectID: <uuid4>, instrument_id: <uuid4>, aware_id: <uuid4>, aware_parameters: { <string>: <uuid4> } }
 // aware_parameters is a map of <aware_parameter_key> : <timeseries_id>
 type AwarePlatformParameterConfig struct {
-	ProjectID       uuid.UUID             `json:"project_id" db:"project_id"`
 	InstrumentID    uuid.UUID             `json:"instrument_id" db:"instrument_id"`
 	AwareID         uuid.UUID             `json:"aware_id" db:"aware_id"`
 	AwareParameters map[string]*uuid.UUID `json:"aware_parameters"`
 }
 
 type AwarePlatformParameterEnabled struct {
-	ProjectID         uuid.UUID  `json:"project_id" db:"project_id"`
 	InstrumentID      uuid.UUID  `json:"instrument_id" db:"instrument_id"`
 	AwareID           uuid.UUID  `json:"aware_id" db:"aware_id"`
 	AwareParameterKey string     `json:"aware_parameter_key" db:"aware_parameter_key"`
@@ -46,7 +44,7 @@ func (q *Queries) ListAwareParameters(ctx context.Context) ([]AwareParameter, er
 }
 
 const listAwarePlatformParameterEnabled = `
-	SELECT project_id, instrument_id, aware_id, aware_parameter_key, timeseries_id
+	SELECT instrument_id, aware_id, aware_parameter_key, timeseries_id
 	FROM v_aware_platform_parameter_enabled
 	ORDER BY project_id, aware_id, aware_parameter_key
 `

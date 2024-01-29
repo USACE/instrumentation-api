@@ -31,3 +31,4 @@ __debug*
 
 # reports from regression tests
 report
+test.log

@@ -31,10 +31,10 @@ var evaluationSchema = fmt.Sprintf(`{
         "start_date": { "type": "string", "format": "date-time" },
         "end_date": { "type": "string", "format": "date-time" },
         "instruments": { "type": "array", "items": %s },
-        "creator": { "type": "string" },
+        "creator_id": { "type": "string" },
         "creator_username": { "type": "string" },
         "create_date": { "type": "string", "format": "date-time" },
-        "updater": { "type": ["string", "null"] },
+        "updater_id": { "type": ["string", "null"] },
         "updater_username": { "type": ["string", "null"] },
         "update_date": { "type": ["string", "null"], "format": "date-time" }
     },

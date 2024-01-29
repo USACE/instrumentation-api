@@ -2,20 +2,12 @@ package model
 
 import (
 	"context"
-	"encoding/json"
 
-	"github.com/USACE/instrumentation-api/api/internal/util"
 	"github.com/google/uuid"
 )
 
-const listProjectsSQL = `
-	SELECT
-		id, federal_id, image, office_id, deleted, slug, name, creator, create_date,
-		updater, update_date, instrument_count, instrument_group_count, timeseries
-	FROM v_project
-`
-
 type District struct {
+	Agency           string     `json:"agency" db:"agency"`
 	ID               uuid.UUID  `json:"id" db:"id"`
 	Name             string     `json:"name" db:"name"`
 	Initials         string     `json:"initials" db:"initials"`
@@ -25,16 +17,16 @@ type District struct {
 }
 
 type Project struct {
-	ID                   uuid.UUID          `json:"id"`
-	FederalID            *string            `json:"federal_id" db:"federal_id"`
-	OfficeID             *uuid.UUID         `json:"office_id" db:"office_id"`
-	Image                *string            `json:"image" db:"image"`
-	Deleted              bool               `json:"-"`
-	Slug                 string             `json:"slug"`
-	Name                 string             `json:"name"`
-	Timeseries           dbSlice[uuid.UUID] `json:"timeseries" db:"timeseries"`
-	InstrumentCount      int                `json:"instrument_count" db:"instrument_count"`
-	InstrumentGroupCount int                `json:"instrument_group_count" db:"instrument_group_count"`
+	ID                   uuid.UUID  `json:"id"`
+	Slug                 string     `json:"slug"`
+	Name                 string     `json:"name"`
+	FederalID            *string    `json:"federal_id" db:"federal_id"`
+	DistrictID           *uuid.UUID `json:"district_id" db:"district_id"`
+	OfficeID             *uuid.UUID `json:"office_id" db:"office_id"`
+	Image                *string    `json:"image" db:"image"`
+	Deleted              bool       `json:"-"`
+	InstrumentCount      int        `json:"instrument_count" db:"instrument_count"`
+	InstrumentGroupCount int        `json:"instrument_group_count" db:"instrument_group_count"`
 	AuditInfo
 }
 
@@ -42,29 +34,16 @@ type ProjectCount struct {
 	ProjectCount int `json:"project_count"`
 }
 
-type ProjectCollection struct {
-	Projects []Project
-}
+type ProjectCollection []Project
 
-func (c *ProjectCollection) UnmarshalJSON(b []byte) error {
-	switch util.JSONType(b) {
-	case "ARRAY":
-		if err := json.Unmarshal(b, &c.Projects); err != nil {
-			return err
-		}
-	case "OBJECT":
-		var p Project
-		if err := json.Unmarshal(b, &p); err != nil {
-			return err
-		}
-		c.Projects = []Project{p}
-	default:
-		c.Projects = make([]Project, 0)
-	}
-	return nil
-}
+const selectProjectsSQL = `
+	SELECT
+		id, federal_id, image, office_id, district_id, deleted, slug, name, creator, creator_username, create_date,
+		updater, updater_username, update_date, instrument_count, instrument_group_count
+	FROM v_project
+`
 
-const projectSearch = listProjectsSQL + `
+const projectSearch = selectProjectsSQL + `
 	WHERE NOT deleted AND name ILIKE '%' || $1 || '%' LIMIT $2 ORDER BY name
 `
 
@@ -93,20 +72,7 @@ func (q *Queries) ListDistricts(ctx context.Context) ([]District, error) {
 	return dd, nil
 }
 
-const listProjectSlugs = `
-	SELECT slug FROM project
-`
-
-// ListProjectSlugs returns a list of used slugs for projects
-func (q *Queries) ListProjectSlugs(ctx context.Context) ([]string, error) {
-	ss := make([]string, 0)
-	if err := q.db.SelectContext(ctx, &ss, listProjectSlugs); err != nil {
-		return nil, err
-	}
-	return ss, nil
-}
-
-const listProjects = listProjectsSQL + `
+const listProjects = selectProjectsSQL + `
 	WHERE NOT deleted ORDER BY name
 `
 
@@ -119,7 +85,7 @@ func (q *Queries) ListProjects(ctx context.Context) ([]Project, error) {
 	return pp, nil
 }
 
-const listProjectsByFederalID = listProjectsSQL + `
+const listProjectsByFederalID = selectProjectsSQL + `
 	WHERE federal_id IS NOT NULL AND federal_id = $1 AND NOT deleted ORDER BY name
 `
 
@@ -132,14 +98,13 @@ func (q *Queries) ListProjectsByFederalID(ctx context.Context, federalID string)
 	return pp, nil
 }
 
-const listProjectsForProfile = `
-	SELECT DISTINCT
-		p.id, p.federal_id, p.image, p.office_id, p.deleted, p.slug, p.name, p.creator, p.create_date,
-		p.updater, p.update_date, p.instrument_count, p.instrument_group_count, p.timeseries
-	FROM profile_project_roles ppr
-	INNER JOIN v_project p on p.id = ppr.project_id
-	WHERE ppr.profile_id = $1 AND NOT p.deleted
-	ORDER BY p.name
+const listProjectsForProfile = selectProjectsSQL + `
+	WHERE id = ANY(
+		SELECT project_id FROM profile_project_roles
+		WHERE profile_id = $1
+	)
+	AND NOT deleted
+	ORDER BY name
 `
 
 func (q *Queries) ListProjectsForProfile(ctx context.Context, profileID uuid.UUID) ([]Project, error) {
@@ -150,8 +115,30 @@ func (q *Queries) ListProjectsForProfile(ctx context.Context, profileID uuid.UUI
 	return pp, nil
 }
 
+const listProjectsForProfileRole = selectProjectsSQL + `
+	WHERE id = ANY(
+		SELECT project_id FROM profile_project_roles pr
+		INNER JOIN role r ON r.id = pr.role_id
+		WHERE pr.profile_id = $1
+		AND r.name = $2
+	)
+	AND NOT deleted
+	ORDER BY name
+`
+
+func (q *Queries) ListProjectsForProfileRole(ctx context.Context, profileID uuid.UUID, role string) ([]Project, error) {
+	pp := make([]Project, 0)
+	err := q.db.SelectContext(ctx, &pp, listProjectsForProfileRole, profileID, role)
+	return pp, err
+}
+
 const listProjectInstruments = listInstrumentsSQL + `
-	WHERE project_id = $1 AND NOT deleted
+	WHERE id = ANY(
+		SELECT instrument_id
+		FROM project_instrument
+		WHERE project_id = $1
+	)
+	AND NOT deleted
 `
 
 // ListProjectInstruments returns a slice of instruments for a project
@@ -161,19 +148,6 @@ func (q *Queries) ListProjectInstruments(ctx context.Context, projectID uuid.UUI
 		return nil, err
 	}
 	return ii, nil
-}
-
-const listProjectInstrumentNames = `
-	SELECT name FROM instrument WHERE project_id = $1
-`
-
-// ListProjectInstrumentNames returns a slice of instrument names for a project
-func (q *Queries) ListProjectInstrumentNames(ctx context.Context, projectID uuid.UUID) ([]string, error) {
-	names := make([]string, 0)
-	if err := q.db.SelectContext(ctx, &names, listProjectInstrumentNames, projectID); err != nil {
-		return nil, err
-	}
-	return names, nil
 }
 
 const listProjectInstrumentGroups = listInstrumentGroupsSQL + `
@@ -202,11 +176,10 @@ func (q *Queries) GetProjectCount(ctx context.Context) (ProjectCount, error) {
 	return pc, nil
 }
 
-const getProject = listProjectsSQL + `
+const getProject = selectProjectsSQL + `
 	WHERE id = $1
 `
 
-// GetProject returns a pointer to a project
 func (q *Queries) GetProject(ctx context.Context, id uuid.UUID) (Project, error) {
 	var p Project
 	err := q.db.GetContext(ctx, &p, getProject, id)
@@ -214,24 +187,33 @@ func (q *Queries) GetProject(ctx context.Context, id uuid.UUID) (Project, error)
 }
 
 const createProject = `
-	INSERT INTO project (federal_id, slug, name, creator, create_date)
-	VALUES ($1, $2, $3, $4, $5)
+	INSERT INTO project (federal_id, slug, name, district_id, creator, create_date)
+	VALUES ($1, slugify($2, 'project'), $2, $3, $4, $5)
 	RETURNING id, slug
 `
 
-func (q *Queries) CreateProject(ctx context.Context, p Project) (IDAndSlug, error) {
-	var aa IDAndSlug
-	err := q.db.GetContext(ctx, &aa, createProject, p.FederalID, p.Slug, p.Name, p.Creator, p.CreateDate)
+func (q *Queries) CreateProject(ctx context.Context, p Project) (IDSlugName, error) {
+	var aa IDSlugName
+	err := q.db.GetContext(ctx, &aa, createProject, p.FederalID, p.Name, p.DistrictID, p.CreatorID, p.CreateDate)
 	return aa, err
 }
 
 const updateProject = `
-	UPDATE project SET name=$2, updater=$3, update_date=$4, office_id=$5, federal_id=$6 WHERE id=$1 RETURNING id
+	UPDATE project SET name=$2, updater=$3, update_date=$4, district_id=$5, federal_id=$6 WHERE id=$1 RETURNING id
 `
 
 // UpdateProject updates a project
 func (q *Queries) UpdateProject(ctx context.Context, p Project) error {
-	_, err := q.db.ExecContext(ctx, updateProject, p.ID, p.Name, p.Updater, p.UpdateDate, p.OfficeID, p.FederalID)
+	_, err := q.db.ExecContext(ctx, updateProject, p.ID, p.Name, p.UpdaterID, p.UpdateDate, p.DistrictID, p.FederalID)
+	return err
+}
+
+const updateProjectImage = `
+	UPDATE project SET image = $1 WHERE project_id = $2
+`
+
+func (q *Queries) UpdateProjectImage(ctx context.Context, fileName string, projectID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, updateProjectImage, fileName, projectID)
 	return err
 }
 
@@ -242,26 +224,5 @@ const deleteFlagProject = `
 // DeleteFlagProject sets deleted to true for a project
 func (q *Queries) DeleteFlagProject(ctx context.Context, id uuid.UUID) error {
 	_, err := q.db.ExecContext(ctx, deleteFlagProject, id)
-	return err
-}
-
-const createProjectTimeseries = `
-	INSERT INTO project_timeseries (project_id, timeseries_id) VALUES ($1, $2)
-	ON CONFLICT ON CONSTRAINT project_unique_timeseries DO NOTHING
-`
-
-// CreateProjectTimeseries promotes a timeseries to the project level
-func (q *Queries) CreateProjectTimeseries(ctx context.Context, projectID, timeseriesID uuid.UUID) error {
-	_, err := q.db.ExecContext(ctx, createProjectTimeseries, projectID, timeseriesID)
-	return err
-}
-
-const deleteProjectTimeseries = `
-	DELETE FROM project_timeseries WHERE project_id = $1 AND timeseries_id = $2
-`
-
-// DeleteProjectTimeseries removes a timeseries from the project level; Does not delete underlying timeseries
-func (q *Queries) DeleteProjectTimeseries(ctx context.Context, projectID, timeseriesID uuid.UUID) error {
-	_, err := q.db.ExecContext(ctx, deleteProjectTimeseries, projectID, timeseriesID)
 	return err
 }

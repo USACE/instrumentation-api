@@ -121,7 +121,7 @@ func (h *ApiHandler) CreateEvaluation(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	profile := c.Get("profile").(model.Profile)
-	ev.ProjectID, ev.Creator, ev.CreateDate = projectID, profile.ID, time.Now()
+	ev.ProjectID, ev.CreatorID, ev.CreateDate = projectID, profile.ID, time.Now()
 
 	evNew, err := h.EvaluationService.CreateEvaluation(c.Request().Context(), ev)
 	if err != nil {
@@ -155,7 +155,7 @@ func (h *ApiHandler) UpdateEvaluation(c echo.Context) error {
 	}
 	p := c.Get("profile").(model.Profile)
 	t := time.Now()
-	ev.Updater, ev.UpdateDate = &p.ID, &t
+	ev.UpdaterID, ev.UpdateDate = &p.ID, &t
 	evUpdated, err := h.EvaluationService.UpdateEvaluation(c.Request().Context(), evID, ev)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())

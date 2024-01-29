@@ -17,12 +17,12 @@ const instrumentNoteSchema = `{
         "title": { "type": "string" },
         "body": { "type": "string" },
         "time": { "type": "string" },
-        "creator": { "type": "string" },
+        "creator_id": { "type": "string" },
         "create_date": { "type": "string", "format": "date-time" },
-        "updater": {  "type": ["string", "null" ] },
+        "updater_id": {  "type": ["string", "null" ] },
         "update_date": { "type": ["string", "null"], "format": "date-time" }
     },
-    "required": ["id", "instrument_id", "title", "body", "time", "creator", "create_date", "updater", "update_date" ],
+    "required": ["id", "instrument_id", "title", "body", "time", "creator_id", "create_date", "updater_id", "update_date" ],
     "additionalProperties": false
 }`
 

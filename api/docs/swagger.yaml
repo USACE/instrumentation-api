@@ -50,7 +50,7 @@ definitions:
         type: string
       create_date:
         type: string
-      creator:
+      creator_id:
         type: string
       creator_username:
         type: string
@@ -80,7 +80,7 @@ definitions:
         type: string
       update_date:
         type: string
-      updater:
+      updater_id:
         type: string
       updater_username:
         type: string
@@ -128,8 +128,6 @@ definitions:
         type: object
       instrument_id:
         type: string
-      project_id:
-        type: string
     type: object
   github_com_USACE_instrumentation-api_api_internal_model.CalculatedTimeseries:
     properties:
@@ -152,7 +150,9 @@ definitions:
     properties:
       create_date:
         type: string
-      creator:
+      creator_id:
+        type: string
+      creator_username:
         type: string
       id:
         type: string
@@ -164,14 +164,18 @@ definitions:
         type: string
       update_date:
         type: string
-      updater:
+      updater_id:
+        type: string
+      updater_username:
         type: string
     type: object
   github_com_USACE_instrumentation-api_api_internal_model.CollectionGroupDetails:
     properties:
       create_date:
         type: string
-      creator:
+      creator_id:
+        type: string
+      creator_username:
         type: string
       id:
         type: string
@@ -187,14 +191,16 @@ definitions:
         type: array
       update_date:
         type: string
-      updater:
+      updater_id:
+        type: string
+      updater_username:
         type: string
     type: object
   github_com_USACE_instrumentation-api_api_internal_model.Datalogger:
     properties:
       create_date:
         type: string
-      creator:
+      creator_id:
         type: string
       creator_username:
         type: string
@@ -222,7 +228,7 @@ definitions:
         type: array
       update_date:
         type: string
-      updater:
+      updater_id:
         type: string
       updater_username:
         type: string
@@ -247,7 +253,7 @@ definitions:
     properties:
       create_date:
         type: string
-      creator:
+      creator_id:
         type: string
       creator_username:
         type: string
@@ -277,13 +283,15 @@ definitions:
         type: array
       update_date:
         type: string
-      updater:
+      updater_id:
         type: string
       updater_username:
         type: string
     type: object
   github_com_USACE_instrumentation-api_api_internal_model.District:
     properties:
+      agency:
+        type: string
       division_initials:
         type: string
       division_name:
@@ -395,7 +403,7 @@ definitions:
         type: string
       create_date:
         type: string
-      creator:
+      creator_id:
         type: string
       creator_username:
         type: string
@@ -419,7 +427,7 @@ definitions:
         type: string
       update_date:
         type: string
-      updater:
+      updater_id:
         type: string
       updater_username:
         type: string
@@ -454,9 +462,11 @@ definitions:
       project_count:
         type: integer
     type: object
-  github_com_USACE_instrumentation-api_api_internal_model.IDAndSlug:
+  github_com_USACE_instrumentation-api_api_internal_model.IDSlugName:
     properties:
       id:
+        type: string
+      name:
         type: string
       slug:
         type: string
@@ -519,7 +529,9 @@ definitions:
         type: array
       create_date:
         type: string
-      creator:
+      creator_id:
+        type: string
+      creator_username:
         type: string
       geometry:
         $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Geometry'
@@ -527,6 +539,8 @@ definitions:
         items:
           type: string
         type: array
+      icon:
+        type: string
       id:
         type: string
       name:
@@ -537,8 +551,10 @@ definitions:
         type: integer
       opts:
         $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Opts'
-      project_id:
-        type: string
+      projects:
+        items:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IDSlugName'
+        type: array
       slug:
         type: string
       station:
@@ -555,17 +571,12 @@ definitions:
         type: string
       update_date:
         type: string
-      updater:
+      updater_id:
+        type: string
+      updater_username:
         type: string
       usgs_id:
         type: string
-    type: object
-  github_com_USACE_instrumentation-api_api_internal_model.InstrumentCollection:
-    properties:
-      items:
-        items:
-          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Instrument'
-        type: array
     type: object
   github_com_USACE_instrumentation-api_api_internal_model.InstrumentCount:
     properties:
@@ -576,7 +587,9 @@ definitions:
     properties:
       create_date:
         type: string
-      creator:
+      creator_id:
+        type: string
+      creator_username:
         type: string
       description:
         type: string
@@ -594,7 +607,9 @@ definitions:
         type: integer
       update_date:
         type: string
-      updater:
+      updater_id:
+        type: string
+      updater_username:
         type: string
     type: object
   github_com_USACE_instrumentation-api_api_internal_model.InstrumentNote:
@@ -603,7 +618,9 @@ definitions:
         type: string
       create_date:
         type: string
-      creator:
+      creator_id:
+        type: string
+      creator_username:
         type: string
       id:
         type: string
@@ -615,7 +632,9 @@ definitions:
         type: string
       update_date:
         type: string
-      updater:
+      updater_id:
+        type: string
+      updater_username:
         type: string
     type: object
   github_com_USACE_instrumentation-api_api_internal_model.InstrumentNoteCollection:
@@ -730,7 +749,9 @@ definitions:
         type: boolean
       create_date:
         type: string
-      creator:
+      creator_id:
+        type: string
+      creator_username:
         type: string
       date_range:
         type: string
@@ -756,7 +777,9 @@ definitions:
         type: array
       update_date:
         type: string
-      updater:
+      updater_id:
+        type: string
+      updater_username:
         type: string
     type: object
   github_com_USACE_instrumentation-api_api_internal_model.Profile:
@@ -782,7 +805,11 @@ definitions:
     properties:
       create_date:
         type: string
-      creator:
+      creator_id:
+        type: string
+      creator_username:
+        type: string
+      district_id:
         type: string
       federal_id:
         type: string
@@ -800,21 +827,12 @@ definitions:
         type: string
       slug:
         type: string
-      timeseries:
-        items:
-          type: string
-        type: array
       update_date:
         type: string
-      updater:
+      updater_id:
         type: string
-    type: object
-  github_com_USACE_instrumentation-api_api_internal_model.ProjectCollection:
-    properties:
-      projects:
-        items:
-          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Project'
-        type: array
+      updater_username:
+        type: string
     type: object
   github_com_USACE_instrumentation-api_api_internal_model.ProjectCount:
     properties:
@@ -968,12 +986,6 @@ definitions:
         type: string
       parameter_id:
         type: string
-      project:
-        type: string
-      project_id:
-        type: string
-      project_slug:
-        type: string
       slug:
         type: string
       unit:
@@ -1057,12 +1069,6 @@ definitions:
       parameter:
         type: string
       parameter_id:
-        type: string
-      project:
-        type: string
-      project_id:
-        type: string
-      project_slug:
         type: string
       slug:
         type: string
@@ -2497,40 +2503,6 @@ paths:
       summary: lists all instruments
       tags:
       - instrument
-    post:
-      parameters:
-      - description: instrument collection payload
-        in: body
-        name: instrument
-        required: true
-        schema:
-          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentCollection'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IDAndSlug'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-      security:
-      - Bearer: []
-      summary: accepts an array of instruments for bulk upload to the database
-      tags:
-      - instrument
   /instruments/{instrument_id}:
     get:
       parameters:
@@ -3503,6 +3475,11 @@ paths:
       - profile
   /my_projects:
     get:
+      parameters:
+      - description: role
+        in: query
+        name: role
+        type: string
       produces:
       - application/json
       responses:
@@ -3526,7 +3503,8 @@ paths:
             $ref: '#/definitions/echo.HTTPError'
       security:
       - CacOnly: []
-      summary: lists projects for current profile
+      summary: lists projects where current profile is an admin or member with optional
+        filter by project role
       tags:
       - project
   /my_tokens:
@@ -3679,7 +3657,9 @@ paths:
         name: project_collection
         required: true
         schema:
-          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.ProjectCollection'
+          items:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Project'
+          type: array
       produces:
       - application/json
       responses:
@@ -3687,7 +3667,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IDAndSlug'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IDSlugName'
             type: array
         "400":
           description: Bad Request
@@ -4549,6 +4529,43 @@ paths:
       summary: updates an existing evaluation
       tags:
       - evaluation
+  /projects/{project_id}/images:
+    post:
+      consumes:
+      - image/jpeg
+      - image/png
+      parameters:
+      - description: project id
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
+      summary: uploades a picture for a project
+      tags:
+      - project
   /projects/{project_id}/inclinometer_measurements:
     post:
       parameters:
@@ -4664,12 +4681,20 @@ paths:
         name: project_id
         required: true
         type: string
+      - description: instrument id
+        format: uuid
+        in: path
+        name: instrument_id
+        required: true
+        type: string
       - description: instrument collection payload
         in: body
         name: instrument
         required: true
         schema:
-          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentCollection'
+          items:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Instrument'
+          type: array
       produces:
       - application/json
       responses:
@@ -4677,7 +4702,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IDAndSlug'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IDSlugName'
             type: array
         "400":
           description: Bad Request
@@ -4952,6 +4977,88 @@ paths:
       summary: lists alerts for a single instrument
       tags:
       - alert
+  /projects/{project_id}/instruments/{instrument_id}/assignments:
+    delete:
+      description: must be Project Admin of project to be unassigned
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: instrument uuid
+        format: uuid
+        in: path
+        name: instrument_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
+      summary: unassigns an instrument from a project.
+      tags:
+      - instrument
+    post:
+      description: must be Project (or Application) Admin of all existing instrument
+        projects and project to be assigned
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: instrument uuid
+        format: uuid
+        in: path
+        name: instrument_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
+      summary: assigns an instrument to a project.
+      tags:
+      - instrument
   /projects/{project_id}/instruments/{instrument_id}/constants:
     get:
       parameters:
@@ -5206,39 +5313,6 @@ paths:
       summary: lists timeseries for an instrument
       tags:
       - timeseries
-  /projects/{project_id}/instruments/names:
-    get:
-      parameters:
-      - description: project uuid
-        format: uuid
-        in: path
-        name: project_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              type: string
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-      summary: lists names of all instruments associated with a project
-      tags:
-      - project
   /projects/{project_id}/members:
     get:
       parameters:
@@ -5621,85 +5695,6 @@ paths:
       summary: lists all timeseries for a single project
       tags:
       - timeseries
-  /projects/{project_id}/timeseries/{timeseries_id}:
-    delete:
-      parameters:
-      - description: project id
-        format: uuid
-        in: path
-        name: project_id
-        required: true
-        type: string
-      - description: timeseries uuid
-        format: uuid
-        in: path
-        name: timeseries_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-      security:
-      - Bearer: []
-      summary: removes a timeseries from the project level
-      tags:
-      - project
-    post:
-      parameters:
-      - description: project id
-        format: uuid
-        in: path
-        name: project_id
-        required: true
-        type: string
-      - description: timeseries uuid
-        format: uuid
-        in: path
-        name: timeseries_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-      security:
-      - Bearer: []
-      summary: exposes a timeseries at the project level
-      tags:
-      - project
   /projects/{project_id}/timeseries_measurements:
     post:
       consumes:
@@ -5921,31 +5916,6 @@ paths:
       tags:
       - submittal
   /timeseries:
-    get:
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Timeseries'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-      summary: lists all timeseries
-      tags:
-      - timeseries
     post:
       parameters:
       - description: timeseries collection items payload
@@ -5961,7 +5931,9 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Timeseries'
+              additionalProperties:
+                type: string
+              type: object
             type: array
         "400":
           description: Bad Request
@@ -6064,7 +6036,9 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Timeseries'
+            additionalProperties:
+              type: string
+            type: object
         "400":
           description: Bad Request
           schema:

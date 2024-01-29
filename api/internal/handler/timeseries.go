@@ -3,31 +3,12 @@ package handler
 import (
 	"github.com/USACE/instrumentation-api/api/internal/message"
 	"github.com/USACE/instrumentation-api/api/internal/model"
-	"github.com/USACE/instrumentation-api/api/internal/util"
 
 	"net/http"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
-
-// ListTimeseries godoc
-//
-//	@Summary lists all timeseries
-//	@Tags timeseries
-//	@Produce json
-//	@Success 200 {array} model.Timeseries
-//	@Failure 400 {object} echo.HTTPError
-//	@Failure 404 {object} echo.HTTPError
-//	@Failure 500 {object} echo.HTTPError
-//	@Router /timeseries [get]
-func (h *ApiHandler) ListTimeseries(c echo.Context) error {
-	tt, err := h.TimeseriesService.ListTimeseries(c.Request().Context())
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-	return c.JSON(http.StatusOK, tt)
-}
 
 // GetTimeseries godoc
 //
@@ -130,7 +111,7 @@ func (h *ApiHandler) ListProjectTimeseries(c echo.Context) error {
 //	@Tags timeseries
 //	@Produce json
 //	@Param timeseries_collection_items body model.TimeseriesCollectionItems true "timeseries collection items payload"
-//	@Success 200 {array} model.Timeseries
+//	@Success 200 {array} map[string]uuid.UUID
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
@@ -141,21 +122,7 @@ func (h *ApiHandler) CreateTimeseries(c echo.Context) error {
 	if err := c.Bind(&tc); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	ctx := c.Request().Context()
-	slugsTaken, err := h.TimeseriesService.ListTimeseriesSlugs(ctx)
-	if err != nil {
-		return err
-	}
-	for idx := range tc.Items {
-		s, err := util.NextUniqueSlug(tc.Items[idx].Name, slugsTaken)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-		}
-		tc.Items[idx].Slug = s
-		slugsTaken = append(slugsTaken, s)
-	}
-
-	tt, err := h.TimeseriesService.CreateTimeseriesBatch(ctx, tc.Items)
+	tt, err := h.TimeseriesService.CreateTimeseriesBatch(c.Request().Context(), tc.Items)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -169,7 +136,7 @@ func (h *ApiHandler) CreateTimeseries(c echo.Context) error {
 //	@Produce json
 //	@Param timeseries_id path string true "timeseries uuid" Format(uuid)
 //	@Param timeseries body model.Timeseries true "timeseries payload"
-//	@Success 200 {object} model.Timeseries
+//	@Success 200 {object} map[string]uuid.UUID
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
@@ -184,9 +151,7 @@ func (h *ApiHandler) UpdateTimeseries(c echo.Context) error {
 	if err := c.Bind(&t); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	if id != t.ID {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MatchRouteParam("`id`"))
-	}
+	t.ID = id
 	if _, err := h.TimeseriesService.UpdateTimeseries(c.Request().Context(), t); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
