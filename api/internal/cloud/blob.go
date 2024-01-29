@@ -35,7 +35,7 @@ type s3BlobConfig struct {
 
 var _ Blob = (*S3Blob)(nil)
 
-func uploader(u *s3manager.Uploader)
+func uploader(u *s3manager.Uploader) {}
 
 func NewS3Blob(cfg *config.AWSS3Config, bucketPrefix, routePrefix string) *S3Blob {
 	awsCfg := cfg.S3Config()
