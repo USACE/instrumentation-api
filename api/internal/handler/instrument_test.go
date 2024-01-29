@@ -29,6 +29,7 @@ var instrumentSchema = fmt.Sprintf(`{
         "name": { "type": "string" },
         "type_id": { "type": "string" },
         "type": { "type": "string" },
+        "icon": { "type": ["string", "null"] },
         "status_id": { "type": "string" },
         "status": { "type": "string" },
         "status_time": { "type": "string" },

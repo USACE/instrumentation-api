@@ -2,31 +2,37 @@
 
 set -o pipefail
 
-if [ "$1" = "up" ]; then
-    (cd api && swag init -q --pd -g cmd/core/main.go --parseInternal true --dir internal)
+COMPOSECMD="env DOCKER_BUILDKIT=1 docker-compose -f docker-compose.yml --profile=local"
+mkdocs() {
+    (cd api && swag init --pd $1 -g cmd/core/main.go --parseInternal true --dir internal)
+}
+
+if [ "$1" = "watch" ]; then
+    mkdocs -q
     if [ "$2" = "mock" ]; then
-        env DOCKER_BUILDKIT=1 docker-compose --profile=local --profile=mock up -d --build
+        $COMPOSECMD -f docker-compose.dev.yml --profile=mock watch
     else
-        env DOCKER_BUILDKIT=1 docker-compose --profile=local up -d --build
+        $COMPOSECMD -f docker-compose.dev.yml watch
+    fi
+
+elif [ "$1" = "up" ]; then
+    mkdocs -q
+    if [ "$2" = "mock" ]; then
+        $COMPOSECMD --profile=mock up -d --build
+    else
+        $COMPOSECMD up -d --build
     fi
 
 elif [ "$1" = "down" ]; then
-    (cd api && swag init -q --pd -g cmd/core/main.go --parseInternal true --dir internal)
-    if [ "$2" = "mock" ]; then
-        docker-compose --profile=local --profile=mock down
-    else
-        docker-compose --profile=local down
-    fi
+    mkdocs -q
+    $COMPOSECMD --profile=mock down
 
 elif [ "$1" = "clean" ]; then
-    if [ "$2" = "mock" ]; then
-        docker-compose --profile=local --profile=mock down -v
-    else
-        docker-compose --profile=local down -v
-    fi
+    $COMPOSECMD --profile=mock down -v
 
 elif [ "$1" = "test" ]; then
-    docker-compose -f docker-compose.yml -f docker-compose.dev.yml build --build-arg dev
+    COMPOSE_FILES="-f docker-compose.yml -f docker-compose.dev.yml"
+    docker-compose $COMPOSE_FILES build
     shift
 
     TEARDOWN=false
@@ -48,19 +54,18 @@ elif [ "$1" = "test" ]; then
     GOCMD="go test ${REST_ARGS[@]} github.com/USACE/instrumentation-api/api/internal/handler"
 
     if [ "$REPORT" = true ]; then
-        docker-compose -f docker-compose.yml -f docker-compose.dev.yml run --entrypoint="$GOCMD" api > $(pwd)/report/api-test.log
+        docker-compose $COMPOSE_FILES run --entrypoint="$GOCMD" api > $(pwd)/test.log
     else
-        docker-compose -f docker-compose.yml -f docker-compose.dev.yml run --entrypoint="$GOCMD" api
+        docker-compose $COMPOSE_FILES run --entrypoint="$GOCMD" api
     fi
 
     if [ $TEARDOWN = true ]; then
-        docker-compose --profile=local --profile=mock down -v
+        docker-compose $COMPOSE_FILES --profile=local --profile=mock down -v
     fi
 
 elif [ "$1" = "mkdocs" ]; then
-    # TODO: this could possibly be added in CI, just run locally for now
-    (cd api && swag init -q --pd -g cmd/core/main.go --parseInternal true --dir internal)
+    mkdocs
 
 else
-    echo -e "usage:\n\t./compose.sh up\n\t./compose.sh down\n\t./compose.sh clean\n\t./compose.sh test\n\t./compose.sh mkdocs"
+    echo -e "usage:\n\t./compose.sh watch\n\t./compose.sh up\n\t./compose.sh down\n\t./compose.sh clean\n\t./compose.sh test\n\t./compose.sh mkdocs"
 fi

@@ -241,6 +241,7 @@ func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 	r.public.GET("/projects/:project_id/instrument_groups", h.ListProjectInstrumentGroups)
 	// Application Admin Only
 	r.private.POST("/projects", h.CreateProjectBulk, mw.IsApplicationAdmin)
+	r.private.POST("/projects/:project_id/images", h.UploadProjectImage, mw.IsApplicationAdmin)
 	r.private.PUT("/projects/:project_id", h.UpdateProject, mw.IsApplicationAdmin)
 	r.private.DELETE("/projects/:project_id", h.DeleteFlagProject, mw.IsApplicationAdmin)
 

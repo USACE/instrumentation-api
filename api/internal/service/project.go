@@ -2,7 +2,12 @@ package service
 
 import (
 	"context"
+	"image"
+	"io"
+	"mime/multipart"
+	"os"
 
+	"github.com/USACE/instrumentation-api/api/internal/img"
 	"github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/google/uuid"
 )
@@ -21,6 +26,7 @@ type ProjectService interface {
 	CreateProject(ctx context.Context, p model.Project) (model.IDSlugName, error)
 	CreateProjectBulk(ctx context.Context, projects []model.Project) ([]model.IDSlugName, error)
 	UpdateProject(ctx context.Context, p model.Project) (model.Project, error)
+	UploadProjectImage(ctx context.Context, projectID uuid.UUID, file multipart.FileHeader, u uploader) error
 	DeleteFlagProject(ctx context.Context, projectID uuid.UUID) error
 }
 
@@ -32,6 +38,8 @@ type projectService struct {
 func NewProjectService(db *model.Database, q *model.Queries) *projectService {
 	return &projectService{db, q}
 }
+
+type uploader func(ctx context.Context, r io.Reader, rawPath, bucketName string) error
 
 // CreateProjectBulk creates one or more projects from an array of projects
 func (s projectService) CreateProjectBulk(ctx context.Context, projects []model.Project) ([]model.IDSlugName, error) {
@@ -81,4 +89,44 @@ func (s projectService) UpdateProject(ctx context.Context, p model.Project) (mod
 	}
 
 	return updated, nil
+}
+
+func (s projectService) UploadProjectImage(ctx context.Context, projectID uuid.UUID, file multipart.FileHeader, u uploader) error {
+	tx, err := s.db.BeginTxx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer model.TxDo(tx.Rollback)
+
+	qtx := s.WithTx(tx)
+
+	p, err := qtx.GetProject(ctx, projectID)
+	if err != nil {
+		return err
+	}
+
+	src, err := file.Open()
+	if err != nil {
+		return err
+	}
+	defer src.Close()
+	dst, err := os.Create(file.Filename)
+	if err != nil {
+		return err
+	}
+	defer dst.Close()
+
+	if err := img.Resize(src, dst, image.Rect(0, 0, 480, 480)); err != nil {
+		return err
+	}
+
+	if err := qtx.UpdateProjectImage(ctx, file.Filename, projectID); err != nil {
+		return err
+	}
+
+	if err := u(ctx, src, "/projects/"+p.Slug+"/"+file.Filename, ""); err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }
