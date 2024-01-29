@@ -1,4 +1,5 @@
-CREATE OR REPLACE VIEW v_instrument_telemetry AS (
+DROP VIEW IF EXISTS v_instrument_telemetry;
+CREATE VIEW v_instrument_telemetry AS (
     SELECT a.id,
            a.instrument_id AS instrument_id,
            b.id AS telemetry_type_id,
@@ -10,7 +11,8 @@ CREATE OR REPLACE VIEW v_instrument_telemetry AS (
     LEFT JOIN telemetry_iridium ti ON a.telemetry_id = ti.id
 );
 
-CREATE OR REPLACE VIEW v_instrument AS (
+DROP VIEW IF EXISTS v_instrument;
+CREATE VIEW v_instrument AS (
     SELECT
         i.id,
         i.deleted,
@@ -119,7 +121,8 @@ CREATE OR REPLACE VIEW v_instrument AS (
     ) o ON o.instrument_id = i.id
 );
 
-CREATE OR REPLACE VIEW v_instrument_group AS (
+DROP VIEW IF EXISTS v_instrument_group;
+CREATE VIEW v_instrument_group AS (
     WITH instrument_count AS (
             SELECT 
             igi.instrument_group_id,

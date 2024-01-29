@@ -1,3 +1,4 @@
+DROP VIEW IF EXISTS v_domain_group;
 DROP VIEW IF EXISTS v_domain;
 CREATE VIEW v_domain AS (
     SELECT
@@ -60,7 +61,6 @@ CREATE VIEW v_domain AS (
 
 GRANT SELECT ON v_domain TO instrumentation_reader;
 
-DROP VIEW IF EXISTS v_domain_group;
 CREATE VIEW v_domain_group AS (
   SELECT
     "group",

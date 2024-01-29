@@ -1,5 +1,6 @@
 -- v_unit
-CREATE OR REPLACE VIEW v_unit AS (
+DROP VIEW IF EXISTS v_unit;
+CREATE VIEW v_unit AS (
     SELECT u.id AS id,
            u.name AS name,
            u.abbreviation AS abbreviation,

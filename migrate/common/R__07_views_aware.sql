@@ -1,5 +1,6 @@
 -- v_aware_platform_parameter_enabled
-CREATE OR REPLACE VIEW v_aware_platform_parameter_enabled AS (
+DROP VIEW IF EXISTS v_aware_platform_parameter_enabled;
+CREATE VIEW v_aware_platform_parameter_enabled AS (
     SELECT
 	i.id          AS instrument_id,
 	a.aware_id    AS aware_id,

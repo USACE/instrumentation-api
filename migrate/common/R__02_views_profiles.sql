@@ -1,4 +1,5 @@
-CREATE OR REPLACE VIEW v_profile AS (
+DROP VIEW IF EXISTS v_profile;
+CREATE VIEW v_profile AS (
     WITH roles_by_profile AS (
         SELECT profile_id,
                array_agg(UPPER(b.slug || '.' || c.name)) AS roles
@@ -18,7 +19,8 @@ CREATE OR REPLACE VIEW v_profile AS (
 );
 
 -- v_profile_project_roles
-CREATE OR REPLACE VIEW v_profile_project_roles AS (
+DROP VIEW IF EXISTS v_profile_project_roles;
+CREATE VIEW v_profile_project_roles AS (
     SELECT a.id,
            a.profile_id,
            b.edipi,
@@ -37,7 +39,8 @@ CREATE OR REPLACE VIEW v_profile_project_roles AS (
 );
 
 -- v_email_autocomplete
-CREATE OR REPLACE VIEW v_email_autocomplete AS (
+DROP VIEW IF EXISTS v_email_autocomplete;
+CREATE VIEW v_email_autocomplete AS (
     SELECT id,
            'email' AS user_type,
 	       null AS username,
