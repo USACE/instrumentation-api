@@ -141,6 +141,13 @@ func TestProjects(t *testing.T) {
 			ExpectedSchema: arrSchema,
 		},
 		{
+			Name:           "ListProjectsForProfileRole",
+			URL:            fmt.Sprintf("/my_projects?role=%s", "admin"),
+			Method:         http.MethodGet,
+			ExpectedStatus: http.StatusOK,
+			ExpectedSchema: arrSchema,
+		},
+		{
 			Name:           "CreateProjectBulk",
 			URL:            "/projects",
 			Method:         http.MethodPost,

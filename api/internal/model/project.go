@@ -98,30 +98,13 @@ func (q *Queries) ListProjectsByFederalID(ctx context.Context, federalID string)
 	return pp, nil
 }
 
-const listProjectsByRole = selectProjectsSQL + `
+var listProjectsForProfile = selectProjectsSQL + `
 	WHERE id = ANY(
-		SELECT project_id FROM profile_project_roles pr
-		INNER JOIN role r ON r.id = pr.role_id
-		WHERE r.name = $1
+		SELECT project_id FROM profile_project_roles
+		WHERE profile_id = $1
 	)
-`
-
-func (q *Queries) ListProjectsByRole(ctx context.Context, profileID uuid.UUID) ([]Project, error) {
-	pp := make([]Project, 0)
-	if err := q.db.SelectContext(ctx, &pp, listProjectsByRole, profileID); err != nil {
-		return nil, err
-	}
-	return pp, nil
-}
-
-const listProjectsForProfile = `
-	SELECT DISTINCT
-		p.id, p.federal_id, p.image, p.office_id, p.deleted, p.slug, p.name, p.creator, p.create_date,
-		p.updater, p.update_date, p.instrument_count, p.instrument_group_count
-	FROM profile_project_roles ppr
-	INNER JOIN v_project p on p.id = ppr.project_id
-	WHERE ppr.profile_id = $1 AND NOT p.deleted
-	ORDER BY p.name
+	AND NOT deleted
+	ORDER BY name
 `
 
 func (q *Queries) ListProjectsForProfile(ctx context.Context, profileID uuid.UUID) ([]Project, error) {
@@ -130,6 +113,23 @@ func (q *Queries) ListProjectsForProfile(ctx context.Context, profileID uuid.UUI
 		return nil, err
 	}
 	return pp, nil
+}
+
+var listProjectsForProfileRole = selectProjectsSQL + `
+	WHERE id = ANY(
+		SELECT project_id FROM profile_project_roles pr
+		INNER JOIN role r ON r.id = pr.role_id
+		WHERE pr.profile_id = $1
+		AND r.name = $2
+	)
+	AND NOT deleted
+	ORDER BY name
+`
+
+func (q *Queries) ListProjectsForProfileRole(ctx context.Context, profileID uuid.UUID, role string) ([]Project, error) {
+	pp := make([]Project, 0)
+	err := q.db.SelectContext(ctx, &pp, listProjectsForProfileRole, profileID, role)
+	return pp, err
 }
 
 const listProjectInstruments = listInstrumentsSQL + `

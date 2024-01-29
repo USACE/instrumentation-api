@@ -54,20 +54,6 @@ func (h *ApiHandler) ListProjects(c echo.Context) error {
 		return c.JSON(http.StatusOK, projects)
 	}
 
-	role := c.QueryParam("role")
-	if role != "" {
-		role = strings.ToLower(role)
-		if role == "admin" || role == "member" {
-			p := c.Get("profile").(model.Profile)
-			projects, err := h.ProjectService.ListProjectsByRole(ctx, p.ID)
-			if err != nil {
-				return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
-			}
-			return c.JSON(http.StatusOK, projects)
-		}
-		return echo.NewHTTPError(http.StatusBadRequest, "role parameter must be 'admin' or 'member'")
-	}
-
 	projects, err := h.ProjectService.ListProjects(ctx)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -87,9 +73,23 @@ func (h *ApiHandler) ListProjects(c echo.Context) error {
 //	@Router /my_projects [get]
 //	@Security CacOnly
 func (h *ApiHandler) ListMyProjects(c echo.Context) error {
+	ctx := c.Request().Context()
+
 	p := c.Get("profile").(model.Profile)
-	profileID := p.ID
-	projects, err := h.ProjectService.ListProjectsForProfile(c.Request().Context(), profileID)
+	role := c.QueryParam("role")
+	if role != "" {
+		role = strings.ToLower(role)
+		if role == "admin" || role == "member" {
+			projects, err := h.ProjectService.ListProjectsForProfileRole(ctx, p.ID, role)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			}
+			return c.JSON(http.StatusOK, projects)
+		}
+		return echo.NewHTTPError(http.StatusBadRequest, "role parameter must be 'admin' or 'member'")
+	}
+
+	projects, err := h.ProjectService.ListProjectsForProfile(ctx, p.ID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
