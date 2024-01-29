@@ -539,6 +539,8 @@ definitions:
         items:
           type: string
         type: array
+      icon:
+        type: string
       id:
         type: string
       name:

@@ -4,7 +4,7 @@ CREATE VIEW v_domain AS (
         id, 
         'instrument_type'   AS group, 
         name                AS value,
-        null                AS description
+        icon                AS description
     FROM instrument_type 
     UNION 
     SELECT
