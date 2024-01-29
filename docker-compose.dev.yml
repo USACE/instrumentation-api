@@ -12,6 +12,3 @@ services:
           target: /go/src/app
           ignore:
             - docs/
-    depends_on:
-      alert:
-        condition: service_started

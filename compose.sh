@@ -31,8 +31,7 @@ elif [ "$1" = "clean" ]; then
     $COMPOSECMD --profile=mock down -v
 
 elif [ "$1" = "test" ]; then
-    COMPOSE_FILES="-f docker-compose.yml -f docker-compose.dev.yml"
-    docker-compose $COMPOSE_FILES build
+    docker-compose build
     shift
 
     TEARDOWN=false
@@ -54,13 +53,13 @@ elif [ "$1" = "test" ]; then
     GOCMD="go test ${REST_ARGS[@]} github.com/USACE/instrumentation-api/api/internal/handler"
 
     if [ "$REPORT" = true ]; then
-        docker-compose $COMPOSE_FILES run --entrypoint="$GOCMD" api > $(pwd)/test.log
+        docker-compose run --entrypoint="$GOCMD" api > $(pwd)/test.log
     else
-        docker-compose $COMPOSE_FILES run --entrypoint="$GOCMD" api
+        docker-compose run --entrypoint="$GOCMD" api
     fi
 
     if [ $TEARDOWN = true ]; then
-        docker-compose $COMPOSE_FILES --profile=local --profile=mock down -v
+        docker-compose --profile=local --profile=mock down -v
     fi
 
 elif [ "$1" = "mkdocs" ]; then
