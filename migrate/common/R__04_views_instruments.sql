@@ -1,3 +1,4 @@
+DROP VIEW IF EXISTS v_instrument;
 DROP VIEW IF EXISTS v_instrument_telemetry;
 CREATE VIEW v_instrument_telemetry AS (
     SELECT a.id,
@@ -11,7 +12,6 @@ CREATE VIEW v_instrument_telemetry AS (
     LEFT JOIN telemetry_iridium ti ON a.telemetry_id = ti.id
 );
 
-DROP VIEW IF EXISTS v_instrument;
 CREATE VIEW v_instrument AS (
     SELECT
         i.id,
