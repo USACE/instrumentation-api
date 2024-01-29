@@ -6,6 +6,7 @@ DROP VIEW IF EXISTS v_instrument;
 DROP VIEW IF EXISTS v_project;
 DROP VIEW IF EXISTS v_timeseries_project_map;
 DROP VIEW IF EXISTS v_aware_platform_parameter_enabled;
+DROP VIEW IF EXISTS v_district_rollup;
 
 CREATE TABLE IF NOT EXISTS project_instrument (
   project_id UUID NOT NULL REFERENCES project (id),
@@ -53,5 +54,6 @@ UPDATE project p SET (district_id) = (
   AND p.office_id IS NOT NULL
 );
 
+-- district table references office_id, project is linked to office_id through district_id
 ALTER TABLE project
   DROP COLUMN office_id;
