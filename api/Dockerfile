@@ -9,17 +9,14 @@ ARG BUILD_ENV
 RUN apk update && apk add --no-cache git ca-certificates
 WORKDIR /go/src/app
 
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-USER appuser
-
 ENV CGO_ENABLED=0
 
 RUN go install github.com/go-delve/delve/cmd/dlv@latest
 
-COPY --chown=appgroup:appuser go.* ./
+COPY go.* ./
 RUN go mod download
 
-COPY --chown=appgroup:appuser . .
+COPY . .
 RUN --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/go/pkg \
     GOOS=linux GOARCH=${GOARCH} \
