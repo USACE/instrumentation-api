@@ -40,9 +40,10 @@ services:
   api:
     build:
       context: api
-      target: core
+      target: builder
       labels:
         - com.host.description=instrumentation-api
+    entrypoint: go run cmd/core/main.go
     restart: unless-stopped
     environment:
       # NOTE: AWS_ Variables provided by execution role in deployed version
