@@ -4521,6 +4521,43 @@ paths:
       summary: updates an existing evaluation
       tags:
       - evaluation
+  /projects/{project_id}/images:
+    post:
+      consumes:
+      - image/jpeg
+      - image/png
+      parameters:
+      - description: project id
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
+      summary: uploades a picture for a project
+      tags:
+      - project
   /projects/{project_id}/inclinometer_measurements:
     post:
       parameters:

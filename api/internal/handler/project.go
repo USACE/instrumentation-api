@@ -265,6 +265,8 @@ func (h *ApiHandler) DeleteFlagProject(c echo.Context) error {
 //
 //	@Summary uploades a picture for a project
 //	@Tags project
+//	@Accept jpeg
+//	@Accept png
 //	@Produce json
 //	@Param project_id path string true "project id" Format(uuid)
 //	@Success 200 {object} map[string]interface{}
@@ -278,12 +280,15 @@ func (h *ApiHandler) UploadProjectImage(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
 	}
-	file, err := c.FormFile("image")
-	if err != nil || file == nil {
+	fh, err := c.FormFile("image")
+	if err != nil || fh == nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "attached form file 'image' required")
 	}
+	if fh.Size > 2000000 {
+		return echo.NewHTTPError(http.StatusBadRequest, "image exceeds max size of 2MB")
+	}
 
-	if err := h.ProjectService.UploadProjectImage(c.Request().Context(), projectID, *file, h.BlobService.UploadContext); err != nil {
+	if err := h.ProjectService.UploadProjectImage(c.Request().Context(), projectID, *fh, h.BlobService.UploadContext); err != nil {
 		if errors.Is(sql.ErrNoRows, err) {
 			return echo.NewHTTPError(http.StatusBadRequest, message.BadRequest)
 		}
