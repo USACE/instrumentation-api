@@ -77,6 +77,15 @@ func (h *ApiHandler) ListMyProjects(c echo.Context) error {
 	ctx := c.Request().Context()
 
 	p := c.Get("profile").(model.Profile)
+
+	if p.IsAdmin {
+		projects, err := h.ProjectService.ListProjects(ctx)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
+		}
+		return c.JSON(http.StatusOK, projects)
+	}
+
 	role := c.QueryParam("role")
 	if role != "" {
 		role = strings.ToLower(role)
