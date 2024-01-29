@@ -1,4 +1,5 @@
-CREATE OR REPLACE VIEW v_project AS (
+DROP VIEW IF EXISTS v_project;
+CREATE VIEW v_project AS (
     SELECT
         p.id,
         p.federal_id,
@@ -41,7 +42,8 @@ CREATE OR REPLACE VIEW v_project AS (
     CROSS JOIN config cfg
 );
 
-CREATE OR REPLACE VIEW v_district AS (
+DROP VIEW IF EXISTS v_district;
+CREATE VIEW v_district AS (
     SELECT
         ag.name         AS agency,
         dis.id          AS id,
