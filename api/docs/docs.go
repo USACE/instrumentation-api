@@ -3648,7 +3648,15 @@ const docTemplate = `{
                 "tags": [
                     "project"
                 ],
-                "summary": "lists projects for current profile",
+                "summary": "lists projects where current profile is an admin or member with optional filter by project role",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "role",
+                        "name": "role",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",

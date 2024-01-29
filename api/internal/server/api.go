@@ -223,7 +223,6 @@ func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 	// Profile
 	r.cacOnly.POST("/profiles", h.CreateProfile)
 	r.cacOnly.GET("/my_profile", h.GetMyProfile)
-	r.cacOnly.GET("/my_projects", h.ListMyProjects)
 	r.cacOnly.POST("/my_tokens", h.CreateToken)
 	r.cacOnly.DELETE("/my_tokens/:token_id", h.DeleteToken)
 
@@ -235,6 +234,7 @@ func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 	// Project
 	r.public.GET("/districts", h.ListDistricts)
 	r.public.GET("/projects", h.ListProjects)
+	r.private.GET("/my_projects", h.ListMyProjects)
 	r.public.GET("/projects/:project_id", h.GetProject)
 	r.public.GET("/projects/count", h.GetProjectCount)
 	r.public.GET("/projects/:project_id/instruments", h.ListProjectInstruments)

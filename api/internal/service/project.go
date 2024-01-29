@@ -18,6 +18,7 @@ type ProjectService interface {
 	ListProjects(ctx context.Context) ([]model.Project, error)
 	ListProjectsByFederalID(ctx context.Context, federalID string) ([]model.Project, error)
 	ListProjectsForProfile(ctx context.Context, profileID uuid.UUID) ([]model.Project, error)
+	ListProjectsForProfileRole(ctx context.Context, profileID uuid.UUID, role string) ([]model.Project, error)
 	ListProjectInstruments(ctx context.Context, projectID uuid.UUID) ([]model.Instrument, error)
 	ListProjectInstrumentGroups(ctx context.Context, projectID uuid.UUID) ([]model.InstrumentGroup, error)
 	GetProjectCount(ctx context.Context) (model.ProjectCount, error)
