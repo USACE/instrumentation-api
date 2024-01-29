@@ -11,15 +11,18 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
 type Blob interface {
 	NewReader(rawPath, bucketName string) (io.ReadCloser, error)
 	NewReaderContext(ctx context.Context, rawPath, bucketName string) (io.ReadCloser, error)
+	UploadContext(ctx context.Context, r io.Reader, rawPath, bucketName string) error
 }
 
 type S3Blob struct {
 	*s3.S3
+	*s3manager.Uploader
 	cfg s3BlobConfig
 }
 
@@ -32,10 +35,13 @@ type s3BlobConfig struct {
 
 var _ Blob = (*S3Blob)(nil)
 
+func uploader(u *s3manager.Uploader)
+
 func NewS3Blob(cfg *config.AWSS3Config, bucketPrefix, routePrefix string) *S3Blob {
 	awsCfg := cfg.S3Config()
 	sess := session.Must(session.NewSession(awsCfg))
-	return &S3Blob{s3.New(sess), s3BlobConfig{
+
+	return &S3Blob{s3.New(sess), s3manager.NewUploader(sess, uploader), s3BlobConfig{
 		awsConfig:    cfg,
 		bucketName:   cfg.AWSS3Bucket,
 		bucketPrefix: bucketPrefix,
@@ -85,4 +91,22 @@ func (s *S3Blob) NewReaderContext(ctx context.Context, rawPath, bucketName strin
 		return nil, err
 	}
 	return output.Body, nil
+}
+
+func (s *S3Blob) UploadContext(ctx context.Context, r io.Reader, rawPath, bucketName string) error {
+	path, err := cleanFilepath(rawPath)
+	if err != nil {
+		return err
+	}
+	key := aws.String(s.cfg.bucketPrefix + strings.TrimPrefix(path, s.cfg.routePrefix))
+	if bucketName == "" {
+		bucketName = s.cfg.bucketName
+	}
+
+	_, err = s.UploadWithContext(ctx, &s3manager.UploadInput{
+		Bucket: aws.String(bucketName),
+		Key:    key,
+		Body:   r,
+	})
+	return err
 }
