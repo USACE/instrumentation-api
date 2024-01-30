@@ -235,6 +235,16 @@ func (q *Queries) UnassignInstrumentFromProject(ctx context.Context, projectID, 
 	return err
 }
 
+const getProjectCountForInstrument = `
+	SELECT COUNT(*) FROM project_instrument WHERE instrument_id = $1
+`
+
+func (q *Queries) GetProjectCountForInstrument(ctx context.Context, instrumentID uuid.UUID) (int, error) {
+	var count int
+	err := q.db.GetContext(ctx, &count, getProjectCountForInstrument, instrumentID)
+	return count, err
+}
+
 const validateCreateInstruments = ` 
 	SELECT pi.project_id, i.name
 	FROM project_instrument pi
