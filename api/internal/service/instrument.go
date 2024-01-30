@@ -52,7 +52,7 @@ func createInstrument(ctx context.Context, q *model.Queries, instrument model.In
 		return model.IDSlugName{}, err
 	}
 	for _, prj := range instrument.Projects {
-		if err := q.AssignInstrumentToProject(ctx, prj.ID, instrument.ID); err != nil {
+		if err := q.AssignInstrumentToProject(ctx, prj.ID, newInstrument.ID); err != nil {
 			return model.IDSlugName{}, err
 		}
 	}
