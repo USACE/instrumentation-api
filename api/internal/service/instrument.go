@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/USACE/instrumentation-api/api/internal/model"
@@ -136,6 +137,29 @@ func (s instrumentService) AssignerIsAuthorized(ctx context.Context, profileID, 
 	}
 
 	return true, nil
+}
+
+func (s instrumentService) UnassignInstrumentFromProject(ctx context.Context, projectID, instrumentID uuid.UUID) error {
+	tx, err := s.db.BeginTxx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer model.TxDo(tx.Rollback)
+
+	qtx := s.WithTx(tx)
+
+	count, err := qtx.GetProjectCountForInstrument(ctx, instrumentID)
+	if err != nil {
+		return err
+	}
+	if count == 1 {
+		return errors.New("cannot unassign project, all instruments must have at least one project assinment")
+	}
+
+	if err := qtx.UnassignInstrumentFromProject(ctx, projectID, instrumentID); err != nil {
+		return err
+	}
+	return tx.Commit()
 }
 
 // UpdateInstrument updates a single instrument
