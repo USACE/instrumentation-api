@@ -9,7 +9,6 @@ import (
 
 type CollectionGroupService interface {
 	ListCollectionGroups(ctx context.Context, projectID uuid.UUID) ([]model.CollectionGroup, error)
-	ListCollectionGroupSlugs(ctx context.Context, projectID uuid.UUID) ([]string, error)
 	GetCollectionGroupDetails(ctx context.Context, projectID, collectionGroupID uuid.UUID) (model.CollectionGroupDetails, error)
 	CreateCollectionGroup(ctx context.Context, cg model.CollectionGroup) (model.CollectionGroup, error)
 	UpdateCollectionGroup(ctx context.Context, cg model.CollectionGroup) (model.CollectionGroup, error)

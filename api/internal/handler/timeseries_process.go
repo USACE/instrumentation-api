@@ -25,6 +25,7 @@ const (
 //	@Summary lists timeseries by timeseries uuid
 //	@Tags timeseries
 //	@Produce json
+//	@Param instrument_id path string true "instrument uuid" Format(uuid)
 //	@Param timeseries_id path string true "timeseries uuid" Format(uuid)
 //	@Param after query string false "after time" Format(date-time)
 //	@param before query string false "before time" Format(date-time)
@@ -83,7 +84,7 @@ func (h *ApiHandler) ListTimeseriesMeasurementsByTimeseries(c echo.Context) erro
 //	@Summary lists timeseries measurements by instrument id
 //	@Tags timeseries
 //	@Produce json
-//	@Param project_id path string true "instrument uuid" Format(uuid)
+//	@Param instrument_id path string true "instrument uuid" Format(uuid)
 //	@Param after query string false "after time" Format(date-time)
 //	@Param before query string false "before time" Format(date-time)
 //	@Param threshold query number false "downsample threshold"

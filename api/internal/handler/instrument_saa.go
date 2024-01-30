@@ -40,7 +40,7 @@ func (h *ApiHandler) GetAllSaaSegmentsForInstrument(c echo.Context) error {
 //	@Produce json
 //	@Param instrument_id path string true "instrument uuid" Format(uuid)
 //	@Param after query string false "after time" Format(date-time)
-//	@Param before path string false "before time" Format(date-time)
+//	@Param before query string true "before time" Format(date-time)
 //	@Success 200 {array} model.SaaMeasurements
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -68,6 +68,7 @@ func (h *ApiHandler) GetSaaMeasurementsForInstrument(c echo.Context) error {
 //	@Summary updates multiple segments for an saa instrument
 //	@Tags instrument-saa
 //	@Produce json
+//	@Param instrument_id path string true "instrument uuid" Format(uuid)
 //	@Param instrument_segments body []model.SaaSegment true "saa instrument segments payload"
 //	@Success 200 {array} model.SaaSegment
 //	@Failure 400 {object} echo.HTTPError

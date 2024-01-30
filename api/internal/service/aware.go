@@ -34,7 +34,6 @@ func (s awareParameterService) ListAwarePlatformParameterConfig(ctx context.Cont
 	for _, e := range ee {
 		if _, ok := m1[e.InstrumentID]; !ok {
 			m1[e.InstrumentID] = model.AwarePlatformParameterConfig{
-				ProjectID:       e.ProjectID,
 				InstrumentID:    e.InstrumentID,
 				AwareID:         e.AwareID,
 				AwareParameters: make(map[string]*uuid.UUID),

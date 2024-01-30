@@ -23,17 +23,25 @@ var domainArrayLoader = gojsonschema.NewStringLoader(`{
     }
 }`)
 
-func TestDomain(t *testing.T) {
+func TestDomains(t *testing.T) {
 	arrSchema, err := gojsonschema.NewSchema(domainArrayLoader)
 	assert.Nil(t, err)
 
-	tests := []HTTPTest{{
-		Name:           "GetDomains",
-		URL:            "/domains",
-		Method:         http.MethodGet,
-		ExpectedStatus: http.StatusOK,
-		ExpectedSchema: arrSchema,
-	}}
+	tests := []HTTPTest{
+		{
+			Name:           "GetDomains",
+			URL:            "/domains",
+			Method:         http.MethodGet,
+			ExpectedStatus: http.StatusOK,
+			ExpectedSchema: arrSchema,
+		},
+		{
+			Name:           "GetDomainMap",
+			URL:            "/domains/map",
+			Method:         http.MethodGet,
+			ExpectedStatus: http.StatusOK,
+		},
+	}
 
 	RunAll(t, tests)
 }

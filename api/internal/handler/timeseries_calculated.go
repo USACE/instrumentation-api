@@ -8,7 +8,6 @@ import (
 
 	"github.com/USACE/instrumentation-api/api/internal/message"
 	"github.com/USACE/instrumentation-api/api/internal/model"
-	"github.com/USACE/instrumentation-api/api/internal/util"
 )
 
 // GetInstrumentCalculations godoc
@@ -54,22 +53,9 @@ func (h *ApiHandler) CreateCalculation(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	var calculationSlug string = ""
-	slugsTaken, err := h.CalculatedTimeseriesService.ListCalculatedTimeseriesSlugs(c.Request().Context())
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
 	if formula.FormulaName == "" {
-		calculationSlug, err = util.NextUniqueSlug("New Formula", slugsTaken)
-		formula.FormulaName = calculationSlug
-	} else {
-		calculationSlug, err = util.NextUniqueSlug(formula.FormulaName, slugsTaken)
+		formula.FormulaName = formula.Formula
 	}
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-	formula.Slug = calculationSlug
 
 	if err := h.CalculatedTimeseriesService.CreateCalculatedTimeseries(c.Request().Context(), formula); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -104,22 +90,9 @@ func (h *ApiHandler) UpdateCalculation(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, message.BadRequest)
 	}
 
-	var calculationSlug string = ""
-	slugsTaken, err := h.CalculatedTimeseriesService.ListCalculatedTimeseriesSlugs(c.Request().Context())
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
 	if formula.FormulaName == "" {
-		calculationSlug, err = util.NextUniqueSlug("New Formula", slugsTaken)
-		formula.FormulaName = calculationSlug
-	} else {
-		calculationSlug, err = util.NextUniqueSlug(formula.FormulaName, slugsTaken)
+		formula.FormulaName = formula.Formula
 	}
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-	formula.Slug = calculationSlug
 
 	if err := h.CalculatedTimeseriesService.UpdateCalculatedTimeseries(c.Request().Context(), formula); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())

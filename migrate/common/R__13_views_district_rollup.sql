@@ -1,4 +1,5 @@
-CREATE OR REPLACE VIEW v_district_rollup AS (
+DROP VIEW IF EXISTS v_district_rollup;
+CREATE VIEW v_district_rollup AS (
     SELECT
         ac.alert_type_id                    AS alert_type_id,
         dt.office_id                        AS office_id,
@@ -21,7 +22,7 @@ CREATE OR REPLACE VIEW v_district_rollup AS (
         )                                   AS green_submittals
     FROM alert_config ac
     INNER JOIN project prj ON ac.project_id = prj.id
-    LEFT JOIN district dt ON dt.office_id = prj.office_id
+    LEFT JOIN district dt ON dt.id = prj.district_id
     LEFT JOIN submittal sub ON sub.alert_config_id = ac.id
     WHERE sub.due_date <= NOW()
     GROUP BY ac.alert_type_id, dt.office_id, dt.initials, prj.id, prj.name, DATE_TRUNC('month', sub.due_date)

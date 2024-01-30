@@ -5,4 +5,4 @@ ENV PYTHONUNBUFFERED=1
 COPY ./telemetry_post_tester.py /app/telemetry_post_tester.py
 WORKDIR /app
 
-ENTRYPOINT [ "./telemetry_post_tester.py", "--use-mock-api-key" ]
+ENTRYPOINT [ "./telemetry_post_tester.py", "--use-mock-api-key", "--multi-table" ]

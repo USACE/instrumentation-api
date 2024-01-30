@@ -40,9 +40,10 @@ services:
   api:
     build:
       context: api
-      target: core
+      target: builder
       labels:
         - com.host.description=instrumentation-api
+    entrypoint: go run cmd/core/main.go
     restart: unless-stopped
     environment:
       # NOTE: AWS_ Variables provided by execution role in deployed version
@@ -72,6 +73,8 @@ services:
         condition: service_healthy
       migrate:
         condition: service_completed_successfully
+      alert:
+        condition: service_started
 
   telemetry:
     build:
@@ -151,8 +154,6 @@ services:
     ports:
       - "9324:9324"
     restart: unless-stopped
-
-  # ---------------------- local profile services ---------------------- #
 
   minio:
     image: minio/minio

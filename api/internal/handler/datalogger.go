@@ -1,13 +1,14 @@
 package handler
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/internal/message"
 	"github.com/USACE/instrumentation-api/api/internal/model"
-	"github.com/USACE/instrumentation-api/api/internal/util"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
@@ -17,7 +18,6 @@ import (
 //	@Summary lists dataloggers for a project
 //	@Tags datalogger
 //	@Produce json
-//	@Param project_id path string true "project uuid" Format(uuid)
 //	@Success 200 {array} model.Datalogger
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -54,8 +54,6 @@ func (h *ApiHandler) ListDataloggers(c echo.Context) error {
 //	@Tags datalogger
 //	@Accept json
 //	@Produce json
-//	@Param project_id path string true "project uuid" Format(uuid)
-//	@Param instrument_id path string true "instrument uuid" Format(uuid)
 //	@Param datalogger body model.Datalogger true "datalogger payload"
 //	@Success 200 {array} model.DataloggerWithKey
 //	@Failure 400 {object} echo.HTTPError
@@ -71,20 +69,11 @@ func (h *ApiHandler) CreateDatalogger(c echo.Context) error {
 	}
 
 	p := c.Get("profile").(model.Profile)
-	n.Creator = p.ID
+	n.CreatorID = p.ID
 
 	if n.Name == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "valid `name` field required")
 	}
-
-	slugsTaken, err := h.DataloggerService.ListDataloggerSlugs(ctx)
-
-	// Generate unique slug
-	slug, err := util.NextUniqueSlug(n.Name, slugsTaken)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
-	}
-	n.Slug = slug
 
 	model, err := h.DataloggerService.GetDataloggerModelName(ctx, n.ModelID)
 	if err != nil {
@@ -139,7 +128,7 @@ func (h *ApiHandler) CycleDataloggerKey(c echo.Context) error {
 
 	profile := c.Get("profile").(model.Profile)
 	t := time.Now()
-	u.Updater, u.UpdateDate = &profile.ID, &t
+	u.UpdaterID, u.UpdateDate = &profile.ID, &t
 
 	dl, err := h.DataloggerService.CycleDataloggerKey(ctx, u)
 	if err != nil {
@@ -209,7 +198,7 @@ func (h *ApiHandler) UpdateDatalogger(c echo.Context) error {
 
 	profile := c.Get("profile").(model.Profile)
 	t := time.Now()
-	u.Updater, u.UpdateDate = &profile.ID, &t
+	u.UpdaterID, u.UpdateDate = &profile.ID, &t
 
 	dlUpdated, err := h.DataloggerService.UpdateDatalogger(ctx, u)
 	if err != nil {
@@ -245,7 +234,7 @@ func (h *ApiHandler) DeleteDatalogger(c echo.Context) error {
 	d := model.Datalogger{ID: dlID}
 	profile := c.Get("profile").(model.Profile)
 	t := time.Now()
-	d.Updater, d.UpdateDate = &profile.ID, &t
+	d.UpdaterID, d.UpdateDate = &profile.ID, &t
 
 	if err := h.DataloggerService.DeleteDatalogger(ctx, d); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -254,29 +243,62 @@ func (h *ApiHandler) DeleteDatalogger(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]interface{}{"id": dlID})
 }
 
-// GetDataloggerPreview godoc
+// GetDataloggerTablePreview godoc
 //
 //	@Summary gets the most recent datalogger preview by by datalogger id
 //	@Tags datalogger
 //	@Produce json
 //	@Param datalogger_id path string true "datalogger uuid" Format(uuid)
-//	@Success 200 {object} model.DataloggerPreview
+//	@Param datalogger_table_id path string true "datalogger table uuid" Format(uuid)
+//	@Success 200 {object} model.DataloggerTablePreview
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
-//	@Router /datalogger/{datalogger_id}/preview [get]
+//	@Router /datalogger/{datalogger_id}/tables/{datalogger_table_id}/preview [get]
 //	@Security Bearer
-func (h *ApiHandler) GetDataloggerPreview(c echo.Context) error {
-	dlID, err := uuid.Parse(c.Param("datalogger_id"))
+func (h *ApiHandler) GetDataloggerTablePreview(c echo.Context) error {
+	_, err := uuid.Parse(c.Param("datalogger_id"))
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusBadRequest, message.MissingQueryParameter("datalogger_id"))
 	}
-
-	// Get preview from c.Request().Context()
-	preview, err := h.DataloggerService.GetDataloggerPreview(c.Request().Context(), dlID)
+	dataloggerTableID, err := uuid.Parse(c.Param("datalogger_table_id"))
 	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, message.MissingQueryParameter("datalogger_table_id"))
+	}
+	preview, err := h.DataloggerService.GetDataloggerTablePreview(c.Request().Context(), dataloggerTableID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return echo.NewHTTPError(http.StatusNotFound, message.NotFound)
+		}
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
-
 	return c.JSON(http.StatusOK, preview)
+}
+
+// ResetDataloggerTableName godoc
+//
+//	@Summary resets a datalogger table name to be renamed by incoming telemetry
+//	@Tags datalogger
+//	@Produce json
+//	@Param datalogger_id path string true "datalogger uuid" Format(uuid)
+//	@Param datalogger_table_id path string true "datalogger table uuid" Format(uuid)
+//	@Success 200 {object} model.DataloggerTablePreview
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /datalogger/{datalogger_id}/tables/{datalogger_table_id}/name [put]
+//	@Security Bearer
+func (h *ApiHandler) ResetDataloggerTableName(c echo.Context) error {
+	_, err := uuid.Parse(c.Param("datalogger_id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, message.MissingQueryParameter("datalogger_id"))
+	}
+	dataloggerTableID, err := uuid.Parse(c.Param("datalogger_table_id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, message.MissingQueryParameter("datalogger_table_id"))
+	}
+	if err := h.DataloggerService.ResetDataloggerTableName(c.Request().Context(), dataloggerTableID); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, map[string]interface{}{"datalogger_table_id": dataloggerTableID})
 }

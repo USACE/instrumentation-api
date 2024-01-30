@@ -41,18 +41,6 @@ func (q *Queries) GetAllCalculatedTimeseriesForInstrument(ctx context.Context, i
 	return cc, nil
 }
 
-const listCalculatedTimeseriesSlugs = `
-	SELECT slug from v_timeseries_computed
-`
-
-func (q *Queries) ListCalculatedTimeseriesSlugs(ctx context.Context) ([]string, error) {
-	slugs := make([]string, 0)
-	if err := q.db.SelectContext(ctx, &slugs, listCalculatedTimeseriesSlugs); err != nil {
-		return nil, err
-	}
-	return slugs, nil
-}
-
 const createCalculatedTimeseries = `
 	INSERT INTO timeseries (
 		instrument_id,
@@ -60,7 +48,7 @@ const createCalculatedTimeseries = `
 		unit_id,
 		slug,
 		name
-	) VALUES ($1,$2,$3,$4,$5)
+	) VALUES ($1, $2, $3, slugify($4, 'timeseries'), $4)
 	RETURNING id
 `
 
@@ -72,7 +60,7 @@ func (q *Queries) CreateCalculatedTimeseries(ctx context.Context, cc CalculatedT
 		cc.UnitID = unknownUnitID
 	}
 	var tsID uuid.UUID
-	err := q.db.GetContext(ctx, &tsID, createCalculatedTimeseries, &cc.InstrumentID, &cc.ParameterID, &cc.UnitID, &cc.Slug, &cc.FormulaName)
+	err := q.db.GetContext(ctx, &tsID, createCalculatedTimeseries, &cc.InstrumentID, &cc.ParameterID, &cc.UnitID, &cc.FormulaName)
 	return tsID, err
 }
 
@@ -122,13 +110,13 @@ const createOrUpdateCalculatedTimeseries = `
 		 unit_id,
 		 slug,
 		 name
-	) VALUES ($1,$2,$3,$4,$5,$6)
+	) VALUES ($1, $2, $3, $4, slugify($5, 'timeseries'), $5)
 	ON CONFLICT (id) DO UPDATE SET
-		instrument_id = COALESCE(EXCLUDED.instrument_id, $7),
-		parameter_id = COALESCE(EXCLUDED.parameter_id, $8),
-		unit_id = COALESCE(EXCLUDED.unit_id, $9),
-		slug = COALESCE(EXCLUDED.slug, $10),
-		name = COALESCE(EXCLUDED.name, $11)
+		instrument_id = COALESCE(EXCLUDED.instrument_id, $6),
+		parameter_id = COALESCE(EXCLUDED.parameter_id, $7),
+		unit_id = COALESCE(EXCLUDED.unit_id, $8),
+		slug = COALESCE(EXCLUDED.slug, slugify($9, 'timeseries')),
+		name = COALESCE(EXCLUDED.name, $9)
 `
 
 func (q *Queries) CreateOrUpdateCalculatedTimeseries(ctx context.Context, cc CalculatedTimeseries, defaultCc CalculatedTimeseries) error {
@@ -137,12 +125,10 @@ func (q *Queries) CreateOrUpdateCalculatedTimeseries(ctx context.Context, cc Cal
 		cc.InstrumentID,
 		cc.ParameterID,
 		cc.UnitID,
-		cc.Slug,
 		cc.FormulaName,
 		defaultCc.InstrumentID,
 		defaultCc.ParameterID,
 		defaultCc.UnitID,
-		defaultCc.Slug,
 		defaultCc.FormulaName,
 	); err != nil {
 		return err

@@ -17,8 +17,7 @@ import (
 //	@Summary lists evaluations for a single project optionally filtered by alert_config_id
 //	@Tags evaluation
 //	@Produce json
-//	@Param project_id path string false "project uuid" Format(uuid)
-//	@Param alert_config_id path string false "alert config uuid" Format(uuid)
+//	@Param project_id path string true "project uuid" Format(uuid)
 //	@Success 200 {array} model.Evaluation
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -77,8 +76,8 @@ func (h *ApiHandler) ListInstrumentEvaluations(c echo.Context) error {
 //	@Summary gets a single evaluation by id
 //	@Tags evaluation
 //	@Produce json
-//	@Param project_id path string false "project uuid" Format(uuid)
-//	@Param instrument_id path string true "instrument uuid" Format(uuid)
+//	@Param project_id path string true "project uuid" Format(uuid)
+//	@Param evaluation_id path string true "evaluation uuid" Format(uuid)
 //	@Success 200 {object} model.Evaluation
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -122,7 +121,7 @@ func (h *ApiHandler) CreateEvaluation(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	profile := c.Get("profile").(model.Profile)
-	ev.ProjectID, ev.Creator, ev.CreateDate = projectID, profile.ID, time.Now()
+	ev.ProjectID, ev.CreatorID, ev.CreateDate = projectID, profile.ID, time.Now()
 
 	evNew, err := h.EvaluationService.CreateEvaluation(c.Request().Context(), ev)
 	if err != nil {
@@ -136,7 +135,7 @@ func (h *ApiHandler) CreateEvaluation(c echo.Context) error {
 //	@Summary updates an existing evaluation
 //	@Tags evaluation
 //	@Produce json
-//	@Param project_id path string false "project uuid" Format(uuid)
+//	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param evaluation_id path string true "evaluation uuid" Format(uuid)
 //	@Param evaluation body model.Evaluation true "evaluation payload"
 //	@Success 200 {object} model.Evaluation
@@ -156,7 +155,7 @@ func (h *ApiHandler) UpdateEvaluation(c echo.Context) error {
 	}
 	p := c.Get("profile").(model.Profile)
 	t := time.Now()
-	ev.Updater, ev.UpdateDate = &p.ID, &t
+	ev.UpdaterID, ev.UpdateDate = &p.ID, &t
 	evUpdated, err := h.EvaluationService.UpdateEvaluation(c.Request().Context(), evID, ev)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -169,7 +168,7 @@ func (h *ApiHandler) UpdateEvaluation(c echo.Context) error {
 //	@Summary deletes an evaluation
 //	@Tags evaluation
 //	@Produce json
-//	@Param project_id path string false "project uuid" Format(uuid)
+//	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param evaluation_id path string true "evaluation uuid" Format(uuid)
 //	@Success 200 {array} model.AlertConfig
 //	@Failure 400 {object} echo.HTTPError

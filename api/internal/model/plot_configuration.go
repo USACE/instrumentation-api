@@ -23,11 +23,11 @@ type PlotConfigSettings struct {
 
 // PlotConfig holds information for entity PlotConfig
 type PlotConfig struct {
-	ID           uuid.UUID          `json:"id"`
-	Name         string             `json:"name"`
-	Slug         string             `json:"slug"`
-	ProjectID    uuid.UUID          `json:"project_id" db:"project_id"`
-	TimeseriesID dbSlice[uuid.UUID] `json:"timeseries_id" db:"timeseries_id"`
+	ID            uuid.UUID          `json:"id"`
+	Name          string             `json:"name"`
+	Slug          string             `json:"slug"`
+	ProjectID     uuid.UUID          `json:"project_id" db:"project_id"`
+	TimeseriesIDs dbSlice[uuid.UUID] `json:"timeseries_id" db:"timeseries_id"`
 	AuditInfo
 	PlotConfigSettings
 }
@@ -77,19 +77,6 @@ const listPlotConfigsSQL = `
 	FROM v_plot_configuration
 `
 
-const listPlotConfigSlugs = `
-	SELECT slug FROM plot_configuration
-`
-
-// ListPlotConfigSlugs lists used instrument group slugs in the database
-func (q *Queries) ListPlotConfigSlugs(ctx context.Context) ([]string, error) {
-	ss := make([]string, 0)
-	if err := q.db.SelectContext(ctx, &ss, listPlotConfigSlugs); err != nil {
-		return nil, err
-	}
-	return ss, nil
-}
-
 const listPlotConfigs = listPlotConfigsSQL + `
 	WHERE project_id = $1
 `
@@ -115,13 +102,13 @@ func (q *Queries) GetPlotConfig(ctx context.Context, plotconfigID uuid.UUID) (Pl
 }
 
 const createPlotConfig = `
-	INSERT INTO plot_configuration (slug, name, project_id, creator, create_date) VALUES ($1, $2, $3, $4, $5)
+	INSERT INTO plot_configuration (slug, name, project_id, creator, create_date) VALUES (slugify($1, 'plot_configuration'), $1, $2, $3, $4)
 	RETURNING id
 `
 
 func (q *Queries) CreatePlotConfig(ctx context.Context, pc PlotConfig) (uuid.UUID, error) {
 	var pcID uuid.UUID
-	err := q.db.GetContext(ctx, &pcID, createPlotConfig, pc.Slug, pc.Name, pc.ProjectID, pc.Creator, pc.CreateDate)
+	err := q.db.GetContext(ctx, &pcID, createPlotConfig, pc.Name, pc.ProjectID, pc.CreatorID, pc.CreateDate)
 	return pcID, err
 }
 
@@ -150,7 +137,7 @@ const updatePlotConfig = `
 `
 
 func (q *Queries) UpdatePlotConfig(ctx context.Context, pc PlotConfig) error {
-	_, err := q.db.ExecContext(ctx, updatePlotConfig, pc.ProjectID, pc.ID, pc.Name, pc.Updater, pc.UpdateDate)
+	_, err := q.db.ExecContext(ctx, updatePlotConfig, pc.ProjectID, pc.ID, pc.Name, pc.UpdaterID, pc.UpdateDate)
 	return err
 }
 
@@ -165,18 +152,12 @@ func (q *Queries) DeletePlotConfig(ctx context.Context, projectID, plotConfigID 
 }
 
 const deletePlotConfigTimeseries = `
-	DELETE FROM plot_configuration_timeseries WHERE plot_configuration_id = ? AND timeseries_id NOT IN (?)
+	DELETE FROM plot_configuration_timeseries WHERE plot_configuration_id = $1
 `
 
-func (q *Queries) DeletePlotConfigTimeseries(ctx context.Context, plotConfigID uuid.UUID, timeseriesIDs []uuid.UUID) error {
-	query, args, err := sqlIn(deletePlotConfigTimeseries, plotConfigID, timeseriesIDs)
-	if err != nil {
-		return err
-	}
-	if _, err := q.db.ExecContext(ctx, query, args...); err != nil {
-		return err
-	}
-	return nil
+func (q *Queries) DeletePlotConfigTimeseries(ctx context.Context, plotConfigID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deletePlotConfigTimeseries, plotConfigID)
+	return err
 }
 
 const deletePlotConfigSettings = `

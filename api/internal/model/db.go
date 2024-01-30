@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/internal/config"
-	"github.com/google/uuid"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
@@ -107,22 +106,6 @@ func NewDatabase(cfg *config.DBConfig) *Database {
 	db.SetConnMaxLifetime(time.Minute * 30)
 
 	return &Database{db}
-}
-
-// IDAndSlug is a UUID4 and Slug representation of something
-type IDAndSlug struct {
-	ID   uuid.UUID `json:"id"`
-	Slug string    `json:"slug"`
-}
-
-// IDAndSlugCollection is a collection of objects with ID and Slug properties
-type IDAndSlugCollection struct {
-	Items []IDAndSlug `json:"items"`
-}
-
-// Shortener allows a shorter representation of an object. Typically, ID and Slug fields only
-type Shortener interface {
-	shorten()
 }
 
 // Some generic types to help sqlx scan arrays / json

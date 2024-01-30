@@ -67,8 +67,7 @@ func (h *ApiHandler) AddProjectMemberRole(c echo.Context) error {
 
 	r, err := h.ProjectRoleService.AddProjectMemberRole(c.Request().Context(), projectID, profileID, roleID, grantedBy.ID)
 	if err != nil {
-		// return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
 	}
 	return c.JSON(http.StatusOK, r)
 }
@@ -103,7 +102,7 @@ func (h *ApiHandler) RemoveProjectMemberRole(c echo.Context) error {
 	}
 
 	if err := h.ProjectRoleService.RemoveProjectMemberRole(c.Request().Context(), projectID, profileID, roleID); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
 	}
 	return c.JSON(http.StatusOK, make(map[string]interface{}))
 }

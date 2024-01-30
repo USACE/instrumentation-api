@@ -45,9 +45,6 @@ func (h *ApiHandler) GetAllAlertConfigsForProject(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 	}
-	if len(aa) == 0 {
-		return echo.NewHTTPError(http.StatusNotFound, message.NotFound)
-	}
 	return c.JSON(http.StatusOK, aa)
 }
 
@@ -56,7 +53,7 @@ func (h *ApiHandler) GetAllAlertConfigsForProject(c echo.Context) error {
 //	@Summary lists alerts for a single instrument
 //	@Tags alert-config
 //	@Produce json
-//	@Param project_id path string false "project uuid" Format(uuid)
+//	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param instrument_id path string true "instrument uuid" Format(uuid)
 //	@Success 200 {array} model.AlertConfig
 //	@Failure 400 {object} echo.HTTPError
@@ -72,9 +69,6 @@ func (h *ApiHandler) ListInstrumentAlertConfigs(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
-	if len(aa) == 0 {
-		return echo.NewHTTPError(http.StatusNotFound, message.NotFound)
-	}
 	return c.JSON(http.StatusOK, aa)
 }
 
@@ -83,6 +77,7 @@ func (h *ApiHandler) ListInstrumentAlertConfigs(c echo.Context) error {
 //	@Summary gets a single alert
 //	@Tags alert-config
 //	@Produce json
+//	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param alert_config_id path string true "alert config uuid" Format(uuid)
 //	@Success 200 {object} model.AlertConfig
 //	@Failure 400 {object} echo.HTTPError
@@ -128,7 +123,7 @@ func (h *ApiHandler) CreateAlertConfig(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	profile := c.Get("profile").(model.Profile)
-	ac.ProjectID, ac.Creator, ac.CreateDate = projectID, profile.ID, time.Now()
+	ac.ProjectID, ac.CreatorID, ac.CreateDate = projectID, profile.ID, time.Now()
 
 	acNew, err := h.AlertConfigService.CreateAlertConfig(c.Request().Context(), ac)
 	if err != nil {
@@ -163,7 +158,7 @@ func (h *ApiHandler) UpdateAlertConfig(c echo.Context) error {
 	}
 	p := c.Get("profile").(model.Profile)
 	t := time.Now()
-	ac.Updater, ac.UpdateDate = &p.ID, &t
+	ac.UpdaterID, ac.UpdateDate = &p.ID, &t
 	aUpdated, err := h.AlertConfigService.UpdateAlertConfig(c.Request().Context(), acID, ac)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {

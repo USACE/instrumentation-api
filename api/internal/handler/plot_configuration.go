@@ -6,7 +6,6 @@ import (
 
 	"github.com/USACE/instrumentation-api/api/internal/message"
 	"github.com/USACE/instrumentation-api/api/internal/model"
-	"github.com/USACE/instrumentation-api/api/internal/util"
 	"github.com/google/uuid"
 
 	"github.com/labstack/echo/v4"
@@ -91,18 +90,8 @@ func (h *ApiHandler) CreatePlotConfig(c echo.Context) error {
 	if pID != pc.ProjectID {
 		return echo.NewHTTPError(http.StatusBadRequest, "route parameter project_id does not match project_id in JSON payload")
 	}
-	slugsTaken, err := h.PlotConfigService.ListPlotConfigSlugs(c.Request().Context())
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-	slug, err := util.NextUniqueSlug(pc.Name, slugsTaken)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-	pc.Slug = slug
-
 	p := c.Get("profile").(model.Profile)
-	pc.Creator, pc.CreateDate = p.ID, time.Now()
+	pc.CreatorID, pc.CreateDate = p.ID, time.Now()
 
 	pcNew, err := h.PlotConfigService.CreatePlotConfig(c.Request().Context(), pc)
 	if err != nil {
@@ -117,6 +106,7 @@ func (h *ApiHandler) CreatePlotConfig(c echo.Context) error {
 //	@Tags plot-config
 //	@Produce json
 //	@Param project_id path string true "project uuid" Format(uuid)
+//	@Param plot_configuration_id path string true "plot config uuid" Format(uuid)
 //	@Param plot_config body model.PlotConfig true "plot config payload"
 //	@Success 200 {object} model.PlotConfig
 //	@Failure 400 {object} echo.HTTPError
@@ -146,12 +136,13 @@ func (h *ApiHandler) UpdatePlotConfig(c echo.Context) error {
 
 	p := c.Get("profile").(model.Profile)
 	tNow := time.Now()
-	pc.Updater, pc.UpdateDate = &p.ID, &tNow
+	pc.UpdaterID, pc.UpdateDate = &p.ID, &tNow
 
-	if err := h.PlotConfigService.UpdatePlotConfig(c.Request().Context(), pc); err != nil {
+	pcUpdated, err := h.PlotConfigService.UpdatePlotConfig(c.Request().Context(), pc)
+	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
-	return c.JSON(http.StatusOK, pc)
+	return c.JSON(http.StatusOK, pcUpdated)
 }
 
 // DeletePlotConfig godoc
@@ -159,6 +150,7 @@ func (h *ApiHandler) UpdatePlotConfig(c echo.Context) error {
 //	@Sumary deletes a plot configuration in a project
 //	@Tags plot-config
 //	@Produce json
+//	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param plot_configuration_id path string true "plot config uuid" Format(uuid)
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError

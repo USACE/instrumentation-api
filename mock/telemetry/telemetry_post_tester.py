@@ -20,10 +20,11 @@ DEFAULT_BASE_URL = "http://telemetry"
 DEFAULT_INTERVAL_SECONDS = 10
 DEFAULT_MODEL = "CR6"
 DEFAULT_SN = "12345"
+DEFAULT_TABLE_NAME = "Demo Datalogger Table"
 DEFAULT_VERBOSE = False
 
 
-def post_data(url: str, data: str, api_key: str) -> Any | None:
+def post_data(url: str, data: dict, api_key: str) -> Any | None:
     json_data = json.dumps(data).encode("utf-8")
 
     request = Request(
@@ -48,7 +49,7 @@ def post_data(url: str, data: str, api_key: str) -> Any | None:
     return None  # exception was thrown
 
 
-def create_test_data(interval: int, idx: int, model: str, sn: str) -> dict:
+def create_test_data(interval: int, idx: int, model: str, sn: str, table_name: str) -> dict:
     measurement_time_1 = datetime.now().isoformat(timespec="seconds")
     measurement_time_2 = (datetime.now() - timedelta(seconds=(interval / 2))).isoformat(
         timespec="seconds"
@@ -60,7 +61,7 @@ def create_test_data(interval: int, idx: int, model: str, sn: str) -> dict:
             "signature": 20883,
             "environment": {
                 "station_name": "6239",
-                "table_name": "Test",
+                "table_name": table_name,
                 "model": model,
                 "serial_no": sn,
                 "os_version": f"{model}.Std.12.01",
@@ -140,8 +141,21 @@ def main() -> None:
         type=str,
     )
     parser.add_argument(
+        "--table",
+        help="table name for payload",
+        default=DEFAULT_TABLE_NAME,
+        type=str,
+    )
+    parser.add_argument(
         "--use-mock-api-key",
         help="[optional] use default mock api key for local testing",
+        default=DEFAULT_USE_MOCK_API_KEY,
+        type=bool,
+        action=argparse.BooleanOptionalAction,
+    )
+    parser.add_argument(
+        "--multi-table",
+        help="[optional] mock an additional payload sent to another specified table",
         default=DEFAULT_USE_MOCK_API_KEY,
         type=bool,
         action=argparse.BooleanOptionalAction,
@@ -164,15 +178,29 @@ def main() -> None:
 
     i = 0
     while True:
-        data = create_test_data(args.interval, i, args.model, args.sn)
-        i += 1
+        data = create_test_data(args.interval, i, args.model, args.sn, args.table)
         print(f"POST: {url}")
+
         if args.verbose:
             print("request payload:", json.dumps(data, indent=2), sep="\n")
+
         post_data(url, data, api_key)
+
         print(f"waiting {args.interval} seconds...\n")
         time.sleep(args.interval)
 
+        if args.multi_table:
+            data = create_test_data(args.interval, i, args.model, args.sn, "Demo Multi-Table")
+            print(f"POST: {url}")
+
+            if args.verbose:
+                print("request payload:", json.dumps(data, indent=2), sep="\n")
+
+            post_data(url, data, api_key)
+            print(f"waiting {args.interval} seconds...\n")
+            time.sleep(args.interval)
+
+        i += 1
 
 if __name__ == "__main__":
     main()

@@ -1,12 +1,14 @@
 package handler
 
 import (
+	"database/sql"
+	"errors"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/internal/message"
 	"github.com/USACE/instrumentation-api/api/internal/model"
-	"github.com/USACE/instrumentation-api/api/internal/util"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -42,16 +44,18 @@ func (h *ApiHandler) ListDistricts(c echo.Context) error {
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects [get]
 func (h *ApiHandler) ListProjects(c echo.Context) error {
-	id := c.QueryParam("federal_id")
-	if id != "" {
-		projects, err := h.ProjectService.ListProjectsByFederalID(c.Request().Context(), id)
+	ctx := c.Request().Context()
+
+	fedID := c.QueryParam("federal_id")
+	if fedID != "" {
+		projects, err := h.ProjectService.ListProjectsByFederalID(ctx, fedID)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
 		}
 		return c.JSON(http.StatusOK, projects)
 	}
 
-	projects, err := h.ProjectService.ListProjects(c.Request().Context())
+	projects, err := h.ProjectService.ListProjects(ctx)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -60,9 +64,10 @@ func (h *ApiHandler) ListProjects(c echo.Context) error {
 
 // ListMyProjects godoc
 //
-//	@Summary lists projects for current profile
+//	@Summary lists projects where current profile is an admin or member with optional filter by project role
 //	@Tags project
 //	@Produce json
+//	@Param role query string false "role"
 //	@Success 200 {array} model.Project
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -70,9 +75,32 @@ func (h *ApiHandler) ListProjects(c echo.Context) error {
 //	@Router /my_projects [get]
 //	@Security CacOnly
 func (h *ApiHandler) ListMyProjects(c echo.Context) error {
+	ctx := c.Request().Context()
+
 	p := c.Get("profile").(model.Profile)
-	profileID := p.ID
-	projects, err := h.ProjectService.ListProjectsForProfile(c.Request().Context(), profileID)
+
+	if p.IsAdmin {
+		projects, err := h.ProjectService.ListProjects(ctx)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
+		}
+		return c.JSON(http.StatusOK, projects)
+	}
+
+	role := c.QueryParam("role")
+	if role != "" {
+		role = strings.ToLower(role)
+		if role == "admin" || role == "member" {
+			projects, err := h.ProjectService.ListProjectsForProfileRole(ctx, p.ID, role)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			}
+			return c.JSON(http.StatusOK, projects)
+		}
+		return echo.NewHTTPError(http.StatusBadRequest, "role parameter must be 'admin' or 'member'")
+	}
+
+	projects, err := h.ProjectService.ListProjectsForProfile(ctx, p.ID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -100,29 +128,6 @@ func (h *ApiHandler) ListProjectInstruments(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, nn)
-}
-
-// ListProjectInstrumentNames godoc
-//
-//	@Summary lists names of all instruments associated with a project
-//	@Tags project
-//	@Produce json
-//	@Param project_id path string true "project uuid" Format(uuid)
-//	@Success 200 {array} string
-//	@Failure 400 {object} echo.HTTPError
-//	@Failure 404 {object} echo.HTTPError
-//	@Failure 500 {object} echo.HTTPError
-//	@Router /projects/{project_id}/instruments/names [get]
-func (h *ApiHandler) ListProjectInstrumentNames(c echo.Context) error {
-	id, err := uuid.Parse(c.Param("project_id"))
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
-	}
-	names, err := h.ProjectService.ListProjectInstrumentNames(c.Request().Context(), id)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-	return c.JSON(http.StatusOK, names)
 }
 
 // ListProjectInstrumentGroups godoc
@@ -195,47 +200,30 @@ func (h *ApiHandler) GetProject(c echo.Context) error {
 //	@Tags project
 //	@Produce json
 //	@Param project_collection body model.ProjectCollection true "project collection payload"
-//	@Success 200 {array} model.IDAndSlug
+//	@Success 200 {array} model.IDSlugName
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects [post]
-//	@Security Bearer[admin]
+//	@Security Bearer
 func (h *ApiHandler) CreateProjectBulk(c echo.Context) error {
-	pc := model.ProjectCollection{}
+	var pc model.ProjectCollection
 	if err := c.Bind(&pc); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	// slugs already taken in the database
-	slugsTaken, err := h.ProjectService.ListProjectSlugs(c.Request().Context())
-	if err != nil {
-		return err
-	}
-
-	// profile of user creating projects
 	p := c.Get("profile").(model.Profile)
-
-	// timestamp
 	t := time.Now()
 
-	for idx := range pc.Projects {
-		// creator
-		pc.Projects[idx].Creator = p.ID
-		// create date
-		pc.Projects[idx].CreateDate = t
-		// Assign Slug
-		s, err := util.NextUniqueSlug(pc.Projects[idx].Name, slugsTaken)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	for idx := range pc {
+		if pc[idx].Name == "" {
+			return echo.NewHTTPError(http.StatusBadRequest, errors.New("project name required"))
 		}
-		pc.Projects[idx].Slug = s
-		// Add slug to array of slugs originally fetched from the database
-		// to catch duplicate names/slugs from the same bulk upload
-		slugsTaken = append(slugsTaken, s)
+		pc[idx].CreatorID = p.ID
+		pc[idx].CreateDate = t
 	}
 
-	pp, err := h.ProjectService.CreateProjectBulk(c.Request().Context(), pc.Projects)
+	pp, err := h.ProjectService.CreateProjectBulk(c.Request().Context(), pc)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -260,20 +248,17 @@ func (h *ApiHandler) UpdateProject(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
 	}
-	p := &model.Project{ID: id}
-	if err := c.Bind(p); err != nil {
+	var p model.Project
+	if err := c.Bind(&p); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	if id != p.ID {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MatchRouteParam("`id`"))
-	}
-
+	p.ID = id
 	profile := c.Get("profile").(model.Profile)
 
 	t := time.Now()
-	p.Updater, p.UpdateDate = &profile.ID, &t
+	p.UpdaterID, p.UpdateDate = &profile.ID, &t
 
-	pUpdated, err := h.ProjectService.UpdateProject(c.Request().Context(), *p)
+	pUpdated, err := h.ProjectService.UpdateProject(c.Request().Context(), p)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -303,60 +288,39 @@ func (h *ApiHandler) DeleteFlagProject(c echo.Context) error {
 	return c.JSON(http.StatusOK, make(map[string]interface{}))
 }
 
-// CreateProjectTimeseries godoc
+// UploadProjectImage godoc
 //
-//	@Summary exposes a timeseries at the project level
+//	@Summary uploades a picture for a project
 //	@Tags project
+//	@Accept jpeg
+//	@Accept png
 //	@Produce json
 //	@Param project_id path string true "project id" Format(uuid)
-//	@Param instrument_id path string true "timeseries uuid" Format(uuid)
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
-//	@Router /projects/{project_id}/timeseries/{timeseries_id} [post]
+//	@Router /projects/{project_id}/images [post]
 //	@Security Bearer
-func (h *ApiHandler) CreateProjectTimeseries(c echo.Context) error {
+func (h *ApiHandler) UploadProjectImage(c echo.Context) error {
 	projectID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
 	}
-	timeseriesID, err := uuid.Parse(c.Param("timeseries_id"))
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	fh, err := c.FormFile("image")
+	if err != nil || fh == nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "attached form file 'image' required")
 	}
-	err = h.ProjectService.CreateProjectTimeseries(c.Request().Context(), projectID, timeseriesID)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	if fh.Size > 2000000 {
+		return echo.NewHTTPError(http.StatusBadRequest, "image exceeds max size of 2MB")
 	}
-	return c.JSON(http.StatusCreated, make(map[string]interface{}))
-}
 
-// DeleteProjectTimeseries godoc
-//
-//	@Summary removes a timeseries from the project level
-//	@Tags project
-//	@Produce json
-//	@Param project_id path string true "project id" Format(uuid)
-//	@Param instrument_id path string true "timeseries uuid" Format(uuid)
-//	@Success 200 {object} map[string]interface{}
-//	@Failure 400 {object} echo.HTTPError
-//	@Failure 404 {object} echo.HTTPError
-//	@Failure 500 {object} echo.HTTPError
-//	@Router /projects/{project_id}/timeseries/{timeseries_id} [delete]
-//	@Security Bearer
-func (h *ApiHandler) DeleteProjectTimeseries(c echo.Context) error {
-	projectID, err := uuid.Parse(c.Param("project_id"))
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-	timeseriesID, err := uuid.Parse(c.Param("timeseries_id"))
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-	err = h.ProjectService.DeleteProjectTimeseries(c.Request().Context(), projectID, timeseriesID)
-	if err != nil {
+	if err := h.ProjectService.UploadProjectImage(c.Request().Context(), projectID, *fh, h.BlobService.UploadContext); err != nil {
+		if errors.Is(sql.ErrNoRows, err) {
+			return echo.NewHTTPError(http.StatusBadRequest, message.BadRequest)
+		}
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
+
 	return c.JSON(http.StatusOK, make(map[string]interface{}))
 }

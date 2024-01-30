@@ -5,7 +5,6 @@ import (
 
 	"github.com/USACE/instrumentation-api/api/internal/message"
 	"github.com/USACE/instrumentation-api/api/internal/model"
-	"github.com/USACE/instrumentation-api/api/internal/util"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
@@ -15,7 +14,7 @@ import (
 //	@Summary lists constants for a given instrument
 //	@Tags instrument-constant
 //	@Produce json
-//	@Param project_id path string false "project uuid" Format(uuid)
+//	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param instrument_id path string true "instrument uuid" Format(uuid)
 //	@Success 200 {array} model.Timeseries
 //	@Failure 400 {object} echo.HTTPError
@@ -39,7 +38,7 @@ func (h *ApiHandler) ListInstrumentConstants(c echo.Context) error {
 //	@Summary creates instrument constants (i.e. timeseries)
 //	@Tags instrument-constant
 //	@Produce json
-//	@Param project_id path string false "project uuid" Format(uuid)
+//	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param instrument_id path string true "instrument uuid" Format(uuid)
 //	@Param timeseries_collection_items body model.TimeseriesCollectionItems true "timeseries collection items payload"
 //	@Success 200 {array} model.Timeseries
@@ -58,20 +57,10 @@ func (h *ApiHandler) CreateInstrumentConstants(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	slugsTaken, err := h.TimeseriesService.ListTimeseriesSlugsForInstrument(ctx, instrumentID)
-	if err != nil {
-		return err
-	}
 	for idx := range tc.Items {
 		if instrumentID != tc.Items[idx].InstrumentID {
 			return echo.NewHTTPError(http.StatusBadRequest, message.MatchRouteParam("`instrument_id`"))
 		}
-		s, err := util.NextUniqueSlug(tc.Items[idx].Name, slugsTaken)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-		}
-		tc.Items[idx].Slug = s
-		slugsTaken = append(slugsTaken, s)
 	}
 	tt, err := h.InstrumentConstantService.CreateInstrumentConstants(ctx, tc.Items)
 	if err != nil {
@@ -85,7 +74,7 @@ func (h *ApiHandler) CreateInstrumentConstants(c echo.Context) error {
 //	@Summary removes a timeseries as an instrument constant
 //	@Tags instrument-constant
 //	@Produce json
-//	@Param project_id path string false "project uuid" Format(uuid)
+//	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param instrument_id path string true "instrument uuid" Format(uuid)
 //	@Param timeseries_id path string true "timeseries uuid" Format(uuid)
 //	@Success 200 {object} map[string]interface{}

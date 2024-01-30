@@ -288,22 +288,6 @@ const docTemplate = `{
                 "summary": "creates a datalogger",
                 "parameters": [
                     {
-                        "type": "string",
-                        "format": "uuid",
-                        "description": "project uuid",
-                        "name": "project_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "format": "uuid",
-                        "description": "instrument uuid",
-                        "name": "instrument_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
                         "description": "datalogger payload",
                         "name": "datalogger",
                         "in": "body",
@@ -507,118 +491,6 @@ const docTemplate = `{
             }
         },
         "/datalogger/{datalogger_id}/equivalency_table": {
-            "get": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "equivalency-table"
-                ],
-                "summary": "gets an equivalency table for a datalogger",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "format": "uuid",
-                        "description": "datalogger uuid",
-                        "name": "datalogger_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "equivalency-table"
-                ],
-                "summary": "updates an equivalency table for a datalogger",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "format": "uuid",
-                        "description": "datalogger uuid",
-                        "name": "datalogger_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "equivalency table payload",
-                        "name": "equivalency_table",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    }
-                }
-            },
             "post": {
                 "security": [
                     {
@@ -631,7 +503,7 @@ const docTemplate = `{
                 "tags": [
                     "equivalency-table"
                 ],
-                "summary": "creates an equivalency table for a datalogger",
+                "summary": "creates an equivalency table for a datalogger and auto create data logger table if not exists",
                 "parameters": [
                     {
                         "type": "string",
@@ -655,120 +527,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "equivalency-table"
-                ],
-                "summary": "deletes an equivalency table",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "format": "uuid",
-                        "description": "datalogger uuid",
-                        "name": "datalogger_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    }
-                }
-            }
-        },
-        "/datalogger/{datalogger_id}/equivalency_table/row": {
-            "delete": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "equivalency-table"
-                ],
-                "summary": "deletes an equivalency table row",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "format": "uuid",
-                        "description": "datalogger uuid",
-                        "name": "datalogger_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "format": "uuid",
-                        "description": "equivalency table row uuid",
-                        "name": "id",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable"
                         }
                     },
                     "400": {
@@ -844,7 +603,392 @@ const docTemplate = `{
                 }
             }
         },
-        "/datalogger/{datalogger_id}/preview": {
+        "/datalogger/{datalogger_id}/tables/{datalogger_table_id}/equivalency_table": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "equivalency-table"
+                ],
+                "summary": "gets an equivalency table for a datalogger",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "datalogger uuid",
+                        "name": "datalogger_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "datalogger table uuid",
+                        "name": "datalogger_table_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "equivalency-table"
+                ],
+                "summary": "updates an equivalency table for a datalogger",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "datalogger uuid",
+                        "name": "datalogger_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "datalogger table uuid",
+                        "name": "datalogger_table_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "equivalency table payload",
+                        "name": "equivalency_table",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "equivalency-table"
+                ],
+                "summary": "creates an equivalency table for a datalogger and auto create data logger table if not exists",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "datalogger uuid",
+                        "name": "datalogger_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "datalogger table uuid",
+                        "name": "datalogger_table_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "equivalency table payload",
+                        "name": "equivalency_table",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "equivalency-table"
+                ],
+                "summary": "deletes an equivalency table and corresponding datalogger table",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "datalogger uuid",
+                        "name": "datalogger_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "datalogger table uuid",
+                        "name": "datalogger_table_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/datalogger/{datalogger_id}/tables/{datalogger_table_id}/equivalency_table/row/{row_id}": {
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "equivalency-table"
+                ],
+                "summary": "deletes an equivalency table row",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "datalogger uuid",
+                        "name": "datalogger_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "datalogger table uuid",
+                        "name": "datalogger_table_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "equivalency table row uuid",
+                        "name": "row_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/datalogger/{datalogger_id}/tables/{datalogger_table_id}/name": {
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "datalogger"
+                ],
+                "summary": "resets a datalogger table name to be renamed by incoming telemetry",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "datalogger uuid",
+                        "name": "datalogger_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "datalogger table uuid",
+                        "name": "datalogger_table_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerTablePreview"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/datalogger/{datalogger_id}/tables/{datalogger_table_id}/preview": {
             "get": {
                 "security": [
                     {
@@ -866,13 +1010,21 @@ const docTemplate = `{
                         "name": "datalogger_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "datalogger table uuid",
+                        "name": "datalogger_table_id",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerPreview"
+                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerTablePreview"
                         }
                     },
                     "400": {
@@ -910,16 +1062,6 @@ const docTemplate = `{
                     "datalogger"
                 ],
                 "summary": "lists dataloggers for a project",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "format": "uuid",
-                        "description": "project uuid",
-                        "name": "project_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1008,6 +1150,43 @@ const docTemplate = `{
                             "items": {
                                 "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Domain"
                             }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/domains/map": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "domain"
+                ],
+                "summary": "Get map with domain group as key",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DomainMap"
                         }
                     },
                     "400": {
@@ -1982,63 +2161,6 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
-            "post": {
-                "security": [
-                    {
-                        "Bearer": []
-                    },
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "instrument"
-                ],
-                "summary": "accepts an array of instruments for bulk upload to the database",
-                "parameters": [
-                    {
-                        "description": "instrument collection payload",
-                        "name": "instrument",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentCollection"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IDAndSlug"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    }
-                }
             }
         },
         "/instruments/count": {
@@ -2108,7 +2230,8 @@ const docTemplate = `{
                         "format": "date-time",
                         "description": "before time",
                         "name": "before",
-                        "in": "path"
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -2205,6 +2328,14 @@ const docTemplate = `{
                 ],
                 "summary": "updates multiple segments for an ipi instrument",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "instrument uuid",
+                        "name": "instrument_id",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "description": "ipi instrument segments payload",
                         "name": "instrument_segments",
@@ -2393,9 +2524,6 @@ const docTemplate = `{
                 "security": [
                     {
                         "Bearer": []
-                    },
-                    {
-                        "Bearer": []
                     }
                 ],
                 "produces": [
@@ -2485,7 +2613,8 @@ const docTemplate = `{
                         "format": "date-time",
                         "description": "before time",
                         "name": "before",
-                        "in": "path"
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -2582,6 +2711,14 @@ const docTemplate = `{
                 ],
                 "summary": "updates multiple segments for an saa instrument",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "instrument uuid",
+                        "name": "instrument_id",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "description": "saa instrument segments payload",
                         "name": "instrument_segments",
@@ -2728,9 +2865,6 @@ const docTemplate = `{
                 "security": [
                     {
                         "Bearer": []
-                    },
-                    {
-                        "Bearer": []
                     }
                 ],
                 "produces": [
@@ -2746,7 +2880,8 @@ const docTemplate = `{
                         "format": "uuid",
                         "description": "instrument uuid",
                         "name": "instrument_id",
-                        "in": "path"
+                        "in": "path",
+                        "required": true
                     },
                     {
                         "type": "string",
@@ -3086,6 +3221,14 @@ const docTemplate = `{
                         "name": "timeseries_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "instrument uuid",
+                        "name": "instrument_id",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -3126,6 +3269,14 @@ const docTemplate = `{
                 ],
                 "summary": "lists timeseries by timeseries uuid",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "instrument uuid",
+                        "name": "instrument_id",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "format": "uuid",
@@ -3197,7 +3348,7 @@ const docTemplate = `{
                         "type": "string",
                         "format": "uuid",
                         "description": "instrument uuid",
-                        "name": "project_id",
+                        "name": "instrument_id",
                         "in": "path",
                         "required": true
                     },
@@ -3497,7 +3648,15 @@ const docTemplate = `{
                 "tags": [
                     "project"
                 ],
-                "summary": "lists projects for current profile",
+                "summary": "lists projects where current profile is an admin or member with optional filter by project role",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "role",
+                        "name": "role",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -3756,9 +3915,7 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "Bearer": [
-                            "admin"
-                        ]
+                        "Bearer": []
                     }
                 ],
                 "produces": [
@@ -3775,7 +3932,10 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.ProjectCollection"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Project"
+                            }
                         }
                     }
                 ],
@@ -3785,7 +3945,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IDAndSlug"
+                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IDSlugName"
                             }
                         }
                     },
@@ -4126,6 +4286,14 @@ const docTemplate = `{
                 ],
                 "summary": "gets a single alert",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "project uuid",
+                        "name": "project_id",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "format": "uuid",
@@ -4841,14 +5009,8 @@ const docTemplate = `{
                         "format": "uuid",
                         "description": "project uuid",
                         "name": "project_id",
-                        "in": "path"
-                    },
-                    {
-                        "type": "string",
-                        "format": "uuid",
-                        "description": "alert config uuid",
-                        "name": "alert_config_id",
-                        "in": "path"
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -4956,13 +5118,14 @@ const docTemplate = `{
                         "format": "uuid",
                         "description": "project uuid",
                         "name": "project_id",
-                        "in": "path"
+                        "in": "path",
+                        "required": true
                     },
                     {
                         "type": "string",
                         "format": "uuid",
-                        "description": "instrument uuid",
-                        "name": "instrument_id",
+                        "description": "evaluation uuid",
+                        "name": "evaluation_id",
                         "in": "path",
                         "required": true
                     }
@@ -5013,7 +5176,8 @@ const docTemplate = `{
                         "format": "uuid",
                         "description": "project uuid",
                         "name": "project_id",
-                        "in": "path"
+                        "in": "path",
+                        "required": true
                     },
                     {
                         "type": "string",
@@ -5079,7 +5243,8 @@ const docTemplate = `{
                         "format": "uuid",
                         "description": "project uuid",
                         "name": "project_id",
-                        "in": "path"
+                        "in": "path",
+                        "required": true
                     },
                     {
                         "type": "string",
@@ -5098,6 +5263,63 @@ const docTemplate = `{
                             "items": {
                                 "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfig"
                             }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/images": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "image/jpeg",
+                    "image/png"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "project"
+                ],
+                "summary": "uploades a picture for a project",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "project id",
+                        "name": "project_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     },
                     "400": {
@@ -5288,9 +5510,6 @@ const docTemplate = `{
                 "security": [
                     {
                         "Bearer": []
-                    },
-                    {
-                        "Bearer": []
                     }
                 ],
                 "produces": [
@@ -5310,63 +5529,24 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "instrument id",
+                        "name": "instrument_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
                         "description": "instrument collection payload",
                         "name": "instrument",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentCollection"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IDAndSlug"
+                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Instrument"
                             }
                         }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    }
-                }
-            }
-        },
-        "/projects/{project_id}/instruments/names": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "project"
-                ],
-                "summary": "lists names of all instruments associated with a project",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "format": "uuid",
-                        "description": "project uuid",
-                        "name": "project_id",
-                        "in": "path",
-                        "required": true
                     }
                 ],
                 "responses": {
@@ -5375,7 +5555,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "type": "string"
+                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IDSlugName"
                             }
                         }
                     },
@@ -5543,7 +5723,8 @@ const docTemplate = `{
                         "format": "uuid",
                         "description": "project uuid",
                         "name": "project_id",
-                        "in": "path"
+                        "in": "path",
+                        "required": true
                     },
                     {
                         "type": "string",
@@ -5786,6 +5967,128 @@ const docTemplate = `{
                 }
             }
         },
+        "/projects/{project_id}/instruments/{instrument_id}/assignments": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "must be Project (or Application) Admin of all existing instrument projects and project to be assigned",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "instrument"
+                ],
+                "summary": "assigns an instrument to a project.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "project uuid",
+                        "name": "project_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "instrument uuid",
+                        "name": "instrument_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "must be Project Admin of project to be unassigned",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "instrument"
+                ],
+                "summary": "unassigns an instrument from a project.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "project uuid",
+                        "name": "project_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "instrument uuid",
+                        "name": "instrument_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/projects/{project_id}/instruments/{instrument_id}/constants": {
             "get": {
                 "produces": [
@@ -5801,7 +6104,8 @@ const docTemplate = `{
                         "format": "uuid",
                         "description": "project uuid",
                         "name": "project_id",
-                        "in": "path"
+                        "in": "path",
+                        "required": true
                     },
                     {
                         "type": "string",
@@ -5861,7 +6165,8 @@ const docTemplate = `{
                         "format": "uuid",
                         "description": "project uuid",
                         "name": "project_id",
-                        "in": "path"
+                        "in": "path",
+                        "required": true
                     },
                     {
                         "type": "string",
@@ -5932,7 +6237,8 @@ const docTemplate = `{
                         "format": "uuid",
                         "description": "project uuid",
                         "name": "project_id",
-                        "in": "path"
+                        "in": "path",
+                        "required": true
                     },
                     {
                         "type": "string",
@@ -6122,7 +6428,8 @@ const docTemplate = `{
                         "format": "uuid",
                         "description": "project uuid",
                         "name": "project_id",
-                        "in": "path"
+                        "in": "path",
+                        "required": true
                     },
                     {
                         "type": "string",
@@ -6537,6 +6844,14 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "plot config uuid",
+                        "name": "plot_configuration_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
                         "description": "plot config payload",
                         "name": "plot_config",
                         "in": "body",
@@ -6586,6 +6901,14 @@ const docTemplate = `{
                     "plot-config"
                 ],
                 "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "project uuid",
+                        "name": "project_id",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "format": "uuid",
@@ -6707,126 +7030,6 @@ const docTemplate = `{
                             "items": {
                                 "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Timeseries"
                             }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    }
-                }
-            }
-        },
-        "/projects/{project_id}/timeseries/{timeseries_id}": {
-            "post": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "project"
-                ],
-                "summary": "exposes a timeseries at the project level",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "format": "uuid",
-                        "description": "project id",
-                        "name": "project_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "format": "uuid",
-                        "description": "timeseries uuid",
-                        "name": "instrument_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "project"
-                ],
-                "summary": "removes a timeseries from the project level",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "format": "uuid",
-                        "description": "project id",
-                        "name": "project_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "format": "uuid",
-                        "description": "timeseries uuid",
-                        "name": "instrument_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
                         }
                     },
                     "400": {
@@ -7005,6 +7208,13 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "project abbr",
+                        "name": "project_slug",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "uri path of requested resource",
                         "name": "uri_path",
                         "in": "path",
@@ -7145,44 +7355,6 @@ const docTemplate = `{
             }
         },
         "/timeseries": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "timeseries"
-                ],
-                "summary": "lists all timeseries",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Timeseries"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    }
-                }
-            },
             "post": {
                 "security": [
                     {
@@ -7213,7 +7385,10 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Timeseries"
+                                "type": "object",
+                                "additionalProperties": {
+                                    "type": "string"
+                                }
                             }
                         }
                     },
@@ -7320,7 +7495,10 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Timeseries"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "400": {
@@ -7734,7 +7912,7 @@ const docTemplate = `{
                 "create_date": {
                     "type": "string"
                 },
-                "creator": {
+                "creator_id": {
                     "type": "string"
                 },
                 "creator_username": {
@@ -7779,7 +7957,7 @@ const docTemplate = `{
                 "update_date": {
                     "type": "string"
                 },
-                "updater": {
+                "updater_id": {
                     "type": "string"
                 },
                 "updater_username": {
@@ -7852,9 +8030,6 @@ const docTemplate = `{
                 },
                 "instrument_id": {
                     "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
                 }
             }
         },
@@ -7890,7 +8065,10 @@ const docTemplate = `{
                 "create_date": {
                     "type": "string"
                 },
-                "creator": {
+                "creator_id": {
+                    "type": "string"
+                },
+                "creator_username": {
                     "type": "string"
                 },
                 "id": {
@@ -7908,7 +8086,10 @@ const docTemplate = `{
                 "update_date": {
                     "type": "string"
                 },
-                "updater": {
+                "updater_id": {
+                    "type": "string"
+                },
+                "updater_username": {
                     "type": "string"
                 }
             }
@@ -7919,7 +8100,10 @@ const docTemplate = `{
                 "create_date": {
                     "type": "string"
                 },
-                "creator": {
+                "creator_id": {
+                    "type": "string"
+                },
+                "creator_username": {
                     "type": "string"
                 },
                 "id": {
@@ -7943,7 +8127,10 @@ const docTemplate = `{
                 "update_date": {
                     "type": "string"
                 },
-                "updater": {
+                "updater_id": {
+                    "type": "string"
+                },
+                "updater_username": {
                     "type": "string"
                 }
             }
@@ -7954,7 +8141,7 @@ const docTemplate = `{
                 "create_date": {
                     "type": "string"
                 },
-                "creator": {
+                "creator_id": {
                     "type": "string"
                 },
                 "creator_username": {
@@ -7987,10 +8174,16 @@ const docTemplate = `{
                 "sn": {
                     "type": "string"
                 },
+                "tables": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerTable"
+                    }
+                },
                 "update_date": {
                     "type": "string"
                 },
-                "updater": {
+                "updater_id": {
                     "type": "string"
                 },
                 "updater_username": {
@@ -7998,20 +8191,25 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.DataloggerPreview": {
+        "github_com_USACE_instrumentation-api_api_internal_model.DataloggerTable": {
             "type": "object",
             "properties": {
-                "datalogger_id": {
+                "id": {
                     "type": "string"
                 },
-                "model": {
+                "table_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_USACE_instrumentation-api_api_internal_model.DataloggerTablePreview": {
+            "type": "object",
+            "properties": {
+                "datalogger_table_id": {
                     "type": "string"
                 },
                 "preview": {
                     "$ref": "#/definitions/pgtype.JSON"
-                },
-                "sn": {
-                    "type": "string"
                 },
                 "update_date": {
                     "type": "string"
@@ -8024,7 +8222,7 @@ const docTemplate = `{
                 "create_date": {
                     "type": "string"
                 },
-                "creator": {
+                "creator_id": {
                     "type": "string"
                 },
                 "creator_username": {
@@ -8060,10 +8258,16 @@ const docTemplate = `{
                 "sn": {
                     "type": "string"
                 },
+                "tables": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerTable"
+                    }
+                },
                 "update_date": {
                     "type": "string"
                 },
-                "updater": {
+                "updater_id": {
                     "type": "string"
                 },
                 "updater_username": {
@@ -8074,6 +8278,9 @@ const docTemplate = `{
         "github_com_USACE_instrumentation-api_api_internal_model.District": {
             "type": "object",
             "properties": {
+                "agency": {
+                    "type": "string"
+                },
                 "division_initials": {
                     "type": "string"
                 },
@@ -8149,6 +8356,29 @@ const docTemplate = `{
                 }
             }
         },
+        "github_com_USACE_instrumentation-api_api_internal_model.DomainGroupOption": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_USACE_instrumentation-api_api_internal_model.DomainMap": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "array",
+                "items": {
+                    "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DomainGroupOption"
+                }
+            }
+        },
         "github_com_USACE_instrumentation-api_api_internal_model.EmailAutocompleteResult": {
             "type": "object",
             "properties": {
@@ -8170,6 +8400,12 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "datalogger_id": {
+                    "type": "string"
+                },
+                "datalogger_table_id": {
+                    "type": "string"
+                },
+                "datalogger_table_name": {
                     "type": "string"
                 },
                 "rows": {
@@ -8215,7 +8451,7 @@ const docTemplate = `{
                 "create_date": {
                     "type": "string"
                 },
-                "creator": {
+                "creator_id": {
                     "type": "string"
                 },
                 "creator_username": {
@@ -8251,7 +8487,7 @@ const docTemplate = `{
                 "update_date": {
                     "type": "string"
                 },
-                "updater": {
+                "updater_id": {
                     "type": "string"
                 },
                 "updater_username": {
@@ -8305,10 +8541,13 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.IDAndSlug": {
+        "github_com_USACE_instrumentation-api_api_internal_model.IDSlugName": {
             "type": "object",
             "properties": {
                 "id": {
+                    "type": "string"
+                },
+                "name": {
                     "type": "string"
                 },
                 "slug": {
@@ -8405,7 +8644,10 @@ const docTemplate = `{
                 "create_date": {
                     "type": "string"
                 },
-                "creator": {
+                "creator_id": {
+                    "type": "string"
+                },
+                "creator_username": {
                     "type": "string"
                 },
                 "geometry": {
@@ -8416,6 +8658,9 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                },
+                "icon": {
+                    "type": "string"
                 },
                 "id": {
                     "type": "string"
@@ -8432,8 +8677,11 @@ const docTemplate = `{
                 "opts": {
                     "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Opts"
                 },
-                "project_id": {
-                    "type": "string"
+                "projects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IDSlugName"
+                    }
                 },
                 "slug": {
                     "type": "string"
@@ -8459,22 +8707,14 @@ const docTemplate = `{
                 "update_date": {
                     "type": "string"
                 },
-                "updater": {
+                "updater_id": {
+                    "type": "string"
+                },
+                "updater_username": {
                     "type": "string"
                 },
                 "usgs_id": {
                     "type": "string"
-                }
-            }
-        },
-        "github_com_USACE_instrumentation-api_api_internal_model.InstrumentCollection": {
-            "type": "object",
-            "properties": {
-                "items": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Instrument"
-                    }
                 }
             }
         },
@@ -8492,7 +8732,10 @@ const docTemplate = `{
                 "create_date": {
                     "type": "string"
                 },
-                "creator": {
+                "creator_id": {
+                    "type": "string"
+                },
+                "creator_username": {
                     "type": "string"
                 },
                 "description": {
@@ -8519,7 +8762,10 @@ const docTemplate = `{
                 "update_date": {
                     "type": "string"
                 },
-                "updater": {
+                "updater_id": {
+                    "type": "string"
+                },
+                "updater_username": {
                     "type": "string"
                 }
             }
@@ -8533,7 +8779,10 @@ const docTemplate = `{
                 "create_date": {
                     "type": "string"
                 },
-                "creator": {
+                "creator_id": {
+                    "type": "string"
+                },
+                "creator_username": {
                     "type": "string"
                 },
                 "id": {
@@ -8551,7 +8800,10 @@ const docTemplate = `{
                 "update_date": {
                     "type": "string"
                 },
-                "updater": {
+                "updater_id": {
+                    "type": "string"
+                },
+                "updater_username": {
                     "type": "string"
                 }
             }
@@ -8612,11 +8864,11 @@ const docTemplate = `{
         "github_com_USACE_instrumentation-api_api_internal_model.IpiSegment": {
             "type": "object",
             "properties": {
-                "cum_dev_timeseries_id": {
-                    "type": "string"
-                },
                 "id": {
                     "type": "integer"
+                },
+                "inc_dev_timeseries_id": {
+                    "type": "string"
                 },
                 "instrument_id": {
                     "type": "string"
@@ -8625,6 +8877,9 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "length_timeseries_id": {
+                    "type": "string"
+                },
+                "temp_timeseries_id": {
                     "type": "string"
                 },
                 "tilt_timeseries_id": {
@@ -8641,8 +8896,14 @@ const docTemplate = `{
                 "elevation": {
                     "type": "number"
                 },
+                "inc_dev": {
+                    "type": "number"
+                },
                 "segment_id": {
                     "type": "integer"
+                },
+                "temp": {
+                    "type": "number"
                 },
                 "tilt": {
                     "type": "number"
@@ -8719,7 +8980,10 @@ const docTemplate = `{
                 "create_date": {
                     "type": "string"
                 },
-                "creator": {
+                "creator_id": {
+                    "type": "string"
+                },
+                "creator_username": {
                     "type": "string"
                 },
                 "date_range": {
@@ -8758,7 +9022,10 @@ const docTemplate = `{
                 "update_date": {
                     "type": "string"
                 },
-                "updater": {
+                "updater_id": {
+                    "type": "string"
+                },
+                "updater_username": {
                     "type": "string"
                 }
             }
@@ -8798,7 +9065,13 @@ const docTemplate = `{
                 "create_date": {
                     "type": "string"
                 },
-                "creator": {
+                "creator_id": {
+                    "type": "string"
+                },
+                "creator_username": {
+                    "type": "string"
+                },
+                "district_id": {
                     "type": "string"
                 },
                 "federal_id": {
@@ -8825,28 +9098,14 @@ const docTemplate = `{
                 "slug": {
                     "type": "string"
                 },
-                "timeseries": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
                 "update_date": {
                     "type": "string"
                 },
-                "updater": {
+                "updater_id": {
                     "type": "string"
-                }
-            }
-        },
-        "github_com_USACE_instrumentation-api_api_internal_model.ProjectCollection": {
-            "type": "object",
-            "properties": {
-                "projects": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Project"
-                    }
+                },
+                "updater_username": {
+                    "type": "string"
                 }
             }
         },
@@ -9082,15 +9341,6 @@ const docTemplate = `{
                 "parameter_id": {
                     "type": "string"
                 },
-                "project": {
-                    "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "project_slug": {
-                    "type": "string"
-                },
                 "slug": {
                     "type": "string"
                 },
@@ -9220,15 +9470,6 @@ const docTemplate = `{
                 "parameter_id": {
                     "type": "string"
                 },
-                "project": {
-                    "type": "string"
-                },
-                "project_id": {
-                    "type": "string"
-                },
-                "project_slug": {
-                    "type": "string"
-                },
                 "slug": {
                     "type": "string"
                 },
@@ -9288,12 +9529,7 @@ const docTemplate = `{
             "description": "CAC-Only routes",
             "type": "apiKey",
             "name": "Authorization",
-            "in": "header",
-            "scopes": {
-                "admin": " Grants read and write access to administrative information",
-                "project_admin": " Grants project members read and write access to projects",
-                "project_member": " Read and write permissions per-project granted by project admin"
-            }
+            "in": "header"
         }
     }
 }`

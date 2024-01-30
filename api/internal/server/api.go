@@ -59,6 +59,8 @@ func (server *ApiServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
+	mw := h.Middleware
+
 	// Alert
 	r.public.GET("/projects/:project_id/instruments/:instrument_id/alerts", h.ListAlertsForInstrument)
 	r.private.GET("/my_alerts", h.ListMyAlerts)
@@ -102,7 +104,8 @@ func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 	r.private.PUT("/datalogger/:datalogger_id", h.UpdateDatalogger)
 	r.private.PUT("/datalogger/:datalogger_id/key", h.CycleDataloggerKey)
 	r.private.DELETE("/datalogger/:datalogger_id", h.DeleteDatalogger)
-	r.private.GET("/datalogger/:datalogger_id/preview", h.GetDataloggerPreview)
+	r.private.GET("/datalogger/:datalogger_id/tables/:datalogger_table_id/preview", h.GetDataloggerTablePreview)
+	r.private.PUT("/datalogger/:datalogger_id/tables/:datalogger_table_id/name", h.ResetDataloggerTableName)
 
 	// DistrictRollup
 	r.public.GET("/projects/:project_id/district_rollup/evaluation_submittals", h.ListProjectEvaluationDistrictRollup)
@@ -110,13 +113,15 @@ func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 
 	// Domain
 	r.public.GET("/domains", h.GetDomains)
+	r.public.GET("/domains/map", h.GetDomainMap)
 
 	// EquivalencyTable
-	r.private.GET("/datalogger/:datalogger_id/equivalency_table", h.GetEquivalencyTable)
+	r.private.GET("/datalogger/:datalogger_id/tables/:datalogger_table_id/equivalency_table", h.GetEquivalencyTable)
 	r.private.POST("/datalogger/:datalogger_id/equivalency_table", h.CreateEquivalencyTable)
-	r.private.PUT("/datalogger/:datalogger_id/equivalency_table", h.UpdateEquivalencyTable)
-	r.private.DELETE("/datalogger/:datalogger_id/equivalency_table", h.DeleteEquivalencyTable)
-	r.private.DELETE("/datalogger/:datalogger_id/equivalency_table/row", h.DeleteEquivalencyTableRow)
+	r.private.POST("/datalogger/:datalogger_id/tables/:datalogger_table_id/equivalency_table", h.CreateEquivalencyTable)
+	r.private.PUT("/datalogger/:datalogger_id/tables/:datalogger_table_id/equivalency_table", h.UpdateEquivalencyTable)
+	r.private.DELETE("/datalogger/:datalogger_id/tables/:datalogger_table_id/equivalency_table", h.DeleteEquivalencyTable)
+	r.private.DELETE("/datalogger/:datalogger_id/tables/:datalogger_table_id/equivalency_table/row/:row_id", h.DeleteEquivalencyTableRow)
 
 	// Evaluation
 	r.public.GET("/projects/:project_id/evaluations", h.ListProjectEvaluations)
@@ -145,8 +150,8 @@ func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 	r.public.GET("/instruments/:instrument_id", h.GetInstrument)
 	r.public.GET("/instruments/:instrument_id/timeseries_measurements", h.ListTimeseriesMeasurementsByInstrument)
 	r.private.POST("/projects/:project_id/instruments", h.CreateInstruments)
-	// TODO: Remove endpoint POST /instruments (no project context)
-	r.private.POST("/instruments", h.CreateInstruments)
+	r.private.POST("/projects/:project_id/instruments/:instrument_id/assignments", h.AssignInstrumentToProject, mw.IsProjectAdmin)
+	r.private.DELETE("/projects/:project_id/instruments/:instrument_id/assignments", h.UnassignInstrumentFromProject, mw.IsProjectAdmin)
 	r.private.PUT("/projects/:project_id/instruments/:instrument_id", h.UpdateInstrument)
 	r.private.PUT("/projects/:project_id/instruments/:instrument_id/geometry", h.UpdateInstrumentGeometry)
 	r.private.DELETE("/projects/:project_id/instruments/:instrument_id", h.DeleteFlagInstrument)
@@ -218,7 +223,6 @@ func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 	// Profile
 	r.cacOnly.POST("/profiles", h.CreateProfile)
 	r.cacOnly.GET("/my_profile", h.GetMyProfile)
-	r.cacOnly.GET("/my_projects", h.ListMyProjects)
 	r.cacOnly.POST("/my_tokens", h.CreateToken)
 	r.cacOnly.DELETE("/my_tokens/:token_id", h.DeleteToken)
 
@@ -230,16 +234,16 @@ func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 	// Project
 	r.public.GET("/districts", h.ListDistricts)
 	r.public.GET("/projects", h.ListProjects)
+	r.private.GET("/my_projects", h.ListMyProjects)
 	r.public.GET("/projects/:project_id", h.GetProject)
 	r.public.GET("/projects/count", h.GetProjectCount)
 	r.public.GET("/projects/:project_id/instruments", h.ListProjectInstruments)
-	r.public.GET("/projects/:project_id/instruments/names", h.ListProjectInstrumentNames)
 	r.public.GET("/projects/:project_id/instrument_groups", h.ListProjectInstrumentGroups)
-	r.private.POST("/projects", h.CreateProjectBulk, h.Middleware.IsApplicationAdmin)
-	r.private.PUT("/projects/:project_id", h.UpdateProject)
-	r.private.DELETE("/projects/:project_id", h.DeleteFlagProject)
-	r.private.POST("/projects/:project_id/timeseries/:timeseries_id", h.CreateProjectTimeseries)
-	r.private.DELETE("/projects/:project_id/timeseries/:timeseries_id", h.DeleteProjectTimeseries)
+	// Application Admin Only
+	r.private.POST("/projects", h.CreateProjectBulk, mw.IsApplicationAdmin)
+	r.private.POST("/projects/:project_id/images", h.UploadProjectImage, mw.IsApplicationAdmin)
+	r.private.PUT("/projects/:project_id", h.UpdateProject, mw.IsApplicationAdmin)
+	r.private.DELETE("/projects/:project_id", h.DeleteFlagProject, mw.IsApplicationAdmin)
 
 	// Search
 	r.public.GET("/search/:entity", h.Search)
@@ -258,7 +262,6 @@ func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 
 	// Timeseries
 	// TODO: Delete timeseries endpoints without project context in URL
-	r.public.GET("/timeseries", h.ListTimeseries)
 	r.public.GET("/timeseries/:timeseries_id", h.GetTimeseries)
 	r.public.GET("/instruments/:instrument_id/timeseries/:timeseries_id", h.GetTimeseries)
 	r.public.GET("/projects/:project_id/timeseries", h.ListProjectTimeseries)

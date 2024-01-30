@@ -12,6 +12,8 @@ type ProjectRoleService interface {
 	GetProjectMembership(ctx context.Context, roleID uuid.UUID) (model.ProjectMembership, error)
 	AddProjectMemberRole(ctx context.Context, projectID, profileID, roleID, grantedBy uuid.UUID) (model.ProjectMembership, error)
 	RemoveProjectMemberRole(ctx context.Context, projectID, profileID, roleID uuid.UUID) error
+	IsProjectAdmin(ctx context.Context, profileID, projectID uuid.UUID) (bool, error)
+	IsProjectMember(ctx context.Context, profileID, projectID uuid.UUID) (bool, error)
 }
 
 type projectRoleService struct {

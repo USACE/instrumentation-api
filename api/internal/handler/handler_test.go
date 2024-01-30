@@ -1,6 +1,9 @@
 package handler_test
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -18,6 +21,18 @@ const (
 	host    = "http://localhost:8080"
 	mockJwt = `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwibmFtZSI6IlVzZXIuQWRtaW4iLCJpYXQiOjE1MTYyMzkwMjIsImV4cCI6MjAwMDAwMDAwMCwicm9sZXMiOlsiUFVCTElDLlVTRVIiXX0.4VAMamtH92GiIb5CpGKpP6LKwU6IjIfw5wS4qc8O8VM`
 )
+
+const IDSlugNameArrSchema = `{
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "id": { "type": "string" },
+      "slug": { "type": "string" },
+      "name": { "type": "string" }
+    }
+  }
+}`
 
 // HTTPTest contains parameters for HTTP Integration Tests
 type HTTPTest struct {
@@ -82,8 +97,24 @@ func RunAll(t *testing.T, tests []HTTPTest) {
 				return
 			}
 
+			// truncate verbose -v output
+			var dst bytes.Buffer
+			if err := json.Indent(&dst, body, "", "  "); err != nil {
+				s := string(body)
+				if len(s) > 500 {
+					s = fmt.Sprintf("%s\n...", s[:500])
+				}
+				t.Logf("could not format json response body: %s", s)
+			} else {
+				s := dst.String()
+				ss := strings.Split(s, "\n")
+				if len(ss) > 25 {
+					s = fmt.Sprintf("%s\n...", strings.Join(ss[:25], "\n"))
+				}
+				t.Logf("response body: %s", s)
+			}
+
 			if v.ExpectedStatus != run.StatusCode {
-				t.Log(string(body))
 				return
 			}
 

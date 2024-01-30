@@ -8,12 +8,10 @@ import (
 )
 
 type PlotConfigService interface {
-	ListPlotConfigSlugs(ctx context.Context) ([]string, error)
 	ListPlotConfigs(ctx context.Context, projectID uuid.UUID) ([]model.PlotConfig, error)
 	GetPlotConfig(ctx context.Context, plotconfigID uuid.UUID) (model.PlotConfig, error)
 	CreatePlotConfig(ctx context.Context, pc model.PlotConfig) (model.PlotConfig, error)
-	UpdatePlotConfig(ctx context.Context, pc model.PlotConfig) error
-	UpdatePlotConfiguration(ctx context.Context, pc model.PlotConfig) (model.PlotConfig, error)
+	UpdatePlotConfig(ctx context.Context, pc model.PlotConfig) (model.PlotConfig, error)
 	DeletePlotConfig(ctx context.Context, projectID, plotConfigID uuid.UUID) error
 }
 
@@ -42,7 +40,7 @@ func (s plotConfigService) CreatePlotConfig(ctx context.Context, pc model.PlotCo
 		return a, err
 	}
 
-	for _, tsid := range pc.TimeseriesID {
+	for _, tsid := range pc.TimeseriesIDs {
 		if err := qtx.CreatePlotConfigTimeseries(ctx, pcID, tsid); err != nil {
 			return a, err
 		}
@@ -66,7 +64,7 @@ func (s plotConfigService) CreatePlotConfig(ctx context.Context, pc model.PlotCo
 }
 
 // UpdatePlotConfiguration update plot configuration for a project
-func (s plotConfigService) UpdatePlotConfiguration(ctx context.Context, pc model.PlotConfig) (model.PlotConfig, error) {
+func (s plotConfigService) UpdatePlotConfig(ctx context.Context, pc model.PlotConfig) (model.PlotConfig, error) {
 	var a model.PlotConfig
 	tx, err := s.db.BeginTxx(ctx, nil)
 	if err != nil {
@@ -80,7 +78,7 @@ func (s plotConfigService) UpdatePlotConfiguration(ctx context.Context, pc model
 		return a, err
 	}
 
-	if err := qtx.DeletePlotConfigTimeseries(ctx, pc.ID, pc.TimeseriesID); err != nil {
+	if err := qtx.DeletePlotConfigTimeseries(ctx, pc.ID); err != nil {
 		return a, err
 	}
 
@@ -92,7 +90,7 @@ func (s plotConfigService) UpdatePlotConfiguration(ctx context.Context, pc model
 		return a, err
 	}
 
-	for _, tsID := range pc.TimeseriesID {
+	for _, tsID := range pc.TimeseriesIDs {
 		if err := qtx.CreatePlotConfigTimeseries(ctx, pc.ID, tsID); err != nil {
 			return a, err
 		}
