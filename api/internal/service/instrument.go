@@ -51,6 +51,11 @@ func createInstrument(ctx context.Context, q *model.Queries, instrument model.In
 	if err != nil {
 		return model.IDSlugName{}, err
 	}
+	for _, prj := range instrument.Projects {
+		if err := q.AssignInstrumentToProject(ctx, prj.ID, instrument.ID); err != nil {
+			return model.IDSlugName{}, err
+		}
+	}
 	if err := q.CreateOrUpdateInstrumentStatus(ctx, newInstrument.ID, instrument.StatusID, instrument.StatusTime); err != nil {
 		return model.IDSlugName{}, err
 	}
