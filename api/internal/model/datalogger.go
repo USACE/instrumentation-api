@@ -243,7 +243,7 @@ const renameEmptyDataloggerTableName = `
 	SET table_name = $2
 	WHERE table_name = '' AND datalogger_id = $1
 	AND NOT EXISTS (
-	   SELECT 1 FROM datalogger_table WHERE datalogger_id = $1 AND table_name = $2
+		SELECT 1 FROM datalogger_table WHERE datalogger_id = $1 AND table_name = $2
 	);
 `
 
