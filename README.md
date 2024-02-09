@@ -76,9 +76,11 @@ To run specific tests, you can pass optional commands to the test script in `./c
 ```
 ## How To Deploy
 
-### Deploying Develop and Stable Core API & Telemetry API
+### Deploying Develop Core API & Telemetry API
 
-Deployments are done though [CI (Continuous Integration) scripts](./.github) using [Github Actions](https://docs.github.com/en/actions). The [core api](./api) and [telemetry api](./telemetry) are tested, built, and pushed to AWS ECR, where they should re-deploy on container push when the CI pipelines successfully finish. If the container does not automattically re-deploy on ECR push, it can be manually deployed from the AWS console.
+Development deployments are done though [CI (Continuous Integration) scripts](./.github) using [Github Actions](https://docs.github.com/en/actions). The [core api](./api) and [telemetry api](./telemetry) are tested, built, and pushed to AWS ECR, where they should re-deploy on container push when the CI pipelines successfully finish. If the container does not automattically re-deploy on ECR push, it can be manually deployed from the AWS console.
+
+Test and prodution deployments are currently done manually. The [./build_ib.sh](./build_ib.sh) can be used to build the application with hardened images sourced from Ironbank. Afterwards, the build images should be pushed to test and/or prod via cli.
 
 ### Postgres Database on AWS Relational Database Service (RDS)
 
