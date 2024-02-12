@@ -118,7 +118,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--base-url",
-        help="base url to send requests to, e.g. stable https://midas-telemetry.rsgis.dev",
+        help="base url to send requests to, e.g. https://midas-telemetry.sec.usace.army.mil",
         default=DEFAULT_BASE_URL,
         type=str,
     )

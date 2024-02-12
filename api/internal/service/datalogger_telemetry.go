@@ -37,6 +37,11 @@ func (s dataloggerTelemetryService) UpdateDataloggerTablePreview(ctx context.Con
 
 	qtx := s.WithTx(tx)
 
+	// replace empty datalogger table name with most recent payload
+	if err := qtx.RenameEmptyDataloggerTableName(ctx, dataloggerID, tableName); err != nil {
+		return uuid.Nil, err
+	}
+
 	tableID, err := qtx.GetOrCreateDataloggerTable(ctx, dataloggerID, tableName)
 	if err != nil {
 		return uuid.Nil, err

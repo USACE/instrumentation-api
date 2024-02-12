@@ -32,6 +32,7 @@ ENTRYPOINT ["/go/bin/midas-telemetry"]
 
 FROM ${BASE_IMAGE} AS alert
 COPY --from=builder /go/bin/alert /go/bin/midas-alert
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 ENTRYPOINT ["/go/bin/midas-alert"]
 
 FROM ${BASE_IMAGE} AS dcs-loader
