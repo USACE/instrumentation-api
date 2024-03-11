@@ -21,6 +21,7 @@ type ApiHandler struct {
 	AwareParameterService          service.AwareParameterService
 	CollectionGroupService         service.CollectionGroupService
 	DataloggerService              service.DataloggerService
+	DataloggerTelemetryService     service.DataloggerTelemetryService
 	DistrictRollupService          service.DistrictRollupService
 	DomainService                  service.DomainService
 	EquivalencyTableService        service.EquivalencyTableService
@@ -67,6 +68,7 @@ func NewApi(cfg *config.ApiConfig) *ApiHandler {
 		AwareParameterService:          service.NewAwareParameterService(db, q),
 		CollectionGroupService:         service.NewCollectionGroupService(db, q),
 		DataloggerService:              service.NewDataloggerService(db, q),
+		DataloggerTelemetryService:     dataloggerTelemetryService,
 		DistrictRollupService:          service.NewDistrictRollupService(db, q),
 		DomainService:                  service.NewDomainService(db, q),
 		EquivalencyTableService:        service.NewEquivalencyTableService(db, q),

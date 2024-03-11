@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/internal/model"
@@ -140,4 +142,55 @@ func (h *ApiHandler) DeleteTimeserieMeasurements(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return c.JSON(http.StatusOK, make(map[string]interface{}))
+}
+
+// CreateOrUpdateTimeseriesMeasurements godoc
+//
+//	@Summary creates one or more timeseries measurements
+//	@Tags measurement
+//	@Accept json,mpfd
+//	@Produce json
+//	@Param timeseries_measurement_collections body model.TimeseriesMeasurementCollectionCollection false "json array of timeseries measurement collections"
+//	@Param timeseries_measurement_collections formData file false "TOA5 file of timeseries measurement collections"
+//	@Success 200 {array} model.MeasurementCollection
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /timeseries_measurements [post]
+//	@Security Bearer
+func (h *ApiHandler) _CreateOrUpdateTimeseriesMeasurements(c echo.Context) error {
+	contentType := "application/json"
+	contentTypeHeader, ok := c.Request().Header["Content-Type"]
+	if ok && len(contentTypeHeader) > 0 {
+		contentType = strings.ToLower(contentTypeHeader[0])
+	}
+
+	if strings.Contains(contentType, "multipart/form-data") {
+		return h.createOrUpdateTimeseriesMeasurementsMultipartFormData(c)
+	}
+
+	return h.CreateOrUpdateTimeseriesMeasurements(c)
+}
+
+func (h *ApiHandler) createOrUpdateTimeseriesMeasurementsMultipartFormData(c echo.Context) error {
+	file, err := c.FormFile("file")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	src, err := file.Open()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	defer func() {
+		if err := src.Close(); err != nil {
+			log.Printf("error closing file: %s", err.Error())
+		}
+	}()
+
+	if err := h.DataloggerTelemetryService.CreateOrUpdateTOA5MeasurementCollection(c.Request().Context(), src); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusCreated, map[string]interface{}{})
 }
