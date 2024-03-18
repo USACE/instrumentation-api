@@ -1,5 +1,4 @@
--- v_aware_platform_parameter_enabled
-DROP VIEW IF EXISTS v_aware_platform_parameter_enabled;
+-- ${flyway:timestamp}
 CREATE VIEW v_aware_platform_parameter_enabled AS (
     SELECT
 	i.id          AS instrument_id,

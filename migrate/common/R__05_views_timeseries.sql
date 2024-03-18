@@ -1,5 +1,4 @@
--- stored and computed timeseries
-DROP VIEW IF EXISTS v_timeseries;
+-- ${flyway:timestamp}
 CREATE VIEW v_timeseries AS (
     WITH ts_stored_and_computed AS (
         SELECT
@@ -30,8 +29,6 @@ CREATE VIEW v_timeseries AS (
     INNER JOIN unit U ON u.id = t.unit_id
 );
 
--- computed timeseries and stored dependency timeseries
-DROP VIEW IF EXISTS v_timeseries_dependency;
 CREATE VIEW v_timeseries_dependency AS (
     WITH variable_tsid_map AS (
 	    SELECT
@@ -59,8 +56,6 @@ CREATE VIEW v_timeseries_dependency AS (
     LEFT JOIN variable_tsid_map m ON m.variable = i.parsed_variable
 );
 
--- v_timeseries_project_map
-DROP VIEW IF EXISTS v_timeseries_project_map;
 CREATE VIEW v_timeseries_project_map AS (
     SELECT
         t.id AS timeseries_id,
@@ -70,12 +65,10 @@ CREATE VIEW v_timeseries_project_map AS (
     LEFT JOIN project_instrument pi ON pi.instrument_id = i.id
 );
 
-DROP VIEW IF EXISTS v_timeseries_stored;
 CREATE VIEW v_timeseries_stored AS (
     SELECT * FROM timeseries WHERE id NOT IN (SELECT timeseries_id FROM calculation)
 );
 
-DROP VIEW IF EXISTS v_timeseries_computed;
 CREATE VIEW v_timeseries_computed AS (
     SELECT
         ts.*,

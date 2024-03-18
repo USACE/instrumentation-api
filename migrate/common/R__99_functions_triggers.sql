@@ -1,7 +1,5 @@
--- POSTGRESQL < 14 does not support CREATE OR REPLACE TRIGGER
--- drop trigger in transaction to replicate this behavior
+-- ${flyway:timestamp}
 
--- Trigger Function; Create Timeseries when aware_platform_parameter_enabled
 CREATE OR REPLACE FUNCTION aware_create_timeseries()
     RETURNS TRIGGER
     LANGUAGE PLPGSQL

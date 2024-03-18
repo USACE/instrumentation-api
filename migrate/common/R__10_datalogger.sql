@@ -1,4 +1,4 @@
-DROP VIEW IF EXISTS v_datalogger;
+-- ${flyway:timestamp}
 CREATE VIEW v_datalogger AS (
     SELECT
         dl.id          AS id,
@@ -42,7 +42,6 @@ CREATE VIEW v_datalogger AS (
     WHERE NOT dl.deleted
 );
 
-DROP VIEW IF EXISTS v_datalogger_preview;
 CREATE VIEW v_datalogger_preview AS (
     SELECT
         p.datalogger_table_id,
@@ -54,7 +53,6 @@ CREATE VIEW v_datalogger_preview AS (
     WHERE NOT dl.deleted
 );
 
-DROP VIEW IF EXISTS v_datalogger_equivalency_table;
 CREATE VIEW v_datalogger_equivalency_table AS (
     SELECT
         dt.datalogger_id AS datalogger_id,
@@ -72,7 +70,6 @@ CREATE VIEW v_datalogger_equivalency_table AS (
     GROUP BY dt.datalogger_id, dt.id
 );
 
-DROP VIEW IF EXISTS v_datalogger_hash;
 CREATE VIEW v_datalogger_hash AS (
     SELECT
         dh.datalogger_id AS datalogger_id,

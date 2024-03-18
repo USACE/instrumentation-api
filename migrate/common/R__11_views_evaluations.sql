@@ -1,5 +1,4 @@
-DROP VIEW IF EXISTS v_evaluation;
-
+-- ${flyway:timestamp}
 CREATE VIEW v_evaluation AS (
     SELECT
         ev.id                               AS id,

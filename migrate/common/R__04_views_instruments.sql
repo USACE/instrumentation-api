@@ -1,5 +1,4 @@
-DROP VIEW IF EXISTS v_instrument;
-DROP VIEW IF EXISTS v_instrument_telemetry;
+-- ${flyway:timestamp}
 CREATE VIEW v_instrument_telemetry AS (
     SELECT a.id,
            a.instrument_id AS instrument_id,
@@ -121,7 +120,6 @@ CREATE VIEW v_instrument AS (
     ) o ON o.instrument_id = i.id
 );
 
-DROP VIEW IF EXISTS v_instrument_group;
 CREATE VIEW v_instrument_group AS (
     WITH instrument_count AS (
             SELECT 

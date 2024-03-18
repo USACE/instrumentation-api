@@ -1,4 +1,4 @@
-DROP VIEW IF EXISTS v_plot_configuration;
+-- ${flyway:timestamp}
 CREATE VIEW v_plot_configuration AS (
     SELECT pc.id                                  AS id,
            pc.slug                                AS slug,

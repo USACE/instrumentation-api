@@ -1,4 +1,4 @@
-DROP VIEW IF EXISTS v_alert;
+-- ${flyway:timestamp}
 CREATE VIEW v_alert AS (
     SELECT a.id AS id,
        a.alert_config_id AS alert_config_id,
@@ -24,7 +24,6 @@ CREATE VIEW v_alert AS (
     INNER JOIN project p ON ac.project_id = p.id
 );
 
-DROP VIEW IF EXISTS v_alert_config;
 CREATE VIEW v_alert_config AS (
     SELECT
         ac.id                               AS id,
@@ -98,7 +97,6 @@ CREATE VIEW v_alert_config AS (
     WHERE NOT ac.deleted
 );
 
-DROP VIEW IF EXISTS v_submittal;
 CREATE VIEW v_submittal AS (
     SELECT
         sub.id                  AS id,

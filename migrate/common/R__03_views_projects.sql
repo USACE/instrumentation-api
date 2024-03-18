@@ -1,4 +1,4 @@
-DROP VIEW IF EXISTS v_project;
+-- ${flyway:timestamp}
 CREATE VIEW v_project AS (
     SELECT
         p.id,
@@ -42,7 +42,6 @@ CREATE VIEW v_project AS (
     CROSS JOIN config cfg
 );
 
-DROP VIEW IF EXISTS v_district;
 CREATE VIEW v_district AS (
     SELECT
         ag.name         AS agency,

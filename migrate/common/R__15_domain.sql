@@ -1,5 +1,4 @@
-DROP VIEW IF EXISTS v_domain_group;
-DROP VIEW IF EXISTS v_domain;
+-- ${flyway:timestamp}
 CREATE VIEW v_domain AS (
     SELECT
         id, 

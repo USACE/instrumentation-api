@@ -1,5 +1,4 @@
--- v_unit
-DROP VIEW IF EXISTS v_unit;
+-- ${flyway:timestamp}
 CREATE VIEW v_unit AS (
     SELECT u.id AS id,
            u.name AS name,

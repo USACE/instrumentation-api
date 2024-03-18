@@ -1,3 +1,4 @@
+-- ${flyway:timestamp}
 DROP FUNCTION IF EXISTS lttb;
 DROP FUNCTION IF EXISTS largest_triangle_accum;
 DROP AGGREGATE IF EXISTS largest_triangle(point_t,point_t,point_t);

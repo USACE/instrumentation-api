@@ -1,4 +1,4 @@
-DROP VIEW IF EXISTS v_saa_segment;
+-- ${flyway:timestamp}
 CREATE VIEW v_saa_segment AS (
     SELECT
         seg.id,
@@ -18,7 +18,6 @@ CREATE VIEW v_saa_segment AS (
     ) sub ON true
 );
 
-DROP VIEW IF EXISTS v_saa_measurement;
 CREATE VIEW v_saa_measurement AS (
     SELECT
         r.instrument_id,
@@ -93,7 +92,6 @@ CREATE VIEW v_saa_measurement AS (
     GROUP BY r.instrument_id, r.time
 );
 
-DROP VIEW IF EXISTS v_ipi_segment;
 CREATE VIEW v_ipi_segment AS (
     SELECT
         seg.id,
@@ -111,7 +109,6 @@ CREATE VIEW v_ipi_segment AS (
     ) sub ON true
 );
 
-DROP VIEW IF EXISTS v_ipi_measurement;
 CREATE VIEW v_ipi_measurement AS (
     SELECT
         r.instrument_id,

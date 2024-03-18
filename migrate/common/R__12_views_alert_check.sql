@@ -1,6 +1,4 @@
-DROP VIEW IF EXISTS v_alert_check_measurement_submittal;
-DROP VIEW IF EXISTS v_alert_check_evaluation_submittal;
-
+-- ${flyway:timestamp}
 CREATE VIEW v_alert_check_measurement_submittal AS (
     SELECT
         ac.id AS alert_config_id,

@@ -1,4 +1,4 @@
-DROP VIEW IF EXISTS v_district_rollup;
+-- ${flyway:timestamp}
 CREATE VIEW v_district_rollup AS (
     SELECT
         ac.alert_type_id                    AS alert_type_id,

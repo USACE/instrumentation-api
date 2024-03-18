@@ -1,3 +1,4 @@
+-- ${flyway:timestamp}
 -- slugify(name, table_name) returns a unique valid slug for text and table name passed.
 -- inspired by
 -- https://gist.github.com/kez/17638bade0382f820280dafa46277435

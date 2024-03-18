@@ -1,4 +1,4 @@
-DROP VIEW IF EXISTS v_profile;
+-- ${flyway:timestamp}
 CREATE VIEW v_profile AS (
     WITH roles_by_profile AS (
         SELECT profile_id,
@@ -18,8 +18,6 @@ CREATE VIEW v_profile AS (
     LEFT JOIN roles_by_profile r ON r.profile_id = p.id
 );
 
--- v_profile_project_roles
-DROP VIEW IF EXISTS v_profile_project_roles;
 CREATE VIEW v_profile_project_roles AS (
     SELECT a.id,
            a.profile_id,
@@ -38,8 +36,6 @@ CREATE VIEW v_profile_project_roles AS (
     ORDER BY username, role
 );
 
--- v_email_autocomplete
-DROP VIEW IF EXISTS v_email_autocomplete;
 CREATE VIEW v_email_autocomplete AS (
     SELECT id,
            'email' AS user_type,
