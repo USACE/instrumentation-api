@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"log"
 	"net/http"
 	"time"
 
@@ -93,8 +92,6 @@ func (h *ApiHandler) CreateCollectionGroup(c echo.Context) error {
 	cg.ProjectID = pID
 	p := c.Get("profile").(model.Profile)
 	cg.CreatorID, cg.CreateDate = p.ID, time.Now()
-
-	log.Printf("CollectionGroup: %+v", cg)
 
 	cgNew, err := h.CollectionGroupService.CreateCollectionGroup(c.Request().Context(), cg)
 	if err != nil {
