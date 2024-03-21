@@ -37,20 +37,13 @@ func (h *ApiHandler) CreateOrUpdateProjectTimeseriesMeasurements(c echo.Context)
 	}
 
 	dd := mcc.TimeseriesIDs()
-	m, err := h.TimeseriesService.GetTimeseriesProjectMap(ctx, dd)
-	if err != nil {
-		return err
-	}
-	for _, tID := range dd {
-		ppID, ok := m[tID]
-		if !ok || ppID != pID {
-			return echo.NewHTTPError(http.StatusBadRequest, "all timeseries posted do not belong to project")
-		}
+	if err := h.TimeseriesService.AssertTimeseriesLinkedToProject(ctx, pID, dd); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	stored, err := h.MeasurementService.CreateOrUpdateTimeseriesMeasurements(ctx, mcc.Items)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusCreated, stored)

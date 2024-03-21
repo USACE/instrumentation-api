@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 
 	"github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/google/uuid"
@@ -9,7 +10,7 @@ import (
 
 type TimeseriesService interface {
 	GetStoredTimeseriesExists(ctx context.Context, timeseriesID uuid.UUID) (bool, error)
-	GetTimeseriesProjectMap(ctx context.Context, timeseriesIDs []uuid.UUID) (map[uuid.UUID]uuid.UUID, error)
+	AssertTimeseriesLinkedToProject(ctx context.Context, projectID uuid.UUID, dd map[uuid.UUID]struct{}) error
 	ListProjectTimeseries(ctx context.Context, projectID uuid.UUID) ([]model.Timeseries, error)
 	ListInstrumentTimeseries(ctx context.Context, instrumentID uuid.UUID) ([]model.Timeseries, error)
 	ListInstrumentGroupTimeseries(ctx context.Context, instrumentGroupID uuid.UUID) ([]model.Timeseries, error)
@@ -52,4 +53,32 @@ func (s timeseriesService) CreateTimeseriesBatch(ctx context.Context, tt []model
 	}
 
 	return uu, nil
+}
+
+func (s timeseriesService) AssertTimeseriesLinkedToProject(ctx context.Context, projectID uuid.UUID, dd map[uuid.UUID]struct{}) error {
+	ddc := make(map[uuid.UUID]struct{}, len(dd))
+	dds := make([]uuid.UUID, len(dd))
+	idx := 0
+	for k := range ddc {
+		ddc[k] = struct{}{}
+		dds[idx] = k
+		idx++
+	}
+
+	q := s.db.Queries()
+
+	m, err := q.GetTimeseriesProjectMap(ctx, dds)
+	if err != nil {
+		return err
+	}
+	for tID := range ddc {
+		ppID, ok := m[tID]
+		if ok && ppID == projectID {
+			delete(ddc, tID)
+		}
+	}
+	if len(ddc) != 0 {
+		return errors.New("instruments for all timeseries must be linked to project")
+	}
+	return nil
 }

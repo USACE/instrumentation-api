@@ -91,17 +91,11 @@ func (h *ApiHandler) CreateOrUpdateProjectInclinometerMeasurements(c echo.Contex
 
 	ctx := c.Request().Context()
 
-	dd := mcc.InclinometerTimeseriesIDs()
-	m, err := h.TimeseriesService.GetTimeseriesProjectMap(ctx, dd)
-	if err != nil {
-		return err
+	dd := mcc.TimeseriesIDs()
+	if err := h.TimeseriesService.AssertTimeseriesLinkedToProject(ctx, pID, dd); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	for _, tID := range dd {
-		ppID, ok := m[tID]
-		if !ok || pID != ppID {
-			return echo.NewHTTPError(http.StatusBadRequest, "all timeseries posted do not belong to project")
-		}
-	}
+
 	p, ok := c.Get("profile").(model.Profile)
 	if !ok {
 		return echo.NewHTTPError(http.StatusBadRequest, "could not get profile")

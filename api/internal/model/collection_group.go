@@ -9,10 +9,10 @@ import (
 
 // CollectionGroup holds information for entity collection_group
 type CollectionGroup struct {
-	ID        uuid.UUID `json:"id"`
+	ID        uuid.UUID `json:"id" db:"id"`
 	ProjectID uuid.UUID `json:"project_id" db:"project_id"`
-	Slug      string    `json:"slug"`
-	Name      string    `json:"name"`
+	Slug      string    `json:"slug" db:"slug"`
+	Name      string    `json:"name" db:"name"`
 	AuditInfo
 }
 
@@ -88,7 +88,7 @@ func (q *Queries) GetCollectionGroupDetailsTimeseries(ctx context.Context, proje
 
 const createCollectionGroup = `
 	INSERT INTO collection_group (project_id, name, slug, creator, create_date, updater, update_date)
-	VALUES ($1, $2, slugify($2, 'collection_group'), $3, $4, $5, $6)
+		VALUES ($1, $2::varchar, slugify($2::varchar, 'collection_group'), $3, $4, $5, $6)
 	RETURNING id, project_id, name, slug, creator, create_date, updater, update_date
 `
 

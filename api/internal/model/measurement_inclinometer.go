@@ -60,10 +60,10 @@ type InclinometerMeasurementCollectionCollection struct {
 }
 
 // InclinometerTimeseriesIDs returns a slice of all timeseries IDs contained in the InclinometerMeasurementCollectionCollection
-func (cc *InclinometerMeasurementCollectionCollection) InclinometerTimeseriesIDs() []uuid.UUID {
-	dd := make([]uuid.UUID, 0)
+func (cc *InclinometerMeasurementCollectionCollection) TimeseriesIDs() map[uuid.UUID]struct{} {
+	dd := make(map[uuid.UUID]struct{})
 	for _, item := range cc.Items {
-		dd = append(dd, item.TimeseriesID)
+		dd[item.TimeseriesID] = struct{}{}
 	}
 	return dd
 }
