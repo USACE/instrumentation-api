@@ -23,11 +23,12 @@ type PlotConfigSettings struct {
 
 // PlotConfig holds information for entity PlotConfig
 type PlotConfig struct {
-	ID            uuid.UUID          `json:"id"`
-	Name          string             `json:"name"`
-	Slug          string             `json:"slug"`
-	ProjectID     uuid.UUID          `json:"project_id" db:"project_id"`
-	TimeseriesIDs dbSlice[uuid.UUID] `json:"timeseries_id" db:"timeseries_id"`
+	ID            uuid.UUID               `json:"id"`
+	Name          string                  `json:"name"`
+	Slug          string                  `json:"slug"`
+	ProjectID     uuid.UUID               `json:"project_id" db:"project_id"`
+	ReportConfigs dbJSONSlice[IDSlugName] `json:"report_configs" db:"report_configs"`
+	TimeseriesIDs dbSlice[uuid.UUID]      `json:"timeseries_id" db:"timeseries_id"`
 	AuditInfo
 	PlotConfigSettings
 }
@@ -64,6 +65,7 @@ const listPlotConfigsSQL = `
 		name,
 		project_id,
 		timeseries_id,
+		report_configs,
 		creator,
 		create_date,
 		updater,

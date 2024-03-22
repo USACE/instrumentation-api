@@ -9,7 +9,7 @@ import (
 	"github.com/xeipuuv/gojsonschema"
 )
 
-const plotConfigSchema = `{
+var plotConfigSchema = fmt.Sprintf(`{
     "type": "object",
     "properties": {
         "id": { "type": "string" },
@@ -29,11 +29,12 @@ const plotConfigSchema = `{
         "show_comments": { "type": "boolean" },
         "auto_range": { "type": "boolean" },
         "date_range": { "type": "string" },
-        "threshold": { "type": "number" }
+        "threshold": { "type": "number" },
+	"report_configs": %s
     },
     "required": ["id", "slug", "name", "creator_id", "create_date", "updater_id", "update_date", "project_id", "timeseries_id"],
     "additionalProperties": false
-}`
+}`, IDSlugNameArrSchema)
 
 var plotConfigObjectLoader = gojsonschema.NewStringLoader(plotConfigSchema)
 

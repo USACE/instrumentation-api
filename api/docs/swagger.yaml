@@ -761,6 +761,10 @@ definitions:
         type: string
       project_id:
         type: string
+      report_configs:
+        items:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IDSlugName'
+        type: array
       show_comments:
         type: boolean
       show_masked:
@@ -852,6 +856,41 @@ definitions:
       role_id:
         type: string
       username:
+        type: string
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.ReportConfig:
+    properties:
+      after:
+        type: string
+      before:
+        type: string
+      create_date:
+        type: string
+      creator_id:
+        type: string
+      creator_username:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      plot_configs:
+        items:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IDSlugName'
+        type: array
+      project_id:
+        type: string
+      project_name:
+        type: string
+      slug:
+        type: string
+      update_date:
+        type: string
+      updater_id:
+        type: string
+      updater_username:
         type: string
     type: object
   github_com_USACE_instrumentation-api_api_internal_model.SaaMeasurements:
@@ -5623,6 +5662,178 @@ paths:
             $ref: '#/definitions/echo.HTTPError'
       security:
       - Bearer: []
+      tags:
+      - plot-config
+  /projects/{project_id}/report_configs:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.ReportConfig'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: lists all report configs for a project
+      tags:
+      - plot-report
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.ReportConfig'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: creates a report config
+      tags:
+      - plot-report
+  /projects/{project_id}/report_configs/{report_config_id}:
+    delete:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: updates a report config
+      tags:
+      - plot-report
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: report config uuid
+        format: uuid
+        in: path
+        name: report_config_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.ReportConfig'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: updates a report config
+      tags:
+      - plot-report
+  /projects/{project_id}/report_configs/{report_config_id}/downloads:
+    get:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: plot config uuid
+        format: uuid
+        in: path
+        name: plot_configuration_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      - application/octet-stream
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
       tags:
       - plot-config
   /projects/{project_id}/submittals:

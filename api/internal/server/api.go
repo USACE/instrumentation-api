@@ -245,6 +245,12 @@ func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 	r.private.PUT("/projects/:project_id", h.UpdateProject, mw.IsApplicationAdmin)
 	r.private.DELETE("/projects/:project_id", h.DeleteFlagProject, mw.IsApplicationAdmin)
 
+	// Report Config
+	r.private.GET("/projects/:project_id/report_configs", h.ListProjectReportConfigs)
+	r.private.POST("/projects/:project_id/report_configs", h.CreateReportConfig)
+	r.private.PUT("/projects/:project_id/report_configs/:report_config_id", h.UpdateReportConfig)
+	r.private.DELETE("/projects/:project_id/report_configs/:report_config_id", h.DeleteReportConfig)
+
 	// Search
 	r.public.GET("/search/:entity", h.Search)
 
