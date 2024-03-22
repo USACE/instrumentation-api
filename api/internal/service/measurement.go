@@ -105,10 +105,10 @@ func (s measurementService) UpdateTimeseriesMeasurements(ctx context.Context, mc
 	qtx := s.WithTx(tx)
 
 	for _, c := range mc {
-		if err := qtx.DeleteTimeseriesMeasurementsByRange(ctx, c.TimeseriesID, tw.Start, tw.End); err != nil {
+		if err := qtx.DeleteTimeseriesMeasurementsByRange(ctx, c.TimeseriesID, tw.After, tw.Before); err != nil {
 			return nil, err
 		}
-		if err := qtx.DeleteTimeseriesNote(ctx, c.TimeseriesID, tw.Start, tw.End); err != nil {
+		if err := qtx.DeleteTimeseriesNote(ctx, c.TimeseriesID, tw.After, tw.Before); err != nil {
 			return nil, err
 		}
 	}

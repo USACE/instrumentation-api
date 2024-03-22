@@ -126,7 +126,7 @@ const listTimeseriesMeasurements = `
 // ListTimeseriesMeasurements returns a stored timeseries with slice of timeseries measurements populated
 func (q *Queries) ListTimeseriesMeasurements(ctx context.Context, timeseriesID uuid.UUID, tw TimeWindow, threshold int) (*MeasurementCollection, error) {
 	items := make([]Measurement, 0)
-	if err := q.db.SelectContext(ctx, &items, listTimeseriesMeasurements, timeseriesID, tw.Start, tw.End); err != nil {
+	if err := q.db.SelectContext(ctx, &items, listTimeseriesMeasurements, timeseriesID, tw.After, tw.Before); err != nil {
 		return nil, err
 	}
 	return &MeasurementCollection{TimeseriesID: timeseriesID, Items: LTTB(items, threshold)}, nil

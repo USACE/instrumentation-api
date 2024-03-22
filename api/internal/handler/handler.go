@@ -40,6 +40,7 @@ type ApiHandler struct {
 	ProfileService                 service.ProfileService
 	ProjectRoleService             service.ProjectRoleService
 	ProjectService                 service.ProjectService
+	ReportConfigService            service.ReportConfigService
 	SaaInstrumentService           service.SaaInstrumentService
 	SubmittalService               service.SubmittalService
 	TimeseriesService              service.TimeseriesService
@@ -86,6 +87,7 @@ func NewApi(cfg *config.ApiConfig) *ApiHandler {
 		ProfileService:                 profileService,
 		ProjectRoleService:             service.NewProjectRoleService(db, q),
 		ProjectService:                 service.NewProjectService(db, q),
+		ReportConfigService:            service.NewReportConfigService(db, q),
 		SaaInstrumentService:           service.NewSaaInstrumentService(db, q),
 		SubmittalService:               service.NewSubmittalService(db, q),
 		TimeseriesService:              service.NewTimeseriesService(db, q),

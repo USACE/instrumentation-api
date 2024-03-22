@@ -442,7 +442,7 @@ func queryTimeseriesMeasurements(ctx context.Context, q *Queries, f ProcessMeasu
 		tt2[idx] = ProcessTimeseries{
 			ProcessTimeseriesInfo: t.ProcessTimeseriesInfo,
 			Measurements:          make([]ProcessMeasurement, 0),
-			TimeWindow:            TimeWindow{Start: f.After, End: f.Before},
+			TimeWindow:            TimeWindow{After: f.After, Before: f.Before},
 		}
 		if err := json.Unmarshal([]byte(t.Measurements), &tt2[idx].Measurements); err != nil {
 			log.Println(err)
@@ -528,7 +528,7 @@ func queryInclinometerTimeseriesMeasurements(ctx context.Context, q *Queries, f 
 		tt2[idx] = ProcessInclinometerTimeseries{
 			ProcessTimeseriesInfo: t.ProcessTimeseriesInfo,
 			Measurements:          make([]ProcessInclinometerMeasurement, 0),
-			TimeWindow:            TimeWindow{Start: f.After, End: f.Before},
+			TimeWindow:            TimeWindow{After: f.After, Before: f.Before},
 		}
 		cm, err := q.GetTimeseriesConstantMeasurement(ctx, t.TimeseriesID, "inclinometer-constant")
 		if err != nil {
