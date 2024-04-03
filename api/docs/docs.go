@@ -6949,6 +6949,11 @@ const docTemplate = `{
         },
         "/projects/{project_id}/report_configs": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -6997,6 +7002,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -7047,6 +7057,11 @@ const docTemplate = `{
         },
         "/projects/{project_id}/report_configs/{report_config_id}": {
             "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -7103,6 +7118,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -7151,6 +7171,11 @@ const docTemplate = `{
         },
         "/projects/{project_id}/report_configs/{report_config_id}/downloads": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json",
                     "application/octet-stream"

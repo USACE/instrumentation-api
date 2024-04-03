@@ -5694,6 +5694,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: lists all report configs for a project
       tags:
       - plot-report
@@ -5726,6 +5728,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: creates a report config
       tags:
       - plot-report
@@ -5758,6 +5762,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: updates a report config
       tags:
       - plot-report
@@ -5796,6 +5802,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: updates a report config
       tags:
       - plot-report
@@ -5834,6 +5842,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       tags:
       - plot-config
   /projects/{project_id}/submittals:

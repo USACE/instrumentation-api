@@ -23,6 +23,7 @@ import (
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id}/report_configs [get]
+//	@Security Bearer
 func (h *ApiHandler) ListProjectReportConfigs(c echo.Context) error {
 	pID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
@@ -47,6 +48,7 @@ func (h *ApiHandler) ListProjectReportConfigs(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id}/report_configs [post]
+//	@Security Bearer
 func (h *ApiHandler) CreateReportConfig(c echo.Context) error {
 	pID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
@@ -83,6 +85,7 @@ func (h *ApiHandler) CreateReportConfig(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id}/report_configs/{report_config_id} [put]
+//	@Security Bearer
 func (h *ApiHandler) UpdateReportConfig(c echo.Context) error {
 	pID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
@@ -121,6 +124,7 @@ func (h *ApiHandler) UpdateReportConfig(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id}/report_configs/{report_config_id} [delete]
+//	@Security Bearer
 func (h *ApiHandler) DeleteReportConfig(c echo.Context) error {
 	rcID, err := uuid.Parse(c.Param("report_config_id"))
 	if err != nil {
@@ -146,6 +150,7 @@ func (h *ApiHandler) DeleteReportConfig(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id}/report_configs/{report_config_id}/downloads [get]
+//	@Security Bearer
 func (h *ApiHandler) DownloadReport(c echo.Context) error {
 	rcID, err := uuid.Parse(c.Param("report_config_id"))
 	if err != nil {
