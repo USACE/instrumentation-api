@@ -38,7 +38,7 @@ func (h *ApiHandler) ListDataloggers(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
-		return echo.NewHTTPError(http.StatusOK, dls)
+		return c.JSON(http.StatusOK, dls)
 	}
 
 	dls, err := h.DataloggerService.ListAllDataloggers(c.Request().Context())

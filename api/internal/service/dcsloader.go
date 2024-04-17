@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/csv"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -15,6 +14,7 @@ import (
 
 	"github.com/USACE/instrumentation-api/api/internal/config"
 	"github.com/USACE/instrumentation-api/api/internal/model"
+	"github.com/USACE/instrumentation-api/api/internal/util"
 	"github.com/google/uuid"
 )
 
@@ -30,21 +30,6 @@ type dcsLoaderService struct {
 
 func NewDcsLoaderService(apiClient *http.Client, cfg *config.DcsLoaderConfig) *dcsLoaderService {
 	return &dcsLoaderService{apiClient, cfg}
-}
-
-// RedactQueryParam redacts a given url parameter returns the redacted *url.Error
-//
-// https://github.com/golang/go/issues/47442#issuecomment-888554396
-func RedactQueryParam(urlErr *url.Error, queryParam string) error {
-	u, uErr := url.Parse(urlErr.URL)
-	if uErr != nil {
-		return errors.New("unable to parse URL string from urlErr")
-	}
-	q := u.Query()
-	q.Set(queryParam, "REDACTED")
-	u.RawQuery = q.Encode()
-	urlErr.URL = u.String()
-	return urlErr
 }
 
 func (s dcsLoaderService) ParseCsvMeasurementCollection(r io.Reader) ([]model.MeasurementCollection, int, error) {
@@ -116,9 +101,14 @@ func (s dcsLoaderService) PostMeasurementCollectionToApi(mcs []model.Measurement
 
 	resp, err := s.apiClient.Do(req)
 	if err != nil {
-		redactedErr := RedactQueryParam(err.(*url.Error), "key")
-		log.Printf("\n\t*** Error; unable to make request; %s", redactedErr.Error())
-		return redactedErr
+		urlErr := err.(*url.Error)
+		urlRedact := util.RedactRequest{URL: urlErr.URL}
+		if err := urlRedact.RedactQueryParam("key"); err != nil {
+			return err
+		}
+		urlErr.URL = urlRedact.URL
+		log.Printf("\n\t*** Error; unable to make request; %s", urlErr.Error())
+		return urlErr
 	}
 	defer resp.Body.Close()
 
