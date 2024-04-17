@@ -28,6 +28,10 @@ func NewApiServer(cfg *config.ApiConfig, h *handler.ApiHandler) *ApiServer {
 
 	e.Use(mw.CORS, mw.GZIP)
 
+	if cfg.RequestLoggerEnabled {
+		e.Use(mw.RequestLogger)
+	}
+
 	public := e.Group(cfg.RoutePrefix)
 	private := e.Group(cfg.RoutePrefix) // cac or token (KeyAuth)
 	cacOnly := e.Group(cfg.RoutePrefix)

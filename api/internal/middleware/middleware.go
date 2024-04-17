@@ -20,7 +20,7 @@ type Middleware interface {
 	KeyAuth(next echo.HandlerFunc) echo.HandlerFunc
 	AppKeyAuth(next echo.HandlerFunc) echo.HandlerFunc
 	DataloggerKeyAuth(next echo.HandlerFunc) echo.HandlerFunc
-	Logger(next echo.HandlerFunc) echo.HandlerFunc
+	RequestLogger(next echo.HandlerFunc) echo.HandlerFunc
 }
 
 type mw struct {
