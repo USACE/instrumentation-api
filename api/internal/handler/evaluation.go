@@ -105,6 +105,7 @@ func (h *ApiHandler) GetEvaluation(c echo.Context) error {
 //	@Produce json
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param evaluation body model.Evaluation true "evaluation payload"
+//	@Param key query string false "api key"
 //	@Success 200 {object} model.Evaluation
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -138,6 +139,7 @@ func (h *ApiHandler) CreateEvaluation(c echo.Context) error {
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param evaluation_id path string true "evaluation uuid" Format(uuid)
 //	@Param evaluation body model.Evaluation true "evaluation payload"
+//	@Param key query string false "api key"
 //	@Success 200 {object} model.Evaluation
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -170,6 +172,7 @@ func (h *ApiHandler) UpdateEvaluation(c echo.Context) error {
 //	@Produce json
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param evaluation_id path string true "evaluation uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Success 200 {array} model.AlertConfig
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError

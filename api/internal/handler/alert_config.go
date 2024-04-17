@@ -107,6 +107,7 @@ func (h *ApiHandler) GetAlertConfig(c echo.Context) error {
 //	@Produce json
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param alert_config body model.AlertConfig true "alert config payload"
+//	@Param key query string false "api key"
 //	@Success 200 {object} model.AlertConfig
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -141,6 +142,7 @@ func (h *ApiHandler) CreateAlertConfig(c echo.Context) error {
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param alert_config_id path string true "alert config uuid" Format(uuid)
 //	@Param alert_config body model.AlertConfig true "alert config payload"
+//	@Param key query string false "api key"
 //	@Success 200 {array} model.AlertConfig
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -176,6 +178,7 @@ func (h *ApiHandler) UpdateAlertConfig(c echo.Context) error {
 //	@Produce json
 //	@Param project_id path string true "Project ID" Format(uuid)
 //	@Param alert_config_id path string true "instrument uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Success 200 {array} model.AlertConfig
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError

@@ -18,6 +18,7 @@ import (
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param instrument_id path string true "instrument uuid" Format(uuid)
 //	@Param alert_config_id path string true "alert config uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Success 200 {object} model.AlertSubscription
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -47,6 +48,7 @@ func (h *ApiHandler) SubscribeProfileToAlerts(c echo.Context) error {
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param instrument_id path string true "instrument uuid" Format(uuid)
 //	@Param alert_config_id path string true "alert config uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -72,6 +74,7 @@ func (h *ApiHandler) UnsubscribeProfileToAlerts(c echo.Context) error {
 //	@Summary lists all alerts subscribed to by the current profile
 //	@Tags alert-subscription
 //	@Produce json
+//	@Param key query string false "api key"
 //	@Success 200 {array} model.AlertSubscription
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -96,6 +99,7 @@ func (h *ApiHandler) ListMyAlertSubscriptions(c echo.Context) error {
 //	@Produce json
 //	@Param alert_subscription_id path string true "alert subscription id" Format(uuid)
 //	@Param alert_subscription body model.AlertSubscription true "alert subscription payload"
+//	@Param key query string false "api key"
 //	@Success 200 {array} model.AlertSubscription
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError

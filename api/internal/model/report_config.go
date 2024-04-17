@@ -18,6 +18,25 @@ type ReportConfig struct {
 	After       *time.Time              `json:"after" db:"after"`
 	Before      *time.Time              `json:"before" db:"before"`
 	AuditInfo
+	// OverridePlotConfigSettings PlotConfigSettings      `json:"override_plot_config_settings" db:"override_plot_config_settings"`
+}
+
+type ReportConfigWithPlotConfigs struct {
+	ReportConfig
+	PlotConfigs []PlotConfig `json:"plot_configs"`
+}
+
+type ReportConfigChartData struct {
+	ReportConfigID uuid.UUID             `json:"report_config_id" db:"report_config_id"`
+	PlotConfigName string                `json:"plot_config_name" db:"plot_config_name"`
+	SeriesName     string                `json:"series_name" db:"series_name"`
+	XAxisUnit      string                `json:"x_axis_unit" db:"x_axis_unit"`
+	XYValues       dbJSONSlice[XYValues] `json:"xy_values" db:"xy_vaules"`
+}
+
+type XYValues struct {
+	X time.Time `json:"x"`
+	Y float64   `json:"y"`
 }
 
 const createReportConfig = `
@@ -45,6 +64,18 @@ func (q *Queries) ListProjectReportConfigs(ctx context.Context, projectID uuid.U
 const getReportConfigByID = `
 	SELECT * FROM v_report_config WHERE id = $1
 `
+
+const listReportConfigPlotConfigs = `
+	SELECT * FROM v_plot_configuration WHERE id = ANY(
+		SELECT plot_config_id FROM report_config_plot_config WHERE report_config_id = $1
+	)
+`
+
+func (q *Queries) ListReportConfigPlotConfigs(ctx context.Context, rcID uuid.UUID) ([]PlotConfig, error) {
+	pcs := make([]PlotConfig, 0)
+	err := q.db.SelectContext(ctx, &pcs, listReportConfigPlotConfigs, rcID)
+	return pcs, err
+}
 
 func (q *Queries) GetReportConfigByID(ctx context.Context, rcID uuid.UUID) (ReportConfig, error) {
 	var rc ReportConfig
@@ -96,3 +127,34 @@ func (q *Queries) UnassignAllReportConfigPlotConfig(ctx context.Context, rcID uu
 	_, err := q.db.ExecContext(ctx, unassignAllInstrumentsFromAlertConfig, rcID)
 	return err
 }
+
+// const getReportConfigChartData = `
+// 	SELECT
+// 		rcpc.report_config_id,
+// 		pc.name AS plot_config_name,
+// 		ii.name || ' - ' || ts.name AS series_name,
+// 		uu.name AS y_axis_unit,
+// 		COALESCE(xy.values, '[]') AS xy_values
+// 	FROM report_config_plot_config rcpc
+// 	INNER JOIN plot_configuration pc ON pc.id = rcpc.plot_config_id
+// 	INNER JOIN plot_configuration_timeseries pcts ON pcts.plot_configuration_id = pc.id
+// 	INNER JOIN timeseries ts ON ts.id = pcts.timeseries_id
+// 	INNER JOIN unit uu ON uu.id = ts.unit_id
+// 	LEFT JOIN LATERAL (
+// 		SELECT json_agg(json_build_object(
+// 			'x', mm.time,
+// 			'y', mm.value
+// 		))::text AS values
+// 		FROM timeseries_measurement mm
+// 		WHERE mm.timeseries_id = ts.id
+// 		AND mm.time > $2
+// 		AND mm.time < $3
+// 	) xy ON true
+// 	WHERE rcpc.id = $1
+// `
+//
+// func (q *Queries) getReportConfigChartData(ctx context.Context, rcID uuid.UUID, tw TimeWindow) ([]ReportConfigChartData, error) {
+// 	cd := make([]ReportConfigChartData, 0)
+// 	err := q.db.SelectContext(ctx, &cd, listReportConfigPlotConfigs, rcID, tw.After, tw.Before)
+// 	return cd, err
+// }

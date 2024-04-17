@@ -41,6 +41,7 @@ func (h *ApiHandler) GetInstrumentCalculations(c echo.Context) error {
 //	@Summary creates a calculation
 //	@Tags formula
 //	@Produce json
+//	@Param key query string false "api key"
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -69,6 +70,7 @@ func (h *ApiHandler) CreateCalculation(c echo.Context) error {
 //	@Tags formula
 //	@Produce json
 //	@Param formula_id path string true "formula uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Success 200 {array} model.CalculatedTimeseries
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -106,6 +108,7 @@ func (h *ApiHandler) UpdateCalculation(c echo.Context) error {
 //	@Tags formula
 //	@Produce json
 //	@Param formula_id path string true "formula uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError

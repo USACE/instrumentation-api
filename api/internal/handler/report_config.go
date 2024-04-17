@@ -17,6 +17,7 @@ import (
 //	@Tags plot-report
 //	@Produce json
 //	@Param project_id path string true "project uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Accept application/json
 //	@Success 200 {object} model.ReportConfig
 //	@Failure 400 {object} echo.HTTPError
@@ -42,6 +43,7 @@ func (h *ApiHandler) ListProjectReportConfigs(c echo.Context) error {
 //	@Tags plot-report
 //	@Produce json
 //	@Param project_id path string true "project uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Accept application/json
 //	@Success 200 {object} model.ReportConfig
 //	@Failure 400 {object} echo.HTTPError
@@ -79,6 +81,7 @@ func (h *ApiHandler) CreateReportConfig(c echo.Context) error {
 //	@Produce json
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param report_config_id path string true "report config uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Accept application/json
 //	@Success 200 {object} model.ReportConfig
 //	@Failure 400 {object} echo.HTTPError
@@ -119,6 +122,7 @@ func (h *ApiHandler) UpdateReportConfig(c echo.Context) error {
 //	@Tags plot-report
 //	@Produce json
 //	@Param project_id path string true "project uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -141,7 +145,6 @@ func (h *ApiHandler) DeleteReportConfig(c echo.Context) error {
 //
 //	@Sumary downloads a report from the given report configs
 //	@Tags plot-config
-//	@Produce json
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param plot_configuration_id path string true "plot config uuid" Format(uuid)
 //	@Produce application/octet-stream
@@ -161,4 +164,28 @@ func (h *ApiHandler) DownloadReport(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, g)
+}
+
+// GetReportConfigWithPlotConfigs godoc
+//
+//	@Sumary Lists all plot configs for a report config
+//	@Tags report-config
+//	@Produce json
+//	@Param report_config_id path string true "report config uuid" Format(uuid)
+//	@Param key query string true "api key"
+//	@Success 200 {object} model.ReportConfigWithPlotConfigs
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /report_configs/{report_config_id}/plot_configs [get]
+func (h *ApiHandler) GetReportConfigWithPlotConfigs(c echo.Context) error {
+	rcID, err := uuid.Parse(c.Param("report_config_id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+	}
+	rcs, err := h.ReportConfigService.GetReportConfigWithPlotConfigs(c.Request().Context(), rcID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, rcs)
 }

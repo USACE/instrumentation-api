@@ -25,7 +25,6 @@ import (
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id}/instruments/{instrument_id}/alerts [get]
-//	@Security Bearer
 func (h *ApiHandler) ListAlertsForInstrument(c echo.Context) error {
 	instrumentID, err := uuid.Parse(c.Param("instrument_id"))
 	if err != nil {
@@ -44,11 +43,13 @@ func (h *ApiHandler) ListAlertsForInstrument(c echo.Context) error {
 //	@Description list all alerts a profile is subscribed to
 //	@Tags alert
 //	@Produce json
+//	@Param key query string false "api key"
 //	@Success 200 {array} model.Alert
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /my_alerts [get]
+//	@Security Bearer
 func (h *ApiHandler) ListMyAlerts(c echo.Context) error {
 	p := c.Get("profile").(model.Profile)
 	profileID := p.ID
@@ -67,6 +68,7 @@ func (h *ApiHandler) ListMyAlerts(c echo.Context) error {
 //	@Tags alert
 //	@Produce json
 //	@Param alert_id path string true "alert uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Success 200 {object} model.Alert
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -98,6 +100,7 @@ func (h *ApiHandler) DoAlertRead(c echo.Context) error {
 //	@Tags alert
 //	@Produce json
 //	@Param alert_id path string true "alert uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Success 200 {object} model.Alert
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError

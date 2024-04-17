@@ -111,16 +111,16 @@ const (
 
 const listTimeseriesMeasurements = `
 	SELECT
-		M.timeseries_id,
-		M.time,
-		M.value,
-		COALESCE(N.masked, 'false') AS masked,
-		COALESCE(N.validated, 'false') AS validated,
-		COALESCE(N.annotation, '') AS annotation
-	FROM timeseries_measurement M
-	LEFT JOIN timeseries_notes N ON M.timeseries_id = N.timeseries_id AND M.time = N.time
-	INNER JOIN timeseries T ON T.id = M.timeseries_id
-	WHERE T.id = $1 AND M.time > $2 AND M.time < $3 ORDER BY M.time ASC
+		m.timeseries_id,
+		m.time,
+		m.value,
+		n.masked,
+		n.validated,
+		n.annotation
+	FROM timeseries_measurement m
+	LEFT JOIN timeseries_notes n ON m.timeseries_id = n.timeseries_id AND m.time = n.time
+	INNER JOIN timeseries t ON t.id = m.timeseries_id
+	WHERE t.id = $1 AND m.time > $2 AND m.time < $3 ORDER BY m.time ASC
 `
 
 // ListTimeseriesMeasurements returns a stored timeseries with slice of timeseries measurements populated

@@ -41,6 +41,7 @@ func (h *ApiHandler) ListInstrumentConstants(c echo.Context) error {
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param instrument_id path string true "instrument uuid" Format(uuid)
 //	@Param timeseries_collection_items body model.TimeseriesCollectionItems true "timeseries collection items payload"
+//	@Param key query string false "api key"
 //	@Success 200 {array} model.Timeseries
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -77,6 +78,7 @@ func (h *ApiHandler) CreateInstrumentConstants(c echo.Context) error {
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param instrument_id path string true "instrument uuid" Format(uuid)
 //	@Param timeseries_id path string true "timeseries uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError

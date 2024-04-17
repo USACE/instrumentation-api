@@ -13,6 +13,7 @@ type ReportConfigService interface {
 	UpdateReportConfig(ctx context.Context, rc model.ReportConfig) error
 	DeleteReportConfig(ctx context.Context, reportConfigID uuid.UUID) error
 	DownloadReport(ctx context.Context, reportConfigID uuid.UUID) ([]byte, error)
+	GetReportConfigWithPlotConfigs(ctx context.Context, rcID uuid.UUID) (model.ReportConfigWithPlotConfigs, error)
 }
 
 type reportConfigService struct {
@@ -81,14 +82,77 @@ func (s reportConfigService) UpdateReportConfig(ctx context.Context, rc model.Re
 	return tx.Commit()
 }
 
-func (s reportConfigService) DownloadReport(ctx context.Context, projectID uuid.UUID) ([]byte, error) {
+func (s reportConfigService) GetReportConfigWithPlotConfigs(ctx context.Context, rcID uuid.UUID) (model.ReportConfigWithPlotConfigs, error) {
 	q := s.db.Queries()
-	_, err := q.ListPlotConfigs(ctx, projectID)
+
+	rc, err := q.GetReportConfigByID(ctx, rcID)
 	if err != nil {
-		return nil, err
+		return model.ReportConfigWithPlotConfigs{}, err
 	}
+	pcs, err := q.ListReportConfigPlotConfigs(ctx, rcID)
+	if err != nil {
+		return model.ReportConfigWithPlotConfigs{}, err
+	}
+	return model.ReportConfigWithPlotConfigs{
+		ReportConfig: rc,
+		PlotConfigs:  pcs,
+	}, nil
+}
 
-	// TODO render pdf plots based on plot configs and time window
+// func (s reportConfigService) DownloadReport(ctx context.Context, rcID uuid.UUID) ([]byte, error) {
+// 	q := s.db.Queries()
+//
+// 	rc, err := q.GetReportConfigByID(ctx, rcID)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+//
+// 	pcs, err := q.ListReportConfigPlotConfigs(ctx, rc.ID)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+//
+// 	// TODO: impose a limit on the number of plots allowed in a report?
+// 	// Otherwise this could go off the rails
+// 	for _, pc := range pcs {
+// 		var tw model.TimeWindow
+// 		pctw, err := pc.DateRangeTimeWindow()
+// 		if err != nil {
+// 			continue
+// 		}
+// 		if rc.After != nil {
+// 			tw.After = *rc.After
+// 		} else {
+// 			tw.After = pctw.After
+// 		}
+// 		if rc.Before != nil {
+// 			tw.Before = *rc.Before
+// 		} else {
+// 			tw.Before = pctw.Before
+// 		}
+//
+// 		// TODO: is this the same API that queries masked/validated/etc?
+// 		// Stored timeseries should adhere to these filters
+// 		// It is not applicable to computed timeseries
+// 		// pgx has automatic prepared statement caching, this is ok
+// 		mm, err := q.SelectMeasurements(ctx, model.ProcessMeasurementFilter{
+// 			TimeseriesIDs: pc.TimeseriesIDs,
+// 			After:         tw.After,
+// 			Before:        tw.Before,
+// 		})
+// 		if err != nil {
+// 			return nil, err
+// 		}
+//
+// 		log.Print(mm)
+// 		// TODO: render plot to pdf to allow measurements to be gc'd
+// 	}
+//
+// 	// TODO: return pdf
+//
+// 	return nil, nil
+// }
 
+func (s reportConfigService) DownloadReport(ctx context.Context, rcID uuid.UUID) ([]byte, error) {
 	return nil, nil
 }

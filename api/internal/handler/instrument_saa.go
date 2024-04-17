@@ -70,6 +70,7 @@ func (h *ApiHandler) GetSaaMeasurementsForInstrument(c echo.Context) error {
 //	@Produce json
 //	@Param instrument_id path string true "instrument uuid" Format(uuid)
 //	@Param instrument_segments body []model.SaaSegment true "saa instrument segments payload"
+//	@Param key query string false "api key"
 //	@Success 200 {array} model.SaaSegment
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError

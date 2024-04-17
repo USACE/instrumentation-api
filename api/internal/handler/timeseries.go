@@ -105,12 +105,36 @@ func (h *ApiHandler) ListProjectTimeseries(c echo.Context) error {
 	return c.JSON(http.StatusOK, tt)
 }
 
+// ListPlotConfigTimeseries godoc
+//
+//	@Summary lists all timeseries for a single plot config
+//	@Tags timeseries
+//	@Produce json
+//	@Param project_id path string true "project uuid" Format(uuid)
+//	@Success 200 {array} model.Timeseries
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /projects/{project_id}/plot_configurations/{plot_config_id}/timeseries [get]
+func (h *ApiHandler) ListPlotConfigTimeseries(c echo.Context) error {
+	pID, err := uuid.Parse(c.Param("plot_config_id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+	}
+	tt, err := h.TimeseriesService.ListProjectTimeseries(c.Request().Context(), pID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, tt)
+}
+
 // CreateTimeseries godoc
 //
 //	@Summary creates one or more timeseries
 //	@Tags timeseries
 //	@Produce json
 //	@Param timeseries_collection_items body model.TimeseriesCollectionItems true "timeseries collection items payload"
+//	@Param key query string false "api key"
 //	@Success 200 {array} map[string]uuid.UUID
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -136,6 +160,7 @@ func (h *ApiHandler) CreateTimeseries(c echo.Context) error {
 //	@Produce json
 //	@Param timeseries_id path string true "timeseries uuid" Format(uuid)
 //	@Param timeseries body model.Timeseries true "timeseries payload"
+//	@Param key query string false "api key"
 //	@Success 200 {object} map[string]uuid.UUID
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -164,6 +189,7 @@ func (h *ApiHandler) UpdateTimeseries(c echo.Context) error {
 //	@Tags timeseries
 //	@Produce json
 //	@Param timeseries_id path string true "timeseries uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError

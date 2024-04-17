@@ -73,7 +73,7 @@ func (h *ApiHandler) ListProjects(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /my_projects [get]
-//	@Security CacOnly
+//	@Security Bearer
 func (h *ApiHandler) ListMyProjects(c echo.Context) error {
 	ctx := c.Request().Context()
 
@@ -200,6 +200,7 @@ func (h *ApiHandler) GetProject(c echo.Context) error {
 //	@Tags project
 //	@Produce json
 //	@Param project_collection body model.ProjectCollection true "project collection payload"
+//	@Param key query string false "api key"
 //	@Success 200 {array} model.IDSlugName
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -237,6 +238,7 @@ func (h *ApiHandler) CreateProjectBulk(c echo.Context) error {
 //	@Produce json
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param project body model.Project true "project payload"
+//	@Param key query string false "api key"
 //	@Success 200 {object} model.Project
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -271,6 +273,7 @@ func (h *ApiHandler) UpdateProject(c echo.Context) error {
 //	@Tags project
 //	@Produce json
 //	@Param project_id path string true "project id" Format(uuid)
+//	@Param key query string false "api key"
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -296,6 +299,7 @@ func (h *ApiHandler) DeleteFlagProject(c echo.Context) error {
 //	@Accept png
 //	@Produce json
 //	@Param project_id path string true "project id" Format(uuid)
+//	@Param key query string false "api key"
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError

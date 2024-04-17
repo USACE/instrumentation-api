@@ -65,6 +65,7 @@ func (h *ApiHandler) GetPlotConfig(c echo.Context) error {
 //	@Produce json
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param plot_config body model.PlotConfig true "plot config payload"
+//	@Param key query string false "api key"
 //	@Success 200 {object} model.PlotConfig
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -108,6 +109,7 @@ func (h *ApiHandler) CreatePlotConfig(c echo.Context) error {
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param plot_configuration_id path string true "plot config uuid" Format(uuid)
 //	@Param plot_config body model.PlotConfig true "plot config payload"
+//	@Param key query string false "api key"
 //	@Success 200 {object} model.PlotConfig
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -152,6 +154,7 @@ func (h *ApiHandler) UpdatePlotConfig(c echo.Context) error {
 //	@Produce json
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param plot_configuration_id path string true "plot config uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError

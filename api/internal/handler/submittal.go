@@ -108,6 +108,7 @@ func (h *ApiHandler) ListAlertConfigSubmittals(c echo.Context) error {
 //	@Tags submittal
 //	@Produce json
 //	@Param submittal_id path string true "submittal uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -131,6 +132,7 @@ func (h *ApiHandler) VerifyMissingSubmittal(c echo.Context) error {
 //	@Tags submittal
 //	@Produce json
 //	@Param alert_config_id path string true "alert config uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError

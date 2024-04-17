@@ -72,6 +72,7 @@ func (h *ApiHandler) ListInclinometerMeasurements(c echo.Context) error {
 //	@Produce json
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param timeseries_measurement_collections body model.InclinometerMeasurementCollectionCollection true "inclinometer measurement collections"
+//	@Param key query string false "api key"
 //	@Success 200 {array} model.InclinometerMeasurementCollection
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -131,6 +132,7 @@ func (h *ApiHandler) CreateOrUpdateProjectInclinometerMeasurements(c echo.Contex
 //	@Produce json
 //	@Param timeseries_id path string true "timeseries uuid" Format(uuid)
 //	@Param time query string true "timestamp of measurement to delete" Format(date-time)
+//	@Param key query string false "api key"
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError

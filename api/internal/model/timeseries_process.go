@@ -101,6 +101,7 @@ type ProcessMeasurementFilter struct {
 	InstrumentID      *uuid.UUID  `db:"instrument_id"`
 	InstrumentGroupID *uuid.UUID  `db:"instrument_group_id"`
 	InstrumentIDs     []uuid.UUID `db:"instrument_ids"`
+	TimeseriesIDs     []uuid.UUID `db:"timeseries_ids"`
 	After             time.Time   `db:"after"`
 	Before            time.Time   `db:"before"`
 }
@@ -357,6 +358,9 @@ func queryTimeseriesMeasurements(ctx context.Context, q *Queries, f ProcessMeasu
 	} else if len(f.InstrumentIDs) > 0 {
 		filterSQL = `instrument_id IN (?)`
 		filterArg = f.InstrumentIDs
+	} else if len(f.TimeseriesIDs) > 0 {
+		filterSQL = `id IN (?)`
+		filterArg = f.TimeseriesIDs
 	} else {
 		return nil, fmt.Errorf("must supply valid filter for timeseries_measurement query")
 	}

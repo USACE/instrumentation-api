@@ -8,7 +8,6 @@ require (
 	github.com/aws/aws-lambda-go v1.46.0
 	github.com/aws/aws-sdk-go v1.51.3
 	github.com/btcsuite/btcutil v1.0.2
-	github.com/go-echarts/go-echarts/v2 v2.3.3
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgconn v1.14.3

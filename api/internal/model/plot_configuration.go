@@ -57,6 +57,32 @@ func (pc *PlotConfig) ValidateDateRange() error {
 	return fmt.Errorf("invalid date range provided")
 }
 
+func (pc *PlotConfig) DateRangeTimeWindow() (TimeWindow, error) {
+	dr := strings.ToLower(pc.DateRange)
+	if dr == "lifetime" {
+		return TimeWindow{After: time.Time{}, Before: time.Now()}, nil
+	}
+	if dr == "5 years" {
+		return TimeWindow{After: time.Now().AddDate(-5, 0, 0), Before: time.Now()}, nil
+	}
+	if dr == "1 year" {
+		return TimeWindow{After: time.Now().AddDate(-1, 0, 0), Before: time.Now()}, nil
+	}
+	cdr := strings.Split(dr, " - ")
+	if len(cdr) == 2 {
+		after, err := time.Parse("01/02/2006", cdr[0])
+		if err != nil {
+			return TimeWindow{}, fmt.Errorf("custom date values must be in format \"MM/DD/YYYY - MM/DD/YYYY\"")
+		}
+		before, err := time.Parse("01/02/2006", cdr[1])
+		if err != nil {
+			return TimeWindow{}, fmt.Errorf("custom date values must be in format \"MM/DD/YYYY - MM/DD/YYYY\"")
+		}
+		return TimeWindow{After: after, Before: before}, nil
+	}
+	return TimeWindow{}, fmt.Errorf("invalid date range provided")
+}
+
 // listPlotConfigsSQL is the base SQL statement for above functions
 const listPlotConfigsSQL = `
 	SELECT
