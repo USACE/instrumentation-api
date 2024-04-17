@@ -20,7 +20,6 @@ require (
 	github.com/labstack/echo/v4 v4.11.4
 	github.com/lib/pq v1.10.9
 	github.com/paulmach/orb v0.11.1
-	github.com/signintech/gopdf v0.22.2
 	github.com/stretchr/testify v1.9.0
 	github.com/swaggo/echo-swagger v1.4.1
 	github.com/swaggo/swag v1.16.3
@@ -52,8 +51,6 @@ require (
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/phpdave11/gofpdi v1.0.14-0.20211212211723-1f10f9844311 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/streadway/amqp v1.0.0 // indirect
 	github.com/swaggo/files/v2 v2.0.0 // indirect
