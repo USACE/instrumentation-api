@@ -2,6 +2,7 @@ package model
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"github.com/google/uuid"
@@ -26,17 +27,12 @@ type ReportConfigWithPlotConfigs struct {
 	PlotConfigs []PlotConfig `json:"plot_configs"`
 }
 
-type ReportConfigChartData struct {
-	ReportConfigID uuid.UUID             `json:"report_config_id" db:"report_config_id"`
-	PlotConfigName string                `json:"plot_config_name" db:"plot_config_name"`
-	SeriesName     string                `json:"series_name" db:"series_name"`
-	XAxisUnit      string                `json:"x_axis_unit" db:"x_axis_unit"`
-	XYValues       dbJSONSlice[XYValues] `json:"xy_values" db:"xy_vaules"`
+type ReportConfigJobMessage struct {
+	ReportConfigID uuid.UUID `json:"report_config_id"`
 }
 
-type XYValues struct {
-	X time.Time `json:"x"`
-	Y float64   `json:"y"`
+func (rj ReportConfigJobMessage) MarshalJSON() ([]byte, error) {
+	return json.Marshal(rj)
 }
 
 const createReportConfig = `
@@ -127,6 +123,14 @@ func (q *Queries) UnassignAllReportConfigPlotConfig(ctx context.Context, rcID uu
 	_, err := q.db.ExecContext(ctx, unassignAllInstrumentsFromAlertConfig, rcID)
 	return err
 }
+
+const createReportDownloadJob = `
+	INSERT INTO report_download_job (job_id) VALUES ($1)
+`
+
+const updateReportDownloadJob = `
+	UPDATE report_download_job SET status_id=$2, update_date=$3 WHERE job_id=$1
+`
 
 // const getReportConfigChartData = `
 // 	SELECT

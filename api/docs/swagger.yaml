@@ -3771,7 +3771,7 @@ paths:
           schema:
             $ref: '#/definitions/echo.HTTPError'
       security:
-      - CacOnly: []
+      - Bearer: []
       summary: lists projects where current profile is an admin or member with optional
         filter by project role
       tags:
@@ -6212,44 +6212,6 @@ paths:
       summary: updates a report config
       tags:
       - plot-report
-  /projects/{project_id}/report_configs/{report_config_id}/downloads:
-    get:
-      parameters:
-      - description: project uuid
-        format: uuid
-        in: path
-        name: project_id
-        required: true
-        type: string
-      - description: plot config uuid
-        format: uuid
-        in: path
-        name: plot_configuration_id
-        required: true
-        type: string
-      produces:
-      - application/octet-stream
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: file
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-      security:
-      - Bearer: []
-      tags:
-      - plot-config
   /projects/{project_id}/submittals:
     get:
       parameters:

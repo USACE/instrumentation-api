@@ -52,6 +52,7 @@ type ApiHandler struct {
 func NewApi(cfg *config.ApiConfig) *ApiHandler {
 	db := model.NewDatabase(&cfg.DBConfig)
 	q := db.Queries()
+	ps := cloud.NewSQSPubsub(&cfg.AWSSQSConfig)
 
 	profileService := service.NewProfileService(db, q)
 	projectRoleService := service.NewProjectRoleService(db, q)
@@ -87,7 +88,7 @@ func NewApi(cfg *config.ApiConfig) *ApiHandler {
 		ProfileService:                 profileService,
 		ProjectRoleService:             service.NewProjectRoleService(db, q),
 		ProjectService:                 service.NewProjectService(db, q),
-		ReportConfigService:            service.NewReportConfigService(db, q),
+		ReportConfigService:            service.NewReportConfigService(db, q, ps),
 		SaaInstrumentService:           service.NewSaaInstrumentService(db, q),
 		SubmittalService:               service.NewSubmittalService(db, q),
 		TimeseriesService:              service.NewTimeseriesService(db, q),
@@ -137,13 +138,13 @@ func NewAlertCheck(cfg *config.AlertCheckConfig) *AlertCheckHandler {
 }
 
 type DcsLoaderHandler struct {
-	Pubsub           cloud.Pubsub
+	PubsubService    cloud.Pubsub
 	DcsLoaderService service.DcsLoaderService
 }
 
 func NewDcsLoader(cfg *config.DcsLoaderConfig) *DcsLoaderHandler {
-	blobService := cloud.NewS3Blob(&cfg.AWSS3Config, "", "")
-	ps := cloud.NewSQSPubsub(&cfg.AWSSQSConfig).WithBlob(blobService)
+	s3Blob := cloud.NewS3Blob(&cfg.AWSS3Config, "", "")
+	ps := cloud.NewSQSPubsub(&cfg.AWSSQSConfig).WithBlob(s3Blob)
 	apiClient := &http.Client{
 		Timeout: time.Second * 60,
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
@@ -152,7 +153,7 @@ func NewDcsLoader(cfg *config.DcsLoaderConfig) *DcsLoaderHandler {
 	}
 
 	return &DcsLoaderHandler{
-		Pubsub:           ps,
+		PubsubService:    ps,
 		DcsLoaderService: service.NewDcsLoaderService(apiClient, cfg),
 	}
 }

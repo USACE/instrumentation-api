@@ -25,5 +25,5 @@ func (h *DcsLoaderHandler) Start() error {
 		return nil
 	}
 
-	return h.Pubsub.ProcessMessages(handler)
+	return h.PubsubService.ProcessMessagesFromBlob(handler)
 }

@@ -154,17 +154,17 @@ func (h *ApiHandler) DeleteReportConfig(c echo.Context) error {
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id}/report_configs/{report_config_id}/downloads [get]
 //	@Security Bearer
-func (h *ApiHandler) DownloadReport(c echo.Context) error {
-	rcID, err := uuid.Parse(c.Param("report_config_id"))
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
-	}
-	g, err := h.ReportConfigService.DownloadReport(c.Request().Context(), rcID)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-	return c.JSON(http.StatusOK, g)
-}
+// func (h *ApiHandler) DownloadReport(c echo.Context) error {
+// 	rcID, err := uuid.Parse(c.Param("report_config_id"))
+// 	if err != nil {
+// 		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+// 	}
+// 	g, err := h.ReportConfigService.DownloadReport(c.Request().Context(), rcID)
+// 	if err != nil {
+// 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+// 	}
+// 	return c.JSON(http.StatusOK, g)
+// }
 
 // GetReportConfigWithPlotConfigs godoc
 //

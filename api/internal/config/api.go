@@ -10,6 +10,7 @@ import (
 type ApiConfig struct {
 	DBConfig
 	AWSS3Config
+	AWSSQSConfig
 	ServerConfig
 }
 

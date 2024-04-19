@@ -18,17 +18,8 @@ interface TimeWindow {
     before: string | undefined;
 }
 
-type XyPosTemplate = {
-    [key: string]: number[]
-}
-
-const XY_POS_TEMPLATE: XyPosTemplate = {
-    [`0`]: [0, 15],
-    [`1`]: [0, 15],
-    [`2`]: [0, 15],
-}
-
-const MAX_PLOT_PAGE_POS_IDX = 3;
+const XY_POS_LOOKUP: number[][] = [[0, 15], [0, 15]]
+const MAX_POS_LOOKUP_IDX = 1;
 
 const s3ClientConfig = { endpoint: process.env.AWS_S3_ENDPOINT };
 
@@ -97,7 +88,7 @@ async function processRecord(r: SQSRecord, apiClient: ApiClient, apiKey: string,
     let plotPagePosIdx = 1;
 
     for (const pc of rp.plot_configs ?? []) {
-        if (plotPagePosIdx > MAX_PLOT_PAGE_POS_IDX) {
+        if (plotPagePosIdx > MAX_POS_LOOKUP_IDX) {
             doc.addPage();
             plotPagePosIdx = 0;
         }
@@ -110,6 +101,7 @@ async function processRecord(r: SQSRecord, apiClient: ApiClient, apiKey: string,
         let gd = await Plotly.newPlot("gd", [], layout);
 
         for (const ts of tss) {
+            // TODO: get order of traces from plot config
             const mm = await apiClient.timeseries.getTimeseriesMeasurements(ts.id!, after, before, 3000);
             const trace = createTraceData(ts, mm.items!, pc);
 
@@ -118,7 +110,7 @@ async function processRecord(r: SQSRecord, apiClient: ApiClient, apiKey: string,
 
         const dataUrl = await Plotly.toImage(gd, { format: 'png', ...layout });
 
-        const xyPos = XY_POS_TEMPLATE[String(plotPagePosIdx)];
+        const xyPos = XY_POS_LOOKUP[plotPagePosIdx];
         if (xyPos === undefined) {
             throw new Error("invalid template xy position index");
         }
@@ -132,38 +124,41 @@ function parseDateRange(dateStr: string | undefined): TimeWindow {
         return { after: undefined, before: undefined }
     }
 
-    let _after;
-    let _before = Date.now()
-    let d = new Date();
+    let a;
+    let delta;
+    let b = Date.now();
+    let d = new Date(b);
 
     switch (String(dateStr).toLowerCase()) {
         case "lifetime":
+            // arbirarity min date
+            a = Date.parse('1800-01-01')
             break;
         case "5 years":
-            _after = _before - d.setUTCFullYear(d.getUTCFullYear() - 5);
+            delta = b - d.setUTCFullYear(d.getUTCFullYear() - 5);
+            a = b - delta;
+            break;
         case "1 year":
-            _after = _before - d.setUTCFullYear(d.getUTCFullYear() - 1);
+            delta = b - d.setUTCFullYear(d.getUTCFullYear() - 1);
+            a = b - delta;
+            break;
         default:
-            const dateParts = String(dateStr).split("-", 1);
-
-            if (dateParts.length !== 2 || dateParts[0].length !== 10 || dateParts[1].length !== 10) {
-                throw new Error("invalid date cannot be parsed");
+            const dateParts = String(dateStr).split(" ", 1);
+            if (dateParts.length !== 2) {
+                throw new Error("could not parse custom date string")
             }
-
-            const [afterMonth, afterDay, afterYear] = dateParts[0].split("/");
-            const [beforeMonth, beforeDay, beforeYear] = dateParts[1].split("/");
-            _after = Date.parse(`${afterYear}-${afterMonth}-${afterDay}`);
-            _before = Date.parse(`${beforeYear}-${beforeMonth}-${beforeDay}`);
+            a = Date.parse(dateParts[0]);
+            b = Date.parse(dateParts[1]);
     }
 
     let after;
     let before;
 
-    if (_after !== undefined) {
-        after = new Date(_after).toUTCString();
+    if (a !== undefined) {
+        after = new Date(a).toISOString();
     }
-    if (_before !== undefined) {
-        before = new Date(_before).toUTCString();
+    if (b !== undefined) {
+        before = new Date(b).toISOString();
     }
 
     return { after, before }

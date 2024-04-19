@@ -3931,7 +3931,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "CacOnly": []
+                        "Bearer": []
                     }
                 ],
                 "produces": [
@@ -7699,65 +7699,6 @@ const docTemplate = `{
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
-                        }
-                    }
-                }
-            }
-        },
-        "/projects/{project_id}/report_configs/{report_config_id}/downloads": {
-            "get": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "produces": [
-                    "application/octet-stream"
-                ],
-                "tags": [
-                    "plot-config"
-                ],
-                "parameters": [
-                    {
-                        "type": "string",
-                        "format": "uuid",
-                        "description": "project uuid",
-                        "name": "project_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "format": "uuid",
-                        "description": "plot config uuid",
-                        "name": "plot_configuration_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "file"
                         }
                     },
                     "400": {

@@ -1,6 +1,7 @@
 package cloud
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"io"
@@ -14,13 +15,17 @@ import (
 )
 
 type Pubsub interface {
-	ProcessMessages(handler messageHandler) error
+	ProcessMessagesFromBlob(handler messageHandler) error
+	PublishMessage(ctx context.Context, message json.Marshaler) (string, error)
 }
+
+type messageHandler func(r io.Reader) error
 
 type SQSPubsub struct {
 	*sqs.SQS
-	cfg  *config.AWSSQSConfig
-	blob Blob
+	cfg      *config.AWSSQSConfig
+	blob     Blob
+	queueUrl *string
 }
 
 var _ Pubsub = (*SQSPubsub)(nil)
@@ -28,7 +33,12 @@ var _ Pubsub = (*SQSPubsub)(nil)
 func NewSQSPubsub(cfg *config.AWSSQSConfig) *SQSPubsub {
 	awsCfg := cfg.SQSConfig()
 	sess := session.Must(session.NewSession(awsCfg))
-	return &SQSPubsub{sqs.New(sess), cfg, nil}
+	queue := sqs.New(sess)
+
+	ps := &SQSPubsub{queue, cfg, nil, nil}
+	ps.MustInitQueueUrl()
+
+	return ps
 }
 
 func (s *SQSPubsub) WithBlob(blob Blob) *SQSPubsub {
@@ -36,30 +46,36 @@ func (s *SQSPubsub) WithBlob(blob Blob) *SQSPubsub {
 	return s
 }
 
-func queueURL(s *SQSPubsub) (string, error) {
+func (s *SQSPubsub) MustInitQueueUrl() {
+	if err := s.InitQueueUrl(); err != nil {
+		log.Fatalf(err.Error())
+	}
+}
+
+func (s *SQSPubsub) InitQueueUrl() error {
 	if s.cfg.AWSSQSQueueURL != "" {
-		return s.cfg.AWSSQSQueueURL, nil
+		s.queueUrl = &s.cfg.AWSSQSQueueURL
 	}
 	urlResult, err := s.GetQueueUrl(&sqs.GetQueueUrlInput{QueueName: &s.cfg.AWSSQSQueueName})
 	if err != nil {
-		return "", err
+		return err
 	}
 	if urlResult == nil || urlResult.QueueUrl == nil {
-		return "", errors.New("queue url is nil")
+		return errors.New("queue url is nil")
 	}
-	return *urlResult.QueueUrl, nil
+	s.queueUrl = urlResult.QueueUrl
+	return nil
 }
 
-type messageHandler func(r io.Reader) error
-
-func (s *SQSPubsub) ProcessMessages(handler messageHandler) error {
+func (s *SQSPubsub) ProcessMessagesFromBlob(handler messageHandler) error {
 	if s.blob == nil {
 		return errors.New("blob must not be nil")
 	}
 
-	url, err := queueURL(s)
-	if err != nil {
-		return err
+	if s.queueUrl == nil {
+		if err := s.InitQueueUrl(); err != nil {
+			return err
+		}
 	}
 
 	var entity events.SNSEntity
@@ -73,7 +89,7 @@ func (s *SQSPubsub) ProcessMessages(handler messageHandler) error {
 			MessageAttributeNames: []*string{
 				aws.String(sqs.QueueAttributeNameAll),
 			},
-			QueueUrl:            aws.String(url),
+			QueueUrl:            s.queueUrl,
 			MaxNumberOfMessages: aws.Int64(1),
 			VisibilityTimeout:   aws.Int64(30),
 			WaitTimeSeconds:     aws.Int64(20),
@@ -114,9 +130,37 @@ func (s *SQSPubsub) ProcessMessages(handler messageHandler) error {
 			}
 
 			s.DeleteMessage(&sqs.DeleteMessageInput{
-				QueueUrl:      aws.String(url),
+				QueueUrl:      s.queueUrl,
 				ReceiptHandle: m.MessageId,
 			})
 		}
 	}
+}
+
+func (s *SQSPubsub) PublishMessage(ctx context.Context, message json.Marshaler) (string, error) {
+	if s.queueUrl == nil {
+		if err := s.InitQueueUrl(); err != nil {
+			return "", err
+		}
+	}
+
+	b, err := message.MarshalJSON()
+	if err != nil {
+		return "", err
+	}
+	messageBody := string(b)
+	sqsMessageInput := &sqs.SendMessageInput{
+		MessageBody: &messageBody,
+	}
+
+	out, err := s.SendMessageWithContext(ctx, sqsMessageInput)
+	if err != nil {
+		return "", err
+	}
+
+	if out.MessageId == nil {
+		return "", errors.New("nil message id returned from queue")
+	}
+
+	return *out.MessageId, nil
 }
