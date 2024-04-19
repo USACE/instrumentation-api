@@ -33,57 +33,36 @@ type PlotConfig struct {
 	PlotConfigSettings
 }
 
-func (pc *PlotConfig) ValidateDateRange() error {
-	dr := strings.ToLower(pc.DateRange)
-	// Check for standard settings
-	if dr == "lifetime" {
-		return nil
-	}
-	if dr == "5 years" {
-		return nil
-	}
-	if dr == "1 year" {
-		return nil
-	}
-	cdr := strings.Split(dr, " - ")
-	if len(cdr) == 2 {
-		for _, v := range cdr {
-			if _, err := time.Parse("01/02/2006", v); err != nil {
-				return fmt.Errorf("custom date values must be in format \"MM/DD/YYYY - MM/DD/YYYY\"")
-			}
-		}
-		return nil
-	}
-	return fmt.Errorf("invalid date range provided")
-}
-
+// DateRangeTimeWindow creates a TimeWindow from a date range string.
+//
+// Acceptable date range strings are "lifetime", "5 years", "1 year", or a fixed date in the
+// format "YYYY-MM-DD YYYY-MM-DD" with after and before dates separated by a single whitespace.
 func (pc *PlotConfig) DateRangeTimeWindow() (TimeWindow, error) {
-	dr := strings.ToLower(pc.DateRange)
-	if dr == "lifetime" {
+	switch dr := strings.ToLower(pc.DateRange); dr {
+	case "lifetime":
 		return TimeWindow{After: time.Time{}, Before: time.Now()}, nil
-	}
-	if dr == "5 years" {
+	case "5 years":
 		return TimeWindow{After: time.Now().AddDate(-5, 0, 0), Before: time.Now()}, nil
-	}
-	if dr == "1 year" {
+	case "1 year":
 		return TimeWindow{After: time.Now().AddDate(-1, 0, 0), Before: time.Now()}, nil
-	}
-	cdr := strings.Split(dr, " - ")
-	if len(cdr) == 2 {
-		after, err := time.Parse("01/02/2006", cdr[0])
-		if err != nil {
-			return TimeWindow{}, fmt.Errorf("custom date values must be in format \"MM/DD/YYYY - MM/DD/YYYY\"")
+	default:
+		cdr := strings.Split(dr, " ")
+		invalidDateErr := fmt.Errorf("invalid date range; custom date range must be in format \"YYYY-MM-DD YYYY-MM-DD\"")
+		if len(cdr) != 2 {
+			return TimeWindow{}, invalidDateErr
 		}
-		before, err := time.Parse("01/02/2006", cdr[1])
+		after, err := time.Parse("2006-01-02", cdr[0])
 		if err != nil {
-			return TimeWindow{}, fmt.Errorf("custom date values must be in format \"MM/DD/YYYY - MM/DD/YYYY\"")
+			return TimeWindow{}, invalidDateErr
+		}
+		before, err := time.Parse("2006-01-02", cdr[1])
+		if err != nil {
+			return TimeWindow{}, invalidDateErr
 		}
 		return TimeWindow{After: after, Before: before}, nil
 	}
-	return TimeWindow{}, fmt.Errorf("invalid date range provided")
 }
 
-// listPlotConfigsSQL is the base SQL statement for above functions
 const listPlotConfigsSQL = `
 	SELECT
 		id,

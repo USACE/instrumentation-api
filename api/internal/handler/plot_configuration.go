@@ -81,7 +81,7 @@ func (h *ApiHandler) CreatePlotConfig(c echo.Context) error {
 	if pc.DateRange == "" {
 		pc.DateRange = "1 year"
 	}
-	if err := pc.ValidateDateRange(); err != nil {
+	if _, err := pc.DateRangeTimeWindow(); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	pID, err := uuid.Parse(c.Param("project_id"))
@@ -125,7 +125,7 @@ func (h *ApiHandler) UpdatePlotConfig(c echo.Context) error {
 	if pc.DateRange == "" {
 		pc.DateRange = "1 year"
 	}
-	if err := pc.ValidateDateRange(); err != nil {
+	if _, err := pc.DateRangeTimeWindow(); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	pID, err := uuid.Parse(c.Param("project_id"))
