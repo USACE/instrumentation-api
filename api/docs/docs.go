@@ -7641,7 +7641,8 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ReportConfig"
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     },
                     "400": {
@@ -10105,12 +10106,6 @@ const docTemplate = `{
         "ReportConfig": {
             "type": "object",
             "properties": {
-                "after": {
-                    "type": "string"
-                },
-                "before": {
-                    "type": "string"
-                },
                 "create_date": {
                     "type": "string"
                 },
@@ -10122,6 +10117,9 @@ const docTemplate = `{
                 },
                 "description": {
                     "type": "string"
+                },
+                "global_overrides": {
+                    "$ref": "#/definitions/ReportConfigGlobalOverrides"
                 },
                 "id": {
                     "type": "string"
@@ -10155,15 +10153,23 @@ const docTemplate = `{
                 }
             }
         },
+        "ReportConfigGlobalOverrides": {
+            "type": "object",
+            "properties": {
+                "date_range": {
+                    "$ref": "#/definitions/TextOption"
+                },
+                "show_masked": {
+                    "$ref": "#/definitions/ToggleOption"
+                },
+                "show_nonvalidated": {
+                    "$ref": "#/definitions/ToggleOption"
+                }
+            }
+        },
         "ReportConfigWithPlotConfigs": {
             "type": "object",
             "properties": {
-                "after": {
-                    "type": "string"
-                },
-                "before": {
-                    "type": "string"
-                },
                 "create_date": {
                     "type": "string"
                 },
@@ -10175,6 +10181,9 @@ const docTemplate = `{
                 },
                 "description": {
                     "type": "string"
+                },
+                "global_overrides": {
+                    "$ref": "#/definitions/ReportConfigGlobalOverrides"
                 },
                 "id": {
                     "type": "string"
@@ -10382,6 +10391,17 @@ const docTemplate = `{
                 }
             }
         },
+        "TextOption": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
         "Timeseries": {
             "type": "object",
             "properties": {
@@ -10448,6 +10468,17 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/MeasurementCollection"
                     }
+                }
+            }
+        },
+        "ToggleOption": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "value": {
+                    "type": "boolean"
                 }
             }
         },

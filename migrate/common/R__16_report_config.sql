@@ -7,15 +7,27 @@ CREATE VIEW v_report_config AS (
         rc.description,
         rc.project_id,
         p.name AS project_name,
-        rc.after,
-        rc.before,
         rc.creator,
         cp.username AS creator_username,
         rc.create_date,
         rc.updater,
         up.username AS updater_username,
         rc.update_date,
-        COALESCE(pc.configs, '[]')::text AS plot_configs
+        COALESCE(pc.configs, '[]')::text AS plot_configs,
+        json_build_object(
+            'date_range', json_build_object(
+                'enabled', rc.date_range_enabled,
+                'value', rc.date_range
+            ),
+            'show_masked', json_build_object(
+                'enabled', rc.show_masked_enabled,
+                'value', rc.show_masked
+            ),
+            'show_nonvalidated', json_build_object(
+                'enabled', rc.show_nonvalidated_enabled,
+                'value', rc.show_nonvalidated
+            )
+        )::text AS global_overrides
     FROM report_config rc
     INNER JOIN project p ON rc.project_id = p.id
     INNER JOIN profile cp ON cp.id = rc.creator

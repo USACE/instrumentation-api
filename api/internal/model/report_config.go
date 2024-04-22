@@ -3,23 +3,45 @@ package model
 import (
 	"context"
 	"encoding/json"
-	"time"
+	"fmt"
 
 	"github.com/google/uuid"
 )
 
 type ReportConfig struct {
-	ID          uuid.UUID               `json:"id" db:"id"`
-	Slug        string                  `json:"slug" db:"slug"`
-	Name        string                  `json:"name" db:"name"`
-	Description string                  `json:"description" db:"description"`
-	ProjectID   uuid.UUID               `json:"project_id" db:"project_id"`
-	ProjectName string                  `json:"project_name" db:"project_name"`
-	PlotConfigs dbJSONSlice[IDSlugName] `json:"plot_configs" db:"plot_configs"`
-	After       *time.Time              `json:"after" db:"after"`
-	Before      *time.Time              `json:"before" db:"before"`
+	ID              uuid.UUID                   `json:"id" db:"id"`
+	Slug            string                      `json:"slug" db:"slug"`
+	Name            string                      `json:"name" db:"name"`
+	Description     string                      `json:"description" db:"description"`
+	ProjectID       uuid.UUID                   `json:"project_id" db:"project_id"`
+	ProjectName     string                      `json:"project_name" db:"project_name"`
+	PlotConfigs     dbJSONSlice[IDSlugName]     `json:"plot_configs" db:"plot_configs"`
+	GlobalOverrides ReportConfigGlobalOverrides `json:"global_overrides" db:"global_overrides"`
 	AuditInfo
-	// OverridePlotConfigSettings PlotConfigSettings      `json:"override_plot_config_settings" db:"override_plot_config_settings"`
+}
+
+type ReportConfigGlobalOverrides struct {
+	DateRange        TextOption   `json:"date_range" db:"date_range"`
+	ShowMasked       ToggleOption `json:"show_masked" db:"show_masked"`
+	ShowNonvalidated ToggleOption `json:"show_nonvalidated" db:"show_nonvalidated"`
+}
+
+type TextOption struct {
+	Enabled bool   `json:"enabled" db:"enabled"`
+	Value   string `json:"value" db:"value"`
+}
+
+type ToggleOption struct {
+	Enabled bool `json:"enabled" db:"enabled"`
+	Value   bool `json:"value" db:"value"`
+}
+
+func (o *ReportConfigGlobalOverrides) Scan(src interface{}) error {
+	b, ok := src.(string)
+	if !ok {
+		return fmt.Errorf("type assertion failed")
+	}
+	return json.Unmarshal([]byte(b), o)
 }
 
 type ReportConfigWithPlotConfigs struct {
@@ -36,14 +58,22 @@ func (rj ReportConfigJobMessage) MarshalJSON() ([]byte, error) {
 }
 
 const createReportConfig = `
-	INSERT INTO report_config (name, slug, project_id, after, before, creator, description)
-	VALUES ($1, slugify($1, 'report_config'), $2, $3, $4, $5, $6)
+	INSERT INTO report_config (
+		name, slug, project_id, creator, description, date_range, date_range_enabled,
+		show_masked, show_masked_enabled, show_nonvalidated, show_nonvalidated_enabled
+	)
+	VALUES ($1, slugify($1, 'report_config'), $2, $3, $4, $5, $6, $7, $8, $9, $10)
 	RETURNING id
 `
 
 func (q *Queries) CreateReportConfig(ctx context.Context, rc ReportConfig) (uuid.UUID, error) {
 	var rcID uuid.UUID
-	err := q.db.GetContext(ctx, &rcID, createReportConfig, rc.Name, rc.ProjectID, rc.After, rc.Before, rc.CreatorID, rc.Description)
+	err := q.db.GetContext(
+		ctx, &rcID, createReportConfig, rc.Name, rc.ProjectID, rc.CreatorID, rc.Description,
+		rc.GlobalOverrides.DateRange.Value, rc.GlobalOverrides.DateRange.Enabled,
+		rc.GlobalOverrides.ShowMasked.Value, rc.GlobalOverrides.ShowMasked.Enabled,
+		rc.GlobalOverrides.ShowNonvalidated.Value, rc.GlobalOverrides.ShowNonvalidated.Enabled,
+	)
 	return rcID, err
 }
 
@@ -57,10 +87,6 @@ func (q *Queries) ListProjectReportConfigs(ctx context.Context, projectID uuid.U
 	return rcs, err
 }
 
-const getReportConfigByID = `
-	SELECT * FROM v_report_config WHERE id = $1
-`
-
 const listReportConfigPlotConfigs = `
 	SELECT * FROM v_plot_configuration WHERE id = ANY(
 		SELECT plot_config_id FROM report_config_plot_config WHERE report_config_id = $1
@@ -73,6 +99,10 @@ func (q *Queries) ListReportConfigPlotConfigs(ctx context.Context, rcID uuid.UUI
 	return pcs, err
 }
 
+const getReportConfigByID = `
+	SELECT * FROM v_report_config WHERE id = $1
+`
+
 func (q *Queries) GetReportConfigByID(ctx context.Context, rcID uuid.UUID) (ReportConfig, error) {
 	var rc ReportConfig
 	err := q.db.GetContext(ctx, &rc, getReportConfigByID, rcID)
@@ -80,11 +110,18 @@ func (q *Queries) GetReportConfigByID(ctx context.Context, rcID uuid.UUID) (Repo
 }
 
 const updateReportConfig = `
-	UPDATE report_config SET name=$2, after=$3, before=$4, updater=$5, update_date=$6, description=$7 WHERE id=$1
+	UPDATE report_config SET name=$2,
+	updater=$3, update_date=$4, description=$5, date_range=$6, date_range_enabled=$7, show_masked=$8,
+	show_masked_enabled=$9, show_nonvalidated=$10, show_nonvalidated_enabled=$11 WHERE id=$1
 `
 
 func (q *Queries) UpdateReportConfig(ctx context.Context, rc ReportConfig) error {
-	_, err := q.db.ExecContext(ctx, updateReportConfig, rc.ID, rc.Name, rc.After, rc.Before, rc.UpdaterID, rc.UpdateDate, rc.Description)
+	_, err := q.db.ExecContext(
+		ctx, updateReportConfig, rc.ID, rc.Name, rc.UpdaterID, rc.UpdateDate, rc.Description,
+		rc.GlobalOverrides.DateRange.Value, rc.GlobalOverrides.DateRange.Enabled,
+		rc.GlobalOverrides.ShowMasked.Value, rc.GlobalOverrides.ShowMasked.Enabled,
+		rc.GlobalOverrides.ShowNonvalidated.Value, rc.GlobalOverrides.ShowNonvalidated.Enabled,
+	)
 	return err
 }
 
@@ -131,34 +168,3 @@ const createReportDownloadJob = `
 const updateReportDownloadJob = `
 	UPDATE report_download_job SET status_id=$2, update_date=$3 WHERE job_id=$1
 `
-
-// const getReportConfigChartData = `
-// 	SELECT
-// 		rcpc.report_config_id,
-// 		pc.name AS plot_config_name,
-// 		ii.name || ' - ' || ts.name AS series_name,
-// 		uu.name AS y_axis_unit,
-// 		COALESCE(xy.values, '[]') AS xy_values
-// 	FROM report_config_plot_config rcpc
-// 	INNER JOIN plot_configuration pc ON pc.id = rcpc.plot_config_id
-// 	INNER JOIN plot_configuration_timeseries pcts ON pcts.plot_configuration_id = pc.id
-// 	INNER JOIN timeseries ts ON ts.id = pcts.timeseries_id
-// 	INNER JOIN unit uu ON uu.id = ts.unit_id
-// 	LEFT JOIN LATERAL (
-// 		SELECT json_agg(json_build_object(
-// 			'x', mm.time,
-// 			'y', mm.value
-// 		))::text AS values
-// 		FROM timeseries_measurement mm
-// 		WHERE mm.timeseries_id = ts.id
-// 		AND mm.time > $2
-// 		AND mm.time < $3
-// 	) xy ON true
-// 	WHERE rcpc.id = $1
-// `
-//
-// func (q *Queries) getReportConfigChartData(ctx context.Context, rcID uuid.UUID, tw TimeWindow) ([]ReportConfigChartData, error) {
-// 	cd := make([]ReportConfigChartData, 0)
-// 	err := q.db.SelectContext(ctx, &cd, listReportConfigPlotConfigs, rcID, tw.After, tw.Before)
-// 	return cd, err
-// }

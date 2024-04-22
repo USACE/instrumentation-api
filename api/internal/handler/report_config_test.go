@@ -9,6 +9,33 @@ import (
 	"github.com/xeipuuv/gojsonschema"
 )
 
+const globalOverridesSchema = `{
+    "type": "object",
+    "properties": {
+        "date_range": {
+            "type": "object",
+            "properties": {
+                "value": { "type": ["string", "null"] },
+                "enabled": { "type": "boolean" }
+            }
+        },
+        "show_masked": {
+            "type": "object",
+            "properties": {
+                "value": { "type": "boolean" },
+                "enabled": { "type": "boolean" }
+            }
+        },
+        "show_nonvalidated": {
+            "type": "object",
+            "properties": {
+                "value": { "type": "boolean" },
+                "enabled": { "type": "boolean" }
+            }
+        }
+    }
+}`
+
 var reportConfigSchema = fmt.Sprintf(`{
     "type": "object",
     "properties": {
@@ -24,13 +51,15 @@ var reportConfigSchema = fmt.Sprintf(`{
         "updater_id": {  "type": ["string", "null"] },
         "updater_username": {  "type": ["string", "null"] },
         "update_date": { "type": ["string", "null"], "format": "date-time" },
-	"after": { "type": ["string", "null"], "format": "date-time" },
-	"before": { "type": ["string", "null"], "format": "date-time" },
+	"global_overrides": %s,
 	"plot_configs": %s
     },
     "additionalProperties": false,
-    "minProperties": 13
-}`, IDSlugNameArrSchema)
+    "required": [
+        "id","slug","name","description","project_id","project_name","creator_id",
+        "creator_username","create_date","global_overrides","plot_configs"
+    ]
+}`, globalOverridesSchema, IDSlugNameArrSchema)
 
 var reportConfigObjectLoader = gojsonschema.NewStringLoader(reportConfigSchema)
 
@@ -46,16 +75,44 @@ const createReportConfigBody = `{
     "description": "create test",
     "plot_configs": [
 	{"id": "cc28ca81-f125-46c6-a5cd-cc055a003c19"}
-    ]
+    ],
+    "global_overrides": {
+        "date_range": {
+             "value": "2023-01-01 2024-01-01",
+             "enabled": true
+        },
+        "show_masked": {
+             "value": true,
+             "enabled": true
+        },
+        "show_nonvalidated": {
+             "value": true,
+             "enabled": true
+        }
+    }
 }`
 
 const updateReportConfigBody = `{
     "name": "Updated Test Report Config",
     "description": "update test",
-    "plot_configs": []
+    "plot_configs": [],
+    "global_overrides": {
+        "date_range": {
+             "value": null,
+             "enabled": false
+        },
+        "show_masked": {
+             "value": true,
+             "enabled": false
+        },
+        "show_nonvalidated": {
+             "value": true,
+             "enabled": false
+        }
+    }
 }`
 
-func TestReportConfigurations(t *testing.T) {
+func TestReportConfigs(t *testing.T) {
 	objSchema, err := gojsonschema.NewSchema(reportConfigObjectLoader)
 	assert.Nil(t, err)
 	arrSchema, err := gojsonschema.NewSchema(reportConfigArrayLoader)
@@ -83,7 +140,6 @@ func TestReportConfigurations(t *testing.T) {
 			Method:         http.MethodPut,
 			Body:           updateReportConfigBody,
 			ExpectedStatus: http.StatusOK,
-			ExpectedSchema: objSchema,
 		},
 		{
 			Name:           "DeleteReportConfig",

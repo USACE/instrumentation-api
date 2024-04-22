@@ -83,7 +83,7 @@ func (h *ApiHandler) CreateReportConfig(c echo.Context) error {
 //	@Param report_config_id path string true "report config uuid" Format(uuid)
 //	@Param key query string false "api key"
 //	@Accept application/json
-//	@Success 200 {object} model.ReportConfig
+//	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
@@ -113,7 +113,7 @@ func (h *ApiHandler) UpdateReportConfig(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, rc)
+	return c.JSON(http.StatusOK, map[string]interface{}{"id": rcID})
 }
 
 // DeleteReportConfig godoc

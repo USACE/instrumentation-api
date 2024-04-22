@@ -865,10 +865,6 @@ definitions:
     type: object
   ReportConfig:
     properties:
-      after:
-        type: string
-      before:
-        type: string
       create_date:
         type: string
       creator_id:
@@ -877,6 +873,8 @@ definitions:
         type: string
       description:
         type: string
+      global_overrides:
+        $ref: '#/definitions/ReportConfigGlobalOverrides'
       id:
         type: string
       name:
@@ -898,12 +896,17 @@ definitions:
       updater_username:
         type: string
     type: object
+  ReportConfigGlobalOverrides:
+    properties:
+      date_range:
+        $ref: '#/definitions/TextOption'
+      show_masked:
+        $ref: '#/definitions/ToggleOption'
+      show_nonvalidated:
+        $ref: '#/definitions/ToggleOption'
+    type: object
   ReportConfigWithPlotConfigs:
     properties:
-      after:
-        type: string
-      before:
-        type: string
       create_date:
         type: string
       creator_id:
@@ -912,6 +915,8 @@ definitions:
         type: string
       description:
         type: string
+      global_overrides:
+        $ref: '#/definitions/ReportConfigGlobalOverrides'
       id:
         type: string
       name:
@@ -1047,6 +1052,13 @@ definitions:
       warning_sent:
         type: boolean
     type: object
+  TextOption:
+    properties:
+      enabled:
+        type: boolean
+      value:
+        type: string
+    type: object
   Timeseries:
     properties:
       id:
@@ -1091,6 +1103,13 @@ definitions:
         items:
           $ref: '#/definitions/MeasurementCollection'
         type: array
+    type: object
+  ToggleOption:
+    properties:
+      enabled:
+        type: boolean
+      value:
+        type: boolean
     type: object
   Token:
     properties:
@@ -6194,7 +6213,8 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/ReportConfig'
+            additionalProperties: true
+            type: object
         "400":
           description: Bad Request
           schema:
