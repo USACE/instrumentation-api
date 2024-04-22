@@ -39,7 +39,7 @@ CREATE VIEW v_report_config AS (
             'name', pc.name
         )) AS configs
         FROM plot_configuration pc
-        WHERE pc.id = ANY(SELECT id FROM report_config_plot_config WHERE report_config_id = rc.id)
+        WHERE pc.id = ANY(SELECT plot_config_id FROM report_config_plot_config WHERE report_config_id = rc.id)
     ) pc ON true
 );
 
