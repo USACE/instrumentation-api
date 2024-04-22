@@ -18,8 +18,9 @@ import (
 )
 
 const (
-	host    = "http://localhost:8080"
-	mockJwt = `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwibmFtZSI6IlVzZXIuQWRtaW4iLCJpYXQiOjE1MTYyMzkwMjIsImV4cCI6MjAwMDAwMDAwMCwicm9sZXMiOlsiUFVCTElDLlVTRVIiXX0.4VAMamtH92GiIb5CpGKpP6LKwU6IjIfw5wS4qc8O8VM`
+	truncateLinesBody = 30
+	host              = "http://localhost:8080"
+	mockJwt           = `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwibmFtZSI6IlVzZXIuQWRtaW4iLCJpYXQiOjE1MTYyMzkwMjIsImV4cCI6MjAwMDAwMDAwMCwicm9sZXMiOlsiUFVCTElDLlVTRVIiXX0.4VAMamtH92GiIb5CpGKpP6LKwU6IjIfw5wS4qc8O8VM`
 )
 
 const IDSlugNameArrSchema = `{
@@ -108,8 +109,8 @@ func RunAll(t *testing.T, tests []HTTPTest) {
 			} else {
 				s := dst.String()
 				ss := strings.Split(s, "\n")
-				if len(ss) > 25 {
-					s = fmt.Sprintf("%s\n...", strings.Join(ss[:25], "\n"))
+				if len(ss) > truncateLinesBody {
+					s = fmt.Sprintf("%s\n...", strings.Join(ss[:truncateLinesBody], "\n"))
 				}
 				t.Logf("response body: %s", s)
 			}
