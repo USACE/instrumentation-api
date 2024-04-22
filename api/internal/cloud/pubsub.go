@@ -36,7 +36,9 @@ func NewSQSPubsub(cfg *config.AWSSQSConfig) *SQSPubsub {
 	queue := sqs.New(sess)
 
 	ps := &SQSPubsub{queue, cfg, nil, nil}
-	ps.MustInitQueueUrl()
+	if !cfg.AWSSQSQueueNoInit {
+		ps.MustInitQueueUrl()
+	}
 
 	return ps
 }

@@ -26,10 +26,11 @@ func (cfg *AWSS3Config) S3Config() *aws.Config {
 }
 
 type AWSSQSConfig struct {
-	AWSSQSRegion    string `envconfig:"AWS_SQS_REGION"`
-	AWSSQSEndpoint  string `envconfig:"AWS_SQS_ENDPOINT"`
-	AWSSQSQueueURL  string `envconfig:"AWS_SQS_QUEUE_URL"`
-	AWSSQSQueueName string `envconfig:"AWS_SQS_QUEUE_NAME"`
+	AWSSQSRegion      string `envconfig:"AWS_SQS_REGION"`
+	AWSSQSEndpoint    string `envconfig:"AWS_SQS_ENDPOINT"`
+	AWSSQSQueueURL    string `envconfig:"AWS_SQS_QUEUE_URL"`
+	AWSSQSQueueName   string `envconfig:"AWS_SQS_QUEUE_NAME"`
+	AWSSQSQueueNoInit bool   `envconfig:"AWS_SQS_QUEUE_NO_INIT"`
 }
 
 // AWSSQSConfig returns a ready-to-go config for session.New() for SQS Actions.
