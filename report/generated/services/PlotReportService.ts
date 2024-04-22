@@ -66,14 +66,14 @@ export class PlotReportService {
      * @param projectId project uuid
      * @param reportConfigId report config uuid
      * @param key api key
-     * @returns ReportConfig OK
+     * @returns any OK
      * @throws ApiError
      */
     public putProjectsReportConfigs(
         projectId: string,
         reportConfigId: string,
         key?: string,
-    ): CancelablePromise<ReportConfig> {
+    ): CancelablePromise<any> {
         return this.httpRequest.request({
             method: 'PUT',
             url: '/projects/{project_id}/report_configs/{report_config_id}',

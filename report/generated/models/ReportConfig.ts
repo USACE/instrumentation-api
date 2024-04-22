@@ -3,17 +3,15 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { IDSlugName } from './IDSlugName';
-import type { PlotConfigSettings } from './PlotConfigSettings';
+import type { ReportConfigGlobalOverrides } from './ReportConfigGlobalOverrides';
 export type ReportConfig = {
-    after?: string;
-    before?: string;
     create_date?: string;
     creator_id?: string;
     creator_username?: string;
     description?: string;
+    global_overrides?: ReportConfigGlobalOverrides;
     id?: string;
     name?: string;
-    override_plot_config_settings?: PlotConfigSettings;
     plot_configs?: Array<IDSlugName>;
     project_id?: string;
     project_name?: string;

@@ -143,28 +143,4 @@ export class PlotConfigService {
             },
         });
     }
-    /**
-     * @param projectId project uuid
-     * @param plotConfigurationId plot config uuid
-     * @returns binary OK
-     * @throws ApiError
-     */
-    public getProjectsReportConfigsDownloads(
-        projectId: string,
-        plotConfigurationId: string,
-    ): CancelablePromise<Blob> {
-        return this.httpRequest.request({
-            method: 'GET',
-            url: '/projects/{project_id}/report_configs/{report_config_id}/downloads',
-            path: {
-                'project_id': projectId,
-                'plot_configuration_id': plotConfigurationId,
-            },
-            errors: {
-                400: `Bad Request`,
-                404: `Not Found`,
-                500: `Internal Server Error`,
-            },
-        });
-    }
 }
