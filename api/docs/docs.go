@@ -9946,6 +9946,9 @@ const docTemplate = `{
                 "date_range": {
                     "type": "string"
                 },
+                "display": {
+                    "$ref": "#/definitions/PlotConfigDisplay"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -9976,12 +9979,6 @@ const docTemplate = `{
                 "threshold": {
                     "type": "integer"
                 },
-                "timeseries_id": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
                 "update_date": {
                     "type": "string"
                 },
@@ -9989,6 +9986,88 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "updater_username": {
+                    "type": "string"
+                }
+            }
+        },
+        "PlotConfigCustomShape": {
+            "type": "object",
+            "properties": {
+                "color": {
+                    "type": "string"
+                },
+                "data_point": {
+                    "type": "number"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "plot_configuration_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "PlotConfigDisplay": {
+            "type": "object",
+            "properties": {
+                "layout": {
+                    "$ref": "#/definitions/PlotConfigLayout"
+                },
+                "traces": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/PlotConfigTimeseriesTrace"
+                    }
+                }
+            }
+        },
+        "PlotConfigLayout": {
+            "type": "object",
+            "properties": {
+                "custom_shapes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/PlotConfigCustomShape"
+                    }
+                },
+                "secondary_axis_title": {
+                    "type": "string"
+                }
+            }
+        },
+        "PlotConfigTimeseriesTrace": {
+            "type": "object",
+            "properties": {
+                "color": {
+                    "type": "string"
+                },
+                "line_style": {
+                    "type": "string"
+                },
+                "name": {
+                    "description": "read-only",
+                    "type": "string"
+                },
+                "plot_configuration_id": {
+                    "type": "string"
+                },
+                "show_markers": {
+                    "type": "boolean"
+                },
+                "timeseries_id": {
+                    "type": "string"
+                },
+                "trace_order": {
+                    "type": "integer"
+                },
+                "width": {
+                    "type": "number"
+                },
+                "y_axis": {
+                    "description": "y1 or y2, default y1",
                     "type": "string"
                 }
             }

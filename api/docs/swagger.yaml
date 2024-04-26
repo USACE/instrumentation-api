@@ -760,6 +760,8 @@ definitions:
         type: string
       date_range:
         type: string
+      display:
+        $ref: '#/definitions/PlotConfigDisplay'
       id:
         type: string
       name:
@@ -780,15 +782,65 @@ definitions:
         type: string
       threshold:
         type: integer
-      timeseries_id:
-        items:
-          type: string
-        type: array
       update_date:
         type: string
       updater_id:
         type: string
       updater_username:
+        type: string
+    type: object
+  PlotConfigCustomShape:
+    properties:
+      color:
+        type: string
+      data_point:
+        type: number
+      enabled:
+        type: boolean
+      name:
+        type: string
+      plot_configuration_id:
+        type: string
+    type: object
+  PlotConfigDisplay:
+    properties:
+      layout:
+        $ref: '#/definitions/PlotConfigLayout'
+      traces:
+        items:
+          $ref: '#/definitions/PlotConfigTimeseriesTrace'
+        type: array
+    type: object
+  PlotConfigLayout:
+    properties:
+      custom_shapes:
+        items:
+          $ref: '#/definitions/PlotConfigCustomShape'
+        type: array
+      secondary_axis_title:
+        type: string
+    type: object
+  PlotConfigTimeseriesTrace:
+    properties:
+      color:
+        type: string
+      line_style:
+        type: string
+      name:
+        description: read-only
+        type: string
+      plot_configuration_id:
+        type: string
+      show_markers:
+        type: boolean
+      timeseries_id:
+        type: string
+      trace_order:
+        type: integer
+      width:
+        type: number
+      y_axis:
+        description: y1 or y2, default y1
         type: string
     type: object
   Profile:
