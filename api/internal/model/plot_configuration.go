@@ -2,6 +2,7 @@ package model
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -16,7 +17,7 @@ type PlotConfig struct {
 	Slug          string                  `json:"slug"`
 	ProjectID     uuid.UUID               `json:"project_id" db:"project_id"`
 	ReportConfigs dbJSONSlice[IDSlugName] `json:"report_configs" db:"report_configs"`
-	Display       PlotConfigDisplay       `json:"display" db:"dispay"`
+	Display       PlotConfigDisplay       `json:"display" db:"display"`
 	AuditInfo
 	PlotConfigSettings
 }
@@ -38,6 +39,14 @@ type PlotConfigSettings struct {
 type PlotConfigDisplay struct {
 	Traces []PlotConfigTimeseriesTrace `json:"traces"`
 	Layout PlotConfigLayout            `json:"layout"`
+}
+
+func (d *PlotConfigDisplay) Scan(src interface{}) error {
+	b, ok := src.(string)
+	if !ok {
+		return fmt.Errorf("type assertion failed")
+	}
+	return json.Unmarshal([]byte(b), d)
 }
 
 type PlotConfigTimeseriesTrace struct {
@@ -101,7 +110,6 @@ const listPlotConfigsSQL = `
 		slug,
 		name,
 		project_id,
-		timeseries_id,
 		report_configs,
 		creator,
 		create_date,

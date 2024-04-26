@@ -13,10 +13,6 @@ var plotConfigSchema = fmt.Sprintf(`{
     "type": "object",
     "properties": {
         "id": { "type": "string" },
-        "timeseries_id": {
-            "type": "array",
-            "items": { "type": "string" }
-        },
         "slug": { "type": "string" },
         "name": { "type": "string" },
         "creator_id": { "type": "string" },
@@ -29,11 +25,14 @@ var plotConfigSchema = fmt.Sprintf(`{
         "show_comments": { "type": "boolean" },
         "auto_range": { "type": "boolean" },
         "date_range": { "type": "string" },
-        "threshold": { "type": "number" }
+        "threshold": { "type": "number" },
         "report_configs": %s,
         "display": %s
     },
-    "required": ["id", "slug", "name", "creator_id", "create_date", "updater_id", "update_date", "project_id", "timeseries_id"],
+    "required": [
+        "id", "slug", "name", "creator_id", "create_date", "updater_id", "update_date", "project_id",
+        "show_masked", "show_nonvalidated", "show_comments", "auto_range", "date_range", "threshold", "report_configs", "display"
+    ],
     "additionalProperties": false
 }`, IDSlugNameArrSchema, plotConfigDisplaySchema)
 
@@ -96,9 +95,9 @@ const updatePlotConfigRemoveTimeseriesBody = `{
         "traces": [
             {
 	        "timeseries_id": "9a3864a8-8766-4bfa-bad1-0328b166f6a8",
-                "name": "update test trace 1"
-                "trace_order": "0"
-                "color": "#0066ff",
+                "name": "update test trace 1",
+                "trace_order": 0,
+                "color": "#0066ff"
 	    }
         ],
 	"layout": {
@@ -117,40 +116,40 @@ const updatePlotConfigAddManyTimeseriesBody = `{
         "traces": [
             {
 	        "timeseries_id": "9a3864a8-8766-4bfa-bad1-0328b166f6a8",
-                "name": "update test trace 1"
-                "trace_order": "0"
-                "color": "#0066ff",
+                "name": "update test trace 1",
+                "trace_order": 0,
+                "color": "#0066ff"
 	    },
             {
-	        "timeseries_id": "8f4ca3a3-5971-4597-bd6f-332d1cf5af7c",,
-                "name": "update test trace 2"
-                "trace_order": "1"
-                "color": "#ff0000",
+	        "timeseries_id": "8f4ca3a3-5971-4597-bd6f-332d1cf5af7c",
+                "name": "update test trace 2",
+                "trace_order": 1,
+                "color": "#ff0000"
 	    },
             {
 	        "timeseries_id": "869465fc-dc1e-445e-81f4-9979b5fadda9",
-                "name": "update test trace 3"
-                "trace_order": "2"
-                "color": "#ffaa00",
+                "name": "update test trace 3",
+                "trace_order": 2,
+                "color": "#ffaa00"
 	    },
             {
 	        "timeseries_id": "7ee902a3-56d0-4acf-8956-67ac82c03a96",
-                "name": "update test trace 4"
-                "trace_order": "3"
-                "color": "#0000ff",
+                "name": "update test trace 4",
+                "trace_order": 3,
+                "color": "#0000ff"
 	    },
             {
 	        "timeseries_id": "d9697351-3a38-4194-9ac4-41541927e475",
-                "name": "update test trace 5"
-                "trace_order": "4"
-                "color": "#00ff00",
+                "name": "update test trace 5",
+                "trace_order": 4,
+                "color": "#00ff00"
 	    },
             {
 	        "timeseries_id": "22a734d6-dc24-451d-a462-43a32f335ae8",
-                "name": "update test trace 6"
-                "trace_order": "5"
-                "color": "#aa00aa",
-	    },
+                "name": "update test trace 6",
+                "trace_order": 5,
+                "color": "#aa00aa"
+	    }
         ],
 	"layout": {
             "custom_shapes": [],
@@ -166,40 +165,40 @@ const createPlotConfigBody = `{
         "traces": [
             {
 	        "timeseries_id": "9a3864a8-8766-4bfa-bad1-0328b166f6a8",
-                "name": "update test trace 1"
-                "trace_order": "0"
-                "color": "#0066ff",
+                "name": "update test trace 1",
+                "trace_order": 0,
+                "color": "#0066ff"
 	    },
             {
-	        "timeseries_id": "8f4ca3a3-5971-4597-bd6f-332d1cf5af7c",,
-                "name": "update test trace 2"
-                "trace_order": "1"
-                "color": "#ff0000",
+	        "timeseries_id": "8f4ca3a3-5971-4597-bd6f-332d1cf5af7c",
+                "name": "update test trace 2",
+                "trace_order": 1,
+                "color": "#ff0000"
 	    },
             {
 	        "timeseries_id": "869465fc-dc1e-445e-81f4-9979b5fadda9",
-                "name": "update test trace 3"
-                "trace_order": "2"
-                "color": "#ffaa00",
+                "name": "update test trace 3",
+                "trace_order": 2,
+                "color": "#ffaa00"
 	    },
             {
 	        "timeseries_id": "7ee902a3-56d0-4acf-8956-67ac82c03a96",
-                "name": "update test trace 4"
-                "trace_order": "3"
-                "color": "#0000ff",
+                "name": "update test trace 4",
+                "trace_order": 3,
+                "color": "#0000ff"
 	    },
             {
 	        "timeseries_id": "d9697351-3a38-4194-9ac4-41541927e475",
-                "name": "update test trace 5"
-                "trace_order": "4"
-                "color": "#00ff00",
+                "name": "update test trace 5",
+                "trace_order": 4,
+                "color": "#00ff00"
 	    },
             {
 	        "timeseries_id": "22a734d6-dc24-451d-a462-43a32f335ae8",
-                "name": "update test trace 6"
-                "trace_order": "5"
-                "color": "#aa00aa",
-	    },
+                "name": "update test trace 6",
+                "trace_order": 5,
+                "color": "#aa00aa"
+	    }
         ],
 	"layout": {
             "custom_shapes": [

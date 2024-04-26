@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/USACE/instrumentation-api/api/internal/model"
@@ -122,9 +121,14 @@ func validateCreateTraces(ctx context.Context, q *model.Queries, pcID uuid.UUID,
 	for _, tr := range trs {
 		tr.PlotConfigurationID = pcID
 
-		// TODO validate input
 		if err := validateColor(tr.Color); err != nil {
 			return err
+		}
+		if tr.LineStyle == "" {
+			tr.LineStyle = "solid"
+		}
+		if tr.YAxis == "" {
+			tr.YAxis = "y1"
 		}
 
 		if err := q.CreatePlotConfigTimeseriesTrace(ctx, tr); err != nil {
@@ -138,7 +142,6 @@ func validateCreateCustomShapes(ctx context.Context, q *model.Queries, pcID uuid
 	for _, cs := range css {
 		cs.PlotConfigurationID = pcID
 
-		// TODO validate input
 		if err := validateColor(cs.Color); err != nil {
 			return err
 		}
@@ -159,8 +162,10 @@ func validateColor(colorHex string) error {
 	if len(parts[0]) != 1 && len(parts[1]) != 6 {
 		return invalidHexErr
 	}
-	if _, err := strconv.Atoi(parts[1]); err != nil {
-		return invalidHexErr
+	for _, r := range parts[1] {
+		if !(r >= '0' && r <= '9' || r >= 'a' && r <= 'f' || r >= 'A' && r <= 'F') {
+			return invalidHexErr
+		}
 	}
 	return nil
 }
