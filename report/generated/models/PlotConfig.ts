@@ -3,12 +3,14 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { IDSlugName } from './IDSlugName';
+import type { PlotConfigDisplay } from './PlotConfigDisplay';
 export type PlotConfig = {
     auto_range?: boolean;
     create_date?: string;
     creator_id?: string;
     creator_username?: string;
     date_range?: string;
+    display?: PlotConfigDisplay;
     id?: string;
     name?: string;
     project_id?: string;
@@ -18,7 +20,6 @@ export type PlotConfig = {
     show_nonvalidated?: boolean;
     slug?: string;
     threshold?: number;
-    timeseries_id?: Array<string>;
     update_date?: string;
     updater_id?: string;
     updater_username?: string;
