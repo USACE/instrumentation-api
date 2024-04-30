@@ -8,10 +8,9 @@ import (
 	"strings"
 
 	"github.com/USACE/instrumentation-api/api/internal/config"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	s3manager "github.com/aws/aws-sdk-go-v2/feature/s3/manager"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
 type Blob interface {
@@ -21,7 +20,7 @@ type Blob interface {
 }
 
 type S3Blob struct {
-	*s3.S3
+	*s3.Client
 	*s3manager.Uploader
 	cfg s3BlobConfig
 }
@@ -38,10 +37,10 @@ var _ Blob = (*S3Blob)(nil)
 func uploader(u *s3manager.Uploader) {}
 
 func NewS3Blob(cfg *config.AWSS3Config, bucketPrefix, routePrefix string) *S3Blob {
-	awsCfg := cfg.S3Config()
-	sess := session.Must(session.NewSession(awsCfg))
+	s3Config := cfg.S3Config()
+	client := s3.NewFromConfig(s3Config)
 
-	return &S3Blob{s3.New(sess), s3manager.NewUploader(sess, uploader), s3BlobConfig{
+	return &S3Blob{client, s3manager.NewUploader(client, uploader), s3BlobConfig{
 		awsConfig:    cfg,
 		bucketName:   cfg.AWSS3Bucket,
 		bucketPrefix: bucketPrefix,
@@ -69,7 +68,7 @@ func (s *S3Blob) NewReader(rawPath, bucketName string) (io.ReadCloser, error) {
 		bucketName = s.cfg.bucketName
 	}
 
-	output, err := s.GetObject(&s3.GetObjectInput{Bucket: aws.String(bucketName), Key: key})
+	output, err := s.GetObject(context.Background(), &s3.GetObjectInput{Bucket: aws.String(bucketName), Key: key})
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +85,7 @@ func (s *S3Blob) NewReaderContext(ctx context.Context, rawPath, bucketName strin
 		bucketName = s.cfg.bucketName
 	}
 
-	output, err := s.GetObjectWithContext(ctx, &s3.GetObjectInput{Bucket: aws.String(bucketName), Key: key})
+	output, err := s.GetObject(ctx, &s3.GetObjectInput{Bucket: aws.String(bucketName), Key: key})
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +102,7 @@ func (s *S3Blob) UploadContext(ctx context.Context, r io.Reader, rawPath, bucket
 		bucketName = s.cfg.bucketName
 	}
 
-	_, err = s.UploadWithContext(ctx, &s3manager.UploadInput{
+	_, err = s.Upload(ctx, &s3.PutObjectInput{
 		Bucket: aws.String(bucketName),
 		Key:    key,
 		Body:   r,

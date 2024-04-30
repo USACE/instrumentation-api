@@ -1,7 +1,11 @@
 package config
 
 import (
-	"github.com/aws/aws-sdk-go/aws"
+	"context"
+	"log"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	awsConfig "github.com/aws/aws-sdk-go-v2/config"
 )
 
 type AWSS3Config struct {
@@ -12,17 +16,16 @@ type AWSS3Config struct {
 	AWSS3Bucket         string `envconfig:"AWS_S3_BUCKET"`
 }
 
-func (cfg *AWSS3Config) S3Config() *aws.Config {
-	awsConfig := aws.NewConfig()
-	awsConfig.WithDisableSSL(cfg.AWSS3DisableSSL)
-	awsConfig.WithS3ForcePathStyle(cfg.AWSS3ForcePathStyle)
+func (cfg *AWSS3Config) S3Config() aws.Config {
+	optFns := make([]func(*awsConfig.LoadOptions) error, 0)
 	if cfg.AWSS3Region != "" {
-		awsConfig.WithRegion(cfg.AWSS3Region)
+		optFns = append(optFns, awsConfig.WithRegion(cfg.AWSS3Region))
 	}
-	if cfg.AWSS3Endpoint != "" {
-		awsConfig.WithEndpoint(cfg.AWSS3Endpoint)
+	s3Config, err := awsConfig.LoadDefaultConfig(context.Background(), optFns...)
+	if err != nil {
+		log.Fatal(err.Error())
 	}
-	return awsConfig
+	return s3Config
 }
 
 type AWSSQSConfig struct {
@@ -35,16 +38,14 @@ type AWSSQSConfig struct {
 
 // AWSSQSConfig returns a ready-to-go config for session.New() for SQS Actions.
 // Supports local testing using SQS stand-in elasticmq
-func (cfg *AWSSQSConfig) SQSConfig() *aws.Config {
-	awsConfig := aws.NewConfig()
+func (cfg *AWSSQSConfig) SQSConfig() aws.Config {
+	optFns := make([]func(*awsConfig.LoadOptions) error, 0)
 	if cfg.AWSSQSRegion != "" {
-		awsConfig.WithRegion(cfg.AWSSQSRegion)
+		optFns = append(optFns, awsConfig.WithRegion(cfg.AWSSQSRegion))
 	}
-	if cfg.AWSSQSEndpoint != "" {
-		awsConfig.WithEndpoint(cfg.AWSSQSEndpoint)
+	s3Config, err := awsConfig.LoadDefaultConfig(context.Background(), optFns...)
+	if err != nil {
+		log.Fatal(err.Error())
 	}
-	if cfg.AWSSQSRegion != "" {
-		awsConfig.WithRegion(cfg.AWSSQSRegion)
-	}
-	return awsConfig
+	return s3Config
 }
