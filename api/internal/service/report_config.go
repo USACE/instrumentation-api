@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/USACE/instrumentation-api/api/internal/cloud"
 	"github.com/USACE/instrumentation-api/api/internal/model"
@@ -110,7 +111,12 @@ func (s reportConfigService) CreateReportDownloadJob(ctx context.Context, rcID u
 
 	// qtx := s.WithTx(tx)
 
-	msgID, err := s.pubsub.PublishMessage(ctx, model.ReportConfigJobMessage{ReportConfigID: rcID})
+	b, err := json.Marshal(model.ReportConfigJobMessage{ReportConfigID: rcID})
+	if err != nil {
+		return "", err
+	}
+
+	msgID, err := s.pubsub.PublishMessage(ctx, b)
 	if err != nil {
 		return "", err
 	}
