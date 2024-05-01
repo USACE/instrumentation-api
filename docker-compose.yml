@@ -9,9 +9,9 @@ services:
       - 5432:5432
     shm_size: 512mb
     restart: unless-stopped
-    environment:
-      - POSTGRES_USER=${POSTGRES_USER:-postgres}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+    env_file:
+      - path: ./env_files/db.env
+        required: true
     user: ${POSTGRES_USER:-postgres}
     healthcheck:
       test: ["CMD-SHELL", "pg_isready"]
@@ -21,13 +21,13 @@ services:
 
   migrate:
     build:
+      args:
+        - BASE_IMAGE=${MIGRATE_BASE_IMAGE:-flyway/flyway:10.9.1}
       context: migrate
     restart: on-failure
-    environment:
-      - FLYWAY_LOCATIONS=${FLYWAY_LOCATIONS:-filesystem:/flyway/sql/common,filesystem:/flyway/sql/local}
-      - FLYWAY_USER=postgres
-      - FLYWAY_PASSWORD=postgres
-      - FLYWAY_URL=jdbc:postgresql://db:5432/postgres
+    env_file:
+      - path: ./env_files/migrate.env
+        required: true
     command: migrate
     volumes:
       - ./migrate:/flyway/sql
@@ -37,46 +37,21 @@ services:
 
   api:
     build:
+      args:
+        - GO_VERSION=${GO_VERSION:-1.22}
       context: api
       target: builder
       labels:
         - com.host.description=instrumentation-api
     entrypoint: go run cmd/core/main.go
     restart: unless-stopped
-    environment:
-      # NOTE: AWS_ Variables provided by execution role in deployed version
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-AKIAIOSFODNN7EXAMPLE}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY}
-      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-east-1}
-      - INSTRUMENTATION_APPLICATION_KEY=${INSTRUMENTATION_APPLICATION_KEY:-appkey}
-      - INSTRUMENTATION_AUTH_DISABLED=${INSTRUMENTATION_AUTH_DISABLED:-False}
-      - INSTRUMENTATION_AUTH_JWT_MOCKED=${INSTRUMENTATION_AUTH_JWT_MOCKED:-True}
-      - INSTRUMENTATION_AWS_S3_REGION=${INSTRUMENTATION_AWS_S3_REGION:-us-east-1}
-      - INSTRUMENTATION_AWS_S3_BUCKET=${INSTRUMENTATION_AWS_S3_BUCKET:-corpsmap-data}
-      - INSTRUMENTATION_AWS_S3_ENDPOINT=${INSTRUMENTATION_AWS_S3_ENDPOINT:-http://minio:9000}
-      - INSTRUMENTATION_AWS_S3_DISABLE_SSL=${INSTRUMENTATION_AWS_S3_DISABLE_SSL:-True}
-      - INSTRUMENTATION_AWS_S3_FORCE_PATH_STYLE=${INSTRUMENTATION_AWS_S3_FORCE_PATH_STYLE:-True}
-      - INSTRUMENTATION_DBUSER=${INSTRUMENTATION_DBUSER:-instrumentation_user}
-      - INSTRUMENTATION_DBPASS=${INSTRUMENTATION_DBPASS:-password}
-      - INSTRUMENTATION_DBNAME=${INSTRUMENTATION_DBNAME:-postgres}
-      - INSTRUMENTATION_DBHOST=${INSTRUMENTATION_DBHOST:-db}
-      - INSTRUMENTATION_DBSSLMODE=${INSTRUMENTATION_DBSSLMODE:-disable}
-      - INSTRUMENTATION_ROUTE_PREFIX=${INSTRUMENTATION_ROUTE_PREFIX:-}
-      - INSTRUMENTATION_REQUEST_LOGGER_ENABLED=${INSTRUMENTATION_REQUEST_LOGGER_ENABLED:-false}
-      - INSTRUMENTATION_AWS_SQS_REGION=${INSTRUMENTATION_AWS_SQS_REGION:-elasticmq}
-      - INSTRUMENTATION_AWS_SQS_ENDPOINT=${INSTRUMENTATION_AWS_SQS_ENDPOINT:-http://elasticmq:9324}
-      - INSTRUMENTATION_AWS_SQS_QUEUE_URL=${INSTRUMENTATION_AWS_SQS_QUEUE_URL:-http://elasticmq:9324/queue/instrumentation-api-report}
-      - INSTRUMENTATION_AWS_SQS_QUEUE_NAME=${INSTRUMENTATION_AWS_SQS_QUEUE_NAME:-instrumentation-api-report}
-      - LOADER_POST_URL=${LOADER_POST_URL:-http://api/timeseries_measurements}
-      - LOADER_API_KEY=${LOADER_API_KEY:-appkey}
-      - LOADER_AWS_S3_ENDPOINT=${LOADER_AWS_S3_ENDPOINT:-http://minio:9000}
-      - LOADER_AWS_S3_DISABLE_SSL=${LOADER_AWS_S3_DISABLE_SSL:-True}
-      - LOADER_AWS_S3_FORCE_PATH_STYLE=${LOADER_AWS_S3_FORCE_PATH_STYLE:-True}
-      - LOADER_AWS_SQS_ENDPOINT=${LOADER_AWS_SQS_ENDPOINT:-http://elasticmq:9324}
-      - LOADER_AWS_SQS_REGION=${LOADER_AWS_SQS_REGION:-elasticmq}
-      - LOADER_AWS_SQS_QUEUE_NAME=${LOADER_AWS_SQS_QUEUE_NAME:-instrumentation-dcs-goes}
-      - LOADER_AWS_SQS_QUEUE_URL=${LOADER_AWS_SQS_QUEUE_URL:-http://elasticmq:9324/queue/instrumentation-dcs-goes}
-      # - INSTRUMENTATION_AWS_SQS_QUEUE_NO_INIT=${INSTRUMENTATION_AWS_SQS_QUEUE_NO_INIT:-true}
+    env_file:
+      - path: ./env_files/api.env
+        required: true
+        # the following env files are only needed for running integration tests
+        # since this container is also the target for the test runner (builder target layer)
+      - path: ./env_files/dcs-loader.env
+        required: true
     ports:
       - "${API_PORT:-8080}:80"
     depends_on:
@@ -91,17 +66,14 @@ services:
 
   telemetry:
     build:
+      args:
+        - GO_VERSION=${GO_VERSION:-1.22}
       context: api
       target: telemetry
     restart: on-failure
-    environment:
-      - INSTRUMENTATION_DBUSER=${INSTRUMENTATION_DBUSER:-instrumentation_user}
-      - INSTRUMENTATION_DBPASS=${INSTRUMENTATION_DBPASS:-password}
-      - INSTRUMENTATION_DBNAME=${INSTRUMENTATION_DBNAME:-postgres}
-      - INSTRUMENTATION_DBHOST=${INSTRUMENTATION_DBHOST:-db}
-      - INSTRUMENTATION_DBSSLMODE=${INSTRUMENTATION_DBSSLMODE:-disable}
-      - INSTRUMENTATION_ROUTE_PREFIX=${INSTRUMENTATION_ROUTE_PREFIX:-}
-      - INSTRUMENTATION_REQUEST_LOGGER_ENABLED=${INSTRUMENTATION_REQUEST_LOGGER_ENABLED:-false}
+    env_file:
+      - path: ./env_files/telemetry.env
+        required: true
     ports:
       - "${TELEMETRY_PORT:-9090}:80"
     depends_on:
@@ -112,24 +84,13 @@ services:
 
   alert:
     build:
+      args:
+        - GO_VERSION=${GO_VERSION:-1.22}
       context: api
       target: alert
-    environment:
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-AKIAIOSFODNN7EXAMPLE}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY}
-      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-east-1}
-      - INSTRUMENTATION_DBUSER=${INSTRUMENTATION_DBUSER:-instrumentation_user}
-      - INSTRUMENTATION_DBPASS=${INSTRUMENTATION_DBPASS:-password}
-      - INSTRUMENTATION_DBNAME=${INSTRUMENTATION_DBNAME:-postgres}
-      - INSTRUMENTATION_DBHOST=${INSTRUMENTATION_DBHOST:-db}
-      - INSTRUMENTATION_DBSSLMODE=${INSTRUMENTATION_DBSSLMODE:-disable}
-      - INSTRUMENTATION_AWS_ECS_TRIGGER_MOCKED=${INSTRUMENTATION_AWS_ECS_TRIGGER_MOCKED:-True}
-      - INSTRUMENTATION_EMAIL_SEND_MOCKED=${INSTRUMENTATION_EMAIL_SEND_MOCKED:-True}
-      - INSTRUMENTATION_EMAIL_FROM=${INSTRUMENTATION_EMAIL_FROM:-success@simulator.amazonses.com}
-      - INSTRUMENTATION_SMTP_HOST=${INSTRUMENTATION_SMTP_HOST:-}
-      - INSTRUMENTATION_SMTP_PORT=${INSTRUMENTATION_SMTP_PORT:-}
-      - INSTRUMENTATION_SMTP_AUTH_USER=${INSTRUMENTATION_SMTP_AUTH_USER:-}
-      - INSTRUMENTATION_SMTP_AUTH_PASS=${INSTRUMENTATION_SMTP_AUTH_PASS:-}
+    env_file:
+      - path: ./env_files/alert.env
+        required: true
     depends_on:
       db:
         condition: service_healthy
@@ -138,22 +99,13 @@ services:
 
   dcs-loader:
     build:
+      args:
+        - GO_VERSION=${GO_VERSION:-1.22}
       context: api
       target: dcs-loader
-    environment:
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-AKIAIOSFODNN7EXAMPLE}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY}
-      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-east-1}
-      - AWS_REGION=${AWS_DEFAULT_REGION:-us-east-1}
-      - LOADER_POST_URL=${LOADER_POST_URL:-http://api/timeseries_measurements}
-      - LOADER_API_KEY=${LOADER_API_KEY:-appkey}
-      - LOADER_AWS_S3_ENDPOINT=${LOADER_AWS_S3_ENDPOINT:-http://minio:9000}
-      - LOADER_AWS_S3_DISABLE_SSL=${LOADER_AWS_S3_DISABLE_SSL:-True}
-      - LOADER_AWS_S3_FORCE_PATH_STYLE=${LOADER_AWS_S3_FORCE_PATH_STYLE:-True}
-      - LOADER_AWS_SQS_ENDPOINT=${LOADER_AWS_SQS_ENDPOINT:-http://elasticmq:9324}
-      - LOADER_AWS_SQS_REGION=${LOADER_AWS_SQS_REGION:-elasticmq}
-      - LOADER_AWS_SQS_QUEUE_NAME=${LOADER_AWS_SQS_QUEUE_NAME:-instrumentation-dcs-goes}
-      - LOADER_AWS_SQS_QUEUE_URL=${LOADER_AWS_SQS_QUEUE_URL:-http://elasticmq:9324/queue/instrumentation-dcs-goes}
+    env_file:
+      - path: ./env_files/dcs-loader.env
+        required: true
     restart: unless-stopped
     depends_on:
       elasticmq:
@@ -163,15 +115,13 @@ services:
     image: softwaremill/elasticmq
     volumes:
       - ./elasticmq.conf:/opt/elasticmq.conf
-    ports:
-      - "9324:9324"
     restart: unless-stopped
 
   minio:
     image: minio/minio
-    environment:
-      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:-AKIAIOSFODNN7EXAMPLE}
-      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY}
+    env_file:
+      - path: ./env_files/minio.env
+        required: true
     command: server /data
     profiles:
       - local
@@ -188,7 +138,7 @@ services:
       /bin/sh -c "
       echo 'sleeping for 10 seconds while minio starts...';
       sleep 10;
-      /usr/bin/mc config host add minio http://minio:9000 ${MINIO_ACCESS_KEY:-AKIAIOSFODNN7EXAMPLE} ${MINIO_SECRET_KEY:-wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY};
+      /usr/bin/mc config host add minio http://minio:9000 AKIAIOSFODNN7EXAMPLE wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY;
       /usr/bin/mc mb minio/corpsmap-data-incoming minio/corpsmap-data;
       /usr/bin/mc policy set public minio/corpsmap-data;
       /usr/bin/mc cp --recursive /media/projects/ minio/corpsmap-data/instrumentation/projects/ ;
