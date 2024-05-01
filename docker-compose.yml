@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   db:
     build:
@@ -69,7 +67,16 @@ services:
       - INSTRUMENTATION_AWS_SQS_ENDPOINT=${INSTRUMENTATION_AWS_SQS_ENDPOINT:-http://elasticmq:9324}
       - INSTRUMENTATION_AWS_SQS_QUEUE_URL=${INSTRUMENTATION_AWS_SQS_QUEUE_URL:-http://elasticmq:9324/queue/instrumentation-api-report}
       - INSTRUMENTATION_AWS_SQS_QUEUE_NAME=${INSTRUMENTATION_AWS_SQS_QUEUE_NAME:-instrumentation-api-report}
-      - INSTRUMENTATION_AWS_SQS_QUEUE_NO_INIT=${INSTRUMENTATION_AWS_SQS_QUEUE_NO_INIT:-true}
+      - LOADER_POST_URL=${LOADER_POST_URL:-http://api/timeseries_measurements}
+      - LOADER_API_KEY=${LOADER_API_KEY:-appkey}
+      - LOADER_AWS_S3_ENDPOINT=${LOADER_AWS_S3_ENDPOINT:-http://minio:9000}
+      - LOADER_AWS_S3_DISABLE_SSL=${LOADER_AWS_S3_DISABLE_SSL:-True}
+      - LOADER_AWS_S3_FORCE_PATH_STYLE=${LOADER_AWS_S3_FORCE_PATH_STYLE:-True}
+      - LOADER_AWS_SQS_ENDPOINT=${LOADER_AWS_SQS_ENDPOINT:-http://elasticmq:9324}
+      - LOADER_AWS_SQS_REGION=${LOADER_AWS_SQS_REGION:-elasticmq}
+      - LOADER_AWS_SQS_QUEUE_NAME=${LOADER_AWS_SQS_QUEUE_NAME:-instrumentation-dcs-goes}
+      - LOADER_AWS_SQS_QUEUE_URL=${LOADER_AWS_SQS_QUEUE_URL:-http://elasticmq:9324/queue/instrumentation-dcs-goes}
+      # - INSTRUMENTATION_AWS_SQS_QUEUE_NO_INIT=${INSTRUMENTATION_AWS_SQS_QUEUE_NO_INIT:-true}
     ports:
       - "${API_PORT:-8080}:80"
     depends_on:
@@ -78,6 +85,8 @@ services:
       migrate:
         condition: service_completed_successfully
       alert:
+        condition: service_started
+      elasticmq:
         condition: service_started
 
   telemetry:
@@ -180,7 +189,7 @@ services:
       echo 'sleeping for 10 seconds while minio starts...';
       sleep 10;
       /usr/bin/mc config host add minio http://minio:9000 ${MINIO_ACCESS_KEY:-AKIAIOSFODNN7EXAMPLE} ${MINIO_SECRET_KEY:-wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY};
-      /usr/bin/mc mb   minio/corpsmap-data-incoming   minio/corpsmap-data;
+      /usr/bin/mc mb minio/corpsmap-data-incoming minio/corpsmap-data;
       /usr/bin/mc policy set public minio/corpsmap-data;
       /usr/bin/mc cp --recursive /media/projects/ minio/corpsmap-data/instrumentation/projects/ ;
       exit 0;
