@@ -31,8 +31,8 @@ type SQSPubsub struct {
 var _ Pubsub = (*SQSPubsub)(nil)
 
 func NewSQSPubsub(cfg *config.AWSSQSConfig) *SQSPubsub {
-	awsCfg := cfg.SQSConfig()
-	queue := sqs.NewFromConfig(awsCfg)
+	sqsCfg, optFns := cfg.SQSConfig()
+	queue := sqs.NewFromConfig(sqsCfg, optFns...)
 
 	ps := &SQSPubsub{queue, cfg, nil, nil}
 	if !cfg.AWSSQSQueueNoInit {
@@ -56,6 +56,7 @@ func (s *SQSPubsub) MustInitQueueUrl() {
 func (s *SQSPubsub) InitQueueUrl() error {
 	if s.cfg.AWSSQSQueueURL != "" {
 		s.queueUrl = &s.cfg.AWSSQSQueueURL
+		return nil
 	}
 	urlResult, err := s.GetQueueUrl(context.Background(), &sqs.GetQueueUrlInput{QueueName: &s.cfg.AWSSQSQueueName})
 	if err != nil {

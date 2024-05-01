@@ -6,6 +6,8 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	awsConfig "github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/sqs"
 )
 
 type AWSS3Config struct {
@@ -16,7 +18,7 @@ type AWSS3Config struct {
 	AWSS3Bucket         string `envconfig:"AWS_S3_BUCKET"`
 }
 
-func (cfg *AWSS3Config) S3Config() aws.Config {
+func (cfg *AWSS3Config) S3Config() (aws.Config, []func(*s3.Options)) {
 	optFns := make([]func(*awsConfig.LoadOptions) error, 0)
 	if cfg.AWSS3Region != "" {
 		optFns = append(optFns, awsConfig.WithRegion(cfg.AWSS3Region))
@@ -25,7 +27,13 @@ func (cfg *AWSS3Config) S3Config() aws.Config {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	return s3Config
+	s3OptFns := make([]func(*s3.Options), 0)
+	if cfg.AWSS3Endpoint != "" {
+		s3OptFns = append(s3OptFns, func(o *s3.Options) {
+			o.BaseEndpoint = aws.String(cfg.AWSS3Endpoint)
+		})
+	}
+	return s3Config, s3OptFns
 }
 
 type AWSSQSConfig struct {
@@ -36,16 +44,20 @@ type AWSSQSConfig struct {
 	AWSSQSQueueNoInit bool   `envconfig:"AWS_SQS_QUEUE_NO_INIT"`
 }
 
-// AWSSQSConfig returns a ready-to-go config for session.New() for SQS Actions.
-// Supports local testing using SQS stand-in elasticmq
-func (cfg *AWSSQSConfig) SQSConfig() aws.Config {
-	optFns := make([]func(*awsConfig.LoadOptions) error, 0)
+func (cfg *AWSSQSConfig) SQSConfig() (aws.Config, []func(*sqs.Options)) {
+	awsOptFns := make([]func(*awsConfig.LoadOptions) error, 0)
 	if cfg.AWSSQSRegion != "" {
-		optFns = append(optFns, awsConfig.WithRegion(cfg.AWSSQSRegion))
+		awsOptFns = append(awsOptFns, awsConfig.WithRegion(cfg.AWSSQSRegion))
 	}
-	s3Config, err := awsConfig.LoadDefaultConfig(context.Background(), optFns...)
+	sqsConfig, err := awsConfig.LoadDefaultConfig(context.Background(), awsOptFns...)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	return s3Config
+	sqsOptFns := make([]func(*sqs.Options), 0)
+	if cfg.AWSSQSEndpoint != "" {
+		sqsOptFns = append(sqsOptFns, func(o *sqs.Options) {
+			o.BaseEndpoint = aws.String(cfg.AWSSQSEndpoint)
+		})
+	}
+	return sqsConfig, sqsOptFns
 }

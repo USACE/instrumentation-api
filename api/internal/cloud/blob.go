@@ -37,8 +37,8 @@ var _ Blob = (*S3Blob)(nil)
 func uploader(u *s3manager.Uploader) {}
 
 func NewS3Blob(cfg *config.AWSS3Config, bucketPrefix, routePrefix string) *S3Blob {
-	s3Config := cfg.S3Config()
-	client := s3.NewFromConfig(s3Config)
+	s3Config, optFns := cfg.S3Config()
+	client := s3.NewFromConfig(s3Config, optFns...)
 
 	return &S3Blob{client, s3manager.NewUploader(client, uploader), s3BlobConfig{
 		awsConfig:    cfg,
