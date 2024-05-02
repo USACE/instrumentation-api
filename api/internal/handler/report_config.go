@@ -14,7 +14,7 @@ import (
 // ListProjectReportConfigs godoc
 //
 //	@Summary lists all report configs for a project
-//	@Tags plot-report
+//	@Tags report-config
 //	@Produce json
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param key query string false "api key"
@@ -40,9 +40,10 @@ func (h *ApiHandler) ListProjectReportConfigs(c echo.Context) error {
 // CreateReportConfig godoc
 //
 //	@Summary creates a report config
-//	@Tags plot-report
+//	@Tags report-config
 //	@Produce json
 //	@Param project_id path string true "project uuid" Format(uuid)
+//	@Param report_config body model.ReportConfig true "report config payload"
 //	@Param key query string false "api key"
 //	@Accept application/json
 //	@Success 200 {object} model.ReportConfig
@@ -77,10 +78,11 @@ func (h *ApiHandler) CreateReportConfig(c echo.Context) error {
 // UpdateReportConfig godoc
 //
 //	@Summary updates a report config
-//	@Tags plot-report
+//	@Tags report-config
 //	@Produce json
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param report_config_id path string true "report config uuid" Format(uuid)
+//	@Param report_config body model.ReportConfig true "report config payload"
 //	@Param key query string false "api key"
 //	@Accept application/json
 //	@Success 200 {object} map[string]interface{}
@@ -119,7 +121,7 @@ func (h *ApiHandler) UpdateReportConfig(c echo.Context) error {
 // DeleteReportConfig godoc
 //
 //	@Summary updates a report config
-//	@Tags plot-report
+//	@Tags report-config
 //	@Produce json
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param key query string false "api key"
@@ -140,31 +142,6 @@ func (h *ApiHandler) DeleteReportConfig(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, map[string]interface{}{"id": rcID})
 }
-
-// DownloadReport godoc
-//
-//	@Sumary downloads a report from the given report configs
-//	@Tags plot-config
-//	@Param project_id path string true "project uuid" Format(uuid)
-//	@Param plot_configuration_id path string true "plot config uuid" Format(uuid)
-//	@Produce application/octet-stream
-//	@Success 200 {file} []byte
-//	@Failure 400 {object} echo.HTTPError
-//	@Failure 404 {object} echo.HTTPError
-//	@Failure 500 {object} echo.HTTPError
-//	@Router /projects/{project_id}/report_configs/{report_config_id}/downloads [get]
-//	@Security Bearer
-// func (h *ApiHandler) DownloadReport(c echo.Context) error {
-// 	rcID, err := uuid.Parse(c.Param("report_config_id"))
-// 	if err != nil {
-// 		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
-// 	}
-// 	g, err := h.ReportConfigService.DownloadReport(c.Request().Context(), rcID)
-// 	if err != nil {
-// 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-// 	}
-// 	return c.JSON(http.StatusOK, g)
-// }
 
 // GetReportConfigWithPlotConfigs godoc
 //
@@ -188,4 +165,97 @@ func (h *ApiHandler) GetReportConfigWithPlotConfigs(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, rcs)
+}
+
+// CreateReportDownloadJob godoc
+//
+//	@Sumary starts a job to create a pdf report
+//	@Tags report-config
+//	@Param project_id path string true "project uuid" Format(uuid)
+//	@Param report_config_id path string true "report config uuid" Format(uuid)
+//	@Param key query string false "api key"
+//	@Produce application/json
+//	@Success 201 {object} model.ReportDownloadJob
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /projects/{project_id}/report_configs/{report_config_id}/jobs [post]
+//	@Security Bearer
+func (h *ApiHandler) CreateReportDownloadJob(c echo.Context) error {
+	rcID, err := uuid.Parse(c.Param("report_config_id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+	}
+	p := c.Get("profile").(model.Profile)
+
+	j, err := h.ReportConfigService.CreateReportDownloadJob(c.Request().Context(), rcID, p.ID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusCreated, j)
+}
+
+// GetReportDownloadJob godoc
+//
+//	@Sumary gets a job that creates a pdf report
+//	@Tags report-config
+//	@Param project_id path string true "project uuid" Format(uuid)
+//	@Param report_config_id path string true "report config uuid" Format(uuid)
+//	@Param job_id path string true "download job uuid" Format(uuid)
+//	@Param key query string false "api key"
+//	@Produce application/json
+//	@Success 200 {object} model.ReportDownloadJob
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /projects/{project_id}/report_configs/{report_config_id}/jobs/{job_id} [get]
+//	@Security Bearer
+func (h *ApiHandler) GetReportDownloadJob(c echo.Context) error {
+	jobID, err := uuid.Parse(c.Param("job_id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+	}
+	p := c.Get("profile").(model.Profile)
+
+	j, err := h.ReportConfigService.GetReportDownloadJob(c.Request().Context(), jobID, p.ID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, j)
+}
+
+// UpdateReportDownloadJob godoc
+//
+//	@Sumary updates a job that creates a pdf report
+//	@Tags report-config
+//	@Param project_id path string true "project uuid" Format(uuid)
+//	@Param report_config_id path string true "report config uuid" Format(uuid)
+//	@Param job_id path string true "download job uuid" Format(uuid)
+//	@Param report_download_job body model.ReportDownloadJob true "report download job payload"
+//	@Produce application/json
+//	@Success 200 {object} map[string]interface{}
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /projects/{project_id}/report_configs/{report_config_id}/jobs/{job_id} [put]
+//	@Security Bearer
+func (h *ApiHandler) UpdateReportDownloadJob(c echo.Context) error {
+	jobID, err := uuid.Parse(c.Param("job_id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+	}
+	var j model.ReportDownloadJob
+	if err := c.Bind(&j); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	j.ID = jobID
+	j.ProgressUpdateDate = time.Now()
+
+	if err := h.ReportConfigService.UpdateReportDownloadJob(c.Request().Context(), j); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{"id": j.ID})
 }

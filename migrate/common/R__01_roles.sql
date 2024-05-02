@@ -115,6 +115,7 @@ GRANT SELECT ON
     ipi_segment,
     report_config,
     report_config_plot_config,
+    report_download_job,
     plot_configuration_timeseries_trace,
     plot_configuration_custom_shape
 TO instrumentation_reader;
@@ -181,6 +182,7 @@ GRANT INSERT,UPDATE,DELETE ON
     ipi_segment,
     report_config,
     report_config_plot_config,
+    report_download_job,
     plot_configuration_timeseries_trace,
     plot_configuration_custom_shape
 TO instrumentation_writer;

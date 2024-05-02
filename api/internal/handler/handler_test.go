@@ -21,6 +21,7 @@ const (
 	truncateLinesBody = 30
 	host              = "http://localhost:8080"
 	mockJwt           = `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwibmFtZSI6IlVzZXIuQWRtaW4iLCJpYXQiOjE1MTYyMzkwMjIsImV4cCI6MjAwMDAwMDAwMCwicm9sZXMiOlsiUFVCTElDLlVTRVIiXX0.4VAMamtH92GiIb5CpGKpP6LKwU6IjIfw5wS4qc8O8VM`
+	mockAppKey        = "appkey"
 )
 
 const IDSlugNameArrSchema = `{

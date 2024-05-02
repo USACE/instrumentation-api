@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -36,6 +37,18 @@ type ToggleOption struct {
 	Value   bool `json:"value" db:"value"`
 }
 
+type ReportDownloadJob struct {
+	ID                 uuid.UUID  `json:"id" db:"id"`
+	ReportConfigID     uuid.UUID  `json:"report_config_id" db:"report_config_id"`
+	Creator            uuid.UUID  `json:"creator" db:"creator"`
+	CreateDate         time.Time  `json:"create_date" db:"create_date"`
+	Status             string     `json:"status" db:"status"`
+	FileKey            *string    `json:"file_key" db:"file_key"`
+	FileExpiry         *time.Time `json:"file_expiry" db:"file_expiry"`
+	Progress           int        `json:"progress" db:"progress"`
+	ProgressUpdateDate time.Time  `json:"progress_update_date" db:"progress_update_date"`
+}
+
 func (o *ReportConfigGlobalOverrides) Scan(src interface{}) error {
 	b, ok := src.(string)
 	if !ok {
@@ -51,10 +64,6 @@ type ReportConfigWithPlotConfigs struct {
 
 type ReportConfigJobMessage struct {
 	ReportConfigID uuid.UUID `json:"report_config_id"`
-}
-
-func (rj ReportConfigJobMessage) MarshalJSON() ([]byte, error) {
-	return json.Marshal(rj)
 }
 
 const createReportConfig = `
@@ -161,10 +170,34 @@ func (q *Queries) UnassignAllReportConfigPlotConfig(ctx context.Context, rcID uu
 	return err
 }
 
-const createReportDownloadJob = `
-	INSERT INTO report_download_job (job_id) VALUES ($1)
+const getReportDownloadJob = `
+	SELECT * FROM report_download_job WHERE id=$1 AND creator=$2
 `
 
-const updateReportDownloadJob = `
-	UPDATE report_download_job SET status_id=$2, update_date=$3 WHERE job_id=$1
+func (q *Queries) GetReportDownloadJob(ctx context.Context, jobID, profileID uuid.UUID) (ReportDownloadJob, error) {
+	var j ReportDownloadJob
+	err := q.db.GetContext(ctx, &j, getReportDownloadJob, jobID, profileID)
+	return j, err
+}
+
+const createReportDownloadJob = `
+	INSERT INTO report_download_job (report_config_id, creator) VALUES ($1, $2) RETURNING *
 `
+
+func (q *Queries) CreateReportDownloadJob(ctx context.Context, rcID, profileID uuid.UUID) (ReportDownloadJob, error) {
+	var jNew ReportDownloadJob
+	err := q.db.GetContext(ctx, &jNew, createReportDownloadJob, rcID, profileID)
+	return jNew, err
+}
+
+const updateReportDownloadJob = `
+	UPDATE report_download_job SET status=$2, progress=$3, progress_update_date=$4, file_key=$5, file_expiry=$6 WHERE id=$1
+`
+
+func (q *Queries) UpdateReportDownloadJob(ctx context.Context, j ReportDownloadJob) error {
+	_, err := q.db.ExecContext(
+		ctx, updateReportDownloadJob,
+		j.ID, j.Status, j.Progress, j.ProgressUpdateDate, j.FileKey, j.FileExpiry,
+	)
+	return err
+}

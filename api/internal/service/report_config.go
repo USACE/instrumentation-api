@@ -13,9 +13,11 @@ type ReportConfigService interface {
 	ListProjectReportConfigs(ctx context.Context, projectID uuid.UUID) ([]model.ReportConfig, error)
 	CreateReportConfig(ctx context.Context, rc model.ReportConfig) (model.ReportConfig, error)
 	UpdateReportConfig(ctx context.Context, rc model.ReportConfig) error
-	DeleteReportConfig(ctx context.Context, reportConfigID uuid.UUID) error
+	DeleteReportConfig(ctx context.Context, rcID uuid.UUID) error
 	GetReportConfigWithPlotConfigs(ctx context.Context, rcID uuid.UUID) (model.ReportConfigWithPlotConfigs, error)
-	CreateReportDownloadJob(ctx context.Context, reportConfigID uuid.UUID) (string, error)
+	CreateReportDownloadJob(ctx context.Context, rcID, profileID uuid.UUID) (model.ReportDownloadJob, error)
+	GetReportDownloadJob(ctx context.Context, jobID, profileID uuid.UUID) (model.ReportDownloadJob, error)
+	UpdateReportDownloadJob(ctx context.Context, j model.ReportDownloadJob) error
 }
 
 type reportConfigService struct {
@@ -102,28 +104,31 @@ func (s reportConfigService) GetReportConfigWithPlotConfigs(ctx context.Context,
 	}, nil
 }
 
-func (s reportConfigService) CreateReportDownloadJob(ctx context.Context, rcID uuid.UUID) (string, error) {
+func (s reportConfigService) CreateReportDownloadJob(ctx context.Context, rcID, profileID uuid.UUID) (model.ReportDownloadJob, error) {
 	tx, err := s.db.BeginTxx(ctx, nil)
 	if err != nil {
-		return "", err
+		return model.ReportDownloadJob{}, err
 	}
 	defer model.TxDo(tx.Rollback)
 
-	// qtx := s.WithTx(tx)
-
-	b, err := json.Marshal(model.ReportConfigJobMessage{ReportConfigID: rcID})
+	qtx := s.WithTx(tx)
+	j, err := qtx.CreateReportDownloadJob(ctx, rcID, profileID)
 	if err != nil {
-		return "", err
+		return model.ReportDownloadJob{}, err
 	}
 
-	msgID, err := s.pubsub.PublishMessage(ctx, b)
+	msg := model.ReportConfigJobMessage{ReportConfigID: rcID}
+	b, err := json.Marshal(msg)
 	if err != nil {
-		return "", err
+		return model.ReportDownloadJob{}, err
+	}
+	if _, err := s.pubsub.PublishMessage(ctx, b); err != nil {
+		return model.ReportDownloadJob{}, err
 	}
 
-	return msgID, nil
+	if err := tx.Commit(); err != nil {
+		return model.ReportDownloadJob{}, err
+	}
+
+	return j, nil
 }
-
-// func (s reportConfigService) GetReportDownloadJob(ctx context.Context, jobID string) error {
-//
-// }

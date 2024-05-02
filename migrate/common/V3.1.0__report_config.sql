@@ -22,18 +22,16 @@ CREATE TABLE IF NOT EXISTS report_config_plot_config (
   CONSTRAINT report_config_plot_config_report_config_id_plot_config_id_key UNIQUE(report_config_id,plot_config_id)
 );
 
-CREATE TABLE IF NOT EXISTS job_status (
-  id int PRIMARY KEY NOT NULL,
-  status text NOT NULL
-);
-
-INSERT INTO job_status (id, status) VALUES (0, 'SUCCESS'), (1, 'FAIL'), (2, 'INIT');
+CREATE TYPE job_status AS ENUM ('SUCCESS', 'FAIL', 'INIT');
 
 CREATE TABLE IF NOT EXISTS report_download_job (
-  job_id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-  report_config_id uuid REFERENCES report_config (id),
+  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+  report_config_id uuid REFERENCES report_config (id) ON DELETE CASCADE,
+  creator uuid NOT NULL REFERENCES profile (id) ON DELETE CASCADE,
   create_date timestamptz NOT NULL DEFAULT now(),
-  update_date timestamptz,
-  status int REFERENCES job_status (id) DEFAULT 2,
-  file_key text
+  status job_status NOT NULL DEFAULT 'INIT',
+  file_key text,
+  file_expiry timestamptz,
+  progress int NOT NULL DEFAULT 0 CHECK (progress >= 0 AND progress <= 100),
+  progress_update_date timestamptz NOT NULL DEFAULT now()
 );

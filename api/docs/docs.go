@@ -7490,7 +7490,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "plot-report"
+                    "report-config"
                 ],
                 "summary": "lists all report configs for a project",
                 "parameters": [
@@ -7549,7 +7549,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "plot-report"
+                    "report-config"
                 ],
                 "summary": "creates a report config",
                 "parameters": [
@@ -7560,6 +7560,15 @@ const docTemplate = `{
                         "name": "project_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "description": "report config payload",
+                        "name": "report_config",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ReportConfig"
+                        }
                     },
                     {
                         "type": "string",
@@ -7610,7 +7619,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "plot-report"
+                    "report-config"
                 ],
                 "summary": "updates a report config",
                 "parameters": [
@@ -7629,6 +7638,15 @@ const docTemplate = `{
                         "name": "report_config_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "description": "report config payload",
+                        "name": "report_config",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ReportConfig"
+                        }
                     },
                     {
                         "type": "string",
@@ -7675,7 +7693,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "plot-report"
+                    "report-config"
                 ],
                 "summary": "updates a report config",
                 "parameters": [
@@ -7692,6 +7710,219 @@ const docTemplate = `{
                         "description": "api key",
                         "name": "key",
                         "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/report_configs/{report_config_id}/jobs": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "report-config"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "project uuid",
+                        "name": "project_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "report config uuid",
+                        "name": "report_config_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/ReportDownloadJob"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/report_configs/{report_config_id}/jobs/{job_id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "report-config"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "project uuid",
+                        "name": "project_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "report config uuid",
+                        "name": "report_config_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "download job uuid",
+                        "name": "job_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ReportDownloadJob"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "report-config"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "project uuid",
+                        "name": "project_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "report config uuid",
+                        "name": "report_config_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "download job uuid",
+                        "name": "job_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "report download job payload",
+                        "name": "report_download_job",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ReportDownloadJob"
+                        }
                     }
                 ],
                 "responses": {
@@ -10292,6 +10523,38 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "updater_username": {
+                    "type": "string"
+                }
+            }
+        },
+        "ReportDownloadJob": {
+            "type": "object",
+            "properties": {
+                "createDate": {
+                    "type": "string"
+                },
+                "creator": {
+                    "type": "string"
+                },
+                "fileExpiry": {
+                    "type": "string"
+                },
+                "fileKey": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "progress": {
+                    "type": "integer"
+                },
+                "progressUpdateDate": {
+                    "type": "string"
+                },
+                "reportConfigID": {
+                    "type": "string"
+                },
+                "status": {
                     "type": "string"
                 }
             }

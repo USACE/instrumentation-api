@@ -9,7 +9,6 @@ import (
 
 	"github.com/USACE/instrumentation-api/api/internal/config"
 	"github.com/aws/aws-lambda-go/events"
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	sqsTypes "github.com/aws/aws-sdk-go-v2/service/sqs/types"
 )
@@ -147,8 +146,9 @@ func (s *SQSPubsub) PublishMessage(ctx context.Context, message []byte) (string,
 		}
 	}
 
+	messageBody := string(message)
 	sqsMessageInput := &sqs.SendMessageInput{
-		MessageBody: aws.String(string(message)),
+		MessageBody: &messageBody,
 		QueueUrl:    s.queueUrl,
 	}
 
@@ -157,7 +157,7 @@ func (s *SQSPubsub) PublishMessage(ctx context.Context, message []byte) (string,
 		return "", err
 	}
 
-	if out.MessageId == nil {
+	if out == nil || out.MessageId == nil {
 		return "", errors.New("nil message id returned from queue")
 	}
 

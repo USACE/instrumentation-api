@@ -990,6 +990,27 @@ definitions:
       updater_username:
         type: string
     type: object
+  ReportDownloadJob:
+    properties:
+      createDate:
+        type: string
+      creator:
+        type: string
+      fileExpiry:
+        type: string
+      fileKey:
+        type: string
+      id:
+        type: string
+      progress:
+        type: integer
+      progressUpdateDate:
+        type: string
+      reportConfigID:
+        type: string
+      status:
+        type: string
+    type: object
   SaaMeasurements:
     properties:
       measurements:
@@ -6162,7 +6183,7 @@ paths:
       - Bearer: []
       summary: lists all report configs for a project
       tags:
-      - plot-report
+      - report-config
     post:
       consumes:
       - application/json
@@ -6173,6 +6194,12 @@ paths:
         name: project_id
         required: true
         type: string
+      - description: report config payload
+        in: body
+        name: report_config
+        required: true
+        schema:
+          $ref: '#/definitions/ReportConfig'
       - description: api key
         in: query
         name: key
@@ -6200,7 +6227,7 @@ paths:
       - Bearer: []
       summary: creates a report config
       tags:
-      - plot-report
+      - report-config
   /projects/{project_id}/report_configs/{report_config_id}:
     delete:
       parameters:
@@ -6238,7 +6265,7 @@ paths:
       - Bearer: []
       summary: updates a report config
       tags:
-      - plot-report
+      - report-config
     put:
       consumes:
       - application/json
@@ -6255,6 +6282,12 @@ paths:
         name: report_config_id
         required: true
         type: string
+      - description: report config payload
+        in: body
+        name: report_config
+        required: true
+        schema:
+          $ref: '#/definitions/ReportConfig'
       - description: api key
         in: query
         name: key
@@ -6283,7 +6316,147 @@ paths:
       - Bearer: []
       summary: updates a report config
       tags:
-      - plot-report
+      - report-config
+  /projects/{project_id}/report_configs/{report_config_id}/jobs:
+    post:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: report config uuid
+        format: uuid
+        in: path
+        name: report_config_id
+        required: true
+        type: string
+      - description: api key
+        in: query
+        name: key
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/ReportDownloadJob'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
+      tags:
+      - report-config
+  /projects/{project_id}/report_configs/{report_config_id}/jobs/{job_id}:
+    get:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: report config uuid
+        format: uuid
+        in: path
+        name: report_config_id
+        required: true
+        type: string
+      - description: download job uuid
+        format: uuid
+        in: path
+        name: job_id
+        required: true
+        type: string
+      - description: api key
+        in: query
+        name: key
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ReportDownloadJob'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
+      tags:
+      - report-config
+    put:
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: report config uuid
+        format: uuid
+        in: path
+        name: report_config_id
+        required: true
+        type: string
+      - description: download job uuid
+        format: uuid
+        in: path
+        name: job_id
+        required: true
+        type: string
+      - description: report download job payload
+        in: body
+        name: report_download_job
+        required: true
+        schema:
+          $ref: '#/definitions/ReportDownloadJob'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
+      tags:
+      - report-config
   /projects/{project_id}/submittals:
     get:
       parameters:

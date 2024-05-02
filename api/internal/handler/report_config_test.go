@@ -68,7 +68,26 @@ var reportConfigArrayLoader = gojsonschema.NewStringLoader(fmt.Sprintf(`{
     "items": %s
 }`, reportConfigSchema))
 
+const reportDownloadJobSchema = `{
+    "type": "object",
+    "properties": {
+        "id": { "type": "string" },
+        "report_config_id": { "type": "string" },
+        "creator": { "type": "string" },
+        "create_date": { "type": "string" },
+        "status": { "type": "string" },
+        "file_key": { "type": ["string", "null"] },
+        "file_expiry": { "type": ["string", "null"] },
+        "progress": { "type": "number" },
+        "progress_update_date": { "type": "string" }
+    }
+}`
+
+var reportDownloadJobObjectLoader = gojsonschema.NewStringLoader(reportDownloadJobSchema)
+
 const testReportConfigID = "a6254bce-9235-4ada-afe7-8ffc3ad867e2"
+const testJobID = "e90dbcc9-7bf4-4402-80ea-c0cdbbb91c6d"
+const testUpdateJobID = "61b69ef2-2c73-4143-930d-3832400ba8f2"
 
 const createReportConfigBody = `{
     "name": "New Test Report Config",
@@ -112,10 +131,17 @@ const updateReportConfigBody = `{
     }
 }`
 
+const updateReportDownloadJobBody = `{
+	"status": "FAIL",
+	"progress": 0
+}`
+
 func TestReportConfigs(t *testing.T) {
 	objSchema, err := gojsonschema.NewSchema(reportConfigObjectLoader)
 	assert.Nil(t, err)
 	arrSchema, err := gojsonschema.NewSchema(reportConfigArrayLoader)
+	assert.Nil(t, err)
+	jobObjSchema, err := gojsonschema.NewSchema(reportDownloadJobObjectLoader)
 	assert.Nil(t, err)
 
 	tests := []HTTPTest{
@@ -133,6 +159,27 @@ func TestReportConfigs(t *testing.T) {
 			Body:           createReportConfigBody,
 			ExpectedStatus: http.StatusCreated,
 			ExpectedSchema: objSchema,
+		},
+		{
+			Name:           "GetReportDownloadJob",
+			URL:            fmt.Sprintf("/projects/%s/report_configs/%s/jobs/%s", testProjectID, testReportConfigID, testJobID),
+			Method:         http.MethodGet,
+			ExpectedStatus: http.StatusOK,
+			ExpectedSchema: jobObjSchema,
+		},
+		{
+			Name:           "CreateReportDownloadJob",
+			URL:            fmt.Sprintf("/projects/%s/report_configs/%s/jobs", testProjectID, testReportConfigID),
+			Method:         http.MethodPost,
+			ExpectedStatus: http.StatusCreated,
+			ExpectedSchema: jobObjSchema,
+		},
+		{
+			Name:           "UpdateReportDownloadJob",
+			URL:            fmt.Sprintf("/projects/%s/report_configs/%s/jobs/%s?key=%s", testProjectID, testReportConfigID, testUpdateJobID, mockAppKey),
+			Body:           updateReportDownloadJobBody,
+			Method:         http.MethodPut,
+			ExpectedStatus: http.StatusOK,
 		},
 		{
 			Name:           "UpdateReportConfig",
