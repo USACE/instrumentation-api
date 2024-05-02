@@ -32,7 +32,6 @@ import { MeasurementInclinometerService } from './services/MeasurementInclinomet
 import { MediaService } from './services/MediaService';
 import { OpendcsService } from './services/OpendcsService';
 import { PlotConfigService } from './services/PlotConfigService';
-import { PlotReportService } from './services/PlotReportService';
 import { ProfileService } from './services/ProfileService';
 import { ProjectService } from './services/ProjectService';
 import { ProjectRoleService } from './services/ProjectRoleService';
@@ -70,7 +69,6 @@ export class ApiClient {
     public readonly media: MediaService;
     public readonly opendcs: OpendcsService;
     public readonly plotConfig: PlotConfigService;
-    public readonly plotReport: PlotReportService;
     public readonly profile: ProfileService;
     public readonly project: ProjectService;
     public readonly projectRole: ProjectRoleService;
@@ -119,7 +117,6 @@ export class ApiClient {
         this.media = new MediaService(this.request);
         this.opendcs = new OpendcsService(this.request);
         this.plotConfig = new PlotConfigService(this.request);
-        this.plotReport = new PlotReportService(this.request);
         this.profile = new ProfileService(this.request);
         this.project = new ProjectService(this.request);
         this.projectRole = new ProjectRoleService(this.request);

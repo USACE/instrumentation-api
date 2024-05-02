@@ -74,6 +74,7 @@ export type { ProjectMembership } from './models/ProjectMembership';
 export type { ReportConfig } from './models/ReportConfig';
 export type { ReportConfigGlobalOverrides } from './models/ReportConfigGlobalOverrides';
 export type { ReportConfigWithPlotConfigs } from './models/ReportConfigWithPlotConfigs';
+export type { ReportDownloadJob } from './models/ReportDownloadJob';
 export type { SaaMeasurements } from './models/SaaMeasurements';
 export type { SaaSegment } from './models/SaaSegment';
 export type { SaaSegmentMeasurement } from './models/SaaSegmentMeasurement';
@@ -117,7 +118,6 @@ export { MeasurementInclinometerService } from './services/MeasurementInclinomet
 export { MediaService } from './services/MediaService';
 export { OpendcsService } from './services/OpendcsService';
 export { PlotConfigService } from './services/PlotConfigService';
-export { PlotReportService } from './services/PlotReportService';
 export { ProfileService } from './services/ProfileService';
 export { ProjectService } from './services/ProjectService';
 export { ProjectRoleService } from './services/ProjectRoleService';
