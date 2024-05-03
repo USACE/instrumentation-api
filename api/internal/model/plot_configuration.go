@@ -54,6 +54,7 @@ type PlotConfigTimeseriesTrace struct {
 	TimeseriesID        uuid.UUID `json:"timeseries_id"`
 	Name                string    `json:"name"` // read-only
 	TraceOrder          int       `json:"trace_order"`
+	TraceType           string    `json:"trace_type"`
 	Color               string    `json:"color"`
 	LineStyle           string    `json:"line_style"`
 	Width               float32   `json:"width"`

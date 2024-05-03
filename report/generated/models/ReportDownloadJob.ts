@@ -3,14 +3,14 @@
 /* tslint:disable */
 /* eslint-disable */
 export type ReportDownloadJob = {
-    createDate?: string;
+    create_date?: string;
     creator?: string;
-    fileExpiry?: string;
-    fileKey?: string;
+    file_expiry?: string;
+    file_key?: string;
     id?: string;
     progress?: number;
-    progressUpdateDate?: string;
-    reportConfigID?: string;
+    progress_update_date?: string;
+    report_config_id?: string;
     status?: string;
 };
 

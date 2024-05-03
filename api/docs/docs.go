@@ -10294,6 +10294,9 @@ const docTemplate = `{
                 "trace_order": {
                     "type": "integer"
                 },
+                "trace_type": {
+                    "type": "string"
+                },
                 "width": {
                     "type": "number"
                 },
@@ -10530,16 +10533,16 @@ const docTemplate = `{
         "ReportDownloadJob": {
             "type": "object",
             "properties": {
-                "createDate": {
+                "create_date": {
                     "type": "string"
                 },
                 "creator": {
                     "type": "string"
                 },
-                "fileExpiry": {
+                "file_expiry": {
                     "type": "string"
                 },
-                "fileKey": {
+                "file_key": {
                     "type": "string"
                 },
                 "id": {
@@ -10548,10 +10551,10 @@ const docTemplate = `{
                 "progress": {
                     "type": "integer"
                 },
-                "progressUpdateDate": {
+                "progress_update_date": {
                     "type": "string"
                 },
-                "reportConfigID": {
+                "report_config_id": {
                     "type": "string"
                 },
                 "status": {

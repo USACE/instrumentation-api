@@ -3,11 +3,13 @@ ADD COLUMN secondary_axis_title text;
 
 CREATE TYPE line_style AS ENUM ('solid', 'dotted', 'dash-dotted');
 CREATE TYPE y_axis AS ENUM ('y1', 'y2');
+CREATE TYPE trace_type AS ENUM ('bar', 'scattergl');
 
 CREATE TABLE plot_configuration_timeseries_trace (
   plot_configuration_id uuid REFERENCES plot_configuration (id) ON DELETE CASCADE,
   timeseries_id uuid REFERENCES timeseries (id) ON DELETE CASCADE,
   trace_order int NOT NULL,
+  trace_type trace_type NOT NULL DEFAULT 'scattergl',
   color text NOT NULL,
   line_style line_style NOT NULL DEFAULT 'solid',
   width real NOT NULL DEFAULT 1,

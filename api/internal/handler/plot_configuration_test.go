@@ -49,6 +49,7 @@ const plotConfigTracesArrSchema = `{
             "timeseries_id": { "type": "string" },
             "name": { "type": "string" },
             "trace_order": { "type": "number" },
+            "trace_type": { "type": "string" },
             "color": { "type": "string" },
             "line_style": { "type": "string" },
             "width": { "type": "number" },

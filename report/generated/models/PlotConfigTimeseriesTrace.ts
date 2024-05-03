@@ -13,6 +13,7 @@ export type PlotConfigTimeseriesTrace = {
     show_markers?: boolean;
     timeseries_id?: string;
     trace_order?: number;
+    trace_type?: string;
     width?: number;
     /**
      * y1 or y2, default y1
