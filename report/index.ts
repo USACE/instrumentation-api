@@ -4,9 +4,15 @@ import { SQSEvent, SQSRecord } from "aws-lambda";
 import { S3Client } from "@aws-sdk/client-s3"; // ES Modules import
 import { Upload } from "@aws-sdk/lib-storage";
 import { UUID } from "crypto";
-import { ApiClient, Measurement, PlotConfig, Timeseries } from "./generated";
+import {
+  ApiClient,
+  Measurement,
+  PlotConfig,
+  PlotConfigTimeseriesTrace,
+  Timeseries,
+} from "./generated";
 import PDFDocument from "pdfkit";
-import Plotly from "plotly.js-dist-min";
+import Plotly, { Dash, PlotType } from "plotly.js-dist-min";
 import { GetSecretValueResponse } from "@aws-sdk/client-secrets-manager";
 
 interface EventMessageBody {
@@ -17,6 +23,8 @@ interface TimeWindow {
   after: string | undefined;
   before: string | undefined;
 }
+
+const MOCK_APP_KEY = "appkey";
 
 const XY_POS_LOOKUP: number[][] = [
   [0, 15],
@@ -39,7 +47,7 @@ const smMockRequest =
 export async function handler(event: SQSEvent) {
   const s3Client = new S3Client(s3ClientConfig);
 
-  let apiKey = "";
+  let apiKey = MOCK_APP_KEY;
   if (!smMockRequest) {
     const res = await fetch(
       `${smBaseUrl}/secretsmanager/get?secretId=${smApiKeyArn}`,
@@ -72,6 +80,7 @@ export async function handler(event: SQSEvent) {
     }
 
     // TODO: POST sucessful upload entry to API
+
     // NOTE: if this fails, the pdf should be automatically deleted anyway by lifetime policy
   }
 }
@@ -108,30 +117,30 @@ async function processRecord(
       plotPagePosIdx = 0;
     }
 
-    const tss =
-      await apiClient.timeseries.getProjectsPlotConfigurationsTimeseries(
-        pc.id!,
-      );
     const { after, before } = parseDateRange(pc.date_range);
 
     const layout = { width: 800, height: 600 };
 
     let gd = await Plotly.newPlot("gd", [], layout);
 
-    // TODO sort
+    const traces = pc.display?.traces ?? [];
 
-    for (const ts of tss) {
-      // TODO: get order of traces from plot config
-      const mm = await apiClient.timeseries.getTimeseriesMeasurements(
-        ts.id!,
-        after,
-        before,
-        3000,
-      );
-      const trace = createTraceData(ts, mm.items!, pc);
+    // traces are pre-sorted
+    const tracePromises = traces.map((tr) => {
+      return async function () {
+        const mm = await apiClient.timeseries.getTimeseriesMeasurements(
+          tr.timeseries_id!,
+          after,
+          before,
+          3000,
+        );
+        const trace = createTraceData(tr, mm.items!, pc);
 
-      await Plotly.addTraces(gd, trace);
-    }
+        await Plotly.addTraces(gd, trace, tr.trace_order);
+      };
+    });
+
+    Promise.all(tracePromises);
 
     const dataUrl = await Plotly.toImage(gd, { format: "png", ...layout });
 
@@ -190,7 +199,7 @@ function parseDateRange(dateStr: string | undefined): TimeWindow {
 }
 
 function createTraceData(
-  ts: Timeseries,
+  tr: PlotConfigTimeseriesTrace,
   mm: Measurement[],
   pc: PlotConfig,
 ): Plotly.Data {
@@ -214,21 +223,22 @@ function createTraceData(
     y[i] = mm[i].value as Plotly.Datum;
   }
 
-  return ts.parameter === "precipitation"
-    ? {
-        x: x,
-        y: y,
-        type: "bar",
-        yaxis: "y2",
-        name: `${ts.instrument} - ${ts.name} (${ts.unit})` || "",
-        showlegend: true,
-      }
-    : {
-        x: x,
-        y: y,
-        type: "scattergl",
-        mode: "lines",
-        name: `${ts.instrument} - ${ts.name} (${ts.unit})` || "",
-        showlegend: true,
-      };
+  return {
+    x: x,
+    y: y,
+    mode: `lines${tr.show_markers ? "+markers" : ""}`,
+    line: {
+      dash: tr.line_style as Dash,
+      color: tr.color,
+      width: tr.width,
+    },
+    marker: {
+      size: Number(tr.width) ? Number(tr.width) * 2 + 3 : 5,
+      color: tr.color,
+    },
+    name: tr.name,
+    type: tr.trace_type as PlotType,
+    yaxis: tr.y_axis,
+    showlegend: true,
+  };
 }
