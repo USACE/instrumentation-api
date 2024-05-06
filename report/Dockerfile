@@ -2,12 +2,13 @@ ARG NODE_VERSION=20
 
 FROM public.ecr.aws/lambda/nodejs:${NODE_VERSION} as builder
 WORKDIR /usr/app
-COPY package.json ./
+COPY package*.json ./
 RUN npm install
-COPY index.ts  ./
+COPY . .
 RUN npm run build
 
 FROM public.ecr.aws/lambda/nodejs:${NODE_VERSION}
 WORKDIR ${LAMBDA_TASK_ROOT}
 COPY --from=builder /usr/app/dist/* ./
+RUN npx @puppeteer/browsers install chrome@stable
 CMD ["index.handler"]

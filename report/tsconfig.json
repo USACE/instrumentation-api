@@ -1,19 +1,31 @@
 {
   "compilerOptions": {
-    "target": "es2020",
+    /* Strictness */
     "strict": true,
+    /* General settings */
+    "verbatimModuleSyntax": true,
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "moduleDetection": "force",
+    "allowImportingTsExtensions": true,
+    "downlevelIteration": true,
+    "noUncheckedIndexedAccess": true,
     "preserveConstEnums": true,
-    "noEmit": true,
-    "sourceMap": false,
-    "module": "commonjs",
-    "moduleResolution": "node",
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
-    "allowSyntheticDefaultImports": true
-  },
-  "exclude": [
-    "node_modules"
-  ]
+    "allowSyntheticDefaultImports": true,
+    /* Library and target */
+    "target": "es2022",
+    "lib": [
+      "es2022",
+      "dom",
+      "dom.iterable"
+    ],
+    /* Using bundler */
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "noEmit": true
+  }
 }

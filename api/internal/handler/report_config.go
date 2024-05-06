@@ -230,10 +230,9 @@ func (h *ApiHandler) GetReportDownloadJob(c echo.Context) error {
 //
 //	@Sumary updates a job that creates a pdf report
 //	@Tags report-config
-//	@Param project_id path string true "project uuid" Format(uuid)
-//	@Param report_config_id path string true "report config uuid" Format(uuid)
 //	@Param job_id path string true "download job uuid" Format(uuid)
 //	@Param report_download_job body model.ReportDownloadJob true "report download job payload"
+//	@Param key query string true "api key"
 //	@Produce application/json
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError

@@ -1,36 +1,24 @@
 import fs from "fs";
-import fetch from "node-fetch";
-import { SQSEvent, SQSRecord } from "aws-lambda";
-import { S3Client } from "@aws-sdk/client-s3"; // ES Modules import
+import path from "path";
+import puppeteer from "puppeteer-core";
+import { S3Client } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
-import { UUID } from "crypto";
-import {
-  ApiClient,
-  Measurement,
-  PlotConfig,
-  PlotConfigTimeseriesTrace,
-  Timeseries,
-} from "./generated";
-import PDFDocument from "pdfkit";
-import Plotly, { Dash, PlotType } from "plotly.js-dist-min";
-import { GetSecretValueResponse } from "@aws-sdk/client-secrets-manager";
+import { ApiClient } from "./generated";
+import { FetchHttpRequest } from "./generated/core/FetchHttpRequest";
+import { processReport } from "./render";
+
+import type { UUID } from "crypto";
+import type { GetSecretValueResponse } from "@aws-sdk/client-secrets-manager";
+import type { ReportDownloadJob } from "./generated";
 
 interface EventMessageBody {
   report_config_id: UUID;
+  job_id: UUID;
 }
 
-interface TimeWindow {
-  after: string | undefined;
-  before: string | undefined;
-}
-
+// TODO: it would be better to get this directly from the s3 uploader response if possible, in case it ever changes
+const FILE_EXPIRY_DURATION_HOURS = 24;
 const MOCK_APP_KEY = "appkey";
-
-const XY_POS_LOOKUP: number[][] = [
-  [0, 15],
-  [0, 15],
-];
-const MAX_POS_LOOKUP_IDX = 1;
 
 const s3ClientConfig = { endpoint: process.env.AWS_S3_ENDPOINT };
 
@@ -44,201 +32,92 @@ const __smMockRequest = String(process.env.AWS_SM_MOCK_REQUEST).toLowerCase();
 const smMockRequest =
   __smMockRequest === "true" || __smMockRequest === "1" ? true : false;
 
-export async function handler(event: SQSEvent) {
+export async function handler(event: EventMessageBody): Promise<void> {
   const s3Client = new S3Client(s3ClientConfig);
 
   let apiKey = MOCK_APP_KEY;
   if (!smMockRequest) {
-    const res = await fetch(
-      `${smBaseUrl}/secretsmanager/get?secretId=${smApiKeyArn}`,
-      {
-        headers: { [`X-Aws-Parameters-Secrets-Token`]: sessionToken },
-        method: "GET",
-      },
-    );
-    const body: GetSecretValueResponse = await res.json();
-    apiKey = body.SecretString!;
+    const req = new FetchHttpRequest({
+      BASE: smBaseUrl!,
+      VERSION: "",
+      WITH_CREDENTIALS: false,
+      CREDENTIALS: "omit",
+    });
+    const res = await req.request<GetSecretValueResponse>({
+      method: "GET",
+      url: `/secretsmanager/get?secretId=${smApiKeyArn}`,
+      headers: { [`X-Aws-Parameters-Secrets-Token`]: sessionToken },
+    });
+    apiKey = res.SecretString!;
   }
 
   const apiClient = new ApiClient({ BASE: apiBaseUrl });
 
-  for (let r of event.Records) {
-    const key = `/${r.messageId}/report.pdf`;
-    const path = `/tmp${key}`;
+  const { report_config_id: rcId, job_id: jobId } = event;
 
-    processRecord(r, apiClient, apiKey, path);
-
-    const buf = fs.createReadStream(path);
-    const uploader = new Upload({
-      client: s3Client,
-      params: { Bucket: s3WriteToBucket, Key: key, Body: buf },
-    });
-    const res = await uploader.done();
-
-    if (res.$metadata.httpStatusCode !== 200) {
-      throw new Error(`pdf upload failed; response: ${res}`);
-    }
-
-    // TODO: POST sucessful upload entry to API
-
-    // NOTE: if this fails, the pdf should be automatically deleted anyway by lifetime policy
-  }
-}
-
-async function processRecord(
-  r: SQSRecord,
-  apiClient: ApiClient,
-  apiKey: string,
-  pdfPath: string,
-) {
-  const { report_config_id: rcID }: EventMessageBody = JSON.parse(r.body);
-
-  const doc = new PDFDocument({
-    info: {
-      Title: "Midas Report",
-      Author: "MIDAS",
-      Subject: "Batch Plot Measurement Reports",
-      Keywords: "MIDAS",
-    },
-  });
-  doc.pipe(fs.createWriteStream(pdfPath));
-
-  const rp = await apiClient.reportConfig.getReportConfigsPlotConfigs(
-    rcID,
-    apiKey,
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+  const htmlContent = fs.readFileSync(
+    path.join(__dirname, "../index.html", "utf8"),
   );
 
-  // start at index 1 to leave room for title and description
-  let plotPagePosIdx = 1;
+  await page.setContent(htmlContent.toString());
+  await page.evaluate(processReport, rcId, apiClient, apiKey);
 
-  for (const pc of rp.plot_configs ?? []) {
-    if (plotPagePosIdx > MAX_POS_LOOKUP_IDX) {
-      doc.addPage();
-      plotPagePosIdx = 0;
-    }
+  const buf = await page.pdf({ format: "A4" });
+  const statusCode = await upload(s3Client, buf, rcId, jobId);
+  await updateJob(apiClient, apiKey, jobId, rcId, statusCode);
 
-    const { after, before } = parseDateRange(pc.date_range);
-
-    const layout = { width: 800, height: 600 };
-
-    let gd = await Plotly.newPlot("gd", [], layout);
-
-    const traces = pc.display?.traces ?? [];
-
-    // traces are pre-sorted
-    const tracePromises = traces.map((tr) => {
-      return async function () {
-        const mm = await apiClient.timeseries.getTimeseriesMeasurements(
-          tr.timeseries_id!,
-          after,
-          before,
-          3000,
-        );
-        const trace = createTraceData(tr, mm.items!, pc);
-
-        await Plotly.addTraces(gd, trace, tr.trace_order);
-      };
-    });
-
-    Promise.all(tracePromises);
-
-    const dataUrl = await Plotly.toImage(gd, { format: "png", ...layout });
-
-    const xyPos = XY_POS_LOOKUP[plotPagePosIdx];
-    if (xyPos === undefined) {
-      throw new Error("invalid template xy position index");
-    }
-
-    doc.image(dataUrl, ...xyPos);
-  }
+  await browser.close();
 }
 
-function parseDateRange(dateStr: string | undefined): TimeWindow {
-  if (dateStr === undefined) {
-    return { after: undefined, before: undefined };
-  }
+async function upload(
+  s3Client: S3Client,
+  buf: Buffer,
+  rcId: UUID,
+  jobId: UUID,
+): Promise<number | undefined> {
+  const key = `/${rcId}/${jobId}__iso8601_${new Date().toISOString().split("T")[0]}__report.pdf`;
 
-  let a;
-  let delta;
-  let b = Date.now();
-  let d = new Date(b);
-
-  switch (String(dateStr).toLowerCase()) {
-    case "lifetime":
-      // arbirarity min date
-      a = Date.parse("1800-01-01");
-      break;
-    case "5 years":
-      delta = b - d.setUTCFullYear(d.getUTCFullYear() - 5);
-      a = b - delta;
-      break;
-    case "1 year":
-      delta = b - d.setUTCFullYear(d.getUTCFullYear() - 1);
-      a = b - delta;
-      break;
-    default:
-      const dateParts = String(dateStr).split(" ", 1);
-      if (dateParts.length !== 2) {
-        throw new Error("could not parse custom date string");
-      }
-      a = Date.parse(dateParts[0]);
-      b = Date.parse(dateParts[1]);
-  }
-
-  let after;
-  let before;
-
-  if (a !== undefined) {
-    after = new Date(a).toISOString();
-  }
-  if (b !== undefined) {
-    before = new Date(b).toISOString();
-  }
-
-  return { after, before };
-}
-
-function createTraceData(
-  tr: PlotConfigTimeseriesTrace,
-  mm: Measurement[],
-  pc: PlotConfig,
-): Plotly.Data {
-  const filteredItems = mm.filter((m) => {
-    if (pc.show_masked && pc.show_nonvalidated) return true;
-    if (pc.show_masked && !m.validated) return false;
-    else if (pc.show_masked && m.validated) return true;
-
-    if (pc.show_nonvalidated && m.masked) return false;
-    else if (pc.show_nonvalidated && !m.masked) return true;
-
-    if (m.masked || !m.validated) return false;
-    return true;
+  const uploader = new Upload({
+    client: s3Client,
+    params: { Bucket: s3WriteToBucket, Key: key, Body: buf },
   });
+  const res = await uploader.done();
 
-  const x: Plotly.Datum[] = new Array(filteredItems.length);
-  const y: Plotly.Datum[] = new Array(filteredItems.length);
+  return res.$metadata.httpStatusCode;
+}
 
-  for (let i = 0; i < filteredItems.length; i++) {
-    x[i] = mm[i].time as Plotly.Datum;
-    y[i] = mm[i].value as Plotly.Datum;
+async function updateJob(
+  apiClient: ApiClient,
+  apiKey: string,
+  jobId: string,
+  rcId: string,
+  statusCode: number | undefined,
+): Promise<void> {
+  if (statusCode !== 201) {
+    const failedJob: ReportDownloadJob = {
+      status: "FAIL",
+      progress: 0,
+    };
+    console.error(
+      `error: pdf upload failed; status code: ${statusCode}; job_id: ${jobId}; report_config_id: ${rcId};`,
+    );
+    apiClient.reportConfig
+      .putProjectsReportConfigsJobs(jobId, failedJob, apiKey)
+      .then(console.log, console.error);
   }
 
-  return {
-    x: x,
-    y: y,
-    mode: `lines${tr.show_markers ? "+markers" : ""}`,
-    line: {
-      dash: tr.line_style as Dash,
-      color: tr.color,
-      width: tr.width,
-    },
-    marker: {
-      size: Number(tr.width) ? Number(tr.width) * 2 + 3 : 5,
-      color: tr.color,
-    },
-    name: tr.name,
-    type: tr.trace_type as PlotType,
-    yaxis: tr.y_axis,
-    showlegend: true,
+  const j: ReportDownloadJob = {
+    status: "SUCCESS",
+    progress: 100,
+    file_expiry: new Date(
+      new Date().getHours() + FILE_EXPIRY_DURATION_HOURS,
+    ).toISOString(),
   };
+
+  // NOTE: if this fails, the pdf should be automatically deleted anyway by lifetime policy
+  await apiClient.reportConfig
+    .putProjectsReportConfigsJobs(jobId, j, apiKey)
+    .then(console.log, console.error);
 }

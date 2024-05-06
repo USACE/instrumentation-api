@@ -188,26 +188,25 @@ export class ReportConfigService {
         });
     }
     /**
-     * @param projectId project uuid
-     * @param reportConfigId report config uuid
      * @param jobId download job uuid
      * @param reportDownloadJob report download job payload
+     * @param key api key
      * @returns any OK
      * @throws ApiError
      */
     public putProjectsReportConfigsJobs(
-        projectId: string,
-        reportConfigId: string,
         jobId: string,
         reportDownloadJob: ReportDownloadJob,
+        key: string,
     ): CancelablePromise<any> {
         return this.httpRequest.request({
             method: 'PUT',
             url: '/projects/{project_id}/report_configs/{report_config_id}/jobs/{job_id}',
             path: {
-                'project_id': projectId,
-                'report_config_id': reportConfigId,
                 'job_id': jobId,
+            },
+            query: {
+                'key': key,
             },
             body: reportDownloadJob,
             errors: {

@@ -7894,22 +7894,6 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "format": "uuid",
-                        "description": "project uuid",
-                        "name": "project_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "format": "uuid",
-                        "description": "report config uuid",
-                        "name": "report_config_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "format": "uuid",
                         "description": "download job uuid",
                         "name": "job_id",
                         "in": "path",
@@ -7923,6 +7907,13 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/ReportDownloadJob"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {

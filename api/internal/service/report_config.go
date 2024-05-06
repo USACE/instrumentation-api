@@ -117,7 +117,7 @@ func (s reportConfigService) CreateReportDownloadJob(ctx context.Context, rcID, 
 		return model.ReportDownloadJob{}, err
 	}
 
-	msg := model.ReportConfigJobMessage{ReportConfigID: rcID}
+	msg := model.ReportConfigJobMessage{ReportConfigID: rcID, JobID: j.ID}
 	b, err := json.Marshal(msg)
 	if err != nil {
 		return model.ReportDownloadJob{}, err

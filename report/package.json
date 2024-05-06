@@ -2,31 +2,30 @@
   "name": "report",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "type": "module",
   "scripts": {
-    "build": "esbuild index.ts --bundle --minify --sourcemap --platform=node --target=es2020 --outfile=dist/index.js",
-    "generate": "openapi --input ../api/docs/swagger.json --client node --name ApiClient --output ./generated"
+    "build": "rm -rf ./dist && node scripts/build.js",
+    "generate": "openapi --input ../api/docs/swagger.json --client fetch --name ApiClient --output ./generated",
+    "start": "node dist/index.cjs"
   },
   "author": "Dennis Smith",
   "license": "MIT",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.554.0",
-    "@aws-sdk/client-secrets-manager": "^3.554.0",
     "@aws-sdk/lib-storage": "^3.556.0",
-    "@types/plotly.js-dist-min": "^2.3.4",
-    "pdfkit": "^0.15.0",
-    "plotly.js-dist-min": "^2.31.1"
+    "plotly.js-dist-min": "^2.31.1",
+    "puppeteer-core": "^22.8.0"
   },
   "devDependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.554.0",
     "@types/aws-lambda": "^8.10.137",
     "@types/node": "^20.12.7",
-    "@types/node-fetch": "^2.6.11",
-    "@types/pdfkit": "^0.13.4",
+    "@types/plotly.js-dist-min": "^2.3.4",
     "@types/uuid": "^9.0.8",
     "abort-controller": "^3.0.0",
     "esbuild": "^0.20.2",
     "form-data": "^4.0.0",
-    "node-fetch": "^2.7.0",
-    "openapi-typescript-codegen": "^0.29.0"
+    "openapi-typescript-codegen": "^0.29.0",
+    "typescript": "^5.4.5"
   }
 }

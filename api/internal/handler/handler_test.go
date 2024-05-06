@@ -45,6 +45,7 @@ type HTTPTest struct {
 	ExpectedStatus int
 	ExpectedSchema *gojsonschema.Schema
 	authHeader     string
+	onSuccess      *func(b []byte)
 }
 
 // singleton api server since database is used in integration tests
@@ -84,10 +85,10 @@ func RunHTTPTest(v HTTPTest) (*http.Response, error) {
 func RunAll(t *testing.T, tests []HTTPTest) {
 	for _, v := range tests {
 		t.Run(v.Name, func(t *testing.T) {
-			run, err := RunHTTPTest(v)
-			assert.Nil(t, err, "error calling RunHTTPTest(v)")
-			if err != nil {
-				t.Log(err.Error())
+			run, httpErr := RunHTTPTest(v)
+			assert.Nil(t, httpErr, "error calling RunHTTPTest(v)")
+			if httpErr != nil {
+				t.Log(httpErr.Error())
 			}
 
 			assert.Equal(t, v.ExpectedStatus, run.StatusCode)
@@ -140,6 +141,11 @@ func RunAll(t *testing.T, tests []HTTPTest) {
 					}
 					t.Log(errs)
 				}
+			}
+
+			if httpErr == nil && v.onSuccess != nil && run != nil && run.Body != nil {
+				callback := *v.onSuccess
+				callback(body)
 			}
 		})
 	}

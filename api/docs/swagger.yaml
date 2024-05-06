@@ -6411,18 +6411,6 @@ paths:
       - report-config
     put:
       parameters:
-      - description: project uuid
-        format: uuid
-        in: path
-        name: project_id
-        required: true
-        type: string
-      - description: report config uuid
-        format: uuid
-        in: path
-        name: report_config_id
-        required: true
-        type: string
       - description: download job uuid
         format: uuid
         in: path
@@ -6435,6 +6423,11 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/ReportDownloadJob'
+      - description: api key
+        in: query
+        name: key
+        required: true
+        type: string
       produces:
       - application/json
       responses:

@@ -64,6 +64,7 @@ type ReportConfigWithPlotConfigs struct {
 
 type ReportConfigJobMessage struct {
 	ReportConfigID uuid.UUID `json:"report_config_id"`
+	JobID          uuid.UUID `json:"job_id"`
 }
 
 const createReportConfig = `

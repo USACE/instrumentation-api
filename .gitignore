@@ -33,3 +33,4 @@ __debug*
 test.log
 
 **/node_modules
+**/dist

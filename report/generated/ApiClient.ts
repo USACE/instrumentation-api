@@ -4,7 +4,7 @@
 /* eslint-disable */
 import type { BaseHttpRequest } from './core/BaseHttpRequest';
 import type { OpenAPIConfig } from './core/OpenAPI';
-import { NodeHttpRequest } from './core/NodeHttpRequest';
+import { FetchHttpRequest } from './core/FetchHttpRequest';
 import { AlertService } from './services/AlertService';
 import { AlertConfigService } from './services/AlertConfigService';
 import { AlertSubscriptionService } from './services/AlertSubscriptionService';
@@ -78,7 +78,7 @@ export class ApiClient {
     public readonly timeseries: TimeseriesService;
     public readonly unit: UnitService;
     public readonly request: BaseHttpRequest;
-    constructor(config?: Partial<OpenAPIConfig>, HttpRequest: HttpRequestConstructor = NodeHttpRequest) {
+    constructor(config?: Partial<OpenAPIConfig>, HttpRequest: HttpRequestConstructor = FetchHttpRequest) {
         this.request = new HttpRequest({
             BASE: config?.BASE ?? '',
             VERSION: config?.VERSION ?? '2.0',

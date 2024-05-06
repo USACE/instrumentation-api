@@ -63,6 +63,8 @@ services:
         condition: service_started
       elasticmq:
         condition: service_started
+      report:
+        condition: service_started
 
   telemetry:
     build:
@@ -107,6 +109,19 @@ services:
       - path: ./env_files/dcs-loader.env
         required: true
     restart: unless-stopped
+    depends_on:
+      elasticmq:
+        condition: service_started
+
+  report:
+    build:
+      args:
+        - NODE_VERSION=${NODE_VERSION:-20}
+      context: report
+      network: host
+    env_file:
+      - path: ./env_files/report.env
+        required: true
     depends_on:
       elasticmq:
         condition: service_started

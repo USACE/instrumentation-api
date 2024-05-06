@@ -1,10 +1,13 @@
 package handler_test
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"testing"
 
+	"github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/stretchr/testify/assert"
 	"github.com/xeipuuv/gojsonschema"
 )
@@ -137,6 +140,25 @@ const updateReportDownloadJobBody = `{
 }`
 
 func TestReportConfigs(t *testing.T) {
+	createReportDownloadJobCallback := func(b []byte) {
+		var j model.ReportDownloadJob
+		err := json.Unmarshal(b, &j)
+		assert.Nil(t, err)
+		if err != nil {
+			return
+		}
+		eventMessage := model.ReportConfigJobMessage{ReportConfigID: j.ReportConfigID, JobID: j.ID}
+		em, err := json.Marshal(eventMessage)
+		assert.Nil(t, err)
+		if err != nil {
+			return
+		}
+		msg := bytes.NewReader(em)
+		res, err := http.Post("http://report:8080/2015-03-31/functions/function/invocations", "application/json", msg)
+		assert.Nil(t, err)
+		assert.Equal(t, 201, res.StatusCode)
+	}
+
 	objSchema, err := gojsonschema.NewSchema(reportConfigObjectLoader)
 	assert.Nil(t, err)
 	arrSchema, err := gojsonschema.NewSchema(reportConfigArrayLoader)
@@ -176,10 +198,11 @@ func TestReportConfigs(t *testing.T) {
 		},
 		{
 			Name:           "UpdateReportDownloadJob",
-			URL:            fmt.Sprintf("/projects/%s/report_configs/%s/jobs/%s?key=%s", testProjectID, testReportConfigID, testUpdateJobID, mockAppKey),
+			URL:            fmt.Sprintf("/report_jobs/%s?key=%s", testUpdateJobID, mockAppKey),
 			Body:           updateReportDownloadJobBody,
 			Method:         http.MethodPut,
 			ExpectedStatus: http.StatusOK,
+			onSuccess:      &createReportDownloadJobCallback,
 		},
 		{
 			Name:           "UpdateReportConfig",

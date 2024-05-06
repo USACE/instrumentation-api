@@ -257,7 +257,7 @@ func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 	r.app.GET("/report_configs/:report_config_id/plot_configs", h.GetReportConfigWithPlotConfigs)
 	r.private.GET("/projects/:project_id/report_configs/:report_config_id/jobs/:job_id", h.GetReportDownloadJob)
 	r.private.POST("/projects/:project_id/report_configs/:report_config_id/jobs", h.CreateReportDownloadJob)
-	r.app.PUT("/projects/:project_id/report_configs/:report_config_id/jobs/:job_id", h.UpdateReportDownloadJob)
+	r.app.PUT("/report_jobs/:job_id", h.UpdateReportDownloadJob)
 
 	// Search
 	r.public.GET("/search/:entity", h.Search)

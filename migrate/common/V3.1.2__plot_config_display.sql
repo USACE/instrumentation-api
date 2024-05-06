@@ -1,7 +1,7 @@
 ALTER TABLE plot_configuration_settings
 ADD COLUMN secondary_axis_title text;
 
-CREATE TYPE line_style AS ENUM ("solid", "dot", "dash", "longdash", "dashdot", "longdashdot");
+CREATE TYPE line_style AS ENUM ('solid', 'dot', 'dash', 'longdash', 'dashdot', 'longdashdot');
 CREATE TYPE y_axis AS ENUM ('y1', 'y2');
 CREATE TYPE trace_type AS ENUM ('bar', 'scattergl');
 
