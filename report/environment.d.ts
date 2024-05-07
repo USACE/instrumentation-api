@@ -8,6 +8,7 @@ declare global {
       AWS_S3_WRITE_TO_BUCKET: string;
       AWS_SESSION_TOKEN: string;
       AWS_SM_MOCK_REQUEST: string;
+      PUPPETEER_EXECUTABLE_PATH: string;
     }
   }
 }

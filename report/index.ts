@@ -1,6 +1,5 @@
 import fs from "fs";
-import path from "path";
-import puppeteer from "puppeteer-core";
+import puppeteer from "puppeteer";
 import { S3Client } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 import { ApiClient } from "./generated";
@@ -27,6 +26,7 @@ const smBaseUrl = process.env.AWS_SM_BASE_URL;
 const smApiKeyArn = process.env.AWS_SM_API_KEY_ARN;
 const s3WriteToBucket = process.env.AWS_S3_WRITE_TO_BUCKET;
 const sessionToken = process.env.AWS_SESSION_TOKEN!;
+const puppeteerExecutablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
 
 const __smMockRequest = String(process.env.AWS_SM_MOCK_REQUEST).toLowerCase();
 const smMockRequest =
@@ -55,11 +55,15 @@ export async function handler(event: EventMessageBody): Promise<void> {
 
   const { report_config_id: rcId, job_id: jobId } = event;
 
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({
+    executablePath: puppeteerExecutablePath,
+    args: [
+      "--headless",
+      "--disable-dev-shm-usage",
+    ]
+  });
   const page = await browser.newPage();
-  const htmlContent = fs.readFileSync(
-    path.join(__dirname, "../index.html", "utf8"),
-  );
+  const htmlContent = fs.readFileSync("/usr/src/app/index.html");
 
   await page.setContent(htmlContent.toString());
   await page.evaluate(processReport, rcId, apiClient, apiKey);
@@ -121,3 +125,6 @@ async function updateJob(
     .putProjectsReportConfigsJobs(jobId, j, apiKey)
     .then(console.log, console.error);
 }
+
+// @ts-ignore
+globalThis.handler = handler

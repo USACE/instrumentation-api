@@ -116,7 +116,8 @@ services:
   report:
     build:
       args:
-        - NODE_VERSION=${NODE_VERSION:-20}
+        - NODE_VERSION=${NODE_VERSION:-22.1}
+        - ALPINE_VERSION=${ALPINE_VERSION:-3.19}
       context: report
       network: host
     env_file:
@@ -125,6 +126,8 @@ services:
     depends_on:
       elasticmq:
         condition: service_started
+    security_opt:
+      - 'seccomp:./report/chrome.json'
 
   elasticmq:
     image: softwaremill/elasticmq
