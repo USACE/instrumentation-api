@@ -46,7 +46,7 @@ func (h *ApiHandler) ListProjectReportConfigs(c echo.Context) error {
 //	@Param report_config body model.ReportConfig true "report config payload"
 //	@Param key query string false "api key"
 //	@Accept application/json
-//	@Success 200 {object} model.ReportConfig
+//	@Success 201 {object} model.ReportConfig
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError

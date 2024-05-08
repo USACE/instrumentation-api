@@ -1,12 +1,32 @@
 import { build } from 'esbuild'
 
+// set to false for testing
+const minify = false;
+
+// need to pre-bundle what gets run in puppeteer.evaluate(...)
+// because it gets run in a browser context
+process.stdout.write("building report-client... ");
 await build({
-  entryPoints: ['index.ts'],
+  minify,
+  entryPoints: ['report-client/report.mts'],
   bundle: true,
   sourcemap: true,
-  minify: false,
+  platform: 'browser',
+  format: 'esm',
+  outfile: 'dist/report-client/report.mjs',
+  inject: ['report-client/global-shim.js'],
+}).then(() => console.log('done'), () => console.log('failed'));
+
+// then bundle the puppeteer code as it gets run in Node context
+process.stdout.write("building puppeteer nodejs server... ");
+await build({
+  minify,
+  entryPoints: ['main.ts'],
+  bundle: true,
+  sourcemap: true,
   platform: 'node',
-  format: 'cjs',
-  outfile: 'dist/index.cjs',
-  inject: ['shim.js'],
-});
+  format: 'esm',
+  outfile: 'dist/main.mjs',
+  external: ['./report-client/report.mjs'],
+  inject: ['cjs-shim.js'],
+}).then(() => console.log('done'), () => console.log('failed'));;

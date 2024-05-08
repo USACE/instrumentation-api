@@ -6,16 +6,15 @@
   "scripts": {
     "build": "rm -rf ./dist && node scripts/build.mjs",
     "generate": "openapi --input ../api/docs/swagger.json --client fetch --name ApiClient --output ./generated",
-    "start": "node dist/index.cjs"
+    "start": "node dist/index.mjs"
   },
   "author": "Dennis Smith",
   "license": "MIT",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.554.0",
     "@aws-sdk/lib-storage": "^3.556.0",
-    "@sparticuz/chromium": "123.0.1",
-    "plotly.js-dist-min": "^2.31.1",
-    "puppeteer": "^22.8.0"
+    "plotly.js-dist-min": "2.31.1",
+    "puppeteer-core": "~22.8.0"
   },
   "devDependencies": {
     "@aws-sdk/client-secrets-manager": "^3.554.0",

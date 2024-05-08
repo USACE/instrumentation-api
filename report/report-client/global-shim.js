@@ -4,6 +4,3 @@ global.globalThis = global;
 global.frames = global;
 global.self = global;
 global.window = global;
-global.navigator = {
-  userAgent: 'puppeteer',
-}

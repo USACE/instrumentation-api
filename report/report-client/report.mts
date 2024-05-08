@@ -1,10 +1,10 @@
-import type { Dash, PlotType } from "plotly.js-dist-min";
+import type { Dash, PlotType, Data, Datum } from "plotly.js-dist-min";
 import type {
   ApiClient,
   Measurement,
   PlotConfig,
   PlotConfigTimeseriesTrace,
-} from "./generated";
+} from "../generated";
 import type { UUID } from "crypto";
 
 interface TimeWindow {
@@ -16,9 +16,9 @@ export async function processReport(
   reportConfigId: UUID,
   apiClient: ApiClient,
   apiKey: string,
+  onAddNewPlot: CallableFunction,
+  onAddTraces: CallableFunction,
 ): Promise<void> {
-  const Plotly = await import("plotly.js-dist-min");
-
   const rp = await apiClient.reportConfig.getReportConfigsPlotConfigs(
     reportConfigId,
     apiKey,
@@ -36,7 +36,7 @@ export async function processReport(
     const plotDiv = document.createElement("div");
     plotDiv.setAttribute("id", `plot-${idx}`);
 
-    let gd = await Plotly.newPlot(plotDiv, [], layout);
+    let gd = await onAddNewPlot(plotDiv, [], layout);
 
     const traces = pc.display?.traces ?? [];
 
@@ -51,7 +51,7 @@ export async function processReport(
         );
         const trace = createTraceData(tr, mm.items!, pc);
 
-        await Plotly.addTraces(gd, trace, tr.trace_order ?? idx);
+        await onAddTraces(gd, trace, tr.trace_order ?? idx);
       };
     });
 
@@ -110,7 +110,7 @@ function createTraceData(
   tr: PlotConfigTimeseriesTrace,
   mm: Measurement[],
   pc: PlotConfig,
-): Plotly.Data {
+): Data {
   const filteredItems = mm.filter((m) => {
     if (pc.show_masked && pc.show_nonvalidated) return true;
     if (pc.show_masked && !m.validated) return false;
@@ -123,12 +123,12 @@ function createTraceData(
     return true;
   });
 
-  const x: Plotly.Datum[] = new Array(filteredItems.length);
-  const y: Plotly.Datum[] = new Array(filteredItems.length);
+  const x: Datum[] = new Array(filteredItems.length);
+  const y: Datum[] = new Array(filteredItems.length);
 
   for (let i = 0; i < filteredItems.length; i++) {
-    x[i] = mm[i]?.time as Plotly.Datum;
-    y[i] = mm[i]?.value as Plotly.Datum;
+    x[i] = mm[i]?.time as Datum;
+    y[i] = mm[i]?.value as Datum;
   }
 
   return {

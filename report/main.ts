@@ -1,10 +1,11 @@
-import fs from "fs";
-import puppeteer from "puppeteer";
+import fs from "node:fs";
+import puppeteer from "puppeteer-core";
 import { S3Client } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
+
 import { ApiClient } from "./generated";
 import { FetchHttpRequest } from "./generated/core/FetchHttpRequest";
-import { processReport } from "./render";
+import { processReport } from "./report-client/report.mjs";
 
 import type { UUID } from "crypto";
 import type { GetSecretValueResponse } from "@aws-sdk/client-secrets-manager";
@@ -15,22 +16,21 @@ interface EventMessageBody {
   job_id: UUID;
 }
 
-// TODO: it would be better to get this directly from the s3 uploader response if possible, in case it ever changes
+// TODO: it would be better to get expiry directly from the
+// s3 uploader response if possible, in case it ever changes
 const FILE_EXPIRY_DURATION_HOURS = 24;
 const MOCK_APP_KEY = "appkey";
 
-const s3ClientConfig = { endpoint: process.env.AWS_S3_ENDPOINT };
+const s3ClientConfig = { endpoint: process.env.AWS_S3_ENDPOINT, region: process.env.AWS_S3_REGION };
 
 const apiBaseUrl = process.env.API_BASE_URL;
+const s3WriteToBucket = process.env.AWS_S3_WRITE_TO_BUCKET;
+const sessionToken = process.env.AWS_SESSION_TOKEN;
 const smBaseUrl = process.env.AWS_SM_BASE_URL;
 const smApiKeyArn = process.env.AWS_SM_API_KEY_ARN;
-const s3WriteToBucket = process.env.AWS_S3_WRITE_TO_BUCKET;
-const sessionToken = process.env.AWS_SESSION_TOKEN!;
 const puppeteerExecutablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
-
-const __smMockRequest = String(process.env.AWS_SM_MOCK_REQUEST).toLowerCase();
-const smMockRequest =
-  __smMockRequest === "true" || __smMockRequest === "1" ? true : false;
+const smMockRequest = process.env.AWS_SM_MOCK_REQUEST;
+const s3SkipUpload = process.env.AWS_S3_SKIP_UPLOAD;
 
 export async function handler(event: EventMessageBody): Promise<void> {
   const s3Client = new S3Client(s3ClientConfig);
@@ -66,10 +66,19 @@ export async function handler(event: EventMessageBody): Promise<void> {
   const htmlContent = fs.readFileSync("/usr/src/app/index.html");
 
   await page.setContent(htmlContent.toString());
-  await page.evaluate(processReport, rcId, apiClient, apiKey);
+  await page.addScriptTag({ content: `${processReport}` })
+
+  await page.evaluateOnNewDocument(async (id, client, key) => {
+    const { newPlot, addTraces } = await import("plotly.js-dist-min");
+    await page.addScriptTag({ content: `${newPlot} ${addTraces}` })
+    processReport(id, client, key, newPlot, addTraces);
+  }, rcId, apiClient, apiKey);
 
   const buf = await page.pdf({ format: "A4" });
-  const statusCode = await upload(s3Client, buf, rcId, jobId);
+  let statusCode: number | undefined = 201;
+  if (!s3SkipUpload) {
+    statusCode = await upload(s3Client, buf, rcId, jobId);
+  }
   await updateJob(apiClient, apiKey, jobId, rcId, statusCode);
 
   await browser.close();
@@ -125,6 +134,3 @@ async function updateJob(
     .putProjectsReportConfigsJobs(jobId, j, apiKey)
     .then(console.log, console.error);
 }
-
-// @ts-ignore
-globalThis.handler = handler

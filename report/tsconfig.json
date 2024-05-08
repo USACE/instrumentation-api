@@ -24,8 +24,14 @@
       "dom.iterable"
     ],
     /* Using bundler */
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "noEmit": true
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "noEmit": true,
+    "exclude": [
+      ".git",
+      "node_modules",
+      "**/dist/*",
+      "**/node_modules/*"
+    ]
   }
 }
