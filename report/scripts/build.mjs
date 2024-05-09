@@ -28,5 +28,8 @@ await build({
   format: 'esm',
   outfile: 'dist/main.mjs',
   external: ['./report-client/report.mjs'],
+  supported: {
+    'dynamic-import': true,
+  },
   inject: ['cjs-shim.js'],
 }).then(() => console.log('done'), () => console.log('failed'));;

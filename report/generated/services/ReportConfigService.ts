@@ -41,7 +41,7 @@ export class ReportConfigService {
      * @param projectId project uuid
      * @param reportConfig report config payload
      * @param key api key
-     * @returns ReportConfig OK
+     * @returns ReportConfig Created
      * @throws ApiError
      */
     public postProjectsReportConfigs(

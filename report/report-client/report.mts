@@ -16,9 +16,10 @@ export async function processReport(
   reportConfigId: UUID,
   apiClient: ApiClient,
   apiKey: string,
-  onAddNewPlot: CallableFunction,
-  onAddTraces: CallableFunction,
 ): Promise<void> {
+  
+  const { newPlot, addTraces } = await import("plotly.js-dist-min");
+
   const rp = await apiClient.reportConfig.getReportConfigsPlotConfigs(
     reportConfigId,
     apiKey,
@@ -36,7 +37,7 @@ export async function processReport(
     const plotDiv = document.createElement("div");
     plotDiv.setAttribute("id", `plot-${idx}`);
 
-    let gd = await onAddNewPlot(plotDiv, [], layout);
+    let gd = await newPlot(plotDiv, [], layout);
 
     const traces = pc.display?.traces ?? [];
 
@@ -51,7 +52,7 @@ export async function processReport(
         );
         const trace = createTraceData(tr, mm.items!, pc);
 
-        await onAddTraces(gd, trace, tr.trace_order ?? idx);
+        await addTraces(gd, trace, tr.trace_order ?? idx);
       };
     });
 

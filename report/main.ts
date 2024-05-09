@@ -66,12 +66,11 @@ export async function handler(event: EventMessageBody): Promise<void> {
   const htmlContent = fs.readFileSync("/usr/src/app/index.html");
 
   await page.setContent(htmlContent.toString());
+  await page.addScriptTag({ path: "./report-client/report.mjs" })
   await page.addScriptTag({ content: `${processReport}` })
-
-  await page.evaluateOnNewDocument(async (id, client, key) => {
-    const { newPlot, addTraces } = await import("plotly.js-dist-min");
-    await page.addScriptTag({ content: `${newPlot} ${addTraces}` })
-    processReport(id, client, key, newPlot, addTraces);
+  
+  await page.evaluate(async (id, client, key) => {
+    processReport(id, client, key);
   }, rcId, apiClient, apiKey);
 
   const buf = await page.pdf({ format: "A4" });
@@ -116,9 +115,8 @@ async function updateJob(
     console.error(
       `error: pdf upload failed; status code: ${statusCode}; job_id: ${jobId}; report_config_id: ${rcId};`,
     );
-    apiClient.reportConfig
-      .putProjectsReportConfigsJobs(jobId, failedJob, apiKey)
-      .then(console.log, console.error);
+    await apiClient.reportConfig
+      .putProjectsReportConfigsJobs(jobId, failedJob, apiKey);
   }
 
   const j: ReportDownloadJob = {
@@ -131,6 +129,5 @@ async function updateJob(
 
   // NOTE: if this fails, the pdf should be automatically deleted anyway by lifetime policy
   await apiClient.reportConfig
-    .putProjectsReportConfigsJobs(jobId, j, apiKey)
-    .then(console.log, console.error);
+    .putProjectsReportConfigsJobs(jobId, j, apiKey);
 }

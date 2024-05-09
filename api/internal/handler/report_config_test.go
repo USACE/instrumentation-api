@@ -145,18 +145,21 @@ func TestReportConfigs(t *testing.T) {
 		err := json.Unmarshal(b, &j)
 		assert.Nil(t, err)
 		if err != nil {
-			return
+			t.Errorf("createReportConfigJobCallback json.Unmarshal failed: %s", err.Error())
 		}
 		eventMessage := model.ReportConfigJobMessage{ReportConfigID: j.ReportConfigID, JobID: j.ID}
 		em, err := json.Marshal(eventMessage)
 		assert.Nil(t, err)
 		if err != nil {
-			return
+			t.Errorf("createReportConfigJobCallback json.Marshal failed: %s", err.Error())
 		}
 		msg := bytes.NewReader(em)
 		res, err := http.Post("http://report:8080/2015-03-31/functions/function/invocations", "application/json", msg)
 		assert.Nil(t, err)
-		assert.Equal(t, 201, res.StatusCode)
+		if err != nil {
+			t.Errorf("createReportConfigJobCallback http.Post failed: %s", err.Error())
+		}
+		assert.Equal(t, 200, res.StatusCode)
 	}
 
 	objSchema, err := gojsonschema.NewSchema(reportConfigObjectLoader)
