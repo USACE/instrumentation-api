@@ -28,6 +28,7 @@ type ApiHandler struct {
 	HeartbeatService               service.HeartbeatService
 	HomeService                    service.HomeService
 	InstrumentService              service.InstrumentService
+	InstrumentAssignService        service.InstrumentAssignService
 	InstrumentConstantService      service.InstrumentConstantService
 	InstrumentGroupService         service.InstrumentGroupService
 	InstrumentNoteService          service.InstrumentNoteService
@@ -74,6 +75,7 @@ func NewApi(cfg *config.ApiConfig) *ApiHandler {
 		HeartbeatService:               service.NewHeartbeatService(db, q),
 		HomeService:                    service.NewHomeService(db, q),
 		InstrumentService:              service.NewInstrumentService(db, q),
+		InstrumentAssignService:        service.NewInstrumentAssignService(db, q),
 		InstrumentConstantService:      service.NewInstrumentConstantService(db, q),
 		InstrumentGroupService:         service.NewInstrumentGroupService(db, q),
 		InstrumentNoteService:          service.NewInstrumentNoteService(db, q),

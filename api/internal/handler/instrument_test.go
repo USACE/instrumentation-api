@@ -309,6 +309,13 @@ func TestInstruments(t *testing.T) {
 			ExpectedSchema: arrSchema,
 		},
 		{
+			Name:           "ValidateCreateInstrument",
+			URL:            fmt.Sprintf("/projects/%s/instruments?dry_run=true", testProjectID),
+			Method:         http.MethodPost,
+			Body:           validateCreateInstrumentBulkBody,
+			ExpectedStatus: http.StatusOK,
+		},
+		{
 			Name:           "CreateInstrumentBulk",
 			URL:            fmt.Sprintf("/projects/%s/instruments", testProjectID),
 			Method:         http.MethodPost,
@@ -316,11 +323,11 @@ func TestInstruments(t *testing.T) {
 			ExpectedStatus: http.StatusCreated,
 		},
 		{
-			Name:           "ValidateCreateInstrument",
+			Name:           "ValidateCreateInstrumentFail",
 			URL:            fmt.Sprintf("/projects/%s/instruments?dry_run=true", testProjectID),
 			Method:         http.MethodPost,
 			Body:           validateCreateInstrumentBulkBody,
-			ExpectedStatus: http.StatusOK,
+			ExpectedStatus: http.StatusBadRequest,
 		},
 		{
 			Name:           "AssignInstrumentToProject",
