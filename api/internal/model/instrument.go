@@ -109,6 +109,11 @@ func (g *Geometry) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+type InstrumentIDName struct {
+	ID   uuid.UUID `json:"id"`
+	Name string    `json:"name"`
+}
+
 const listInstrumentsSQL = `
 	SELECT 
 		id,
@@ -292,4 +297,21 @@ const deleteFlagInstrument = `
 func (q *Queries) DeleteFlagInstrument(ctx context.Context, projectID, instrumentID uuid.UUID) error {
 	_, err := q.db.ExecContext(ctx, deleteFlagInstrument, projectID, instrumentID)
 	return err
+}
+
+const listInstrumentIDNamesByIDs = `
+	SELECT id, name
+	FROM instrument
+	WHERE id IN (?)
+	AND NOT deleted
+`
+
+func (q *Queries) ListInstrumentIDNamesByIDs(ctx context.Context, instrumentIDs []uuid.UUID) ([]InstrumentIDName, error) {
+	query, args, err := sqlIn(listInstrumentIDNamesByIDs, instrumentIDs)
+	if err != nil {
+		return nil, err
+	}
+	ii := make([]InstrumentIDName, 0)
+	err = q.db.SelectContext(ctx, &ii, q.db.Rebind(query), args...)
+	return ii, err
 }

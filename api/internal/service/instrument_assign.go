@@ -26,26 +26,30 @@ func NewInstrumentAssignService(db *model.Database, q *model.Queries) *instrumen
 	return &instrumentAssignService{db, q}
 }
 
-func validateAssignInstrumentsToProject(ctx context.Context, q *model.Queries, profileID, projectID uuid.UUID, instruments []model.Instrument) (model.InstrumentsValidation, error) {
-	iIDs := make([]uuid.UUID, len(instruments))
-	iNames := make([]string, len(instruments))
-	for idx := range instruments {
-		iIDs[idx] = instruments[idx].ID
-		iNames[idx] = instruments[idx].Name
-	}
-	v, err := q.ValidateInstrumentsAssignerAuthorized(ctx, profileID, iIDs)
-	if err != nil || !v.IsValid {
-		return v, err
-	}
-	return q.ValidateInstrumentNamesProjectUnique(ctx, projectID, iNames)
-}
-
 func validateAssignProjectsToInstrument(ctx context.Context, q *model.Queries, profileID uuid.UUID, instrument model.Instrument, projectIDs []uuid.UUID) (model.InstrumentsValidation, error) {
 	v, err := q.ValidateProjectsAssignerAuthorized(ctx, profileID, instrument.ID, projectIDs)
 	if err != nil || !v.IsValid {
 		return v, err
 	}
 	return q.ValidateProjectsInstrumentNameUnique(ctx, instrument.Name, projectIDs)
+}
+
+func validateAssignInstrumentsToProject(ctx context.Context, q *model.Queries, profileID, projectID uuid.UUID, instrumentIDs []uuid.UUID) (model.InstrumentsValidation, error) {
+	iIDNames, err := q.ListInstrumentIDNamesByIDs(ctx, instrumentIDs)
+	if err != nil {
+		return model.InstrumentsValidation{}, err
+	}
+	iIDs := make([]uuid.UUID, len(iIDNames))
+	iNames := make([]string, len(iIDNames))
+	for idx := range iIDNames {
+		iIDs[idx] = iIDNames[idx].ID
+		iNames[idx] = iIDNames[idx].Name
+	}
+	v, err := q.ValidateInstrumentsAssignerAuthorized(ctx, profileID, iIDs)
+	if err != nil || !v.IsValid {
+		return v, err
+	}
+	return q.ValidateInstrumentNamesProjectUnique(ctx, projectID, iNames)
 }
 
 func assignProjectsToInstrument(ctx context.Context, q *model.Queries, profileID, instrumentID uuid.UUID, projectIDs []uuid.UUID) (model.InstrumentsValidation, error) {
@@ -79,7 +83,7 @@ func unassignProjectsFromInstrument(ctx context.Context, q *model.Queries, profi
 }
 
 func assignInstrumentsToProject(ctx context.Context, q *model.Queries, profileID, projectID uuid.UUID, instrumentIDs []uuid.UUID) (model.InstrumentsValidation, error) {
-	v, err := q.ValidateInstrumentsAssignerAuthorized(ctx, profileID, instrumentIDs)
+	v, err := validateAssignInstrumentsToProject(ctx, q, profileID, projectID, instrumentIDs)
 	if err != nil || !v.IsValid {
 		return v, err
 	}
