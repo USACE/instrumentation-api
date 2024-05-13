@@ -143,7 +143,7 @@ func checkEvaluations(ctx context.Context, q *model.Queries, subMap model.Submit
 	}
 
 	// handleChecks should not rollback txn but should bubble up errors after txn committed
-	alertCheckErr := handleChecks[*model.EvaluationCheck, *model.AlertConfigEvaluationCheck](ctx, q, accs, cfg)
+	alertCheckErr := handleChecks(ctx, q, accs, cfg)
 	if alertCheckErr != nil {
 		return alertCheckErr
 	}
@@ -181,7 +181,7 @@ func checkMeasurements(ctx context.Context, q *model.Queries, subMap model.Submi
 		accs = append(accs, &acc)
 	}
 
-	alertCheckErr := handleChecks[*model.MeasurementCheck, *model.AlertConfigMeasurementCheck](ctx, q, accs, cfg)
+	alertCheckErr := handleChecks(ctx, q, accs, cfg)
 	if alertCheckErr != nil {
 		return alertCheckErr
 	}
@@ -350,7 +350,7 @@ func handleChecks[T alertChecker, PT alertConfigChecker[T]](ctx context.Context,
 	}
 	wg.Wait()
 
-	if err := updateAlertConfigChecks[T, PT](ctx, q, aaccs); err != nil {
+	if err := updateAlertConfigChecks(ctx, q, aaccs); err != nil {
 		errs = append(errs, err)
 		return errors.Join(errs...)
 	}

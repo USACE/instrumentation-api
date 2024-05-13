@@ -13,7 +13,7 @@ definitions:
       type:
         type: string
     type: object
-  Alert:
+  github_com_USACE_instrumentation-api_api_internal_model.Alert:
     properties:
       alert_config_id:
         type: string
@@ -25,7 +25,7 @@ definitions:
         type: string
       instruments:
         items:
-          $ref: '#/definitions/AlertConfigInstrument'
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfigInstrument'
         type: array
       name:
         type: string
@@ -36,11 +36,11 @@ definitions:
       read:
         type: boolean
     type: object
-  AlertConfig:
+  github_com_USACE_instrumentation-api_api_internal_model.AlertConfig:
     properties:
       alert_email_subscriptions:
         items:
-          $ref: '#/definitions/EmailAutocompleteResult'
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EmailAutocompleteResult'
         type: array
       alert_type:
         type: string
@@ -58,7 +58,7 @@ definitions:
         type: string
       instruments:
         items:
-          $ref: '#/definitions/AlertConfigInstrument'
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfigInstrument'
         type: array
       last_checked:
         type: string
@@ -87,14 +87,14 @@ definitions:
       warning_interval:
         type: string
     type: object
-  AlertConfigInstrument:
+  github_com_USACE_instrumentation-api_api_internal_model.AlertConfigInstrument:
     properties:
       instrument_id:
         type: string
       instrument_name:
         type: string
     type: object
-  AlertSubscription:
+  github_com_USACE_instrumentation-api_api_internal_model.AlertSubscription:
     properties:
       alert_config_id:
         type: string
@@ -107,7 +107,7 @@ definitions:
       profile_id:
         type: string
     type: object
-  AwareParameter:
+  github_com_USACE_instrumentation-api_api_internal_model.AwareParameter:
     properties:
       id:
         type: string
@@ -118,7 +118,7 @@ definitions:
       unit_id:
         type: string
     type: object
-  AwarePlatformParameterConfig:
+  github_com_USACE_instrumentation-api_api_internal_model.AwarePlatformParameterConfig:
     properties:
       aware_id:
         type: string
@@ -129,7 +129,7 @@ definitions:
       instrument_id:
         type: string
     type: object
-  CalculatedTimeseries:
+  github_com_USACE_instrumentation-api_api_internal_model.CalculatedTimeseries:
     properties:
       formula:
         type: string
@@ -146,7 +146,7 @@ definitions:
       unit_id:
         type: string
     type: object
-  CollectionGroup:
+  github_com_USACE_instrumentation-api_api_internal_model.CollectionGroup:
     properties:
       create_date:
         type: string
@@ -169,7 +169,7 @@ definitions:
       updater_username:
         type: string
     type: object
-  CollectionGroupDetails:
+  github_com_USACE_instrumentation-api_api_internal_model.CollectionGroupDetails:
     properties:
       create_date:
         type: string
@@ -187,7 +187,7 @@ definitions:
         type: string
       timeseries:
         items:
-          $ref: '#/definitions/collectionGroupDetailsTimeseries'
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.collectionGroupDetailsTimeseries'
         type: array
       update_date:
         type: string
@@ -196,7 +196,7 @@ definitions:
       updater_username:
         type: string
     type: object
-  Datalogger:
+  github_com_USACE_instrumentation-api_api_internal_model.Datalogger:
     properties:
       create_date:
         type: string
@@ -224,7 +224,7 @@ definitions:
         type: string
       tables:
         items:
-          $ref: '#/definitions/DataloggerTable'
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerTable'
         type: array
       update_date:
         type: string
@@ -233,14 +233,14 @@ definitions:
       updater_username:
         type: string
     type: object
-  DataloggerTable:
+  github_com_USACE_instrumentation-api_api_internal_model.DataloggerTable:
     properties:
       id:
         type: string
       table_name:
         type: string
     type: object
-  DataloggerTablePreview:
+  github_com_USACE_instrumentation-api_api_internal_model.DataloggerTablePreview:
     properties:
       datalogger_table_id:
         type: string
@@ -249,7 +249,7 @@ definitions:
       update_date:
         type: string
     type: object
-  DataloggerWithKey:
+  github_com_USACE_instrumentation-api_api_internal_model.DataloggerWithKey:
     properties:
       create_date:
         type: string
@@ -279,7 +279,7 @@ definitions:
         type: string
       tables:
         items:
-          $ref: '#/definitions/DataloggerTable'
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerTable'
         type: array
       update_date:
         type: string
@@ -288,7 +288,7 @@ definitions:
       updater_username:
         type: string
     type: object
-  District:
+  github_com_USACE_instrumentation-api_api_internal_model.District:
     properties:
       agency:
         type: string
@@ -305,7 +305,7 @@ definitions:
       office_id:
         type: string
     type: object
-  DistrictRollup:
+  github_com_USACE_instrumentation-api_api_internal_model.DistrictRollup:
     properties:
       actual_total_submittals:
         type: integer
@@ -330,7 +330,7 @@ definitions:
       yellow_submittals:
         type: integer
     type: object
-  Domain:
+  github_com_USACE_instrumentation-api_api_internal_model.Domain:
     properties:
       description:
         type: string
@@ -341,7 +341,7 @@ definitions:
       value:
         type: string
     type: object
-  DomainGroupOption:
+  github_com_USACE_instrumentation-api_api_internal_model.DomainGroupOption:
     properties:
       description:
         type: string
@@ -350,13 +350,13 @@ definitions:
       value:
         type: string
     type: object
-  DomainMap:
+  github_com_USACE_instrumentation-api_api_internal_model.DomainMap:
     additionalProperties:
       items:
-        $ref: '#/definitions/DomainGroupOption'
+        $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DomainGroupOption'
       type: array
     type: object
-  EmailAutocompleteResult:
+  github_com_USACE_instrumentation-api_api_internal_model.EmailAutocompleteResult:
     properties:
       email:
         type: string
@@ -367,7 +367,7 @@ definitions:
       username:
         type: string
     type: object
-  EquivalencyTable:
+  github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable:
     properties:
       datalogger_id:
         type: string
@@ -377,10 +377,10 @@ definitions:
         type: string
       rows:
         items:
-          $ref: '#/definitions/EquivalencyTableRow'
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTableRow'
         type: array
     type: object
-  EquivalencyTableRow:
+  github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTableRow:
     properties:
       display_name:
         type: string
@@ -393,7 +393,7 @@ definitions:
       timeseries_id:
         type: string
     type: object
-  Evaluation:
+  github_com_USACE_instrumentation-api_api_internal_model.Evaluation:
     properties:
       alert_config_id:
         type: string
@@ -413,7 +413,7 @@ definitions:
         type: string
       instruments:
         items:
-          $ref: '#/definitions/EvaluationInstrument'
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EvaluationInstrument'
         type: array
       name:
         type: string
@@ -432,14 +432,14 @@ definitions:
       updater_username:
         type: string
     type: object
-  EvaluationInstrument:
+  github_com_USACE_instrumentation-api_api_internal_model.EvaluationInstrument:
     properties:
       instrument_id:
         type: string
       instrument_name:
         type: string
     type: object
-  Geometry:
+  github_com_USACE_instrumentation-api_api_internal_model.Geometry:
     properties:
       coordinates: {}
       geometries:
@@ -449,12 +449,7 @@ definitions:
       type:
         type: string
     type: object
-  Heartbeat:
-    properties:
-      time:
-        type: string
-    type: object
-  Home:
+  github_com_USACE_instrumentation-api_api_internal_model.Home:
     properties:
       instrument_count:
         type: integer
@@ -467,7 +462,7 @@ definitions:
       project_count:
         type: integer
     type: object
-  IDSlugName:
+  github_com_USACE_instrumentation-api_api_internal_model.IDSlugName:
     properties:
       id:
         type: string
@@ -476,7 +471,7 @@ definitions:
       slug:
         type: string
     type: object
-  InclinometerMeasurement:
+  github_com_USACE_instrumentation-api_api_internal_model.InclinometerMeasurement:
     properties:
       create_date:
         type: string
@@ -489,38 +484,38 @@ definitions:
           type: integer
         type: array
     type: object
-  InclinometerMeasurementCollection:
+  github_com_USACE_instrumentation-api_api_internal_model.InclinometerMeasurementCollection:
     properties:
       inclinometers:
         items:
-          $ref: '#/definitions/InclinometerMeasurement'
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InclinometerMeasurement'
         type: array
       timeseries_id:
         type: string
     type: object
-  InclinometerMeasurementCollectionCollection:
+  github_com_USACE_instrumentation-api_api_internal_model.InclinometerMeasurementCollectionCollection:
     properties:
       items:
         items:
-          $ref: '#/definitions/InclinometerMeasurementCollection'
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InclinometerMeasurementCollection'
         type: array
     type: object
-  InclinometerMeasurementCollectionLean:
+  github_com_USACE_instrumentation-api_api_internal_model.InclinometerMeasurementCollectionLean:
     properties:
       items:
         items:
-          $ref: '#/definitions/InclinometerMeasurementLean'
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InclinometerMeasurementLean'
         type: array
       timeseries_id:
         type: string
     type: object
-  InclinometerMeasurementLean:
+  github_com_USACE_instrumentation-api_api_internal_model.InclinometerMeasurementLean:
     additionalProperties:
       items:
         type: integer
       type: array
     type: object
-  Instrument:
+  github_com_USACE_instrumentation-api_api_internal_model.Instrument:
     properties:
       alert_configs:
         items:
@@ -539,7 +534,7 @@ definitions:
       creator_username:
         type: string
       geometry:
-        $ref: '#/definitions/Geometry'
+        $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Geometry'
       groups:
         items:
           type: string
@@ -555,10 +550,10 @@ definitions:
       offset:
         type: integer
       opts:
-        $ref: '#/definitions/Opts'
+        $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Opts'
       projects:
         items:
-          $ref: '#/definitions/IDSlugName'
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IDSlugName'
         type: array
       slug:
         type: string
@@ -583,12 +578,12 @@ definitions:
       usgs_id:
         type: string
     type: object
-  InstrumentCount:
+  github_com_USACE_instrumentation-api_api_internal_model.InstrumentCount:
     properties:
       instrument_count:
         type: integer
     type: object
-  InstrumentGroup:
+  github_com_USACE_instrumentation-api_api_internal_model.InstrumentGroup:
     properties:
       create_date:
         type: string
@@ -617,7 +612,7 @@ definitions:
       updater_username:
         type: string
     type: object
-  InstrumentNote:
+  github_com_USACE_instrumentation-api_api_internal_model.InstrumentNote:
     properties:
       body:
         type: string
@@ -642,14 +637,21 @@ definitions:
       updater_username:
         type: string
     type: object
-  InstrumentNoteCollection:
+  github_com_USACE_instrumentation-api_api_internal_model.InstrumentNoteCollection:
     properties:
       items:
         items:
-          $ref: '#/definitions/InstrumentNote'
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentNote'
         type: array
     type: object
-  InstrumentStatus:
+  github_com_USACE_instrumentation-api_api_internal_model.InstrumentProjectAssignments:
+    properties:
+      project_ids:
+        items:
+          type: string
+        type: array
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.InstrumentStatus:
     properties:
       id:
         type: string
@@ -660,23 +662,32 @@ definitions:
       time:
         type: string
     type: object
-  InstrumentStatusCollection:
+  github_com_USACE_instrumentation-api_api_internal_model.InstrumentStatusCollection:
     properties:
       items:
         items:
-          $ref: '#/definitions/InstrumentStatus'
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentStatus'
         type: array
     type: object
-  IpiMeasurements:
+  github_com_USACE_instrumentation-api_api_internal_model.InstrumentsValidation:
+    properties:
+      errors:
+        items:
+          type: string
+        type: array
+      is_valid:
+        type: boolean
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.IpiMeasurements:
     properties:
       measurements:
         items:
-          $ref: '#/definitions/IpiSegmentMeasurement'
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IpiSegmentMeasurement'
         type: array
       time:
         type: string
     type: object
-  IpiSegment:
+  github_com_USACE_instrumentation-api_api_internal_model.IpiSegment:
     properties:
       id:
         type: integer
@@ -693,7 +704,7 @@ definitions:
       tilt_timeseries_id:
         type: string
     type: object
-  IpiSegmentMeasurement:
+  github_com_USACE_instrumentation-api_api_internal_model.IpiSegmentMeasurement:
     properties:
       cum_dev:
         type: number
@@ -708,7 +719,7 @@ definitions:
       tilt:
         type: number
     type: object
-  Measurement:
+  github_com_USACE_instrumentation-api_api_internal_model.Measurement:
     properties:
       annotation:
         type: string
@@ -723,32 +734,32 @@ definitions:
       value:
         type: number
     type: object
-  MeasurementCollection:
+  github_com_USACE_instrumentation-api_api_internal_model.MeasurementCollection:
     properties:
       items:
         items:
-          $ref: '#/definitions/Measurement'
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Measurement'
         type: array
       timeseries_id:
         type: string
     type: object
-  MeasurementCollectionLean:
+  github_com_USACE_instrumentation-api_api_internal_model.MeasurementCollectionLean:
     properties:
       items:
         items:
-          $ref: '#/definitions/MeasurementLean'
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.MeasurementLean'
         type: array
       timeseries_id:
         type: string
     type: object
-  MeasurementLean:
+  github_com_USACE_instrumentation-api_api_internal_model.MeasurementLean:
     additionalProperties:
       type: number
     type: object
-  Opts:
+  github_com_USACE_instrumentation-api_api_internal_model.Opts:
     additionalProperties: true
     type: object
-  PlotConfig:
+  github_com_USACE_instrumentation-api_api_internal_model.PlotConfig:
     properties:
       auto_range:
         type: boolean
@@ -760,18 +771,12 @@ definitions:
         type: string
       date_range:
         type: string
-      display:
-        $ref: '#/definitions/PlotConfigDisplay'
       id:
         type: string
       name:
         type: string
       project_id:
         type: string
-      report_configs:
-        items:
-          $ref: '#/definitions/IDSlugName'
-        type: array
       show_comments:
         type: boolean
       show_masked:
@@ -782,6 +787,10 @@ definitions:
         type: string
       threshold:
         type: integer
+      timeseries_id:
+        items:
+          type: string
+        type: array
       update_date:
         type: string
       updater_id:
@@ -789,63 +798,7 @@ definitions:
       updater_username:
         type: string
     type: object
-  PlotConfigCustomShape:
-    properties:
-      color:
-        type: string
-      data_point:
-        type: number
-      enabled:
-        type: boolean
-      name:
-        type: string
-      plot_configuration_id:
-        type: string
-    type: object
-  PlotConfigDisplay:
-    properties:
-      layout:
-        $ref: '#/definitions/PlotConfigLayout'
-      traces:
-        items:
-          $ref: '#/definitions/PlotConfigTimeseriesTrace'
-        type: array
-    type: object
-  PlotConfigLayout:
-    properties:
-      custom_shapes:
-        items:
-          $ref: '#/definitions/PlotConfigCustomShape'
-        type: array
-      secondary_axis_title:
-        type: string
-    type: object
-  PlotConfigTimeseriesTrace:
-    properties:
-      color:
-        type: string
-      line_style:
-        type: string
-      name:
-        description: read-only
-        type: string
-      plot_configuration_id:
-        type: string
-      show_markers:
-        type: boolean
-      timeseries_id:
-        type: string
-      trace_order:
-        type: integer
-      trace_type:
-        type: string
-      width:
-        type: number
-      y_axis:
-        description: y1 or y2, default y1
-        type: string
-    type: object
-  Profile:
+  github_com_USACE_instrumentation-api_api_internal_model.Profile:
     properties:
       email:
         type: string
@@ -859,12 +812,12 @@ definitions:
         type: array
       tokens:
         items:
-          $ref: '#/definitions/TokenInfoProfile'
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.TokenInfoProfile'
         type: array
       username:
         type: string
     type: object
-  Project:
+  github_com_USACE_instrumentation-api_api_internal_model.Project:
     properties:
       create_date:
         type: string
@@ -897,12 +850,19 @@ definitions:
       updater_username:
         type: string
     type: object
-  ProjectCount:
+  github_com_USACE_instrumentation-api_api_internal_model.ProjectCount:
     properties:
       project_count:
         type: integer
     type: object
-  ProjectMembership:
+  github_com_USACE_instrumentation-api_api_internal_model.ProjectInstrumentAssignments:
+    properties:
+      instrument_ids:
+        items:
+          type: string
+        type: array
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.ProjectMembership:
     properties:
       email:
         type: string
@@ -917,112 +877,16 @@ definitions:
       username:
         type: string
     type: object
-  ReportConfig:
-    properties:
-      create_date:
-        type: string
-      creator_id:
-        type: string
-      creator_username:
-        type: string
-      description:
-        type: string
-      global_overrides:
-        $ref: '#/definitions/ReportConfigGlobalOverrides'
-      id:
-        type: string
-      name:
-        type: string
-      plot_configs:
-        items:
-          $ref: '#/definitions/IDSlugName'
-        type: array
-      project_id:
-        type: string
-      project_name:
-        type: string
-      slug:
-        type: string
-      update_date:
-        type: string
-      updater_id:
-        type: string
-      updater_username:
-        type: string
-    type: object
-  ReportConfigGlobalOverrides:
-    properties:
-      date_range:
-        $ref: '#/definitions/TextOption'
-      show_masked:
-        $ref: '#/definitions/ToggleOption'
-      show_nonvalidated:
-        $ref: '#/definitions/ToggleOption'
-    type: object
-  ReportConfigWithPlotConfigs:
-    properties:
-      create_date:
-        type: string
-      creator_id:
-        type: string
-      creator_username:
-        type: string
-      description:
-        type: string
-      global_overrides:
-        $ref: '#/definitions/ReportConfigGlobalOverrides'
-      id:
-        type: string
-      name:
-        type: string
-      plot_configs:
-        items:
-          $ref: '#/definitions/PlotConfig'
-        type: array
-      project_id:
-        type: string
-      project_name:
-        type: string
-      slug:
-        type: string
-      update_date:
-        type: string
-      updater_id:
-        type: string
-      updater_username:
-        type: string
-    type: object
-  ReportDownloadJob:
-    properties:
-      create_date:
-        type: string
-      creator:
-        type: string
-      file_expiry:
-        type: string
-      file_key:
-        type: string
-      id:
-        type: string
-      progress:
-        type: integer
-      progress_update_date:
-        type: string
-      report_config_id:
-        type: string
-      status:
-        type: string
-    type: object
-  SaaMeasurements:
+  github_com_USACE_instrumentation-api_api_internal_model.SaaMeasurements:
     properties:
       measurements:
         items:
-          $ref: '#/definitions/SaaSegmentMeasurement'
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.SaaSegmentMeasurement'
         type: array
       time:
         type: string
     type: object
-  SaaSegment:
+  github_com_USACE_instrumentation-api_api_internal_model.SaaSegment:
     properties:
       id:
         type: integer
@@ -1041,7 +905,7 @@ definitions:
       z_timeseries_id:
         type: string
     type: object
-  SaaSegmentMeasurement:
+  github_com_USACE_instrumentation-api_api_internal_model.SaaSegmentMeasurement:
     properties:
       elevation:
         type: number
@@ -1072,7 +936,7 @@ definitions:
       z_increment:
         type: number
     type: object
-  SearchResult:
+  github_com_USACE_instrumentation-api_api_internal_model.SearchResult:
     properties:
       id:
         type: string
@@ -1080,7 +944,7 @@ definitions:
       type:
         type: string
     type: object
-  Site:
+  github_com_USACE_instrumentation-api_api_internal_model.Site:
     properties:
       description:
         type: string
@@ -1089,16 +953,16 @@ definitions:
       elevationUnits:
         type: string
       siteName:
-        $ref: '#/definitions/SiteName'
+        $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.SiteName'
     type: object
-  SiteName:
+  github_com_USACE_instrumentation-api_api_internal_model.SiteName:
     properties:
       id:
         type: string
       nameType:
         type: string
     type: object
-  Submittal:
+  github_com_USACE_instrumentation-api_api_internal_model.Submittal:
     properties:
       alert_config_id:
         type: string
@@ -1127,14 +991,7 @@ definitions:
       warning_sent:
         type: boolean
     type: object
-  TextOption:
-    properties:
-      enabled:
-        type: boolean
-      value:
-        type: string
-    type: object
-  Timeseries:
+  github_com_USACE_instrumentation-api_api_internal_model.Timeseries:
     properties:
       id:
         type: string
@@ -1160,33 +1017,26 @@ definitions:
         type: string
       values:
         items:
-          $ref: '#/definitions/Measurement'
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Measurement'
         type: array
       variable:
         type: string
     type: object
-  TimeseriesCollectionItems:
+  github_com_USACE_instrumentation-api_api_internal_model.TimeseriesCollectionItems:
     properties:
       items:
         items:
-          $ref: '#/definitions/Timeseries'
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Timeseries'
         type: array
     type: object
-  TimeseriesMeasurementCollectionCollection:
+  github_com_USACE_instrumentation-api_api_internal_model.TimeseriesMeasurementCollectionCollection:
     properties:
       items:
         items:
-          $ref: '#/definitions/MeasurementCollection'
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.MeasurementCollection'
         type: array
     type: object
-  ToggleOption:
-    properties:
-      enabled:
-        type: boolean
-      value:
-        type: boolean
-    type: object
-  Token:
+  github_com_USACE_instrumentation-api_api_internal_model.Token:
     properties:
       issued:
         type: string
@@ -1197,14 +1047,14 @@ definitions:
       token_id:
         type: string
     type: object
-  TokenInfoProfile:
+  github_com_USACE_instrumentation-api_api_internal_model.TokenInfoProfile:
     properties:
       issued:
         type: string
       token_id:
         type: string
     type: object
-  Unit:
+  github_com_USACE_instrumentation-api_api_internal_model.Unit:
     properties:
       abbreviation:
         type: string
@@ -1221,7 +1071,7 @@ definitions:
       unit_family_id:
         type: string
     type: object
-  collectionGroupDetailsTimeseries:
+  github_com_USACE_instrumentation-api_api_internal_model.collectionGroupDetailsTimeseries:
     properties:
       id:
         type: string
@@ -1251,7 +1101,7 @@ definitions:
         type: string
       values:
         items:
-          $ref: '#/definitions/Measurement'
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Measurement'
         type: array
       variable:
         type: string
@@ -1300,7 +1150,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/Submittal'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Submittal'
             type: array
         "400":
           description: Bad Request
@@ -1325,10 +1175,6 @@ paths:
         in: path
         name: alert_config_id
         required: true
-        type: string
-      - description: api key
-        in: query
-        name: key
         type: string
       produces:
       - application/json
@@ -1372,11 +1218,7 @@ paths:
         name: alert_subscription
         required: true
         schema:
-          $ref: '#/definitions/AlertSubscription'
-      - description: api key
-        in: query
-        name: key
-        type: string
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertSubscription'
       produces:
       - application/json
       responses:
@@ -1384,7 +1226,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/AlertSubscription'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertSubscription'
             type: array
         "400":
           description: Bad Request
@@ -1412,7 +1254,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/AwarePlatformParameterConfig'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AwarePlatformParameterConfig'
             type: array
         "400":
           description: Bad Request
@@ -1438,7 +1280,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/AwareParameter'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AwareParameter'
             type: array
         "400":
           description: Bad Request
@@ -1465,11 +1307,7 @@ paths:
         name: datalogger
         required: true
         schema:
-          $ref: '#/definitions/Datalogger'
-      - description: api key
-        in: query
-        name: key
-        type: string
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Datalogger'
       produces:
       - application/json
       responses:
@@ -1477,7 +1315,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/DataloggerWithKey'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerWithKey'
             type: array
         "400":
           description: Bad Request
@@ -1504,10 +1342,6 @@ paths:
         in: path
         name: datalogger_id
         required: true
-        type: string
-      - description: api key
-        in: query
-        name: key
         type: string
       produces:
       - application/json
@@ -1542,17 +1376,13 @@ paths:
         name: datalogger_id
         required: true
         type: string
-      - description: api key
-        in: query
-        name: key
-        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/Datalogger'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Datalogger'
         "400":
           description: Bad Request
           schema:
@@ -1583,18 +1413,14 @@ paths:
         name: datalogger
         required: true
         schema:
-          $ref: '#/definitions/Datalogger'
-      - description: api key
-        in: query
-        name: key
-        type: string
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Datalogger'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/Datalogger'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Datalogger'
         "400":
           description: Bad Request
           schema:
@@ -1626,18 +1452,14 @@ paths:
         name: equivalency_table
         required: true
         schema:
-          $ref: '#/definitions/EquivalencyTable'
-      - description: api key
-        in: query
-        name: key
-        type: string
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/EquivalencyTable'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable'
         "400":
           description: Bad Request
           schema:
@@ -1665,17 +1487,13 @@ paths:
         name: datalogger_id
         required: true
         type: string
-      - description: api key
-        in: query
-        name: key
-        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/DataloggerWithKey'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerWithKey'
         "400":
           description: Bad Request
           schema:
@@ -1707,10 +1525,6 @@ paths:
         in: path
         name: datalogger_table_id
         required: true
-        type: string
-      - description: api key
-        in: query
-        name: key
         type: string
       produces:
       - application/json
@@ -1751,10 +1565,6 @@ paths:
         name: datalogger_table_id
         required: true
         type: string
-      - description: api key
-        in: query
-        name: key
-        type: string
       produces:
       - application/json
       responses:
@@ -1762,7 +1572,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/EquivalencyTable'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable'
             type: array
         "400":
           description: Bad Request
@@ -1800,18 +1610,14 @@ paths:
         name: equivalency_table
         required: true
         schema:
-          $ref: '#/definitions/EquivalencyTable'
-      - description: api key
-        in: query
-        name: key
-        type: string
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/EquivalencyTable'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable'
         "400":
           description: Bad Request
           schema:
@@ -1849,18 +1655,14 @@ paths:
         name: equivalency_table
         required: true
         schema:
-          $ref: '#/definitions/EquivalencyTable'
-      - description: api key
-        in: query
-        name: key
-        type: string
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/EquivalencyTable'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable'
         "400":
           description: Bad Request
           schema:
@@ -1898,10 +1700,6 @@ paths:
         in: path
         name: row_id
         required: true
-        type: string
-      - description: api key
-        in: query
-        name: key
         type: string
       produces:
       - application/json
@@ -1943,17 +1741,13 @@ paths:
         name: datalogger_table_id
         required: true
         type: string
-      - description: api key
-        in: query
-        name: key
-        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/DataloggerTablePreview'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerTablePreview'
         "400":
           description: Bad Request
           schema:
@@ -1986,17 +1780,13 @@ paths:
         name: datalogger_table_id
         required: true
         type: string
-      - description: api key
-        in: query
-        name: key
-        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/DataloggerTablePreview'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerTablePreview'
         "400":
           description: Bad Request
           schema:
@@ -2016,11 +1806,6 @@ paths:
       - datalogger
   /dataloggers:
     get:
-      parameters:
-      - description: api key
-        in: query
-        name: key
-        type: string
       produces:
       - application/json
       responses:
@@ -2028,7 +1813,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/Datalogger'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Datalogger'
             type: array
         "400":
           description: Bad Request
@@ -2056,7 +1841,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/District'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.District'
             type: array
         "400":
           description: Bad Request
@@ -2082,7 +1867,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/Domain'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Domain'
             type: array
         "400":
           description: Bad Request
@@ -2107,7 +1892,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/DomainMap'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DomainMap'
         "400":
           description: Bad Request
           schema:
@@ -2138,7 +1923,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/EmailAutocompleteResult'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EmailAutocompleteResult'
             type: array
         "400":
           description: Bad Request
@@ -2176,7 +1961,7 @@ paths:
           schema:
             items:
               additionalProperties:
-                $ref: '#/definitions/MeasurementCollectionLean'
+                $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.MeasurementCollectionLean'
               type: object
             type: array
         "400":
@@ -2203,7 +1988,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/CalculatedTimeseries'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.CalculatedTimeseries'
             type: array
         "400":
           description: Bad Request
@@ -2221,11 +2006,6 @@ paths:
       tags:
       - formula
     post:
-      parameters:
-      - description: api key
-        in: query
-        name: key
-        type: string
       produces:
       - application/json
       responses:
@@ -2260,10 +2040,6 @@ paths:
         name: formula_id
         required: true
         type: string
-      - description: api key
-        in: query
-        name: key
-        type: string
       produces:
       - application/json
       responses:
@@ -2297,10 +2073,6 @@ paths:
         name: formula_id
         required: true
         type: string
-      - description: api key
-        in: query
-        name: key
-        type: string
       produces:
       - application/json
       responses:
@@ -2308,7 +2080,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/CalculatedTimeseries'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.CalculatedTimeseries'
             type: array
         "400":
           description: Bad Request
@@ -2342,50 +2114,6 @@ paths:
       summary: checks the health of the api server
       tags:
       - heartbeat
-  /heartbeat:
-    post:
-      parameters:
-      - description: api key
-        in: query
-        name: key
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/Heartbeat'
-      summary: creates a heartbeat entry at regular intervals
-      tags:
-      - heartbeat
-  /heartbeat/latest:
-    get:
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/Heartbeat'
-      summary: gets the latest heartbeat
-      tags:
-      - heartbeat
-  /heartbeats:
-    get:
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/Heartbeat'
-            type: array
-      summary: returns all heartbeats
-      tags:
-      - heartbeat
   /home:
     get:
       produces:
@@ -2394,7 +2122,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/Home'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Home'
         "500":
           description: Internal Server Error
           schema:
@@ -2423,7 +2151,7 @@ paths:
           schema:
             items:
               additionalProperties:
-                $ref: '#/definitions/InclinometerMeasurementCollectionLean'
+                $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InclinometerMeasurementCollectionLean'
               type: object
             type: array
         "400":
@@ -2450,7 +2178,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/InstrumentGroup'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentGroup'
             type: array
         "400":
           description: Bad Request
@@ -2474,18 +2202,14 @@ paths:
         name: instrument_group
         required: true
         schema:
-          $ref: '#/definitions/InstrumentGroup'
-      - description: api key
-        in: query
-        name: key
-        type: string
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentGroup'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/InstrumentGroup'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentGroup'
         "400":
           description: Bad Request
           schema:
@@ -2512,10 +2236,6 @@ paths:
         name: instrument_group_id
         required: true
         type: string
-      - description: api key
-        in: query
-        name: key
-        type: string
       produces:
       - application/json
       responses:
@@ -2523,7 +2243,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/InstrumentGroup'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentGroup'
             type: array
         "400":
           description: Bad Request
@@ -2556,7 +2276,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/InstrumentGroup'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentGroup'
         "400":
           description: Bad Request
           schema:
@@ -2585,18 +2305,14 @@ paths:
         name: instrument_group
         required: true
         schema:
-          $ref: '#/definitions/InstrumentGroup'
-      - description: api key
-        in: query
-        name: key
-        type: string
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentGroup'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/InstrumentGroup'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentGroup'
         "400":
           description: Bad Request
           schema:
@@ -2630,7 +2346,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/Instrument'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Instrument'
             type: array
         "400":
           description: Bad Request
@@ -2654,10 +2370,6 @@ paths:
         in: path
         name: instrument_group_id
         required: true
-        type: string
-      - description: api key
-        in: query
-        name: key
         type: string
       produces:
       - application/json
@@ -2698,10 +2410,6 @@ paths:
         in: path
         name: instrument_id
         required: true
-        type: string
-      - description: api key
-        in: query
-        name: key
         type: string
       produces:
       - application/json
@@ -2744,7 +2452,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/Timeseries'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Timeseries'
             type: array
         "400":
           description: Bad Request
@@ -2776,7 +2484,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/MeasurementCollection'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.MeasurementCollection'
         "400":
           description: Bad Request
           schema:
@@ -2801,7 +2509,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/Instrument'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Instrument'
             type: array
         "400":
           description: Bad Request
@@ -2833,7 +2541,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/Instrument'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Instrument'
         "400":
           description: Bad Request
           schema:
@@ -2865,7 +2573,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/InstrumentNote'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentNote'
             type: array
         "400":
           description: Bad Request
@@ -2896,10 +2604,6 @@ paths:
         in: path
         name: note_id
         required: true
-        type: string
-      - description: api key
-        in: query
-        name: key
         type: string
       produces:
       - application/json
@@ -2942,7 +2646,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/InstrumentStatus'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentStatus'
             type: array
         "400":
           description: Bad Request
@@ -2972,11 +2676,7 @@ paths:
         name: instrument_status
         required: true
         schema:
-          $ref: '#/definitions/InstrumentStatusCollection'
-      - description: api key
-        in: query
-        name: key
-        type: string
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentStatusCollection'
       produces:
       - application/json
       responses:
@@ -3016,10 +2716,6 @@ paths:
         in: path
         name: status_id
         required: true
-        type: string
-      - description: api key
-        in: query
-        name: key
         type: string
       produces:
       - application/json
@@ -3067,7 +2763,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/AlertConfig'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfig'
             type: array
         "400":
           description: Bad Request
@@ -3104,7 +2800,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/Submittal'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Submittal'
             type: array
         "400":
           description: Bad Request
@@ -3142,7 +2838,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/Timeseries'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Timeseries'
         "400":
           description: Bad Request
           schema:
@@ -3193,7 +2889,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/MeasurementCollection'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.MeasurementCollection'
         "400":
           description: Bad Request
           schema:
@@ -3238,7 +2934,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/MeasurementCollection'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.MeasurementCollection'
         "400":
           description: Bad Request
           schema:
@@ -3262,7 +2958,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/InstrumentCount'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentCount'
         "400":
           description: Bad Request
           schema:
@@ -3305,7 +3001,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/IpiMeasurements'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IpiMeasurements'
             type: array
         "400":
           description: Bad Request
@@ -3338,7 +3034,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/IpiSegment'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IpiSegment'
             type: array
         "400":
           description: Bad Request
@@ -3369,12 +3065,8 @@ paths:
         required: true
         schema:
           items:
-            $ref: '#/definitions/IpiSegment'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IpiSegment'
           type: array
-      - description: api key
-        in: query
-        name: key
-        type: string
       produces:
       - application/json
       responses:
@@ -3382,7 +3074,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/IpiSegment'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IpiSegment'
             type: array
         "400":
           description: Bad Request
@@ -3410,7 +3102,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/InstrumentNote'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentNote'
             type: array
         "400":
           description: Bad Request
@@ -3434,11 +3126,7 @@ paths:
         name: instrument_note
         required: true
         schema:
-          $ref: '#/definitions/InstrumentNoteCollection'
-      - description: api key
-        in: query
-        name: key
-        type: string
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentNoteCollection'
       produces:
       - application/json
       responses:
@@ -3446,7 +3134,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/InstrumentNote'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentNote'
             type: array
         "400":
           description: Bad Request
@@ -3480,7 +3168,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/InstrumentNote'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentNote'
         "400":
           description: Bad Request
           schema:
@@ -3509,11 +3197,7 @@ paths:
         name: instrument_note
         required: true
         schema:
-          $ref: '#/definitions/InstrumentNote'
-      - description: api key
-        in: query
-        name: key
-        type: string
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentNote'
       produces:
       - application/json
       responses:
@@ -3521,7 +3205,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/AlertConfig'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfig'
             type: array
         "400":
           description: Bad Request
@@ -3567,7 +3251,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/SaaMeasurements'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.SaaMeasurements'
             type: array
         "400":
           description: Bad Request
@@ -3600,7 +3284,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/SaaSegment'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.SaaSegment'
             type: array
         "400":
           description: Bad Request
@@ -3631,12 +3315,8 @@ paths:
         required: true
         schema:
           items:
-            $ref: '#/definitions/SaaSegment'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.SaaSegment'
           type: array
-      - description: api key
-        in: query
-        name: key
-        type: string
       produces:
       - application/json
       responses:
@@ -3644,7 +3324,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/SaaSegment'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.SaaSegment'
             type: array
         "400":
           description: Bad Request
@@ -3665,11 +3345,6 @@ paths:
       - instrument-saa
   /my_alert_subscriptions:
     get:
-      parameters:
-      - description: api key
-        in: query
-        name: key
-        type: string
       produces:
       - application/json
       responses:
@@ -3677,7 +3352,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/AlertSubscription'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertSubscription'
             type: array
         "400":
           description: Bad Request
@@ -3699,11 +3374,6 @@ paths:
   /my_alerts:
     get:
       description: list all alerts a profile is subscribed to
-      parameters:
-      - description: api key
-        in: query
-        name: key
-        type: string
       produces:
       - application/json
       responses:
@@ -3711,7 +3381,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/Alert'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Alert'
             type: array
         "400":
           description: Bad Request
@@ -3725,8 +3395,6 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
-      security:
-      - Bearer: []
       summary: lists subscribed alerts for a single user
       tags:
       - alert
@@ -3742,17 +3410,13 @@ paths:
         name: alert_id
         required: true
         type: string
-      - description: api key
-        in: query
-        name: key
-        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/Alert'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Alert'
         "400":
           description: Bad Request
           schema:
@@ -3782,17 +3446,13 @@ paths:
         name: alert_id
         required: true
         type: string
-      - description: api key
-        in: query
-        name: key
-        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/Alert'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Alert'
         "400":
           description: Bad Request
           schema:
@@ -3818,7 +3478,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/Profile'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Profile'
         "400":
           description: Bad Request
           schema:
@@ -3850,7 +3510,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/Project'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Project'
             type: array
         "400":
           description: Bad Request
@@ -3865,7 +3525,7 @@ paths:
           schema:
             $ref: '#/definitions/echo.HTTPError'
       security:
-      - Bearer: []
+      - CacOnly: []
       summary: lists projects where current profile is an admin or member with optional
         filter by project role
       tags:
@@ -3878,7 +3538,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/Token'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Token'
         "400":
           description: Bad Request
           schema:
@@ -3939,7 +3599,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/Site'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Site'
             type: array
         "400":
           description: Bad Request
@@ -3964,7 +3624,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/Profile'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Profile'
         "400":
           description: Bad Request
           schema:
@@ -3996,7 +3656,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/Project'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Project'
             type: array
         "400":
           description: Bad Request
@@ -4021,12 +3681,8 @@ paths:
         required: true
         schema:
           items:
-            $ref: '#/definitions/Project'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Project'
           type: array
-      - description: api key
-        in: query
-        name: key
-        type: string
       produces:
       - application/json
       responses:
@@ -4034,7 +3690,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/IDSlugName'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IDSlugName'
             type: array
         "400":
           description: Bad Request
@@ -4061,10 +3717,6 @@ paths:
         in: path
         name: project_id
         required: true
-        type: string
-      - description: api key
-        in: query
-        name: key
         type: string
       produces:
       - application/json
@@ -4105,7 +3757,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/Project'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Project'
         "400":
           description: Bad Request
           schema:
@@ -4134,18 +3786,14 @@ paths:
         name: project
         required: true
         schema:
-          $ref: '#/definitions/Project'
-      - description: api key
-        in: query
-        name: key
-        type: string
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Project'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/Project'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Project'
         "400":
           description: Bad Request
           schema:
@@ -4179,7 +3827,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/AlertConfig'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfig'
             type: array
         "400":
           description: Bad Request
@@ -4211,18 +3859,14 @@ paths:
         name: alert_config
         required: true
         schema:
-          $ref: '#/definitions/AlertConfig'
-      - description: api key
-        in: query
-        name: key
-        type: string
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfig'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/AlertConfig'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfig'
         "400":
           description: Bad Request
           schema:
@@ -4255,10 +3899,6 @@ paths:
         name: alert_config_id
         required: true
         type: string
-      - description: api key
-        in: query
-        name: key
-        type: string
       produces:
       - application/json
       responses:
@@ -4266,7 +3906,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/AlertConfig'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfig'
             type: array
         "400":
           description: Bad Request
@@ -4305,7 +3945,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/AlertConfig'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfig'
         "400":
           description: Bad Request
           schema:
@@ -4342,11 +3982,7 @@ paths:
         name: alert_config
         required: true
         schema:
-          $ref: '#/definitions/AlertConfig'
-      - description: api key
-        in: query
-        name: key
-        type: string
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfig'
       produces:
       - application/json
       responses:
@@ -4354,7 +3990,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/AlertConfig'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfig'
             type: array
         "400":
           description: Bad Request
@@ -4389,7 +4025,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/AlertConfig'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfig'
             type: array
         "400":
           description: Bad Request
@@ -4421,11 +4057,7 @@ paths:
         name: collection_group
         required: true
         schema:
-          $ref: '#/definitions/CollectionGroup'
-      - description: api key
-        in: query
-        name: key
-        type: string
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.CollectionGroup'
       produces:
       - application/json
       responses:
@@ -4433,7 +4065,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/CollectionGroup'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.CollectionGroup'
             type: array
         "400":
           description: Bad Request
@@ -4466,10 +4098,6 @@ paths:
         in: path
         name: collection_group_id
         required: true
-        type: string
-      - description: api key
-        in: query
-        name: key
         type: string
       produces:
       - application/json
@@ -4516,7 +4144,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/CollectionGroupDetails'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.CollectionGroupDetails'
         "400":
           description: Bad Request
           schema:
@@ -4550,18 +4178,14 @@ paths:
         name: collection_group
         required: true
         schema:
-          $ref: '#/definitions/CollectionGroup'
-      - description: api key
-        in: query
-        name: key
-        type: string
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.CollectionGroup'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/CollectionGroup'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.CollectionGroup'
         "400":
           description: Bad Request
           schema:
@@ -4599,10 +4223,6 @@ paths:
         in: path
         name: timeseries_id
         required: true
-        type: string
-      - description: api key
-        in: query
-        name: key
         type: string
       produces:
       - application/json
@@ -4649,10 +4269,6 @@ paths:
         name: timeseries_id
         required: true
         type: string
-      - description: api key
-        in: query
-        name: key
-        type: string
       produces:
       - application/json
       responses:
@@ -4694,7 +4310,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/DistrictRollup'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DistrictRollup'
             type: array
         "400":
           description: Bad Request
@@ -4727,7 +4343,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/DistrictRollup'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DistrictRollup'
             type: array
         "400":
           description: Bad Request
@@ -4760,7 +4376,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/Evaluation'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Evaluation'
             type: array
         "400":
           description: Bad Request
@@ -4790,18 +4406,14 @@ paths:
         name: evaluation
         required: true
         schema:
-          $ref: '#/definitions/Evaluation'
-      - description: api key
-        in: query
-        name: key
-        type: string
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Evaluation'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/Evaluation'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Evaluation'
         "400":
           description: Bad Request
           schema:
@@ -4834,10 +4446,6 @@ paths:
         name: evaluation_id
         required: true
         type: string
-      - description: api key
-        in: query
-        name: key
-        type: string
       produces:
       - application/json
       responses:
@@ -4845,7 +4453,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/AlertConfig'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfig'
             type: array
         "400":
           description: Bad Request
@@ -4884,7 +4492,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/Evaluation'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Evaluation'
         "400":
           description: Bad Request
           schema:
@@ -4919,18 +4527,14 @@ paths:
         name: evaluation
         required: true
         schema:
-          $ref: '#/definitions/Evaluation'
-      - description: api key
-        in: query
-        name: key
-        type: string
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Evaluation'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/Evaluation'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Evaluation'
         "400":
           description: Bad Request
           schema:
@@ -4959,10 +4563,6 @@ paths:
         in: path
         name: project_id
         required: true
-        type: string
-      - description: api key
-        in: query
-        name: key
         type: string
       produces:
       - application/json
@@ -5003,11 +4603,7 @@ paths:
         name: timeseries_measurement_collections
         required: true
         schema:
-          $ref: '#/definitions/InclinometerMeasurementCollectionCollection'
-      - description: api key
-        in: query
-        name: key
-        type: string
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InclinometerMeasurementCollectionCollection'
       produces:
       - application/json
       responses:
@@ -5015,7 +4611,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/InclinometerMeasurementCollection'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InclinometerMeasurementCollection'
             type: array
         "400":
           description: Bad Request
@@ -5050,7 +4646,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/InstrumentGroup'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentGroup'
             type: array
         "400":
           description: Bad Request
@@ -5083,7 +4679,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/Project'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Project'
             type: array
         "400":
           description: Bad Request
@@ -5120,12 +4716,8 @@ paths:
         required: true
         schema:
           items:
-            $ref: '#/definitions/Instrument'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Instrument'
           type: array
-      - description: api key
-        in: query
-        name: key
-        type: string
       produces:
       - application/json
       responses:
@@ -5133,7 +4725,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/IDSlugName'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IDSlugName'
             type: array
         "400":
           description: Bad Request
@@ -5166,10 +4758,6 @@ paths:
         in: path
         name: instrument_id
         required: true
-        type: string
-      - description: api key
-        in: query
-        name: key
         type: string
       produces:
       - application/json
@@ -5215,18 +4803,14 @@ paths:
         name: instrument
         required: true
         schema:
-          $ref: '#/definitions/Instrument'
-      - description: api key
-        in: query
-        name: key
-        type: string
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Instrument'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/Instrument'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Instrument'
         "400":
           description: Bad Request
           schema:
@@ -5266,7 +4850,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/AlertConfig'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfig'
             type: array
         "400":
           description: Bad Request
@@ -5304,17 +4888,13 @@ paths:
         name: alert_config_id
         required: true
         type: string
-      - description: api key
-        in: query
-        name: key
-        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/AlertSubscription'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertSubscription'
         "400":
           description: Bad Request
           schema:
@@ -5352,10 +4932,6 @@ paths:
         in: path
         name: alert_config_id
         required: true
-        type: string
-      - description: api key
-        in: query
-        name: key
         type: string
       produces:
       - application/json
@@ -5405,7 +4981,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/Alert'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Alert'
             type: array
         "400":
           description: Bad Request
@@ -5419,6 +4995,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
       summary: lists alerts for a single instrument
       tags:
       - alert
@@ -5438,9 +5016,14 @@ paths:
         name: instrument_id
         required: true
         type: string
-      - description: api key
+      - description: valid values are 'assign' or 'unassign'
         in: query
-        name: key
+        name: action
+        required: true
+        type: string
+      - description: validate request without performing action
+        in: query
+        name: dry_run
         type: string
       produces:
       - application/json
@@ -5448,8 +5031,7 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentsValidation'
         "400":
           description: Bad Request
           schema:
@@ -5483,9 +5065,9 @@ paths:
         name: instrument_id
         required: true
         type: string
-      - description: api key
+      - description: validate request without performing action
         in: query
-        name: key
+        name: dry_run
         type: string
       produces:
       - application/json
@@ -5493,8 +5075,7 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentsValidation'
         "400":
           description: Bad Request
           schema:
@@ -5510,6 +5091,55 @@ paths:
       security:
       - Bearer: []
       summary: assigns an instrument to a project.
+      tags:
+      - instrument
+    put:
+      description: must be Project (or Application) Admin of all existing instrument
+        projects and project to be assigned
+      parameters:
+      - description: instrument uuid
+        format: uuid
+        in: path
+        name: instrument_id
+        required: true
+        type: string
+      - description: project uuids
+        in: body
+        name: project_ids
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentProjectAssignments'
+      - description: valid values are 'assign' or 'unassign'
+        in: query
+        name: action
+        required: true
+        type: string
+      - description: validate request without performing action
+        in: query
+        name: dry_run
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentsValidation'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
+      summary: updates multiple project assignments for an instrument
       tags:
       - instrument
   /projects/{project_id}/instruments/{instrument_id}/constants:
@@ -5534,7 +5164,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/Timeseries'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Timeseries'
             type: array
         "400":
           description: Bad Request
@@ -5570,11 +5200,7 @@ paths:
         name: timeseries_collection_items
         required: true
         schema:
-          $ref: '#/definitions/TimeseriesCollectionItems'
-      - description: api key
-        in: query
-        name: key
-        type: string
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.TimeseriesCollectionItems'
       produces:
       - application/json
       responses:
@@ -5582,7 +5208,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/Timeseries'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Timeseries'
             type: array
         "400":
           description: Bad Request
@@ -5621,10 +5247,6 @@ paths:
         in: path
         name: timeseries_id
         required: true
-        type: string
-      - description: api key
-        in: query
-        name: key
         type: string
       produces:
       - application/json
@@ -5673,7 +5295,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/Evaluation'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Evaluation'
             type: array
         "400":
           description: Bad Request
@@ -5710,18 +5332,14 @@ paths:
         name: instrument
         required: true
         schema:
-          $ref: '#/definitions/Instrument'
-      - description: api key
-        in: query
-        name: key
-        type: string
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Instrument'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/Instrument'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Instrument'
         "400":
           description: Bad Request
           schema:
@@ -5761,7 +5379,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/Timeseries'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Timeseries'
             type: array
         "400":
           description: Bad Request
@@ -5778,6 +5396,56 @@ paths:
       summary: lists timeseries for an instrument
       tags:
       - timeseries
+  /projects/{project_id}/instruments/assignments:
+    put:
+      description: must be Project (or Application) Admin of all existing instrument
+        projects and project to be assigned
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: instrument uuids
+        in: body
+        name: instrument_ids
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.ProjectInstrumentAssignments'
+      - description: valid values are 'assign' or 'unassign'
+        in: query
+        name: action
+        required: true
+        type: string
+      - description: validate request without performing action
+        in: query
+        name: dry_run
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentsValidation'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
+      summary: updates multiple instrument assigments for a project
+      tags:
+      - instrument
   /projects/{project_id}/members:
     get:
       parameters:
@@ -5787,10 +5455,6 @@ paths:
         name: project_id
         required: true
         type: string
-      - description: api key
-        in: query
-        name: key
-        type: string
       produces:
       - application/json
       responses:
@@ -5798,7 +5462,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/ProjectMembership'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.ProjectMembership'
             type: array
         "400":
           description: Bad Request
@@ -5837,10 +5501,6 @@ paths:
         in: path
         name: role_id
         required: true
-        type: string
-      - description: api key
-        in: query
-        name: key
         type: string
       produces:
       - application/json
@@ -5887,17 +5547,13 @@ paths:
         name: role_id
         required: true
         type: string
-      - description: api key
-        in: query
-        name: key
-        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/ProjectMembership'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.ProjectMembership'
         "400":
           description: Bad Request
           schema:
@@ -5931,7 +5587,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/PlotConfig'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.PlotConfig'
             type: array
         "400":
           description: Bad Request
@@ -5961,18 +5617,14 @@ paths:
         name: plot_config
         required: true
         schema:
-          $ref: '#/definitions/PlotConfig'
-      - description: api key
-        in: query
-        name: key
-        type: string
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.PlotConfig'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/PlotConfig'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.PlotConfig'
         "400":
           description: Bad Request
           schema:
@@ -5989,39 +5641,6 @@ paths:
       - Bearer: []
       tags:
       - plot-config
-  /projects/{project_id}/plot_configurations/{plot_config_id}/timeseries:
-    get:
-      parameters:
-      - description: project uuid
-        format: uuid
-        in: path
-        name: project_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/Timeseries'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-      summary: lists all timeseries for a single plot config
-      tags:
-      - timeseries
   /projects/{project_id}/plot_configurations/{plot_configuration_id}:
     delete:
       parameters:
@@ -6036,10 +5655,6 @@ paths:
         in: path
         name: plot_configuration_id
         required: true
-        type: string
-      - description: api key
-        in: query
-        name: key
         type: string
       produces:
       - application/json
@@ -6085,7 +5700,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/PlotConfig'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.PlotConfig'
         "400":
           description: Bad Request
           schema:
@@ -6119,18 +5734,14 @@ paths:
         name: plot_config
         required: true
         schema:
-          $ref: '#/definitions/PlotConfig'
-      - description: api key
-        in: query
-        name: key
-        type: string
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.PlotConfig'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/PlotConfig'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.PlotConfig'
         "400":
           description: Bad Request
           schema:
@@ -6147,311 +5758,6 @@ paths:
       - Bearer: []
       tags:
       - plot-config
-  /projects/{project_id}/report_configs:
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: project uuid
-        format: uuid
-        in: path
-        name: project_id
-        required: true
-        type: string
-      - description: api key
-        in: query
-        name: key
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/ReportConfig'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-      security:
-      - Bearer: []
-      summary: lists all report configs for a project
-      tags:
-      - report-config
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: project uuid
-        format: uuid
-        in: path
-        name: project_id
-        required: true
-        type: string
-      - description: report config payload
-        in: body
-        name: report_config
-        required: true
-        schema:
-          $ref: '#/definitions/ReportConfig'
-      - description: api key
-        in: query
-        name: key
-        type: string
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/ReportConfig'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-      security:
-      - Bearer: []
-      summary: creates a report config
-      tags:
-      - report-config
-  /projects/{project_id}/report_configs/{report_config_id}:
-    delete:
-      parameters:
-      - description: project uuid
-        format: uuid
-        in: path
-        name: project_id
-        required: true
-        type: string
-      - description: api key
-        in: query
-        name: key
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-      security:
-      - Bearer: []
-      summary: updates a report config
-      tags:
-      - report-config
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: project uuid
-        format: uuid
-        in: path
-        name: project_id
-        required: true
-        type: string
-      - description: report config uuid
-        format: uuid
-        in: path
-        name: report_config_id
-        required: true
-        type: string
-      - description: report config payload
-        in: body
-        name: report_config
-        required: true
-        schema:
-          $ref: '#/definitions/ReportConfig'
-      - description: api key
-        in: query
-        name: key
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-      security:
-      - Bearer: []
-      summary: updates a report config
-      tags:
-      - report-config
-  /projects/{project_id}/report_configs/{report_config_id}/jobs:
-    post:
-      parameters:
-      - description: project uuid
-        format: uuid
-        in: path
-        name: project_id
-        required: true
-        type: string
-      - description: report config uuid
-        format: uuid
-        in: path
-        name: report_config_id
-        required: true
-        type: string
-      - description: api key
-        in: query
-        name: key
-        type: string
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/ReportDownloadJob'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-      security:
-      - Bearer: []
-      tags:
-      - report-config
-  /projects/{project_id}/report_configs/{report_config_id}/jobs/{job_id}:
-    get:
-      parameters:
-      - description: project uuid
-        format: uuid
-        in: path
-        name: project_id
-        required: true
-        type: string
-      - description: report config uuid
-        format: uuid
-        in: path
-        name: report_config_id
-        required: true
-        type: string
-      - description: download job uuid
-        format: uuid
-        in: path
-        name: job_id
-        required: true
-        type: string
-      - description: api key
-        in: query
-        name: key
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/ReportDownloadJob'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-      security:
-      - Bearer: []
-      tags:
-      - report-config
-    put:
-      parameters:
-      - description: download job uuid
-        format: uuid
-        in: path
-        name: job_id
-        required: true
-        type: string
-      - description: report download job payload
-        in: body
-        name: report_download_job
-        required: true
-        schema:
-          $ref: '#/definitions/ReportDownloadJob'
-      - description: api key
-        in: query
-        name: key
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-      security:
-      - Bearer: []
-      tags:
-      - report-config
   /projects/{project_id}/submittals:
     get:
       parameters:
@@ -6472,7 +5778,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/Submittal'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Submittal'
             type: array
         "400":
           description: Bad Request
@@ -6505,7 +5811,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/Timeseries'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Timeseries'
             type: array
         "400":
           description: Bad Request
@@ -6538,11 +5844,7 @@ paths:
         name: timeseries_measurement_collections
         required: true
         schema:
-          $ref: '#/definitions/TimeseriesMeasurementCollectionCollection'
-      - description: api key
-        in: query
-        name: key
-        type: string
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.TimeseriesMeasurementCollectionCollection'
       produces:
       - application/json
       responses:
@@ -6550,7 +5852,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/MeasurementCollection'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.MeasurementCollection'
             type: array
         "400":
           description: Bad Request
@@ -6592,11 +5894,7 @@ paths:
         name: timeseries_measurement_collections
         required: true
         schema:
-          $ref: '#/definitions/TimeseriesMeasurementCollectionCollection'
-      - description: api key
-        in: query
-        name: key
-        type: string
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.TimeseriesMeasurementCollectionCollection'
       produces:
       - application/json
       responses:
@@ -6604,7 +5902,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/MeasurementCollection'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.MeasurementCollection'
             type: array
         "400":
           description: Bad Request
@@ -6664,7 +5962,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/ProjectCount'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.ProjectCount'
         "400":
           description: Bad Request
           schema:
@@ -6680,41 +5978,6 @@ paths:
       summary: gets the total number of non-deleted projects in the system
       tags:
       - project
-  /report_configs/{report_config_id}/plot_configs:
-    get:
-      parameters:
-      - description: report config uuid
-        format: uuid
-        in: path
-        name: report_config_id
-        required: true
-        type: string
-      - description: api key
-        in: query
-        name: key
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/ReportConfigWithPlotConfigs'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-      tags:
-      - report-config
   /search/{entity}:
     get:
       parameters:
@@ -6734,7 +5997,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/SearchResult'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.SearchResult'
             type: array
         "400":
           description: Bad Request
@@ -6759,10 +6022,6 @@ paths:
         in: path
         name: submittal_id
         required: true
-        type: string
-      - description: api key
-        in: query
-        name: key
         type: string
       produces:
       - application/json
@@ -6797,11 +6056,7 @@ paths:
         name: timeseries_collection_items
         required: true
         schema:
-          $ref: '#/definitions/TimeseriesCollectionItems'
-      - description: api key
-        in: query
-        name: key
-        type: string
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.TimeseriesCollectionItems'
       produces:
       - application/json
       responses:
@@ -6838,10 +6093,6 @@ paths:
         in: path
         name: timeseries_id
         required: true
-        type: string
-      - description: api key
-        in: query
-        name: key
         type: string
       produces:
       - application/json
@@ -6882,7 +6133,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/Timeseries'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Timeseries'
         "400":
           description: Bad Request
           schema:
@@ -6911,11 +6162,7 @@ paths:
         name: timeseries
         required: true
         schema:
-          $ref: '#/definitions/Timeseries'
-      - description: api key
-        in: query
-        name: key
-        type: string
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Timeseries'
       produces:
       - application/json
       responses:
@@ -6956,10 +6203,6 @@ paths:
         in: query
         name: time
         required: true
-        type: string
-      - description: api key
-        in: query
-        name: key
         type: string
       produces:
       - application/json
@@ -7010,7 +6253,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/InclinometerMeasurementCollection'
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InclinometerMeasurementCollection'
         "400":
           description: Bad Request
           schema:
@@ -7041,10 +6284,6 @@ paths:
         name: time
         required: true
         type: string
-      - description: api key
-        in: query
-        name: key
-        type: string
       produces:
       - application/json
       responses:
@@ -7070,50 +6309,6 @@ paths:
       summary: deletes a single timeseries measurement by timestamp
       tags:
       - measurement
-    get:
-      parameters:
-      - description: timeseries uuid
-        format: uuid
-        in: path
-        name: timeseries_id
-        required: true
-        type: string
-      - description: after time
-        format: date-time
-        in: query
-        name: after
-        type: string
-      - description: before time
-        format: date-time
-        in: query
-        name: before
-        type: string
-      - description: downsample threshold
-        in: query
-        name: threshold
-        type: number
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/MeasurementCollection'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/echo.HTTPError'
-      summary: lists timeseries by timeseries uuid
-      tags:
-      - timeseries
   /timeseries_measurements:
     post:
       parameters:
@@ -7122,12 +6317,7 @@ paths:
         name: timeseries_measurement_collections
         required: true
         schema:
-          $ref: '#/definitions/TimeseriesMeasurementCollectionCollection'
-      - description: api key
-        in: query
-        name: key
-        required: true
-        type: string
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.TimeseriesMeasurementCollectionCollection'
       produces:
       - application/json
       responses:
@@ -7135,7 +6325,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/MeasurementCollection'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.MeasurementCollection'
             type: array
         "400":
           description: Bad Request
@@ -7161,7 +6351,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/Unit'
+              $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Unit'
             type: array
         "400":
           description: Bad Request
