@@ -336,7 +336,7 @@ func TestInstruments(t *testing.T) {
 			ExpectedStatus: http.StatusOK,
 		},
 		{
-			Name:           "UnssignInstrumentFromProject",
+			Name:           "UnassignInstrumentFromProject",
 			URL:            fmt.Sprintf("/projects/%s/instruments/%s/assignments", testAssignProjectID, testInstrumentID),
 			Method:         http.MethodDelete,
 			ExpectedStatus: http.StatusOK,

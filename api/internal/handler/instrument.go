@@ -116,10 +116,17 @@ func (h *ApiHandler) CreateInstruments(c echo.Context) error {
 	}
 
 	if c.QueryParam("dry_run") == "true" {
-		h.InstrumentAssignService.ValidateInstrumentNamesProjectUnique(ctx, projectID, instrumentNames)
+		v, err := h.InstrumentAssignService.ValidateInstrumentNamesProjectUnique(ctx, projectID, instrumentNames)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+		if !v.IsValid {
+			return c.JSON(http.StatusBadRequest, v)
+		}
+		return c.JSON(http.StatusOK, v)
 	}
 
-	nn, err := h.InstrumentService.CreateInstruments(ctx, p.ID, projectID, ic)
+	nn, err := h.InstrumentService.CreateInstruments(ctx, ic)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

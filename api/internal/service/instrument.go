@@ -13,7 +13,7 @@ type InstrumentService interface {
 	GetInstrument(ctx context.Context, instrumentID uuid.UUID) (model.Instrument, error)
 	GetInstrumentCount(ctx context.Context) (model.InstrumentCount, error)
 	CreateInstrument(ctx context.Context, i model.Instrument) (model.IDSlugName, error)
-	CreateInstruments(ctx context.Context, profileID, projectID uuid.UUID, instruments []model.Instrument) ([]model.IDSlugName, error)
+	CreateInstruments(ctx context.Context, instruments []model.Instrument) ([]model.IDSlugName, error)
 	UpdateInstrument(ctx context.Context, projectID uuid.UUID, i model.Instrument) (model.Instrument, error)
 	UpdateInstrumentGeometry(ctx context.Context, projectID, instrumentID uuid.UUID, geom geojson.Geometry, p model.Profile) (model.Instrument, error)
 	DeleteFlagInstrument(ctx context.Context, projectID, instrumentID uuid.UUID) error
@@ -65,42 +65,6 @@ func createInstrument(ctx context.Context, q *model.Queries, instrument model.In
 	return newInstrument, nil
 }
 
-func createInstruments(ctx context.Context, q *model.Queries, profileID, projectID uuid.UUID, instruments []model.Instrument) ([]model.IDSlugName, error) {
-	instrumentIDs := make([]uuid.UUID, len(instruments))
-	newInstruments := make([]model.IDSlugName, len(instruments))
-	for idx := range instruments {
-		newInstrument, err := q.CreateInstrument(ctx, instruments[idx])
-		if err != nil {
-			return nil, err
-		}
-		instrumentIDs[idx] = newInstrument.ID
-		instruments[idx].ID = newInstrument.ID
-	}
-	v, err := assignInstrumentsToProject(ctx, q, profileID, projectID, instrumentIDs)
-	if err != nil || !v.IsValid {
-		return nil, err
-	}
-	for idx := range instruments {
-		if err := q.CreateOrUpdateInstrumentStatus(ctx, instruments[idx].ID, instruments[idx].StatusID, instruments[idx].StatusTime); err != nil {
-			return nil, err
-		}
-	}
-	for idx := range instruments {
-		if instruments[idx].AwareID != nil {
-			if err := q.CreateAwarePlatform(ctx, instruments[idx].ID, *instruments[idx].AwareID); err != nil {
-				return nil, err
-			}
-		}
-	}
-	for idx := range instruments {
-		instruments[idx].ID = instrumentIDs[idx]
-		if err := handleOpts(ctx, q, instruments[idx], create); err != nil {
-			return nil, err
-		}
-	}
-	return newInstruments, nil
-}
-
 func (s instrumentService) CreateInstrument(ctx context.Context, instrument model.Instrument) (model.IDSlugName, error) {
 	tx, err := s.db.BeginTxx(ctx, nil)
 	if err != nil {
@@ -121,7 +85,7 @@ func (s instrumentService) CreateInstrument(ctx context.Context, instrument mode
 	return newInstrument, nil
 }
 
-func (s instrumentService) CreateInstruments(ctx context.Context, profileID, projectID uuid.UUID, instruments []model.Instrument) ([]model.IDSlugName, error) {
+func (s instrumentService) CreateInstruments(ctx context.Context, instruments []model.Instrument) ([]model.IDSlugName, error) {
 	tx, err := s.db.BeginTxx(ctx, nil)
 	if err != nil {
 		return nil, err
@@ -130,11 +94,14 @@ func (s instrumentService) CreateInstruments(ctx context.Context, profileID, pro
 
 	qtx := s.WithTx(tx)
 
-	ii, err := createInstruments(ctx, qtx, profileID, projectID, instruments)
-	if err != nil {
-		return nil, err
+	ii := make([]model.IDSlugName, len(instruments))
+	for idx, i := range instruments {
+		newInstrument, err := createInstrument(ctx, qtx, i)
+		if err != nil {
+			return nil, err
+		}
+		ii[idx] = newInstrument
 	}
-
 	if err := tx.Commit(); err != nil {
 		return nil, err
 	}

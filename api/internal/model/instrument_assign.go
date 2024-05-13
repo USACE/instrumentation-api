@@ -48,7 +48,6 @@ const validateInstrumentNamesProjectUnique = `
 	WHERE pi.project_id = ?
 	AND i.name IN (?)
 	AND NOT i.deleted
-	ORDER BY pi.project_id
 `
 
 // ValidateInstrumentNamesProjectUnique checks that the provided instrument names do not already belong to a project
@@ -127,17 +126,15 @@ const validateInstrumentsAssignerAuthorized = `
 	WHERE pi.instrument_id IN (?)
 	AND NOT EXISTS (
 		SELECT 1 FROM v_profile_project_roles ppr
-		WHERE profile_id = ?
-		AND (ppr.is_admin
-		OR (ppr.project_id = pi.project_id AND ppr.role = 'ADMIN'))
+		WHERE ppr.profile_id = ?
+		AND (ppr.is_admin OR (ppr.project_id = pi.project_id AND ppr.role = 'ADMIN'))
 	)
 	AND NOT i.deleted
-	ORDER BY p.name
 `
 
 func (q *Queries) ValidateInstrumentsAssignerAuthorized(ctx context.Context, profileID uuid.UUID, instrumentIDs []uuid.UUID) (InstrumentsValidation, error) {
 	var v InstrumentsValidation
-	query, args, err := sqlIn(validateInstrumentsAssignerAuthorized, profileID, instrumentIDs)
+	query, args, err := sqlIn(validateInstrumentsAssignerAuthorized, instrumentIDs, profileID)
 	if err != nil {
 		return v, err
 	}
@@ -170,13 +167,12 @@ const validateProjectsAssignerAuthorized = `
 	SELECT p.name
 	FROM project_instrument pi
 	INNER JOIN project p ON pi.project_id = p.id
+	INNER JOIN instrument i ON pi.instrument_id = i.id
 	WHERE pi.instrument_id = ?
 	AND pi.project_id IN (?)
 	AND NOT EXISTS (
 		SELECT 1 FROM v_profile_project_roles ppr
-		WHERE profile_id = ?
-		AND (ppr.is_admin
-		OR (ppr.project_id = pi.project_id AND ppr.role = 'ADMIN'))
+		WHERE profile_id = ? AND (ppr.is_admin OR (ppr.project_id = pi.project_id AND ppr.role = 'ADMIN'))
 	)
 	AND NOT i.deleted
 	ORDER BY p.name
@@ -184,7 +180,7 @@ const validateProjectsAssignerAuthorized = `
 
 func (q *Queries) ValidateProjectsAssignerAuthorized(ctx context.Context, profileID, instrumentID uuid.UUID, projectIDs []uuid.UUID) (InstrumentsValidation, error) {
 	var v InstrumentsValidation
-	query, args, err := sqlIn(validateInstrumentsAssignerAuthorized, instrumentID, projectIDs, profileID)
+	query, args, err := sqlIn(validateProjectsAssignerAuthorized, instrumentID, projectIDs, profileID)
 	if err != nil {
 		return v, err
 	}
