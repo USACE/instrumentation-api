@@ -18,6 +18,7 @@ import (
 //	@Produce json
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param instrument_id path string true "instrument uuid" Format(uuid)
+//	@Param dry_run query string false "validate request without performing action"
 //	@Success 200 {object} model.InstrumentsValidation
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -52,6 +53,8 @@ func (h *ApiHandler) AssignInstrumentToProject(c echo.Context) error {
 //	@Produce json
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param instrument_id path string true "instrument uuid" Format(uuid)
+//	@Param action query string true "valid values are 'assign' or 'unassign'"
+//	@Param dry_run query string false "validate request without performing action"
 //	@Success 200 {object} model.InstrumentsValidation
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -78,25 +81,23 @@ func (h *ApiHandler) UnassignInstrumentFromProject(c echo.Context) error {
 	return c.JSON(http.StatusOK, v)
 }
 
-type ProjectIDsPayload struct {
-	ProjectIDs []uuid.UUID `json:"project_ids"`
-}
-
-// AssignProjectsToInstrument godoc
+// UpdateInstrumentProjectAssignments godoc
 //
-//	@Summary assigns multiple projects to an instruments
+//	@Summary updates multiple project assignments for an instrument
 //	@Tags instrument
 //	@Description must be Project (or Application) Admin of all existing instrument projects and project to be assigned
 //	@Produce json
 //	@Param instrument_id path string true "instrument uuid" Format(uuid)
 //	@Param project_ids body  true "project uuids" Format(uuid)
-//	@Success 200 {object} model.InstrumentsValidation
+//	@Param action query string true "valid values are 'assign' or 'unassign'"
+//	@Param dry_run query string false "validate request without performing action"
+//	@Success 201 {object} model.InstrumentsValidation
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
-//	@Router /instruments/{instrument_id}/assignments [post]
+//	@Router projects/{project_id}/instruments/{instrument_id}/assignments [put]
 //	@Security Bearer
-func (h *ApiHandler) AssignProjectsToInstrument(c echo.Context) error {
+func (h *ApiHandler) UpdateInstrumentProjectAssignments(c echo.Context) error {
 	iID, err := uuid.Parse(c.Param("instrument_id"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
@@ -104,73 +105,47 @@ func (h *ApiHandler) AssignProjectsToInstrument(c echo.Context) error {
 	p := c.Get("profile").(model.Profile)
 	dryRun := strings.ToLower(c.QueryParam("dry_run")) == "true"
 
-	pl := ProjectIDsPayload{ProjectIDs: make([]uuid.UUID, 0)}
+	pl := model.InstrumentProjectAssignments{ProjectIDs: make([]uuid.UUID, 0)}
 	if err := c.Bind(&pl); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	v, err := h.InstrumentAssignService.AssignProjectsToInstrument(c.Request().Context(), p.ID, iID, pl.ProjectIDs, dryRun)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	ctx := c.Request().Context()
+	switch strings.ToLower(c.QueryParam("action")) {
+	case "assign":
+		v, err := h.InstrumentAssignService.AssignProjectsToInstrument(ctx, p.ID, iID, pl.ProjectIDs, dryRun)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+		return c.JSON(http.StatusOK, v)
+	case "unassign":
+		v, err := h.InstrumentAssignService.UnassignProjectsFromInstrument(ctx, p.ID, iID, pl.ProjectIDs, dryRun)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+		return c.JSON(http.StatusOK, v)
+	default:
+		return echo.NewHTTPError(http.StatusBadRequest, "required query parameter 'action': valid values are 'assign' or 'unassign'")
 	}
-
-	return c.JSON(http.StatusOK, v)
 }
 
-// UnassignProjectsFromInstrument godoc
+// UpdateProjectInstrumentAssignments godoc
 //
-//	@Summary unassigns multiple projects from an instrument
-//	@Tags instrument
-//	@Description must be Project (or Application) Admin of all projects to be uassigned
-//	@Produce json
-//	@Param instrument_id path string true "instrument uuid" Format(uuid)
-//	@Param project_ids body  true "project uuids" Format(uuid)
-//	@Success 200 {object} model.InstrumentsValidation
-//	@Failure 400 {object} echo.HTTPError
-//	@Failure 404 {object} echo.HTTPError
-//	@Failure 500 {object} echo.HTTPError
-//	@Router /instruments/{instrument_id}/assignments [post]
-//	@Security Bearer
-func (h *ApiHandler) UnssignProjectsFromInstrument(c echo.Context) error {
-	iID, err := uuid.Parse(c.Param("instrument_id"))
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
-	}
-	p := c.Get("profile").(model.Profile)
-	dryRun := strings.ToLower(c.QueryParam("dry_run")) == "true"
-
-	pl := ProjectIDsPayload{ProjectIDs: make([]uuid.UUID, 0)}
-	if err := c.Bind(&pl); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	v, err := h.InstrumentAssignService.UnassignProjectsFromInstrument(c.Request().Context(), p.ID, iID, pl.ProjectIDs, dryRun)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	return c.JSON(http.StatusOK, v)
-}
-
-type InstrumentIDsPayload struct {
-	InstrumentIDs []uuid.UUID `json:"instrument_ids"`
-}
-
-// AssignInstrumentsToProject godoc
-//
-//	@Summary assigns multiple instruments to a project
+//	@Summary updates multiple instrument assigments for a project
 //	@Tags instrument
 //	@Description must be Project (or Application) Admin of all existing instrument projects and project to be assigned
 //	@Produce json
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param instrument_ids body true "instrument uuids" Format(uuid)
-//	@Success 200 {object} map[string]interface{}
+//	@Param action query string true "valid values are 'assign' or 'unassign'"
+//	@Param dry_run query string false "validate request without performing action"
+//	@Success 201 {object} model.InstrumentsValidation
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
-//	@Router /projects/{project_id}/instruments/assignments [post]
+//	@Router /projects/{project_id}/instruments/assignments [put]
 //	@Security Bearer
-func (h *ApiHandler) AssignInstrumentsToProject(c echo.Context) error {
+func (h *ApiHandler) UpdateProjectInstrumentAssignments(c echo.Context) error {
 	pID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
@@ -178,50 +153,26 @@ func (h *ApiHandler) AssignInstrumentsToProject(c echo.Context) error {
 	p := c.Get("profile").(model.Profile)
 	dryRun := strings.ToLower(c.QueryParam("dry_run")) == "true"
 
-	pl := InstrumentIDsPayload{InstrumentIDs: make([]uuid.UUID, 0)}
+	pl := model.ProjectInstrumentAssignments{InstrumentIDs: make([]uuid.UUID, 0)}
 	if err := c.Bind(&pl); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	v, err := h.InstrumentAssignService.AssignInstrumentsToProject(c.Request().Context(), p.ID, pID, pl.InstrumentIDs, dryRun)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	ctx := c.Request().Context()
+	switch strings.ToLower(c.QueryParam("action")) {
+	case "assign":
+		v, err := h.InstrumentAssignService.AssignInstrumentsToProject(ctx, p.ID, pID, pl.InstrumentIDs, dryRun)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+		return c.JSON(http.StatusOK, v)
+	case "unassign":
+		v, err := h.InstrumentAssignService.UnassignInstrumentsFromProject(ctx, p.ID, pID, pl.InstrumentIDs, dryRun)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+		return c.JSON(http.StatusOK, v)
+	default:
+		return echo.NewHTTPError(http.StatusBadRequest, "required query parameter 'action': valid values are 'assign' or 'unassign'")
 	}
-
-	return c.JSON(http.StatusOK, v)
-}
-
-// UnassignInstrumentsFromProject godoc
-//
-//	@Summary unassigns multiple instruments from a project
-//	@Tags instrument
-//	@Description must be Project (or Application) Admin of all projects to be unassigned
-//	@Produce json
-//	@Param project_id path string true "project uuid" Format(uuid)
-//	@Param instrument_ids body true "instrument uuids" Format(uuid)
-//	@Success 200 {object} map[string]interface{}
-//	@Failure 400 {object} echo.HTTPError
-//	@Failure 404 {object} echo.HTTPError
-//	@Failure 500 {object} echo.HTTPError
-//	@Router /projects/{project_id}/instruments/assignments [post]
-//	@Security Bearer
-func (h *ApiHandler) UnassignInstrumentsToProject(c echo.Context) error {
-	pID, err := uuid.Parse(c.Param("project_id"))
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
-	}
-	p := c.Get("profile").(model.Profile)
-	dryRun := strings.ToLower(c.QueryParam("dry_run")) == "true"
-
-	pl := InstrumentIDsPayload{InstrumentIDs: make([]uuid.UUID, 0)}
-	if err := c.Bind(&pl); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	v, err := h.InstrumentAssignService.UnassignInstrumentsFromProject(c.Request().Context(), p.ID, pID, pl.InstrumentIDs, dryRun)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	return c.JSON(http.StatusOK, v)
 }

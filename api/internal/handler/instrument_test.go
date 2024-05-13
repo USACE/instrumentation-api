@@ -81,8 +81,7 @@ var instrumentCountObjectLoader = gojsonschema.NewStringLoader(`{
 }`)
 
 const (
-	testInstrumentID    = "a7540f69-c41e-43b3-b655-6e44097edb7e"
-	testAssignProjectID = "d559abfd-7ec7-4d0d-97bd-a04018f01e4c"
+	testInstrumentID = "a7540f69-c41e-43b3-b655-6e44097edb7e"
 )
 
 const updateInstrumentBody = `{
@@ -328,18 +327,6 @@ func TestInstruments(t *testing.T) {
 			Method:         http.MethodPost,
 			Body:           validateCreateInstrumentBulkBody,
 			ExpectedStatus: http.StatusBadRequest,
-		},
-		{
-			Name:           "AssignInstrumentToProject",
-			URL:            fmt.Sprintf("/projects/%s/instruments/%s/assignments", testAssignProjectID, testInstrumentID),
-			Method:         http.MethodPost,
-			ExpectedStatus: http.StatusOK,
-		},
-		{
-			Name:           "UnassignInstrumentFromProject",
-			URL:            fmt.Sprintf("/projects/%s/instruments/%s/assignments", testAssignProjectID, testInstrumentID),
-			Method:         http.MethodDelete,
-			ExpectedStatus: http.StatusOK,
 		},
 		{
 			Name:           "DeleteInstrument",

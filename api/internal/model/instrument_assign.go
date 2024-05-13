@@ -22,6 +22,14 @@ type InstrumentsValidation struct {
 	Errors     []string   `json:"errors"`
 }
 
+type ProjectInstrumentAssignments struct {
+	InstrumentIDs []uuid.UUID `json:"instrument_ids"`
+}
+
+type InstrumentProjectAssignments struct {
+	ProjectIDs []uuid.UUID `json:"project_ids"`
+}
+
 const assignInstrumentToProject = `
 	INSERT INTO project_instrument (project_id, instrument_id) VALUES ($1, $2)
 	ON CONFLICT ON CONSTRAINT project_instrument_project_id_instrument_id_key DO NOTHING
@@ -57,7 +65,9 @@ func (q *Queries) ValidateInstrumentNamesProjectUnique(ctx context.Context, proj
 	if err != nil {
 		return v, err
 	}
-	var nn []string
+	var nn []struct {
+		Name string `db:"name"`
+	}
 	if err := q.db.SelectContext(ctx, &nn, q.db.Rebind(query), args...); err != nil {
 		return v, err
 	}
@@ -66,7 +76,7 @@ func (q *Queries) ValidateInstrumentNamesProjectUnique(ctx context.Context, proj
 		for idx := range nn {
 			vErrors[idx] = fmt.Sprintf(
 				"Instrument name '%s' is already taken. Instrument names must be unique within associated projects",
-				nn[idx],
+				nn[idx].Name,
 			)
 		}
 		v.Errors = vErrors
@@ -96,7 +106,9 @@ func (q *Queries) ValidateProjectsInstrumentNameUnique(ctx context.Context, inst
 	if err != nil {
 		return v, err
 	}
-	var nn []string
+	var nn []struct {
+		Name string `db:"name"`
+	}
 	if err := q.db.SelectContext(ctx, &nn, q.db.Rebind(query), args...); err != nil {
 		return v, err
 	}
@@ -105,7 +117,7 @@ func (q *Queries) ValidateProjectsInstrumentNameUnique(ctx context.Context, inst
 		for idx := range nn {
 			vErrors[idx] = fmt.Sprintf(
 				"Instrument name '%s' is already taken. Instrument names must be unique within associated projects",
-				nn[idx],
+				nn[idx].Name,
 			)
 		}
 		v.Errors = vErrors
@@ -184,7 +196,9 @@ func (q *Queries) ValidateProjectsAssignerAuthorized(ctx context.Context, profil
 	if err != nil {
 		return v, err
 	}
-	var nn []string
+	var nn []struct {
+		Name string `db:"name"`
+	}
 	if err := q.db.SelectContext(ctx, &nn, q.db.Rebind(query), args...); err != nil {
 		return v, err
 	}
@@ -193,7 +207,7 @@ func (q *Queries) ValidateProjectsAssignerAuthorized(ctx context.Context, profil
 		for idx := range nn {
 			vErrors[idx] = fmt.Sprintf(
 				"Cannot assign instrument to project '%s' because the user is not an ADMIN of this project",
-				nn[idx],
+				nn[idx].Name,
 			)
 		}
 		v.Errors = vErrors

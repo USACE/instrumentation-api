@@ -154,11 +154,15 @@ func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 	r.public.GET("/instruments/:instrument_id", h.GetInstrument)
 	r.public.GET("/instruments/:instrument_id/timeseries_measurements", h.ListTimeseriesMeasurementsByInstrument)
 	r.private.POST("/projects/:project_id/instruments", h.CreateInstruments)
-	r.private.POST("/projects/:project_id/instruments/:instrument_id/assignments", h.AssignInstrumentToProject, mw.IsProjectAdmin)
-	r.private.DELETE("/projects/:project_id/instruments/:instrument_id/assignments", h.UnassignInstrumentFromProject, mw.IsProjectAdmin)
 	r.private.PUT("/projects/:project_id/instruments/:instrument_id", h.UpdateInstrument)
 	r.private.PUT("/projects/:project_id/instruments/:instrument_id/geometry", h.UpdateInstrumentGeometry)
 	r.private.DELETE("/projects/:project_id/instruments/:instrument_id", h.DeleteFlagInstrument)
+
+	// InstrumentAssignments
+	r.private.POST("/projects/:project_id/instruments/:instrument_id/assignments", h.AssignInstrumentToProject, mw.IsProjectAdmin)
+	r.private.DELETE("/projects/:project_id/instruments/:instrument_id/assignments", h.UnassignInstrumentFromProject, mw.IsProjectAdmin)
+	r.private.PUT("/projects/:project_id/instruments/:instrument_id/assignments", h.UpdateInstrumentProjectAssignments)
+	r.private.PUT("/projects/:project_id/instruments/assignments", h.UpdateProjectInstrumentAssignments)
 
 	// InstrumentConstant
 	r.public.GET("/projects/:project_id/instruments/:instrument_id/constants", h.ListInstrumentConstants)
