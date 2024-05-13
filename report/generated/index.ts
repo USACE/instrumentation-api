@@ -50,8 +50,10 @@ export type { InstrumentCount } from './models/InstrumentCount';
 export type { InstrumentGroup } from './models/InstrumentGroup';
 export type { InstrumentNote } from './models/InstrumentNote';
 export type { InstrumentNoteCollection } from './models/InstrumentNoteCollection';
+export type { InstrumentProjectAssignments } from './models/InstrumentProjectAssignments';
 export type { InstrumentStatus } from './models/InstrumentStatus';
 export type { InstrumentStatusCollection } from './models/InstrumentStatusCollection';
+export type { InstrumentsValidation } from './models/InstrumentsValidation';
 export type { IpiMeasurements } from './models/IpiMeasurements';
 export type { IpiSegment } from './models/IpiSegment';
 export type { IpiSegmentMeasurement } from './models/IpiSegmentMeasurement';
@@ -70,6 +72,7 @@ export type { PlotConfigTimeseriesTrace } from './models/PlotConfigTimeseriesTra
 export type { Profile } from './models/Profile';
 export type { Project } from './models/Project';
 export type { ProjectCount } from './models/ProjectCount';
+export type { ProjectInstrumentAssignments } from './models/ProjectInstrumentAssignments';
 export type { ProjectMembership } from './models/ProjectMembership';
 export type { ReportConfig } from './models/ReportConfig';
 export type { ReportConfigGlobalOverrides } from './models/ReportConfigGlobalOverrides';

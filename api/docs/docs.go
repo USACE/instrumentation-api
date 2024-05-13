@@ -6004,7 +6004,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.ProjectInstrumentAssignments"
+                            "$ref": "#/definitions/ProjectInstrumentAssignments"
                         }
                     },
                     {
@@ -6025,7 +6025,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentsValidation"
+                            "$ref": "#/definitions/InstrumentsValidation"
                         }
                     },
                     "400": {
@@ -6485,7 +6485,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentProjectAssignments"
+                            "$ref": "#/definitions/InstrumentProjectAssignments"
                         }
                     },
                     {
@@ -6506,7 +6506,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentsValidation"
+                            "$ref": "#/definitions/InstrumentsValidation"
                         }
                     },
                     "400": {
@@ -6571,7 +6571,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentsValidation"
+                            "$ref": "#/definitions/InstrumentsValidation"
                         }
                     },
                     "400": {
@@ -6643,7 +6643,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentsValidation"
+                            "$ref": "#/definitions/InstrumentsValidation"
                         }
                     },
                     "400": {
@@ -10151,7 +10151,18 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.InstrumentStatus": {
+        "InstrumentProjectAssignments": {
+            "type": "object",
+            "properties": {
+                "project_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "InstrumentStatus": {
             "type": "object",
             "properties": {
                 "id": {
@@ -10179,7 +10190,21 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.IpiMeasurements": {
+        "InstrumentsValidation": {
+            "type": "object",
+            "properties": {
+                "errors": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "is_valid": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "IpiMeasurements": {
             "type": "object",
             "properties": {
                 "measurements": {
@@ -10537,7 +10562,41 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.ProjectInstrumentAssignments": {
+        "ProjectInstrumentAssignments": {
+            "type": "object",
+            "properties": {
+                "instrument_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "ProjectMembership": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "profile_id": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "role_id": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "ReportConfig": {
             "type": "object",
             "properties": {
                 "create_date": {

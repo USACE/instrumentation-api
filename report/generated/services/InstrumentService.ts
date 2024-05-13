@@ -5,6 +5,9 @@
 import type { IDSlugName } from '../models/IDSlugName';
 import type { Instrument } from '../models/Instrument';
 import type { InstrumentCount } from '../models/InstrumentCount';
+import type { InstrumentProjectAssignments } from '../models/InstrumentProjectAssignments';
+import type { InstrumentsValidation } from '../models/InstrumentsValidation';
+import type { ProjectInstrumentAssignments } from '../models/ProjectInstrumentAssignments';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 export class InstrumentService {
@@ -97,6 +100,40 @@ export class InstrumentService {
         });
     }
     /**
+     * updates multiple instrument assigments for a project
+     * must be Project (or Application) Admin of all existing instrument projects and project to be assigned
+     * @param projectId project uuid
+     * @param instrumentIds instrument uuids
+     * @param action valid values are 'assign' or 'unassign'
+     * @param dryRun validate request without performing action
+     * @returns InstrumentsValidation OK
+     * @throws ApiError
+     */
+    public putProjectsInstrumentsAssignments(
+        projectId: string,
+        instrumentIds: ProjectInstrumentAssignments,
+        action: string,
+        dryRun?: string,
+    ): CancelablePromise<InstrumentsValidation> {
+        return this.httpRequest.request({
+            method: 'PUT',
+            url: '/projects/{project_id}/instruments/assignments',
+            path: {
+                'project_id': projectId,
+            },
+            query: {
+                'action': action,
+                'dry_run': dryRun,
+            },
+            body: instrumentIds,
+            errors: {
+                400: `Bad Request`,
+                404: `Not Found`,
+                500: `Internal Server Error`,
+            },
+        });
+    }
+    /**
      * updates an existing instrument
      * @param projectId project uuid
      * @param instrumentId instrument uuid
@@ -160,19 +197,53 @@ export class InstrumentService {
         });
     }
     /**
+     * updates multiple project assignments for an instrument
+     * must be Project (or Application) Admin of all existing instrument projects and project to be assigned
+     * @param instrumentId instrument uuid
+     * @param projectIds project uuids
+     * @param action valid values are 'assign' or 'unassign'
+     * @param dryRun validate request without performing action
+     * @returns InstrumentsValidation OK
+     * @throws ApiError
+     */
+    public putProjectsInstrumentsAssignments1(
+        instrumentId: string,
+        projectIds: InstrumentProjectAssignments,
+        action: string,
+        dryRun?: string,
+    ): CancelablePromise<InstrumentsValidation> {
+        return this.httpRequest.request({
+            method: 'PUT',
+            url: '/projects/{project_id}/instruments/{instrument_id}/assignments',
+            path: {
+                'instrument_id': instrumentId,
+            },
+            query: {
+                'action': action,
+                'dry_run': dryRun,
+            },
+            body: projectIds,
+            errors: {
+                400: `Bad Request`,
+                404: `Not Found`,
+                500: `Internal Server Error`,
+            },
+        });
+    }
+    /**
      * assigns an instrument to a project.
      * must be Project (or Application) Admin of all existing instrument projects and project to be assigned
      * @param projectId project uuid
      * @param instrumentId instrument uuid
-     * @param key api key
-     * @returns any OK
+     * @param dryRun validate request without performing action
+     * @returns InstrumentsValidation OK
      * @throws ApiError
      */
     public postProjectsInstrumentsAssignments(
         projectId: string,
         instrumentId: string,
-        key?: string,
-    ): CancelablePromise<any> {
+        dryRun?: string,
+    ): CancelablePromise<InstrumentsValidation> {
         return this.httpRequest.request({
             method: 'POST',
             url: '/projects/{project_id}/instruments/{instrument_id}/assignments',
@@ -181,7 +252,7 @@ export class InstrumentService {
                 'instrument_id': instrumentId,
             },
             query: {
-                'key': key,
+                'dry_run': dryRun,
             },
             errors: {
                 400: `Bad Request`,
@@ -195,15 +266,17 @@ export class InstrumentService {
      * must be Project Admin of project to be unassigned
      * @param projectId project uuid
      * @param instrumentId instrument uuid
-     * @param key api key
-     * @returns any OK
+     * @param action valid values are 'assign' or 'unassign'
+     * @param dryRun validate request without performing action
+     * @returns InstrumentsValidation OK
      * @throws ApiError
      */
     public deleteProjectsInstrumentsAssignments(
         projectId: string,
         instrumentId: string,
-        key?: string,
-    ): CancelablePromise<any> {
+        action: string,
+        dryRun?: string,
+    ): CancelablePromise<InstrumentsValidation> {
         return this.httpRequest.request({
             method: 'DELETE',
             url: '/projects/{project_id}/instruments/{instrument_id}/assignments',
@@ -212,7 +285,8 @@ export class InstrumentService {
                 'instrument_id': instrumentId,
             },
             query: {
-                'key': key,
+                'action': action,
+                'dry_run': dryRun,
             },
             errors: {
                 400: `Bad Request`,
