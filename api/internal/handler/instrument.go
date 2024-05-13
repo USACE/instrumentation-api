@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/internal/message"
@@ -115,7 +116,7 @@ func (h *ApiHandler) CreateInstruments(c echo.Context) error {
 		ic[idx].CreateDate = t
 	}
 
-	if c.QueryParam("dry_run") == "true" {
+	if strings.ToLower(c.QueryParam("dry_run")) == "true" {
 		v, err := h.InstrumentAssignService.ValidateInstrumentNamesProjectUnique(ctx, projectID, instrumentNames)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())

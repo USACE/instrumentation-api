@@ -33,7 +33,7 @@ func (h *ApiHandler) AssignInstrumentToProject(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
 	}
-	dryRun := c.QueryParam("dry_run") == "true"
+	dryRun := strings.ToLower(c.QueryParam("dry_run")) == "true"
 	p := c.Get("profile").(model.Profile)
 
 	v, err := h.InstrumentAssignService.AssignInstrumentsToProject(c.Request().Context(), p.ID, pID, []uuid.UUID{iID}, dryRun)
