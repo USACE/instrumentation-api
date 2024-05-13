@@ -24,10 +24,12 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
 
 FROM ${BASE_IMAGE} AS core
 COPY --from=builder /go/bin/core /go/bin/midas-core
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 ENTRYPOINT ["/go/bin/midas-core"]
 
 FROM ${BASE_IMAGE} AS telemetry
 COPY --from=builder /go/bin/telemetry /go/bin/midas-telemetry
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 ENTRYPOINT ["/go/bin/midas-telemetry"]
 
 FROM ${BASE_IMAGE} AS alert
