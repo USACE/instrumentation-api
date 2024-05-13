@@ -30,4 +30,5 @@ INSERT INTO plot_configuration_timeseries_trace (plot_configuration_id, timeseri
 SELECT plot_configuration_id, timeseries_id, 0, '#' || lpad(to_hex(round(random() * 10000000)::int4),6,'0')
 FROM plot_configuration_timeseries;
 
+DROP VIEW IF EXISTS v_plot_configuration;
 DROP TABLE plot_configuration_timeseries;
