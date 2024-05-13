@@ -71,6 +71,7 @@ func (h *ApiHandler) GetInstrumentStatus(c echo.Context) error {
 //	@Produce json
 //	@Param instrument_id path string true "instrument uuid" Format(uuid)
 //	@Param instrument_status body model.InstrumentStatusCollection true "instrument status collection paylaod"
+//	@Param key query string false "api key"
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -109,6 +110,7 @@ func (h *ApiHandler) CreateOrUpdateInstrumentStatus(c echo.Context) error {
 //	@Produce json
 //	@Param instrument_id path string true "instrument uuid" Format(uuid)
 //	@Param status_id path string true "project uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError

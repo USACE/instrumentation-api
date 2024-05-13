@@ -253,6 +253,16 @@ func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 	r.private.PUT("/projects/:project_id", h.UpdateProject, mw.IsApplicationAdmin)
 	r.private.DELETE("/projects/:project_id", h.DeleteFlagProject, mw.IsApplicationAdmin)
 
+	// Report Config
+	r.private.GET("/projects/:project_id/report_configs", h.ListProjectReportConfigs)
+	r.private.POST("/projects/:project_id/report_configs", h.CreateReportConfig)
+	r.private.PUT("/projects/:project_id/report_configs/:report_config_id", h.UpdateReportConfig)
+	r.private.DELETE("/projects/:project_id/report_configs/:report_config_id", h.DeleteReportConfig)
+	r.app.GET("/report_configs/:report_config_id/plot_configs", h.GetReportConfigWithPlotConfigs)
+	r.private.GET("/projects/:project_id/report_configs/:report_config_id/jobs/:job_id", h.GetReportDownloadJob)
+	r.private.POST("/projects/:project_id/report_configs/:report_config_id/jobs", h.CreateReportDownloadJob)
+	r.app.PUT("/report_jobs/:job_id", h.UpdateReportDownloadJob)
+
 	// Search
 	r.public.GET("/search/:entity", h.Search)
 
@@ -274,6 +284,8 @@ func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 	r.public.GET("/instruments/:instrument_id/timeseries/:timeseries_id", h.GetTimeseries)
 	r.public.GET("/projects/:project_id/timeseries", h.ListProjectTimeseries)
 	r.public.GET("/projects/:project_id/instruments/:instrument_id/timeseries", h.ListInstrumentTimeseries)
+	r.public.GET("/projects/:project_id/plot_configurations/:plot_config_id/timeseries", h.ListPlotConfigTimeseries)
+
 	r.private.POST("/timeseries", h.CreateTimeseries)
 	r.private.PUT("/timeseries/:timeseries_id", h.UpdateTimeseries)
 	r.private.DELETE("/timeseries/:timeseries_id", h.DeleteTimeseries)

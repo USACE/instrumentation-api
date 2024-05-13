@@ -44,7 +44,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Submittal"
+                                "$ref": "#/definitions/Submittal"
                             }
                         }
                     },
@@ -91,6 +91,12 @@ const docTemplate = `{
                         "name": "alert_config_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -154,8 +160,14 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertSubscription"
+                            "$ref": "#/definitions/AlertSubscription"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -164,7 +176,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertSubscription"
+                                "$ref": "#/definitions/AlertSubscription"
                             }
                         }
                     },
@@ -204,7 +216,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AwarePlatformParameterConfig"
+                                "$ref": "#/definitions/AwarePlatformParameterConfig"
                             }
                         }
                     },
@@ -244,7 +256,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AwareParameter"
+                                "$ref": "#/definitions/AwareParameter"
                             }
                         }
                     },
@@ -293,8 +305,14 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Datalogger"
+                            "$ref": "#/definitions/Datalogger"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -303,7 +321,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerWithKey"
+                                "$ref": "#/definitions/DataloggerWithKey"
                             }
                         }
                     },
@@ -350,13 +368,19 @@ const docTemplate = `{
                         "name": "datalogger_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Datalogger"
+                            "$ref": "#/definitions/Datalogger"
                         }
                     },
                     "400": {
@@ -407,15 +431,21 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Datalogger"
+                            "$ref": "#/definitions/Datalogger"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Datalogger"
+                            "$ref": "#/definitions/Datalogger"
                         }
                     },
                     "400": {
@@ -459,6 +489,12 @@ const docTemplate = `{
                         "name": "datalogger_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -519,15 +555,21 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable"
+                            "$ref": "#/definitions/EquivalencyTable"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable"
+                            "$ref": "#/definitions/EquivalencyTable"
                         }
                     },
                     "400": {
@@ -573,13 +615,19 @@ const docTemplate = `{
                         "name": "datalogger_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerWithKey"
+                            "$ref": "#/definitions/DataloggerWithKey"
                         }
                     },
                     "400": {
@@ -633,6 +681,12 @@ const docTemplate = `{
                         "name": "datalogger_table_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -641,7 +695,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable"
+                                "$ref": "#/definitions/EquivalencyTable"
                             }
                         }
                     },
@@ -701,15 +755,21 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable"
+                            "$ref": "#/definitions/EquivalencyTable"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable"
+                            "$ref": "#/definitions/EquivalencyTable"
                         }
                     },
                     "400": {
@@ -768,15 +828,21 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable"
+                            "$ref": "#/definitions/EquivalencyTable"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable"
+                            "$ref": "#/definitions/EquivalencyTable"
                         }
                     },
                     "400": {
@@ -828,6 +894,12 @@ const docTemplate = `{
                         "name": "datalogger_table_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -897,6 +969,12 @@ const docTemplate = `{
                         "name": "row_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -958,13 +1036,19 @@ const docTemplate = `{
                         "name": "datalogger_table_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerTablePreview"
+                            "$ref": "#/definitions/DataloggerTablePreview"
                         }
                     },
                     "400": {
@@ -1018,13 +1102,19 @@ const docTemplate = `{
                         "name": "datalogger_table_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerTablePreview"
+                            "$ref": "#/definitions/DataloggerTablePreview"
                         }
                     },
                     "400": {
@@ -1062,13 +1152,21 @@ const docTemplate = `{
                     "datalogger"
                 ],
                 "summary": "lists dataloggers for a project",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Datalogger"
+                                "$ref": "#/definitions/Datalogger"
                             }
                         }
                     },
@@ -1108,7 +1206,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.District"
+                                "$ref": "#/definitions/District"
                             }
                         }
                     },
@@ -1148,7 +1246,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Domain"
+                                "$ref": "#/definitions/Domain"
                             }
                         }
                     },
@@ -1186,7 +1284,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DomainMap"
+                            "$ref": "#/definitions/DomainMap"
                         }
                     },
                     "400": {
@@ -1234,7 +1332,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EmailAutocompleteResult"
+                                "$ref": "#/definitions/EmailAutocompleteResult"
                             }
                         }
                     },
@@ -1293,7 +1391,7 @@ const docTemplate = `{
                             "items": {
                                 "type": "object",
                                 "additionalProperties": {
-                                    "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.MeasurementCollectionLean"
+                                    "$ref": "#/definitions/MeasurementCollectionLean"
                                 }
                             }
                         }
@@ -1334,7 +1432,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.CalculatedTimeseries"
+                                "$ref": "#/definitions/CalculatedTimeseries"
                             }
                         }
                     },
@@ -1371,6 +1469,14 @@ const docTemplate = `{
                     "formula"
                 ],
                 "summary": "creates a calculation",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1422,6 +1528,12 @@ const docTemplate = `{
                         "name": "formula_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1430,7 +1542,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.CalculatedTimeseries"
+                                "$ref": "#/definitions/CalculatedTimeseries"
                             }
                         }
                     },
@@ -1475,6 +1587,12 @@ const docTemplate = `{
                         "name": "formula_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1529,6 +1647,75 @@ const docTemplate = `{
                 }
             }
         },
+        "/heartbeat": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "heartbeat"
+                ],
+                "summary": "creates a heartbeat entry at regular intervals",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Heartbeat"
+                        }
+                    }
+                }
+            }
+        },
+        "/heartbeat/latest": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "heartbeat"
+                ],
+                "summary": "gets the latest heartbeat",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Heartbeat"
+                        }
+                    }
+                }
+            }
+        },
+        "/heartbeats": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "heartbeat"
+                ],
+                "summary": "returns all heartbeats",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Heartbeat"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/home": {
             "get": {
                 "produces": [
@@ -1542,7 +1729,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Home"
+                            "$ref": "#/definitions/Home"
                         }
                     },
                     "500": {
@@ -1588,7 +1775,7 @@ const docTemplate = `{
                             "items": {
                                 "type": "object",
                                 "additionalProperties": {
-                                    "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InclinometerMeasurementCollectionLean"
+                                    "$ref": "#/definitions/InclinometerMeasurementCollectionLean"
                                 }
                             }
                         }
@@ -1629,7 +1816,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentGroup"
+                                "$ref": "#/definitions/InstrumentGroup"
                             }
                         }
                     },
@@ -1673,15 +1860,21 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentGroup"
+                            "$ref": "#/definitions/InstrumentGroup"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentGroup"
+                            "$ref": "#/definitions/InstrumentGroup"
                         }
                     },
                     "400": {
@@ -1728,7 +1921,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentGroup"
+                            "$ref": "#/definitions/InstrumentGroup"
                         }
                     },
                     "400": {
@@ -1779,15 +1972,21 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentGroup"
+                            "$ref": "#/definitions/InstrumentGroup"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentGroup"
+                            "$ref": "#/definitions/InstrumentGroup"
                         }
                     },
                     "400": {
@@ -1831,6 +2030,12 @@ const docTemplate = `{
                         "name": "instrument_group_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1839,7 +2044,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentGroup"
+                                "$ref": "#/definitions/InstrumentGroup"
                             }
                         }
                     },
@@ -1889,7 +2094,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Instrument"
+                                "$ref": "#/definitions/Instrument"
                             }
                         }
                     },
@@ -1934,6 +2139,12 @@ const docTemplate = `{
                         "name": "instrument_group_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1995,6 +2206,12 @@ const docTemplate = `{
                         "name": "instrument_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -2051,7 +2268,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Timeseries"
+                                "$ref": "#/definitions/Timeseries"
                             }
                         }
                     },
@@ -2099,7 +2316,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.MeasurementCollection"
+                            "$ref": "#/definitions/MeasurementCollection"
                         }
                     },
                     "400": {
@@ -2138,7 +2355,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Instrument"
+                                "$ref": "#/definitions/Instrument"
                             }
                         }
                     },
@@ -2176,7 +2393,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentCount"
+                            "$ref": "#/definitions/InstrumentCount"
                         }
                     },
                     "400": {
@@ -2240,7 +2457,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IpiMeasurements"
+                                "$ref": "#/definitions/IpiMeasurements"
                             }
                         }
                     },
@@ -2290,7 +2507,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IpiSegment"
+                                "$ref": "#/definitions/IpiSegment"
                             }
                         }
                     },
@@ -2344,9 +2561,15 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IpiSegment"
+                                "$ref": "#/definitions/IpiSegment"
                             }
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -2355,7 +2578,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IpiSegment"
+                                "$ref": "#/definitions/IpiSegment"
                             }
                         }
                     },
@@ -2395,7 +2618,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentNote"
+                                "$ref": "#/definitions/InstrumentNote"
                             }
                         }
                     },
@@ -2439,8 +2662,14 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentNoteCollection"
+                            "$ref": "#/definitions/InstrumentNoteCollection"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -2449,7 +2678,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentNote"
+                                "$ref": "#/definitions/InstrumentNote"
                             }
                         }
                     },
@@ -2497,7 +2726,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentNote"
+                            "$ref": "#/definitions/InstrumentNote"
                         }
                     },
                     "400": {
@@ -2548,8 +2777,14 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentNote"
+                            "$ref": "#/definitions/InstrumentNote"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -2558,7 +2793,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfig"
+                                "$ref": "#/definitions/AlertConfig"
                             }
                         }
                     },
@@ -2623,7 +2858,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.SaaMeasurements"
+                                "$ref": "#/definitions/SaaMeasurements"
                             }
                         }
                     },
@@ -2673,7 +2908,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.SaaSegment"
+                                "$ref": "#/definitions/SaaSegment"
                             }
                         }
                     },
@@ -2727,9 +2962,15 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.SaaSegment"
+                                "$ref": "#/definitions/SaaSegment"
                             }
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -2738,7 +2979,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.SaaSegment"
+                                "$ref": "#/definitions/SaaSegment"
                             }
                         }
                     },
@@ -2786,7 +3027,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Instrument"
+                            "$ref": "#/definitions/Instrument"
                         }
                     },
                     "400": {
@@ -2835,7 +3076,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentNote"
+                                "$ref": "#/definitions/InstrumentNote"
                             }
                         }
                     },
@@ -2890,6 +3131,12 @@ const docTemplate = `{
                         "name": "note_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -2946,7 +3193,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentStatus"
+                                "$ref": "#/definitions/InstrumentStatus"
                             }
                         }
                     },
@@ -2998,8 +3245,14 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentStatusCollection"
+                            "$ref": "#/definitions/InstrumentStatusCollection"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -3064,7 +3317,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfig"
+                                "$ref": "#/definitions/AlertConfig"
                             }
                         }
                     },
@@ -3117,6 +3370,12 @@ const docTemplate = `{
                         "name": "status_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -3179,7 +3438,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Submittal"
+                                "$ref": "#/definitions/Submittal"
                             }
                         }
                     },
@@ -3235,7 +3494,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Timeseries"
+                            "$ref": "#/definitions/Timeseries"
                         }
                     },
                     "400": {
@@ -3310,7 +3569,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.MeasurementCollection"
+                            "$ref": "#/definitions/MeasurementCollection"
                         }
                     },
                     "400": {
@@ -3377,7 +3636,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.MeasurementCollection"
+                            "$ref": "#/definitions/MeasurementCollection"
                         }
                     },
                     "400": {
@@ -3415,13 +3674,21 @@ const docTemplate = `{
                     "alert-subscription"
                 ],
                 "summary": "lists all alerts subscribed to by the current profile",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertSubscription"
+                                "$ref": "#/definitions/AlertSubscription"
                             }
                         }
                     },
@@ -3448,6 +3715,11 @@ const docTemplate = `{
         },
         "/my_alerts": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "list all alerts a profile is subscribed to",
                 "produces": [
                     "application/json"
@@ -3456,13 +3728,21 @@ const docTemplate = `{
                     "alert"
                 ],
                 "summary": "lists subscribed alerts for a single user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Alert"
+                                "$ref": "#/definitions/Alert"
                             }
                         }
                     },
@@ -3510,13 +3790,19 @@ const docTemplate = `{
                         "name": "alert_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Alert"
+                            "$ref": "#/definitions/Alert"
                         }
                     },
                     "400": {
@@ -3563,13 +3849,19 @@ const docTemplate = `{
                         "name": "alert_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Alert"
+                            "$ref": "#/definitions/Alert"
                         }
                     },
                     "400": {
@@ -3611,7 +3903,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Profile"
+                            "$ref": "#/definitions/Profile"
                         }
                     },
                     "400": {
@@ -3639,7 +3931,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "CacOnly": []
+                        "Bearer": []
                     }
                 ],
                 "produces": [
@@ -3663,7 +3955,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Project"
+                                "$ref": "#/definitions/Project"
                             }
                         }
                     },
@@ -3706,7 +3998,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Token"
+                            "$ref": "#/definitions/Token"
                         }
                     },
                     "400": {
@@ -3798,7 +4090,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Site"
+                                "$ref": "#/definitions/Site"
                             }
                         }
                     },
@@ -3841,7 +4133,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Profile"
+                            "$ref": "#/definitions/Profile"
                         }
                     },
                     "400": {
@@ -3888,7 +4180,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Project"
+                                "$ref": "#/definitions/Project"
                             }
                         }
                     },
@@ -3934,9 +4226,15 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Project"
+                                "$ref": "#/definitions/Project"
                             }
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -3945,7 +4243,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IDSlugName"
+                                "$ref": "#/definitions/IDSlugName"
                             }
                         }
                     },
@@ -3983,7 +4281,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.ProjectCount"
+                            "$ref": "#/definitions/ProjectCount"
                         }
                     },
                     "400": {
@@ -4030,7 +4328,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Project"
+                            "$ref": "#/definitions/Project"
                         }
                     },
                     "400": {
@@ -4081,15 +4379,21 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Project"
+                            "$ref": "#/definitions/Project"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Project"
+                            "$ref": "#/definitions/Project"
                         }
                     },
                     "400": {
@@ -4133,6 +4437,12 @@ const docTemplate = `{
                         "name": "project_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -4189,7 +4499,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfig"
+                                "$ref": "#/definitions/AlertConfig"
                             }
                         }
                     },
@@ -4244,15 +4554,21 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfig"
+                            "$ref": "#/definitions/AlertConfig"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfig"
+                            "$ref": "#/definitions/AlertConfig"
                         }
                     },
                     "400": {
@@ -4307,7 +4623,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfig"
+                            "$ref": "#/definitions/AlertConfig"
                         }
                     },
                     "400": {
@@ -4369,8 +4685,14 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfig"
+                            "$ref": "#/definitions/AlertConfig"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -4379,7 +4701,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfig"
+                                "$ref": "#/definitions/AlertConfig"
                             }
                         }
                     },
@@ -4432,6 +4754,12 @@ const docTemplate = `{
                         "name": "alert_config_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -4440,7 +4768,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfig"
+                                "$ref": "#/definitions/AlertConfig"
                             }
                         }
                     },
@@ -4490,7 +4818,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfig"
+                                "$ref": "#/definitions/AlertConfig"
                             }
                         }
                     },
@@ -4543,8 +4871,14 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.CollectionGroup"
+                            "$ref": "#/definitions/CollectionGroup"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -4553,7 +4887,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.CollectionGroup"
+                                "$ref": "#/definitions/CollectionGroup"
                             }
                         }
                     },
@@ -4609,7 +4943,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.CollectionGroupDetails"
+                            "$ref": "#/definitions/CollectionGroupDetails"
                         }
                     },
                     "400": {
@@ -4667,15 +5001,21 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.CollectionGroup"
+                            "$ref": "#/definitions/CollectionGroup"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.CollectionGroup"
+                            "$ref": "#/definitions/CollectionGroup"
                         }
                     },
                     "400": {
@@ -4727,6 +5067,12 @@ const docTemplate = `{
                         "name": "collection_group_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -4796,6 +5142,12 @@ const docTemplate = `{
                         "name": "timeseries_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -4863,6 +5215,12 @@ const docTemplate = `{
                         "name": "timeseries_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -4919,7 +5277,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DistrictRollup"
+                                "$ref": "#/definitions/DistrictRollup"
                             }
                         }
                     },
@@ -4969,7 +5327,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DistrictRollup"
+                                "$ref": "#/definitions/DistrictRollup"
                             }
                         }
                     },
@@ -5019,7 +5377,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Evaluation"
+                                "$ref": "#/definitions/Evaluation"
                             }
                         }
                     },
@@ -5071,15 +5429,21 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Evaluation"
+                            "$ref": "#/definitions/Evaluation"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Evaluation"
+                            "$ref": "#/definitions/Evaluation"
                         }
                     },
                     "400": {
@@ -5134,7 +5498,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Evaluation"
+                            "$ref": "#/definitions/Evaluation"
                         }
                     },
                     "400": {
@@ -5193,15 +5557,21 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Evaluation"
+                            "$ref": "#/definitions/Evaluation"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Evaluation"
+                            "$ref": "#/definitions/Evaluation"
                         }
                     },
                     "400": {
@@ -5253,6 +5623,12 @@ const docTemplate = `{
                         "name": "evaluation_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -5261,7 +5637,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfig"
+                                "$ref": "#/definitions/AlertConfig"
                             }
                         }
                     },
@@ -5312,6 +5688,12 @@ const docTemplate = `{
                         "name": "project_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -5372,8 +5754,14 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InclinometerMeasurementCollectionCollection"
+                            "$ref": "#/definitions/InclinometerMeasurementCollectionCollection"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -5382,7 +5770,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InclinometerMeasurementCollection"
+                                "$ref": "#/definitions/InclinometerMeasurementCollection"
                             }
                         }
                     },
@@ -5432,7 +5820,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentGroup"
+                                "$ref": "#/definitions/InstrumentGroup"
                             }
                         }
                     },
@@ -5482,7 +5870,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Project"
+                                "$ref": "#/definitions/Project"
                             }
                         }
                     },
@@ -5544,9 +5932,15 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Instrument"
+                                "$ref": "#/definitions/Instrument"
                             }
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -5555,7 +5949,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IDSlugName"
+                                "$ref": "#/definitions/IDSlugName"
                             }
                         }
                     },
@@ -5610,7 +6004,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.ProjectInstrumentAssignments"
+                            "$ref": "#/definitions/ProjectInstrumentAssignments"
                         }
                     },
                     {
@@ -5631,7 +6025,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentsValidation"
+                            "$ref": "#/definitions/InstrumentsValidation"
                         }
                     },
                     "400": {
@@ -5692,15 +6086,21 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Instrument"
+                            "$ref": "#/definitions/Instrument"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Instrument"
+                            "$ref": "#/definitions/Instrument"
                         }
                     },
                     "400": {
@@ -5752,6 +6152,12 @@ const docTemplate = `{
                         "name": "instrument_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -5816,7 +6222,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfig"
+                                "$ref": "#/definitions/AlertConfig"
                             }
                         }
                     },
@@ -5879,13 +6285,19 @@ const docTemplate = `{
                         "name": "alert_config_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertSubscription"
+                            "$ref": "#/definitions/AlertSubscription"
                         }
                     },
                     "400": {
@@ -5947,6 +6359,12 @@ const docTemplate = `{
                         "name": "alert_config_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -5980,11 +6398,6 @@ const docTemplate = `{
         },
         "/projects/{project_id}/instruments/{instrument_id}/alerts": {
             "get": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
                 "description": "list all alerts associated an instrument",
                 "produces": [
                     "application/json"
@@ -6017,7 +6430,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Alert"
+                                "$ref": "#/definitions/Alert"
                             }
                         }
                     },
@@ -6072,7 +6485,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentProjectAssignments"
+                            "$ref": "#/definitions/InstrumentProjectAssignments"
                         }
                     },
                     {
@@ -6093,7 +6506,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentsValidation"
+                            "$ref": "#/definitions/InstrumentsValidation"
                         }
                     },
                     "400": {
@@ -6158,7 +6571,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentsValidation"
+                            "$ref": "#/definitions/InstrumentsValidation"
                         }
                     },
                     "400": {
@@ -6230,7 +6643,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentsValidation"
+                            "$ref": "#/definitions/InstrumentsValidation"
                         }
                     },
                     "400": {
@@ -6287,7 +6700,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Timeseries"
+                                "$ref": "#/definitions/Timeseries"
                             }
                         }
                     },
@@ -6347,8 +6760,14 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.TimeseriesCollectionItems"
+                            "$ref": "#/definitions/TimeseriesCollectionItems"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -6357,7 +6776,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Timeseries"
+                                "$ref": "#/definitions/Timeseries"
                             }
                         }
                     },
@@ -6420,6 +6839,12 @@ const docTemplate = `{
                         "name": "timeseries_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -6484,7 +6909,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Evaluation"
+                                "$ref": "#/definitions/Evaluation"
                             }
                         }
                     },
@@ -6546,15 +6971,21 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Instrument"
+                            "$ref": "#/definitions/Instrument"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Instrument"
+                            "$ref": "#/definitions/Instrument"
                         }
                     },
                     "400": {
@@ -6611,7 +7042,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Timeseries"
+                                "$ref": "#/definitions/Timeseries"
                             }
                         }
                     },
@@ -6658,6 +7089,12 @@ const docTemplate = `{
                         "name": "project_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -6666,7 +7103,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.ProjectMembership"
+                                "$ref": "#/definitions/ProjectMembership"
                             }
                         }
                     },
@@ -6729,13 +7166,19 @@ const docTemplate = `{
                         "name": "role_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.ProjectMembership"
+                            "$ref": "#/definitions/ProjectMembership"
                         }
                     },
                     "400": {
@@ -6795,6 +7238,12 @@ const docTemplate = `{
                         "name": "role_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -6851,7 +7300,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.PlotConfig"
+                                "$ref": "#/definitions/PlotConfig"
                             }
                         }
                     },
@@ -6902,15 +7351,71 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.PlotConfig"
+                            "$ref": "#/definitions/PlotConfig"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.PlotConfig"
+                            "$ref": "#/definitions/PlotConfig"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/plot_configurations/{plot_config_id}/timeseries": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "timeseries"
+                ],
+                "summary": "lists all timeseries for a single plot config",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "project uuid",
+                        "name": "project_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Timeseries"
+                            }
                         }
                     },
                     "400": {
@@ -6964,7 +7469,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.PlotConfig"
+                            "$ref": "#/definitions/PlotConfig"
                         }
                     },
                     "400": {
@@ -7022,15 +7527,21 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.PlotConfig"
+                            "$ref": "#/definitions/PlotConfig"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.PlotConfig"
+                            "$ref": "#/definitions/PlotConfig"
                         }
                     },
                     "400": {
@@ -7080,6 +7591,481 @@ const docTemplate = `{
                         "description": "plot config uuid",
                         "name": "plot_configuration_id",
                         "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/report_configs": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "report-config"
+                ],
+                "summary": "lists all report configs for a project",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "project uuid",
+                        "name": "project_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ReportConfig"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "report-config"
+                ],
+                "summary": "creates a report config",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "project uuid",
+                        "name": "project_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "report config payload",
+                        "name": "report_config",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ReportConfig"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/ReportConfig"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/report_configs/{report_config_id}": {
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "report-config"
+                ],
+                "summary": "updates a report config",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "project uuid",
+                        "name": "project_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "report config uuid",
+                        "name": "report_config_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "report config payload",
+                        "name": "report_config",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ReportConfig"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "report-config"
+                ],
+                "summary": "updates a report config",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "project uuid",
+                        "name": "project_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/report_configs/{report_config_id}/jobs": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "report-config"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "project uuid",
+                        "name": "project_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "report config uuid",
+                        "name": "report_config_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/ReportDownloadJob"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{project_id}/report_configs/{report_config_id}/jobs/{job_id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "report-config"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "project uuid",
+                        "name": "project_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "report config uuid",
+                        "name": "report_config_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "download job uuid",
+                        "name": "job_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ReportDownloadJob"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "report-config"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "download job uuid",
+                        "name": "job_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "report download job payload",
+                        "name": "report_download_job",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ReportDownloadJob"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -7143,7 +8129,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Submittal"
+                                "$ref": "#/definitions/Submittal"
                             }
                         }
                     },
@@ -7193,7 +8179,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Timeseries"
+                                "$ref": "#/definitions/Timeseries"
                             }
                         }
                     },
@@ -7261,8 +8247,14 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.TimeseriesMeasurementCollectionCollection"
+                            "$ref": "#/definitions/TimeseriesMeasurementCollectionCollection"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -7271,7 +8263,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.MeasurementCollection"
+                                "$ref": "#/definitions/MeasurementCollection"
                             }
                         }
                     },
@@ -7326,8 +8318,14 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.TimeseriesMeasurementCollectionCollection"
+                            "$ref": "#/definitions/TimeseriesMeasurementCollectionCollection"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -7336,7 +8334,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.MeasurementCollection"
+                                "$ref": "#/definitions/MeasurementCollection"
                             }
                         }
                     },
@@ -7411,6 +8409,59 @@ const docTemplate = `{
                 }
             }
         },
+        "/report_configs/{report_config_id}/plot_configs": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "report-config"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "report config uuid",
+                        "name": "report_config_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ReportConfigWithPlotConfigs"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/search/{entity}": {
             "get": {
                 "produces": [
@@ -7441,7 +8492,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.SearchResult"
+                                "$ref": "#/definitions/SearchResult"
                             }
                         }
                     },
@@ -7488,6 +8539,12 @@ const docTemplate = `{
                         "name": "submittal_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -7540,8 +8597,14 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.TimeseriesCollectionItems"
+                            "$ref": "#/definitions/TimeseriesCollectionItems"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -7601,7 +8664,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Timeseries"
+                            "$ref": "#/definitions/Timeseries"
                         }
                     },
                     "400": {
@@ -7652,8 +8715,14 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Timeseries"
+                            "$ref": "#/definitions/Timeseries"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -7707,6 +8776,12 @@ const docTemplate = `{
                         "name": "timeseries_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -7775,7 +8850,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InclinometerMeasurementCollection"
+                            "$ref": "#/definitions/InclinometerMeasurementCollection"
                         }
                     },
                     "400": {
@@ -7827,6 +8902,12 @@ const docTemplate = `{
                         "name": "time",
                         "in": "query",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -7859,6 +8940,71 @@ const docTemplate = `{
             }
         },
         "/timeseries/{timeseries_id}/measurements": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "timeseries"
+                ],
+                "summary": "lists timeseries by timeseries uuid",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "timeseries uuid",
+                        "name": "timeseries_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "after time",
+                        "name": "after",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "before time",
+                        "name": "before",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "downsample threshold",
+                        "name": "threshold",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/MeasurementCollection"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            },
             "delete": {
                 "security": [
                     {
@@ -7888,6 +9034,12 @@ const docTemplate = `{
                         "name": "time",
                         "in": "query",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -7935,8 +9087,15 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.TimeseriesMeasurementCollectionCollection"
+                            "$ref": "#/definitions/TimeseriesMeasurementCollectionCollection"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "api key",
+                        "name": "key",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -7945,7 +9104,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.MeasurementCollection"
+                                "$ref": "#/definitions/MeasurementCollection"
                             }
                         }
                     },
@@ -7985,7 +9144,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Unit"
+                                "$ref": "#/definitions/Unit"
                             }
                         }
                     },
@@ -8021,7 +9180,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.Alert": {
+        "Alert": {
             "type": "object",
             "properties": {
                 "alert_config_id": {
@@ -8039,7 +9198,7 @@ const docTemplate = `{
                 "instruments": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfigInstrument"
+                        "$ref": "#/definitions/AlertConfigInstrument"
                     }
                 },
                 "name": {
@@ -8056,13 +9215,13 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.AlertConfig": {
+        "AlertConfig": {
             "type": "object",
             "properties": {
                 "alert_email_subscriptions": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EmailAutocompleteResult"
+                        "$ref": "#/definitions/EmailAutocompleteResult"
                     }
                 },
                 "alert_type": {
@@ -8089,7 +9248,7 @@ const docTemplate = `{
                 "instruments": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.AlertConfigInstrument"
+                        "$ref": "#/definitions/AlertConfigInstrument"
                     }
                 },
                 "last_checked": {
@@ -8133,7 +9292,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.AlertConfigInstrument": {
+        "AlertConfigInstrument": {
             "type": "object",
             "properties": {
                 "instrument_id": {
@@ -8144,7 +9303,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.AlertSubscription": {
+        "AlertSubscription": {
             "type": "object",
             "properties": {
                 "alert_config_id": {
@@ -8164,7 +9323,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.AwareParameter": {
+        "AwareParameter": {
             "type": "object",
             "properties": {
                 "id": {
@@ -8181,7 +9340,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.AwarePlatformParameterConfig": {
+        "AwarePlatformParameterConfig": {
             "type": "object",
             "properties": {
                 "aware_id": {
@@ -8198,7 +9357,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.CalculatedTimeseries": {
+        "CalculatedTimeseries": {
             "type": "object",
             "properties": {
                 "formula": {
@@ -8224,7 +9383,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.CollectionGroup": {
+        "CollectionGroup": {
             "type": "object",
             "properties": {
                 "create_date": {
@@ -8259,7 +9418,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.CollectionGroupDetails": {
+        "CollectionGroupDetails": {
             "type": "object",
             "properties": {
                 "create_date": {
@@ -8286,7 +9445,7 @@ const docTemplate = `{
                 "timeseries": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.collectionGroupDetailsTimeseries"
+                        "$ref": "#/definitions/collectionGroupDetailsTimeseries"
                     }
                 },
                 "update_date": {
@@ -8300,7 +9459,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.Datalogger": {
+        "Datalogger": {
             "type": "object",
             "properties": {
                 "create_date": {
@@ -8342,7 +9501,7 @@ const docTemplate = `{
                 "tables": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerTable"
+                        "$ref": "#/definitions/DataloggerTable"
                     }
                 },
                 "update_date": {
@@ -8356,7 +9515,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.DataloggerTable": {
+        "DataloggerTable": {
             "type": "object",
             "properties": {
                 "id": {
@@ -8367,7 +9526,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.DataloggerTablePreview": {
+        "DataloggerTablePreview": {
             "type": "object",
             "properties": {
                 "datalogger_table_id": {
@@ -8381,7 +9540,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.DataloggerWithKey": {
+        "DataloggerWithKey": {
             "type": "object",
             "properties": {
                 "create_date": {
@@ -8426,7 +9585,7 @@ const docTemplate = `{
                 "tables": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DataloggerTable"
+                        "$ref": "#/definitions/DataloggerTable"
                     }
                 },
                 "update_date": {
@@ -8440,7 +9599,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.District": {
+        "District": {
             "type": "object",
             "properties": {
                 "agency": {
@@ -8466,7 +9625,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.DistrictRollup": {
+        "DistrictRollup": {
             "type": "object",
             "properties": {
                 "actual_total_submittals": {
@@ -8504,7 +9663,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.Domain": {
+        "Domain": {
             "type": "object",
             "properties": {
                 "description": {
@@ -8521,7 +9680,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.DomainGroupOption": {
+        "DomainGroupOption": {
             "type": "object",
             "properties": {
                 "description": {
@@ -8535,16 +9694,16 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.DomainMap": {
+        "DomainMap": {
             "type": "object",
             "additionalProperties": {
                 "type": "array",
                 "items": {
-                    "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.DomainGroupOption"
+                    "$ref": "#/definitions/DomainGroupOption"
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.EmailAutocompleteResult": {
+        "EmailAutocompleteResult": {
             "type": "object",
             "properties": {
                 "email": {
@@ -8561,7 +9720,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTable": {
+        "EquivalencyTable": {
             "type": "object",
             "properties": {
                 "datalogger_id": {
@@ -8576,12 +9735,12 @@ const docTemplate = `{
                 "rows": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTableRow"
+                        "$ref": "#/definitions/EquivalencyTableRow"
                     }
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.EquivalencyTableRow": {
+        "EquivalencyTableRow": {
             "type": "object",
             "properties": {
                 "display_name": {
@@ -8601,7 +9760,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.Evaluation": {
+        "Evaluation": {
             "type": "object",
             "properties": {
                 "alert_config_id": {
@@ -8631,7 +9790,7 @@ const docTemplate = `{
                 "instruments": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.EvaluationInstrument"
+                        "$ref": "#/definitions/EvaluationInstrument"
                     }
                 },
                 "name": {
@@ -8660,7 +9819,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.EvaluationInstrument": {
+        "EvaluationInstrument": {
             "type": "object",
             "properties": {
                 "instrument_id": {
@@ -8671,7 +9830,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.Geometry": {
+        "Geometry": {
             "type": "object",
             "properties": {
                 "coordinates": {},
@@ -8686,7 +9845,15 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.Home": {
+        "Heartbeat": {
+            "type": "object",
+            "properties": {
+                "time": {
+                    "type": "string"
+                }
+            }
+        },
+        "Home": {
             "type": "object",
             "properties": {
                 "instrument_count": {
@@ -8706,7 +9873,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.IDSlugName": {
+        "IDSlugName": {
             "type": "object",
             "properties": {
                 "id": {
@@ -8720,7 +9887,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.InclinometerMeasurement": {
+        "InclinometerMeasurement": {
             "type": "object",
             "properties": {
                 "create_date": {
@@ -8740,13 +9907,13 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.InclinometerMeasurementCollection": {
+        "InclinometerMeasurementCollection": {
             "type": "object",
             "properties": {
                 "inclinometers": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InclinometerMeasurement"
+                        "$ref": "#/definitions/InclinometerMeasurement"
                     }
                 },
                 "timeseries_id": {
@@ -8754,24 +9921,24 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.InclinometerMeasurementCollectionCollection": {
+        "InclinometerMeasurementCollectionCollection": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InclinometerMeasurementCollection"
+                        "$ref": "#/definitions/InclinometerMeasurementCollection"
                     }
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.InclinometerMeasurementCollectionLean": {
+        "InclinometerMeasurementCollectionLean": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InclinometerMeasurementLean"
+                        "$ref": "#/definitions/InclinometerMeasurementLean"
                     }
                 },
                 "timeseries_id": {
@@ -8779,7 +9946,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.InclinometerMeasurementLean": {
+        "InclinometerMeasurementLean": {
             "type": "object",
             "additionalProperties": {
                 "type": "array",
@@ -8788,7 +9955,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.Instrument": {
+        "Instrument": {
             "type": "object",
             "properties": {
                 "alert_configs": {
@@ -8816,7 +9983,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "geometry": {
-                    "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Geometry"
+                    "$ref": "#/definitions/Geometry"
                 },
                 "groups": {
                     "type": "array",
@@ -8840,12 +10007,12 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "opts": {
-                    "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Opts"
+                    "$ref": "#/definitions/Opts"
                 },
                 "projects": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IDSlugName"
+                        "$ref": "#/definitions/IDSlugName"
                     }
                 },
                 "slug": {
@@ -8883,7 +10050,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.InstrumentCount": {
+        "InstrumentCount": {
             "type": "object",
             "properties": {
                 "instrument_count": {
@@ -8891,7 +10058,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.InstrumentGroup": {
+        "InstrumentGroup": {
             "type": "object",
             "properties": {
                 "create_date": {
@@ -8935,7 +10102,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.InstrumentNote": {
+        "InstrumentNote": {
             "type": "object",
             "properties": {
                 "body": {
@@ -8973,18 +10140,18 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.InstrumentNoteCollection": {
+        "InstrumentNoteCollection": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentNote"
+                        "$ref": "#/definitions/InstrumentNote"
                     }
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.InstrumentProjectAssignments": {
+        "InstrumentProjectAssignments": {
             "type": "object",
             "properties": {
                 "project_ids": {
@@ -8995,7 +10162,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.InstrumentStatus": {
+        "InstrumentStatus": {
             "type": "object",
             "properties": {
                 "id": {
@@ -9012,18 +10179,18 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.InstrumentStatusCollection": {
+        "InstrumentStatusCollection": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentStatus"
+                        "$ref": "#/definitions/InstrumentStatus"
                     }
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.InstrumentsValidation": {
+        "InstrumentsValidation": {
             "type": "object",
             "properties": {
                 "errors": {
@@ -9037,13 +10204,13 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.IpiMeasurements": {
+        "IpiMeasurements": {
             "type": "object",
             "properties": {
                 "measurements": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.IpiSegmentMeasurement"
+                        "$ref": "#/definitions/IpiSegmentMeasurement"
                     }
                 },
                 "time": {
@@ -9051,7 +10218,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.IpiSegment": {
+        "IpiSegment": {
             "type": "object",
             "properties": {
                 "id": {
@@ -9077,7 +10244,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.IpiSegmentMeasurement": {
+        "IpiSegmentMeasurement": {
             "type": "object",
             "properties": {
                 "cum_dev": {
@@ -9100,7 +10267,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.Measurement": {
+        "Measurement": {
             "type": "object",
             "properties": {
                 "annotation": {
@@ -9123,13 +10290,13 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.MeasurementCollection": {
+        "MeasurementCollection": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Measurement"
+                        "$ref": "#/definitions/Measurement"
                     }
                 },
                 "timeseries_id": {
@@ -9137,13 +10304,13 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.MeasurementCollectionLean": {
+        "MeasurementCollectionLean": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.MeasurementLean"
+                        "$ref": "#/definitions/MeasurementLean"
                     }
                 },
                 "timeseries_id": {
@@ -9151,17 +10318,17 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.MeasurementLean": {
+        "MeasurementLean": {
             "type": "object",
             "additionalProperties": {
                 "type": "number"
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.Opts": {
+        "Opts": {
             "type": "object",
             "additionalProperties": true
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.PlotConfig": {
+        "PlotConfig": {
             "type": "object",
             "properties": {
                 "auto_range": {
@@ -9179,6 +10346,9 @@ const docTemplate = `{
                 "date_range": {
                     "type": "string"
                 },
+                "display": {
+                    "$ref": "#/definitions/PlotConfigDisplay"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -9187,6 +10357,12 @@ const docTemplate = `{
                 },
                 "project_id": {
                     "type": "string"
+                },
+                "report_configs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/IDSlugName"
+                    }
                 },
                 "show_comments": {
                     "type": "boolean"
@@ -9203,12 +10379,6 @@ const docTemplate = `{
                 "threshold": {
                     "type": "integer"
                 },
-                "timeseries_id": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
                 "update_date": {
                     "type": "string"
                 },
@@ -9220,7 +10390,92 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.Profile": {
+        "PlotConfigCustomShape": {
+            "type": "object",
+            "properties": {
+                "color": {
+                    "type": "string"
+                },
+                "data_point": {
+                    "type": "number"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "plot_configuration_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "PlotConfigDisplay": {
+            "type": "object",
+            "properties": {
+                "layout": {
+                    "$ref": "#/definitions/PlotConfigLayout"
+                },
+                "traces": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/PlotConfigTimeseriesTrace"
+                    }
+                }
+            }
+        },
+        "PlotConfigLayout": {
+            "type": "object",
+            "properties": {
+                "custom_shapes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/PlotConfigCustomShape"
+                    }
+                },
+                "secondary_axis_title": {
+                    "type": "string"
+                }
+            }
+        },
+        "PlotConfigTimeseriesTrace": {
+            "type": "object",
+            "properties": {
+                "color": {
+                    "type": "string"
+                },
+                "line_style": {
+                    "type": "string"
+                },
+                "name": {
+                    "description": "read-only",
+                    "type": "string"
+                },
+                "plot_configuration_id": {
+                    "type": "string"
+                },
+                "show_markers": {
+                    "type": "boolean"
+                },
+                "timeseries_id": {
+                    "type": "string"
+                },
+                "trace_order": {
+                    "type": "integer"
+                },
+                "trace_type": {
+                    "type": "string"
+                },
+                "width": {
+                    "type": "number"
+                },
+                "y_axis": {
+                    "description": "y1 or y2, default y1",
+                    "type": "string"
+                }
+            }
+        },
+        "Profile": {
             "type": "object",
             "properties": {
                 "email": {
@@ -9241,7 +10496,7 @@ const docTemplate = `{
                 "tokens": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.TokenInfoProfile"
+                        "$ref": "#/definitions/TokenInfoProfile"
                     }
                 },
                 "username": {
@@ -9249,7 +10504,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.Project": {
+        "Project": {
             "type": "object",
             "properties": {
                 "create_date": {
@@ -9299,7 +10554,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.ProjectCount": {
+        "ProjectCount": {
             "type": "object",
             "properties": {
                 "project_count": {
@@ -9307,7 +10562,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.ProjectInstrumentAssignments": {
+        "ProjectInstrumentAssignments": {
             "type": "object",
             "properties": {
                 "instrument_ids": {
@@ -9318,7 +10573,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.ProjectMembership": {
+        "ProjectMembership": {
             "type": "object",
             "properties": {
                 "email": {
@@ -9341,13 +10596,159 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.SaaMeasurements": {
+        "ReportConfig": {
+            "type": "object",
+            "properties": {
+                "create_date": {
+                    "type": "string"
+                },
+                "creator_id": {
+                    "type": "string"
+                },
+                "creator_username": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "global_overrides": {
+                    "$ref": "#/definitions/ReportConfigGlobalOverrides"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "plot_configs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/IDSlugName"
+                    }
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "project_name": {
+                    "type": "string"
+                },
+                "slug": {
+                    "type": "string"
+                },
+                "update_date": {
+                    "type": "string"
+                },
+                "updater_id": {
+                    "type": "string"
+                },
+                "updater_username": {
+                    "type": "string"
+                }
+            }
+        },
+        "ReportConfigGlobalOverrides": {
+            "type": "object",
+            "properties": {
+                "date_range": {
+                    "$ref": "#/definitions/TextOption"
+                },
+                "show_masked": {
+                    "$ref": "#/definitions/ToggleOption"
+                },
+                "show_nonvalidated": {
+                    "$ref": "#/definitions/ToggleOption"
+                }
+            }
+        },
+        "ReportConfigWithPlotConfigs": {
+            "type": "object",
+            "properties": {
+                "create_date": {
+                    "type": "string"
+                },
+                "creator_id": {
+                    "type": "string"
+                },
+                "creator_username": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "global_overrides": {
+                    "$ref": "#/definitions/ReportConfigGlobalOverrides"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "plot_configs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/PlotConfig"
+                    }
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "project_name": {
+                    "type": "string"
+                },
+                "slug": {
+                    "type": "string"
+                },
+                "update_date": {
+                    "type": "string"
+                },
+                "updater_id": {
+                    "type": "string"
+                },
+                "updater_username": {
+                    "type": "string"
+                }
+            }
+        },
+        "ReportDownloadJob": {
+            "type": "object",
+            "properties": {
+                "create_date": {
+                    "type": "string"
+                },
+                "creator": {
+                    "type": "string"
+                },
+                "file_expiry": {
+                    "type": "string"
+                },
+                "file_key": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "progress": {
+                    "type": "integer"
+                },
+                "progress_update_date": {
+                    "type": "string"
+                },
+                "report_config_id": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "SaaMeasurements": {
             "type": "object",
             "properties": {
                 "measurements": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.SaaSegmentMeasurement"
+                        "$ref": "#/definitions/SaaSegmentMeasurement"
                     }
                 },
                 "time": {
@@ -9355,7 +10756,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.SaaSegment": {
+        "SaaSegment": {
             "type": "object",
             "properties": {
                 "id": {
@@ -9384,7 +10785,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.SaaSegmentMeasurement": {
+        "SaaSegmentMeasurement": {
             "type": "object",
             "properties": {
                 "elevation": {
@@ -9431,7 +10832,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.SearchResult": {
+        "SearchResult": {
             "type": "object",
             "properties": {
                 "id": {
@@ -9443,7 +10844,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.Site": {
+        "Site": {
             "type": "object",
             "properties": {
                 "description": {
@@ -9456,11 +10857,11 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "siteName": {
-                    "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.SiteName"
+                    "$ref": "#/definitions/SiteName"
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.SiteName": {
+        "SiteName": {
             "type": "object",
             "properties": {
                 "id": {
@@ -9471,7 +10872,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.Submittal": {
+        "Submittal": {
             "type": "object",
             "properties": {
                 "alert_config_id": {
@@ -9515,7 +10916,18 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.Timeseries": {
+        "TextOption": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
+        "Timeseries": {
             "type": "object",
             "properties": {
                 "id": {
@@ -9554,7 +10966,7 @@ const docTemplate = `{
                 "values": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Measurement"
+                        "$ref": "#/definitions/Measurement"
                     }
                 },
                 "variable": {
@@ -9562,29 +10974,40 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.TimeseriesCollectionItems": {
+        "TimeseriesCollectionItems": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Timeseries"
+                        "$ref": "#/definitions/Timeseries"
                     }
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.TimeseriesMeasurementCollectionCollection": {
+        "TimeseriesMeasurementCollectionCollection": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.MeasurementCollection"
+                        "$ref": "#/definitions/MeasurementCollection"
                     }
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.Token": {
+        "ToggleOption": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "value": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "Token": {
             "type": "object",
             "properties": {
                 "issued": {
@@ -9601,7 +11024,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.TokenInfoProfile": {
+        "TokenInfoProfile": {
             "type": "object",
             "properties": {
                 "issued": {
@@ -9612,7 +11035,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.Unit": {
+        "Unit": {
             "type": "object",
             "properties": {
                 "abbreviation": {
@@ -9638,7 +11061,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_USACE_instrumentation-api_api_internal_model.collectionGroupDetailsTimeseries": {
+        "collectionGroupDetailsTimeseries": {
             "type": "object",
             "properties": {
                 "id": {
@@ -9683,7 +11106,7 @@ const docTemplate = `{
                 "values": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_USACE_instrumentation-api_api_internal_model.Measurement"
+                        "$ref": "#/definitions/Measurement"
                     }
                 },
                 "variable": {

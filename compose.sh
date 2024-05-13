@@ -2,9 +2,16 @@
 
 set -o pipefail
 
-COMPOSECMD="env DOCKER_BUILDKIT=1 docker-compose -f docker-compose.yml --profile=local"
+parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+cd "$parent_path"
+
+COMPOSECMD="env DOCKER_BUILDKIT=1 docker-compose -f docker-compose.yml"
 mkdocs() {
-    (cd api && swag init --pd $1 -g cmd/core/main.go --parseInternal true --dir internal)
+    (
+        cd api && swag init --pd $1 -g cmd/core/main.go --parseInternal true --dir internal;
+        find ./docs -type f -exec sed -i '' -e 's/github_com_USACE_instrumentation-api_api_internal_model.//g' {} \;
+        cd ../report && npm run generate >/dev/null;
+    )
 }
 
 if [ "$1" = "watch" ]; then
@@ -59,7 +66,7 @@ elif [ "$1" = "test" ]; then
     fi
 
     if [ $TEARDOWN = true ]; then
-        docker-compose --profile=local --profile=mock down -v
+        docker-compose --profile=mock down -v
     fi
 
 elif [ "$1" = "mkdocs" ]; then

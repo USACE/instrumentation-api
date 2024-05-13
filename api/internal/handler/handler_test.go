@@ -18,8 +18,10 @@ import (
 )
 
 const (
-	host    = "http://localhost:8080"
-	mockJwt = `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwibmFtZSI6IlVzZXIuQWRtaW4iLCJpYXQiOjE1MTYyMzkwMjIsImV4cCI6MjAwMDAwMDAwMCwicm9sZXMiOlsiUFVCTElDLlVTRVIiXX0.4VAMamtH92GiIb5CpGKpP6LKwU6IjIfw5wS4qc8O8VM`
+	truncateLinesBody = 30
+	host              = "http://localhost:8080"
+	mockJwt           = `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwibmFtZSI6IlVzZXIuQWRtaW4iLCJpYXQiOjE1MTYyMzkwMjIsImV4cCI6MjAwMDAwMDAwMCwicm9sZXMiOlsiUFVCTElDLlVTRVIiXX0.4VAMamtH92GiIb5CpGKpP6LKwU6IjIfw5wS4qc8O8VM`
+	mockAppKey        = "appkey"
 )
 
 const IDSlugNameArrSchema = `{
@@ -43,6 +45,7 @@ type HTTPTest struct {
 	ExpectedStatus int
 	ExpectedSchema *gojsonschema.Schema
 	authHeader     string
+	onSuccess      *func(b []byte)
 }
 
 // singleton api server since database is used in integration tests
@@ -82,10 +85,10 @@ func RunHTTPTest(v HTTPTest) (*http.Response, error) {
 func RunAll(t *testing.T, tests []HTTPTest) {
 	for _, v := range tests {
 		t.Run(v.Name, func(t *testing.T) {
-			run, err := RunHTTPTest(v)
-			assert.Nil(t, err, "error calling RunHTTPTest(v)")
-			if err != nil {
-				t.Log(err.Error())
+			run, httpErr := RunHTTPTest(v)
+			assert.Nil(t, httpErr, "error calling RunHTTPTest(v)")
+			if httpErr != nil {
+				t.Log(httpErr.Error())
 			}
 
 			assert.Equal(t, v.ExpectedStatus, run.StatusCode)
@@ -108,8 +111,8 @@ func RunAll(t *testing.T, tests []HTTPTest) {
 			} else {
 				s := dst.String()
 				ss := strings.Split(s, "\n")
-				if len(ss) > 25 {
-					s = fmt.Sprintf("%s\n...", strings.Join(ss[:25], "\n"))
+				if len(ss) > truncateLinesBody {
+					s = fmt.Sprintf("%s\n...", strings.Join(ss[:truncateLinesBody], "\n"))
 				}
 				t.Logf("response body: %s", s)
 			}
@@ -138,6 +141,11 @@ func RunAll(t *testing.T, tests []HTTPTest) {
 					}
 					t.Log(errs)
 				}
+			}
+
+			if httpErr == nil && v.onSuccess != nil && run != nil && run.Body != nil {
+				callback := *v.onSuccess
+				callback(body)
 			}
 		})
 	}

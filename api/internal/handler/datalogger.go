@@ -18,6 +18,7 @@ import (
 //	@Summary lists dataloggers for a project
 //	@Tags datalogger
 //	@Produce json
+//	@Param key query string false "api key"
 //	@Success 200 {array} model.Datalogger
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -55,6 +56,7 @@ func (h *ApiHandler) ListDataloggers(c echo.Context) error {
 //	@Accept json
 //	@Produce json
 //	@Param datalogger body model.Datalogger true "datalogger payload"
+//	@Param key query string false "api key"
 //	@Success 200 {array} model.DataloggerWithKey
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -107,6 +109,7 @@ func (h *ApiHandler) CreateDatalogger(c echo.Context) error {
 //	@Tags datalogger
 //	@Produce json
 //	@Param datalogger_id path string true "datalogger uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Success 200 {object} model.DataloggerWithKey
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -144,6 +147,7 @@ func (h *ApiHandler) CycleDataloggerKey(c echo.Context) error {
 //	@Tags datalogger
 //	@Produce json
 //	@Param datalogger_id path string true "datalogger uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Success 200 {object} model.Datalogger
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -170,6 +174,7 @@ func (h *ApiHandler) GetDatalogger(c echo.Context) error {
 //	@Produce json
 //	@Param datalogger_id path string true "datalogger uuid" Format(uuid)
 //	@Param datalogger body model.Datalogger true "datalogger payload"
+//	@Param key query string false "api key"
 //	@Success 200 {object} model.Datalogger
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -214,6 +219,7 @@ func (h *ApiHandler) UpdateDatalogger(c echo.Context) error {
 //	@Tags datalogger
 //	@Produce json
 //	@Param datalogger_id path string true "datalogger uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -250,6 +256,7 @@ func (h *ApiHandler) DeleteDatalogger(c echo.Context) error {
 //	@Produce json
 //	@Param datalogger_id path string true "datalogger uuid" Format(uuid)
 //	@Param datalogger_table_id path string true "datalogger table uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Success 200 {object} model.DataloggerTablePreview
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -282,6 +289,7 @@ func (h *ApiHandler) GetDataloggerTablePreview(c echo.Context) error {
 //	@Produce json
 //	@Param datalogger_id path string true "datalogger uuid" Format(uuid)
 //	@Param datalogger_table_id path string true "datalogger table uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Success 200 {object} model.DataloggerTablePreview
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError

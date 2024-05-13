@@ -84,6 +84,7 @@ func (h *ApiHandler) GetInstrument(c echo.Context) error {
 //	@Param project_id path string true "project id" Format(uuid)
 //	@Param instrument_id path string true "instrument id" Format(uuid)
 //	@Param instrument body model.InstrumentCollection true "instrument collection payload"
+//	@Param key query string false "api key"
 //	@Success 200 {array} model.IDSlugName
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -143,6 +144,7 @@ func (h *ApiHandler) CreateInstruments(c echo.Context) error {
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param instrument_id path string true "instrument uuid" Format(uuid)
 //	@Param instrument body model.Instrument true "instrument payload"
+//	@Param key query string false "api key"
 //	@Success 200 {object} model.Instrument
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -187,6 +189,7 @@ func (h *ApiHandler) UpdateInstrument(c echo.Context) error {
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param instrument_id path string true "instrument uuid" Format(uuid)
 //	@Param instrument body model.Instrument true "instrument payload"
+//	@Param key query string false "api key"
 //	@Success 200 {object} model.Instrument
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -223,6 +226,7 @@ func (h *ApiHandler) UpdateInstrumentGeometry(c echo.Context) error {
 //	@Produce json
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param instrument_id path string true "instrument uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError

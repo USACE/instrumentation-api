@@ -32,7 +32,7 @@ func (h *ApiHandler) ListProjectEvaluationDistrictRollup(c echo.Context) error {
 	if err := tw.SetWindow(from, to, time.Now().AddDate(-1, 0, 0), time.Now()); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	if fiveYrsAfterStart := tw.Start.AddDate(5, 0, 0); tw.End.After(fiveYrsAfterStart) {
+	if fiveYrsAfterStart := tw.After.AddDate(5, 0, 0); tw.Before.After(fiveYrsAfterStart) {
 		return echo.NewHTTPError(http.StatusBadRequest, "maximum requested time range exceeded (5 years)")
 	}
 
@@ -65,7 +65,7 @@ func (h *ApiHandler) ListProjectMeasurementDistrictRollup(c echo.Context) error 
 	if err := tw.SetWindow(from, to, time.Now().AddDate(-1, 0, 0), time.Now()); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	if fiveYrsAfterStart := tw.Start.AddDate(5, 0, 0); tw.End.After(fiveYrsAfterStart) {
+	if fiveYrsAfterStart := tw.After.AddDate(5, 0, 0); tw.Before.After(fiveYrsAfterStart) {
 		return echo.NewHTTPError(http.StatusBadRequest, "maximum requested time range exceeded (5 years)")
 	}
 

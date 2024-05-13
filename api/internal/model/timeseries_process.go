@@ -101,6 +101,7 @@ type ProcessMeasurementFilter struct {
 	InstrumentID      *uuid.UUID  `db:"instrument_id"`
 	InstrumentGroupID *uuid.UUID  `db:"instrument_group_id"`
 	InstrumentIDs     []uuid.UUID `db:"instrument_ids"`
+	TimeseriesIDs     []uuid.UUID `db:"timeseries_ids"`
 	After             time.Time   `db:"after"`
 	Before            time.Time   `db:"before"`
 }
@@ -357,6 +358,9 @@ func queryTimeseriesMeasurements(ctx context.Context, q *Queries, f ProcessMeasu
 	} else if len(f.InstrumentIDs) > 0 {
 		filterSQL = `instrument_id IN (?)`
 		filterArg = f.InstrumentIDs
+	} else if len(f.TimeseriesIDs) > 0 {
+		filterSQL = `id IN (?)`
+		filterArg = f.TimeseriesIDs
 	} else {
 		return nil, fmt.Errorf("must supply valid filter for timeseries_measurement query")
 	}
@@ -442,7 +446,7 @@ func queryTimeseriesMeasurements(ctx context.Context, q *Queries, f ProcessMeasu
 		tt2[idx] = ProcessTimeseries{
 			ProcessTimeseriesInfo: t.ProcessTimeseriesInfo,
 			Measurements:          make([]ProcessMeasurement, 0),
-			TimeWindow:            TimeWindow{Start: f.After, End: f.Before},
+			TimeWindow:            TimeWindow{After: f.After, Before: f.Before},
 		}
 		if err := json.Unmarshal([]byte(t.Measurements), &tt2[idx].Measurements); err != nil {
 			log.Println(err)
@@ -528,7 +532,7 @@ func queryInclinometerTimeseriesMeasurements(ctx context.Context, q *Queries, f 
 		tt2[idx] = ProcessInclinometerTimeseries{
 			ProcessTimeseriesInfo: t.ProcessTimeseriesInfo,
 			Measurements:          make([]ProcessInclinometerMeasurement, 0),
-			TimeWindow:            TimeWindow{Start: f.After, End: f.Before},
+			TimeWindow:            TimeWindow{After: f.After, Before: f.Before},
 		}
 		cm, err := q.GetTimeseriesConstantMeasurement(ctx, t.TimeseriesID, "inclinometer-constant")
 		if err != nil {

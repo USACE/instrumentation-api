@@ -81,6 +81,7 @@ func (h *ApiHandler) GetInstrumentNote(c echo.Context) error {
 //	@Tags instrument-note
 //	@Produce json
 //	@Param instrument_note body model.InstrumentNoteCollection true "instrument note collection payload"
+//	@Param key query string false "api key"
 //	@Success 200 {array} model.InstrumentNote
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -115,6 +116,7 @@ func (h *ApiHandler) CreateInstrumentNote(c echo.Context) error {
 //	@Produce json
 //	@Param note_id path string true "note uuid" Format(uuid)
 //	@Param instrument_note body model.InstrumentNote true "instrument note collection payload"
+//	@Param key query string false "api key"
 //	@Success 200 {array} model.AlertConfig
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -151,6 +153,7 @@ func (h *ApiHandler) UpdateInstrumentNote(c echo.Context) error {
 //	@Produce json
 //	@Param instrument_id path string true "instrument uuid" Format(uuid)
 //	@Param note_id path string true "note uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError

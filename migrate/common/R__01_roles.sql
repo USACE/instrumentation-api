@@ -83,7 +83,6 @@ GRANT SELECT ON
     measure,
     parameter,
     plot_configuration,
-    plot_configuration_timeseries,
     plot_configuration_settings,
     project,
     project_instrument,
@@ -113,7 +112,12 @@ GRANT SELECT ON
     saa_opts,
     saa_segment,
     ipi_opts,
-    ipi_segment
+    ipi_segment,
+    report_config,
+    report_config_plot_config,
+    report_download_job,
+    plot_configuration_timeseries_trace,
+    plot_configuration_custom_shape
 TO instrumentation_reader;
 
 -- Role instrumentation_writer
@@ -131,7 +135,6 @@ GRANT INSERT,UPDATE,DELETE ON
     instrument,
     instrument_telemetry,
     plot_configuration,
-    plot_configuration_timeseries,
     plot_configuration_settings,
     profile,
     profile_project_roles,
@@ -176,7 +179,12 @@ GRANT INSERT,UPDATE,DELETE ON
     saa_opts,
     saa_segment,
     ipi_opts,
-    ipi_segment
+    ipi_segment,
+    report_config,
+    report_config_plot_config,
+    report_download_job,
+    plot_configuration_timeseries_trace,
+    plot_configuration_custom_shape
 TO instrumentation_writer;
 
 -- Role postgis_reader
@@ -223,3 +231,4 @@ DROP VIEW IF EXISTS v_timeseries_dependency CASCADE;
 DROP VIEW IF EXISTS v_timeseries_project_map CASCADE;
 DROP VIEW IF EXISTS v_timeseries_stored CASCADE;
 DROP VIEW IF EXISTS v_unit CASCADE;
+DROP VIEW IF EXISTS v_report_config CASCADE;

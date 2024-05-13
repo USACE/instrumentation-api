@@ -72,6 +72,7 @@ func (h *ApiHandler) GetCollectionGroupDetails(c echo.Context) error {
 //	@Produce json
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param collection_group body model.CollectionGroup true "collection group payload"
+//	@Param key query string false "api key"
 //	@Success 200 {array} model.CollectionGroup
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -108,6 +109,7 @@ func (h *ApiHandler) CreateCollectionGroup(c echo.Context) error {
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param collection_group_id path string true "collection group uuid"
 //	@Param collection_group body model.CollectionGroup true "collection group payload"
+//	@Param key query string false "api key"
 //	@Success 200 {object} model.CollectionGroup
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -148,6 +150,7 @@ func (h *ApiHandler) UpdateCollectionGroup(c echo.Context) error {
 //	@Produce json
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param collection_group_id path string true "collection group uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -177,6 +180,7 @@ func (h *ApiHandler) DeleteCollectionGroup(c echo.Context) error {
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param collection_group_id path string true "collection group uuid" Format(uuid)
 //	@Param timeseries_id path string true "timeseries uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -206,6 +210,7 @@ func (h *ApiHandler) AddTimeseriesToCollectionGroup(c echo.Context) error {
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param collection_group_id path string true "collection group uuid" Format(uuid)
 //	@Param timeseries_id path string true "timeseries uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError

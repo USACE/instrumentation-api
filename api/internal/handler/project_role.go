@@ -16,6 +16,7 @@ import (
 //	@Tags project-role
 //	@Produce json
 //	@Param project_id path string true "project uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Success 200 {array} model.ProjectMembership
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -42,6 +43,7 @@ func (h *ApiHandler) ListProjectMembers(c echo.Context) error {
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param profile_id path string true "profile uuid" Format(uuid)
 //	@Param role_id path string true "role uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Success 200 {object} model.ProjectMembership
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -80,6 +82,7 @@ func (h *ApiHandler) AddProjectMemberRole(c echo.Context) error {
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param profile_id path string true "profile uuid" Format(uuid)
 //	@Param role_id path string true "role uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError

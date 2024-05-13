@@ -58,6 +58,7 @@ func (h *ApiHandler) GetInstrumentGroup(c echo.Context) error {
 //	@Tags instrument-group
 //	@Produce json
 //	@Param instrument_group body model.InstrumentGroup true "instrument group payload"
+//	@Param key query string false "api key"
 //	@Success 200 {object} model.InstrumentGroup
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -94,6 +95,7 @@ func (h *ApiHandler) CreateInstrumentGroup(c echo.Context) error {
 //	@Produce json
 //	@Param instrument_group_id path string true "instrument group uuid" Format(uuid)
 //	@Param instrument_group body model.InstrumentGroup true "instrument group payload"
+//	@Param key query string false "api key"
 //	@Success 200 {object} model.InstrumentGroup
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -138,6 +140,7 @@ func (h *ApiHandler) UpdateInstrumentGroup(c echo.Context) error {
 //	@Tags instrument-group
 //	@Produce json
 //	@Param instrument_group_id path string true "instrument group uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Success 200 {array} model.InstrumentGroup
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -184,6 +187,7 @@ func (h *ApiHandler) ListInstrumentGroupInstruments(c echo.Context) error {
 //	@Tags instrument-group
 //	@Produce json
 //	@Param instrument_group_id path string true "instrument group uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -212,6 +216,7 @@ func (h *ApiHandler) CreateInstrumentGroupInstruments(c echo.Context) error {
 //	@Produce json
 //	@Param instrument_group_id path string true "instrument group uuid" Format(uuid)
 //	@Param instrument_id path string true "instrument uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError

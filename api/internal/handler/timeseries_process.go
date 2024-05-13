@@ -34,14 +34,13 @@ const (
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
+//	@Router /timeseries/{timeseries_id}/measurements [get]
 //	@Router /instruments/{instrument_id}/timeseries/{timeseries_id}/measurements [get]
 func (h *ApiHandler) ListTimeseriesMeasurementsByTimeseries(c echo.Context) error {
 	tsID, err := uuid.Parse(c.Param("timeseries_id"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
 	}
-
-	// TODO: move business logic to service layer
 
 	isStored, err := h.TimeseriesService.GetStoredTimeseriesExists(c.Request().Context(), tsID)
 	if err != nil {
@@ -180,8 +179,8 @@ func selectMeasurementsHandler(h *ApiHandler, f model.ProcessMeasurementFilter, 
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
-		f.After = tw.Start
-		f.Before = tw.End
+		f.After = tw.After
+		f.Before = tw.Before
 
 		trs := c.QueryParam("threshold")
 
@@ -236,8 +235,8 @@ func selectInclinometerMeasurementsHandler(h *ApiHandler, f model.ProcessMeasure
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
-		f.After = tw.Start
-		f.Before = tw.End
+		f.After = tw.After
+		f.Before = tw.Before
 
 		mrc, err := h.ProcessTimeseriesService.SelectInclinometerMeasurements(c.Request().Context(), f)
 		if err != nil {

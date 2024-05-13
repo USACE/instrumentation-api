@@ -18,6 +18,7 @@ import (
 //	@Produce json
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param timeseries_measurement_collections body model.TimeseriesMeasurementCollectionCollection true "array of timeseries measurement collections"
+//	@Param key query string false "api key"
 //	@Success 200 {array} model.MeasurementCollection
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -55,6 +56,7 @@ func (h *ApiHandler) CreateOrUpdateProjectTimeseriesMeasurements(c echo.Context)
 //	@Tags measurement
 //	@Produce json
 //	@Param timeseries_measurement_collections body model.TimeseriesMeasurementCollectionCollection true "array of timeseries measurement collections"
+//	@Param key query string true "api key"
 //	@Success 200 {array} model.MeasurementCollection
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -82,6 +84,7 @@ func (h *ApiHandler) CreateOrUpdateTimeseriesMeasurements(c echo.Context) error 
 //	@Param after query string false "after timestamp" Format(date-time)
 //	@Param before query string false "before timestamp" Format(date-time)
 //	@Param timeseries_measurement_collections body model.TimeseriesMeasurementCollectionCollection true "array of timeseries measurement collections"
+//	@Param key query string false "api key"
 //	@Success 200 {array} model.MeasurementCollection
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -112,6 +115,7 @@ func (h *ApiHandler) UpdateTimeseriesMeasurements(c echo.Context) error {
 //	@Produce json
 //	@Param timeseries_id path string true "timeseries uuid" Format(uuid)
 //	@Param time query string true "timestamp of measurement to delete" Format(date-time)
+//	@Param key query string false "api key"
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
