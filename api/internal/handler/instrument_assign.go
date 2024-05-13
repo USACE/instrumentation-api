@@ -88,14 +88,14 @@ func (h *ApiHandler) UnassignInstrumentFromProject(c echo.Context) error {
 //	@Description must be Project (or Application) Admin of all existing instrument projects and project to be assigned
 //	@Produce json
 //	@Param instrument_id path string true "instrument uuid" Format(uuid)
-//	@Param project_ids body  true "project uuids" Format(uuid)
+//	@Param project_ids body model.InstrumentProjectAssignments true "project uuids"
 //	@Param action query string true "valid values are 'assign' or 'unassign'"
 //	@Param dry_run query string false "validate request without performing action"
-//	@Success 201 {object} model.InstrumentsValidation
+//	@Success 200 {object} model.InstrumentsValidation
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
-//	@Router projects/{project_id}/instruments/{instrument_id}/assignments [put]
+//	@Router /projects/{project_id}/instruments/{instrument_id}/assignments [put]
 //	@Security Bearer
 func (h *ApiHandler) UpdateInstrumentProjectAssignments(c echo.Context) error {
 	iID, err := uuid.Parse(c.Param("instrument_id"))
@@ -136,10 +136,10 @@ func (h *ApiHandler) UpdateInstrumentProjectAssignments(c echo.Context) error {
 //	@Description must be Project (or Application) Admin of all existing instrument projects and project to be assigned
 //	@Produce json
 //	@Param project_id path string true "project uuid" Format(uuid)
-//	@Param instrument_ids body true "instrument uuids" Format(uuid)
+//	@Param instrument_ids body model.ProjectInstrumentAssignments true "instrument uuids"
 //	@Param action query string true "valid values are 'assign' or 'unassign'"
 //	@Param dry_run query string false "validate request without performing action"
-//	@Success 201 {object} model.InstrumentsValidation
+//	@Success 200 {object} model.InstrumentsValidation
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError

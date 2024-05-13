@@ -644,6 +644,13 @@ definitions:
           $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentNote'
         type: array
     type: object
+  github_com_USACE_instrumentation-api_api_internal_model.InstrumentProjectAssignments:
+    properties:
+      project_ids:
+        items:
+          type: string
+        type: array
+    type: object
   github_com_USACE_instrumentation-api_api_internal_model.InstrumentStatus:
     properties:
       id:
@@ -661,6 +668,15 @@ definitions:
         items:
           $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentStatus'
         type: array
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.InstrumentsValidation:
+    properties:
+      errors:
+        items:
+          type: string
+        type: array
+      is_valid:
+        type: boolean
     type: object
   github_com_USACE_instrumentation-api_api_internal_model.IpiMeasurements:
     properties:
@@ -838,6 +854,13 @@ definitions:
     properties:
       project_count:
         type: integer
+    type: object
+  github_com_USACE_instrumentation-api_api_internal_model.ProjectInstrumentAssignments:
+    properties:
+      instrument_ids:
+        items:
+          type: string
+        type: array
     type: object
   github_com_USACE_instrumentation-api_api_internal_model.ProjectMembership:
     properties:
@@ -4993,14 +5016,22 @@ paths:
         name: instrument_id
         required: true
         type: string
+      - description: valid values are 'assign' or 'unassign'
+        in: query
+        name: action
+        required: true
+        type: string
+      - description: validate request without performing action
+        in: query
+        name: dry_run
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentsValidation'
         "400":
           description: Bad Request
           schema:
@@ -5034,14 +5065,17 @@ paths:
         name: instrument_id
         required: true
         type: string
+      - description: validate request without performing action
+        in: query
+        name: dry_run
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentsValidation'
         "400":
           description: Bad Request
           schema:
@@ -5057,6 +5091,55 @@ paths:
       security:
       - Bearer: []
       summary: assigns an instrument to a project.
+      tags:
+      - instrument
+    put:
+      description: must be Project (or Application) Admin of all existing instrument
+        projects and project to be assigned
+      parameters:
+      - description: instrument uuid
+        format: uuid
+        in: path
+        name: instrument_id
+        required: true
+        type: string
+      - description: project uuids
+        in: body
+        name: project_ids
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentProjectAssignments'
+      - description: valid values are 'assign' or 'unassign'
+        in: query
+        name: action
+        required: true
+        type: string
+      - description: validate request without performing action
+        in: query
+        name: dry_run
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentsValidation'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
+      summary: updates multiple project assignments for an instrument
       tags:
       - instrument
   /projects/{project_id}/instruments/{instrument_id}/constants:
@@ -5313,6 +5396,56 @@ paths:
       summary: lists timeseries for an instrument
       tags:
       - timeseries
+  /projects/{project_id}/instruments/assignments:
+    put:
+      description: must be Project (or Application) Admin of all existing instrument
+        projects and project to be assigned
+      parameters:
+      - description: project uuid
+        format: uuid
+        in: path
+        name: project_id
+        required: true
+        type: string
+      - description: instrument uuids
+        in: body
+        name: instrument_ids
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.ProjectInstrumentAssignments'
+      - description: valid values are 'assign' or 'unassign'
+        in: query
+        name: action
+        required: true
+        type: string
+      - description: validate request without performing action
+        in: query
+        name: dry_run
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_USACE_instrumentation-api_api_internal_model.InstrumentsValidation'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      security:
+      - Bearer: []
+      summary: updates multiple instrument assigments for a project
+      tags:
+      - instrument
   /projects/{project_id}/members:
     get:
       parameters:
