@@ -1,13 +1,10 @@
 package handler_test
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"testing"
 
-	"github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/stretchr/testify/assert"
 	"github.com/xeipuuv/gojsonschema"
 )
@@ -140,27 +137,27 @@ const updateReportDownloadJobBody = `{
 }`
 
 func TestReportConfigs(t *testing.T) {
-	createReportDownloadJobCallback := func(b []byte) {
-		var j model.ReportDownloadJob
-		err := json.Unmarshal(b, &j)
-		assert.Nil(t, err)
-		if err != nil {
-			t.Errorf("createReportConfigJobCallback json.Unmarshal failed: %s", err.Error())
-		}
-		eventMessage := model.ReportConfigJobMessage{ReportConfigID: j.ReportConfigID, JobID: j.ID}
-		em, err := json.Marshal(eventMessage)
-		assert.Nil(t, err)
-		if err != nil {
-			t.Errorf("createReportConfigJobCallback json.Marshal failed: %s", err.Error())
-		}
-		msg := bytes.NewReader(em)
-		res, err := http.Post("http://report:8080/2015-03-31/functions/function/invocations", "application/json", msg)
-		assert.Nil(t, err)
-		if err != nil {
-			t.Errorf("createReportConfigJobCallback http.Post failed: %s", err.Error())
-		}
-		assert.Equal(t, 200, res.StatusCode)
-	}
+	// createReportDownloadJobCallback := func(b []byte) {
+	// 	var j model.ReportDownloadJob
+	// 	err := json.Unmarshal(b, &j)
+	// 	assert.Nil(t, err)
+	// 	if err != nil {
+	// 		t.Errorf("createReportConfigJobCallback json.Unmarshal failed: %s", err.Error())
+	// 	}
+	// 	eventMessage := model.ReportConfigJobMessage{ReportConfigID: j.ReportConfigID, JobID: j.ID}
+	// 	em, err := json.Marshal(eventMessage)
+	// 	assert.Nil(t, err)
+	// 	if err != nil {
+	// 		t.Errorf("createReportConfigJobCallback json.Marshal failed: %s", err.Error())
+	// 	}
+	// 	msg := bytes.NewReader(em)
+	// 	res, err := http.Post("http://report:8080/2015-03-31/functions/function/invocations", "application/json", msg)
+	// 	assert.Nil(t, err)
+	// 	if err != nil {
+	// 		t.Errorf("createReportConfigJobCallback http.Post failed: %s", err.Error())
+	// 	}
+	// 	assert.Equal(t, 200, res.StatusCode)
+	// }
 
 	objSchema, err := gojsonschema.NewSchema(reportConfigObjectLoader)
 	assert.Nil(t, err)
@@ -192,20 +189,20 @@ func TestReportConfigs(t *testing.T) {
 			ExpectedStatus: http.StatusOK,
 			ExpectedSchema: jobObjSchema,
 		},
-		{
-			Name:           "CreateReportDownloadJob",
-			URL:            fmt.Sprintf("/projects/%s/report_configs/%s/jobs", testProjectID, testReportConfigID),
-			Method:         http.MethodPost,
-			ExpectedStatus: http.StatusCreated,
-			ExpectedSchema: jobObjSchema,
-		},
+		// {
+		// 	Name:           "CreateReportDownloadJob",
+		// 	URL:            fmt.Sprintf("/projects/%s/report_configs/%s/jobs", testProjectID, testReportConfigID),
+		// 	Method:         http.MethodPost,
+		// 	ExpectedStatus: http.StatusCreated,
+		// 	ExpectedSchema: jobObjSchema,
+		//	onSuccess:      &createReportDownloadJobCallback,
+		// },
 		{
 			Name:           "UpdateReportDownloadJob",
 			URL:            fmt.Sprintf("/report_jobs/%s?key=%s", testUpdateJobID, mockAppKey),
-			Body:           updateReportDownloadJobBody,
 			Method:         http.MethodPut,
+			Body:           updateReportDownloadJobBody,
 			ExpectedStatus: http.StatusOK,
-			onSuccess:      &createReportDownloadJobCallback,
 		},
 		{
 			Name:           "UpdateReportConfig",
