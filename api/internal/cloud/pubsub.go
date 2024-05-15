@@ -34,9 +34,10 @@ func NewSQSPubsub(cfg *config.AWSSQSConfig) *SQSPubsub {
 	queue := sqs.NewFromConfig(sqsCfg, optFns...)
 
 	ps := &SQSPubsub{queue, cfg, nil, nil}
-	if !cfg.AWSSQSQueueNoInit {
-		ps.MustInitQueueUrl()
-	}
+	// TODO: enable when sqs queue for report service is created
+	// if !cfg.AWSSQSQueueNoInit {
+	// 	ps.MustInitQueueUrl()
+	// }
 
 	return ps
 }
