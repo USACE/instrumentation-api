@@ -111,6 +111,7 @@ func (h *ApiHandler) ListProjectTimeseries(c echo.Context) error {
 //	@Tags timeseries
 //	@Produce json
 //	@Param project_id path string true "project uuid" Format(uuid)
+//	@Param plot_config_id path string true "plot config uuid" Format(uuid)
 //	@Success 200 {array} model.Timeseries
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError

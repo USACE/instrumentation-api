@@ -45,7 +45,6 @@ type HTTPTest struct {
 	ExpectedStatus int
 	ExpectedSchema *gojsonschema.Schema
 	authHeader     string
-	onSuccess      *func(b []byte)
 }
 
 // singleton api server since database is used in integration tests
@@ -141,11 +140,6 @@ func RunAll(t *testing.T, tests []HTTPTest) {
 					}
 					t.Log(errs)
 				}
-			}
-
-			if httpErr == nil && v.onSuccess != nil && run != nil && run.Body != nil {
-				callback := *v.onSuccess
-				callback(body)
 			}
 		})
 	}

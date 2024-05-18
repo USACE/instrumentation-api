@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -124,6 +125,7 @@ func (h *ApiHandler) UpdateReportConfig(c echo.Context) error {
 //	@Tags report-config
 //	@Produce json
 //	@Param project_id path string true "project uuid" Format(uuid)
+//	@Param report_config_id path string true "report config uuid" Format(uuid)
 //	@Param key query string false "api key"
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
@@ -145,7 +147,7 @@ func (h *ApiHandler) DeleteReportConfig(c echo.Context) error {
 
 // GetReportConfigWithPlotConfigs godoc
 //
-//	@Sumary Lists all plot configs for a report config
+//	@Summary Lists all plot configs for a report config
 //	@Tags report-config
 //	@Produce json
 //	@Param report_config_id path string true "report config uuid" Format(uuid)
@@ -169,7 +171,7 @@ func (h *ApiHandler) GetReportConfigWithPlotConfigs(c echo.Context) error {
 
 // CreateReportDownloadJob godoc
 //
-//	@Sumary starts a job to create a pdf report
+//	@Summary starts a job to create a pdf report
 //	@Tags report-config
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param report_config_id path string true "report config uuid" Format(uuid)
@@ -198,7 +200,7 @@ func (h *ApiHandler) CreateReportDownloadJob(c echo.Context) error {
 
 // GetReportDownloadJob godoc
 //
-//	@Sumary gets a job that creates a pdf report
+//	@Summary gets a job that creates a pdf report
 //	@Tags report-config
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param report_config_id path string true "report config uuid" Format(uuid)
@@ -228,18 +230,18 @@ func (h *ApiHandler) GetReportDownloadJob(c echo.Context) error {
 
 // UpdateReportDownloadJob godoc
 //
-//	@Sumary updates a job that creates a pdf report
+//	@Summary updates a job that creates a pdf report
 //	@Tags report-config
 //	@Param job_id path string true "download job uuid" Format(uuid)
 //	@Param report_download_job body model.ReportDownloadJob true "report download job payload"
 //	@Param key query string true "api key"
+//	@Accept application/json
 //	@Produce application/json
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
-//	@Router /projects/{project_id}/report_configs/{report_config_id}/jobs/{job_id} [put]
-//	@Security Bearer
+//	@Router /report_jobs/{job_id} [put]
 func (h *ApiHandler) UpdateReportDownloadJob(c echo.Context) error {
 	jobID, err := uuid.Parse(c.Param("job_id"))
 	if err != nil {
@@ -257,4 +259,50 @@ func (h *ApiHandler) UpdateReportDownloadJob(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{"id": j.ID})
+}
+
+// DownloadReport godoc
+//
+//	@Summary downloads a report for a given report job id
+//	@Tags report-config
+//	@Produce application/pdf
+//	@Param project_id path string true "project uuid" Format(uuid)
+//	@Param report_config_id path string true "report config uuid" Format(uuid)
+//	@Param job_id path string true "job uuid" Format(uuid)
+//	@Success 200 {file} file
+//	@Failure 400 {object} echo.HTTPError
+//	@Failure 404 {object} echo.HTTPError
+//	@Failure 500 {object} echo.HTTPError
+//	@Router /projects/{project_id}/report_configs/{report_config_id}/jobs/{job_id}/downloads [get]
+//	@Security Bearer
+func (h *ApiHandler) DownloadReport(c echo.Context) error {
+	jobID, err := uuid.Parse(c.Param("job_id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+	}
+	p := c.Get("profile").(model.Profile)
+
+	j, err := h.ReportConfigService.GetReportDownloadJob(c.Request().Context(), jobID, p.ID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	if j.Status != "SUCCESS" {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("job status %s", j.Status))
+	}
+	if j.FileExpiry != nil && time.Now().After(*j.FileExpiry) {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("file no longer exists, expired at %s", *j.FileExpiry))
+	}
+	if j.FileKey == nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "file key returned nil")
+	}
+
+	r, err := h.BlobService.NewReaderContext(c.Request().Context(), *j.FileKey, "")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	c.Response().Header().Set(echo.HeaderContentDisposition, "attachment")
+	c.Response().Header().Set("Cache-Control", "public, max-age=31536000")
+
+	return c.Stream(http.StatusOK, "application/pdf", r)
 }
