@@ -32,12 +32,12 @@ RUN apk add --no-cache --update --repository=https://dl-cdn.alpinelinux.org/alpi
 
 # packages needed for Lambda ric / rie and Nodejs
 RUN apk add --no-cache \
-	tini make gcc g++ python3 git npm yarn \
+	make gcc g++ python3 git npm yarn \
 	wget cmake unzip curl-dev autoconf automake libtool
 
 RUN ln -s /usr/share/aclocal /usr/local/share/aclocal
 
-COPY chrome_local.conf /etc/fonts/local.conf
+COPY chrome/local.conf /etc/fonts/local.conf
 
 # Add Chrome as a user
 RUN mkdir -p /usr/src/app \

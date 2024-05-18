@@ -1,33 +1,45 @@
 import type { Dash, PlotType, Data, Datum } from "plotly.js-dist-min";
-import type {
-  ApiClient,
-  Measurement,
-  PlotConfig,
-  PlotConfigTimeseriesTrace,
-} from "../generated";
 import type { UUID } from "crypto";
+import type { paths, components } from "../generated";
+
+type PlotConfigTimeseriesTrace = components["schemas"]["PlotConfigTimeseriesTrace"];
+type Measurement = components["schemas"]["Measurement"];
+type PlotConfig = components["schemas"]["PlotConfig"];
 
 interface TimeWindow {
   after: string | undefined;
   before: string | undefined;
 }
 
-export async function processReport(
+window.processReport = async (
   reportConfigId: UUID,
-  apiClient: ApiClient,
+  baseUrl: string,
   apiKey: string,
-): Promise<void> {
-  
+) => {
   const { newPlot, addTraces } = await import("plotly.js-dist-min");
+  const { default: createClient } = await import("openapi-fetch");
 
-  const rp = await apiClient.reportConfig.getReportConfigsPlotConfigs(
-    reportConfigId,
-    apiKey,
-  );
+  const apiClient = createClient<paths>({ baseUrl });
+
+  const { data: rp, error } = await apiClient.GET("/report_configs/{report_config_id}/plot_configs", {
+    params: {
+      path : {
+        report_config_id: reportConfigId
+      },
+      query: {
+        key: apiKey,
+      },
+    },
+  });
+
+  if (error) {
+    // TODO
+    throw new Error(JSON.stringify(error));
+  }
 
   const contentDiv = document.getElementById("content");
 
-  const pcs = rp.plot_configs ?? [];
+  const pcs = rp?.plot_configs ?? [];
 
   pcs.forEach(async (pc, idx) => {
     const { after, before } = parseDateRange(pc.date_range);
@@ -37,27 +49,38 @@ export async function processReport(
     const plotDiv = document.createElement("div");
     plotDiv.setAttribute("id", `plot-${idx}`);
 
-    let gd = await newPlot(plotDiv, [], layout);
+    await newPlot(plotDiv, [], layout, { staticPlot: true });
 
     const traces = pc.display?.traces ?? [];
 
     // traces are pre-sorted
     const tracePromises = traces.map((tr, idx) => {
       return async function () {
-        const mm = await apiClient.timeseries.getTimeseriesMeasurements(
-          tr.timeseries_id!,
-          after,
-          before,
-          3000,
-        );
-        const trace = createTraceData(tr, mm.items!, pc);
+        const { data: mm, error } = await apiClient.GET("/timeseries/{timeseries_id}/measurements", {
+          params: {
+            path: {
+              timeseries_id: tr.timeseries_id!,
+            },
+            query: {
+              after,
+              before,
+              threshold: 3000,
+            },
+          }
+        });
+        
+        if (error) {
+          // TODO, skip this timeseries for now in case of failure
+          console.error(error);
+          return;
+        }
 
-        await addTraces(gd, trace, tr.trace_order ?? idx);
+        const trace = createTraceData(tr, mm?.items!, pc);
+        await addTraces(plotDiv, trace, tr.trace_order ?? idx);
       };
     });
 
-    Promise.all(tracePromises);
-
+    await Promise.all(tracePromises);
     contentDiv?.appendChild(plotDiv);
   });
 }
