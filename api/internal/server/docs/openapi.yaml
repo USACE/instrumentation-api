@@ -9029,6 +9029,7 @@ components:
         description: description
         project_name: project_name
         update_date: update_date
+        district_name: district_name
         project_id: project_id
         creator_id: creator_id
         name: name
@@ -9051,6 +9052,8 @@ components:
         creator_username:
           type: string
         description:
+          type: string
+        district_name:
           type: string
         global_overrides:
           $ref: '#/components/schemas/ReportConfigGlobalOverrides'
@@ -9111,6 +9114,7 @@ components:
         description: description
         project_name: project_name
         update_date: update_date
+        district_name: district_name
         project_id: project_id
         creator_id: creator_id
         name: name
@@ -9243,6 +9247,8 @@ components:
         creator_username:
           type: string
         description:
+          type: string
+        district_name:
           type: string
         global_overrides:
           $ref: '#/components/schemas/ReportConfigGlobalOverrides'

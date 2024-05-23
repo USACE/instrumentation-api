@@ -153,9 +153,9 @@ export async function handler(event: EventMessageBody): Promise<void> {
   // await page.addScriptTag({ url: "https://unpkg.com/virtual-webgl@1.0.6/src/virtual-webgl.js" });
   await page.addScriptTag({ path: "./report.mjs" });
 
-  await page.evaluate(
+  const { districtName } = await page.evaluate(
     async (id, url, apikey) => {
-      await window.processReport(id, url, apikey);
+      return await window.processReport(id, url, apikey);
     },
     rcId,
     apiBaseUrl,
@@ -164,7 +164,6 @@ export async function handler(event: EventMessageBody): Promise<void> {
 
   // wait for all content to load before exporting to PDF
   await page.waitForNetworkIdle();
-  // await page.waitForResponse(response => response.url().includes('/timeseries_measurement'));
   await waitForDOMStable(page);
 
   const buf = await page.pdf({
@@ -172,7 +171,7 @@ export async function handler(event: EventMessageBody): Promise<void> {
     scale: 1,
     displayHeaderFooter: true,
     headerTemplate: getHeader(logoBackground),
-    footerTemplate: getFooter(castleLogoSvg, "TODO District Name"),
+    footerTemplate: getFooter(castleLogoSvg, districtName),
     preferCSSPageSize: true,
   });
   let statusCode: number | undefined;

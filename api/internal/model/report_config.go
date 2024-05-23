@@ -16,6 +16,7 @@ type ReportConfig struct {
 	Description     string                      `json:"description" db:"description"`
 	ProjectID       uuid.UUID                   `json:"project_id" db:"project_id"`
 	ProjectName     string                      `json:"project_name" db:"project_name"`
+	DistrictName    *string                     `json:"district_name" db:"district_name"`
 	PlotConfigs     dbJSONSlice[IDSlugName]     `json:"plot_configs" db:"plot_configs"`
 	GlobalOverrides ReportConfigGlobalOverrides `json:"global_overrides" db:"global_overrides"`
 	AuditInfo

@@ -7930,6 +7930,7 @@ export interface components {
      *   "description": "description",
      *   "project_name": "project_name",
      *   "update_date": "update_date",
+     *   "district_name": "district_name",
      *   "project_id": "project_id",
      *   "creator_id": "creator_id",
      *   "name": "name",
@@ -7956,6 +7957,7 @@ export interface components {
       creator_id?: string;
       creator_username?: string;
       description?: string;
+      district_name?: string;
       global_overrides?: components["schemas"]["ReportConfigGlobalOverrides"];
       id?: string;
       name?: string;
@@ -8009,6 +8011,7 @@ export interface components {
      *   "description": "description",
      *   "project_name": "project_name",
      *   "update_date": "update_date",
+     *   "district_name": "district_name",
      *   "project_id": "project_id",
      *   "creator_id": "creator_id",
      *   "name": "name",
@@ -8179,6 +8182,7 @@ export interface components {
       creator_id?: string;
       creator_username?: string;
       description?: string;
+      district_name?: string;
       global_overrides?: components["schemas"]["ReportConfigGlobalOverrides"];
       id?: string;
       name?: string;

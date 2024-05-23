@@ -19,7 +19,7 @@ window.processReport = async (
   reportConfigId: UUID,
   baseUrl: string,
   apiKey: string,
-) => {
+): Promise<{ districtName: string }> => {
   const { newPlot } = await import("plotly.js-dist-min");
   const { default: createClient } = await import("openapi-fetch");
 
@@ -47,6 +47,11 @@ window.processReport = async (
 
   const introDiv = document.createElement("div");
   introDiv.setAttribute("id", "intro");
+
+  const authorDiv = document.createElement("div");
+  authorDiv.innerText = `Report configuration created by ${rp.creator_username ?? "MIDAS"}`;
+  authorDiv.setAttribute("id", "author");
+  introDiv?.appendChild(authorDiv);
 
   const titleHeader = document.createElement("h1");
   titleHeader.innerText = `${rp.project_name ?? "MIDAS Project"}: ${rp.name ?? "Report"}`;
@@ -224,6 +229,10 @@ window.processReport = async (
 
     contentDiv?.appendChild(wrapperDiv);
   });
+
+  return {
+    districtName: rp?.district_name ?? "No District",
+  };
 };
 
 function parseDateRange(dateStr: string | undefined): {

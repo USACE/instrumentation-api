@@ -7,6 +7,7 @@ CREATE VIEW v_report_config AS (
         rc.description,
         rc.project_id,
         p.name AS project_name,
+        dt.name AS district_name,
         rc.creator,
         cp.username AS creator_username,
         rc.create_date,
@@ -30,6 +31,7 @@ CREATE VIEW v_report_config AS (
         )::text AS global_overrides
     FROM report_config rc
     INNER JOIN project p ON rc.project_id = p.id
+    LEFT JOIN district dt ON p.district_id = dt.id
     INNER JOIN profile cp ON cp.id = rc.creator
     LEFT JOIN profile up ON up.id = rc.updater
     LEFT JOIN LATERAL (

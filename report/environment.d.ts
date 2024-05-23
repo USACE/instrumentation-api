@@ -13,7 +13,11 @@ declare global {
     }
   }
   interface Window {
-    processReport: CallableFunction;
+    processReport: (
+      id: UUID,
+      url: string,
+      apiKey: string,
+    ) => Promise<{ districtName: string }>;
   }
 }
 

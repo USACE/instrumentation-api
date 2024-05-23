@@ -12447,6 +12447,9 @@
           "description" : {
             "type" : "string"
           },
+          "district_name" : {
+            "type" : "string"
+          },
           "global_overrides" : {
             "$ref" : "#/components/schemas/ReportConfigGlobalOverrides"
           },
@@ -12509,6 +12512,9 @@
             "type" : "string"
           },
           "description" : {
+            "type" : "string"
+          },
+          "district_name" : {
             "type" : "string"
           },
           "global_overrides" : {
