@@ -16,6 +16,8 @@ CREATE VIEW v_plot_configuration AS (
         COALESCE(k.date_range, '1 year')      AS date_range,
         COALESCE(k.threshold, 3000)           AS threshold,
         COALESCE(rc.configs, '[]')::text      AS report_configs,
+        -- TODO plot_type_id
+        -- TODO ploty_type_name
         json_build_object(
             'traces', COALESCE(traces.items, '[]'),
             'layout', json_build_object(
@@ -63,6 +65,7 @@ CREATE VIEW v_plot_configuration AS (
         FROM plot_configuration_custom_shape ccs
         WHERE pc.id = ccs.plot_configuration_id
     ) cs on true
+    ORDER BY pc.name
 );
 
 GRANT SELECT ON v_plot_configuration TO instrumentation_reader;
