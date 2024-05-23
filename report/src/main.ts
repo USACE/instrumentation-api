@@ -1,8 +1,11 @@
 import fs from "node:fs";
-import puppeteer from "puppeteer-core";
+import puppeteer, { Page } from "puppeteer-core";
 import { S3Client } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 import createClient from "openapi-fetch";
+
+import { castleLogoSvg } from "./svgInlineContent";
+import { logoBackground } from "./base64InlineContent";
 
 import type { UUID } from "crypto";
 import type { GetSecretValueResponse } from "@aws-sdk/client-secrets-manager";
@@ -48,6 +51,65 @@ const smApiKeyArn = process.env.AWS_SM_API_KEY_ARN;
 const puppeteerExecutablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
 const smMockRequest = process.env.AWS_SM_MOCK_REQUEST;
 
+function getHeader(bgImgBase64: string) {
+  return `<div style="top: 0; width: 100%; height: auto; margin: 0;">
+              <img style="top: 0; max-width: 100%; max-height: 100%" src="data:image/png;base64,${bgImgBase64}" />  
+          </div>`;
+}
+
+function getFooter(svgContent: string, logoText: string) {
+  return `<div style="display: inline-block; width: 100%; height: auto; margin: 0 0.7cm; font-size: 9pt;">
+              <div style="position: absolute; bottom: 1pc; left: 1pc;">
+                <div id="castle-logo" style="display: block; margin-bottom: 5px;">
+                  ${svgContent}
+                </div>
+                <label for="castle-logo" style="position: absolute; bottom: 0; left: 0; overflow: hidden; white-space: nowrap;">${logoText}</label>
+              </div>
+              <div style="color: grey; font-style: italic; position: absolute; bottom: 1pc; right: 1pc;">
+                <span class="date"></span>
+                <span>&nbsp;UTC</span>
+                <span style="margin-left: 25px;">Page no.&nbsp;</span>
+                <span class="pageNumber"></span>
+                <span>/</span>
+                <span class="totalPages"></span>
+              </div>
+          </div>`;
+}
+
+async function waitForDOMStable(
+  page: Page,
+  options = { timeout: 30000, idleTime: 2000 },
+): Promise<void> {
+  await page.evaluate(
+    ({ timeout, idleTime }) =>
+      new Promise((resolve, reject) => {
+        setTimeout(() => {
+          observer.disconnect();
+          const msg =
+            `timeout of ${timeout} ms ` +
+            "exceeded waiting for DOM to stabilize";
+          reject(Error(msg));
+        }, timeout);
+        const observer = new MutationObserver(() => {
+          clearTimeout(timeoutId);
+          timeoutId = setTimeout(finish, idleTime);
+        });
+        const config = {
+          attributes: true,
+          childList: true,
+          subtree: true,
+        };
+        observer.observe(document.body, config);
+        const finish = () => {
+          observer.disconnect();
+          resolve("done");
+        };
+        let timeoutId = setTimeout(finish, idleTime);
+      }),
+    options,
+  );
+}
+
 export async function handler(event: EventMessageBody): Promise<void> {
   const s3Client = new S3Client(s3ClientConfig);
 
@@ -67,12 +129,28 @@ export async function handler(event: EventMessageBody): Promise<void> {
 
   const browser = await puppeteer.launch({
     executablePath: puppeteerExecutablePath,
-    args: ["--headless", "--disable-dev-shm-usage"],
+    args: ["--headless"],
   });
   const page = await browser.newPage();
+
+  // bubble up events from headless browser
+  page.on("console", (message) => console.log(`Console: ${message.text()}`));
+  page.on("pageerror", ({ message }) => console.log(`Error: ${message}`));
+  page.on("requestfailed", (request) =>
+    console.log(
+      `Request failed: ${request.failure()?.errorText} ${request.url()}`,
+    ),
+  );
+
   const htmlContent = fs.readFileSync("/usr/src/app/index.html");
 
   await page.setContent(htmlContent.toString());
+  // This is supposed to fix the problem of too many WebGL contexts
+  // in the case where a page has many different plots but there are some
+  // errors that the WebGLContext elements are not supported.
+  // TODO: check that WebGL 1 is enabled on the apk installation of chrome
+  //
+  // await page.addScriptTag({ url: "https://unpkg.com/virtual-webgl@1.0.6/src/virtual-webgl.js" });
   await page.addScriptTag({ path: "./report.mjs" });
 
   await page.evaluate(
@@ -84,7 +162,19 @@ export async function handler(event: EventMessageBody): Promise<void> {
     apiKey,
   );
 
-  const buf = await page.pdf({ format: "A4" });
+  // wait for all content to load before exporting to PDF
+  await page.waitForNetworkIdle();
+  // await page.waitForResponse(response => response.url().includes('/timeseries_measurement'));
+  await waitForDOMStable(page);
+
+  const buf = await page.pdf({
+    format: "letter",
+    scale: 1,
+    displayHeaderFooter: true,
+    headerTemplate: getHeader(logoBackground),
+    footerTemplate: getFooter(castleLogoSvg, "TODO District Name"),
+    preferCSSPageSize: true,
+  });
   let statusCode: number | undefined;
 
   const fileKey = `/${rcId}/${jobId}/${new Date().toISOString().split("T")[0]}_midas_report.pdf`;
@@ -131,7 +221,6 @@ async function updateJob(
         job_id: jobId,
       },
     },
-    headers: {},
   };
 
   if (statusCode !== 200) {

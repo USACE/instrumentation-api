@@ -2,6 +2,65 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <!-- needed for loading multiple WebGL1 contexts-->
+    <style media="print">
+      @page {
+        size: letter portrait;
+        margin: 4pc;
+        margin-top: 6pc;
+      }
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: "Helvetica", "Arial", sans-serif;
+        color: #444444;
+        font-size: 11.5pt;
+        background-color: #fafafa;
+      }
+      .sheet {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        position: relative;
+        box-sizing: border-box;
+        page-break-after: always;
+      }
+      body.letter .sheet {
+        width: 216mm;
+        height: 280mm;
+      }
+      body.letter.landscape .sheet {
+        width: 280mm;
+        height: 216mm;
+      }
+      #content {
+        display: block;
+      }
+      #content > * {
+        display: block;
+        float: left;
+        break-inside: avoid;
+      }
+      #intro {
+        text-align: left;
+      }
+      #title {
+        font-weight: bold;
+        font-size: 24pt;
+      }
+      .plot-wrapper {
+        text-align: left;
+        font-weight: bold;
+        font-size: 18pt;
+      }
+      .plot-header {
+        margin-left: 30px;
+        margin-bottom: 0;
+      }
+      .plot {
+        margin-top: 0;
+      }
+    </style>
     <title>MIDAS Report</title>
   </head>
   <body>

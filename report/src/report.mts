@@ -1,156 +1,276 @@
-import type { Dash, PlotType, Data, Datum } from "plotly.js-dist-min";
+import type {
+  Dash,
+  PlotType,
+  Datum,
+  LayoutAxis,
+  Layout,
+  Shape,
+  Config,
+  PlotData,
+} from "plotly.js-dist-min";
 import type { UUID } from "crypto";
 import type { paths, components } from "../generated";
 
-type PlotConfigTimeseriesTrace = components["schemas"]["PlotConfigTimeseriesTrace"];
+type PlotConfigTimeseriesTrace =
+  components["schemas"]["PlotConfigTimeseriesTrace"];
 type Measurement = components["schemas"]["Measurement"];
-type PlotConfig = components["schemas"]["PlotConfig"];
-
-interface TimeWindow {
-  after: string | undefined;
-  before: string | undefined;
-}
 
 window.processReport = async (
   reportConfigId: UUID,
   baseUrl: string,
   apiKey: string,
 ) => {
-  const { newPlot, addTraces } = await import("plotly.js-dist-min");
+  const { newPlot } = await import("plotly.js-dist-min");
   const { default: createClient } = await import("openapi-fetch");
 
   const apiClient = createClient<paths>({ baseUrl });
 
-  const { data: rp, error } = await apiClient.GET("/report_configs/{report_config_id}/plot_configs", {
-    params: {
-      path : {
-        report_config_id: reportConfigId
-      },
-      query: {
-        key: apiKey,
+  const { data: rp, error } = await apiClient.GET(
+    "/report_configs/{report_config_id}/plot_configs",
+    {
+      params: {
+        path: {
+          report_config_id: reportConfigId,
+        },
+        query: {
+          key: apiKey,
+        },
       },
     },
-  });
+  );
 
   if (error) {
-    // TODO
     throw new Error(JSON.stringify(error));
   }
 
   const contentDiv = document.getElementById("content");
 
+  const introDiv = document.createElement("div");
+  introDiv.setAttribute("id", "intro");
+
+  const titleHeader = document.createElement("h1");
+  titleHeader.innerText = `${rp.project_name ?? "MIDAS Project"}: ${rp.name ?? "Report"}`;
+  titleHeader.setAttribute("id", "title");
+  introDiv?.appendChild(titleHeader);
+
   const pcs = rp?.plot_configs ?? [];
 
-  pcs.forEach(async (pc, idx) => {
-    const { after, before } = parseDateRange(pc.date_range);
+  const p = document.createElement("p");
+  p.innerText = rp.description ?? "";
+  p.setAttribute("id", "description");
+  introDiv?.appendChild(p);
 
-    const layout = { width: 800, height: 600 };
+  contentDiv?.appendChild(introDiv);
 
-    const plotDiv = document.createElement("div");
-    plotDiv.setAttribute("id", `plot-${idx}`);
+  const globalDateRange = rp.global_overrides?.date_range;
+  const globalShowMasked = rp.global_overrides?.show_masked;
+  const globalShowNonvalidated = rp.global_overrides?.show_nonvalidated;
 
-    await newPlot(plotDiv, [], layout, { staticPlot: true });
+  let dateRange = globalDateRange?.value;
+  let showMasked = globalShowMasked?.value;
+  let showNonvalidated = globalShowNonvalidated?.value;
+
+  // There's an upper limit to how many points in an svg plotly can render.
+  // As a workaround, we can use WebGL after we've crossed that threshold
+  // The downside is that WebGL is pixel-based rather than vector-based like
+  // svg, so the resulting files are larger and have lower resolution than
+  // the normal scatter plots.
+  let counter: number = 0;
+
+  pcs.forEach(async (pc): Promise<void> => {
+    const wrapperDiv = document.createElement("div");
+    wrapperDiv.setAttribute("class", "plot-wrapper");
+
+    if (!globalDateRange?.enabled) {
+      dateRange = pc.date_range;
+    }
+
+    let { after, before } = parseDateRange(dateRange);
+
+    const plotHeader = document.createElement("h1");
+    wrapperDiv.setAttribute("class", "plot-header");
+    plotHeader.innerText = pc.name ?? "Unnamed Plot";
+    wrapperDiv?.appendChild(plotHeader);
 
     const traces = pc.display?.traces ?? [];
+    const data = await Promise.all(
+      traces.map(async (tr): Promise<Partial<PlotData>> => {
+        let { data: mm, error } = await apiClient.GET(
+          "/timeseries/{timeseries_id}/measurements",
+          {
+            params: {
+              path: {
+                timeseries_id: tr.timeseries_id!,
+              },
+              query: {
+                after,
+                before,
+                threshold: 3000,
+              },
+            },
+          },
+        );
 
-    // traces are pre-sorted
-    const tracePromises = traces.map((tr, idx) => {
-      return async function () {
-        const { data: mm, error } = await apiClient.GET("/timeseries/{timeseries_id}/measurements", {
-          params: {
-            path: {
-              timeseries_id: tr.timeseries_id!,
-            },
-            query: {
-              after,
-              before,
-              threshold: 3000,
-            },
-          }
-        });
-        
         if (error) {
-          // TODO, skip this timeseries for now in case of failure
           console.error(error);
-          return;
         }
 
-        const trace = createTraceData(tr, mm?.items!, pc);
-        await addTraces(plotDiv, trace, tr.trace_order ?? idx);
-      };
-    });
+        if (!globalShowMasked?.enabled) {
+          showMasked = pc.show_masked;
+        }
+        if (!globalShowNonvalidated?.enabled) {
+          showNonvalidated = pc.show_nonvalidated;
+        }
 
-    await Promise.all(tracePromises);
-    contentDiv?.appendChild(plotDiv);
+        const items = mm?.items ?? [];
+
+        const filteredItems = items.filter((m) => {
+          if (showMasked && showNonvalidated) return true;
+          if (showMasked && !m.validated) return false;
+          else if (showMasked && m.validated) return true;
+
+          if (showNonvalidated && m.masked) return false;
+          else if (showNonvalidated && !m.masked) return true;
+
+          if (m.masked || !m.validated) return false;
+          return true;
+        });
+
+        counter += filteredItems.length;
+
+        if (counter < 10_000) {
+          // https://community.plotly.com/t/webgl-plots-are-blurry/41716/3
+          // This issue happens because WebGL plots are pixel-based. It may be worth
+          // using them for larger datasets but the config.plotGlPixelRatio param at
+          // high values causes larger files. Consider using WebGL based plots if there
+          // is a very large dataset being processed and processing time/cpu usage is an issue.
+          if (tr.trace_type === "scattergl") {
+            tr.trace_type = "scatter";
+          }
+        }
+
+        return createTraceData(tr, filteredItems);
+      }),
+    );
+
+    const defaultCustomShapes: Partial<Shape>[] = [];
+    const layout: Partial<Layout> = {
+      width: 1000,
+      height: 400,
+      margin: {
+        t: 0,
+        pad: 0,
+      },
+      showlegend: true,
+      legend: {
+        orientation: "h",
+        x: 0,
+        y: -0.2,
+      },
+      xaxis: {
+        range: [after, before],
+        title: "Date",
+        showline: true,
+        mirror: true,
+      },
+      yaxis: {
+        title: "Measurement", // TODO this should be a field from plot config
+        showline: true,
+        mirror: true,
+        // domain: [0, withPrecipitation ? 0.66 : 1],
+      },
+      // TODO this should be conditional if there is a secondary y axis title
+      yaxis2: {
+        title: pc?.display?.layout?.secondary_axis_title,
+        showline: true,
+        side: "right" as LayoutAxis["side"],
+        overlaying: "y1" as LayoutAxis["overlaying"],
+        // domain: [0, withPrecipitation ? 0.66 : 1],
+      },
+      // TODO conditional if "withPrecipitation"
+      // yaxis3: {
+      //   title: 'Rainfall',
+      //   autorange: 'reversed',
+      //   showline: true,
+      //   mirror: true,
+      //   domain: [0.66, 1],
+      // },
+      shapes: pc?.display?.layout?.custom_shapes?.reduce((filtered, shape) => {
+        if (shape.enabled) {
+          filtered.push({
+            type: "line",
+            x0: after,
+            x1: before,
+            y0: shape.data_point,
+            y1: shape.data_point,
+            line: {
+              color: shape.color,
+              width: 3,
+            },
+          });
+        }
+        return filtered;
+      }, defaultCustomShapes),
+    };
+
+    const config: Partial<Config> = {
+      staticPlot: true,
+    };
+
+    const graphDiv = document.createElement("div");
+    graphDiv.setAttribute("class", "plot");
+    wrapperDiv?.appendChild(graphDiv);
+    await newPlot(graphDiv, data, layout, config);
+
+    contentDiv?.appendChild(wrapperDiv);
   });
-}
+};
 
-function parseDateRange(dateStr: string | undefined): TimeWindow {
+function parseDateRange(dateStr: string | undefined): {
+  before: string;
+  after: string;
+} {
+  let a = new Date();
+  let b = new Date();
+
   if (dateStr === undefined) {
-    return { after: undefined, before: undefined };
+    a.setUTCDate(a.getUTCDate() - 7);
+    return {
+      after: a.toISOString(),
+      before: b.toISOString(),
+    };
   }
-
-  let a: number;
-  let delta: number;
-  let b = Date.now();
-  let d = new Date(b);
 
   switch (String(dateStr).toLowerCase()) {
     case "lifetime":
-      // arbirarity min date
-      a = Date.parse("1800-01-01");
+      a = new Date(Date.parse("1800-01-01")); // arbirarity min date
       break;
     case "5 years":
-      delta = b - d.setUTCFullYear(d.getUTCFullYear() - 5);
-      a = b - delta;
+      a.setUTCFullYear(a.getUTCFullYear() - 5);
       break;
     case "1 year":
-      delta = b - d.setUTCFullYear(d.getUTCFullYear() - 1);
-      a = b - delta;
+      a.setUTCFullYear(a.getUTCFullYear() - 1);
       break;
     default:
-      const dateParts = String(dateStr).split(" ", 1);
+      const dateParts = String(dateStr).trim().split(" ");
       if (dateParts.length !== 2) {
         throw new Error("could not parse custom date string");
       }
-      a = Date.parse(dateParts[0]!);
-      b = Date.parse(dateParts[1]!);
+      a = new Date(Date.parse(dateParts[0]!));
+      b = new Date(Date.parse(dateParts[1]!));
   }
 
-  let after: string | undefined;
-  let before: string | undefined;
-
-  if (a !== undefined) {
-    after = new Date(a).toISOString();
-  }
-  if (b !== undefined) {
-    before = new Date(b).toISOString();
-  }
-
-  return { after, before };
+  return { after: a.toISOString(), before: b.toISOString() };
 }
 
 function createTraceData(
   tr: PlotConfigTimeseriesTrace,
   mm: Measurement[],
-  pc: PlotConfig,
-): Data {
-  const filteredItems = mm.filter((m) => {
-    if (pc.show_masked && pc.show_nonvalidated) return true;
-    if (pc.show_masked && !m.validated) return false;
-    else if (pc.show_masked && m.validated) return true;
+): Partial<PlotData> {
+  const x: Datum[] = new Array(mm.length);
+  const y: Datum[] = new Array(mm.length);
 
-    if (pc.show_nonvalidated && m.masked) return false;
-    else if (pc.show_nonvalidated && !m.masked) return true;
-
-    if (m.masked || !m.validated) return false;
-    return true;
-  });
-
-  const x: Datum[] = new Array(filteredItems.length);
-  const y: Datum[] = new Array(filteredItems.length);
-
-  for (let i = 0; i < filteredItems.length; i++) {
+  for (let i = 0; i < mm.length; i++) {
     x[i] = mm[i]?.time as Datum;
     y[i] = mm[i]?.value as Datum;
   }

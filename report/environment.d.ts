@@ -13,7 +13,7 @@ declare global {
     }
   }
   interface Window {
-      processReport: CallableFunction;
+    processReport: CallableFunction;
   }
 }
 

@@ -1,7 +1,7 @@
 import { build } from 'esbuild'
 
 // set to false for testing
-const minify = false;
+const minify = true;
 
 // need to pre-bundle what gets run in puppeteer.evaluate(...)
 // because it gets run in a browser context
