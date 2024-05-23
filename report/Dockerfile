@@ -61,7 +61,6 @@ RUN mkdir -p ~/.aws-lambda-rie \
 	&& chmod +x ~/.aws-lambda-rie/aws-lambda-rie
 
 COPY --from=builder /usr/app/dist/ ./
-COPY --from=builder /usr/app/index.html ./
 COPY --from=builder /usr/app/entry_script.sh ./
 
 ENV PUPPETEER_EXECUTABLE_PATH /usr/bin/chromium-browser

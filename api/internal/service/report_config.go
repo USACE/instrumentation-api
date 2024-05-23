@@ -18,7 +18,7 @@ type ReportConfigService interface {
 	UpdateReportConfig(ctx context.Context, rc model.ReportConfig) error
 	DeleteReportConfig(ctx context.Context, rcID uuid.UUID) error
 	GetReportConfigWithPlotConfigs(ctx context.Context, rcID uuid.UUID) (model.ReportConfigWithPlotConfigs, error)
-	CreateReportDownloadJob(ctx context.Context, rcID, profileID uuid.UUID) (model.ReportDownloadJob, error)
+	CreateReportDownloadJob(ctx context.Context, rcID, profileID uuid.UUID, isLandscape bool) (model.ReportDownloadJob, error)
 	GetReportDownloadJob(ctx context.Context, jobID, profileID uuid.UUID) (model.ReportDownloadJob, error)
 	UpdateReportDownloadJob(ctx context.Context, j model.ReportDownloadJob) error
 }
@@ -108,7 +108,7 @@ func (s reportConfigService) GetReportConfigWithPlotConfigs(ctx context.Context,
 	}, nil
 }
 
-func (s reportConfigService) CreateReportDownloadJob(ctx context.Context, rcID, profileID uuid.UUID) (model.ReportDownloadJob, error) {
+func (s reportConfigService) CreateReportDownloadJob(ctx context.Context, rcID, profileID uuid.UUID, isLandscape bool) (model.ReportDownloadJob, error) {
 	tx, err := s.db.BeginTxx(ctx, nil)
 	if err != nil {
 		return model.ReportDownloadJob{}, err
@@ -121,7 +121,7 @@ func (s reportConfigService) CreateReportDownloadJob(ctx context.Context, rcID, 
 		return model.ReportDownloadJob{}, err
 	}
 
-	msg := model.ReportConfigJobMessage{ReportConfigID: rcID, JobID: j.ID}
+	msg := model.ReportConfigJobMessage{ReportConfigID: rcID, JobID: j.ID, IsLandscape: isLandscape}
 	b, err := json.Marshal(msg)
 	if err != nil {
 		return model.ReportDownloadJob{}, err

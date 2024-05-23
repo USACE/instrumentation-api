@@ -17,6 +17,7 @@ declare global {
       id: UUID,
       url: string,
       apiKey: string,
+      isLandscape: boolean,
     ) => Promise<{ districtName: string }>;
   }
 }

@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/internal/message"
@@ -188,9 +189,10 @@ func (h *ApiHandler) CreateReportDownloadJob(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
 	}
+	isLandscape := strings.ToLower(c.QueryParam("is_landscape")) == "true"
 	p := c.Get("profile").(model.Profile)
 
-	j, err := h.ReportConfigService.CreateReportDownloadJob(c.Request().Context(), rcID, p.ID)
+	j, err := h.ReportConfigService.CreateReportDownloadJob(c.Request().Context(), rcID, p.ID, isLandscape)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

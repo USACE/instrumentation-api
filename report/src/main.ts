@@ -1,4 +1,3 @@
-import fs from "node:fs";
 import puppeteer, { Page } from "puppeteer-core";
 import { S3Client } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
@@ -6,6 +5,7 @@ import createClient from "openapi-fetch";
 
 import { castleLogoSvg } from "./svgInlineContent";
 import { logoBackground } from "./base64InlineContent";
+import { getIndexHtml, getHeaderTmpl, getFooterTmpl } from "./htmlContent";
 
 import type { UUID } from "crypto";
 import type { GetSecretValueResponse } from "@aws-sdk/client-secrets-manager";
@@ -18,6 +18,7 @@ type ReportDownloadJob = components["schemas"]["ReportDownloadJob"];
 interface EventMessageBody {
   report_config_id: UUID;
   job_id: UUID;
+  is_landscape: boolean;
 }
 
 // TODO: it would be better to get expiry directly from the
@@ -50,31 +51,6 @@ const smBaseUrl = process.env.AWS_SM_BASE_URL;
 const smApiKeyArn = process.env.AWS_SM_API_KEY_ARN;
 const puppeteerExecutablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
 const smMockRequest = process.env.AWS_SM_MOCK_REQUEST;
-
-function getHeader(bgImgBase64: string) {
-  return `<div style="top: 0; width: 100%; height: auto; margin: 0;">
-              <img style="top: 0; max-width: 100%; max-height: 100%" src="data:image/png;base64,${bgImgBase64}" />  
-          </div>`;
-}
-
-function getFooter(svgContent: string, logoText: string) {
-  return `<div style="display: inline-block; width: 100%; height: auto; margin: 0 0.7cm; font-size: 9pt;">
-              <div style="position: absolute; bottom: 1pc; left: 1pc;">
-                <div id="castle-logo" style="display: block; margin-bottom: 5px;">
-                  ${svgContent}
-                </div>
-                <label for="castle-logo" style="position: absolute; bottom: 0; left: 0; overflow: hidden; white-space: nowrap;">${logoText}</label>
-              </div>
-              <div style="color: grey; font-style: italic; position: absolute; bottom: 1pc; right: 1pc;">
-                <span class="date"></span>
-                <span>&nbsp;UTC</span>
-                <span style="margin-left: 25px;">Page no.&nbsp;</span>
-                <span class="pageNumber"></span>
-                <span>/</span>
-                <span class="totalPages"></span>
-              </div>
-          </div>`;
-}
 
 async function waitForDOMStable(
   page: Page,
@@ -125,7 +101,7 @@ export async function handler(event: EventMessageBody): Promise<void> {
     apiKey = res.SecretString!;
   }
 
-  const { report_config_id: rcId, job_id: jobId } = event;
+  const { report_config_id: rcId, job_id: jobId, is_landscape: isLandscape } = event;
 
   const browser = await puppeteer.launch({
     executablePath: puppeteerExecutablePath,
@@ -142,9 +118,7 @@ export async function handler(event: EventMessageBody): Promise<void> {
     ),
   );
 
-  const htmlContent = fs.readFileSync("/usr/src/app/index.html");
-
-  await page.setContent(htmlContent.toString());
+  await page.setContent(getIndexHtml(event.is_landscape ? "landscape" : "portrait"));
   // This is supposed to fix the problem of too many WebGL contexts
   // in the case where a page has many different plots but there are some
   // errors that the WebGLContext elements are not supported.
@@ -154,12 +128,13 @@ export async function handler(event: EventMessageBody): Promise<void> {
   await page.addScriptTag({ path: "./report.mjs" });
 
   const { districtName } = await page.evaluate(
-    async (id, url, apikey) => {
-      return await window.processReport(id, url, apikey);
+    async (id, url, apikey, isLandscape) => {
+      return await window.processReport(id, url, apikey, isLandscape);
     },
     rcId,
     apiBaseUrl,
     apiKey,
+    isLandscape,
   );
 
   // wait for all content to load before exporting to PDF
@@ -170,8 +145,8 @@ export async function handler(event: EventMessageBody): Promise<void> {
     format: "letter",
     scale: 1,
     displayHeaderFooter: true,
-    headerTemplate: getHeader(logoBackground),
-    footerTemplate: getFooter(castleLogoSvg, districtName),
+    headerTemplate: getHeaderTmpl(logoBackground),
+    footerTemplate: getFooterTmpl(castleLogoSvg, districtName),
     preferCSSPageSize: true,
   });
   let statusCode: number | undefined;

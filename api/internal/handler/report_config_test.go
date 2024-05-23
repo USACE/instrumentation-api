@@ -45,6 +45,7 @@ var reportConfigSchema = fmt.Sprintf(`{
 	"description": { "type": "string" },
         "project_id": { "type": "string" },
         "project_name": { "type": "string" },
+        "district_name": { "type": ["string", "null"] },
         "creator_id": { "type": "string" },
 	"creator_username": { "type": "string" },
         "create_date": { "type": "string", "format": "date-time" },
@@ -56,7 +57,7 @@ var reportConfigSchema = fmt.Sprintf(`{
     },
     "additionalProperties": false,
     "required": [
-        "id","slug","name","description","project_id","project_name","creator_id",
+        "id","slug","name","description","project_id","project_name", "district_name", "creator_id",
         "creator_username","create_date","global_overrides","plot_configs"
     ]
 }`, globalOverridesSchema, IDSlugNameArrSchema)
