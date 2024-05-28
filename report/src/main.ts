@@ -101,7 +101,11 @@ export async function handler(event: EventMessageBody): Promise<void> {
     apiKey = res.SecretString!;
   }
 
-  const { report_config_id: rcId, job_id: jobId, is_landscape: isLandscape } = event;
+  const {
+    report_config_id: rcId,
+    job_id: jobId,
+    is_landscape: isLandscape,
+  } = event;
 
   const browser = await puppeteer.launch({
     executablePath: puppeteerExecutablePath,
@@ -118,7 +122,9 @@ export async function handler(event: EventMessageBody): Promise<void> {
     ),
   );
 
-  await page.setContent(getIndexHtml(event.is_landscape ? "landscape" : "portrait"));
+  await page.setContent(
+    getIndexHtml(event.is_landscape ? "landscape" : "portrait"),
+  );
   // This is supposed to fix the problem of too many WebGL contexts
   // in the case where a page has many different plots but there are some
   // errors that the WebGLContext elements are not supported.
