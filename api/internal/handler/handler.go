@@ -62,7 +62,7 @@ func NewApi(cfg *config.ApiConfig) *ApiHandler {
 
 	return &ApiHandler{
 		Middleware:                     mw,
-		BlobService:                    cloud.NewS3Blob(&cfg.AWSS3Config, "/midas", cfg.RoutePrefix),
+		BlobService:                    cloud.NewS3Blob(&cfg.AWSS3Config, "", cfg.RoutePrefix),
 		AlertService:                   service.NewAlertService(db, q),
 		AlertConfigService:             service.NewAlertConfigService(db, q),
 		AlertSubscriptionService:       service.NewAlertSubscriptionService(db, q),
@@ -90,7 +90,7 @@ func NewApi(cfg *config.ApiConfig) *ApiHandler {
 		ProfileService:                 profileService,
 		ProjectRoleService:             service.NewProjectRoleService(db, q),
 		ProjectService:                 service.NewProjectService(db, q),
-		ReportConfigService:            service.NewReportConfigService(db, q, ps),
+		ReportConfigService:            service.NewReportConfigService(db, q, ps, cfg.AuthJWTMocked),
 		SaaInstrumentService:           service.NewSaaInstrumentService(db, q),
 		SubmittalService:               service.NewSubmittalService(db, q),
 		TimeseriesService:              service.NewTimeseriesService(db, q),

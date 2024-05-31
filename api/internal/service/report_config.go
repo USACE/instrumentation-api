@@ -1,8 +1,11 @@
 package service
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
+	"net/http"
 
 	"github.com/USACE/instrumentation-api/api/internal/cloud"
 	"github.com/USACE/instrumentation-api/api/internal/model"
@@ -15,7 +18,7 @@ type ReportConfigService interface {
 	UpdateReportConfig(ctx context.Context, rc model.ReportConfig) error
 	DeleteReportConfig(ctx context.Context, rcID uuid.UUID) error
 	GetReportConfigWithPlotConfigs(ctx context.Context, rcID uuid.UUID) (model.ReportConfigWithPlotConfigs, error)
-	CreateReportDownloadJob(ctx context.Context, rcID, profileID uuid.UUID) (model.ReportDownloadJob, error)
+	CreateReportDownloadJob(ctx context.Context, rcID, profileID uuid.UUID, isLandscape bool) (model.ReportDownloadJob, error)
 	GetReportDownloadJob(ctx context.Context, jobID, profileID uuid.UUID) (model.ReportDownloadJob, error)
 	UpdateReportDownloadJob(ctx context.Context, j model.ReportDownloadJob) error
 }
@@ -23,11 +26,12 @@ type ReportConfigService interface {
 type reportConfigService struct {
 	db *model.Database
 	*model.Queries
-	pubsub cloud.Pubsub
+	pubsub    cloud.Pubsub
+	mockQueue bool
 }
 
-func NewReportConfigService(db *model.Database, q *model.Queries, ps cloud.Pubsub) *reportConfigService {
-	return &reportConfigService{db, q, ps}
+func NewReportConfigService(db *model.Database, q *model.Queries, ps cloud.Pubsub, mockQueue bool) *reportConfigService {
+	return &reportConfigService{db, q, ps, mockQueue}
 }
 
 func (s reportConfigService) CreateReportConfig(ctx context.Context, rc model.ReportConfig) (model.ReportConfig, error) {
@@ -104,7 +108,7 @@ func (s reportConfigService) GetReportConfigWithPlotConfigs(ctx context.Context,
 	}, nil
 }
 
-func (s reportConfigService) CreateReportDownloadJob(ctx context.Context, rcID, profileID uuid.UUID) (model.ReportDownloadJob, error) {
+func (s reportConfigService) CreateReportDownloadJob(ctx context.Context, rcID, profileID uuid.UUID, isLandscape bool) (model.ReportDownloadJob, error) {
 	tx, err := s.db.BeginTxx(ctx, nil)
 	if err != nil {
 		return model.ReportDownloadJob{}, err
@@ -117,11 +121,13 @@ func (s reportConfigService) CreateReportDownloadJob(ctx context.Context, rcID, 
 		return model.ReportDownloadJob{}, err
 	}
 
-	msg := model.ReportConfigJobMessage{ReportConfigID: rcID, JobID: j.ID}
+	msg := model.ReportConfigJobMessage{ReportConfigID: rcID, JobID: j.ID, IsLandscape: isLandscape}
 	b, err := json.Marshal(msg)
 	if err != nil {
 		return model.ReportDownloadJob{}, err
 	}
+
+	// NOTE: Depending on how long this takes, possibly invoke the lambdas directly
 	if _, err := s.pubsub.PublishMessage(ctx, b); err != nil {
 		return model.ReportDownloadJob{}, err
 	}
@@ -130,5 +136,23 @@ func (s reportConfigService) CreateReportDownloadJob(ctx context.Context, rcID, 
 		return model.ReportDownloadJob{}, err
 	}
 
+	if s.mockQueue {
+		if err := mockInvokeLocalLambda("http://report:8080/2015-03-31/functions/function/invocations", b); err != nil {
+			return model.ReportDownloadJob{}, err
+		}
+	}
+
 	return j, nil
+}
+
+func mockInvokeLocalLambda(invokeUrl string, message []byte) error {
+	r := bytes.NewReader(message)
+	res, err := http.Post(invokeUrl, "application/json", r)
+	if err != nil {
+		return err
+	}
+	if res.StatusCode != 200 {
+		return errors.New("unable to invoke locally mocked lambda")
+	}
+	return nil
 }

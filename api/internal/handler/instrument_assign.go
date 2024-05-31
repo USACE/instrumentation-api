@@ -87,6 +87,7 @@ func (h *ApiHandler) UnassignInstrumentFromProject(c echo.Context) error {
 //	@Tags instrument
 //	@Description must be Project (or Application) Admin of all existing instrument projects and project to be assigned
 //	@Produce json
+//	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param instrument_id path string true "instrument uuid" Format(uuid)
 //	@Param project_ids body model.InstrumentProjectAssignments true "project uuids"
 //	@Param action query string true "valid values are 'assign' or 'unassign'"

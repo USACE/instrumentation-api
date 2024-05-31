@@ -1,14 +1,19 @@
 package server
 
 import (
+	"fmt"
+	"log"
 	"net/http"
 
-	_ "github.com/USACE/instrumentation-api/api/docs"
+	"embed"
+
 	"github.com/USACE/instrumentation-api/api/internal/config"
 	"github.com/USACE/instrumentation-api/api/internal/handler"
 	"github.com/labstack/echo/v4"
-	echoSwagger "github.com/swaggo/echo-swagger"
 )
+
+//go:embed docs/*
+var apidocFS embed.FS
 
 type ApiServer struct {
 	e *echo.Echo
@@ -48,7 +53,22 @@ func NewApiServer(cfg *config.ApiConfig, h *handler.ApiHandler) *ApiServer {
 		app,
 	}}
 
-	public.GET("/swagger/*", echoSwagger.WrapHandler)
+	apidocHandler := echo.WrapHandler(http.FileServer(http.FS(apidocFS)))
+	public.GET("/docs/*", apidocHandler)
+
+	apidoc, err := apidocFS.ReadFile("docs/openapi.json")
+	switch err {
+	case nil:
+		apiDocHtmlHandler, err := h.CreateDocHtmlHandler(apidoc, cfg.ServerBaseUrl, cfg.AuthJWTMocked)
+		if err != nil {
+			fmt.Printf("error serving apidoc html: %s", err.Error())
+			break
+		}
+		public.GET("/docs", apiDocHtmlHandler)
+		public.GET("/docs/index.html", apiDocHtmlHandler)
+	default:
+		log.Printf("unable to read embedded file docs/openapi.json: %s", err.Error())
+	}
 
 	server.RegisterRoutes(h)
 	return server
@@ -260,8 +280,9 @@ func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 	r.private.DELETE("/projects/:project_id/report_configs/:report_config_id", h.DeleteReportConfig)
 	r.app.GET("/report_configs/:report_config_id/plot_configs", h.GetReportConfigWithPlotConfigs)
 	r.private.GET("/projects/:project_id/report_configs/:report_config_id/jobs/:job_id", h.GetReportDownloadJob)
-	// r.private.POST("/projects/:project_id/report_configs/:report_config_id/jobs", h.CreateReportDownloadJob)
+	r.private.POST("/projects/:project_id/report_configs/:report_config_id/jobs", h.CreateReportDownloadJob)
 	r.app.PUT("/report_jobs/:job_id", h.UpdateReportDownloadJob)
+	r.private.GET("/projects/:project_id/report_configs/:report_config_id/jobs/:job_id/downloads", h.DownloadReport)
 
 	// Search
 	r.public.GET("/search/:entity", h.Search)

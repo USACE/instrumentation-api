@@ -16,9 +16,12 @@ CREATE VIEW v_plot_configuration AS (
         COALESCE(k.date_range, '1 year')      AS date_range,
         COALESCE(k.threshold, 3000)           AS threshold,
         COALESCE(rc.configs, '[]')::text      AS report_configs,
+        -- TODO plot_type_id
+        -- TODO ploty_type_name
         json_build_object(
             'traces', COALESCE(traces.items, '[]'),
             'layout', json_build_object(
+                'yaxis_title', k.yaxis_title,
                 'secondary_axis_title', k.secondary_axis_title,
                 'custom_shapes', COALESCE(cs.items, '[]')
             )
@@ -33,6 +36,7 @@ CREATE VIEW v_plot_configuration AS (
             auto_range,
             date_range,
             threshold,
+            yaxis_title,
             secondary_axis_title
         FROM plot_configuration_settings
         GROUP BY id
@@ -49,13 +53,17 @@ CREATE VIEW v_plot_configuration AS (
     ) rc ON true
     LEFT JOIN LATERAL (
         SELECT json_agg(
-            to_jsonb(tr) || jsonb_build_object('name', i.name || ' - ' || ts.name || ' (' || u.name || ')')
+            to_jsonb(tr) || jsonb_build_object(
+                'name', i.name || ' - ' || ts.name || ' (' || u.name || ')',
+                'parameter', p.name
+            )
             ORDER BY tr.trace_order ASC
         ) as items
         FROM plot_configuration_timeseries_trace tr
         INNER JOIN timeseries ts ON tr.timeseries_id = ts.id
         INNER JOIN instrument i ON ts.instrument_id = i.id
         INNER JOIN unit u ON ts.unit_id = u.id
+        INNER JOIN parameter p ON ts.parameter_id = p.id
         WHERE tr.plot_configuration_id = pc.id
     ) traces ON true
     LEFT JOIN LATERAL (
@@ -63,6 +71,7 @@ CREATE VIEW v_plot_configuration AS (
         FROM plot_configuration_custom_shape ccs
         WHERE pc.id = ccs.plot_configuration_id
     ) cs on true
+    ORDER BY pc.name
 );
 
 GRANT SELECT ON v_plot_configuration TO instrumentation_reader;

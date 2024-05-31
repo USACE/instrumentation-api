@@ -52,7 +52,8 @@ func (d *PlotConfigDisplay) Scan(src interface{}) error {
 type PlotConfigTimeseriesTrace struct {
 	PlotConfigurationID uuid.UUID `json:"plot_configuration_id"`
 	TimeseriesID        uuid.UUID `json:"timeseries_id"`
-	Name                string    `json:"name"` // read-only
+	Name                string    `json:"name"`      // read-only
+	Parameter           string    `json:"parameter"` // read-only
 	TraceOrder          int       `json:"trace_order"`
 	TraceType           string    `json:"trace_type"`
 	Color               string    `json:"color"`
@@ -64,6 +65,7 @@ type PlotConfigTimeseriesTrace struct {
 
 type PlotConfigLayout struct {
 	CustomShapes       []PlotConfigCustomShape `json:"custom_shapes"`
+	YAxisTitle         *string                 `json:"yaxis_title"`
 	SecondaryAxisTitle *string                 `json:"secondary_axis_title"`
 }
 
@@ -254,12 +256,12 @@ func (q *Queries) DeleteAllPlotConfigCustomShapes(ctx context.Context, pcID uuid
 
 // PlotConfigSettings
 const createPlotConfigSettings = `
-	INSERT INTO plot_configuration_settings (id, show_masked, show_nonvalidated, show_comments, auto_range, date_range, threshold, secondary_axis_title) 
-	VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	INSERT INTO plot_configuration_settings (id, show_masked, show_nonvalidated, show_comments, auto_range, date_range, threshold, yaxis_title, secondary_axis_title) 
+	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 `
 
 func (q *Queries) CreatePlotConfigSettings(ctx context.Context, pc PlotConfig) error {
-	_, err := q.db.ExecContext(ctx, createPlotConfigSettings, pc.ID, pc.ShowMasked, pc.ShowNonValidated, pc.ShowComments, pc.AutoRange, pc.DateRange, pc.Threshold, pc.Display.Layout.SecondaryAxisTitle)
+	_, err := q.db.ExecContext(ctx, createPlotConfigSettings, pc.ID, pc.ShowMasked, pc.ShowNonValidated, pc.ShowComments, pc.AutoRange, pc.DateRange, pc.Threshold, pc.Display.Layout.YAxisTitle, pc.Display.Layout.SecondaryAxisTitle)
 	return err
 }
 

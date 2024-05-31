@@ -1,7 +1,7 @@
 #!/bin/sh
 
 if [ -z "${AWS_LAMBDA_RUNTIME_API}" ]; then
-  exec ~/.aws-lambda-rie/aws-lambda-rie /usr/bin/npx aws-lambda-ric $1
+  exec ~/.aws-lambda-rie/aws-lambda-rie npx aws-lambda-ric $1
 else
-  exec /usr/bin/npx aws-lambda-ric $1
+  exec npx aws-lambda-ric $1
 fi

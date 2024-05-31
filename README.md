@@ -4,9 +4,9 @@ A REST API to manage instrumentation data for the MIDAS (Monitoring Instrumentat
 
 MIDAS project management is tracked in https://github.com/USACE/instrumentation
 
-## Documentation
+## API Documentation
 
-"[swag](https://github.com/swaggo/swag)" code annotations are used in [./api/internal/handler/](./api/internal/handler/) to generate OpenApi 2.0 docs that are available via `$API_HOSTNAME/swagger/index.html` on the API server. Generating documnetation can be done using the compose script: `./compose.sh mkdocs`
+"[swag](https://github.com/swaggo/swag)" is used to generate API Documentation via code annotations in [./api/internal/handler/](./api/internal/handler/). These documents are available via [Scalar](https://github.com/scalar/scalar) at `$API_HOSTNAME/docs` on the API server. Optionally append `/openapi.json` or `/openapi.yaml` to the aforementioned URI for the respective raw API docs. Generating documnetation can be done using the compose script `./compose.sh mkdocs`.
 
 ## How to Develop
 
@@ -70,7 +70,16 @@ Regression tests are maintained for the project using Go [httptest](https://pkg.
 To run specific tests, you can pass optional commands to the test script in `./compose.sh` like so, where `*args` are passed to `go test *args`. The `-rm` flag will automatically remove containers after they run:
 ```bash
 ./compose.sh test [-rm] *args
+
+# example
+# go test -run regexp
+#   Run only those tests and examples matching the regular expression.
+./compose.sh test -rm -run Project  # matches any tests where the name includes "Project"
 ```
+
+## Local Lambda Invocation
+The [./report](./report/) directory contains an asynchronous lambda function that is called via AWS SQS (Simple Queue Service). Locally, the API service mocks this call with the [Lambda RIE (Runtime Interface Emulator)](https://github.com/aws/aws-lambda-runtime-interface-emulator/). If `AUTH_JWT_MOCKED`,(an API service environment variable) is `true`, the API container will attempt to invoke the Lambda via the RIE endpoint instead of the queue.
+
 ## How To Deploy
 
 ### Deploying Develop Core API & Telemetry API

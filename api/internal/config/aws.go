@@ -33,6 +33,12 @@ func (cfg *AWSS3Config) S3Config() (aws.Config, []func(*s3.Options)) {
 			o.BaseEndpoint = aws.String(cfg.AWSS3Endpoint)
 		})
 	}
+	if cfg.AWSS3ForcePathStyle {
+		s3OptFns = append(s3OptFns, func(o *s3.Options) {
+			o.UsePathStyle = true
+		})
+	}
+
 	return s3Config, s3OptFns
 }
 

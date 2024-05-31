@@ -1,6 +1,7 @@
 package config
 
 type ServerConfig struct {
+	ServerBaseUrl        string `envconfig:"SERVER_BASE_URL"`
 	AuthDisabled         bool   `envconfig:"AUTH_DISABLED"`
 	AuthJWTMocked        bool   `envconfig:"AUTH_JWT_MOCKED"`
 	ApplicationKey       string `envconfig:"APPLICATION_KEY"`

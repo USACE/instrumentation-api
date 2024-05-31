@@ -46,7 +46,7 @@ func (q *Queries) ListAwareParameters(ctx context.Context) ([]AwareParameter, er
 const listAwarePlatformParameterEnabled = `
 	SELECT instrument_id, aware_id, aware_parameter_key, timeseries_id
 	FROM v_aware_platform_parameter_enabled
-	ORDER BY project_id, aware_id, aware_parameter_key
+	ORDER BY aware_id, aware_parameter_key
 `
 
 func (q *Queries) ListAwarePlatformParameterEnabled(ctx context.Context) ([]AwarePlatformParameterEnabled, error) {

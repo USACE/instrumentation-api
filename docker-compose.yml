@@ -118,7 +118,10 @@ services:
     env_file:
       - path: ./env_files/minio.env
         required: true
-    command: server /data
+    command: server /data --console-address ":9001"
+    ports:
+      - ${MINIO_GATEWAY_PORT:-9000}:9000
+      - ${MINIO_CONSOLE_PORT:-9001}:9001
 
   # configure minio on startup (create buckets, etc)
   # inspired by https://github.com/minio/minio/issues/4769
@@ -152,12 +155,12 @@ services:
       - path: ./env_files/report.env
         required: true
     security_opt:
-      - 'seccomp:./report/chrome.json'
+      - 'seccomp:./report/chrome/chrome.json'
     depends_on:
       elasticmq:
         condition: service_started
-      minio:
-        condition: service_started
+      minio_init:
+        condition: service_completed_successfully
 
   elasticmq:
     image: softwaremill/elasticmq

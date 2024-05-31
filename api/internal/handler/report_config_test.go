@@ -45,6 +45,7 @@ var reportConfigSchema = fmt.Sprintf(`{
 	"description": { "type": "string" },
         "project_id": { "type": "string" },
         "project_name": { "type": "string" },
+        "district_name": { "type": ["string", "null"] },
         "creator_id": { "type": "string" },
 	"creator_username": { "type": "string" },
         "create_date": { "type": "string", "format": "date-time" },
@@ -56,7 +57,7 @@ var reportConfigSchema = fmt.Sprintf(`{
     },
     "additionalProperties": false,
     "required": [
-        "id","slug","name","description","project_id","project_name","creator_id",
+        "id","slug","name","description","project_id","project_name", "district_name", "creator_id",
         "creator_username","create_date","global_overrides","plot_configs"
     ]
 }`, globalOverridesSchema, IDSlugNameArrSchema)
@@ -137,28 +138,6 @@ const updateReportDownloadJobBody = `{
 }`
 
 func TestReportConfigs(t *testing.T) {
-	// createReportDownloadJobCallback := func(b []byte) {
-	// 	var j model.ReportDownloadJob
-	// 	err := json.Unmarshal(b, &j)
-	// 	assert.Nil(t, err)
-	// 	if err != nil {
-	// 		t.Errorf("createReportConfigJobCallback json.Unmarshal failed: %s", err.Error())
-	// 	}
-	// 	eventMessage := model.ReportConfigJobMessage{ReportConfigID: j.ReportConfigID, JobID: j.ID}
-	// 	em, err := json.Marshal(eventMessage)
-	// 	assert.Nil(t, err)
-	// 	if err != nil {
-	// 		t.Errorf("createReportConfigJobCallback json.Marshal failed: %s", err.Error())
-	// 	}
-	// 	msg := bytes.NewReader(em)
-	// 	res, err := http.Post("http://report:8080/2015-03-31/functions/function/invocations", "application/json", msg)
-	// 	assert.Nil(t, err)
-	// 	if err != nil {
-	// 		t.Errorf("createReportConfigJobCallback http.Post failed: %s", err.Error())
-	// 	}
-	// 	assert.Equal(t, 200, res.StatusCode)
-	// }
-
 	objSchema, err := gojsonschema.NewSchema(reportConfigObjectLoader)
 	assert.Nil(t, err)
 	arrSchema, err := gojsonschema.NewSchema(reportConfigArrayLoader)
@@ -189,14 +168,13 @@ func TestReportConfigs(t *testing.T) {
 			ExpectedStatus: http.StatusOK,
 			ExpectedSchema: jobObjSchema,
 		},
-		// {
-		// 	Name:           "CreateReportDownloadJob",
-		// 	URL:            fmt.Sprintf("/projects/%s/report_configs/%s/jobs", testProjectID, testReportConfigID),
-		// 	Method:         http.MethodPost,
-		// 	ExpectedStatus: http.StatusCreated,
-		// 	ExpectedSchema: jobObjSchema,
-		//	onSuccess:      &createReportDownloadJobCallback,
-		// },
+		{
+			Name:           "CreateReportDownloadJob",
+			URL:            fmt.Sprintf("/projects/%s/report_configs/%s/jobs", testProjectID, testReportConfigID),
+			Method:         http.MethodPost,
+			ExpectedStatus: http.StatusCreated,
+			ExpectedSchema: jobObjSchema,
+		},
 		{
 			Name:           "UpdateReportDownloadJob",
 			URL:            fmt.Sprintf("/report_jobs/%s?key=%s", testUpdateJobID, mockAppKey),

@@ -36,7 +36,7 @@ func (h *ApiHandler) ListPlotConfigs(c echo.Context) error {
 
 // GetPlotConfig godoc
 //
-//	@Sumary gets a single plot configuration by id
+//	@Summary gets a single plot configuration by id
 //	@Tags plot-config
 //	@Produce json
 //	@Param project_id path string true "project uuid" Format(uuid)
@@ -60,7 +60,7 @@ func (h *ApiHandler) GetPlotConfig(c echo.Context) error {
 
 // CreatePlotConfig godoc
 //
-//	@Sumary adds a plot configuration to a project
+//	@Summary adds a plot configuration to a project
 //	@Tags plot-config
 //	@Produce json
 //	@Param project_id path string true "project uuid" Format(uuid)
@@ -149,7 +149,7 @@ func (h *ApiHandler) UpdatePlotConfig(c echo.Context) error {
 
 // DeletePlotConfig godoc
 //
-//	@Sumary deletes a plot configuration in a project
+//	@Summary deletes a plot configuration in a project
 //	@Tags plot-config
 //	@Produce json
 //	@Param project_id path string true "project uuid" Format(uuid)
