@@ -185,7 +185,7 @@ window.processReport = async (
         mirror: true,
       },
       yaxis: {
-        title: "Measurement", // TODO this should be a field from plot config
+        title: pc?.display?.layout?.yaxis_title ?? "Measurement",
         showline: true,
         mirror: true,
         domain: [0, withPrecipitation ? 0.66 : 1],

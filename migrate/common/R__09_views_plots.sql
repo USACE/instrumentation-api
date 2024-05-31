@@ -21,6 +21,7 @@ CREATE VIEW v_plot_configuration AS (
         json_build_object(
             'traces', COALESCE(traces.items, '[]'),
             'layout', json_build_object(
+                'yaxis_title', k.yaxis_title,
                 'secondary_axis_title', k.secondary_axis_title,
                 'custom_shapes', COALESCE(cs.items, '[]')
             )
@@ -35,6 +36,7 @@ CREATE VIEW v_plot_configuration AS (
             auto_range,
             date_range,
             threshold,
+            yaxis_title,
             secondary_axis_title
         FROM plot_configuration_settings
         GROUP BY id

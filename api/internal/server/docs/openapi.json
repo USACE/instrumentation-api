@@ -12271,6 +12271,9 @@
           },
           "secondary_axis_title" : {
             "type" : "string"
+          },
+          "yaxis_title" : {
+            "type" : "string"
           }
         },
         "type" : "object"

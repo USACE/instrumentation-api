@@ -8688,6 +8688,7 @@ components:
               name: name
               plot_configuration_id: plot_configuration_id
               enabled: true
+            yaxis_title: yaxis_title
             secondary_axis_title: secondary_axis_title
           traces:
           - trace_type: trace_type
@@ -8805,6 +8806,7 @@ components:
             name: name
             plot_configuration_id: plot_configuration_id
             enabled: true
+          yaxis_title: yaxis_title
           secondary_axis_title: secondary_axis_title
         traces:
         - trace_type: trace_type
@@ -8850,6 +8852,7 @@ components:
           name: name
           plot_configuration_id: plot_configuration_id
           enabled: true
+        yaxis_title: yaxis_title
         secondary_axis_title: secondary_axis_title
       properties:
         custom_shapes:
@@ -8857,6 +8860,8 @@ components:
             $ref: '#/components/schemas/PlotConfigCustomShape'
           type: array
         secondary_axis_title:
+          type: string
+        yaxis_title:
           type: string
       type: object
     PlotConfigTimeseriesTrace:
@@ -9146,6 +9151,7 @@ components:
                 name: name
                 plot_configuration_id: plot_configuration_id
                 enabled: true
+              yaxis_title: yaxis_title
               secondary_axis_title: secondary_axis_title
             traces:
             - trace_type: trace_type
@@ -9206,6 +9212,7 @@ components:
                 name: name
                 plot_configuration_id: plot_configuration_id
                 enabled: true
+              yaxis_title: yaxis_title
               secondary_axis_title: secondary_axis_title
             traces:
             - trace_type: trace_type

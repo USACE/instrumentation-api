@@ -7608,6 +7608,7 @@ export interface components {
      *           "enabled": true
      *         }
      *       ],
+     *       "yaxis_title": "yaxis_title",
      *       "secondary_axis_title": "secondary_axis_title"
      *     },
      *     "traces": [
@@ -7721,6 +7722,7 @@ export interface components {
      *         "enabled": true
      *       }
      *     ],
+     *     "yaxis_title": "yaxis_title",
      *     "secondary_axis_title": "secondary_axis_title"
      *   },
      *   "traces": [
@@ -7775,12 +7777,14 @@ export interface components {
      *       "enabled": true
      *     }
      *   ],
+     *   "yaxis_title": "yaxis_title",
      *   "secondary_axis_title": "secondary_axis_title"
      * }
      */
     PlotConfigLayout: {
       custom_shapes?: components["schemas"]["PlotConfigCustomShape"][];
       secondary_axis_title?: string;
+      yaxis_title?: string;
     };
     /**
      * @example {
@@ -8048,6 +8052,7 @@ export interface components {
      *               "enabled": true
      *             }
      *           ],
+     *           "yaxis_title": "yaxis_title",
      *           "secondary_axis_title": "secondary_axis_title"
      *         },
      *         "traces": [
@@ -8127,6 +8132,7 @@ export interface components {
      *               "enabled": true
      *             }
      *           ],
+     *           "yaxis_title": "yaxis_title",
      *           "secondary_axis_title": "secondary_axis_title"
      *         },
      *         "traces": [

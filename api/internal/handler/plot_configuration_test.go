@@ -74,6 +74,7 @@ const plotConfigLayoutSchema = `{
                 }
             }
         },
+        "yaxis_title": { "type": ["string", "null"] },
         "secondary_y_axis": { "type": ["string", "null"] }
     }
 }`
@@ -103,6 +104,7 @@ const updatePlotConfigRemoveTimeseriesBody = `{
         ],
 	"layout": {
             "custom_shapes": [],
+            "yaxis_title": "Custom Y Axis Title",
             "secondary_axis_title": "test second axis title"
         }
     }
@@ -154,6 +156,7 @@ const updatePlotConfigAddManyTimeseriesBody = `{
         ],
 	"layout": {
             "custom_shapes": [],
+            "yaxis_title": "Custom Y Axis Title",
             "secondary_axis_title": "test second axis title"
         }
     }
@@ -210,6 +213,7 @@ const createPlotConfigBody = `{
                     "color": "#123abc"
                 }
             ],
+            "yaxis_title": "New Custom Y Axis Title",
             "secondary_axis_title": "test second axis title"
         }
     }

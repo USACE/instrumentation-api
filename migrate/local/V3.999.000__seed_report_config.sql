@@ -11,3 +11,7 @@ INSERT INTO report_download_job (id, report_config_id, creator, status, file_key
 
 INSERT INTO report_download_job (id, report_config_id, creator, status, progress) VALUES
 ('61b69ef2-2c73-4143-930d-3832400ba8f2', 'a625f801-66e7-4d10-8d96-eb9dc55d1376', '57329df6-9f7a-4dad-9383-4633b452efab', 'INIT', 0);
+
+INSERT INTO plot_configuration_settings (id, show_masked, show_nonvalidated, show_comments, auto_range, date_range, threshold, yaxis_title, secondary_axis_title) VALUES
+('cc28ca81-f125-46c6-a5cd-cc055a003c19', true, true, true, false, 'lifetime', 3000, 'Custom Y Axis', NULL),
+('64879f68-6a2c-4d78-8e8b-5e9b9d2e0d6a', true, true, true, false, 'lifetime', 3000, NULL, 'Custom Y2 Axis');
