@@ -157,7 +157,7 @@ export async function handler(event: EventMessageBody): Promise<void> {
   });
   let statusCode: number | undefined;
 
-  const fileKey = `/${rcId}/${jobId}/${new Date().toISOString().split("T")[0]}_midas_report.pdf`;
+  const fileKey = `/reports/${rcId}/${jobId}/${new Date().toISOString().split("T")[0]}_midas_report.pdf`;
 
   statusCode = await upload(s3Client, buf, fileKey);
   await updateJob(apiKey, jobId, rcId, statusCode, fileKey);
