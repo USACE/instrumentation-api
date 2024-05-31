@@ -52,7 +52,8 @@ func (d *PlotConfigDisplay) Scan(src interface{}) error {
 type PlotConfigTimeseriesTrace struct {
 	PlotConfigurationID uuid.UUID `json:"plot_configuration_id"`
 	TimeseriesID        uuid.UUID `json:"timeseries_id"`
-	Name                string    `json:"name"` // read-only
+	Name                string    `json:"name"`      // read-only
+	Parameter           string    `json:"parameter"` // read-only
 	TraceOrder          int       `json:"trace_order"`
 	TraceType           string    `json:"trace_type"`
 	Color               string    `json:"color"`

@@ -7617,6 +7617,7 @@ export interface components {
      *         "show_markers": true,
      *         "timeseries_id": "timeseries_id",
      *         "y_axis": "y_axis",
+     *         "parameter": "parameter",
      *         "name": "name",
      *         "width": 1.4658129805029452,
      *         "line_style": "line_style",
@@ -7629,6 +7630,7 @@ export interface components {
      *         "show_markers": true,
      *         "timeseries_id": "timeseries_id",
      *         "y_axis": "y_axis",
+     *         "parameter": "parameter",
      *         "name": "name",
      *         "width": 1.4658129805029452,
      *         "line_style": "line_style",
@@ -7728,6 +7730,7 @@ export interface components {
      *       "show_markers": true,
      *       "timeseries_id": "timeseries_id",
      *       "y_axis": "y_axis",
+     *       "parameter": "parameter",
      *       "name": "name",
      *       "width": 1.4658129805029452,
      *       "line_style": "line_style",
@@ -7740,6 +7743,7 @@ export interface components {
      *       "show_markers": true,
      *       "timeseries_id": "timeseries_id",
      *       "y_axis": "y_axis",
+     *       "parameter": "parameter",
      *       "name": "name",
      *       "width": 1.4658129805029452,
      *       "line_style": "line_style",
@@ -7785,6 +7789,7 @@ export interface components {
      *   "show_markers": true,
      *   "timeseries_id": "timeseries_id",
      *   "y_axis": "y_axis",
+     *   "parameter": "parameter",
      *   "name": "name",
      *   "width": 1.4658129805029452,
      *   "line_style": "line_style",
@@ -7797,6 +7802,8 @@ export interface components {
       line_style?: string;
       /** @description read-only */
       name?: string;
+      /** @description read-only */
+      parameter?: string;
       plot_configuration_id?: string;
       show_markers?: boolean;
       timeseries_id?: string;
@@ -8050,6 +8057,7 @@ export interface components {
      *             "show_markers": true,
      *             "timeseries_id": "timeseries_id",
      *             "y_axis": "y_axis",
+     *             "parameter": "parameter",
      *             "name": "name",
      *             "width": 1.4658129805029452,
      *             "line_style": "line_style",
@@ -8062,6 +8070,7 @@ export interface components {
      *             "show_markers": true,
      *             "timeseries_id": "timeseries_id",
      *             "y_axis": "y_axis",
+     *             "parameter": "parameter",
      *             "name": "name",
      *             "width": 1.4658129805029452,
      *             "line_style": "line_style",
@@ -8127,6 +8136,7 @@ export interface components {
      *             "show_markers": true,
      *             "timeseries_id": "timeseries_id",
      *             "y_axis": "y_axis",
+     *             "parameter": "parameter",
      *             "name": "name",
      *             "width": 1.4658129805029452,
      *             "line_style": "line_style",
@@ -8139,6 +8149,7 @@ export interface components {
      *             "show_markers": true,
      *             "timeseries_id": "timeseries_id",
      *             "y_axis": "y_axis",
+     *             "parameter": "parameter",
      *             "name": "name",
      *             "width": 1.4658129805029452,
      *             "line_style": "line_style",

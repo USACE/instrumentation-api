@@ -12287,6 +12287,10 @@
             "description" : "read-only",
             "type" : "string"
           },
+          "parameter" : {
+            "description" : "read-only",
+            "type" : "string"
+          },
           "plot_configuration_id" : {
             "type" : "string"
           },

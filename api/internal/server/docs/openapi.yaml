@@ -8695,6 +8695,7 @@ components:
             show_markers: true
             timeseries_id: timeseries_id
             y_axis: y_axis
+            parameter: parameter
             name: name
             width: 1.4658129805029452
             line_style: line_style
@@ -8705,6 +8706,7 @@ components:
             show_markers: true
             timeseries_id: timeseries_id
             y_axis: y_axis
+            parameter: parameter
             name: name
             width: 1.4658129805029452
             line_style: line_style
@@ -8810,6 +8812,7 @@ components:
           show_markers: true
           timeseries_id: timeseries_id
           y_axis: y_axis
+          parameter: parameter
           name: name
           width: 1.4658129805029452
           line_style: line_style
@@ -8820,6 +8823,7 @@ components:
           show_markers: true
           timeseries_id: timeseries_id
           y_axis: y_axis
+          parameter: parameter
           name: name
           width: 1.4658129805029452
           line_style: line_style
@@ -8862,6 +8866,7 @@ components:
         show_markers: true
         timeseries_id: timeseries_id
         y_axis: y_axis
+        parameter: parameter
         name: name
         width: 1.4658129805029452
         line_style: line_style
@@ -8873,6 +8878,9 @@ components:
         line_style:
           type: string
         name:
+          description: read-only
+          type: string
+        parameter:
           description: read-only
           type: string
         plot_configuration_id:
@@ -9145,6 +9153,7 @@ components:
               show_markers: true
               timeseries_id: timeseries_id
               y_axis: y_axis
+              parameter: parameter
               name: name
               width: 1.4658129805029452
               line_style: line_style
@@ -9155,6 +9164,7 @@ components:
               show_markers: true
               timeseries_id: timeseries_id
               y_axis: y_axis
+              parameter: parameter
               name: name
               width: 1.4658129805029452
               line_style: line_style
@@ -9203,6 +9213,7 @@ components:
               show_markers: true
               timeseries_id: timeseries_id
               y_axis: y_axis
+              parameter: parameter
               name: name
               width: 1.4658129805029452
               line_style: line_style
@@ -9213,6 +9224,7 @@ components:
               show_markers: true
               timeseries_id: timeseries_id
               y_axis: y_axis
+              parameter: parameter
               name: name
               width: 1.4658129805029452
               line_style: line_style

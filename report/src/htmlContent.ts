@@ -23,7 +23,7 @@ export function getFooterTmpl(svgContent: string, logoText: string) {
           </div>`;
 }
 
-export function getIndexHtml(orientation: string): string {
+export function getIndexHtml(orientation: "portrait" | "landscape"): string {
   return `<!doctype html>
             <html lang="en">
               <head>

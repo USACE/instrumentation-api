@@ -15,6 +15,8 @@ type PlotConfigTimeseriesTrace =
   components["schemas"]["PlotConfigTimeseriesTrace"];
 type Measurement = components["schemas"]["Measurement"];
 
+const precip = "precipitation";
+
 window.processReport = async (
   reportConfigId: UUID,
   baseUrl: string,
@@ -98,8 +100,12 @@ window.processReport = async (
     wrapperDiv?.appendChild(plotHeader);
 
     const traces = pc.display?.traces ?? [];
+    let withPrecipitation = false;
     const data = await Promise.all(
       traces.map(async (tr): Promise<Partial<PlotData>> => {
+        if (tr?.parameter === precip) {
+          withPrecipitation = true;
+        }
         let { data: mm, error } = await apiClient.GET(
           "/timeseries/{timeseries_id}/measurements",
           {
@@ -182,24 +188,30 @@ window.processReport = async (
         title: "Measurement", // TODO this should be a field from plot config
         showline: true,
         mirror: true,
-        // domain: [0, withPrecipitation ? 0.66 : 1],
+        domain: [0, withPrecipitation ? 0.66 : 1],
       },
-      // TODO this should be conditional if there is a secondary y axis title
-      yaxis2: {
-        title: pc?.display?.layout?.secondary_axis_title,
-        showline: true,
-        side: "right" as LayoutAxis["side"],
-        overlaying: "y1" as LayoutAxis["overlaying"],
-        // domain: [0, withPrecipitation ? 0.66 : 1],
-      },
-      // TODO conditional if "withPrecipitation"
-      // yaxis3: {
-      //   title: 'Rainfall',
-      //   autorange: 'reversed',
-      //   showline: true,
-      //   mirror: true,
-      //   domain: [0.66, 1],
-      // },
+      ...(pc?.display?.layout?.secondary_axis_title
+        ? {
+            yaxis2: {
+              title: pc?.display?.layout?.secondary_axis_title,
+              showline: true,
+              side: "right" as LayoutAxis["side"],
+              overlaying: "y1" as LayoutAxis["overlaying"],
+              domain: [0, withPrecipitation ? 0.66 : 1],
+            },
+          }
+        : {}),
+      ...(withPrecipitation
+        ? {
+            yaxis3: {
+              title: "Rainfall",
+              autorange: "reversed",
+              showline: true,
+              mirror: true,
+              domain: [0.66, 1],
+            },
+          }
+        : {}),
       shapes: pc?.display?.layout?.custom_shapes?.reduce((filtered, shape) => {
         if (shape.enabled) {
           filtered.push({
@@ -282,6 +294,11 @@ function createTraceData(
   for (let i = 0; i < mm.length; i++) {
     x[i] = mm[i]?.time as Datum;
     y[i] = mm[i]?.value as Datum;
+  }
+
+  if (tr.parameter === precip) {
+    tr.trace_type = "bar";
+    tr.y_axis = "y3";
   }
 
   return {
