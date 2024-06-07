@@ -46,6 +46,7 @@ const s3ClientConfig: S3ClientConfig = {
 
 const apiBaseUrl = process.env.API_BASE_URL;
 const s3WriteToBucket = process.env.AWS_S3_WRITE_TO_BUCKET;
+const s3WriteToBucketPrefix = process.env.AWS_S3_WRITE_TO_BUCKET_PREFIX;
 const sessionToken = process.env.AWS_SESSION_TOKEN;
 const smBaseUrl = process.env.AWS_SM_BASE_URL;
 const smApiKeyArn = process.env.AWS_SM_API_KEY_ARN;
@@ -133,7 +134,7 @@ export async function handler(event: EventMessageBody): Promise<void> {
   // await page.addScriptTag({ url: "https://unpkg.com/virtual-webgl@1.0.6/src/virtual-webgl.js" });
   await page.addScriptTag({ path: "./report.mjs" });
 
-  const { districtName } = await page.evaluate(
+  const { districtName, projectName } = await page.evaluate(
     async (id, url, apikey, isLandscape) => {
       return await window.processReport(id, url, apikey, isLandscape);
     },
@@ -152,12 +153,12 @@ export async function handler(event: EventMessageBody): Promise<void> {
     scale: 1,
     displayHeaderFooter: true,
     headerTemplate: getHeaderTmpl(logoBackground),
-    footerTemplate: getFooterTmpl(castleLogoSvg, districtName),
+    footerTemplate: getFooterTmpl(castleLogoSvg, districtName, projectName),
     preferCSSPageSize: true,
   });
   let statusCode: number | undefined;
 
-  const fileKey = `/reports/${rcId}/${jobId}/${new Date().toISOString().split("T")[0]}_midas_report.pdf`;
+  const fileKey = `${s3WriteToBucketPrefix}/${rcId}/${jobId}/${new Date().toISOString().split("T")[0]}_midas_report.pdf`;
 
   statusCode = await upload(s3Client, buf, fileKey);
   await updateJob(apiKey, jobId, rcId, statusCode, fileKey);

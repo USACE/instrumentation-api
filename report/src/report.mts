@@ -21,7 +21,7 @@ window.processReport = async (
   reportConfigId: UUID,
   baseUrl: string,
   apiKey: string,
-): Promise<{ districtName: string }> => {
+): Promise<{ districtName: string; projectName: string }> => {
   const { newPlot } = await import("plotly.js-dist-min");
   const { default: createClient } = await import("openapi-fetch");
 
@@ -244,6 +244,7 @@ window.processReport = async (
 
   return {
     districtName: rp?.district_name ?? "No District",
+    projectName: rp?.project_name ?? "MIDAS Project",
   };
 };
 

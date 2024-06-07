@@ -6,6 +6,7 @@ declare global {
       AWS_SM_BASE_URL: string;
       AWS_SM_API_KEY_ARN: string;
       AWS_S3_WRITE_TO_BUCKET: string;
+      AWS_S3_WRITE_TO_BUCKET_PREFIX: string;
       AWS_S3_SKIP_UPLOAD: string;
       AWS_SESSION_TOKEN: string;
       AWS_SM_MOCK_REQUEST: string;
@@ -18,7 +19,7 @@ declare global {
       url: string,
       apiKey: string,
       isLandscape: boolean,
-    ) => Promise<{ districtName: string }>;
+    ) => Promise<{ districtName: string, projectName: string }>;
   }
 }
 
