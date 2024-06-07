@@ -1,19 +1,24 @@
 export function getHeaderTmpl(bgImgBase64: string) {
-  return `<div style="top: 0; width: 100%; height: auto; margin: 0;">
-              <img style="top: 0; max-width: 100%; max-height: 100%" src="data:image/png;base64,${bgImgBase64}" />  
+  return `<div style="position: absolute; top: 0; width: 100%; height: auto; margin: 0 auto">
+              <img style="max-width: 100%; max-height: 100%" src="data:image/png;base64,${bgImgBase64}" />  
           </div>`;
 }
 
-export function getFooterTmpl(svgContent: string, logoText: string) {
-  return `<div style="display: inline-block; width: 100%; height: auto; margin: 0 0.7cm; font-size: 9pt;">
+export function getFooterTmpl(
+  svgContent: string,
+  logoTextLine1: string,
+  logoTextLine2: string,
+) {
+  return `<div style="display: inline-block; width: 100%; height: auto; bottom: 0; margin-left: 0.7cm; margin-bottom: 0; padding-bottom: 0; font-size: 9pt;">
               <div style="position: absolute; bottom: 1pc; left: 1pc;">
-                <div id="castle-logo" style="display: block; margin-bottom: 5px;">
+                <div style="display: block; margin-bottom: 5px;">
                   ${svgContent}
                 </div>
-                <label for="castle-logo" style="position: absolute; bottom: 0; left: 0; overflow: hidden; white-space: nowrap;">${logoText}</label>
+                <span style="position: absolute; bottom: 0; left: 0; overflow: hidden; white-space: nowrap;">${logoTextLine1}</span>
               </div>
               <div style="color: grey; font-style: italic; position: absolute; bottom: 1pc; right: 1pc;">
-                <span class="date"></span>
+                <span style="overflow: hidden; white-space: nowrap;">${logoTextLine2}</span>
+                <span style="margin-left: 25px;" class="date"></span>
                 <span>&nbsp;UTC</span>
                 <span style="margin-left: 25px;">Page no.&nbsp;</span>
                 <span class="pageNumber"></span>
