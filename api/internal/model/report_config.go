@@ -169,7 +169,7 @@ const unassignAllReportConfigPlotConfig = `
 `
 
 func (q *Queries) UnassignAllReportConfigPlotConfig(ctx context.Context, rcID uuid.UUID) error {
-	_, err := q.db.ExecContext(ctx, unassignAllInstrumentsFromAlertConfig, rcID)
+	_, err := q.db.ExecContext(ctx, unassignAllReportConfigPlotConfig, rcID)
 	return err
 }
 
