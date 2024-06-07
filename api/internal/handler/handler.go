@@ -62,7 +62,7 @@ func NewApi(cfg *config.ApiConfig) *ApiHandler {
 
 	return &ApiHandler{
 		Middleware:                     mw,
-		BlobService:                    cloud.NewS3Blob(&cfg.AWSS3Config, "", cfg.RoutePrefix),
+		BlobService:                    cloud.NewS3Blob(&cfg.AWSS3Config, "/instrumentation", cfg.RoutePrefix),
 		AlertService:                   service.NewAlertService(db, q),
 		AlertConfigService:             service.NewAlertConfigService(db, q),
 		AlertSubscriptionService:       service.NewAlertSubscriptionService(db, q),
