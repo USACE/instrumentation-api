@@ -21,7 +21,7 @@ var profileObjectLoader = gojsonschema.NewStringLoader(`{
 
 const testCreateProfileBody = `{
     "username": "testuser",
-    "email": "test.user@gmail.com"
+    "email": "test.user@fake.usace.army.mil"
 }`
 
 const mockJwtNewUser = `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwibmFtZSI6IlVzZXIuTmV3IiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjIwMDAwMDAwMDAsInJvbGVzIjpbIlBVQkxJQy5VU0VSIl19._WR_s6AGyq2FwHA980M8XoFbhVInvgTqstauxUfcmYs`

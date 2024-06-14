@@ -11,21 +11,31 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// EDIPIMiddleware attaches EDIPI (CAC) to Context
+// EDIPI middleware attaches EDIPI (CAC) to Context
 // Used for CAC-Only Routes
 func (m *mw) EDIPI(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		key := c.QueryParam("key")
-		if key == "" {
-			user, ok := c.Get("user").(*jwt.Token)
-			if !ok {
-				return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
-			}
-			claims, ok := user.Claims.(jwt.MapClaims)
-			if !ok {
-				return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
-			}
-			edipi, err := strconv.Atoi(claims["sub"].(string))
+		if key != "" {
+			return next(c)
+		}
+
+		user, ok := c.Get("user").(*jwt.Token)
+		if !ok {
+			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
+		}
+		claims, ok := user.Claims.(jwt.MapClaims)
+		if !ok {
+			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
+		}
+		sub, ok := claims["sub"].(string)
+		if !ok || sub == "" {
+			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
+		}
+		c.Set("sub", sub)
+		cacUID := claims["cacUID"].(string)
+		if cacUID != "" {
+			edipi, err := strconv.Atoi(claims["cacUID"].(string))
 			if err != nil {
 				return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
 			}
@@ -70,14 +80,25 @@ func (m *mw) AttachProfile(next echo.HandlerFunc) echo.HandlerFunc {
 			c.Set("profile", p)
 			return next(c)
 		}
-		// If a User was authenticated using CAC (JWT), lookup Profile by edipi
-		edipi := c.Get("EDIPI")
-		if edipi == nil {
+		var sub *uuid.UUID
+		sub, ok := c.Get("sub").(*uuid.UUID)
+		if sub == nil || !ok {
 			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
 		}
-		p, err := m.ProfileService.GetProfileWithTokensFromEDIPI(ctx, edipi.(int))
+		var edipi *int
+		edipi, ok = c.Get("EDIPI").(*int)
+		if edipi == nil || !ok {
+			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
+		}
+		p, err := m.ProfileService.GetProfileWithTokensFromEDIPI(ctx, *edipi)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
+		}
+		if p.Sub == nil {
+			if err := m.ProfileService.UpdateSubForEDIPI(ctx, *edipi, *sub); err != nil {
+				return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
+			}
+			p.Sub = sub
 		}
 		c.Set("profile", p)
 

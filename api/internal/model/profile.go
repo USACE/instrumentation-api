@@ -25,9 +25,10 @@ type TokenInfoProfile struct {
 
 // ProfileInfo is information necessary to construct a profile
 type ProfileInfo struct {
-	EDIPI    int    `json:"-"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
+	Sub      *uuid.UUID `json:"-"`
+	EDIPI    int        `json:"-"`
+	Username string     `json:"username"`
+	Email    string     `json:"email"`
 }
 
 // TokenInfo represents the information held in the database about a token
@@ -47,7 +48,7 @@ type Token struct {
 }
 
 const getProfileFromEDIPI = `
-	SELECT id, edipi, username, email, is_admin, roles FROM v_profile WHERE edipi = $1
+	SELECT id, sub, edipi, username, email, is_admin, roles FROM v_profile WHERE edipi = $1
 `
 
 // GetProfileFromEDIPI returns a profile given an edipi
@@ -125,6 +126,13 @@ func (q *Queries) GetTokenInfoByTokenID(ctx context.Context, tokenID string) (To
 	var n TokenInfo
 	err := q.db.GetContext(ctx, &n, getTokenInfoByTokenID, tokenID)
 	return n, err
+}
+
+const updateSubForEDIPI = `UPDATE profile SET sub=$1 WHERE edipi=$2`
+
+func (q *Queries) UpdateSubForEDIPI(ctx context.Context, sub uuid.UUID, edipi int) error {
+	_, err := q.db.ExecContext(ctx, updateSubForEDIPI, sub, edipi)
+	return err
 }
 
 const deleteToken = `
