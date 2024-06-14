@@ -16,8 +16,6 @@ CREATE VIEW v_plot_configuration AS (
         COALESCE(k.date_range, '1 year')      AS date_range,
         COALESCE(k.threshold, 3000)           AS threshold,
         COALESCE(rc.configs, '[]')::text      AS report_configs,
-        -- TODO plot_type_id
-        -- TODO ploty_type_name
         json_build_object(
             'traces', COALESCE(traces.items, '[]'),
             'layout', json_build_object(
@@ -72,6 +70,39 @@ CREATE VIEW v_plot_configuration AS (
         WHERE pc.id = ccs.plot_configuration_id
     ) cs on true
     ORDER BY pc.name
+);
+
+-- CREATE TABLE plot_contour_config (
+--   plot_config_id uuid UNIQUE NOT NULL REFERENCES plot_config(id),
+--   date timestamptz NOT NULL,
+--   locf_backfill interval NOT NULL,
+--   gradient_smoothing boolean NOT NULL DEFAULT false,
+--   contour_smoothing boolean NOT NULL DEFAULT false,
+--   show_labels boolean NOT NULL DEFAULT false
+-- );
+--
+-- CREATE TABLE plot_contour_config_timeseries (
+--   plot_contour_config_id uuid NOT NULL REFERENCES plot_contour_config(plot_config_id),
+--   timeseries_id uuid NOT NULL REFERENCES timeseries(id),
+--   CONSTRAINT UNIQUE(plot_contour_config_id, timeseries_id)
+-- );
+
+CREATE VIEW v_plot_contour AS (
+    SELECT
+        
+);
+
+--
+-- CREATE TABLE plot_bullseye_config (
+--   plot_config_id uuid UNIQUE NOT NULL REFERENCES plot_config(id),
+--   x_axis_timeseries_id uuid NOT NULL REFERENCES timeseries(id),
+--   y_axis_timeseries_id uuid NOT NULL REFERENCES timeseries(id),
+--   CONSTRAINT UNIQUE(x_axis_timeseries_id, y_axis_timeseries_id)
+-- );
+
+CREATE VIEW v_plot_bullseye AS (
+    SELECT
+        
 );
 
 GRANT SELECT ON v_plot_configuration TO instrumentation_reader;
