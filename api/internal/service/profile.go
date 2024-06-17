@@ -13,7 +13,7 @@ type ProfileService interface {
 	CreateProfile(ctx context.Context, n model.ProfileInfo) (model.Profile, error)
 	CreateProfileToken(ctx context.Context, profileID uuid.UUID) (model.Token, error)
 	GetTokenInfoByTokenID(ctx context.Context, tokenID string) (model.TokenInfo, error)
-	UpdateSubForEDIPI(ctx context.Context, edipi int, sub uuid.UUID) error
+	UpdateSubForEDIPI(ctx context.Context, sub uuid.UUID, edipi int) error
 	DeleteToken(ctx context.Context, profileID uuid.UUID, tokenID string) error
 }
 
