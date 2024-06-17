@@ -5,7 +5,7 @@ set -o pipefail
 parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 cd "$parent_path"
 
-COMPOSECMD="DOCKER_BUILDKIT=1 docker-compose -f docker-compose.yml"
+COMPOSECMD="docker-compose -f docker-compose.yml"
 mkdocs() {
     (
         DOCKER_BUILDKIT=1 docker build --file api/Dockerfile.openapi --output api/internal/server/docs api
@@ -16,21 +16,21 @@ mkdocs() {
 if [ "$1" = "watch" ]; then
     mkdocs -q
     if [ "$2" = "mock" ]; then
-        $COMPOSECMD -f docker-compose.dev.yml --profile=mock watch
+        DOCKER_BUILDKIT=1 $COMPOSECMD -f docker-compose.dev.yml --profile=mock watch
     elif [ "$2" = "auth" ]; then
-        AUTH_JWT_MOCKED=false $COMPOSECMD -f docker-compose.dev.yml watch
+        DOCKER_BUILDKIT=1 AUTH_JWT_MOCKED=false $COMPOSECMD -f docker-compose.dev.yml watch
     else
-        $COMPOSECMD -f docker-compose.dev.yml watch
+        DOCKER_BUILDKIT=1 $COMPOSECMD -f docker-compose.dev.yml watch
     fi
 
 elif [ "$1" = "up" ]; then
     mkdocs -q
     if [ "$2" = "mock" ]; then
-        $COMPOSECMD --profile=mock up -d --build
+        DOCKER_BUILDKIT=1 $COMPOSECMD --profile=mock up -d --build
     elif [ "$2" = "auth" ]; then
-        AUTH_JWT_MOCKED=false $COMPOSECMD up -d --build
+        DOCKER_BUILDKIT=1 AUTH_JWT_MOCKED=false $COMPOSECMD up -d --build
     else
-        $COMPOSECMD up -d --build
+        DOCKER_BUILDKIT=1 $COMPOSECMD up -d --build
     fi
 
 elif [ "$1" = "down" ]; then

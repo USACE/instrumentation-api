@@ -95,7 +95,7 @@ func (m *mw) AttachProfile(next echo.HandlerFunc) echo.HandlerFunc {
 			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
 		}
 		if p.Sub == nil {
-			if err := m.ProfileService.UpdateSubForEDIPI(ctx, *edipi, *sub); err != nil {
+			if err := m.ProfileService.UpdateSubForEDIPI(ctx, *sub, *edipi); err != nil {
 				return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
 			}
 			p.Sub = sub
