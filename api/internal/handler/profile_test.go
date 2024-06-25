@@ -24,7 +24,7 @@ const testCreateProfileBody = `{
     "email": "test.user@fake.usace.army.mil"
 }`
 
-const mockJwtNewUser = `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwibmFtZSI6IlVzZXIuTmV3IiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjIwMDAwMDAwMDAsInJvbGVzIjpbIlBVQkxJQy5VU0VSIl19._WR_s6AGyq2FwHA980M8XoFbhVInvgTqstauxUfcmYs`
+const mockJwtNewUser = `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwibmFtZSI6Ik5ld1VzZXIiLCJnaXZlbl9uYW1lIjoiTmV3IFVzZXIiLCJwcmVmZXJyZWRfbmFtZSI6Ik5ldyBVc2VyIiwiY2FjVUlEIjoiMSIsIng1MDlfcHJlc2VudGVkIjp0cnVlLCJpYXQiOjE1MTYyMzkwMjIsImV4cCI6MjAwMDAwMDAwMCwicm9sZXMiOltdfQ.ElWDNEZu7EVMKzm7DaZctRXgJmLZy8658AOAteaY2Cs`
 
 func TestProfiles(t *testing.T) {
 	objSchema, err := gojsonschema.NewSchema(profileObjectLoader)

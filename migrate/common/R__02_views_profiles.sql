@@ -9,6 +9,7 @@ CREATE VIEW v_profile AS (
         GROUP BY profile_id
     )
     SELECT p.id,
+           p.sub,
            p.edipi,
            p.username,
            p.email,
@@ -21,6 +22,7 @@ CREATE VIEW v_profile AS (
 CREATE VIEW v_profile_project_roles AS (
     SELECT a.id,
            a.profile_id,
+           b.sub,
            b.edipi,
            b.username,
            b.email,

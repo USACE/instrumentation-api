@@ -33,8 +33,8 @@ func (m *mw) EDIPI(next echo.HandlerFunc) echo.HandlerFunc {
 			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
 		}
 		c.Set("sub", sub)
-		cacUID := claims["cacUID"].(string)
-		if cacUID != "" {
+		cacUID, exists := claims["cacUID"]
+		if exists && cacUID != nil {
 			edipi, err := strconv.Atoi(claims["cacUID"].(string))
 			if err != nil {
 				return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
@@ -80,25 +80,23 @@ func (m *mw) AttachProfile(next echo.HandlerFunc) echo.HandlerFunc {
 			c.Set("profile", p)
 			return next(c)
 		}
-		var sub *uuid.UUID
-		sub, ok := c.Get("sub").(*uuid.UUID)
-		if sub == nil || !ok {
+		sub, ok := c.Get("sub").(string)
+		if !ok {
 			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
 		}
-		var edipi *int
-		edipi, ok = c.Get("EDIPI").(*int)
-		if edipi == nil || !ok {
+		edipi, ok := c.Get("EDIPI").(int)
+		if !ok {
 			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
 		}
-		p, err := m.ProfileService.GetProfileWithTokensFromEDIPI(ctx, *edipi)
+		p, err := m.ProfileService.GetProfileWithTokensFromEDIPI(ctx, edipi)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
 		}
 		if p.Sub == nil {
-			if err := m.ProfileService.UpdateSubForEDIPI(ctx, *sub, *edipi); err != nil {
+			if err := m.ProfileService.UpdateSubForEDIPI(ctx, sub, edipi); err != nil {
 				return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
 			}
-			p.Sub = sub
+			p.Sub = &sub
 		}
 		c.Set("profile", p)
 

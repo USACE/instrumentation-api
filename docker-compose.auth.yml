@@ -26,7 +26,7 @@ services:
     env_file: ./env_files/auth.env
     ports:
       - ${KEYCLOAK_PORT:-8090}:8080
-    command: start-dev --import-realm
+    command: start-dev
     depends_on:
       authdb:
         condition: service_healthy

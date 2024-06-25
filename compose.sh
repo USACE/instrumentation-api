@@ -18,7 +18,7 @@ if [ "$1" = "watch" ]; then
     if [ "$2" = "mock" ]; then
         DOCKER_BUILDKIT=1 $COMPOSECMD -f docker-compose.dev.yml --profile=mock watch
     elif [ "$2" = "auth" ]; then
-        DOCKER_BUILDKIT=1 AUTH_JWT_MOCKED=false $COMPOSECMD -f docker-compose.dev.yml watch
+        DOCKER_BUILDKIT=1 AUTH_JWT_MOCKED=false $COMPOSECMD -f docker-compose.dev.yml -f docker-compose.auth.yml watch
     else
         DOCKER_BUILDKIT=1 $COMPOSECMD -f docker-compose.dev.yml watch
     fi
@@ -28,17 +28,17 @@ elif [ "$1" = "up" ]; then
     if [ "$2" = "mock" ]; then
         DOCKER_BUILDKIT=1 $COMPOSECMD --profile=mock up -d --build
     elif [ "$2" = "auth" ]; then
-        DOCKER_BUILDKIT=1 AUTH_JWT_MOCKED=false $COMPOSECMD up -d --build
+        DOCKER_BUILDKIT=1 AUTH_JWT_MOCKED=false $COMPOSECMD -f docker-compose.auth.yml up -d --build
     else
         DOCKER_BUILDKIT=1 $COMPOSECMD up -d --build
     fi
 
 elif [ "$1" = "down" ]; then
     mkdocs -q
-    $COMPOSECMD --profile=mock down
+    $COMPOSECMD -f docker-compose.dev.yml -f docker-compose.auth.yml --profile=mock down
 
 elif [ "$1" = "clean" ]; then
-    $COMPOSECMD --profile=mock down -v
+    $COMPOSECMD -f docker-compose.dev.yml -f docker-compose.auth.yml --profile=mock down -v
 
 elif [ "$1" = "test" ]; then
     docker-compose build

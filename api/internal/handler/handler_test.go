@@ -20,7 +20,7 @@ import (
 const (
 	truncateLinesBody = 30
 	host              = "http://localhost:8080"
-	mockJwt           = `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwibmFtZSI6IlVzZXIuQWRtaW4iLCJpYXQiOjE1MTYyMzkwMjIsImV4cCI6MjAwMDAwMDAwMCwicm9sZXMiOlsiUFVCTElDLlVTRVIiXX0.4VAMamtH92GiIb5CpGKpP6LKwU6IjIfw5wS4qc8O8VM`
+	mockJwt           = `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwibmFtZSI6IlVzZXIuQXBwbGljYXRpb25BZG1pbiIsImdpdmVuX25hbWUiOiJNb2NrIEFkbWluIiwicHJlZmVycmVkX25hbWUiOiJNb2NrIEFkbWluIiwiY2FjVUlEIjoiMiIsIng1MDlfcHJlc2VudGVkIjp0cnVlLCJpYXQiOjE1MTYyMzkwMjIsImV4cCI6MjAwMDAwMDAwMCwicm9sZXMiOltdfQ.m3XTmSQmy_T6ywoLChBXqhXEC_dMg9K-zjRM7_WbGl8`
 	mockAppKey        = "appkey"
 )
 

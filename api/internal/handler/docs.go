@@ -62,6 +62,6 @@ const htmlTmpl = `<!doctype html>
 const mockAuthOptions = `authentication: {
     preferredSecurityScheme: 'Bearer',
     apiKey: {
-        token: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwibmFtZSI6IlVzZXIuQXBwbGljYXRpb25BZG1pbiIsImlhdCI6MTUxNjIzOTAyMiwiZXhwIjoyMDAwMDAwMDAwLCJyb2xlcyI6W119.aKaDNBnuhQyXI6zvzn-dAg8SxJSP3mQEx5FTSmJbYog',
+        token: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwibmFtZSI6IlVzZXIuQXBwbGljYXRpb25BZG1pbiIsImdpdmVuX25hbWUiOiJNb2NrIEFkbWluIiwicHJlZmVycmVkX25hbWUiOiJNb2NrIEFkbWluIiwiY2FjVUlEIjoiMiIsIng1MDlfcHJlc2VudGVkIjp0cnVlLCJpYXQiOjE1MTYyMzkwMjIsImV4cCI6MjAwMDAwMDAwMCwicm9sZXMiOltdfQ.m3XTmSQmy_T6ywoLChBXqhXEC_dMg9K-zjRM7_WbGl8',
     },
 },`
