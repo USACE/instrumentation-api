@@ -1469,6 +1469,9 @@ abecd34e-b852-4786-9c7a-fc3e5bbb9192	1719327556360	cwbi	DELETE	98749fe9-5c8f-4d4
 ad88d2ca-8bb4-4808-957f-39f233ee3537	1719327608110	cwbi	CREATE	98749fe9-5c8f-4d46-b973-16664c916f0f	fca2fb0d-1434-4ba2-bd0a-699e623e79be	f3fc1dd9-af7b-498a-9435-31da080a37ad	172.23.0.1	users/f8dcafea-243e-4b89-8d7d-fa01918130f4	\N	\N	USER
 92e80107-7868-49db-82b0-8e6781fc7dd0	1719327627811	cwbi	ACTION	98749fe9-5c8f-4d46-b973-16664c916f0f	fca2fb0d-1434-4ba2-bd0a-699e623e79be	f3fc1dd9-af7b-498a-9435-31da080a37ad	172.23.0.1	users/f8dcafea-243e-4b89-8d7d-fa01918130f4/reset-password	\N	\N	USER
 90c7e09a-f304-4b7b-80b1-5982aed23532	1719327657137	cwbi	UPDATE	98749fe9-5c8f-4d46-b973-16664c916f0f	fca2fb0d-1434-4ba2-bd0a-699e623e79be	f3fc1dd9-af7b-498a-9435-31da080a37ad	172.23.0.1	users/f8dcafea-243e-4b89-8d7d-fa01918130f4	\N	\N	USER
+59e263a4-ac83-48eb-a7bb-670fd34e31cb	1719331815993	cwbi	CREATE	98749fe9-5c8f-4d46-b973-16664c916f0f	fca2fb0d-1434-4ba2-bd0a-699e623e79be	f3fc1dd9-af7b-498a-9435-31da080a37ad	172.26.0.1	default-default-client-scopes/5286fee9-6cda-4a94-aba0-dffa0a5c2e8f	\N	\N	CLIENT_SCOPE
+2386f610-be40-454a-bfda-967f96cb1314	1719331818597	cwbi	CREATE	98749fe9-5c8f-4d46-b973-16664c916f0f	fca2fb0d-1434-4ba2-bd0a-699e623e79be	f3fc1dd9-af7b-498a-9435-31da080a37ad	172.26.0.1	default-default-client-scopes/9cf08b6f-66b3-46ab-b59c-cd96e9f1b8c0	\N	\N	CLIENT_SCOPE
+320c6d73-3204-47d8-9135-3f93cdc728ab	1719331823951	cwbi	CREATE	98749fe9-5c8f-4d46-b973-16664c916f0f	fca2fb0d-1434-4ba2-bd0a-699e623e79be	f3fc1dd9-af7b-498a-9435-31da080a37ad	172.26.0.1	default-default-client-scopes/b0a33b5f-7c9a-4d59-9602-855dfb2a0b92	\N	\N	CLIENT_SCOPE
 \.
 
 
@@ -2391,6 +2394,9 @@ cwbi	8af9e1dc-6902-4244-a87e-b40749f6a92d	f
 cwbi	0542ff9c-210f-4eb3-b62e-fa7272032823	f
 cwbi	2648bc85-15fc-4968-b6b5-8b9743c8cfad	f
 cwbi	2b3b3db7-5772-4d81-a35a-742ea21a95e6	f
+cwbi	5286fee9-6cda-4a94-aba0-dffa0a5c2e8f	t
+cwbi	9cf08b6f-66b3-46ab-b59c-cd96e9f1b8c0	t
+cwbi	b0a33b5f-7c9a-4d59-9602-855dfb2a0b92	t
 \.
 
 
@@ -2407,6 +2413,8 @@ d39bad0c-3397-4ea6-bfc3-8ddbf90aaeab	midas	{"auth_method":"openid-connect","auth
 cca63b92-098a-46fe-a91e-5fa70191d948	midas	{"token_id":"d4839301-7d3c-4c13-a160-08226454cf7d","grant_type":"authorization_code","refresh_token_type":"Refresh","scope":"openid email profile","refresh_token_id":"5116195b-7317-4bb6-810f-159d0c9c6b83","code_id":"55ca46c8-5e92-4c78-8cec-a8f753079c63","client_auth_method":"client-secret"}	\N	172.21.0.1	cwbi	55ca46c8-5e92-4c78-8cec-a8f753079c63	1719326385661	CODE_TO_TOKEN	1c6decce-7042-4a2c-9880-ac7c5bc27b8c
 feec4233-466a-468e-966c-4571673f1956	midas	{"auth_method":"openid-connect","auth_type":"code","response_type":"code","redirect_uri":"http://localhost:3000/silent-check-sso.html","consent":"no_consent_required","code_id":"55ca46c8-5e92-4c78-8cec-a8f753079c63","response_mode":"fragment","username":"smith_dennis@bah.com"}	\N	172.21.0.1	cwbi	55ca46c8-5e92-4c78-8cec-a8f753079c63	1719326404018	LOGIN	1c6decce-7042-4a2c-9880-ac7c5bc27b8c
 2ab2d731-92aa-4f5d-bc0e-7d40f0ce9b41	midas	{"token_id":"6932a4b0-7bcb-42a0-b300-8d10dbc1d2d9","grant_type":"authorization_code","refresh_token_type":"Refresh","scope":"openid email profile","refresh_token_id":"985180bf-df49-4271-9169-3bf56dce2393","code_id":"55ca46c8-5e92-4c78-8cec-a8f753079c63","client_auth_method":"client-secret"}	\N	172.21.0.1	cwbi	55ca46c8-5e92-4c78-8cec-a8f753079c63	1719326404043	CODE_TO_TOKEN	1c6decce-7042-4a2c-9880-ac7c5bc27b8c
+3aade133-5064-498e-9e33-4bad0fedcc14	midas	{"auth_method":"openid-connect","auth_type":"code","redirect_uri":"http://localhost:3000/","consent":"no_consent_required","code_id":"3bebb32a-8533-4a52-8120-c6db5e44ec15","username":"test"}	\N	172.24.0.1	cwbi	3bebb32a-8533-4a52-8120-c6db5e44ec15	1719328122561	LOGIN	f8dcafea-243e-4b89-8d7d-fa01918130f4
+7eb08eaf-f4cc-4f46-a059-32a8d1151afb	midas	{"token_id":"0c100ffa-0378-4d90-a508-1d8df758a233","grant_type":"authorization_code","refresh_token_type":"Refresh","scope":"openid email profile","refresh_token_id":"2d10429d-f166-404a-b9f3-762fa7d35b2e","code_id":"3bebb32a-8533-4a52-8120-c6db5e44ec15","client_auth_method":"client-secret"}	\N	172.24.0.1	cwbi	3bebb32a-8533-4a52-8120-c6db5e44ec15	1719328123004	CODE_TO_TOKEN	f8dcafea-243e-4b89-8d7d-fa01918130f4
 \.
 
 
