@@ -25,10 +25,9 @@ type TokenInfoProfile struct {
 
 // ProfileInfo is information necessary to construct a profile
 type ProfileInfo struct {
-	Sub      *string `json:"-"`
-	EDIPI    int     `json:"-"`
-	Username string  `json:"username"`
-	Email    string  `json:"email"`
+	EDIPI    int    `json:"-"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
 }
 
 // TokenInfo represents the information held in the database about a token
@@ -47,14 +46,23 @@ type Token struct {
 	TokenInfo
 }
 
-const getProfileFromEDIPI = `
-	SELECT id, sub, edipi, username, email, is_admin, roles FROM v_profile WHERE edipi = $1
+const getProfileForEDIPI = `
+	SELECT * FROM v_profile WHERE edipi = $1
 `
 
-// GetProfileFromEDIPI returns a profile given an edipi
-func (q *Queries) GetProfileFromEDIPI(ctx context.Context, edipi int) (Profile, error) {
+func (q *Queries) GetProfileForEDIPI(ctx context.Context, edipi int) (Profile, error) {
 	var p Profile
-	err := q.db.GetContext(ctx, &p, getProfileFromEDIPI, edipi)
+	err := q.db.GetContext(ctx, &p, getProfileForEDIPI, edipi)
+	return p, err
+}
+
+const getProfileForEmail = `
+	SELECT * FROM v_profile WHERE email = $1
+`
+
+func (q *Queries) GetProfileForEmail(ctx context.Context, email string) (Profile, error) {
+	var p Profile
+	err := q.db.GetContext(ctx, &p, getProfileForEDIPI, email)
 	return p, err
 }
 
@@ -128,10 +136,17 @@ func (q *Queries) GetTokenInfoByTokenID(ctx context.Context, tokenID string) (To
 	return n, err
 }
 
-const updateSubForEDIPI = `UPDATE profile SET sub=$1 WHERE edipi=$2`
+const updateProfileForEDIPI = `UPDATE profile SET username=$1, email=$2 WHERE edipi=$3`
 
-func (q *Queries) UpdateSubForEDIPI(ctx context.Context, sub string, edipi int) error {
-	_, err := q.db.ExecContext(ctx, updateSubForEDIPI, sub, edipi)
+func (q *Queries) UpdateProfileForEDIPI(ctx context.Context, username, email string, edipi int) error {
+	_, err := q.db.ExecContext(ctx, updateProfileForEDIPI, username, email, edipi)
+	return err
+}
+
+const updateProfileForEmail = `UPDATE profile SET username=$1 WHERE email=$2`
+
+func (q *Queries) UpdateProfileForEmail(ctx context.Context, username, email string) error {
+	_, err := q.db.ExecContext(ctx, updateProfileForEmail, username, email)
 	return err
 }
 

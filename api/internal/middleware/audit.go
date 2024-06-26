@@ -1,6 +1,8 @@
 package middleware
 
 import (
+	"errors"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -11,9 +13,57 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// EDIPI middleware attaches EDIPI (CAC) to Context
-// Used for CAC-Only Routes
-func (m *mw) EDIPI(next echo.HandlerFunc) echo.HandlerFunc {
+type TokenClaims struct {
+	PreferredUsername string
+	Email             string
+	SubjectDN         *string
+	CacUID            *int
+}
+
+func mapClaims(user *jwt.Token) (TokenClaims, error) {
+	claims, ok := user.Claims.(jwt.MapClaims)
+	if !ok {
+		return TokenClaims{}, errors.New("unable to map claims")
+	}
+
+	// common claims, required
+	pu, ok := claims["preferred_username"].(string)
+	if !ok || pu == "" {
+		return TokenClaims{}, errors.New("error parsing token claims: email")
+	}
+	email, ok := claims["email"].(string)
+	if !ok || email == "" {
+		return TokenClaims{}, errors.New("error parsing token claims: email")
+	}
+
+	// cac-specific claims, for cac users only
+	dn, ok := claims["subjectDN"].(*string)
+	if !ok {
+		return TokenClaims{}, errors.New("error parsing token claims: subjectDN")
+	}
+	cacUIDStr, ok := claims["cacUID"].(*string)
+	if !ok {
+		return TokenClaims{}, errors.New("error parsing token claims: cacUID")
+	}
+
+	var cacUID *int
+	if cacUIDStr != nil {
+		cacUIDClaims, err := strconv.Atoi(*cacUIDStr)
+		if err != nil {
+			return TokenClaims{}, errors.New("error parsing token claims: cacUID")
+		}
+		cacUID = &cacUIDClaims
+	}
+
+	return TokenClaims{
+		PreferredUsername: pu,
+		Email:             email,
+		SubjectDN:         dn,
+		CacUID:            cacUID,
+	}, nil
+}
+
+func (m *mw) AttachClaims(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		key := c.QueryParam("key")
 		if key != "" {
@@ -24,38 +74,30 @@ func (m *mw) EDIPI(next echo.HandlerFunc) echo.HandlerFunc {
 		if !ok {
 			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
 		}
-		claims, ok := user.Claims.(jwt.MapClaims)
-		if !ok {
+
+		claims, err := mapClaims(user)
+		if err != nil {
 			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
 		}
-		sub, ok := claims["sub"].(string)
-		if !ok || sub == "" {
-			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
-		}
-		c.Set("sub", sub)
-		cacUID, exists := claims["cacUID"]
-		if exists && cacUID != nil {
-			edipi, err := strconv.Atoi(claims["cacUID"].(string))
-			if err != nil {
-				return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
-			}
-			c.Set("EDIPI", edipi)
-		}
+		c.Set("claims", claims)
+
+		log.Printf("claims %+v", claims)
+
 		return next(c)
 	}
 }
 
 func (m *mw) CACOnly(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		edipi := c.Get("EDIPI")
-		if edipi == nil {
+		claims, ok := c.Get("claims").(TokenClaims)
+		if !ok || claims.CacUID == nil {
 			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
 		}
 		return next(c)
 	}
 }
 
-// AttachProfileID attaches ProfileID of user to context
+// AttachProfile attaches the Profile of a user to request context
 func (m *mw) AttachProfile(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx := c.Request().Context()
@@ -80,25 +122,41 @@ func (m *mw) AttachProfile(next echo.HandlerFunc) echo.HandlerFunc {
 			c.Set("profile", p)
 			return next(c)
 		}
-		sub, ok := c.Get("sub").(string)
+		claims, ok := c.Get("claims").(TokenClaims)
 		if !ok {
 			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
 		}
-		edipi, ok := c.Get("EDIPI").(int)
-		if !ok {
-			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
-		}
-		p, err := m.ProfileService.GetProfileWithTokensFromEDIPI(ctx, edipi)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
-		}
-		if p.Sub == nil {
-			if err := m.ProfileService.UpdateSubForEDIPI(ctx, sub, edipi); err != nil {
+
+		if claims.CacUID != nil {
+			p, err := m.ProfileService.GetProfileWithTokensFromEDIPI(ctx, *claims.CacUID)
+			if err != nil {
 				return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
 			}
-			p.Sub = &sub
+			if p.Username != claims.PreferredUsername || p.Email != claims.Email {
+				if err := m.ProfileService.UpdateProfileForEDIPI(ctx, claims.PreferredUsername, claims.Email, *claims.CacUID); err != nil {
+					return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
+				}
+				p.Username = claims.PreferredUsername
+				p.Email = claims.Email
+			}
+			c.Set("profile", p)
+			log.Printf("cac profile %+v", p)
+		} else if claims.Email != "" {
+			p, err := m.ProfileService.GetProfileWithTokensFromEmail(ctx, claims.Email)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
+			}
+			if p.Username != claims.PreferredUsername {
+				if err := m.ProfileService.UpdateProfileForEmail(ctx, claims.PreferredUsername, claims.Email); err != nil {
+					return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
+				}
+				p.Username = claims.PreferredUsername
+			}
+			c.Set("profile", p)
+			log.Printf("email profile %+v", p)
+		} else {
+			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
 		}
-		c.Set("profile", p)
 
 		return next(c)
 	}

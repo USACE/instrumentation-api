@@ -7,7 +7,7 @@ import (
 )
 
 type Middleware interface {
-	EDIPI(next echo.HandlerFunc) echo.HandlerFunc
+	AttachClaims(next echo.HandlerFunc) echo.HandlerFunc
 	CACOnly(next echo.HandlerFunc) echo.HandlerFunc
 	AttachProfile(next echo.HandlerFunc) echo.HandlerFunc
 	IsApplicationAdmin(next echo.HandlerFunc) echo.HandlerFunc

@@ -9,11 +9,13 @@ import (
 
 type ProfileService interface {
 	GetProfileWithTokensFromEDIPI(ctx context.Context, edipi int) (model.Profile, error)
+	GetProfileWithTokensFromEmail(ctx context.Context, email string) (model.Profile, error)
 	GetProfileWithTokensFromTokenID(ctx context.Context, tokenID string) (model.Profile, error)
 	CreateProfile(ctx context.Context, n model.ProfileInfo) (model.Profile, error)
 	CreateProfileToken(ctx context.Context, profileID uuid.UUID) (model.Token, error)
 	GetTokenInfoByTokenID(ctx context.Context, tokenID string) (model.TokenInfo, error)
-	UpdateSubForEDIPI(ctx context.Context, sub string, edipi int) error
+	UpdateProfileForEDIPI(ctx context.Context, username, email string, edipi int) error
+	UpdateProfileForEmail(ctx context.Context, username, email string) error
 	DeleteToken(ctx context.Context, profileID uuid.UUID, tokenID string) error
 }
 
@@ -27,7 +29,20 @@ func NewProfileService(db *model.Database, q *model.Queries) *profileService {
 }
 
 func (s profileService) GetProfileWithTokensFromEDIPI(ctx context.Context, edipi int) (model.Profile, error) {
-	p, err := s.GetProfileFromEDIPI(ctx, edipi)
+	p, err := s.GetProfileForEDIPI(ctx, edipi)
+	if err != nil {
+		return model.Profile{}, err
+	}
+	tokens, err := s.GetIssuedTokens(ctx, p.ID)
+	if err != nil {
+		return model.Profile{}, err
+	}
+	p.Tokens = tokens
+	return p, nil
+}
+
+func (s profileService) GetProfileWithTokensFromEmail(ctx context.Context, email string) (model.Profile, error) {
+	p, err := s.GetProfileForEmail(ctx, email)
 	if err != nil {
 		return model.Profile{}, err
 	}

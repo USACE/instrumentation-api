@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/USACE/instrumentation-api/api/internal/message"
+	"github.com/USACE/instrumentation-api/api/internal/middleware"
 	"github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/labstack/echo/v4"
 )
@@ -22,17 +23,18 @@ import (
 //	@Router /profiles [post]
 //	@Security CacOnly
 func (h *ApiHandler) CreateProfile(c echo.Context) error {
-	var n model.ProfileInfo
-	if err := c.Bind(&n); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	claims := c.Get("claims").(middleware.TokenClaims)
+	p := model.ProfileInfo{
+		EDIPI:    *claims.CacUID,
+		Username: claims.PreferredUsername,
+		Email:    claims.Email,
 	}
-	n.EDIPI = c.Get("EDIPI").(int)
 
-	p, err := h.ProfileService.CreateProfile(c.Request().Context(), n)
+	pNew, err := h.ProfileService.CreateProfile(c.Request().Context(), p)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
-	return c.JSON(http.StatusCreated, p)
+	return c.JSON(http.StatusCreated, pNew)
 }
 
 // GetMyProfile godoc
@@ -47,8 +49,8 @@ func (h *ApiHandler) CreateProfile(c echo.Context) error {
 //	@Router /my_profile [get]
 //	@Security CacOnly
 func (h *ApiHandler) GetMyProfile(c echo.Context) error {
-	edipi := c.Get("EDIPI").(int)
-	p, err := h.ProfileService.GetProfileWithTokensFromEDIPI(c.Request().Context(), edipi)
+	claims := c.Get("claims").(middleware.TokenClaims)
+	p, err := h.ProfileService.GetProfileWithTokensFromEDIPI(c.Request().Context(), *claims.CacUID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return echo.NewHTTPError(http.StatusNotFound, message.NotFound)
@@ -70,9 +72,9 @@ func (h *ApiHandler) GetMyProfile(c echo.Context) error {
 //	@Router /my_tokens [post]
 //	@Security CacOnly
 func (h *ApiHandler) CreateToken(c echo.Context) error {
-	edipi := c.Get("EDIPI").(int)
+	claims := c.Get("claims").(middleware.TokenClaims)
 	ctx := c.Request().Context()
-	p, err := h.ProfileService.GetProfileWithTokensFromEDIPI(ctx, edipi)
+	p, err := h.ProfileService.GetProfileWithTokensFromEDIPI(ctx, *claims.CacUID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "could not locate user profile with information provided")
 	}
@@ -96,19 +98,16 @@ func (h *ApiHandler) CreateToken(c echo.Context) error {
 //	@Router /my_tokens/{token_id} [delete]
 //	@Security CacOnly
 func (h *ApiHandler) DeleteToken(c echo.Context) error {
-	// Get ProfileID
-	edipi := c.Get("EDIPI").(int)
+	claims := c.Get("claims").(middleware.TokenClaims)
 	ctx := c.Request().Context()
-	p, err := h.ProfileService.GetProfileWithTokensFromEDIPI(ctx, edipi)
+	p, err := h.ProfileService.GetProfileWithTokensFromEDIPI(ctx, *claims.CacUID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, message.BadRequest)
 	}
-	// Get Token ID
 	tokenID := c.Param("token_id")
 	if tokenID == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "Bad Token ID")
 	}
-	// Delete Token
 	if err := h.ProfileService.DeleteToken(ctx, p.ID, tokenID); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

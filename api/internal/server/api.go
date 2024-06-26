@@ -42,8 +42,8 @@ func NewApiServer(cfg *config.ApiConfig, h *handler.ApiHandler) *ApiServer {
 	cacOnly := e.Group(cfg.RoutePrefix)
 	app := e.Group(cfg.RoutePrefix)
 
-	private.Use(mw.JWTSkipIfKey, mw.KeyAuth, mw.EDIPI, mw.AttachProfile)
-	cacOnly.Use(mw.JWT, mw.EDIPI, mw.CACOnly)
+	private.Use(mw.JWTSkipIfKey, mw.KeyAuth, mw.AttachClaims, mw.AttachProfile)
+	cacOnly.Use(mw.JWT, mw.AttachClaims, mw.CACOnly)
 	app.Use(mw.AppKeyAuth)
 
 	server := &ApiServer{e, apiGroups{
