@@ -21,8 +21,8 @@ MIDAS project management is tracked in https://github.com/USACE/instrumentation
 4. Use the [./compose.sh](./compose.sh) shell script to build and (re)start the Docker Compose services. You can now access the application locally through Docker. Use the `up` argument to start, `down` to spin down, and `clean` to spin down and remove volumes. Optionally add the `mock` argument to start/remove the mock datalogger service.
 
 ```sh
-./compose.sh up [mock,auth]
-./compose.sh down [mock,auth]
+./compose.sh up [mock]
+./compose.sh down [mock]
 ```
 
 #### General Tab
