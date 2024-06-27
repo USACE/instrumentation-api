@@ -25,7 +25,7 @@ type TokenInfoProfile struct {
 
 // ProfileInfo is information necessary to construct a profile
 type ProfileInfo struct {
-	EDIPI    int    `json:"-"`
+	EDIPI    *int   `json:"-"`
 	Username string `json:"username"`
 	Email    string `json:"email"`
 }
@@ -62,7 +62,7 @@ const getProfileForEmail = `
 
 func (q *Queries) GetProfileForEmail(ctx context.Context, email string) (Profile, error) {
 	var p Profile
-	err := q.db.GetContext(ctx, &p, getProfileForEDIPI, email)
+	err := q.db.GetContext(ctx, &p, getProfileForEmail, email)
 	return p, err
 }
 
@@ -76,16 +76,16 @@ func (q *Queries) GetIssuedTokens(ctx context.Context, profileID uuid.UUID) ([]T
 	return tokens, err
 }
 
-const getProfileFromTokenID = `
+const getProfileForTokenID = `
 	SELECT p.id, p.edipi, p.username, p.email, p.is_admin
 	FROM profile_token t
 	LEFT JOIN v_profile p ON p.id = t.profile_id
 	WHERE t.token_id = $1
 `
 
-func (q *Queries) GetProfileFromTokenID(ctx context.Context, tokenID string) (Profile, error) {
+func (q *Queries) GetProfileForTokenID(ctx context.Context, tokenID string) (Profile, error) {
 	var p Profile
-	err := q.db.GetContext(ctx, getProfileFromTokenID, tokenID)
+	err := q.db.GetContext(ctx, getProfileForTokenID, tokenID)
 	return p, err
 }
 

@@ -8,13 +8,14 @@ import (
 
 type Middleware interface {
 	AttachClaims(next echo.HandlerFunc) echo.HandlerFunc
-	CACOnly(next echo.HandlerFunc) echo.HandlerFunc
+	RequireClaims(next echo.HandlerFunc) echo.HandlerFunc
 	AttachProfile(next echo.HandlerFunc) echo.HandlerFunc
 	IsApplicationAdmin(next echo.HandlerFunc) echo.HandlerFunc
 	IsProjectAdmin(next echo.HandlerFunc) echo.HandlerFunc
 	IsProjectMember(next echo.HandlerFunc) echo.HandlerFunc
 	GZIP(next echo.HandlerFunc) echo.HandlerFunc
 	CORS(next echo.HandlerFunc) echo.HandlerFunc
+	CORSWhitelist(next echo.HandlerFunc) echo.HandlerFunc
 	JWT(next echo.HandlerFunc) echo.HandlerFunc
 	JWTSkipIfKey(next echo.HandlerFunc) echo.HandlerFunc
 	KeyAuth(next echo.HandlerFunc) echo.HandlerFunc

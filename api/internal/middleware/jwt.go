@@ -8,7 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func mwJWT(publicKey string, isDisabled, skipIfKey, mock bool) echo.MiddlewareFunc {
+func mwJWT(publicKey, signingMethod string, isDisabled, skipIfKey, mock bool) echo.MiddlewareFunc {
 	pk := fmt.Sprintf("-----BEGIN PUBLIC KEY-----\n%s\n-----END PUBLIC KEY-----", publicKey)
 	if mock {
 		return echojwt.WithConfig(echojwt.Config{
@@ -19,7 +19,7 @@ func mwJWT(publicKey string, isDisabled, skipIfKey, mock bool) echo.MiddlewareFu
 		})
 	}
 	return echojwt.WithConfig(echojwt.Config{
-		SigningMethod: "RS512",
+		SigningMethod: signingMethod,
 		KeyFunc: func(t *jwt.Token) (interface{}, error) {
 			return jwt.ParseRSAPublicKeyFromPEM([]byte(pk))
 		},
@@ -30,11 +30,11 @@ func mwJWT(publicKey string, isDisabled, skipIfKey, mock bool) echo.MiddlewareFu
 }
 
 func (m *mw) JWTSkipIfKey(next echo.HandlerFunc) echo.HandlerFunc {
-	jwtmw := mwJWT(m.cfg.AuthPublicKey, m.cfg.AuthDisabled, true, m.cfg.AuthJWTMocked)
+	jwtmw := mwJWT(m.cfg.AuthPublicKey, m.cfg.AuthSigningMethod, m.cfg.AuthDisabled, true, m.cfg.AuthJWTMocked)
 	return jwtmw(next)
 }
 
 func (m *mw) JWT(next echo.HandlerFunc) echo.HandlerFunc {
-	jwtmw := mwJWT(m.cfg.AuthPublicKey, m.cfg.AuthDisabled, false, m.cfg.AuthJWTMocked)
+	jwtmw := mwJWT(m.cfg.AuthPublicKey, m.cfg.AuthSigningMethod, m.cfg.AuthDisabled, false, m.cfg.AuthJWTMocked)
 	return jwtmw(next)
 }

@@ -4662,7 +4662,7 @@
           }
         },
         "security" : [ {
-          "CacOnly" : [ ]
+          "ClaimsOnly" : [ ]
         } ],
         "summary" : "gets profile for current authenticated user",
         "tags" : [ "profile" ]
@@ -4775,7 +4775,7 @@
           }
         },
         "security" : [ {
-          "CacOnly" : [ ]
+          "ClaimsOnly" : [ ]
         } ],
         "summary" : "creates token for a profile",
         "tags" : [ "profile" ]
@@ -4837,7 +4837,7 @@
           }
         },
         "security" : [ {
-          "CacOnly" : [ ]
+          "ClaimsOnly" : [ ]
         } ],
         "summary" : "deletes a token for a profile",
         "tags" : [ "profile" ]
@@ -4939,7 +4939,7 @@
           }
         },
         "security" : [ {
-          "CacOnly" : [ ]
+          "ClaimsOnly" : [ ]
         } ],
         "summary" : "creates a user profile",
         "tags" : [ "profile" ]
@@ -12993,7 +12993,7 @@
         "name" : "Authorization",
         "type" : "apiKey"
       },
-      "CacOnly" : {
+      "ClaimsOnly" : {
         "description" : "CAC-Only routes",
         "in" : "header",
         "name" : "Authorization",

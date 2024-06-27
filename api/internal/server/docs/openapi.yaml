@@ -3090,7 +3090,7 @@ paths:
                 $ref: '#/components/schemas/echo.HTTPError'
           description: Internal Server Error
       security:
-      - CacOnly: []
+      - ClaimsOnly: []
       summary: gets profile for current authenticated user
       tags:
       - profile
@@ -3163,7 +3163,7 @@ paths:
                 $ref: '#/components/schemas/echo.HTTPError'
           description: Internal Server Error
       security:
-      - CacOnly: []
+      - ClaimsOnly: []
       summary: creates token for a profile
       tags:
       - profile
@@ -3204,7 +3204,7 @@ paths:
                 $ref: '#/components/schemas/echo.HTTPError'
           description: Internal Server Error
       security:
-      - CacOnly: []
+      - ClaimsOnly: []
       summary: deletes a token for a profile
       tags:
       - profile
@@ -3268,7 +3268,7 @@ paths:
                 $ref: '#/components/schemas/echo.HTTPError'
           description: Internal Server Error
       security:
-      - CacOnly: []
+      - ClaimsOnly: []
       summary: creates a user profile
       tags:
       - profile
@@ -9828,7 +9828,7 @@ components:
       in: header
       name: Authorization
       type: apiKey
-    CacOnly:
+    ClaimsOnly:
       description: CAC-Only routes
       in: header
       name: Authorization

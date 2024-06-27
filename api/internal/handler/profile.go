@@ -21,18 +21,19 @@ import (
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /profiles [post]
-//	@Security CacOnly
+//	@Security ClaimsOnly
 func (h *ApiHandler) CreateProfile(c echo.Context) error {
 	claims := c.Get("claims").(middleware.TokenClaims)
+
 	p := model.ProfileInfo{
-		EDIPI:    *claims.CacUID,
 		Username: claims.PreferredUsername,
 		Email:    claims.Email,
+		EDIPI:    claims.CacUID,
 	}
 
 	pNew, err := h.ProfileService.CreateProfile(c.Request().Context(), p)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
 	}
 	return c.JSON(http.StatusCreated, pNew)
 }
@@ -47,10 +48,17 @@ func (h *ApiHandler) CreateProfile(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /my_profile [get]
-//	@Security CacOnly
+//	@Security ClaimsOnly
 func (h *ApiHandler) GetMyProfile(c echo.Context) error {
 	claims := c.Get("claims").(middleware.TokenClaims)
-	p, err := h.ProfileService.GetProfileWithTokensFromEDIPI(c.Request().Context(), *claims.CacUID)
+	ctx := c.Request().Context()
+	var p model.Profile
+	var err error
+	if claims.CacUID != nil {
+		p, err = h.ProfileService.GetProfileWithTokensForEDIPI(ctx, *claims.CacUID)
+	} else {
+		p, err = h.ProfileService.GetProfileWithTokensForEmail(ctx, claims.Email)
+	}
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return echo.NewHTTPError(http.StatusNotFound, message.NotFound)
@@ -70,17 +78,23 @@ func (h *ApiHandler) GetMyProfile(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /my_tokens [post]
-//	@Security CacOnly
+//	@Security ClaimsOnly
 func (h *ApiHandler) CreateToken(c echo.Context) error {
 	claims := c.Get("claims").(middleware.TokenClaims)
 	ctx := c.Request().Context()
-	p, err := h.ProfileService.GetProfileWithTokensFromEDIPI(ctx, *claims.CacUID)
+	var p model.Profile
+	var err error
+	if claims.CacUID != nil {
+		p, err = h.ProfileService.GetProfileWithTokensForEDIPI(ctx, *claims.CacUID)
+	} else {
+		p, err = h.ProfileService.GetProfileWithTokensForEmail(ctx, claims.Email)
+	}
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "could not locate user profile with information provided")
 	}
 	token, err := h.ProfileService.CreateProfileToken(ctx, p.ID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
 	}
 	return c.JSON(http.StatusCreated, token)
 }
@@ -96,11 +110,17 @@ func (h *ApiHandler) CreateToken(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /my_tokens/{token_id} [delete]
-//	@Security CacOnly
+//	@Security ClaimsOnly
 func (h *ApiHandler) DeleteToken(c echo.Context) error {
 	claims := c.Get("claims").(middleware.TokenClaims)
 	ctx := c.Request().Context()
-	p, err := h.ProfileService.GetProfileWithTokensFromEDIPI(ctx, *claims.CacUID)
+	var p model.Profile
+	var err error
+	if claims.CacUID != nil {
+		p, err = h.ProfileService.GetProfileWithTokensForEDIPI(ctx, *claims.CacUID)
+	} else {
+		p, err = h.ProfileService.GetProfileWithTokensForEmail(ctx, claims.Email)
+	}
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, message.BadRequest)
 	}
@@ -109,7 +129,7 @@ func (h *ApiHandler) DeleteToken(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Bad Token ID")
 	}
 	if err := h.ProfileService.DeleteToken(ctx, p.ID, tokenID); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
 	}
 	return c.JSON(http.StatusOK, make(map[string]interface{}))
 }

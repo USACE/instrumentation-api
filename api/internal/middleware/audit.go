@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"errors"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -37,18 +36,20 @@ func mapClaims(user *jwt.Token) (TokenClaims, error) {
 	}
 
 	// cac-specific claims, for cac users only
-	dn, ok := claims["subjectDN"].(*string)
-	if !ok {
-		return TokenClaims{}, errors.New("error parsing token claims: subjectDN")
-	}
-	cacUIDStr, ok := claims["cacUID"].(*string)
-	if !ok {
-		return TokenClaims{}, errors.New("error parsing token claims: cacUID")
+	dnClaim, exists := claims["subjectDN"]
+	var dn *string
+	if exists && dnClaim != nil {
+		dnStr, ok := dnClaim.(string)
+		if !ok {
+			return TokenClaims{}, errors.New("error parsing token claims: subjectDN")
+		}
+		dn = &dnStr
 	}
 
+	cacUIDClaim, exists := claims["cacUID"]
 	var cacUID *int
-	if cacUIDStr != nil {
-		cacUIDClaims, err := strconv.Atoi(*cacUIDStr)
+	if exists && cacUIDClaim != nil {
+		cacUIDClaims, err := strconv.Atoi(cacUIDClaim.(string))
 		if err != nil {
 			return TokenClaims{}, errors.New("error parsing token claims: cacUID")
 		}
@@ -81,16 +82,14 @@ func (m *mw) AttachClaims(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 		c.Set("claims", claims)
 
-		log.Printf("claims %+v", claims)
-
 		return next(c)
 	}
 }
 
-func (m *mw) CACOnly(next echo.HandlerFunc) echo.HandlerFunc {
+func (m *mw) RequireClaims(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		claims, ok := c.Get("claims").(TokenClaims)
-		if !ok || claims.CacUID == nil {
+		if !ok || (claims.CacUID == nil && claims.Email == "") {
 			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
 		}
 		return next(c)
@@ -105,7 +104,7 @@ func (m *mw) AttachProfile(next echo.HandlerFunc) echo.HandlerFunc {
 		// lookup superuser profile; the "EDIPI" of the Superuser is consistently 79.
 		// The superuser is initialized as part of database and seed data initialization
 		if c.Get("ApplicationKeyAuthSuccess") == true {
-			p, err := m.ProfileService.GetProfileWithTokensFromEDIPI(ctx, 79)
+			p, err := m.ProfileService.GetProfileWithTokensForEDIPI(ctx, 79)
 			if err != nil {
 				return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
 			}
@@ -115,7 +114,7 @@ func (m *mw) AttachProfile(next echo.HandlerFunc) echo.HandlerFunc {
 		// If a User was authenticated via KeyAuth, lookup the user's profile using key_id
 		if c.Get("KeyAuthSuccess") == true {
 			keyID := c.Get("KeyAuthKeyID").(string)
-			p, err := m.ProfileService.GetProfileWithTokensFromTokenID(ctx, keyID)
+			p, err := m.ProfileService.GetProfileWithTokensForTokenID(ctx, keyID)
 			if err != nil {
 				return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
 			}
@@ -128,7 +127,7 @@ func (m *mw) AttachProfile(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		if claims.CacUID != nil {
-			p, err := m.ProfileService.GetProfileWithTokensFromEDIPI(ctx, *claims.CacUID)
+			p, err := m.ProfileService.GetProfileWithTokensForEDIPI(ctx, *claims.CacUID)
 			if err != nil {
 				return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
 			}
@@ -140,9 +139,8 @@ func (m *mw) AttachProfile(next echo.HandlerFunc) echo.HandlerFunc {
 				p.Email = claims.Email
 			}
 			c.Set("profile", p)
-			log.Printf("cac profile %+v", p)
 		} else if claims.Email != "" {
-			p, err := m.ProfileService.GetProfileWithTokensFromEmail(ctx, claims.Email)
+			p, err := m.ProfileService.GetProfileWithTokensForEmail(ctx, claims.Email)
 			if err != nil {
 				return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
 			}
@@ -153,7 +151,6 @@ func (m *mw) AttachProfile(next echo.HandlerFunc) echo.HandlerFunc {
 				p.Username = claims.PreferredUsername
 			}
 			c.Set("profile", p)
-			log.Printf("email profile %+v", p)
 		} else {
 			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
 		}

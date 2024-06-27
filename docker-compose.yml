@@ -52,8 +52,6 @@ services:
         # since this container is also the target for the test runner (builder target layer)
       - path: ./env_files/dcs-loader.env
         required: true
-    environment:
-      - INSTRUMENTATION_AUTH_JWT_MOCKED=${AUTH_JWT_MOCKED:-true}
     ports:
       - "${API_PORT:-8080}:80"
     depends_on:

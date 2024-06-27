@@ -35,7 +35,7 @@ CREATE VIEW v_profile_project_roles AS (
     FROM profile_project_roles a
     INNER JOIN profile b ON b.id = a.profile_id
     INNER JOIN project c ON c.id = a.project_id
-    INNER JOIN role    r ON r.id = a.role_id
+    INNER JOIN role r ON r.id = a.role_id
     ORDER BY username, role
 );
 
