@@ -22,8 +22,6 @@ SET row_security = off;
 
 CREATE SCHEMA keycloak;
 
-CREATE ROLE keycloak_user LOGIN PASSWORD 'keycloak_password';
-
 ALTER SCHEMA keycloak OWNER TO keycloak_user;
 
 SET default_tablespace = '';
