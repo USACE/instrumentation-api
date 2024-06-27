@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/USACE/instrumentation-api/api/internal/message"
+	"github.com/USACE/instrumentation-api/api/internal/middleware"
 	"github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/labstack/echo/v4"
 )
@@ -20,19 +21,21 @@ import (
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /profiles [post]
-//	@Security CacOnly
+//	@Security ClaimsOnly
 func (h *ApiHandler) CreateProfile(c echo.Context) error {
-	var n model.ProfileInfo
-	if err := c.Bind(&n); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-	n.EDIPI = c.Get("EDIPI").(int)
+	claims := c.Get("claims").(middleware.TokenClaims)
 
-	p, err := h.ProfileService.CreateProfile(c.Request().Context(), n)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	p := model.ProfileInfo{
+		Username: claims.PreferredUsername,
+		Email:    claims.Email,
+		EDIPI:    claims.CacUID,
 	}
-	return c.JSON(http.StatusCreated, p)
+
+	pNew, err := h.ProfileService.CreateProfile(c.Request().Context(), p)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
+	}
+	return c.JSON(http.StatusCreated, pNew)
 }
 
 // GetMyProfile godoc
@@ -45,10 +48,17 @@ func (h *ApiHandler) CreateProfile(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /my_profile [get]
-//	@Security CacOnly
+//	@Security ClaimsOnly
 func (h *ApiHandler) GetMyProfile(c echo.Context) error {
-	edipi := c.Get("EDIPI").(int)
-	p, err := h.ProfileService.GetProfileWithTokensFromEDIPI(c.Request().Context(), edipi)
+	claims := c.Get("claims").(middleware.TokenClaims)
+	ctx := c.Request().Context()
+	var p model.Profile
+	var err error
+	if claims.CacUID != nil {
+		p, err = h.ProfileService.GetProfileWithTokensForEDIPI(ctx, *claims.CacUID)
+	} else {
+		p, err = h.ProfileService.GetProfileWithTokensForEmail(ctx, claims.Email)
+	}
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return echo.NewHTTPError(http.StatusNotFound, message.NotFound)
@@ -68,17 +78,23 @@ func (h *ApiHandler) GetMyProfile(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /my_tokens [post]
-//	@Security CacOnly
+//	@Security ClaimsOnly
 func (h *ApiHandler) CreateToken(c echo.Context) error {
-	edipi := c.Get("EDIPI").(int)
+	claims := c.Get("claims").(middleware.TokenClaims)
 	ctx := c.Request().Context()
-	p, err := h.ProfileService.GetProfileWithTokensFromEDIPI(ctx, edipi)
+	var p model.Profile
+	var err error
+	if claims.CacUID != nil {
+		p, err = h.ProfileService.GetProfileWithTokensForEDIPI(ctx, *claims.CacUID)
+	} else {
+		p, err = h.ProfileService.GetProfileWithTokensForEmail(ctx, claims.Email)
+	}
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "could not locate user profile with information provided")
 	}
 	token, err := h.ProfileService.CreateProfileToken(ctx, p.ID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
 	}
 	return c.JSON(http.StatusCreated, token)
 }
@@ -94,23 +110,26 @@ func (h *ApiHandler) CreateToken(c echo.Context) error {
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /my_tokens/{token_id} [delete]
-//	@Security CacOnly
+//	@Security ClaimsOnly
 func (h *ApiHandler) DeleteToken(c echo.Context) error {
-	// Get ProfileID
-	edipi := c.Get("EDIPI").(int)
+	claims := c.Get("claims").(middleware.TokenClaims)
 	ctx := c.Request().Context()
-	p, err := h.ProfileService.GetProfileWithTokensFromEDIPI(ctx, edipi)
+	var p model.Profile
+	var err error
+	if claims.CacUID != nil {
+		p, err = h.ProfileService.GetProfileWithTokensForEDIPI(ctx, *claims.CacUID)
+	} else {
+		p, err = h.ProfileService.GetProfileWithTokensForEmail(ctx, claims.Email)
+	}
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, message.BadRequest)
 	}
-	// Get Token ID
 	tokenID := c.Param("token_id")
 	if tokenID == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "Bad Token ID")
 	}
-	// Delete Token
 	if err := h.ProfileService.DeleteToken(ctx, p.ID, tokenID); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
 	}
 	return c.JSON(http.StatusOK, make(map[string]interface{}))
 }

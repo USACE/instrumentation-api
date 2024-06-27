@@ -8,12 +8,14 @@ import (
 )
 
 type ProfileService interface {
-	GetProfileWithTokensFromEDIPI(ctx context.Context, edipi int) (model.Profile, error)
-	GetProfileWithTokensFromTokenID(ctx context.Context, tokenID string) (model.Profile, error)
+	GetProfileWithTokensForEDIPI(ctx context.Context, edipi int) (model.Profile, error)
+	GetProfileWithTokensForEmail(ctx context.Context, email string) (model.Profile, error)
+	GetProfileWithTokensForTokenID(ctx context.Context, tokenID string) (model.Profile, error)
 	CreateProfile(ctx context.Context, n model.ProfileInfo) (model.Profile, error)
 	CreateProfileToken(ctx context.Context, profileID uuid.UUID) (model.Token, error)
 	GetTokenInfoByTokenID(ctx context.Context, tokenID string) (model.TokenInfo, error)
-	UpdateSubForEDIPI(ctx context.Context, sub uuid.UUID, edipi int) error
+	UpdateProfileForEDIPI(ctx context.Context, username, email string, edipi int) error
+	UpdateProfileForEmail(ctx context.Context, username, email string) error
 	DeleteToken(ctx context.Context, profileID uuid.UUID, tokenID string) error
 }
 
@@ -26,8 +28,8 @@ func NewProfileService(db *model.Database, q *model.Queries) *profileService {
 	return &profileService{db, q}
 }
 
-func (s profileService) GetProfileWithTokensFromEDIPI(ctx context.Context, edipi int) (model.Profile, error) {
-	p, err := s.GetProfileFromEDIPI(ctx, edipi)
+func (s profileService) GetProfileWithTokensForEDIPI(ctx context.Context, edipi int) (model.Profile, error) {
+	p, err := s.GetProfileForEDIPI(ctx, edipi)
 	if err != nil {
 		return model.Profile{}, err
 	}
@@ -39,9 +41,22 @@ func (s profileService) GetProfileWithTokensFromEDIPI(ctx context.Context, edipi
 	return p, nil
 }
 
-// GetProfileFromTokenID returns a profile given a token ID
-func (s profileService) GetProfileWithTokensFromTokenID(ctx context.Context, tokenID string) (model.Profile, error) {
-	p, err := s.GetProfileFromTokenID(ctx, tokenID)
+func (s profileService) GetProfileWithTokensForEmail(ctx context.Context, email string) (model.Profile, error) {
+	p, err := s.GetProfileForEmail(ctx, email)
+	if err != nil {
+		return model.Profile{}, err
+	}
+	tokens, err := s.GetIssuedTokens(ctx, p.ID)
+	if err != nil {
+		return model.Profile{}, err
+	}
+	p.Tokens = tokens
+	return p, nil
+}
+
+// GetProfileForTokenID returns a profile given a token ID
+func (s profileService) GetProfileWithTokensForTokenID(ctx context.Context, tokenID string) (model.Profile, error) {
+	p, err := s.GetProfileForTokenID(ctx, tokenID)
 	if err != nil {
 		return model.Profile{}, err
 	}
