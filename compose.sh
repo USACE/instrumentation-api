@@ -59,9 +59,9 @@ elif [ "$1" = "test" ]; then
     GOCMD="go test ${REST_ARGS[@]} github.com/USACE/instrumentation-api/api/internal/handler"
 
     if [ "$REPORT" = true ]; then
-        docker-compose run --entrypoint="$GOCMD" api > $(pwd)/test.log
+        docker-compose run -e AWS_SQS_QUEUE_NO_INIT=true --entrypoint="$GOCMD" api > $(pwd)/test.log
     else
-        docker-compose run --entrypoint="$GOCMD" api
+        docker-compose run -e AWS_SQS_QUEUE_NO_INIT=true --entrypoint="$GOCMD" api
     fi
 
     if [ $TEARDOWN = true ]; then
