@@ -5,6 +5,7 @@ on:
     branches: [develop]
     paths:
       - "api/**"
+      - "report/**"
       - ".github/workflows/api-develop.yml"
 
 jobs:
