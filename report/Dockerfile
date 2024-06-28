@@ -46,12 +46,12 @@ RUN ln -s /usr/share/aclocal /usr/local/share/aclocal
 
 COPY chrome/local.conf /etc/fonts/local.conf
 
-# Add Chrome as a user
-RUN mkdir -p /usr/src/app \
-	&& adduser -D chrome \
-	&& chown -R chrome:chrome /usr/src/app
-# Run Chrome as non-privileged
-USER chrome
+RUN addgroup -S pptruser && adduser -S -G pptruser pptruser \
+	&& mkdir -p /home/pptruser/Downloads /usr/src/app \
+	&& chown -R pptruser:pptruser /home/pptruser \
+	&& chown -R pptruser:pptruser /usr/src/app
+
+USER pptruser
 
 ENV CHROME_BIN=/usr/bin/chromium-browser \
 	CHROME_PATH=/usr/lib/chromium/
