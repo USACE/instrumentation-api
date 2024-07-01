@@ -1,9 +1,11 @@
+import util from "util";
+import os from "os";
+console.log('Executing user:\n', util.inspect(os.userInfo()));
+
 import puppeteer, { Page } from "puppeteer-core";
 import { S3Client } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 import createClient from "openapi-fetch";
-import util from "util";
-import os from "os";
 
 import { castleLogoSvg } from "./svgInlineContent";
 import { logoBackground } from "./base64InlineContent";
@@ -90,8 +92,6 @@ async function waitForDOMStable(
 }
 
 export async function handler(event: EventMessageBody): Promise<void> {
-  console.log('Executing user:\n', util.inspect(os.userInfo()));
-
   const s3Client = new S3Client(s3ClientConfig);
 
   let apiKey = MOCK_APP_KEY;
