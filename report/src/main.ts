@@ -51,7 +51,7 @@ const sessionToken = process.env.AWS_SESSION_TOKEN;
 const smBaseUrl = process.env.AWS_SM_BASE_URL;
 const smApiKeyArn = process.env.AWS_SM_API_KEY_ARN;
 const puppeteerExecutablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
-const smMockRequest = process.env.AWS_SM_MOCK_REQUEST;
+const smMockRequest = String(process.env.AWS_SM_MOCK_REQUEST).toLowerCase() === "true";
 
 async function waitForDOMStable(
   page: Page,
