@@ -108,9 +108,18 @@ export async function handler(event: EventMessageBody): Promise<void> {
     is_landscape: isLandscape,
   } = event;
 
+  // these flags are acceptable because we are only using chrome as a renderer for Plotly
+  // no external site data is loaded (sans the internal MIDAS API) via cdn and all packages are bundled
+  // this is needed because lambda cannot load custom security profiles (seccomp) and uses seccomp BPF be default
+  const sandboxFlags = [
+    "--no-sandbox",
+    "--disable-setuid-sandbox",
+    "--no-zygote",
+  ];
+
   const browser = await puppeteer.launch({
     executablePath: puppeteerExecutablePath,
-    args: ["--headless"],
+    args: ["--headless", ...sandboxFlags],
   });
   const page = await browser.newPage();
 
