@@ -1,14 +1,14 @@
 declare global {
   namespace NodeJS {
     interface ProcessEnv {
-      AWS_S3_ENDPOINT: string;
       API_BASE_URL: string;
-      AWS_SM_BASE_URL: string;
-      AWS_SM_API_KEY_ARN: string;
+      AWS_S3_ENDPOINT: string;
       AWS_S3_WRITE_TO_BUCKET: string;
       AWS_S3_WRITE_TO_BUCKET_PREFIX: string;
-      AWS_SESSION_TOKEN: string;
+      AWS_SM_API_KEY_SECRET_ID: string;
+      AWS_SM_ENDPOINT: string;
       AWS_SM_MOCK_REQUEST: string;
+      AWS_SM_REGION: string;
       PUPPETEER_EXECUTABLE_PATH: string;
     }
   }

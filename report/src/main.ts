@@ -1,4 +1,5 @@
 import puppeteer, { Page } from "puppeteer-core";
+import { SecretsManagerClient, GetSecretValueCommand } from "@aws-sdk/client-secrets-manager";
 import { S3Client } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 import createClient from "openapi-fetch";
@@ -8,7 +9,7 @@ import { logoBackground } from "./base64InlineContent";
 import { getIndexHtml, getHeaderTmpl, getFooterTmpl } from "./htmlContent";
 
 import type { UUID } from "crypto";
-import type { GetSecretValueResponse } from "@aws-sdk/client-secrets-manager";
+import type { SecretsManagerClientConfig } from "@aws-sdk/client-secrets-manager";
 import type { S3ClientConfig } from "@aws-sdk/client-s3";
 import type { AwsCredentialIdentity } from "@aws-sdk/types";
 import type { paths, components } from "../generated";
@@ -44,12 +45,15 @@ const s3ClientConfig: S3ClientConfig = {
   forcePathStyle: true,
 };
 
+const smClientConfig: SecretsManagerClientConfig = {
+  endpoint: process.env.AWS_SM_ENDPOINT,
+  region: process.env.AWS_SM_REGION,
+};
+
 const apiBaseUrl = process.env.API_BASE_URL;
 const s3WriteToBucket = process.env.AWS_S3_WRITE_TO_BUCKET;
 const s3WriteToBucketPrefix = process.env.AWS_S3_WRITE_TO_BUCKET_PREFIX;
-const sessionToken = process.env.AWS_SESSION_TOKEN;
-const smBaseUrl = process.env.AWS_SM_BASE_URL;
-const smApiKeyArn = process.env.AWS_SM_API_KEY_ARN;
+const smApiKeySecretId = process.env.AWS_SM_API_KEY_SECRET_ID;
 const puppeteerExecutablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
 const smMockRequest = String(process.env.AWS_SM_MOCK_REQUEST).toLowerCase() === "true";
 
@@ -92,14 +96,10 @@ export async function handler(event: EventMessageBody): Promise<void> {
 
   let apiKey = MOCK_APP_KEY;
   if (!smMockRequest) {
-    const res: GetSecretValueResponse = await fetch(
-      `${smBaseUrl}/secretsmanager/get?secretId=${smApiKeyArn}`,
-      {
-        headers: { [`X-Aws-Parameters-Secrets-Token`]: sessionToken },
-        method: "GET",
-      },
-    ).then((res) => res.json(), console.error);
-    apiKey = res?.SecretString ?? "";
+    const client = new SecretsManagerClient(smClientConfig);
+    const command = new GetSecretValueCommand({ SecretId: smApiKeySecretId });
+    const res = await client.send(command);
+    apiKey = res.SecretString ?? "";
   }
 
   const {
