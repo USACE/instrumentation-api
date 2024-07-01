@@ -11,10 +11,16 @@ COPY . .
 RUN npm run build
 
 FROM ${BASE_IMAGE}
-COPY --from=builder /usr/lib /usr/lib
-COPY --from=builder /usr/local/lib /usr/local/lib
-COPY --from=builder /usr/local/include /usr/local/include
-COPY --from=builder /usr/local/bin /usr/local/bin
+
+RUN addgroup -S pptruser && adduser -S -G pptruser pptruser \
+	&& mkdir -p /home/pptruser/Downloads /usr/src/app \
+	&& chown -R pptruser:pptruser /home/pptruser \
+	&& chown -R pptruser:pptruser /usr/src/app
+
+COPY --from=builder --chown=pptruser /usr/lib /usr/lib
+COPY --from=builder --chown=pptruser /usr/local/lib /usr/local/lib
+COPY --from=builder --chown=pptruser /usr/local/include /usr/local/include
+COPY --from=builder --chown=pptruser /usr/local/bin /usr/local/bin
 
 # Needed for Lambda CMake Backtrace
 RUN apk add --no-cache --update --repository=https://dl-cdn.alpinelinux.org/alpine/v3.16/main/ libexecinfo-dev
@@ -46,11 +52,6 @@ RUN ln -s /usr/share/aclocal /usr/local/share/aclocal
 
 COPY chrome/local.conf /etc/fonts/local.conf
 
-RUN addgroup -S pptruser && adduser -S -G pptruser pptruser \
-	&& mkdir -p /home/pptruser/Downloads /usr/src/app \
-	&& chown -R pptruser:pptruser /home/pptruser \
-	&& chown -R pptruser:pptruser /usr/src/app
-
 USER pptruser
 
 ENV CHROME_BIN=/usr/bin/chromium-browser \
@@ -64,8 +65,8 @@ RUN mkdir -p ~/.aws-lambda-rie \
 	https://github.com/aws/aws-lambda-runtime-interface-emulator/releases/latest/download/aws-lambda-rie \
 	&& chmod +x ~/.aws-lambda-rie/aws-lambda-rie
 
-COPY --from=builder /usr/app/dist/ ./
-COPY --from=builder /usr/app/entry_script.sh ./
+COPY --from=builder --chown=pptruser /usr/app/dist/ ./
+COPY --from=builder --chown=pptruser /usr/app/entry_script.sh ./
 
 ENV PUPPETEER_EXECUTABLE_PATH /usr/bin/chromium-browser
 

@@ -1,7 +1,3 @@
-import util from "util";
-import os from "os";
-console.log('Executing user:\n', util.inspect(os.userInfo()));
-
 import puppeteer, { Page } from "puppeteer-core";
 import { S3Client } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
