@@ -99,7 +99,7 @@ export async function handler(event: EventMessageBody): Promise<void> {
         method: "GET",
       },
     ).then((res) => res.json(), console.error);
-    apiKey = res.SecretString!;
+    apiKey = res?.SecretString ?? "";
   }
 
   const {
