@@ -113,17 +113,18 @@ export async function handler(event: EventMessageBody): Promise<void> {
   // this is needed because lambda cannot load custom security profiles (seccomp) and uses seccomp BPF be default
   // docker also provides a layer of isolation, as this container is run as non-root, least privileged user
   const chromiumArgs = [
-    "--disable-software-rasterizer",
     "--disable-dev-shm-usage",
-    "--single-process",
+    "--disable-setuid-sandbox",
+    "--disable-software-rasterizer",
     "--no-sandbox",
     "--no-zygote",
+    "--single-process",
   ];
 
   const browser = await puppeteer.launch({
     executablePath: puppeteerExecutablePath,
     args: chromiumArgs,
-    headless: true,
+    headless: "shell",
   });
   const page = await browser.newPage();
 
