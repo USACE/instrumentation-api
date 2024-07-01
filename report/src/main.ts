@@ -54,6 +54,7 @@ const apiBaseUrl = process.env.API_BASE_URL;
 const s3WriteToBucket = process.env.AWS_S3_WRITE_TO_BUCKET;
 const s3WriteToBucketPrefix = process.env.AWS_S3_WRITE_TO_BUCKET_PREFIX;
 const smApiKeySecretId = process.env.AWS_SM_API_KEY_SECRET_ID;
+const smKey = process.env.AWS_SM_KEY ?? "";
 const puppeteerExecutablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
 const smMockRequest = String(process.env.AWS_SM_MOCK_REQUEST).toLowerCase() === "true";
 
@@ -99,7 +100,8 @@ export async function handler(event: EventMessageBody): Promise<void> {
     const client = new SecretsManagerClient(smClientConfig);
     const command = new GetSecretValueCommand({ SecretId: smApiKeySecretId });
     const res = await client.send(command);
-    apiKey = res.SecretString ?? "";
+    const resJson = res.SecretString ? JSON.parse(res.SecretString) : undefined;
+    apiKey = resJson[smKey] ?? "";
   }
 
   const {
