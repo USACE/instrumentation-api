@@ -57,11 +57,6 @@ USER pptruser
 ENV CHROME_BIN=/usr/bin/chromium-browser \
 	CHROME_PATH=/usr/lib/chromium/
 
-# these flags are acceptable because we are only using chrome as a renderer for Plotly
-# no external site data is loaded (sans the internal MIDAS API) via cdn and all packages are bundled
-# this is needed because lambda cannot load custom security profiles (seccomp) and uses seccomp BPF be default
-ENV CHROMIUM_FLAGS="--disable-software-rasterizer --disable-dev-shm-usage --single-process --no-sandbox"
-
 RUN mkdir -p ~/.aws-lambda-rie \
 	&& wget -O ~/.aws-lambda-rie/aws-lambda-rie \
 	https://github.com/aws/aws-lambda-runtime-interface-emulator/releases/latest/download/aws-lambda-rie \
