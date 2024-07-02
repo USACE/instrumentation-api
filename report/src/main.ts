@@ -93,6 +93,8 @@ async function waitForDOMStable(
 }
 
 export async function handler(event: EventMessageBody): Promise<void> {
+  console.log("recieved event from queue...", event)
+
   const s3Client = new S3Client(s3ClientConfig);
 
   let apiKey = MOCK_APP_KEY;
