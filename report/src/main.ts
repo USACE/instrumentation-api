@@ -13,6 +13,7 @@ import type { SecretsManagerClientConfig } from "@aws-sdk/client-secrets-manager
 import type { S3ClientConfig } from "@aws-sdk/client-s3";
 import type { AwsCredentialIdentity } from "@aws-sdk/types";
 import type { paths, components } from "../generated";
+import type { SQSEvent } from "aws-lambda";
 
 type ReportDownloadJob = components["schemas"]["ReportDownloadJob"];
 
@@ -92,9 +93,7 @@ async function waitForDOMStable(
   );
 }
 
-export async function handler(event: EventMessageBody): Promise<void> {
-  console.log("recieved event from queue...", event)
-
+export async function handler(event: SQSEvent): Promise<void> {
   const s3Client = new S3Client(s3ClientConfig);
 
   let apiKey = MOCK_APP_KEY;
@@ -105,6 +104,12 @@ export async function handler(event: EventMessageBody): Promise<void> {
     const resJson = res.SecretString ? JSON.parse(res.SecretString) : undefined;
     apiKey = resJson[smKey] ?? "";
   }
+
+  event.Records.forEach(rec => processEvent(JSON.parse(rec.body), s3Client, apiKey));
+}
+
+async function processEvent(event: EventMessageBody, s3Client: S3Client, apiKey: string) {
+  console.log("recieved event from queue", event)
 
   const {
     report_config_id: rcId,
