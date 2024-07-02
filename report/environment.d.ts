@@ -10,6 +10,7 @@ declare global {
       AWS_SM_KEY: string;
       AWS_SM_MOCK_REQUEST: string;
       AWS_SM_REGION: string;
+      CHROME_DUMPIO: string;
       PUPPETEER_EXECUTABLE_PATH: string;
     }
   }

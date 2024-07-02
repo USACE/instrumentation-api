@@ -59,17 +59,17 @@ const smApiKeySecretId = process.env.AWS_SM_API_KEY_SECRET_ID;
 const smKey = process.env.AWS_SM_KEY ?? "";
 const puppeteerExecutablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
 const smMockRequest = String(process.env.AWS_SM_MOCK_REQUEST).toLowerCase() === "true";
+const chromeDumpIO = String(process.env.CHROME_DUMPIO).toLowerCase() === "true";
 
 // these flags are acceptable because we are only using chrome as a renderer for Plotly
 // no external site data is loaded (sans the internal MIDAS API) via cdn and all packages are bundled
 // this is needed because lambda cannot load custom security profiles (seccomp) and uses seccomp BPF be default
 // docker also provides a layer of isolation, as this container is run as non-root, least privileged user
 const chromiumArgs = [
+  "--headless",
   "--disable-dev-shm-usage",
-  "--disable-setuid-sandbox",
   "--disable-software-rasterizer",
-  "--no-sandbox",
-  "--no-zygote",
+  "--disable-gpu",
 ];
 
 let browserPromise: Promise<Browser>;
@@ -78,9 +78,10 @@ async function prepareBrowser() {
   return puppeteer.launch({
     executablePath: puppeteerExecutablePath,
     args: chromiumArgs,
+    dumpio: chromeDumpIO,
     headless: true,
     timeout: WAIT_FOR_MS,
-    dumpio: true,
+    devtools: false,
   });
 }
 
