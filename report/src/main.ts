@@ -1,4 +1,4 @@
-import puppeteer, { Page } from "puppeteer-core";
+import puppeteer, { Page, Browser } from "puppeteer-core";
 import { SecretsManagerClient, GetSecretValueCommand } from "@aws-sdk/client-secrets-manager";
 import { S3Client } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
@@ -60,6 +60,30 @@ const smKey = process.env.AWS_SM_KEY ?? "";
 const puppeteerExecutablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
 const smMockRequest = String(process.env.AWS_SM_MOCK_REQUEST).toLowerCase() === "true";
 
+// these flags are acceptable because we are only using chrome as a renderer for Plotly
+// no external site data is loaded (sans the internal MIDAS API) via cdn and all packages are bundled
+// this is needed because lambda cannot load custom security profiles (seccomp) and uses seccomp BPF be default
+// docker also provides a layer of isolation, as this container is run as non-root, least privileged user
+const chromiumArgs = [
+  "--disable-dev-shm-usage",
+  "--disable-setuid-sandbox",
+  "--disable-software-rasterizer",
+  "--no-sandbox",
+  "--no-zygote",
+];
+
+let browserPromise: Promise<Browser>;
+
+async function prepareBrowser() {
+  return puppeteer.launch({
+    executablePath: puppeteerExecutablePath,
+    args: chromiumArgs,
+    headless: true,
+    timeout: WAIT_FOR_MS,
+    dumpio: true,
+  });
+}
+
 async function waitForDOMStable(
   page: Page,
   options = { timeout: 30_000, idleTime: 2000 },
@@ -120,25 +144,11 @@ async function processEvent(event: EventMessageBody, s3Client: S3Client, apiKey:
     is_landscape: isLandscape,
   } = event;
 
-  // these flags are acceptable because we are only using chrome as a renderer for Plotly
-  // no external site data is loaded (sans the internal MIDAS API) via cdn and all packages are bundled
-  // this is needed because lambda cannot load custom security profiles (seccomp) and uses seccomp BPF be default
-  // docker also provides a layer of isolation, as this container is run as non-root, least privileged user
-  const chromiumArgs = [
-    "--disable-dev-shm-usage",
-    "--disable-setuid-sandbox",
-    "--disable-software-rasterizer",
-    "--no-sandbox",
-    "--no-zygote",
-  ];
+  if (!browserPromise) {
+    browserPromise = prepareBrowser();
+  }
+  const browser = await browserPromise;
 
-  const browser = await puppeteer.launch({
-    executablePath: puppeteerExecutablePath,
-    args: chromiumArgs,
-    headless: true,
-    timeout: WAIT_FOR_MS,
-    dumpio: true,
-  });
   const page = await browser.newPage();
 
   // bubble up events from headless browser
