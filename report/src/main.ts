@@ -137,6 +137,7 @@ async function processEvent(event: EventMessageBody, s3Client: S3Client, apiKey:
     args: chromiumArgs,
     headless: true,
     timeout: 0,
+    dumpio: true,
   });
   const page = await browser.newPage();
 
@@ -181,6 +182,7 @@ async function processEvent(event: EventMessageBody, s3Client: S3Client, apiKey:
     headerTemplate: getHeaderTmpl(logoBackground),
     footerTemplate: getFooterTmpl(castleLogoSvg, districtName, projectName),
     preferCSSPageSize: true,
+    timeout: 0,
   });
   let statusCode: number | undefined;
 
@@ -190,6 +192,7 @@ async function processEvent(event: EventMessageBody, s3Client: S3Client, apiKey:
   await updateJob(apiKey, jobId, rcId, statusCode, fileKey);
 
   await browser.close();
+  console.log("completed job", jobId); 
 }
 
 async function upload(
