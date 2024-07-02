@@ -61,7 +61,7 @@ const smMockRequest = String(process.env.AWS_SM_MOCK_REQUEST).toLowerCase() === 
 
 async function waitForDOMStable(
   page: Page,
-  options = { timeout: 30000, idleTime: 2000 },
+  options = { timeout: 30_000, idleTime: 2000 },
 ): Promise<void> {
   await page.evaluate(
     ({ timeout, idleTime }) =>
@@ -173,7 +173,7 @@ async function processEvent(event: EventMessageBody, s3Client: S3Client, apiKey:
 
   // wait for all content to load before exporting to PDF
   await page.waitForNetworkIdle();
-  await waitForDOMStable(page);
+  await waitForDOMStable(page, { timeout: 60_000 * 5, idleTime: 2000 });
 
   const buf = await page.pdf({
     format: "letter",
