@@ -27,6 +27,7 @@ interface EventMessageBody {
 // s3 uploader response if possible, in case it ever changes
 const FILE_EXPIRY_DURATION_HOURS = 24;
 const MOCK_APP_KEY = "appkey";
+const WAIT_FOR_MS = 60_000 * 5 // 5 minutes
 
 const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
 const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
@@ -136,7 +137,7 @@ async function processEvent(event: EventMessageBody, s3Client: S3Client, apiKey:
     executablePath: puppeteerExecutablePath,
     args: chromiumArgs,
     headless: true,
-    timeout: 0,
+    timeout: WAIT_FOR_MS,
     dumpio: true,
   });
   const page = await browser.newPage();
@@ -172,8 +173,8 @@ async function processEvent(event: EventMessageBody, s3Client: S3Client, apiKey:
   );
 
   // wait for all content to load before exporting to PDF
-  await page.waitForNetworkIdle();
-  await waitForDOMStable(page, { timeout: 60_000 * 5, idleTime: 2000 });
+  await page.waitForNetworkIdle({ timeout: WAIT_FOR_MS });
+  await waitForDOMStable(page, { timeout: WAIT_FOR_MS, idleTime: 2000 });
 
   const buf = await page.pdf({
     format: "letter",
@@ -182,7 +183,7 @@ async function processEvent(event: EventMessageBody, s3Client: S3Client, apiKey:
     headerTemplate: getHeaderTmpl(logoBackground),
     footerTemplate: getFooterTmpl(castleLogoSvg, districtName, projectName),
     preferCSSPageSize: true,
-    timeout: 0,
+    timeout: WAIT_FOR_MS,
   });
   let statusCode: number | undefined;
 
