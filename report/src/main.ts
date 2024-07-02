@@ -135,7 +135,7 @@ async function processEvent(event: EventMessageBody, s3Client: S3Client, apiKey:
   const browser = await puppeteer.launch({
     executablePath: puppeteerExecutablePath,
     args: chromiumArgs,
-    headless: "shell",
+    headless: true,
     timeout: 0,
   });
   const page = await browser.newPage();
