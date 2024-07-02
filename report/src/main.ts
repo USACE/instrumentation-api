@@ -130,7 +130,6 @@ async function processEvent(event: EventMessageBody, s3Client: S3Client, apiKey:
     "--disable-software-rasterizer",
     "--no-sandbox",
     "--no-zygote",
-    "--single-process",
   ];
 
   const browser = await puppeteer.launch({
