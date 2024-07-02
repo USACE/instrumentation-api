@@ -105,7 +105,9 @@ export async function handler(event: SQSEvent): Promise<void> {
     apiKey = resJson[smKey] ?? "";
   }
 
-  event.Records.forEach(rec => processEvent(JSON.parse(rec.body), s3Client, apiKey));
+  for (const rec of event.Records) {
+    await processEvent(JSON.parse(rec.body), s3Client, apiKey);
+  }
 }
 
 async function processEvent(event: EventMessageBody, s3Client: S3Client, apiKey: string) {
