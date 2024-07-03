@@ -2,7 +2,10 @@ import util from "util";
 import os from "os";
 
 import puppeteer, { Page, Browser } from "puppeteer-core";
-import { SecretsManagerClient, GetSecretValueCommand } from "@aws-sdk/client-secrets-manager";
+import {
+  SecretsManagerClient,
+  GetSecretValueCommand,
+} from "@aws-sdk/client-secrets-manager";
 import { S3Client } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 import createClient from "openapi-fetch";
@@ -30,7 +33,7 @@ interface EventMessageBody {
 // s3 uploader response if possible, in case it ever changes
 const FILE_EXPIRY_DURATION_HOURS = 24;
 const MOCK_APP_KEY = "appkey";
-const WAIT_FOR_MS = 60_000 * 5 // 5 minutes
+const WAIT_FOR_MS = 60_000 * 5; // 5 minutes
 
 const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
 const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
@@ -46,9 +49,12 @@ if (accessKeyId && secretAccessKey) {
 const s3ClientConfig: S3ClientConfig = {
   endpoint: process.env.AWS_S3_ENDPOINT,
   region: process.env.AWS_S3_REGION,
-  credentials,
   forcePathStyle: true,
 };
+
+if (credentials) {
+  s3ClientConfig.credentials = credentials;
+}
 
 const smClientConfig: SecretsManagerClientConfig = {
   endpoint: process.env.AWS_SM_ENDPOINT,
@@ -61,19 +67,28 @@ const s3WriteToBucketPrefix = process.env.AWS_S3_WRITE_TO_BUCKET_PREFIX;
 const smApiKeySecretId = process.env.AWS_SM_API_KEY_SECRET_ID;
 const smKey = process.env.AWS_SM_KEY ?? "";
 const puppeteerExecutablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
-const smMockRequest = String(process.env.AWS_SM_MOCK_REQUEST).toLowerCase() === "true";
+const smMockRequest =
+  String(process.env.AWS_SM_MOCK_REQUEST).toLowerCase() === "true";
 const chromeDumpIO = String(process.env.CHROME_DUMPIO).toLowerCase() === "true";
 
-type ProcessEventArgs = { event: EventMessageBody, s3Client: S3Client, apiKey: string }
+type ProcessEventArgs = {
+  event: EventMessageBody;
+  s3Client: S3Client;
+  apiKey: string;
+};
 
-type retryFunc<T> = (args: T) => Promise<boolean>
+type retryFunc<T> = (args: T) => Promise<boolean>;
 
-async function retry(func: retryFunc<ProcessEventArgs>, args: ProcessEventArgs, retries: number): Promise<boolean> {
+async function retry(
+  func: retryFunc<ProcessEventArgs>,
+  args: ProcessEventArgs,
+  retries: number,
+): Promise<boolean> {
   for (let i = 0; i < retries; ++i) {
     if (await func(args)) {
       return true;
     }
-    console.log("retrying...")
+    console.log("retrying...");
     await sleep(1000);
   }
   return false;
@@ -93,17 +108,17 @@ const chromiumArgs = [
   "--headless",
   "--disable-dev-shm-usage",
   "--disable-software-rasterizer",
-  '--disable-infobars',
-  '--no-sandbox',
-  '--disable-setuid-sandbox',
-  '--disable-gpu=False',
-  '--enable-webgl',
-  '--single-process',
-  '--user-data-dir=/tmp/user-data',
-  '--data-path=/tmp/data-path',
-  '--homedir=/tmp',
-  '--disk-cache-dir=/tmp/cache-dir',
-  '--database=/tmp/database',
+  "--disable-infobars",
+  "--no-sandbox",
+  "--disable-setuid-sandbox",
+  "--disable-gpu=False",
+  "--enable-webgl",
+  "--single-process",
+  "--user-data-dir=/tmp/user-data",
+  "--data-path=/tmp/data-path",
+  "--homedir=/tmp",
+  "--disk-cache-dir=/tmp/cache-dir",
+  "--database=/tmp/database",
 ];
 
 let browserPromise: Promise<Browser>;
@@ -119,7 +134,7 @@ async function prepareBrowser() {
     protocolTimeout: 20_000,
     ignoreHTTPSErrors: true,
     defaultViewport: null,
-    ignoreDefaultArgs: ['--enable-automation'],
+    ignoreDefaultArgs: ["--enable-automation"],
   });
 }
 
@@ -158,7 +173,7 @@ async function waitForDOMStable(
 }
 
 export async function handler(event: SQSEvent): Promise<void> {
-  console.log('Executing user:\n', util.inspect(os.userInfo()));
+  console.log("Executing user:\n", util.inspect(os.userInfo()));
   const s3Client = new S3Client(s3ClientConfig);
 
   let apiKey = MOCK_APP_KEY;
@@ -171,15 +186,18 @@ export async function handler(event: SQSEvent): Promise<void> {
   }
 
   for (const rec of event.Records) {
-    await retry(processEvent, { event: JSON.parse(rec.body), s3Client, apiKey }, 5);
+    await retry(
+      processEvent,
+      { event: JSON.parse(rec.body), s3Client, apiKey },
+      5,
+    );
   }
 }
-
 
 async function processEvent(args: ProcessEventArgs): Promise<boolean> {
   const { event, s3Client, apiKey } = args;
 
-  console.log("recieved event from queue", event)
+  console.log("recieved event from queue", event);
 
   const {
     report_config_id: rcId,
@@ -248,14 +266,13 @@ async function processEvent(args: ProcessEventArgs): Promise<boolean> {
     await updateJob(apiKey, jobId, rcId, statusCode, fileKey);
 
     await browser.close();
-    console.log("completed job", jobId); 
+    console.log("completed job", jobId);
     return true;
-
   } catch (err) {
-    console.error("error starting chromium...", err)
+    console.error("error during job...", err);
     if (browser?.connected) {
-        console.log("closing browser...")
-        await browser.close();
+      console.log("closing browser...");
+      await browser.close();
     }
     return false;
   }
@@ -335,6 +352,5 @@ async function updateJob(
   if (error) {
     throw new Error(JSON.stringify(error));
   }
-
   console.log("SUCCESS", data);
 }
