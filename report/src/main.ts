@@ -1,3 +1,6 @@
+import util from "util";
+import os from "os";
+
 import puppeteer, { Page, Browser } from "puppeteer-core";
 import { SecretsManagerClient, GetSecretValueCommand } from "@aws-sdk/client-secrets-manager";
 import { S3Client } from "@aws-sdk/client-s3";
@@ -119,6 +122,7 @@ async function waitForDOMStable(
 }
 
 export async function handler(event: SQSEvent): Promise<void> {
+  console.log('Executing user:\n', util.inspect(os.userInfo()));
   const s3Client = new S3Client(s3ClientConfig);
 
   let apiKey = MOCK_APP_KEY;
