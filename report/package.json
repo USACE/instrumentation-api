@@ -15,7 +15,7 @@
     "@aws-sdk/lib-storage": "^3.556.0",
     "openapi-fetch": "^0.9.6",
     "plotly.js-dist-min": "2.31.1",
-    "puppeteer-core": "^22.12.1"
+    "puppeteer-core": "22.7.1"
   },
   "devDependencies": {
     "@aws-sdk/client-secrets-manager": "^3.606.0",

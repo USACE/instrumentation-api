@@ -1,11 +1,8 @@
 package service
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
-	"net/http"
 
 	"github.com/USACE/instrumentation-api/api/internal/cloud"
 	"github.com/USACE/instrumentation-api/api/internal/model"
@@ -137,22 +134,10 @@ func (s reportConfigService) CreateReportDownloadJob(ctx context.Context, rcID, 
 	}
 
 	if s.mockQueue {
-		if err := mockInvokeLocalLambda("http://report:8080/2015-03-31/functions/function/invocations", b); err != nil {
+		if _, err := s.pubsub.MockPublishMessage(ctx, b); err != nil {
 			return model.ReportDownloadJob{}, err
 		}
 	}
 
 	return j, nil
-}
-
-func mockInvokeLocalLambda(invokeUrl string, message []byte) error {
-	r := bytes.NewReader(message)
-	res, err := http.Post(invokeUrl, "application/json", r)
-	if err != nil {
-		return err
-	}
-	if res.StatusCode != 200 {
-		return errors.New("unable to invoke locally mocked lambda")
-	}
-	return nil
 }

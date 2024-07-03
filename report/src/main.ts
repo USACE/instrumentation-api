@@ -69,7 +69,6 @@ const chromiumArgs = [
   "--headless",
   "--disable-dev-shm-usage",
   "--disable-software-rasterizer",
-  "--disable-gpu",
 ];
 
 let browserPromise: Promise<Browser>;
