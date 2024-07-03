@@ -64,6 +64,27 @@ const puppeteerExecutablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
 const smMockRequest = String(process.env.AWS_SM_MOCK_REQUEST).toLowerCase() === "true";
 const chromeDumpIO = String(process.env.CHROME_DUMPIO).toLowerCase() === "true";
 
+type ProcessEventArgs = { event: EventMessageBody, s3Client: S3Client, apiKey: string }
+
+type retryFunc<T> = (args: T) => Promise<boolean>
+
+async function retry(func: retryFunc<ProcessEventArgs>, args: ProcessEventArgs, retries: number): Promise<boolean> {
+  for (let i = 0; i < retries; ++i) {
+    if (await func(args)) {
+      return true;
+    }
+    console.log("retrying...")
+    await sleep(1000);
+  }
+  return false;
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
 // these flags are acceptable because we are only using chrome as a renderer for Plotly
 // no external site data is loaded (sans the internal MIDAS API) via cdn and all packages are bundled
 // this is needed because lambda cannot load custom security profiles (seccomp) and uses seccomp BPF be default
@@ -72,60 +93,17 @@ const chromiumArgs = [
   "--headless",
   "--disable-dev-shm-usage",
   "--disable-software-rasterizer",
-
-  "--allow-pre-commit-input",
-  "--disable-background-networking",
-  "--disable-background-timer-throttling",
-  "--disable-backgrounding-occluded-windows",
-  "--disable-breakpad",
-  "--disable-client-side-phishing-detection",
-  "--disable-component-extensions-with-background-pages",
-  "--disable-component-update",
-  "--disable-default-apps",
-  "--disable-dev-shm-usage",
-  "--disable-extensions",
-  "--disable-hang-monitor",
-  "--disable-ipc-flooding-protection",
-  "--disable-popup-blocking",
-  "--disable-prompt-on-repost",
-  "--disable-renderer-backgrounding",
-  "--disable-sync",
-  "--enable-automation",
-  "--enable-blink-features=IdleDetection",
-  "--export-tagged-pdf",
-  "--force-color-profile=srgb",
-  "--metrics-recording-only",
-  "--no-first-run",
-  "--password-store=basic",
-  "--use-mock-keychain",
-
-  "--allow-running-insecure-content",
-  "--disable-setuid-sandbox",
-  "--disable-site-isolation-trials",
-  "--disable-web-security",
-  "--no-sandbox",
-  "--no-zygote",
-
-  "--disable-features=Translate,BackForwardCache,AcceptCHFrame,MediaRouter,OptimizationHints,AudioServiceOutOfProcess,IsolateOrigins,site-per-process",
-  "--enable-features=NetworkServiceInProcess2,SharedArrayBuffer",
-
-  "--disable-domain-reliability",
-  "--disable-print-preview",
-  "--disable-speech-api",
-  "--disk-cache-size=33554432",
-  "--mute-audio",
-  "--no-default-browser-check",
-  "--no-pings",
-  "--single-process",
-  "--font-render-hinting=none",
-
-  "--hide-scrollbars",
-  "--ignore-gpu-blocklist",
-  "--in-process-gpu",
-  "--window-size=1920,1080",
-
-  "--use-gl=angle",
-  "--use-angle=swiftshader",
+  '--disable-infobars',
+  '--no-sandbox',
+  '--disable-setuid-sandbox',
+  '--disable-gpu=False',
+  '--enable-webgl',
+  '--single-process',
+  '--user-data-dir=/tmp/user-data',
+  '--data-path=/tmp/data-path',
+  '--homedir=/tmp',
+  '--disk-cache-dir=/tmp/cache-dir',
+  '--database=/tmp/database',
 ];
 
 let browserPromise: Promise<Browser>;
@@ -138,6 +116,10 @@ async function prepareBrowser() {
     headless: true,
     timeout: WAIT_FOR_MS,
     devtools: false,
+    protocolTimeout: 20_000,
+    ignoreHTTPSErrors: true,
+    defaultViewport: null,
+    ignoreDefaultArgs: ['--enable-automation'],
   });
 }
 
@@ -189,11 +171,14 @@ export async function handler(event: SQSEvent): Promise<void> {
   }
 
   for (const rec of event.Records) {
-    await processEvent(JSON.parse(rec.body), s3Client, apiKey);
+    await retry(processEvent, { event: JSON.parse(rec.body), s3Client, apiKey }, 5);
   }
 }
 
-async function processEvent(event: EventMessageBody, s3Client: S3Client, apiKey: string) {
+
+async function processEvent(args: ProcessEventArgs): Promise<boolean> {
+  const { event, s3Client, apiKey } = args;
+
   console.log("recieved event from queue", event)
 
   const {
@@ -202,65 +187,78 @@ async function processEvent(event: EventMessageBody, s3Client: S3Client, apiKey:
     is_landscape: isLandscape,
   } = event;
 
-  if (!browserPromise) {
-    browserPromise = prepareBrowser();
+  let browser: Browser | null = null;
+  let page: Page | null = null;
+
+  try {
+    if (!browserPromise) {
+      browserPromise = prepareBrowser();
+    }
+    browser = await browserPromise;
+    page = await browser.newPage();
+
+    // bubble up events from headless browser
+    page.on("console", (message) => console.log(`Console: ${message.text()}`));
+    page.on("pageerror", ({ message }) => console.log(`Error: ${message}`));
+    page.on("requestfailed", (request) =>
+      console.log(
+        `Request failed: ${request.failure()?.errorText} ${request.url()}`,
+      ),
+    );
+
+    await page.setContent(
+      getIndexHtml(event.is_landscape ? "landscape" : "portrait"),
+    );
+    // This is supposed to fix the problem of too many WebGL contexts
+    // in the case where a page has many different plots but there are some
+    // errors that the WebGLContext elements are not supported.
+    // TODO: check that WebGL 1 is enabled on the apk installation of chrome
+    //
+    // await page.addScriptTag({ url: "https://unpkg.com/virtual-webgl@1.0.6/src/virtual-webgl.js" });
+    await page.addScriptTag({ path: "./report.mjs" });
+
+    const { districtName, projectName } = await page.evaluate(
+      async (id, url, apikey, isLandscape) => {
+        return await window.processReport(id, url, apikey, isLandscape);
+      },
+      rcId,
+      apiBaseUrl,
+      apiKey,
+      isLandscape,
+    );
+
+    // wait for all content to load before exporting to PDF
+    await page.waitForNetworkIdle({ timeout: WAIT_FOR_MS });
+    await waitForDOMStable(page, { timeout: WAIT_FOR_MS, idleTime: 2000 });
+
+    const buf = await page.pdf({
+      format: "letter",
+      scale: 1,
+      displayHeaderFooter: true,
+      headerTemplate: getHeaderTmpl(logoBackground),
+      footerTemplate: getFooterTmpl(castleLogoSvg, districtName, projectName),
+      preferCSSPageSize: true,
+      timeout: WAIT_FOR_MS,
+    });
+    let statusCode: number | undefined;
+
+    const fileKey = `${s3WriteToBucketPrefix}/${rcId}/${jobId}/${new Date().toISOString().split("T")[0]}_midas_report.pdf`;
+
+    statusCode = await upload(s3Client, buf, fileKey);
+    await updateJob(apiKey, jobId, rcId, statusCode, fileKey);
+
+    await browser.close();
+    console.log("completed job", jobId); 
+    return true;
+
+  } catch (err) {
+    console.error("error starting chromium...", err)
+    if (browser?.connected) {
+        console.log("closing browser...")
+        await browser.close();
+    }
+    return false;
   }
-  const browser = await browserPromise;
-
-  const page = await browser.newPage();
-
-  // bubble up events from headless browser
-  page.on("console", (message) => console.log(`Console: ${message.text()}`));
-  page.on("pageerror", ({ message }) => console.log(`Error: ${message}`));
-  page.on("requestfailed", (request) =>
-    console.log(
-      `Request failed: ${request.failure()?.errorText} ${request.url()}`,
-    ),
-  );
-
-  await page.setContent(
-    getIndexHtml(event.is_landscape ? "landscape" : "portrait"),
-  );
-  // This is supposed to fix the problem of too many WebGL contexts
-  // in the case where a page has many different plots but there are some
-  // errors that the WebGLContext elements are not supported.
-  // TODO: check that WebGL 1 is enabled on the apk installation of chrome
-  //
-  // await page.addScriptTag({ url: "https://unpkg.com/virtual-webgl@1.0.6/src/virtual-webgl.js" });
-  await page.addScriptTag({ path: "./report.mjs" });
-
-  const { districtName, projectName } = await page.evaluate(
-    async (id, url, apikey, isLandscape) => {
-      return await window.processReport(id, url, apikey, isLandscape);
-    },
-    rcId,
-    apiBaseUrl,
-    apiKey,
-    isLandscape,
-  );
-
-  // wait for all content to load before exporting to PDF
-  await page.waitForNetworkIdle({ timeout: WAIT_FOR_MS });
-  await waitForDOMStable(page, { timeout: WAIT_FOR_MS, idleTime: 2000 });
-
-  const buf = await page.pdf({
-    format: "letter",
-    scale: 1,
-    displayHeaderFooter: true,
-    headerTemplate: getHeaderTmpl(logoBackground),
-    footerTemplate: getFooterTmpl(castleLogoSvg, districtName, projectName),
-    preferCSSPageSize: true,
-    timeout: WAIT_FOR_MS,
-  });
-  let statusCode: number | undefined;
-
-  const fileKey = `${s3WriteToBucketPrefix}/${rcId}/${jobId}/${new Date().toISOString().split("T")[0]}_midas_report.pdf`;
-
-  statusCode = await upload(s3Client, buf, fileKey);
-  await updateJob(apiKey, jobId, rcId, statusCode, fileKey);
-
-  await browser.close();
-  console.log("completed job", jobId); 
 }
 
 async function upload(
