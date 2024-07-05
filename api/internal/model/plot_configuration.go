@@ -10,6 +10,13 @@ import (
 	"github.com/google/uuid"
 )
 
+const (
+	ScatterLinePlotType = "scatter-line"
+	ProfilePlotType     = "profile"
+	ContourPlotType     = "contour"
+	BullseyePlotType    = "bullseye"
+)
+
 // PlotConfig holds information for entity PlotConfig
 type PlotConfig struct {
 	ID            uuid.UUID               `json:"id"`
@@ -32,6 +39,8 @@ type PlotConfigSettings struct {
 	AutoRange        bool   `json:"auto_range" db:"auto_range"`
 	DateRange        string `json:"date_range" db:"date_range"`
 	Threshold        int    `json:"threshold" db:"threshold"`
+	PlotType         string `json:"plot_type" db:"plot_type"`
+	PlotTypeOptions  PlotTypeOptioner
 	// TODO
 	// AlertConfigIDs []string
 }
@@ -76,6 +85,34 @@ type PlotConfigCustomShape struct {
 	DataPoint           float32   `json:"data_point"`
 	Color               string    `json:"color"`
 }
+
+type PlotTypeOptioner interface {
+	Option()
+}
+
+type PlotBullseyeConfig struct {
+	XAxisTimeseriesID uuid.UUID `json:"x_axis_timeseries_id" db:"x_axis_timeseries_id"`
+	YAxisTimeseriesID uuid.UUID `json:"y_axis_timeseries_id" db:"y_axis_timeseries_id"`
+}
+
+func (p PlotBullseyeConfig) Option()
+
+type PlotContourConfig struct {
+	TimeseiresIDs     dbSlice[uuid.UUID] `json:"timeseries_ids" db:"timeseries_ids"`
+	Date              time.Time          `json:"date" db:"date"`
+	LocfBackfill      string             `json:"locf_backfill" db:"locf_backfill"`
+	GradientSmoothing bool               `json:"gradient_smoothing" db:"gradient_smoothing"`
+	ContourSmoothing  bool               `json:"contour_smoothing" db:"contour_smoothing"`
+	ShowLabels        bool               `json:"show_labels" db:"show_labels"`
+}
+
+func (p PlotContourConfig) Option()
+
+type PlotProfileConfig struct {
+	InstrumentIDs dbSlice[uuid.UUID] `json:"instrument_ids" db:"instrument_ids"`
+}
+
+func (p PlotProfileConfig) Option()
 
 // DateRangeTimeWindow creates a TimeWindow from a date range string.
 //
@@ -256,12 +293,12 @@ func (q *Queries) DeleteAllPlotConfigCustomShapes(ctx context.Context, pcID uuid
 
 // PlotConfigSettings
 const createPlotConfigSettings = `
-	INSERT INTO plot_configuration_settings (id, show_masked, show_nonvalidated, show_comments, auto_range, date_range, threshold, yaxis_title, secondary_axis_title) 
-	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+	INSERT INTO plot_configuration_settings (id, show_masked, show_nonvalidated, show_comments, auto_range, date_range, threshold, yaxis_title, secondary_axis_title, plot_type) 
+	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 `
 
 func (q *Queries) CreatePlotConfigSettings(ctx context.Context, pc PlotConfig) error {
-	_, err := q.db.ExecContext(ctx, createPlotConfigSettings, pc.ID, pc.ShowMasked, pc.ShowNonValidated, pc.ShowComments, pc.AutoRange, pc.DateRange, pc.Threshold, pc.Display.Layout.YAxisTitle, pc.Display.Layout.SecondaryAxisTitle)
+	_, err := q.db.ExecContext(ctx, createPlotConfigSettings, pc.ID, pc.ShowMasked, pc.ShowNonValidated, pc.ShowComments, pc.AutoRange, pc.DateRange, pc.Threshold, pc.Display.Layout.YAxisTitle, pc.Display.Layout.SecondaryAxisTitle, pc.PlotType)
 	return err
 }
 
@@ -271,5 +308,69 @@ const deletePlotConfigSettings = `
 
 func (q *Queries) DeletePlotConfigSettings(ctx context.Context, plotConfigID uuid.UUID) error {
 	_, err := q.db.ExecContext(ctx, deletePlotConfigSettings, plotConfigID)
+	return err
+}
+
+const createPlotBullseyeConfig = `
+	INSERT INTO plot_bullseye_config (plot_config_id, x_axis_timeseries_id, y_axis_timeseries_id) VALUES ($1, $2, $3)
+`
+
+func (q *Queries) CreatePlotBullseyeConfig(ctx context.Context, plotConfigID uuid.UUID, cfg PlotBullseyeConfig) error {
+	_, err := q.db.ExecContext(ctx, createPlotBullseyeConfig, plotConfigID, cfg.XAxisTimeseriesID, cfg.YAxisTimeseriesID)
+	return err
+}
+
+const deletePlotBullseyeConfig = `
+	DELETE FROM plot_bullseye_config WHERE plog_config_id = $1
+`
+
+func (q *Queries) DeletePlotBullseyeConfig(ctx context.Context, plotConfigID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deletePlotBullseyeConfig, plotConfigID)
+	return err
+}
+
+const createPlotContourConfig = `
+	INSERT INTO plot_contour_config (plot_config_id, date, locf_backfill, gradient_smoothing, contour_smoothing, show_labels) 
+	VALUES ($1, $2, $3, $4, $5, $6)
+`
+
+func (q *Queries) CreatePlotContourConfig(ctx context.Context, plotConfigID uuid.UUID, cfg PlotContourConfig) error {
+	_, err := q.db.ExecContext(ctx, createPlotContourConfig, plotConfigID, cfg.Date, cfg.LocfBackfill, cfg.GradientSmoothing, cfg.ContourSmoothing, cfg.ShowLabels)
+	return err
+}
+
+const deletePlotContourConfig = `
+	DELETE FROM plot_contour_config WHERE plog_config_id = $1
+`
+
+func (q *Queries) DeletePlotContourConfig(ctx context.Context, plotConfigID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deletePlotContourConfig, plotConfigID)
+	return err
+}
+
+const createPlotContourConfigTimeseries = `
+	INSERT INTO plot_contour_config_timeseries (plot_config_id, timeseries_id) VALUES ($1, $2)
+`
+
+func (q *Queries) CreatePlotContourConfigTimeseries(ctx context.Context, plotConfigID, timeseriesID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, createPlotContourConfigTimeseries, plotConfigID, timeseriesID)
+	return err
+}
+
+const deletePlotContourConfigTimeseries = `
+	DELETE FROM plot_contour_config_timeseries WHERE plog_config_id = $1 AND timeseries_id = $2
+`
+
+func (q *Queries) DeletePlotContourConfigTimeseries(ctx context.Context, plotConfigID, timeseriesID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deletePlotContourConfigTimeseries, plotConfigID, timeseriesID)
+	return err
+}
+
+const createPlotProfileConfig = `
+	INSERT INTO plot_profile_config (plot_config_id, instrument_id) VALUES ($1, $2)
+`
+
+func (q *Queries) CreatePlotProfileConfig(ctx context.Context, plotConfigID, instrumentID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, createPlotProfileConfig, plotConfigID, instrumentID)
 	return err
 }

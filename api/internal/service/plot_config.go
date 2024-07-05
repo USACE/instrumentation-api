@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -47,14 +48,46 @@ func (s plotConfigService) CreatePlotConfig(ctx context.Context, pc model.PlotCo
 		return a, err
 	}
 
+	// TODO create the plot-type-specfic config
+	switch pc.PlotType {
+	case model.BullseyePlotType:
+		cfg, ok := pc.PlotTypeOptions.(model.PlotBullseyeConfig)
+		if !ok {
+			return a, errors.New("could not convert plot_type_options to bullseye plot config")
+		}
+		if err := qtx.CreatePlotBullseyeConfig(ctx, pc.ID, cfg); err != nil {
+			return a, err
+		}
+	case model.ContourPlotType:
+		cfg, ok := pc.PlotTypeOptions.(model.PlotContourConfig)
+		if !ok {
+			return a, errors.New("could not convert plot_type_options to contour plot config")
+		}
+		if err := qtx.CreatePlotContourConfig(ctx, pc.ID, cfg); err != nil {
+			return a, err
+		}
+	case model.ProfilePlotType:
+		_, ok := pc.PlotTypeOptions.(model.PlotProfileConfig)
+		if !ok {
+			return a, errors.New("could not convert plot_type_options to profile plot config")
+		}
+		// TODO create profile plot config (instrument ids)
+	case model.ScatterLinePlotType:
+		_, ok := pc.PlotTypeOptions.(model.PlotBullseyeConfig)
+		if !ok {
+			return a, errors.New("could not convert plot_type_options to scatter-line plot config")
+		}
+		// TODO create scatter-line plot config (currently the default)
+	default:
+		return a, errors.New("plot type not implemented")
+	}
+
 	if err := validateCreateTraces(ctx, qtx, pc.ID, pc.Display.Traces); err != nil {
 		return pc, err
 	}
-
 	if err := validateCreateCustomShapes(ctx, qtx, pc.ID, pc.Display.Layout.CustomShapes); err != nil {
 		return pc, err
 	}
-
 	pcNew, err := qtx.GetPlotConfig(ctx, pcID)
 	if err != nil {
 		return a, err

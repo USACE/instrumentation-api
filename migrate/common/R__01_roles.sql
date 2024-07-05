@@ -198,37 +198,7 @@ GRANT instrumentation_reader TO instrumentation_user;
 GRANT instrumentation_writer TO instrumentation_user;
 
 -- Drop all views to be recreated
-DROP VIEW IF EXISTS v_alert CASCADE;
-DROP VIEW IF EXISTS v_alert_check_evaluation_submittal CASCADE;
-DROP VIEW IF EXISTS v_alert_check_measurement_submittal CASCADE;
-DROP VIEW IF EXISTS v_alert_config CASCADE;
-DROP VIEW IF EXISTS v_aware_platform_parameter_enabled CASCADE;
-DROP VIEW IF EXISTS v_datalogger CASCADE;
-DROP VIEW IF EXISTS v_datalogger_equivalency_table CASCADE;
-DROP VIEW IF EXISTS v_datalogger_hash CASCADE;
-DROP VIEW IF EXISTS v_datalogger_preview CASCADE;
-DROP VIEW IF EXISTS v_district CASCADE;
-DROP VIEW IF EXISTS v_district_rollup CASCADE;
-DROP VIEW IF EXISTS v_domain CASCADE;
-DROP VIEW IF EXISTS v_domain_group CASCADE;
-DROP VIEW IF EXISTS v_email_autocomplete CASCADE;
-DROP VIEW IF EXISTS v_evaluation CASCADE;
-DROP VIEW IF EXISTS v_instrument CASCADE;
-DROP VIEW IF EXISTS v_instrument_group CASCADE;
-DROP VIEW IF EXISTS v_instrument_telemetry CASCADE;
-DROP VIEW IF EXISTS v_ipi_measurement CASCADE;
-DROP VIEW IF EXISTS v_ipi_segment CASCADE;
-DROP VIEW IF EXISTS v_plot_configuration CASCADE;
-DROP VIEW IF EXISTS v_profile CASCADE;
-DROP VIEW IF EXISTS v_profile_project_roles CASCADE;
-DROP VIEW IF EXISTS v_project CASCADE;
-DROP VIEW IF EXISTS v_saa_measurement CASCADE;
-DROP VIEW IF EXISTS v_saa_segment CASCADE;
-DROP VIEW IF EXISTS v_submittal CASCADE;
-DROP VIEW IF EXISTS v_timeseries CASCADE;
-DROP VIEW IF EXISTS v_timeseries_computed CASCADE;
-DROP VIEW IF EXISTS v_timeseries_dependency CASCADE;
-DROP VIEW IF EXISTS v_timeseries_project_map CASCADE;
-DROP VIEW IF EXISTS v_timeseries_stored CASCADE;
-DROP VIEW IF EXISTS v_unit CASCADE;
-DROP VIEW IF EXISTS v_report_config CASCADE;
+SELECT 'DROP VIEW ' || string_agg (table_name, ', ') || ' CASCADE;'
+FROM information_schema.views
+WHERE table_schema = 'midas'
+AND table_name LIKE 'v_%';
