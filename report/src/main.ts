@@ -1,4 +1,11 @@
-import puppeteer, { Page } from "puppeteer-core";
+import util from "util";
+import os from "os";
+
+import puppeteer, { Page, Browser } from "puppeteer-core";
+import {
+  SecretsManagerClient,
+  GetSecretValueCommand,
+} from "@aws-sdk/client-secrets-manager";
 import { S3Client } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 import createClient from "openapi-fetch";
@@ -8,10 +15,11 @@ import { logoBackground } from "./base64InlineContent";
 import { getIndexHtml, getHeaderTmpl, getFooterTmpl } from "./htmlContent";
 
 import type { UUID } from "crypto";
-import type { GetSecretValueResponse } from "@aws-sdk/client-secrets-manager";
+import type { SecretsManagerClientConfig } from "@aws-sdk/client-secrets-manager";
 import type { S3ClientConfig } from "@aws-sdk/client-s3";
 import type { AwsCredentialIdentity } from "@aws-sdk/types";
 import type { paths, components } from "../generated";
+import type { SQSEvent } from "aws-lambda";
 
 type ReportDownloadJob = components["schemas"]["ReportDownloadJob"];
 
@@ -25,6 +33,7 @@ interface EventMessageBody {
 // s3 uploader response if possible, in case it ever changes
 const FILE_EXPIRY_DURATION_HOURS = 24;
 const MOCK_APP_KEY = "appkey";
+const WAIT_FOR_MS = 60_000 * 5; // 5 minutes
 
 const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
 const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
@@ -40,22 +49,98 @@ if (accessKeyId && secretAccessKey) {
 const s3ClientConfig: S3ClientConfig = {
   endpoint: process.env.AWS_S3_ENDPOINT,
   region: process.env.AWS_S3_REGION,
-  credentials,
   forcePathStyle: true,
+};
+
+if (credentials) {
+  s3ClientConfig.credentials = credentials;
+}
+
+const smClientConfig: SecretsManagerClientConfig = {
+  endpoint: process.env.AWS_SM_ENDPOINT,
+  region: process.env.AWS_SM_REGION,
 };
 
 const apiBaseUrl = process.env.API_BASE_URL;
 const s3WriteToBucket = process.env.AWS_S3_WRITE_TO_BUCKET;
 const s3WriteToBucketPrefix = process.env.AWS_S3_WRITE_TO_BUCKET_PREFIX;
-const sessionToken = process.env.AWS_SESSION_TOKEN;
-const smBaseUrl = process.env.AWS_SM_BASE_URL;
-const smApiKeyArn = process.env.AWS_SM_API_KEY_ARN;
+const smApiKeySecretId = process.env.AWS_SM_API_KEY_SECRET_ID;
+const smKey = process.env.AWS_SM_KEY ?? "";
 const puppeteerExecutablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
-const smMockRequest = process.env.AWS_SM_MOCK_REQUEST;
+const smMockRequest =
+  String(process.env.AWS_SM_MOCK_REQUEST).toLowerCase() === "true";
+const chromeDumpIO = String(process.env.CHROME_DUMPIO).toLowerCase() === "true";
+
+type ProcessEventArgs = {
+  event: EventMessageBody;
+  s3Client: S3Client;
+  apiKey: string;
+};
+
+type retryFunc<T> = (args: T) => Promise<boolean>;
+
+async function retry(
+  func: retryFunc<ProcessEventArgs>,
+  args: ProcessEventArgs,
+  retries: number,
+): Promise<boolean> {
+  for (let i = 0; i < retries; ++i) {
+    if (await func(args)) {
+      return true;
+    }
+    console.log("retrying...");
+    await sleep(1000);
+  }
+  return false;
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+// these flags are acceptable because we are only using chrome as a renderer for Plotly
+// no external site data is loaded (sans the internal MIDAS API) via cdn and all packages are bundled
+// this is needed because lambda cannot load custom security profiles (seccomp) and uses seccomp BPF be default
+// docker also provides a layer of isolation, as this container is run as non-root, least privileged user
+const chromiumArgs = [
+  "--headless",
+  "--disable-dev-shm-usage",
+  "--disable-software-rasterizer",
+  "--disable-infobars",
+  "--no-sandbox",
+  "--disable-setuid-sandbox",
+  "--disable-gpu=False",
+  "--enable-webgl",
+  "--single-process",
+  "--user-data-dir=/tmp/user-data",
+  "--data-path=/tmp/data-path",
+  "--homedir=/tmp",
+  "--disk-cache-dir=/tmp/cache-dir",
+  "--database=/tmp/database",
+];
+
+let browserPromise: Promise<Browser>;
+
+async function prepareBrowser() {
+  return puppeteer.launch({
+    executablePath: puppeteerExecutablePath,
+    args: chromiumArgs,
+    dumpio: chromeDumpIO,
+    headless: true,
+    timeout: WAIT_FOR_MS,
+    devtools: false,
+    protocolTimeout: 20_000,
+    ignoreHTTPSErrors: true,
+    defaultViewport: null,
+    ignoreDefaultArgs: ["--enable-automation"],
+  });
+}
 
 async function waitForDOMStable(
   page: Page,
-  options = { timeout: 30000, idleTime: 2000 },
+  options = { timeout: 30_000, idleTime: 2000 },
 ): Promise<void> {
   await page.evaluate(
     ({ timeout, idleTime }) =>
@@ -87,20 +172,32 @@ async function waitForDOMStable(
   );
 }
 
-export async function handler(event: EventMessageBody): Promise<void> {
+export async function handler(event: SQSEvent): Promise<void> {
+  console.log("Executing user:\n", util.inspect(os.userInfo()));
   const s3Client = new S3Client(s3ClientConfig);
 
   let apiKey = MOCK_APP_KEY;
   if (!smMockRequest) {
-    const res: GetSecretValueResponse = await fetch(
-      `${smBaseUrl}/secretsmanager/get?secretId=${smApiKeyArn}`,
-      {
-        headers: { [`X-Aws-Parameters-Secrets-Token`]: sessionToken },
-        method: "GET",
-      },
-    ).then((res) => res.json(), console.error);
-    apiKey = res.SecretString!;
+    const client = new SecretsManagerClient(smClientConfig);
+    const command = new GetSecretValueCommand({ SecretId: smApiKeySecretId });
+    const res = await client.send(command);
+    const resJson = res.SecretString ? JSON.parse(res.SecretString) : undefined;
+    apiKey = resJson[smKey] ?? "";
   }
+
+  for (const rec of event.Records) {
+    await retry(
+      processEvent,
+      { event: JSON.parse(rec.body), s3Client, apiKey },
+      5,
+    );
+  }
+}
+
+async function processEvent(args: ProcessEventArgs): Promise<boolean> {
+  const { event, s3Client, apiKey } = args;
+
+  console.log("recieved event from queue", event);
 
   const {
     report_config_id: rcId,
@@ -108,62 +205,77 @@ export async function handler(event: EventMessageBody): Promise<void> {
     is_landscape: isLandscape,
   } = event;
 
-  const browser = await puppeteer.launch({
-    executablePath: puppeteerExecutablePath,
-    args: ["--headless"],
-  });
-  const page = await browser.newPage();
+  let browser: Browser | null = null;
+  let page: Page | null = null;
 
-  // bubble up events from headless browser
-  page.on("console", (message) => console.log(`Console: ${message.text()}`));
-  page.on("pageerror", ({ message }) => console.log(`Error: ${message}`));
-  page.on("requestfailed", (request) =>
-    console.log(
-      `Request failed: ${request.failure()?.errorText} ${request.url()}`,
-    ),
-  );
+  try {
+    if (!browserPromise) {
+      browserPromise = prepareBrowser();
+    }
+    browser = await browserPromise;
+    page = await browser.newPage();
 
-  await page.setContent(
-    getIndexHtml(event.is_landscape ? "landscape" : "portrait"),
-  );
-  // This is supposed to fix the problem of too many WebGL contexts
-  // in the case where a page has many different plots but there are some
-  // errors that the WebGLContext elements are not supported.
-  // TODO: check that WebGL 1 is enabled on the apk installation of chrome
-  //
-  // await page.addScriptTag({ url: "https://unpkg.com/virtual-webgl@1.0.6/src/virtual-webgl.js" });
-  await page.addScriptTag({ path: "./report.mjs" });
+    // bubble up events from headless browser
+    page.on("console", (message) => console.log(`Console: ${message.text()}`));
+    page.on("pageerror", ({ message }) => console.log(`Error: ${message}`));
+    page.on("requestfailed", (request) =>
+      console.log(
+        `Request failed: ${request.failure()?.errorText} ${request.url()}`,
+      ),
+    );
 
-  const { districtName, projectName } = await page.evaluate(
-    async (id, url, apikey, isLandscape) => {
-      return await window.processReport(id, url, apikey, isLandscape);
-    },
-    rcId,
-    apiBaseUrl,
-    apiKey,
-    isLandscape,
-  );
+    await page.setContent(
+      getIndexHtml(event.is_landscape ? "landscape" : "portrait"),
+    );
+    // This is supposed to fix the problem of too many WebGL contexts
+    // in the case where a page has many different plots but there are some
+    // errors that the WebGLContext elements are not supported.
+    // TODO: check that WebGL 1 is enabled on the apk installation of chrome
+    //
+    // await page.addScriptTag({ url: "https://unpkg.com/virtual-webgl@1.0.6/src/virtual-webgl.js" });
+    await page.addScriptTag({ path: "./report.mjs" });
 
-  // wait for all content to load before exporting to PDF
-  await page.waitForNetworkIdle();
-  await waitForDOMStable(page);
+    const { districtName, projectName } = await page.evaluate(
+      async (id, url, apikey, isLandscape) => {
+        return await window.processReport(id, url, apikey, isLandscape);
+      },
+      rcId,
+      apiBaseUrl,
+      apiKey,
+      isLandscape,
+    );
 
-  const buf = await page.pdf({
-    format: "letter",
-    scale: 1,
-    displayHeaderFooter: true,
-    headerTemplate: getHeaderTmpl(logoBackground),
-    footerTemplate: getFooterTmpl(castleLogoSvg, districtName, projectName),
-    preferCSSPageSize: true,
-  });
-  let statusCode: number | undefined;
+    // wait for all content to load before exporting to PDF
+    await page.waitForNetworkIdle({ timeout: WAIT_FOR_MS });
+    await waitForDOMStable(page, { timeout: WAIT_FOR_MS, idleTime: 2000 });
 
-  const fileKey = `${s3WriteToBucketPrefix}/${rcId}/${jobId}/${new Date().toISOString().split("T")[0]}_midas_report.pdf`;
+    const buf = await page.pdf({
+      format: "letter",
+      scale: 1,
+      displayHeaderFooter: true,
+      headerTemplate: getHeaderTmpl(logoBackground),
+      footerTemplate: getFooterTmpl(castleLogoSvg, districtName, projectName),
+      preferCSSPageSize: true,
+      timeout: WAIT_FOR_MS,
+    });
+    let statusCode: number | undefined;
 
-  statusCode = await upload(s3Client, buf, fileKey);
-  await updateJob(apiKey, jobId, rcId, statusCode, fileKey);
+    const fileKey = `${s3WriteToBucketPrefix}/${rcId}/${jobId}/${new Date().toISOString().split("T")[0]}_midas_report.pdf`;
 
-  await browser.close();
+    statusCode = await upload(s3Client, buf, fileKey);
+    await updateJob(apiKey, jobId, rcId, statusCode, fileKey);
+
+    await browser.close();
+    console.log("completed job", jobId);
+    return true;
+  } catch (err) {
+    console.error("error during job...", err);
+    if (browser?.connected) {
+      console.log("closing browser...");
+      await browser.close();
+    }
+    return false;
+  }
 }
 
 async function upload(
@@ -240,6 +352,5 @@ async function updateJob(
   if (error) {
     throw new Error(JSON.stringify(error));
   }
-
   console.log("SUCCESS", data);
 }
