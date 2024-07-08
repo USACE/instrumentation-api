@@ -57,7 +57,7 @@ func (h *ApiHandler) GetMyProfile(c echo.Context) error {
 	if claims.CacUID != nil {
 		p, err = h.ProfileService.GetProfileWithTokensForEDIPI(ctx, *claims.CacUID)
 	} else {
-		p, err = h.ProfileService.GetProfileWithTokensForEmail(ctx, claims.Email)
+		p, err = h.ProfileService.GetProfileWithTokensForUsername(ctx, claims.PreferredUsername)
 	}
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -87,7 +87,7 @@ func (h *ApiHandler) CreateToken(c echo.Context) error {
 	if claims.CacUID != nil {
 		p, err = h.ProfileService.GetProfileWithTokensForEDIPI(ctx, *claims.CacUID)
 	} else {
-		p, err = h.ProfileService.GetProfileWithTokensForEmail(ctx, claims.Email)
+		p, err = h.ProfileService.GetProfileWithTokensForUsername(ctx, claims.PreferredUsername)
 	}
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "could not locate user profile with information provided")
@@ -119,7 +119,7 @@ func (h *ApiHandler) DeleteToken(c echo.Context) error {
 	if claims.CacUID != nil {
 		p, err = h.ProfileService.GetProfileWithTokensForEDIPI(ctx, *claims.CacUID)
 	} else {
-		p, err = h.ProfileService.GetProfileWithTokensForEmail(ctx, claims.Email)
+		p, err = h.ProfileService.GetProfileWithTokensForUsername(ctx, claims.PreferredUsername)
 	}
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, message.BadRequest)

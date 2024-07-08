@@ -17,6 +17,7 @@ type TokenClaims struct {
 	Email             string
 	SubjectDN         *string
 	CacUID            *int
+	X509Presented     bool
 }
 
 func mapClaims(user *jwt.Token) (TokenClaims, error) {
@@ -56,11 +57,15 @@ func mapClaims(user *jwt.Token) (TokenClaims, error) {
 		cacUID = &cacUIDClaims
 	}
 
+	// x509 coerces to false for nil when second param returned
+	x509, _ := claims["x509_presented"].(bool)
+
 	return TokenClaims{
 		PreferredUsername: pu,
 		Email:             email,
 		SubjectDN:         dn,
 		CacUID:            cacUID,
+		X509Presented:     x509,
 	}, nil
 }
 
@@ -139,16 +144,16 @@ func (m *mw) AttachProfile(next echo.HandlerFunc) echo.HandlerFunc {
 				p.Email = claims.Email
 			}
 			c.Set("profile", p)
-		} else if claims.Email != "" {
-			p, err := m.ProfileService.GetProfileWithTokensForEmail(ctx, claims.Email)
+		} else if claims.PreferredUsername != "" && claims.Email != "" {
+			p, err := m.ProfileService.GetProfileWithTokensForUsername(ctx, claims.PreferredUsername)
 			if err != nil {
 				return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
 			}
-			if p.Username != claims.PreferredUsername {
-				if err := m.ProfileService.UpdateProfileForEmail(ctx, claims.PreferredUsername, claims.Email); err != nil {
+			if p.Email != claims.Email {
+				if err := m.ProfileService.UpdateEmailForUsername(ctx, claims.Email, claims.PreferredUsername); err != nil {
 					return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
 				}
-				p.Username = claims.PreferredUsername
+				p.Email = claims.Email
 			}
 			c.Set("profile", p)
 		} else {

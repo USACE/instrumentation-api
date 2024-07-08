@@ -56,13 +56,13 @@ func (q *Queries) GetProfileForEDIPI(ctx context.Context, edipi int) (Profile, e
 	return p, err
 }
 
-const getProfileForEmail = `
-	SELECT * FROM v_profile WHERE email = $1
+const getProfileForUsername = `
+	SELECT * FROM v_profile WHERE username = $1
 `
 
-func (q *Queries) GetProfileForEmail(ctx context.Context, email string) (Profile, error) {
+func (q *Queries) GetProfileForUsername(ctx context.Context, username string) (Profile, error) {
 	var p Profile
-	err := q.db.GetContext(ctx, &p, getProfileForEmail, email)
+	err := q.db.GetContext(ctx, &p, getProfileForUsername, username)
 	return p, err
 }
 
@@ -143,10 +143,10 @@ func (q *Queries) UpdateProfileForEDIPI(ctx context.Context, username, email str
 	return err
 }
 
-const updateProfileForEmail = `UPDATE profile SET username=$1 WHERE email=$2`
+const updateEmailForUsername = `UPDATE profile SET email=$1 WHERE username=$2`
 
-func (q *Queries) UpdateProfileForEmail(ctx context.Context, username, email string) error {
-	_, err := q.db.ExecContext(ctx, updateProfileForEmail, username, email)
+func (q *Queries) UpdateEmailForUsername(ctx context.Context, email, username string) error {
+	_, err := q.db.ExecContext(ctx, updateEmailForUsername, email, username)
 	return err
 }
 
