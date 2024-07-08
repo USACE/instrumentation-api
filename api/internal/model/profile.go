@@ -25,7 +25,7 @@ type TokenInfoProfile struct {
 
 // ProfileInfo is information necessary to construct a profile
 type ProfileInfo struct {
-	EDIPI    int    `json:"-"`
+	EDIPI    *int   `json:"-"`
 	Username string `json:"username"`
 	Email    string `json:"email"`
 }
@@ -46,14 +46,23 @@ type Token struct {
 	TokenInfo
 }
 
-const getProfileFromEDIPI = `
-	SELECT id, edipi, username, email, is_admin, roles FROM v_profile WHERE edipi = $1
+const getProfileForEDIPI = `
+	SELECT * FROM v_profile WHERE edipi = $1
 `
 
-// GetProfileFromEDIPI returns a profile given an edipi
-func (q *Queries) GetProfileFromEDIPI(ctx context.Context, edipi int) (Profile, error) {
+func (q *Queries) GetProfileForEDIPI(ctx context.Context, edipi int) (Profile, error) {
 	var p Profile
-	err := q.db.GetContext(ctx, &p, getProfileFromEDIPI, edipi)
+	err := q.db.GetContext(ctx, &p, getProfileForEDIPI, edipi)
+	return p, err
+}
+
+const getProfileForUsername = `
+	SELECT * FROM v_profile WHERE username = $1
+`
+
+func (q *Queries) GetProfileForUsername(ctx context.Context, username string) (Profile, error) {
+	var p Profile
+	err := q.db.GetContext(ctx, &p, getProfileForUsername, username)
 	return p, err
 }
 
@@ -67,16 +76,16 @@ func (q *Queries) GetIssuedTokens(ctx context.Context, profileID uuid.UUID) ([]T
 	return tokens, err
 }
 
-const getProfileFromTokenID = `
+const getProfileForTokenID = `
 	SELECT p.id, p.edipi, p.username, p.email, p.is_admin
 	FROM profile_token t
 	LEFT JOIN v_profile p ON p.id = t.profile_id
 	WHERE t.token_id = $1
 `
 
-func (q *Queries) GetProfileFromTokenID(ctx context.Context, tokenID string) (Profile, error) {
+func (q *Queries) GetProfileForTokenID(ctx context.Context, tokenID string) (Profile, error) {
 	var p Profile
-	err := q.db.GetContext(ctx, getProfileFromTokenID, tokenID)
+	err := q.db.GetContext(ctx, getProfileForTokenID, tokenID)
 	return p, err
 }
 
@@ -125,6 +134,20 @@ func (q *Queries) GetTokenInfoByTokenID(ctx context.Context, tokenID string) (To
 	var n TokenInfo
 	err := q.db.GetContext(ctx, &n, getTokenInfoByTokenID, tokenID)
 	return n, err
+}
+
+const updateProfileForEDIPI = `UPDATE profile SET username=$1, email=$2 WHERE edipi=$3`
+
+func (q *Queries) UpdateProfileForEDIPI(ctx context.Context, username, email string, edipi int) error {
+	_, err := q.db.ExecContext(ctx, updateProfileForEDIPI, username, email, edipi)
+	return err
+}
+
+const updateEmailForUsername = `UPDATE profile SET email=$1 WHERE username=$2`
+
+func (q *Queries) UpdateEmailForUsername(ctx context.Context, email, username string) error {
+	_, err := q.db.ExecContext(ctx, updateEmailForUsername, email, username)
+	return err
 }
 
 const deleteToken = `

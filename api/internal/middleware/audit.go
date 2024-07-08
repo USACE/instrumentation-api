@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -11,41 +12,96 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// EDIPIMiddleware attaches EDIPI (CAC) to Context
-// Used for CAC-Only Routes
-func (m *mw) EDIPI(next echo.HandlerFunc) echo.HandlerFunc {
+type TokenClaims struct {
+	PreferredUsername string
+	Email             string
+	SubjectDN         *string
+	CacUID            *int
+	X509Presented     bool
+}
+
+func mapClaims(user *jwt.Token) (TokenClaims, error) {
+	claims, ok := user.Claims.(jwt.MapClaims)
+	if !ok {
+		return TokenClaims{}, errors.New("unable to map claims")
+	}
+
+	// common claims, required
+	pu, ok := claims["preferred_username"].(string)
+	if !ok || pu == "" {
+		return TokenClaims{}, errors.New("error parsing token claims: email")
+	}
+	email, ok := claims["email"].(string)
+	if !ok || email == "" {
+		return TokenClaims{}, errors.New("error parsing token claims: email")
+	}
+
+	// cac-specific claims, for cac users only
+	dnClaim, exists := claims["subjectDN"]
+	var dn *string
+	if exists && dnClaim != nil {
+		dnStr, ok := dnClaim.(string)
+		if !ok {
+			return TokenClaims{}, errors.New("error parsing token claims: subjectDN")
+		}
+		dn = &dnStr
+	}
+
+	cacUIDClaim, exists := claims["cacUID"]
+	var cacUID *int
+	if exists && cacUIDClaim != nil {
+		cacUIDClaims, err := strconv.Atoi(cacUIDClaim.(string))
+		if err != nil {
+			return TokenClaims{}, errors.New("error parsing token claims: cacUID")
+		}
+		cacUID = &cacUIDClaims
+	}
+
+	// x509 coerces to false for nil when second param returned
+	x509, _ := claims["x509_presented"].(bool)
+
+	return TokenClaims{
+		PreferredUsername: pu,
+		Email:             email,
+		SubjectDN:         dn,
+		CacUID:            cacUID,
+		X509Presented:     x509,
+	}, nil
+}
+
+func (m *mw) AttachClaims(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		key := c.QueryParam("key")
-		if key == "" {
-			user, ok := c.Get("user").(*jwt.Token)
-			if !ok {
-				return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
-			}
-			claims, ok := user.Claims.(jwt.MapClaims)
-			if !ok {
-				return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
-			}
-			edipi, err := strconv.Atoi(claims["sub"].(string))
-			if err != nil {
-				return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
-			}
-			c.Set("EDIPI", edipi)
+		if key != "" {
+			return next(c)
 		}
+
+		user, ok := c.Get("user").(*jwt.Token)
+		if !ok {
+			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
+		}
+
+		claims, err := mapClaims(user)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
+		}
+		c.Set("claims", claims)
+
 		return next(c)
 	}
 }
 
-func (m *mw) CACOnly(next echo.HandlerFunc) echo.HandlerFunc {
+func (m *mw) RequireClaims(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		edipi := c.Get("EDIPI")
-		if edipi == nil {
+		claims, ok := c.Get("claims").(TokenClaims)
+		if !ok || (claims.CacUID == nil && claims.Email == "") {
 			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
 		}
 		return next(c)
 	}
 }
 
-// AttachProfileID attaches ProfileID of user to context
+// AttachProfile attaches the Profile of a user to request context
 func (m *mw) AttachProfile(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx := c.Request().Context()
@@ -53,7 +109,7 @@ func (m *mw) AttachProfile(next echo.HandlerFunc) echo.HandlerFunc {
 		// lookup superuser profile; the "EDIPI" of the Superuser is consistently 79.
 		// The superuser is initialized as part of database and seed data initialization
 		if c.Get("ApplicationKeyAuthSuccess") == true {
-			p, err := m.ProfileService.GetProfileWithTokensFromEDIPI(ctx, 79)
+			p, err := m.ProfileService.GetProfileWithTokensForEDIPI(ctx, 79)
 			if err != nil {
 				return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
 			}
@@ -63,23 +119,46 @@ func (m *mw) AttachProfile(next echo.HandlerFunc) echo.HandlerFunc {
 		// If a User was authenticated via KeyAuth, lookup the user's profile using key_id
 		if c.Get("KeyAuthSuccess") == true {
 			keyID := c.Get("KeyAuthKeyID").(string)
-			p, err := m.ProfileService.GetProfileWithTokensFromTokenID(ctx, keyID)
+			p, err := m.ProfileService.GetProfileWithTokensForTokenID(ctx, keyID)
 			if err != nil {
 				return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
 			}
 			c.Set("profile", p)
 			return next(c)
 		}
-		// If a User was authenticated using CAC (JWT), lookup Profile by edipi
-		edipi := c.Get("EDIPI")
-		if edipi == nil {
+		claims, ok := c.Get("claims").(TokenClaims)
+		if !ok {
 			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
 		}
-		p, err := m.ProfileService.GetProfileWithTokensFromEDIPI(ctx, edipi.(int))
-		if err != nil {
+
+		if claims.CacUID != nil {
+			p, err := m.ProfileService.GetProfileWithTokensForEDIPI(ctx, *claims.CacUID)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
+			}
+			if p.Username != claims.PreferredUsername || p.Email != claims.Email {
+				if err := m.ProfileService.UpdateProfileForEDIPI(ctx, claims.PreferredUsername, claims.Email, *claims.CacUID); err != nil {
+					return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
+				}
+				p.Username = claims.PreferredUsername
+				p.Email = claims.Email
+			}
+			c.Set("profile", p)
+		} else if claims.PreferredUsername != "" && claims.Email != "" {
+			p, err := m.ProfileService.GetProfileWithTokensForUsername(ctx, claims.PreferredUsername)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
+			}
+			if p.Email != claims.Email {
+				if err := m.ProfileService.UpdateEmailForUsername(ctx, claims.Email, claims.PreferredUsername); err != nil {
+					return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
+				}
+				p.Email = claims.Email
+			}
+			c.Set("profile", p)
+		} else {
 			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
 		}
-		c.Set("profile", p)
 
 		return next(c)
 	}

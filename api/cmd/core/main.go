@@ -20,7 +20,7 @@ import (
 // @name Authorization
 // @description Type "Bearer" followed by a space and access token.
 
-// @securityDefinitions.apikey CacOnly
+// @securityDefinitions.apikey ClaimsOnly
 // @in header
 // @name Authorization
 // @description CAC-Only routes

@@ -21,10 +21,10 @@ type ApiServer struct {
 }
 
 type apiGroups struct {
-	public  *echo.Group
-	private *echo.Group
-	cacOnly *echo.Group
-	app     *echo.Group
+	public     *echo.Group
+	private    *echo.Group
+	claimsOnly *echo.Group
+	app        *echo.Group
 }
 
 func NewApiServer(cfg *config.ApiConfig, h *handler.ApiHandler) *ApiServer {
@@ -39,17 +39,17 @@ func NewApiServer(cfg *config.ApiConfig, h *handler.ApiHandler) *ApiServer {
 
 	public := e.Group(cfg.RoutePrefix)
 	private := e.Group(cfg.RoutePrefix) // cac or token (KeyAuth)
-	cacOnly := e.Group(cfg.RoutePrefix)
+	authOnly := e.Group(cfg.RoutePrefix)
 	app := e.Group(cfg.RoutePrefix)
 
-	private.Use(mw.JWTSkipIfKey, mw.KeyAuth, mw.EDIPI, mw.AttachProfile)
-	cacOnly.Use(mw.JWT, mw.EDIPI, mw.CACOnly)
+	private.Use(mw.JWTSkipIfKey, mw.KeyAuth, mw.AttachClaims, mw.AttachProfile)
+	authOnly.Use(mw.CORSWhitelist, mw.JWT, mw.AttachClaims, mw.RequireClaims)
 	app.Use(mw.AppKeyAuth)
 
 	server := &ApiServer{e, apiGroups{
 		public,
 		private,
-		cacOnly,
+		authOnly,
 		app,
 	}}
 
@@ -249,10 +249,10 @@ func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 	r.private.DELETE("/projects/:project_id/plot_configurations/:plot_configuration_id", h.DeletePlotConfig)
 
 	// Profile
-	r.cacOnly.POST("/profiles", h.CreateProfile)
-	r.cacOnly.GET("/my_profile", h.GetMyProfile)
-	r.cacOnly.POST("/my_tokens", h.CreateToken)
-	r.cacOnly.DELETE("/my_tokens/:token_id", h.DeleteToken)
+	r.claimsOnly.POST("/profiles", h.CreateProfile)
+	r.claimsOnly.GET("/my_profile", h.GetMyProfile)
+	r.claimsOnly.POST("/my_tokens", h.CreateToken)
+	r.claimsOnly.DELETE("/my_tokens/:token_id", h.DeleteToken)
 
 	// ProjectRole
 	r.private.GET("/projects/:project_id/members", h.ListProjectMembers)
