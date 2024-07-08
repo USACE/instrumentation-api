@@ -1,11 +1,13 @@
 package cloud
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"io"
 	"log"
+	"net/http"
 
 	"github.com/USACE/instrumentation-api/api/internal/config"
 	"github.com/aws/aws-lambda-go/events"
@@ -16,6 +18,7 @@ import (
 type Pubsub interface {
 	ProcessMessagesFromBlob(handler messageHandler) error
 	PublishMessage(ctx context.Context, message []byte) (string, error)
+	MockPublishMessage(ctx context.Context, message []byte) (string, error)
 }
 
 type messageHandler func(r io.Reader) error
@@ -34,10 +37,9 @@ func NewSQSPubsub(cfg *config.AWSSQSConfig) *SQSPubsub {
 	queue := sqs.NewFromConfig(sqsCfg, optFns...)
 
 	ps := &SQSPubsub{queue, cfg, nil, nil}
-	// TODO: enable when sqs queue for report service is created
-	// if !cfg.AWSSQSQueueNoInit {
-	// 	ps.MustInitQueueUrl()
-	// }
+	if !cfg.AWSSQSQueueNoInit {
+		ps.MustInitQueueUrl()
+	}
 
 	return ps
 }
@@ -163,4 +165,31 @@ func (s *SQSPubsub) PublishMessage(ctx context.Context, message []byte) (string,
 	}
 
 	return *out.MessageId, nil
+}
+
+func (s *SQSPubsub) MockPublishMessage(ctx context.Context, message []byte) (string, error) {
+	body := events.SQSMessage{Body: string(message)}
+	event := events.SQSEvent{Records: []events.SQSMessage{body}}
+	b, err := json.Marshal(event)
+	if err != nil {
+		return "", err
+	}
+
+	if err := mockInvokeLocalLambda("http://report:8080/2015-03-31/functions/function/invocations", b); err != nil {
+		return "", err
+	}
+
+	return "mock-message-id", nil
+}
+
+func mockInvokeLocalLambda(invokeUrl string, message []byte) error {
+	r := bytes.NewReader(message)
+	res, err := http.Post(invokeUrl, "application/json", r)
+	if err != nil {
+		return err
+	}
+	if res.StatusCode != 200 {
+		return errors.New("unable to invoke locally mocked lambda")
+	}
+	return nil
 }

@@ -116,7 +116,7 @@ window.processReport = async (
               query: {
                 after,
                 before,
-                threshold: 3000,
+                threshold: 1500,
               },
             },
           },
@@ -149,7 +149,7 @@ window.processReport = async (
 
         counter += filteredItems.length;
 
-        if (counter < 10_000) {
+        if (counter < 500_000) {
           // https://community.plotly.com/t/webgl-plots-are-blurry/41716/3
           // This issue happens because WebGL plots are pixel-based. It may be worth
           // using them for larger datasets but the config.plotGlPixelRatio param at
