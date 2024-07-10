@@ -8916,9 +8916,12 @@ components:
         - token_id: token_id
           issued: issued
         id: id
+        display_name: display_name
         email: email
         username: username
       properties:
+        display_name:
+          type: string
         email:
           type: string
         id:

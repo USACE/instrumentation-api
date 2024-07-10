@@ -10,11 +10,11 @@ import (
 
 // Profile is a user profile
 type Profile struct {
-	ID uuid.UUID `json:"id"`
-	ProfileInfo
+	ID      uuid.UUID          `json:"id" db:"id"`
 	Tokens  []TokenInfoProfile `json:"tokens"`
 	IsAdmin bool               `json:"is_admin" db:"is_admin"`
 	Roles   dbSlice[string]    `json:"roles" db:"roles"`
+	ProfileInfo
 }
 
 // TokenInfoProfile is token information embedded in Profile
@@ -25,9 +25,10 @@ type TokenInfoProfile struct {
 
 // ProfileInfo is information necessary to construct a profile
 type ProfileInfo struct {
-	EDIPI    *int   `json:"-"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
+	EDIPI       *int   `json:"-" db:"edipi"`
+	Username    string `json:"username" db:"username"`
+	DisplayName string `json:"display_name" db:"display_name"`
+	Email       string `json:"email" db:"email"`
 }
 
 // TokenInfo represents the information held in the database about a token
@@ -46,6 +47,15 @@ type Token struct {
 	TokenInfo
 }
 
+type ProfileClaims struct {
+	PreferredUsername string
+	Name              string
+	Email             string
+	SubjectDN         *string
+	CacUID            *int
+	X509Presented     bool
+}
+
 const getProfileForEDIPI = `
 	SELECT * FROM v_profile WHERE edipi = $1
 `
@@ -53,6 +63,16 @@ const getProfileForEDIPI = `
 func (q *Queries) GetProfileForEDIPI(ctx context.Context, edipi int) (Profile, error) {
 	var p Profile
 	err := q.db.GetContext(ctx, &p, getProfileForEDIPI, edipi)
+	return p, err
+}
+
+const getProfileForEmail = `
+	SELECT * FROM v_profile WHERE email ILIKE $1
+`
+
+func (q *Queries) GetProfileForEmail(ctx context.Context, email string) (Profile, error) {
+	var p Profile
+	err := q.db.GetContext(ctx, &p, getProfileForEmail, email)
 	return p, err
 }
 
@@ -90,7 +110,7 @@ func (q *Queries) GetProfileForTokenID(ctx context.Context, tokenID string) (Pro
 }
 
 const createProfile = `
-	INSERT INTO profile (edipi, username, email) VALUES ($1, $2, $3) RETURNING id, username, email
+	INSERT INTO profile (edipi, username, email, display_name) VALUES ($1, $2, $3, $4) RETURNING id, username, email, display_name
 `
 
 // CreateProfile creates a new profile
@@ -99,7 +119,7 @@ func (q *Queries) CreateProfile(ctx context.Context, n ProfileInfo) (Profile, er
 		Tokens: make([]TokenInfoProfile, 0),
 		Roles:  make([]string, 0),
 	}
-	err := q.db.GetContext(ctx, &p, createProfile, n.EDIPI, n.Username, n.Email)
+	err := q.db.GetContext(ctx, &p, createProfile, n.EDIPI, n.Username, n.Email, n.DisplayName)
 	return p, err
 }
 
@@ -136,17 +156,24 @@ func (q *Queries) GetTokenInfoByTokenID(ctx context.Context, tokenID string) (To
 	return n, err
 }
 
-const updateProfileForEDIPI = `UPDATE profile SET username=$1, email=$2 WHERE edipi=$3`
+const updateProfileForEDIPI = `UPDATE profile SET username=$1, email=$2, display_name=$3 WHERE edipi=$4`
 
-func (q *Queries) UpdateProfileForEDIPI(ctx context.Context, username, email string, edipi int) error {
-	_, err := q.db.ExecContext(ctx, updateProfileForEDIPI, username, email, edipi)
+func (q *Queries) UpdateProfileForEDIPI(ctx context.Context, edipi int, pi ProfileInfo) error {
+	_, err := q.db.ExecContext(ctx, updateProfileForEDIPI, pi.Username, pi.Email, pi.DisplayName, edipi)
 	return err
 }
 
-const updateEmailForUsername = `UPDATE profile SET email=$1 WHERE username=$2`
+const updateProfileForEmail = `UPDATE profile SET username=$1, display_name=$2 WHERE email ILIKE $3`
 
-func (q *Queries) UpdateEmailForUsername(ctx context.Context, email, username string) error {
-	_, err := q.db.ExecContext(ctx, updateEmailForUsername, email, username)
+func (q *Queries) UpdateProfileForEmail(ctx context.Context, email string, pi ProfileInfo) error {
+	_, err := q.db.ExecContext(ctx, updateProfileForEmail, pi.Username, pi.DisplayName, email)
+	return err
+}
+
+const updateProfileForUsername = `UPDATE profile SET email=$1, display_name=$2 WHERE username=$3`
+
+func (q *Queries) UpdateProfileForUsername(ctx context.Context, username string, pi ProfileInfo) error {
+	_, err := q.db.ExecContext(ctx, updateProfileForEmail, pi.Email, pi.DisplayName, username)
 	return err
 }
 

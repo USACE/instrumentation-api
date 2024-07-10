@@ -12321,6 +12321,9 @@
       },
       "Profile" : {
         "properties" : {
+          "display_name" : {
+            "type" : "string"
+          },
           "email" : {
             "type" : "string"
           },

@@ -1,12 +1,9 @@
 package handler
 
 import (
-	"database/sql"
-	"errors"
 	"net/http"
 
 	"github.com/USACE/instrumentation-api/api/internal/message"
-	"github.com/USACE/instrumentation-api/api/internal/middleware"
 	"github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/labstack/echo/v4"
 )
@@ -23,12 +20,13 @@ import (
 //	@Router /profiles [post]
 //	@Security ClaimsOnly
 func (h *ApiHandler) CreateProfile(c echo.Context) error {
-	claims := c.Get("claims").(middleware.TokenClaims)
+	claims := c.Get("claims").(model.ProfileClaims)
 
 	p := model.ProfileInfo{
-		Username: claims.PreferredUsername,
-		Email:    claims.Email,
-		EDIPI:    claims.CacUID,
+		Username:    claims.PreferredUsername,
+		DisplayName: claims.Name,
+		Email:       claims.Email,
+		EDIPI:       claims.CacUID,
 	}
 
 	pNew, err := h.ProfileService.CreateProfile(c.Request().Context(), p)
@@ -50,22 +48,20 @@ func (h *ApiHandler) CreateProfile(c echo.Context) error {
 //	@Router /my_profile [get]
 //	@Security ClaimsOnly
 func (h *ApiHandler) GetMyProfile(c echo.Context) error {
-	claims := c.Get("claims").(middleware.TokenClaims)
 	ctx := c.Request().Context()
-	var p model.Profile
-	var err error
-	if claims.CacUID != nil {
-		p, err = h.ProfileService.GetProfileWithTokensForEDIPI(ctx, *claims.CacUID)
-	} else {
-		p, err = h.ProfileService.GetProfileWithTokensForUsername(ctx, claims.PreferredUsername)
-	}
+	claims := c.Get("claims").(model.ProfileClaims)
+
+	p, err := h.ProfileService.GetProfileWithTokensForClaims(ctx, claims)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return echo.NewHTTPError(http.StatusNotFound, message.NotFound)
-		}
 		return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
 	}
-	return c.JSON(http.StatusOK, p)
+
+	pValidated, err := h.ProfileService.UpdateProfileForClaims(ctx, p, claims)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
+	}
+
+	return c.JSON(http.StatusOK, pValidated)
 }
 
 // CreateToken godoc
@@ -80,17 +76,12 @@ func (h *ApiHandler) GetMyProfile(c echo.Context) error {
 //	@Router /my_tokens [post]
 //	@Security ClaimsOnly
 func (h *ApiHandler) CreateToken(c echo.Context) error {
-	claims := c.Get("claims").(middleware.TokenClaims)
+	claims := c.Get("claims").(model.ProfileClaims)
 	ctx := c.Request().Context()
-	var p model.Profile
-	var err error
-	if claims.CacUID != nil {
-		p, err = h.ProfileService.GetProfileWithTokensForEDIPI(ctx, *claims.CacUID)
-	} else {
-		p, err = h.ProfileService.GetProfileWithTokensForUsername(ctx, claims.PreferredUsername)
-	}
+
+	p, err := h.ProfileService.GetProfileWithTokensForClaims(ctx, claims)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "could not locate user profile with information provided")
+		return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
 	}
 	token, err := h.ProfileService.CreateProfileToken(ctx, p.ID)
 	if err != nil {
@@ -112,21 +103,17 @@ func (h *ApiHandler) CreateToken(c echo.Context) error {
 //	@Router /my_tokens/{token_id} [delete]
 //	@Security ClaimsOnly
 func (h *ApiHandler) DeleteToken(c echo.Context) error {
-	claims := c.Get("claims").(middleware.TokenClaims)
+	claims := c.Get("claims").(model.ProfileClaims)
 	ctx := c.Request().Context()
-	var p model.Profile
-	var err error
-	if claims.CacUID != nil {
-		p, err = h.ProfileService.GetProfileWithTokensForEDIPI(ctx, *claims.CacUID)
-	} else {
-		p, err = h.ProfileService.GetProfileWithTokensForUsername(ctx, claims.PreferredUsername)
-	}
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.BadRequest)
-	}
+
 	tokenID := c.Param("token_id")
 	if tokenID == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "Bad Token ID")
+		return echo.NewHTTPError(http.StatusBadRequest, "bad token id")
+	}
+
+	p, err := h.ProfileService.GetProfileWithTokensForClaims(ctx, claims)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, message.InternalServerError)
 	}
 	if err := h.ProfileService.DeleteToken(ctx, p.ID, tokenID); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)

@@ -12,28 +12,24 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type TokenClaims struct {
-	PreferredUsername string
-	Email             string
-	SubjectDN         *string
-	CacUID            *int
-	X509Presented     bool
-}
-
-func mapClaims(user *jwt.Token) (TokenClaims, error) {
+func mapClaims(user *jwt.Token) (model.ProfileClaims, error) {
 	claims, ok := user.Claims.(jwt.MapClaims)
 	if !ok {
-		return TokenClaims{}, errors.New("unable to map claims")
+		return model.ProfileClaims{}, errors.New("unable to map claims")
 	}
 
 	// common claims, required
 	pu, ok := claims["preferred_username"].(string)
 	if !ok || pu == "" {
-		return TokenClaims{}, errors.New("error parsing token claims: email")
+		return model.ProfileClaims{}, errors.New("error parsing token claims: email")
 	}
 	email, ok := claims["email"].(string)
 	if !ok || email == "" {
-		return TokenClaims{}, errors.New("error parsing token claims: email")
+		return model.ProfileClaims{}, errors.New("error parsing token claims: email")
+	}
+	name, ok := claims["name"].(string)
+	if !ok || name == "" {
+		return model.ProfileClaims{}, errors.New("error parsing token claims: name")
 	}
 
 	// cac-specific claims, for cac users only
@@ -42,7 +38,7 @@ func mapClaims(user *jwt.Token) (TokenClaims, error) {
 	if exists && dnClaim != nil {
 		dnStr, ok := dnClaim.(string)
 		if !ok {
-			return TokenClaims{}, errors.New("error parsing token claims: subjectDN")
+			return model.ProfileClaims{}, errors.New("error parsing token claims: subjectDN")
 		}
 		dn = &dnStr
 	}
@@ -52,7 +48,7 @@ func mapClaims(user *jwt.Token) (TokenClaims, error) {
 	if exists && cacUIDClaim != nil {
 		cacUIDClaims, err := strconv.Atoi(cacUIDClaim.(string))
 		if err != nil {
-			return TokenClaims{}, errors.New("error parsing token claims: cacUID")
+			return model.ProfileClaims{}, errors.New("error parsing token claims: cacUID")
 		}
 		cacUID = &cacUIDClaims
 	}
@@ -60,8 +56,9 @@ func mapClaims(user *jwt.Token) (TokenClaims, error) {
 	// x509 coerces to false for nil when second param returned
 	x509, _ := claims["x509_presented"].(bool)
 
-	return TokenClaims{
+	return model.ProfileClaims{
 		PreferredUsername: pu,
+		Name:              name,
 		Email:             email,
 		SubjectDN:         dn,
 		CacUID:            cacUID,
@@ -93,8 +90,8 @@ func (m *mw) AttachClaims(next echo.HandlerFunc) echo.HandlerFunc {
 
 func (m *mw) RequireClaims(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		claims, ok := c.Get("claims").(TokenClaims)
-		if !ok || (claims.CacUID == nil && claims.Email == "") {
+		_, ok := c.Get("claims").(model.ProfileClaims)
+		if !ok {
 			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
 		}
 		return next(c)
@@ -116,6 +113,7 @@ func (m *mw) AttachProfile(next echo.HandlerFunc) echo.HandlerFunc {
 			c.Set("profile", p)
 			return next(c)
 		}
+
 		// If a User was authenticated via KeyAuth, lookup the user's profile using key_id
 		if c.Get("KeyAuthSuccess") == true {
 			keyID := c.Get("KeyAuthKeyID").(string)
@@ -126,40 +124,18 @@ func (m *mw) AttachProfile(next echo.HandlerFunc) echo.HandlerFunc {
 			c.Set("profile", p)
 			return next(c)
 		}
-		claims, ok := c.Get("claims").(TokenClaims)
+
+		claims, ok := c.Get("claims").(model.ProfileClaims)
 		if !ok {
 			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
 		}
 
-		if claims.CacUID != nil {
-			p, err := m.ProfileService.GetProfileWithTokensForEDIPI(ctx, *claims.CacUID)
-			if err != nil {
-				return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
-			}
-			if p.Username != claims.PreferredUsername || p.Email != claims.Email {
-				if err := m.ProfileService.UpdateProfileForEDIPI(ctx, claims.PreferredUsername, claims.Email, *claims.CacUID); err != nil {
-					return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
-				}
-				p.Username = claims.PreferredUsername
-				p.Email = claims.Email
-			}
-			c.Set("profile", p)
-		} else if claims.PreferredUsername != "" && claims.Email != "" {
-			p, err := m.ProfileService.GetProfileWithTokensForUsername(ctx, claims.PreferredUsername)
-			if err != nil {
-				return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
-			}
-			if p.Email != claims.Email {
-				if err := m.ProfileService.UpdateEmailForUsername(ctx, claims.Email, claims.PreferredUsername); err != nil {
-					return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
-				}
-				p.Email = claims.Email
-			}
-			c.Set("profile", p)
-		} else {
+		p, err := m.ProfileService.GetProfileWithTokensForClaims(ctx, claims)
+		if err != nil {
 			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
 		}
 
+		c.Set("profile", p)
 		return next(c)
 	}
 }

@@ -13,6 +13,7 @@ CREATE VIEW v_profile AS (
         p.id,
         p.edipi,
         p.username,
+        p.display_name,
         p.email,
         p.is_admin,
         COALESCE(r.roles,'{}') AS roles
@@ -26,6 +27,7 @@ CREATE VIEW v_profile_project_roles AS (
         a.profile_id,
         b.edipi,
         b.username,
+        b.display_name,
         b.email,
         b.is_admin,
         c.id AS project_id,
