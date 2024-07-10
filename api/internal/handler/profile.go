@@ -3,7 +3,6 @@ package handler
 import (
 	"net/http"
 
-	"github.com/USACE/instrumentation-api/api/internal/message"
 	"github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/labstack/echo/v4"
 )
@@ -31,7 +30,7 @@ func (h *ApiHandler) CreateProfile(c echo.Context) error {
 
 	pNew, err := h.ProfileService.CreateProfile(c.Request().Context(), p)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
+		return err
 	}
 	return c.JSON(http.StatusCreated, pNew)
 }
@@ -53,12 +52,12 @@ func (h *ApiHandler) GetMyProfile(c echo.Context) error {
 
 	p, err := h.ProfileService.GetProfileWithTokensForClaims(ctx, claims)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
+		return err
 	}
 
 	pValidated, err := h.ProfileService.UpdateProfileForClaims(ctx, p, claims)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
+		return err
 	}
 
 	return c.JSON(http.StatusOK, pValidated)
@@ -81,11 +80,11 @@ func (h *ApiHandler) CreateToken(c echo.Context) error {
 
 	p, err := h.ProfileService.GetProfileWithTokensForClaims(ctx, claims)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
+		return err
 	}
 	token, err := h.ProfileService.CreateProfileToken(ctx, p.ID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
+		return err
 	}
 	return c.JSON(http.StatusCreated, token)
 }
@@ -113,10 +112,10 @@ func (h *ApiHandler) DeleteToken(c echo.Context) error {
 
 	p, err := h.ProfileService.GetProfileWithTokensForClaims(ctx, claims)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.InternalServerError)
+		return err
 	}
 	if err := h.ProfileService.DeleteToken(ctx, p.ID, tokenID); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
+		return err
 	}
 	return c.JSON(http.StatusOK, make(map[string]interface{}))
 }
