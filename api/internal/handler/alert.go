@@ -26,7 +26,7 @@ import (
 func (h *ApiHandler) ListAlertsForInstrument(c echo.Context) error {
 	instrumentID, err := uuid.Parse(c.Param("instrument_id"))
 	if err != nil {
-		return httperr.BadRequest(err)
+		return httperr.MalformedID(err)
 	}
 	aa, err := h.AlertService.GetAllAlertsForInstrument(c.Request().Context(), instrumentID)
 	if err != nil {

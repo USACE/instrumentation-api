@@ -32,7 +32,7 @@ func (h *ApiHandler) ListProjectEvaluationDistrictRollup(c echo.Context) error {
 	var tw model.TimeWindow
 	from, to := c.QueryParam("from_timestamp_month"), c.QueryParam("to_timestamp_month")
 	if err := tw.SetWindow(from, to, time.Now().AddDate(-1, 0, 0), time.Now()); err != nil {
-		return httperr.BadRequest(err)
+		return httperr.MalformedDate(err)
 	}
 	if fiveYrsAfterStart := tw.After.AddDate(5, 0, 0); tw.Before.After(fiveYrsAfterStart) {
 		return httperr.Message(http.StatusBadRequest, timeRangeErrMessage)
@@ -65,7 +65,7 @@ func (h *ApiHandler) ListProjectMeasurementDistrictRollup(c echo.Context) error 
 	var tw model.TimeWindow
 	from, to := c.QueryParam("from_timestamp_month"), c.QueryParam("to_timestamp_month")
 	if err := tw.SetWindow(from, to, time.Now().AddDate(-1, 0, 0), time.Now()); err != nil {
-		return httperr.BadRequest(err)
+		return httperr.MalformedDate(err)
 	}
 	if fiveYrsAfterStart := tw.After.AddDate(5, 0, 0); tw.Before.After(fiveYrsAfterStart) {
 		return httperr.Message(http.StatusBadRequest, timeRangeErrMessage)

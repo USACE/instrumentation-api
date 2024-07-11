@@ -58,13 +58,3 @@ func MalformedBody(err error) *echo.HTTPError {
 func MalformedDate(err error) *echo.HTTPError {
 	return Error(http.StatusBadRequest, "malformed date - use RFC3339 format", err)
 }
-
-func MissingQueryParameter(param string) *echo.HTTPError {
-	msg := "missing query parameter " + param
-	return Error(http.StatusBadRequest, msg, errors.New(msg))
-}
-
-func MatchRouteParam(param string) *echo.HTTPError {
-	msg := "object " + param + " does not match route param"
-	return Error(http.StatusBadRequest, msg, errors.New(msg))
-}
