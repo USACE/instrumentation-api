@@ -51,7 +51,7 @@ func (h *ApiHandler) ListTimeseriesMeasurementsByTimeseries(c echo.Context) erro
 		var tw model.TimeWindow
 		a, b := c.QueryParam("after"), c.QueryParam("before")
 		if err := tw.SetWindow(a, b, time.Now().AddDate(0, 0, -7), time.Now()); err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			return httperr.MalformedDate(err)
 		}
 
 		trs := c.QueryParam("threshold")
@@ -60,14 +60,14 @@ func (h *ApiHandler) ListTimeseriesMeasurementsByTimeseries(c echo.Context) erro
 		if trs != "" {
 			tr, err := strconv.Atoi(trs)
 			if err != nil {
-				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+				return httperr.Message(http.StatusBadRequest, "threshold parameter must be an int")
 			}
 			threshold = tr
 		}
 
 		resBody, err := h.MeasurementService.ListTimeseriesMeasurements(c.Request().Context(), tsID, tw, threshold)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			return httperr.InternalServerError(err)
 		}
 		return c.JSON(http.StatusOK, resBody)
 	}
