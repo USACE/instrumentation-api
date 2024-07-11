@@ -42,7 +42,7 @@ func InternalServerError(err error) *echo.HTTPError {
 
 func ServerErrorOrNotFound(err error) *echo.HTTPError {
 	if errors.Is(err, sql.ErrNoRows) {
-		return Error(http.StatusNotFound, "not found", err)
+		return NotFound(err)
 	}
 	return InternalServerError(err)
 }
