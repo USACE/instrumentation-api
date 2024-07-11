@@ -4,11 +4,13 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/USACE/instrumentation-api/api/internal/message"
+	"github.com/USACE/instrumentation-api/api/internal/httperr"
 	"github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
+
+const timeRangeErrMessage = "maximum requested time range exceeded (5 years)"
 
 // ListEvaluationDistrictRollup godoc
 //
@@ -24,21 +26,21 @@ import (
 func (h *ApiHandler) ListProjectEvaluationDistrictRollup(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		httperr.MalformedID(err)
 	}
 
 	var tw model.TimeWindow
 	from, to := c.QueryParam("from_timestamp_month"), c.QueryParam("to_timestamp_month")
 	if err := tw.SetWindow(from, to, time.Now().AddDate(-1, 0, 0), time.Now()); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.BadRequest(err)
 	}
 	if fiveYrsAfterStart := tw.After.AddDate(5, 0, 0); tw.Before.After(fiveYrsAfterStart) {
-		return echo.NewHTTPError(http.StatusBadRequest, "maximum requested time range exceeded (5 years)")
+		return httperr.Message(http.StatusBadRequest, timeRangeErrMessage)
 	}
 
 	project, err := h.DistrictRollupService.ListEvaluationDistrictRollup(c.Request().Context(), id, tw)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, project)
 }
@@ -57,21 +59,21 @@ func (h *ApiHandler) ListProjectEvaluationDistrictRollup(c echo.Context) error {
 func (h *ApiHandler) ListProjectMeasurementDistrictRollup(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 
 	var tw model.TimeWindow
 	from, to := c.QueryParam("from_timestamp_month"), c.QueryParam("to_timestamp_month")
 	if err := tw.SetWindow(from, to, time.Now().AddDate(-1, 0, 0), time.Now()); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.BadRequest(err)
 	}
 	if fiveYrsAfterStart := tw.After.AddDate(5, 0, 0); tw.Before.After(fiveYrsAfterStart) {
-		return echo.NewHTTPError(http.StatusBadRequest, "maximum requested time range exceeded (5 years)")
+		return httperr.Message(http.StatusBadRequest, timeRangeErrMessage)
 	}
 
 	project, err := h.DistrictRollupService.ListMeasurementDistrictRollup(c.Request().Context(), id, tw)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, project)
 }

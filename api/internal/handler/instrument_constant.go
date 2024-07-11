@@ -3,7 +3,7 @@ package handler
 import (
 	"net/http"
 
-	"github.com/USACE/instrumentation-api/api/internal/message"
+	"github.com/USACE/instrumentation-api/api/internal/httperr"
 	"github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -24,11 +24,11 @@ import (
 func (h *ApiHandler) ListInstrumentConstants(c echo.Context) error {
 	instrumentID, err := uuid.Parse(c.Param("instrument_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
 	cc, err := h.InstrumentConstantService.ListInstrumentConstants(c.Request().Context(), instrumentID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, cc)
 }
@@ -52,20 +52,20 @@ func (h *ApiHandler) CreateInstrumentConstants(c echo.Context) error {
 	ctx := c.Request().Context()
 	var tc model.TimeseriesCollectionItems
 	if err := c.Bind(&tc); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedBody(err)
 	}
 	instrumentID, err := uuid.Parse(c.Param("instrument_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
 	for idx := range tc.Items {
 		if instrumentID != tc.Items[idx].InstrumentID {
-			return echo.NewHTTPError(http.StatusBadRequest, message.MatchRouteParam("`instrument_id`"))
+			return httperr.Message(http.StatusBadRequest, "all instrument ids in body must match query parameter")
 		}
 	}
 	tt, err := h.InstrumentConstantService.CreateInstrumentConstants(ctx, tc.Items)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusCreated, tt)
 }
@@ -88,15 +88,15 @@ func (h *ApiHandler) CreateInstrumentConstants(c echo.Context) error {
 func (h *ApiHandler) DeleteInstrumentConstant(c echo.Context) error {
 	instrumentID, err := uuid.Parse(c.Param("instrument_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
 	timeseriesID, err := uuid.Parse(c.Param("timeseries_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
 	err = h.InstrumentConstantService.DeleteInstrumentConstant(c.Request().Context(), instrumentID, timeseriesID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, make(map[string]interface{}))
 }

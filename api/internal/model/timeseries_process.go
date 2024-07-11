@@ -2,6 +2,7 @@ package model
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -9,7 +10,6 @@ import (
 	"time"
 
 	"github.com/Knetic/govaluate"
-	"github.com/USACE/instrumentation-api/api/internal/message"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx/types"
 	"github.com/tidwall/btree"
@@ -114,7 +114,7 @@ type BTreeNode struct {
 
 func (mrc *ProcessTimeseriesResponseCollection) GroupByInstrument(threshold int) (map[uuid.UUID][]MeasurementCollectionLean, error) {
 	if len(*mrc) == 0 {
-		return make(map[uuid.UUID][]MeasurementCollectionLean), fmt.Errorf(message.NotFound)
+		return make(map[uuid.UUID][]MeasurementCollectionLean), nil
 	}
 
 	tmp := make(map[uuid.UUID]map[uuid.UUID][]MeasurementLean)
@@ -151,7 +151,7 @@ func (mrc *ProcessTimeseriesResponseCollection) GroupByInstrument(threshold int)
 
 func (mrc *ProcessInclinometerTimeseriesResponseCollection) GroupByInstrument() (map[uuid.UUID][]InclinometerMeasurementCollectionLean, error) {
 	if len(*mrc) == 0 {
-		return make(map[uuid.UUID][]InclinometerMeasurementCollectionLean), fmt.Errorf(message.NotFound)
+		return make(map[uuid.UUID][]InclinometerMeasurementCollectionLean), sql.ErrNoRows
 	}
 
 	res := make(map[uuid.UUID][]InclinometerMeasurementCollectionLean)
@@ -174,7 +174,10 @@ func (mrc *ProcessInclinometerTimeseriesResponseCollection) GroupByInstrument() 
 
 func (mrc *ProcessTimeseriesResponseCollection) CollectSingleTimeseries(threshold int, tsID uuid.UUID) (MeasurementCollection, error) {
 	if len(*mrc) == 0 {
-		return MeasurementCollection{}, fmt.Errorf(message.NotFound)
+		return MeasurementCollection{
+			TimeseriesID: tsID,
+			Items:        make([]Measurement, 0),
+		}, nil
 	}
 
 	for _, t := range *mrc {

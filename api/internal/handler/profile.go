@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 
+	"github.com/USACE/instrumentation-api/api/internal/httperr"
 	"github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/labstack/echo/v4"
 )
@@ -30,7 +31,7 @@ func (h *ApiHandler) CreateProfile(c echo.Context) error {
 
 	pNew, err := h.ProfileService.CreateProfile(c.Request().Context(), p)
 	if err != nil {
-		return err
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusCreated, pNew)
 }
@@ -52,12 +53,12 @@ func (h *ApiHandler) GetMyProfile(c echo.Context) error {
 
 	p, err := h.ProfileService.GetProfileWithTokensForClaims(ctx, claims)
 	if err != nil {
-		return err
+		return httperr.InternalServerError(err)
 	}
 
 	pValidated, err := h.ProfileService.UpdateProfileForClaims(ctx, p, claims)
 	if err != nil {
-		return err
+		return httperr.InternalServerError(err)
 	}
 
 	return c.JSON(http.StatusOK, pValidated)
@@ -80,11 +81,11 @@ func (h *ApiHandler) CreateToken(c echo.Context) error {
 
 	p, err := h.ProfileService.GetProfileWithTokensForClaims(ctx, claims)
 	if err != nil {
-		return err
+		return httperr.InternalServerError(err)
 	}
 	token, err := h.ProfileService.CreateProfileToken(ctx, p.ID)
 	if err != nil {
-		return err
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusCreated, token)
 }
@@ -107,15 +108,15 @@ func (h *ApiHandler) DeleteToken(c echo.Context) error {
 
 	tokenID := c.Param("token_id")
 	if tokenID == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "bad token id")
+		return httperr.Message(http.StatusBadRequest, "bad token id")
 	}
 
 	p, err := h.ProfileService.GetProfileWithTokensForClaims(ctx, claims)
 	if err != nil {
-		return err
+		return httperr.InternalServerError(err)
 	}
 	if err := h.ProfileService.DeleteToken(ctx, p.ID, tokenID); err != nil {
-		return err
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, make(map[string]interface{}))
 }

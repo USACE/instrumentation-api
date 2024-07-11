@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/USACE/instrumentation-api/api/internal/message"
+	"github.com/USACE/instrumentation-api/api/internal/httperr"
 	"github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -28,18 +28,18 @@ import (
 func (h *ApiHandler) AssignInstrumentToProject(c echo.Context) error {
 	pID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 	iID, err := uuid.Parse(c.Param("instrument_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 	dryRun := strings.ToLower(c.QueryParam("dry_run")) == "true"
 	p := c.Get("profile").(model.Profile)
 
 	v, err := h.InstrumentAssignService.AssignInstrumentsToProject(c.Request().Context(), p.ID, pID, []uuid.UUID{iID}, dryRun)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 
 	return c.JSON(http.StatusOK, v)
@@ -64,18 +64,18 @@ func (h *ApiHandler) AssignInstrumentToProject(c echo.Context) error {
 func (h *ApiHandler) UnassignInstrumentFromProject(c echo.Context) error {
 	pID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 	iID, err := uuid.Parse(c.Param("instrument_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 	dryRun := strings.ToLower(c.QueryParam("dry_run")) == "true"
 	p := c.Get("profile").(model.Profile)
 
 	v, err := h.InstrumentAssignService.UnassignInstrumentsFromProject(c.Request().Context(), p.ID, pID, []uuid.UUID{iID}, dryRun)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 
 	return c.JSON(http.StatusOK, v)
@@ -101,14 +101,14 @@ func (h *ApiHandler) UnassignInstrumentFromProject(c echo.Context) error {
 func (h *ApiHandler) UpdateInstrumentProjectAssignments(c echo.Context) error {
 	iID, err := uuid.Parse(c.Param("instrument_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 	p := c.Get("profile").(model.Profile)
 	dryRun := strings.ToLower(c.QueryParam("dry_run")) == "true"
 
 	pl := model.InstrumentProjectAssignments{ProjectIDs: make([]uuid.UUID, 0)}
 	if err := c.Bind(&pl); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedBody(err)
 	}
 
 	ctx := c.Request().Context()
@@ -116,17 +116,17 @@ func (h *ApiHandler) UpdateInstrumentProjectAssignments(c echo.Context) error {
 	case "assign":
 		v, err := h.InstrumentAssignService.AssignProjectsToInstrument(ctx, p.ID, iID, pl.ProjectIDs, dryRun)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			return httperr.InternalServerError(err)
 		}
 		return c.JSON(http.StatusOK, v)
 	case "unassign":
 		v, err := h.InstrumentAssignService.UnassignProjectsFromInstrument(ctx, p.ID, iID, pl.ProjectIDs, dryRun)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			return httperr.InternalServerError(err)
 		}
 		return c.JSON(http.StatusOK, v)
 	default:
-		return echo.NewHTTPError(http.StatusBadRequest, "required query parameter 'action': valid values are 'assign' or 'unassign'")
+		return httperr.Message(http.StatusBadRequest, "required query parameter 'action': valid values are 'assign' or 'unassign'")
 	}
 }
 
@@ -149,14 +149,14 @@ func (h *ApiHandler) UpdateInstrumentProjectAssignments(c echo.Context) error {
 func (h *ApiHandler) UpdateProjectInstrumentAssignments(c echo.Context) error {
 	pID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 	p := c.Get("profile").(model.Profile)
 	dryRun := strings.ToLower(c.QueryParam("dry_run")) == "true"
 
 	pl := model.ProjectInstrumentAssignments{InstrumentIDs: make([]uuid.UUID, 0)}
 	if err := c.Bind(&pl); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedBody(err)
 	}
 
 	ctx := c.Request().Context()
@@ -164,16 +164,16 @@ func (h *ApiHandler) UpdateProjectInstrumentAssignments(c echo.Context) error {
 	case "assign":
 		v, err := h.InstrumentAssignService.AssignInstrumentsToProject(ctx, p.ID, pID, pl.InstrumentIDs, dryRun)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			return httperr.InternalServerError(err)
 		}
 		return c.JSON(http.StatusOK, v)
 	case "unassign":
 		v, err := h.InstrumentAssignService.UnassignInstrumentsFromProject(ctx, p.ID, pID, pl.InstrumentIDs, dryRun)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			return httperr.InternalServerError(err)
 		}
 		return c.JSON(http.StatusOK, v)
 	default:
-		return echo.NewHTTPError(http.StatusBadRequest, "required query parameter 'action': valid values are 'assign' or 'unassign'")
+		return httperr.Message(http.StatusBadRequest, "required query parameter 'action': valid values are 'assign' or 'unassign'")
 	}
 }

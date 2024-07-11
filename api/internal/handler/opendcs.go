@@ -3,7 +3,7 @@ package handler
 import (
 	"net/http"
 
-	"github.com/USACE/instrumentation-api/api/internal/message"
+	"github.com/USACE/instrumentation-api/api/internal/httperr"
 	_ "github.com/USACE/instrumentation-api/api/internal/model"
 
 	"github.com/labstack/echo/v4"
@@ -22,7 +22,7 @@ import (
 func (h *ApiHandler) ListOpendcsSites(c echo.Context) error {
 	ss, err := h.OpendcsService.ListOpendcsSites(c.Request().Context())
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.BadRequest)
+		return httperr.InternalServerError(err)
 	}
 	return c.XMLPretty(http.StatusOK, ss, "  ")
 }

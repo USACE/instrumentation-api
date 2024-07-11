@@ -1,13 +1,12 @@
 package handler
 
 import (
-	"database/sql"
 	"errors"
 	"fmt"
 	"net/http"
 	"time"
 
-	"github.com/USACE/instrumentation-api/api/internal/message"
+	"github.com/USACE/instrumentation-api/api/internal/httperr"
 	"github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -30,12 +29,12 @@ func (h *ApiHandler) ListDataloggers(c echo.Context) error {
 	if pID != "" {
 		pID, err := uuid.Parse(pID)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+			return httperr.MalformedID(err)
 		}
 
 		dls, err := h.DataloggerService.ListProjectDataloggers(c.Request().Context(), pID)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			return httperr.InternalServerError(err)
 		}
 
 		return c.JSON(http.StatusOK, dls)
@@ -43,7 +42,7 @@ func (h *ApiHandler) ListDataloggers(c echo.Context) error {
 
 	dls, err := h.DataloggerService.ListAllDataloggers(c.Request().Context())
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 
 	return c.JSON(http.StatusOK, dls)
@@ -67,37 +66,34 @@ func (h *ApiHandler) CreateDatalogger(c echo.Context) error {
 	ctx := c.Request().Context()
 	n := model.Datalogger{}
 	if err := c.Bind(&n); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedBody(err)
 	}
 
 	p := c.Get("profile").(model.Profile)
 	n.CreatorID = p.ID
 
 	if n.Name == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "valid `name` field required")
+		return httperr.BadRequest(errors.New("valid `name` field required"))
 	}
 
 	model, err := h.DataloggerService.GetDataloggerModelName(ctx, n.ModelID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("data logger model id %s not found", n.ModelID))
+		return httperr.BadRequest(fmt.Errorf("data logger model id %s not found", n.ModelID))
 	}
 
 	// check if datalogger with model and sn already exists and is not deleted
 	exists, err := h.DataloggerService.GetDataloggerIsActive(ctx, model, n.SN)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 
 	if exists {
-		return echo.NewHTTPError(
-			http.StatusInternalServerError,
-			"active data logger model with this model and serial number already exist",
-		)
+		return httperr.BadRequest(errors.New("active data logger model with this model and serial number already exist"))
 	}
 
 	dl, err := h.DataloggerService.CreateDatalogger(ctx, n)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
+		return httperr.InternalServerError(err)
 	}
 
 	return c.JSON(http.StatusCreated, dl)
@@ -120,13 +116,13 @@ func (h *ApiHandler) CycleDataloggerKey(c echo.Context) error {
 	ctx := c.Request().Context()
 	dlID, err := uuid.Parse(c.Param("datalogger_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 
 	u := model.Datalogger{ID: dlID}
 
 	if err := h.DataloggerService.VerifyDataloggerExists(ctx, dlID); err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		return httperr.NotFound(err)
 	}
 
 	profile := c.Get("profile").(model.Profile)
@@ -135,7 +131,7 @@ func (h *ApiHandler) CycleDataloggerKey(c echo.Context) error {
 
 	dl, err := h.DataloggerService.CycleDataloggerKey(ctx, u)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
+		return httperr.InternalServerError(err)
 	}
 
 	return c.JSON(http.StatusOK, dl)
@@ -157,11 +153,11 @@ func (h *ApiHandler) CycleDataloggerKey(c echo.Context) error {
 func (h *ApiHandler) GetDatalogger(c echo.Context) error {
 	dlID, err := uuid.Parse(c.Param("datalogger_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 	dl, err := h.DataloggerService.GetOneDatalogger(c.Request().Context(), dlID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, message.NotFound)
+		httperr.ServerErrorOrNotFound(err)
 	}
 
 	return c.JSON(http.StatusOK, dl)
@@ -185,20 +181,17 @@ func (h *ApiHandler) UpdateDatalogger(c echo.Context) error {
 	ctx := c.Request().Context()
 	dlID, err := uuid.Parse(c.Param("datalogger_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 
 	u := model.Datalogger{ID: dlID}
 	if err := c.Bind(&u); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedBody(err)
 	}
-
-	if dlID != u.ID {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MatchRouteParam("`id`"))
-	}
+	u.ID = dlID
 
 	if err := h.DataloggerService.VerifyDataloggerExists(ctx, dlID); err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		return httperr.InternalServerError(err)
 	}
 
 	profile := c.Get("profile").(model.Profile)
@@ -207,7 +200,7 @@ func (h *ApiHandler) UpdateDatalogger(c echo.Context) error {
 
 	dlUpdated, err := h.DataloggerService.UpdateDatalogger(ctx, u)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 
 	return c.JSON(http.StatusOK, dlUpdated)
@@ -230,11 +223,11 @@ func (h *ApiHandler) DeleteDatalogger(c echo.Context) error {
 	ctx := c.Request().Context()
 	dlID, err := uuid.Parse(c.Param("datalogger_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 
 	if err := h.DataloggerService.VerifyDataloggerExists(ctx, dlID); err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		return httperr.InternalServerError(err)
 	}
 
 	d := model.Datalogger{ID: dlID}
@@ -243,7 +236,7 @@ func (h *ApiHandler) DeleteDatalogger(c echo.Context) error {
 	d.UpdaterID, d.UpdateDate = &profile.ID, &t
 
 	if err := h.DataloggerService.DeleteDatalogger(ctx, d); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{"id": dlID})
@@ -266,18 +259,15 @@ func (h *ApiHandler) DeleteDatalogger(c echo.Context) error {
 func (h *ApiHandler) GetDataloggerTablePreview(c echo.Context) error {
 	_, err := uuid.Parse(c.Param("datalogger_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MissingQueryParameter("datalogger_id"))
+		return httperr.MalformedID(err)
 	}
 	dataloggerTableID, err := uuid.Parse(c.Param("datalogger_table_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MissingQueryParameter("datalogger_table_id"))
+		return httperr.MalformedID(err)
 	}
 	preview, err := h.DataloggerService.GetDataloggerTablePreview(c.Request().Context(), dataloggerTableID)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return echo.NewHTTPError(http.StatusNotFound, message.NotFound)
-		}
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.ServerErrorOrNotFound(err)
 	}
 	return c.JSON(http.StatusOK, preview)
 }
@@ -299,14 +289,14 @@ func (h *ApiHandler) GetDataloggerTablePreview(c echo.Context) error {
 func (h *ApiHandler) ResetDataloggerTableName(c echo.Context) error {
 	_, err := uuid.Parse(c.Param("datalogger_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MissingQueryParameter("datalogger_id"))
+		return httperr.MalformedID(err)
 	}
 	dataloggerTableID, err := uuid.Parse(c.Param("datalogger_table_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MissingQueryParameter("datalogger_table_id"))
+		return httperr.MalformedID(err)
 	}
 	if err := h.DataloggerService.ResetDataloggerTableName(c.Request().Context(), dataloggerTableID); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{"datalogger_table_id": dataloggerTableID})
 }

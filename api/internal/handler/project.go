@@ -1,13 +1,11 @@
 package handler
 
 import (
-	"database/sql"
-	"errors"
 	"net/http"
 	"strings"
 	"time"
 
-	"github.com/USACE/instrumentation-api/api/internal/message"
+	"github.com/USACE/instrumentation-api/api/internal/httperr"
 	"github.com/USACE/instrumentation-api/api/internal/model"
 
 	"github.com/google/uuid"
@@ -27,7 +25,7 @@ import (
 func (h *ApiHandler) ListDistricts(c echo.Context) error {
 	dd, err := h.ProjectService.ListDistricts(c.Request().Context())
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, dd)
 }
@@ -50,14 +48,14 @@ func (h *ApiHandler) ListProjects(c echo.Context) error {
 	if fedID != "" {
 		projects, err := h.ProjectService.ListProjectsByFederalID(ctx, fedID)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
+			return httperr.InternalServerError(err)
 		}
 		return c.JSON(http.StatusOK, projects)
 	}
 
 	projects, err := h.ProjectService.ListProjects(ctx)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, projects)
 }
@@ -82,7 +80,7 @@ func (h *ApiHandler) ListMyProjects(c echo.Context) error {
 	if p.IsAdmin {
 		projects, err := h.ProjectService.ListProjects(ctx)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
+			return httperr.InternalServerError(err)
 		}
 		return c.JSON(http.StatusOK, projects)
 	}
@@ -93,16 +91,16 @@ func (h *ApiHandler) ListMyProjects(c echo.Context) error {
 		if role == "admin" || role == "member" {
 			projects, err := h.ProjectService.ListProjectsForProfileRole(ctx, p.ID, role)
 			if err != nil {
-				return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+				return httperr.InternalServerError(err)
 			}
 			return c.JSON(http.StatusOK, projects)
 		}
-		return echo.NewHTTPError(http.StatusBadRequest, "role parameter must be 'admin' or 'member'")
+		return httperr.Message(http.StatusBadRequest, "role parameter must be 'admin' or 'member'")
 	}
 
 	projects, err := h.ProjectService.ListProjectsForProfile(ctx, p.ID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, projects)
 }
@@ -121,11 +119,11 @@ func (h *ApiHandler) ListMyProjects(c echo.Context) error {
 func (h *ApiHandler) ListProjectInstruments(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 	nn, err := h.ProjectService.ListProjectInstruments(c.Request().Context(), id)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, nn)
 }
@@ -144,11 +142,11 @@ func (h *ApiHandler) ListProjectInstruments(c echo.Context) error {
 func (h *ApiHandler) ListProjectInstrumentGroups(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 	gg, err := h.ProjectService.ListProjectInstrumentGroups(c.Request().Context(), id)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, gg)
 }
@@ -166,7 +164,7 @@ func (h *ApiHandler) ListProjectInstrumentGroups(c echo.Context) error {
 func (h *ApiHandler) GetProjectCount(c echo.Context) error {
 	pc, err := h.ProjectService.GetProjectCount(c.Request().Context())
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, pc)
 }
@@ -185,11 +183,11 @@ func (h *ApiHandler) GetProjectCount(c echo.Context) error {
 func (h *ApiHandler) GetProject(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 	project, err := h.ProjectService.GetProject(c.Request().Context(), id)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, project)
 }
@@ -210,7 +208,7 @@ func (h *ApiHandler) GetProject(c echo.Context) error {
 func (h *ApiHandler) CreateProjectBulk(c echo.Context) error {
 	var pc model.ProjectCollection
 	if err := c.Bind(&pc); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedBody(err)
 	}
 
 	p := c.Get("profile").(model.Profile)
@@ -218,7 +216,7 @@ func (h *ApiHandler) CreateProjectBulk(c echo.Context) error {
 
 	for idx := range pc {
 		if pc[idx].Name == "" {
-			return echo.NewHTTPError(http.StatusBadRequest, errors.New("project name required"))
+			return httperr.Message(http.StatusBadRequest, "project name required")
 		}
 		pc[idx].CreatorID = p.ID
 		pc[idx].CreateDate = t
@@ -226,7 +224,7 @@ func (h *ApiHandler) CreateProjectBulk(c echo.Context) error {
 
 	pp, err := h.ProjectService.CreateProjectBulk(c.Request().Context(), pc)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusCreated, pp)
 }
@@ -248,11 +246,11 @@ func (h *ApiHandler) CreateProjectBulk(c echo.Context) error {
 func (h *ApiHandler) UpdateProject(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 	var p model.Project
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedBody(err)
 	}
 	p.ID = id
 	profile := c.Get("profile").(model.Profile)
@@ -262,7 +260,7 @@ func (h *ApiHandler) UpdateProject(c echo.Context) error {
 
 	pUpdated, err := h.ProjectService.UpdateProject(c.Request().Context(), p)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, pUpdated)
 }
@@ -283,10 +281,10 @@ func (h *ApiHandler) UpdateProject(c echo.Context) error {
 func (h *ApiHandler) DeleteFlagProject(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		return httperr.MalformedID(err)
 	}
 	if err := h.ProjectService.DeleteFlagProject(c.Request().Context(), id); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, make(map[string]interface{}))
 }
@@ -309,21 +307,18 @@ func (h *ApiHandler) DeleteFlagProject(c echo.Context) error {
 func (h *ApiHandler) UploadProjectImage(c echo.Context) error {
 	projectID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 	fh, err := c.FormFile("image")
 	if err != nil || fh == nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "attached form file 'image' required")
+		return httperr.Message(http.StatusBadRequest, "attached form file 'image' required")
 	}
 	if fh.Size > 2000000 {
-		return echo.NewHTTPError(http.StatusBadRequest, "image exceeds max size of 2MB")
+		return httperr.Message(http.StatusBadRequest, "image exceeds max size of 2MB")
 	}
 
 	if err := h.ProjectService.UploadProjectImage(c.Request().Context(), projectID, *fh, h.BlobService.UploadContext); err != nil {
-		if errors.Is(sql.ErrNoRows, err) {
-			return echo.NewHTTPError(http.StatusBadRequest, message.BadRequest)
-		}
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.ServerErrorOrNotFound(err)
 	}
 
 	return c.JSON(http.StatusOK, make(map[string]interface{}))

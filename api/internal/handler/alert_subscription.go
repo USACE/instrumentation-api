@@ -1,9 +1,10 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 
-	"github.com/USACE/instrumentation-api/api/internal/message"
+	"github.com/USACE/instrumentation-api/api/internal/httperr"
 	"github.com/USACE/instrumentation-api/api/internal/model"
 
 	"github.com/google/uuid"
@@ -31,11 +32,11 @@ func (h *ApiHandler) SubscribeProfileToAlerts(c echo.Context) error {
 
 	alertConfigID, err := uuid.Parse(c.Param("alert_config_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
 	pa, err := h.AlertSubscriptionService.SubscribeProfileToAlerts(c.Request().Context(), alertConfigID, profileID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, pa)
 }
@@ -61,10 +62,10 @@ func (h *ApiHandler) UnsubscribeProfileToAlerts(c echo.Context) error {
 
 	alertConfigID, err := uuid.Parse(c.Param("alert_config_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
 	if err = h.AlertSubscriptionService.UnsubscribeProfileToAlerts(c.Request().Context(), alertConfigID, profileID); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, make(map[string]interface{}))
 }
@@ -86,7 +87,7 @@ func (h *ApiHandler) ListMyAlertSubscriptions(c echo.Context) error {
 	profileID := p.ID
 	ss, err := h.AlertSubscriptionService.ListMyAlertSubscriptions(c.Request().Context(), profileID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, ss)
 }
@@ -109,26 +110,25 @@ func (h *ApiHandler) ListMyAlertSubscriptions(c echo.Context) error {
 func (h *ApiHandler) UpdateMyAlertSubscription(c echo.Context) error {
 	var s model.AlertSubscription
 	if err := c.Bind(&s); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedBody(err)
 	}
 	sID, err := uuid.Parse(c.Param("alert_subscription_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
-	if s.ID != sID {
-		return echo.NewHTTPError(http.StatusBadRequest, "route parameter subscription_id does not match id in JSON payload")
-	}
+	s.ID = sID
+
 	p := c.Get("profile").(model.Profile)
 	t, err := h.AlertSubscriptionService.GetAlertSubscriptionByID(c.Request().Context(), sID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	if p.ID != t.ProfileID {
-		return echo.NewHTTPError(http.StatusUnauthorized, message.Unauthorized)
+		return httperr.Unauthorized(errors.New("profile id or requester did not match alert subscription id"))
 	}
 	sUpdated, err := h.AlertSubscriptionService.UpdateMyAlertSubscription(c.Request().Context(), s)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, sUpdated)
 }

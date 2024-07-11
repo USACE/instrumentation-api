@@ -2,28 +2,32 @@ package handler
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"math"
 	"net/http"
 	"time"
 
-	"github.com/USACE/instrumentation-api/api/internal/message"
+	"github.com/USACE/instrumentation-api/api/internal/httperr"
 	"github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/labstack/echo/v4"
 )
 
 const preparse = "preparse"
 
+const snErrMsg = "`sn` parameter must match request body"
+const modelErrMsg = "`model` parameter must match request body"
+
 // CreateOrUpdateDataloggerMeasurements creates or updates measurements for a timeseries using an equivalency table
 func (h *TelemetryHandler) CreateOrUpdateDataloggerMeasurements(c echo.Context) error {
 	modelName := c.Param("model")
 	if modelName == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "missing route param `model`")
+		return httperr.Message(http.StatusBadRequest, "missing route param `model`")
 	}
 	sn := c.Param("sn")
 	if sn == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "missing route param `sn`")
+		return httperr.Message(http.StatusBadRequest, "missing route param `sn`")
 	}
 
 	ctx := c.Request().Context()
@@ -31,27 +35,27 @@ func (h *TelemetryHandler) CreateOrUpdateDataloggerMeasurements(c echo.Context) 
 	// Make sure datalogger is active
 	dl, err := h.DataloggerTelemetryService.GetDataloggerByModelSN(ctx, modelName, sn)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.InternalServerError(err)
 	}
 
 	body := make(map[string]interface{})
 	err = json.NewDecoder(c.Request().Body).Decode(&body)
 	if err != nil {
-		return err
+		return httperr.MalformedBody(err)
 	}
 	rawJSON, err := json.Marshal(body)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedBody(err)
 	}
 
 	var prv model.DataloggerTablePreview
 	if err := prv.Preview.Set(rawJSON); err != nil {
-		return err
+		return httperr.InternalServerError(err)
 	}
 	prv.UpdateDate = time.Now()
 
 	if _, err := h.DataloggerTelemetryService.UpdateDataloggerTablePreview(ctx, dl.ID, preparse, prv); err != nil {
-		return err
+		return httperr.InternalServerError(err)
 	}
 
 	if modelName == "CR6" || modelName == "CR1000X" {
@@ -59,7 +63,7 @@ func (h *TelemetryHandler) CreateOrUpdateDataloggerMeasurements(c echo.Context) 
 		return cr6Handler(c)
 	}
 
-	return echo.NewHTTPError(http.StatusBadRequest, message.BadRequest)
+	return httperr.BadRequest(errors.New("datalogger model not supported"))
 }
 
 // getCR6Handler handles parsing and uploading of Campbell Scientific CR6 measurement payloads
@@ -88,18 +92,20 @@ func getCR6Handler(h *TelemetryHandler, dl model.Datalogger, rawJSON []byte) ech
 		var pl model.DataloggerPayload
 		if err := json.Unmarshal(rawJSON, &pl); err != nil {
 			em = append(em, fmt.Sprintf("%d: %s", http.StatusBadRequest, err.Error()))
-			return echo.NewHTTPError(http.StatusBadRequest, message.BadRequest)
+			return httperr.MalformedBody(err)
 		}
 
 		// Check sn from route param matches sn in request body
 		if dl.SN != pl.Head.Environment.SerialNo {
-			em = append(em, fmt.Sprintf("%d: %s", http.StatusBadRequest, fmt.Sprint(message.MatchRouteParam("`sn`"), dl.SN)))
-			return echo.NewHTTPError(http.StatusBadRequest, message.BadRequest)
+			snErr := fmt.Sprint(snErrMsg, dl.SN)
+			em = append(em, fmt.Sprintf("%d: %s", http.StatusBadRequest, snErr))
+			httperr.BadRequest(errors.New(snErr))
 		}
 		// Check sn from route param matches model in request body
 		if *dl.Model != pl.Head.Environment.Model {
-			em = append(em, fmt.Sprintf("%d: %s", http.StatusBadRequest, fmt.Sprint(message.MatchRouteParam("`model`"), *dl.Model)))
-			return echo.NewHTTPError(http.StatusBadRequest, message.BadRequest)
+			modelErr := fmt.Sprint(modelErrMsg, *dl.Model)
+			em = append(em, fmt.Sprintf("%d: %s", http.StatusBadRequest, modelErr))
+			httperr.BadRequest(errors.New(modelErr))
 		}
 
 		// reroute deferred errors and previews to respective table
@@ -107,20 +113,20 @@ func getCR6Handler(h *TelemetryHandler, dl model.Datalogger, rawJSON []byte) ech
 
 		var prv model.DataloggerTablePreview
 		if err := prv.Preview.Set(rawJSON); err != nil {
-			return err
+			return httperr.MalformedBody(err)
 		}
 		prv.UpdateDate = time.Now()
 
 		tableID, err := h.DataloggerTelemetryService.UpdateDataloggerTablePreview(ctx, dl.ID, tn, prv)
 		if err != nil {
 			em = append(em, fmt.Sprintf("%d: %s", http.StatusInternalServerError, err.Error()))
-			return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
+			return httperr.InternalServerError(err)
 		}
 
 		eqt, err := h.EquivalencyTableService.GetEquivalencyTable(ctx, tableID)
 		if err != nil {
 			em = append(em, fmt.Sprintf("%d: %s", http.StatusInternalServerError, err.Error()))
-			return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
+			return httperr.InternalServerError(err)
 		}
 
 		eqtFields := make(map[string]model.EquivalencyTableRow)
@@ -187,7 +193,7 @@ func getCR6Handler(h *TelemetryHandler, dl model.Datalogger, rawJSON []byte) ech
 
 		if _, err = h.MeasurementService.CreateOrUpdateTimeseriesMeasurements(ctx, mcs); err != nil {
 			em = append(em, fmt.Sprintf("%d: %s", http.StatusInternalServerError, err.Error()))
-			return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
+			return httperr.InternalServerError(err)
 		}
 
 		return c.JSON(http.StatusOK, map[string]interface{}{"model": *dl.Model, "sn": dl.SN})

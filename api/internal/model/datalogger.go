@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/internal/password"
@@ -115,19 +114,12 @@ func (q *Queries) GetDataloggerIsActive(ctx context.Context, modelName, sn strin
 }
 
 const verifyDataloggerExists = `
-	SELECT EXISTS (SELECT id FROM v_datalogger WHERE id = $1)::int
+	SELECT id FROM v_datalogger WHERE id = $1
 `
 
 // VerifyDataloggerExists checks if datalogger with sn already exists and is not deleted
 func (q *Queries) VerifyDataloggerExists(ctx context.Context, dlID uuid.UUID) error {
-	var dlExists bool
-	if err := q.db.GetContext(ctx, &dlExists, verifyDataloggerExists, dlID); err != nil {
-		return err
-	}
-	if !dlExists {
-		return fmt.Errorf("active data logger with id %s not found", dlID)
-	}
-	return nil
+	return q.db.GetContext(ctx, &uuid.UUID{}, verifyDataloggerExists, dlID)
 }
 
 const createDataloggerHash = `

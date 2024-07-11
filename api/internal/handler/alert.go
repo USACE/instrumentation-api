@@ -1,11 +1,9 @@
 package handler
 
 import (
-	"database/sql"
-	"errors"
 	"net/http"
 
-	"github.com/USACE/instrumentation-api/api/internal/message"
+	"github.com/USACE/instrumentation-api/api/internal/httperr"
 	"github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/google/uuid"
 
@@ -28,11 +26,11 @@ import (
 func (h *ApiHandler) ListAlertsForInstrument(c echo.Context) error {
 	instrumentID, err := uuid.Parse(c.Param("instrument_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.BadRequest(err)
 	}
 	aa, err := h.AlertService.GetAllAlertsForInstrument(c.Request().Context(), instrumentID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, aa)
 }
@@ -55,7 +53,7 @@ func (h *ApiHandler) ListMyAlerts(c echo.Context) error {
 	profileID := p.ID
 	aa, err := h.AlertService.GetAllAlertsForProfile(c.Request().Context(), profileID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, aa)
 }
@@ -80,14 +78,11 @@ func (h *ApiHandler) DoAlertRead(c echo.Context) error {
 	profileID := p.ID
 	alertID, err := uuid.Parse(c.Param("alert_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
 	a, err := h.AlertService.DoAlertRead(c.Request().Context(), profileID, alertID)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return echo.NewHTTPError(http.StatusNotFound, message.NotFound)
-		}
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, a)
 }
@@ -112,14 +107,11 @@ func (h *ApiHandler) DoAlertUnread(c echo.Context) error {
 	profileID := p.ID
 	alertID, err := uuid.Parse(c.Param("alert_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
 	a, err := h.AlertService.DoAlertUnread(c.Request().Context(), profileID, alertID)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return echo.NewHTTPError(http.StatusNotFound, message.NotFound)
-		}
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, a)
 }

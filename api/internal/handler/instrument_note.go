@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/USACE/instrumentation-api/api/internal/message"
+	"github.com/USACE/instrumentation-api/api/internal/httperr"
 	"github.com/USACE/instrumentation-api/api/internal/model"
 
 	"github.com/google/uuid"
@@ -24,7 +24,7 @@ import (
 func (h *ApiHandler) ListInstrumentNotes(c echo.Context) error {
 	notes, err := h.InstrumentNoteService.ListInstrumentNotes(c.Request().Context())
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, notes)
 }
@@ -43,11 +43,11 @@ func (h *ApiHandler) ListInstrumentNotes(c echo.Context) error {
 func (h *ApiHandler) ListInstrumentInstrumentNotes(c echo.Context) error {
 	iID, err := uuid.Parse(c.Param("instrument_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 	notes, err := h.InstrumentNoteService.ListInstrumentInstrumentNotes(c.Request().Context(), iID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, notes)
 }
@@ -66,11 +66,11 @@ func (h *ApiHandler) ListInstrumentInstrumentNotes(c echo.Context) error {
 func (h *ApiHandler) GetInstrumentNote(c echo.Context) error {
 	nID, err := uuid.Parse(c.Param("note_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 	note, err := h.InstrumentNoteService.GetInstrumentNote(c.Request().Context(), nID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, note)
 }
@@ -91,7 +91,7 @@ func (h *ApiHandler) GetInstrumentNote(c echo.Context) error {
 func (h *ApiHandler) CreateInstrumentNote(c echo.Context) error {
 	nc := model.InstrumentNoteCollection{}
 	if err := c.Bind(&nc); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedBody(err)
 	}
 	// profile and timestamp
 	p := c.Get("profile").(model.Profile)
@@ -103,7 +103,7 @@ func (h *ApiHandler) CreateInstrumentNote(c echo.Context) error {
 	}
 	nn, err := h.InstrumentNoteService.CreateInstrumentNote(c.Request().Context(), nc.Items)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 
 	return c.JSON(http.StatusCreated, nn)
@@ -126,22 +126,21 @@ func (h *ApiHandler) CreateInstrumentNote(c echo.Context) error {
 func (h *ApiHandler) UpdateInstrumentNote(c echo.Context) error {
 	noteID, err := uuid.Parse(c.Param("note_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
 	n := model.InstrumentNote{ID: noteID}
 	if err := c.Bind(&n); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedBody(err)
 	}
-	if noteID != n.ID {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MatchRouteParam("`note_id`"))
-	}
+	n.ID = noteID
+
 	p := c.Get("profile").(model.Profile)
 	t := time.Now()
 	n.UpdaterID, n.UpdateDate = &p.ID, &t
 
 	nUpdated, err := h.InstrumentNoteService.UpdateInstrumentNote(c.Request().Context(), n)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, nUpdated)
 }
@@ -163,10 +162,10 @@ func (h *ApiHandler) UpdateInstrumentNote(c echo.Context) error {
 func (h *ApiHandler) DeleteInstrumentNote(c echo.Context) error {
 	noteID, err := uuid.Parse(c.Param("note_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
 	if err := h.InstrumentNoteService.DeleteInstrumentNote(c.Request().Context(), noteID); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, make(map[string]interface{}))
 }

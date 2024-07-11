@@ -2,10 +2,9 @@ package middleware
 
 import (
 	"errors"
-	"net/http"
 	"strconv"
 
-	"github.com/USACE/instrumentation-api/api/internal/message"
+	"github.com/USACE/instrumentation-api/api/internal/httperr"
 	"github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
@@ -75,12 +74,12 @@ func (m *mw) AttachClaims(next echo.HandlerFunc) echo.HandlerFunc {
 
 		user, ok := c.Get("user").(*jwt.Token)
 		if !ok {
-			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
+			return httperr.Forbidden(errors.New("could not get `user` jwt from echo context"))
 		}
 
 		claims, err := mapClaims(user)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
+			return httperr.Forbidden(err)
 		}
 		c.Set("claims", claims)
 
@@ -92,7 +91,7 @@ func (m *mw) RequireClaims(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		_, ok := c.Get("claims").(model.ProfileClaims)
 		if !ok {
-			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
+			return httperr.Forbidden(errors.New("no valid claims for user"))
 		}
 		return next(c)
 	}
@@ -108,7 +107,7 @@ func (m *mw) AttachProfile(next echo.HandlerFunc) echo.HandlerFunc {
 		if c.Get("ApplicationKeyAuthSuccess") == true {
 			p, err := m.ProfileService.GetProfileWithTokensForEDIPI(ctx, 79)
 			if err != nil {
-				return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
+				return httperr.Forbidden(err)
 			}
 			c.Set("profile", p)
 			return next(c)
@@ -119,7 +118,7 @@ func (m *mw) AttachProfile(next echo.HandlerFunc) echo.HandlerFunc {
 			keyID := c.Get("KeyAuthKeyID").(string)
 			p, err := m.ProfileService.GetProfileWithTokensForTokenID(ctx, keyID)
 			if err != nil {
-				return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
+				return httperr.Forbidden(err)
 			}
 			c.Set("profile", p)
 			return next(c)
@@ -127,12 +126,12 @@ func (m *mw) AttachProfile(next echo.HandlerFunc) echo.HandlerFunc {
 
 		claims, ok := c.Get("claims").(model.ProfileClaims)
 		if !ok {
-			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
+			return httperr.Forbidden(errors.New("could not bind claims from context"))
 		}
 
 		p, err := m.ProfileService.GetProfileWithTokensForClaims(ctx, claims)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
+			return httperr.Forbidden(err)
 		}
 
 		c.Set("profile", p)
@@ -145,10 +144,10 @@ func (m *mw) IsApplicationAdmin(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		p, ok := c.Get("profile").(model.Profile)
 		if !ok {
-			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
+			return httperr.Forbidden(errors.New("could not bind profile from context"))
 		}
 		if !p.IsAdmin {
-			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
+			return httperr.Forbidden(errors.New("attempted application admin access failure"))
 		}
 		return next(c)
 	}
@@ -160,18 +159,18 @@ func (m *mw) IsProjectAdmin(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		p, ok := c.Get("profile").(model.Profile)
 		if !ok {
-			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
+			return httperr.Forbidden(errors.New("could not bind profile from context"))
 		}
 		if p.IsAdmin {
 			return next(c)
 		}
 		projectID, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
-			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
+			return httperr.Forbidden(err)
 		}
 		authorized, err := m.ProjectRoleService.IsProjectAdmin(c.Request().Context(), p.ID, projectID)
 		if err != nil || !authorized {
-			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
+			return httperr.Forbidden(err)
 		}
 		return next(c)
 	}
@@ -183,18 +182,18 @@ func (m *mw) IsProjectMember(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		p, ok := c.Get("profile").(model.Profile)
 		if !ok {
-			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
+			return httperr.Forbidden(errors.New("could not bind profile from context"))
 		}
 		if p.IsAdmin {
 			return next(c)
 		}
 		projectID, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
-			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
+			return httperr.Forbidden(err)
 		}
 		authorized, err := m.ProjectRoleService.IsProjectMember(c.Request().Context(), p.ID, projectID)
 		if err != nil || !authorized {
-			return echo.NewHTTPError(http.StatusForbidden, message.Unauthorized)
+			return httperr.Forbidden(err)
 		}
 		return next(c)
 	}
