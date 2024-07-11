@@ -29,6 +29,9 @@ elif [ "$1" = "up" ]; then
         DOCKER_BUILDKIT=1 $COMPOSECMD up -d --build
     fi
 
+elif [ "$1" = "authdbdump" ]; then
+    $COMPOSECMD exec authdb pg_dump postgres > auth/initdb/init2.sql
+
 elif [ "$1" = "down" ]; then
     mkdocs -q
     $COMPOSECMD -f docker-compose.dev.yml --profile=mock down
