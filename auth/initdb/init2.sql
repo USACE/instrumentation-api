@@ -22,6 +22,7 @@ SET row_security = off;
 
 CREATE SCHEMA keycloak;
 
+
 ALTER SCHEMA keycloak OWNER TO keycloak_user;
 
 SET default_tablespace = '';
@@ -1487,6 +1488,7 @@ f675ebb2-8c9f-4d74-a5b9-ce32818865c4	1719428810190	cwbi	UPDATE	98749fe9-5c8f-4d4
 19fb8d0c-baac-4d81-936a-4908633550af	1719438836121	cwbi	CREATE	98749fe9-5c8f-4d46-b973-16664c916f0f	fca2fb0d-1434-4ba2-bd0a-699e623e79be	f3fc1dd9-af7b-498a-9435-31da080a37ad	192.168.32.1	users/127cbaee-ee0c-4cd9-92a3-8e8a6f023e4a	\N	\N	USER
 4380573e-54a8-46f5-a963-800ba182aa7d	1719438849825	cwbi	ACTION	98749fe9-5c8f-4d46-b973-16664c916f0f	fca2fb0d-1434-4ba2-bd0a-699e623e79be	f3fc1dd9-af7b-498a-9435-31da080a37ad	192.168.32.1	users/127cbaee-ee0c-4cd9-92a3-8e8a6f023e4a/reset-password	\N	\N	USER
 76f3fc10-4508-4fb4-adb3-e309d34b41d6	1719438907833	cwbi	UPDATE	98749fe9-5c8f-4d46-b973-16664c916f0f	fca2fb0d-1434-4ba2-bd0a-699e623e79be	f3fc1dd9-af7b-498a-9435-31da080a37ad	192.168.32.1	users/127cbaee-ee0c-4cd9-92a3-8e8a6f023e4a	\N	\N	USER
+312690b1-fc76-493e-8f58-720216ca62ba	1720198846971	cwbi	UPDATE	98749fe9-5c8f-4d46-b973-16664c916f0f	fca2fb0d-1434-4ba2-bd0a-699e623e79be	f3fc1dd9-af7b-498a-9435-31da080a37ad	172.19.0.1	\N	\N	\N	REALM
 \.
 
 
@@ -2078,6 +2080,7 @@ fd71d89d-9f31-4dbb-b37b-d7826e62004e	Max Clients Limit	cwbi	max-clients	org.keyc
 cc0c3f19-6af7-4b58-9dca-fb0fb2e0db94	fallback-RS512	cwbi	rsa-generated	org.keycloak.keys.KeyProvider	cwbi	\N
 f0a0b63f-84cf-4b56-a6e8-4fd9bc9415b0	rsa-generated	cwbi	rsa-generated	org.keycloak.keys.KeyProvider	cwbi	\N
 1bbb3f1c-1cbc-4211-90ce-80d3bdd41320	aes-generated	cwbi	aes-generated	org.keycloak.keys.KeyProvider	cwbi	\N
+b675b797-9c59-47da-b378-65e9ab174073	\N	cwbi	declarative-user-profile	org.keycloak.userprofile.UserProfileProvider	cwbi	\N
 \.
 
 
@@ -2253,6 +2256,7 @@ COPY keycloak.credential (id, salt, type, user_id, created_date, user_label, sec
 08c1dcd8-c7da-4851-b18d-3fd2fe5905ef	\N	password	f3fc1dd9-af7b-498a-9435-31da080a37ad	1719326096351	\N	{"value":"fNSqW2YM3jIEBSKVk6zogGGIerlNBxlII/d0jCJmmIgahPKX3CmI0GKBbz2arwR5O6a4DulX0v6KGja33O3Y9w==","salt":"lrvDVTkV44mlKYR0H7ahKQ==","additionalParameters":{}}	{"hashIterations":27500,"algorithm":"pbkdf2-sha256","additionalParameters":{}}	10
 eb68ec6c-b233-467a-83de-f8907db05bf8	\N	password	f8dcafea-243e-4b89-8d7d-fa01918130f4	1719327627809	My password	{"value":"rS7hFhgurbYTqf2xOl21TK+ma64Za4bGekInBymZql67Fw9onWH8ghYQrIXhI/Px7RtIdevaAwXtGEnxGBEtpg==","salt":"E4/Bwx3A3YV1wur9bAI4nQ==","additionalParameters":{}}	{"hashIterations":27500,"algorithm":"pbkdf2-sha256","additionalParameters":{}}	10
 c0ddc8fb-b335-4908-979c-170956e5dfc1	\N	password	127cbaee-ee0c-4cd9-92a3-8e8a6f023e4a	1719438849822	My password	{"value":"cmmEQr11CDETApkFo92Ufi0h+qPfe2Rz34N6RNgdVYaOYZOcAwldY6d6M6spufpuGc62vGhZ0NBKlAR5/u8AHw==","salt":"oPBgKF5zunaSWRspE2bGVw==","additionalParameters":{}}	{"hashIterations":27500,"algorithm":"pbkdf2-sha256","additionalParameters":{}}	10
+eea54938-e813-43ff-81b6-697354de1a11	\N	password	f9b33064-13d0-47d7-8294-fb8f0fac819f	1720198987674	\N	{"value":"41Cn7baSFQjReOlJjBFVUSMnS5LlXopOMbXG4BZ7JcqjKT9bEdrLHpgDcLJdFS6VABZunx/WaVeyb1jLaO2GAg==","salt":"eg9MBjHhyQdRGH/Pask4jw==","additionalParameters":{}}	{"hashIterations":27500,"algorithm":"pbkdf2-sha256","additionalParameters":{}}	10
 \.
 
 
@@ -2620,6 +2624,22 @@ a1b18336-d2b8-49ad-add4-aa3b36ab3cf1	midas	{"token_id":"294b8131-ef7e-436a-a064-
 f0755ce7-7c3c-4539-b7a1-b12422a5be50	midas	{"token_id":"9b50e160-4d0d-45bd-8a66-aeb3bae4879e","grant_type":"authorization_code","refresh_token_type":"Refresh","scope":"openid email profile","refresh_token_id":"c0aca88d-d14b-40c7-b8c2-f3663ecf27d9","code_id":"a2b2f44d-d8a6-4dab-9b7f-dc15b0e3c70c","client_auth_method":"client-secret"}	\N	192.168.48.1	cwbi	a2b2f44d-d8a6-4dab-9b7f-dc15b0e3c70c	1719444764801	CODE_TO_TOKEN	127cbaee-ee0c-4cd9-92a3-8e8a6f023e4a
 f614e5c5-6842-4468-bfd4-d8a8de22c661	midas	{"auth_method":"openid-connect","auth_type":"code","redirect_uri":"http://localhost:3000/","consent":"no_consent_required","code_id":"6f0de584-0f10-4264-93c6-3207cc57260e","username":"nocactest"}	\N	192.168.48.1	cwbi	6f0de584-0f10-4264-93c6-3207cc57260e	1719444923908	LOGIN	127cbaee-ee0c-4cd9-92a3-8e8a6f023e4a
 ba8068ec-487a-445d-b426-2549fd4fedc4	midas	{"token_id":"1684605e-81c4-4d0c-a488-1e454ff8d2d5","grant_type":"authorization_code","refresh_token_type":"Refresh","scope":"openid email profile","refresh_token_id":"3416d07e-8df9-4f8e-ae10-f12c26ae04fc","code_id":"6f0de584-0f10-4264-93c6-3207cc57260e","client_auth_method":"client-secret"}	\N	192.168.48.1	cwbi	6f0de584-0f10-4264-93c6-3207cc57260e	1719444924883	CODE_TO_TOKEN	127cbaee-ee0c-4cd9-92a3-8e8a6f023e4a
+4cb95b11-e400-4d56-8392-d61f0c8e2849	midas	{"auth_method":"openid-connect","auth_type":"code","redirect_uri":"http://localhost:3000/","consent":"no_consent_required","code_id":"55a38410-b834-4954-bddb-6f92ef622971","username":"test"}	\N	172.19.0.1	cwbi	55a38410-b834-4954-bddb-6f92ef622971	1720194792004	LOGIN	f8dcafea-243e-4b89-8d7d-fa01918130f4
+d1bb0c83-95c8-4150-8bcb-e629967cdb9f	midas	{"token_id":"4aa0bc62-3ad8-49ce-b975-be907ca5bd38","grant_type":"authorization_code","refresh_token_type":"Refresh","scope":"openid email profile","refresh_token_id":"1ae79a08-d12e-48c5-9453-756933bdc2bc","code_id":"55a38410-b834-4954-bddb-6f92ef622971","client_auth_method":"client-secret"}	\N	172.19.0.1	cwbi	55a38410-b834-4954-bddb-6f92ef622971	1720194793020	CODE_TO_TOKEN	f8dcafea-243e-4b89-8d7d-fa01918130f4
+71fa4fad-8331-4e57-84b8-0d481617315c	midas	{"auth_method":"openid-connect","auth_type":"code","response_type":"code","redirect_uri":"http://localhost:3000/silent-check-sso.html","consent":"no_consent_required","code_id":"55a38410-b834-4954-bddb-6f92ef622971","response_mode":"fragment","username":"test"}	\N	172.19.0.1	cwbi	55a38410-b834-4954-bddb-6f92ef622971	1720195165050	LOGIN	f8dcafea-243e-4b89-8d7d-fa01918130f4
+512738db-41fc-43e3-91b1-6c393b20aa7f	midas	{"token_id":"47c9ad36-a5e7-4b5f-89be-a8de36f6cc43","grant_type":"authorization_code","refresh_token_type":"Refresh","scope":"openid email profile","refresh_token_id":"90c8acbb-63aa-49b1-8196-3b690c0cbeca","code_id":"55a38410-b834-4954-bddb-6f92ef622971","client_auth_method":"client-secret"}	\N	172.19.0.1	cwbi	55a38410-b834-4954-bddb-6f92ef622971	1720195165105	CODE_TO_TOKEN	f8dcafea-243e-4b89-8d7d-fa01918130f4
+c641334f-1614-41c0-9cce-37b54cdd39f4	\N	{"redirect_uri":"http://localhost:3000/"}	\N	172.19.0.1	cwbi	55a38410-b834-4954-bddb-6f92ef622971	1720195168627	LOGOUT	f8dcafea-243e-4b89-8d7d-fa01918130f4
+e64c75ad-f20a-4851-9675-b0215fd80ad5	midas	{"auth_method":"openid-connect","auth_type":"code","redirect_uri":"http://localhost:3000/","consent":"no_consent_required","code_id":"d5ea5d16-fcfb-427a-9bfb-8be248c07ac2","username":"test"}	\N	172.19.0.1	cwbi	d5ea5d16-fcfb-427a-9bfb-8be248c07ac2	1720195179752	LOGIN	f8dcafea-243e-4b89-8d7d-fa01918130f4
+71ba83f5-bbe4-4062-9891-90dd98e47f8f	midas	{"token_id":"663fee1b-e5f9-4eba-a2b4-a613b238eb94","grant_type":"authorization_code","refresh_token_type":"Refresh","scope":"openid email profile","refresh_token_id":"840fa03e-8f75-4c7c-b89b-59b864091d7d","code_id":"d5ea5d16-fcfb-427a-9bfb-8be248c07ac2","client_auth_method":"client-secret"}	\N	172.19.0.1	cwbi	d5ea5d16-fcfb-427a-9bfb-8be248c07ac2	1720195180635	CODE_TO_TOKEN	f8dcafea-243e-4b89-8d7d-fa01918130f4
+55144ff0-4020-4c25-9af8-9efdb1102dd2	midas	{"auth_method":"openid-connect","auth_type":"code","response_type":"code","redirect_uri":"http://localhost:3000/silent-check-sso.html","consent":"no_consent_required","code_id":"d5ea5d16-fcfb-427a-9bfb-8be248c07ac2","response_mode":"fragment","username":"test"}	\N	172.19.0.1	cwbi	d5ea5d16-fcfb-427a-9bfb-8be248c07ac2	1720197970655	LOGIN	f8dcafea-243e-4b89-8d7d-fa01918130f4
+9952b20e-4d01-4dbd-ab71-3e6e0243f7c2	midas	{"token_id":"7e8c8d1f-5ce1-41fa-9e77-65018ae7ccf9","grant_type":"authorization_code","refresh_token_type":"Refresh","scope":"openid email profile","refresh_token_id":"3247e296-cbbb-4674-a6cc-a9b6d494f820","code_id":"d5ea5d16-fcfb-427a-9bfb-8be248c07ac2","client_auth_method":"client-secret"}	\N	172.19.0.1	cwbi	d5ea5d16-fcfb-427a-9bfb-8be248c07ac2	1720197970704	CODE_TO_TOKEN	f8dcafea-243e-4b89-8d7d-fa01918130f4
+c0076dcf-bbc0-4849-9ce3-598734d943a6	midas	{"auth_method":"openid-connect","auth_type":"code","response_type":"code","redirect_uri":"http://localhost:3000/silent-check-sso.html","consent":"no_consent_required","code_id":"d5ea5d16-fcfb-427a-9bfb-8be248c07ac2","response_mode":"fragment","username":"test"}	\N	172.19.0.1	cwbi	d5ea5d16-fcfb-427a-9bfb-8be248c07ac2	1720198420222	LOGIN	f8dcafea-243e-4b89-8d7d-fa01918130f4
+064eafa9-7bee-491d-8b31-532705cd8aa5	midas	{"token_id":"a2ca212b-9ed5-4c51-bdb4-bd24a4a4158b","grant_type":"authorization_code","refresh_token_type":"Refresh","scope":"openid email profile","refresh_token_id":"71ae5de9-b574-4ca9-9668-ac470f59f3f2","code_id":"d5ea5d16-fcfb-427a-9bfb-8be248c07ac2","client_auth_method":"client-secret"}	\N	172.19.0.1	cwbi	d5ea5d16-fcfb-427a-9bfb-8be248c07ac2	1720198420259	CODE_TO_TOKEN	f8dcafea-243e-4b89-8d7d-fa01918130f4
+9e8e4d4b-8d86-4bed-8609-2f6a54f9dc5a	\N	{"redirect_uri":"http://localhost:3000/blue-water-dam-example-project#dashboard"}	\N	172.19.0.1	cwbi	d5ea5d16-fcfb-427a-9bfb-8be248c07ac2	1720198481958	LOGOUT	f8dcafea-243e-4b89-8d7d-fa01918130f4
+560311b7-1bf7-4053-9505-e98da6073c0c	midas	{"auth_method":"openid-connect","auth_type":"code","redirect_uri":"http://localhost:3000/blue-water-dam-example-project#dashboard","code_id":"b64bca9d-9370-4ba2-b29e-18cc8387ac70","username":"newuser"}	user_not_found	172.19.0.1	cwbi	\N	1720198497268	LOGIN_ERROR	\N
+5d2740f0-42fe-449c-8f33-b6385979287f	midas	{"auth_method":"openid-connect","auth_type":"code","register_method":"form","last_name":"TestUser","redirect_uri":"http://localhost:3000/blue-water-dam-example-project#dashboard","first_name":"New","code_id":"deb471d7-7554-4cf6-8b9c-b04d87161ca9","email":"thisisatestemail@fake.usace.army.mil","username":"aaaaaaa"}	\N	172.19.0.1	cwbi	\N	1720198987621	REGISTER	f9b33064-13d0-47d7-8294-fb8f0fac819f
+3720d91a-3c15-4480-acfc-84d0a274aa29	midas	{"auth_method":"openid-connect","auth_type":"code","redirect_uri":"http://localhost:3000/blue-water-dam-example-project#dashboard","consent":"no_consent_required","code_id":"deb471d7-7554-4cf6-8b9c-b04d87161ca9","username":"aaaaaaa"}	\N	172.19.0.1	cwbi	deb471d7-7554-4cf6-8b9c-b04d87161ca9	1720198987679	LOGIN	f9b33064-13d0-47d7-8294-fb8f0fac819f
+70ab02ce-946a-4b80-a479-9d4ff5fc48ac	midas	{"token_id":"00c0879f-dce7-464e-9872-bb55d1f5ecd4","grant_type":"authorization_code","refresh_token_type":"Refresh","scope":"openid email profile","refresh_token_id":"3cfa6bbd-62f6-4a1c-8a24-bb6e53869f5d","code_id":"deb471d7-7554-4cf6-8b9c-b04d87161ca9","client_auth_method":"client-secret"}	\N	172.19.0.1	cwbi	deb471d7-7554-4cf6-8b9c-b04d87161ca9	1720198988530	CODE_TO_TOKEN	f9b33064-13d0-47d7-8294-fb8f0fac819f
 \.
 
 
@@ -3299,8 +3319,8 @@ d6680f62-2652-47d0-9b6c-6b7eae6d8c34	String	jsonType.label
 --
 
 COPY keycloak.realm (id, access_code_lifespan, user_action_lifespan, access_token_lifespan, account_theme, admin_theme, email_theme, enabled, events_enabled, events_expiration, login_theme, name, not_before, password_policy, registration_allowed, remember_me, reset_password_allowed, social, ssl_required, sso_idle_timeout, sso_max_lifespan, update_profile_on_soc_login, verify_email, master_admin_client, login_lifespan, internationalization_enabled, default_locale, reg_email_as_username, admin_events_enabled, admin_events_details_enabled, edit_username_allowed, otp_policy_counter, otp_policy_window, otp_policy_period, otp_policy_digits, otp_policy_alg, otp_policy_type, browser_flow, registration_flow, direct_grant_flow, reset_credentials_flow, client_auth_flow, offline_session_idle_timeout, revoke_refresh_token, access_token_life_implicit, login_with_email_allowed, duplicate_emails_allowed, docker_auth_flow, refresh_token_max_reuse, allow_user_managed_access, sso_max_lifespan_remember_me, sso_idle_timeout_remember_me, default_role) FROM stdin;
-cwbi	60	300	600	identity	\N	\N	t	t	0	identity	cwbi	0	\N	f	f	t	f	EXTERNAL	3600	36000	f	f	bc580584-cd30-4019-9ee4-0c162f4f9802	1800	f	\N	f	t	f	t	0	1	30	6	HmacSHA1	totp	fc78af35-3d57-4224-9087-7a4408ab4194	ee67ed51-4cbe-44b9-addf-8d1531025bfa	0679fb07-660f-4278-a965-820043ead874	18c46dcb-0468-4180-b925-a529175a7b03	eaf2aa1e-6359-43ca-b403-c169273acae9	86400	f	900	f	t	bb69c43d-7961-4f3e-abe3-793f283e0c68	0	t	0	0	c883c84f-d797-4170-bcf1-888f3843ba15
 98749fe9-5c8f-4d46-b973-16664c916f0f	60	300	60	\N	\N	\N	t	f	0	\N	master	0	\N	f	f	f	f	EXTERNAL	1800	36000	f	f	ebe2670b-ba08-442e-9983-2807d8e8dbba	1800	f	\N	f	f	f	f	0	1	30	6	HmacSHA1	totp	ee2d0274-f49c-44f6-a979-7e7f86176265	6cda22fb-db28-4a17-89cf-fca653249993	ea02467e-0b93-485a-8bf2-e401083b818f	602d6901-12a3-4e29-8bf1-98757e0a2dac	e58dc8c5-51b0-4ce5-a7be-e4270afd426e	2592000	f	900	t	f	b7d46802-4ce3-4643-bd2d-a5f250726a36	0	f	0	0	db5807fc-5e23-4f38-8243-bfdc9673bd9e
+cwbi	60	300	600	identity	\N	\N	t	t	0	identity	cwbi	0	\N	t	f	t	f	EXTERNAL	3600	36000	f	f	bc580584-cd30-4019-9ee4-0c162f4f9802	1800	f	\N	f	t	f	t	0	1	30	6	HmacSHA1	totp	fc78af35-3d57-4224-9087-7a4408ab4194	ee67ed51-4cbe-44b9-addf-8d1531025bfa	0679fb07-660f-4278-a965-820043ead874	18c46dcb-0468-4180-b925-a529175a7b03	eaf2aa1e-6359-43ca-b403-c169273acae9	86400	f	900	f	t	bb69c43d-7961-4f3e-abe3-793f283e0c68	0	t	0	0	c883c84f-d797-4170-bcf1-888f3843ba15
 \.
 
 
@@ -3330,12 +3350,9 @@ displayNameHtml	98749fe9-5c8f-4d46-b973-16664c916f0f	<div class="kc-logo-text"><
 defaultSignatureAlgorithm	98749fe9-5c8f-4d46-b973-16664c916f0f	RS256
 offlineSessionMaxLifespanEnabled	98749fe9-5c8f-4d46-b973-16664c916f0f	false
 offlineSessionMaxLifespan	98749fe9-5c8f-4d46-b973-16664c916f0f	5184000
-_browser_header.contentSecurityPolicyReportOnly	cwbi	
-_browser_header.xContentTypeOptions	cwbi	nosniff
-_browser_header.xRobotsTag	cwbi	none
-_browser_header.xFrameOptions	cwbi	SAMEORIGIN
-_browser_header.xXSSProtection	cwbi	1; mode=block
-_browser_header.strictTransportSecurity	cwbi	max-age=31536000; includeSubDomains
+frontendUrl	cwbi	
+userProfileEnabled	cwbi	false
+displayName	cwbi	Civil Work Business Intelligence Development and Testing
 bruteForceProtected	cwbi	false
 permanentLockout	cwbi	false
 maxFailureWaitSeconds	cwbi	900
@@ -3344,19 +3361,18 @@ waitIncrementSeconds	cwbi	60
 quickLoginCheckMilliSeconds	cwbi	1000
 maxDeltaTimeSeconds	cwbi	43200
 failureFactor	cwbi	30
-realmReusableOtpCode	cwbi	false
-displayName	cwbi	Civil Work Business Intelligence Development and Testing
-defaultSignatureAlgorithm	cwbi	RS256
-offlineSessionMaxLifespanEnabled	cwbi	false
-offlineSessionMaxLifespan	cwbi	5184000
-clientSessionIdleTimeout	cwbi	3600
-clientSessionMaxLifespan	cwbi	32400
-clientOfflineSessionIdleTimeout	cwbi	0
-clientOfflineSessionMaxLifespan	cwbi	0
 actionTokenGeneratedByAdminLifespan	cwbi	43200
 actionTokenGeneratedByUserLifespan	cwbi	300
+defaultSignatureAlgorithm	cwbi	RS256
 oauth2DeviceCodeLifespan	cwbi	600
 oauth2DevicePollingInterval	cwbi	600
+offlineSessionMaxLifespanEnabled	cwbi	false
+offlineSessionMaxLifespan	cwbi	5184000
+clientOfflineSessionIdleTimeout	cwbi	0
+clientOfflineSessionMaxLifespan	cwbi	0
+clientSessionIdleTimeout	cwbi	3600
+clientSessionMaxLifespan	cwbi	32400
+realmReusableOtpCode	cwbi	false
 webAuthnPolicyRpEntityName	cwbi	keycloak
 webAuthnPolicySignatureAlgorithms	cwbi	ES256
 webAuthnPolicyRpId	cwbi	
@@ -3375,16 +3391,20 @@ webAuthnPolicyRequireResidentKeyPasswordless	cwbi	not specified
 webAuthnPolicyUserVerificationRequirementPasswordless	cwbi	not specified
 webAuthnPolicyCreateTimeoutPasswordless	cwbi	0
 webAuthnPolicyAvoidSameAuthenticatorRegisterPasswordless	cwbi	false
+client-policies.profiles	cwbi	{"profiles":[]}
+client-policies.policies	cwbi	{"policies":[]}
+cibaAuthRequestedUserHint	cwbi	login_hint
 cibaBackchannelTokenDeliveryMode	cwbi	poll
 cibaExpiresIn	cwbi	120
 cibaInterval	cwbi	5
-cibaAuthRequestedUserHint	cwbi	login_hint
 parRequestUriLifespan	cwbi	60
+_browser_header.contentSecurityPolicyReportOnly	cwbi	
+_browser_header.xContentTypeOptions	cwbi	nosniff
+_browser_header.xRobotsTag	cwbi	none
+_browser_header.xFrameOptions	cwbi	SAMEORIGIN
 _browser_header.contentSecurityPolicy	cwbi	frame-src 'self' *; frame-ancestors 'self' *
-userProfileEnabled	cwbi	false
-frontendUrl	cwbi	
-client-policies.profiles	cwbi	{"profiles":[]}
-client-policies.policies	cwbi	{"policies":[]}
+_browser_header.xXSSProtection	cwbi	1; mode=block
+_browser_header.strictTransportSecurity	cwbi	max-age=31536000; includeSubDomains
 \.
 
 
@@ -3709,6 +3729,7 @@ COPY keycloak.user_entity (id, email, email_constraint, email_verified, enabled,
 f3fc1dd9-af7b-498a-9435-31da080a37ad	\N	47fc5432-cc32-4471-ae60-5d638d6b7fb4	f	t	\N	\N	\N	98749fe9-5c8f-4d46-b973-16664c916f0f	admin	1719326096269	\N	0
 f8dcafea-243e-4b89-8d7d-fa01918130f4	anthony.m.lambert@fake.usace.army.mil	e2b90b7a-7b44-4982-aa44-c4ca043efb03	t	t	\N	Anthony	Lambert	cwbi	test	1719327608101	\N	0
 127cbaee-ee0c-4cd9-92a3-8e8a6f023e4a	molly.rutherford@fake.usace.army.mil	7a01ff11-105d-40c5-9818-f70563fa8256	t	t	\N	Molly	Rutherford	cwbi	nocactest	1719438836112	\N	0
+f9b33064-13d0-47d7-8294-fb8f0fac819f	thisisatestemail@fake.usace.army.mil	563e0f8e-b5d3-446b-8831-29d36470c702	f	t	\N	New	TestUser	cwbi	aaaaaaa	1720198987614	\N	0
 \.
 
 
@@ -3769,6 +3790,7 @@ db5807fc-5e23-4f38-8243-bfdc9673bd9e	f3fc1dd9-af7b-498a-9435-31da080a37ad
 8eb26a12-1853-44b8-bf59-4da9e0cb683c	f3fc1dd9-af7b-498a-9435-31da080a37ad
 c883c84f-d797-4170-bcf1-888f3843ba15	f8dcafea-243e-4b89-8d7d-fa01918130f4
 c883c84f-d797-4170-bcf1-888f3843ba15	127cbaee-ee0c-4cd9-92a3-8e8a6f023e4a
+c883c84f-d797-4170-bcf1-888f3843ba15	f9b33064-13d0-47d7-8294-fb8f0fac819f
 \.
 
 
