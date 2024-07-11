@@ -22,6 +22,7 @@ type Middleware interface {
 	AppKeyAuth(next echo.HandlerFunc) echo.HandlerFunc
 	DataloggerKeyAuth(next echo.HandlerFunc) echo.HandlerFunc
 	RequestLogger(next echo.HandlerFunc) echo.HandlerFunc
+	RequestID(next echo.HandlerFunc) echo.HandlerFunc
 }
 
 type mw struct {

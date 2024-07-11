@@ -1,11 +1,10 @@
 package handler
 
 import (
-	"database/sql"
 	"net/http"
 	"time"
 
-	"github.com/USACE/instrumentation-api/api/internal/message"
+	"github.com/USACE/instrumentation-api/api/internal/httperr"
 	"github.com/USACE/instrumentation-api/api/internal/model"
 
 	"github.com/google/uuid"
@@ -26,22 +25,23 @@ import (
 func (h *ApiHandler) ListProjectEvaluations(c echo.Context) error {
 	projectID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
+	ctx := c.Request().Context()
 	var ee []model.Evaluation
 	if qp := c.QueryParam("alert_config_id"); qp != "" {
 		alertConfigID, err := uuid.Parse(qp)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			return httperr.MalformedID(err)
 		}
-		ee, err = h.EvaluationService.ListProjectEvaluationsByAlertConfig(c.Request().Context(), projectID, alertConfigID)
+		ee, err = h.EvaluationService.ListProjectEvaluationsByAlertConfig(ctx, projectID, alertConfigID)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			return httperr.InternalServerError(err)
 		}
 	} else {
-		ee, err = h.EvaluationService.ListProjectEvaluations(c.Request().Context(), projectID)
+		ee, err = h.EvaluationService.ListProjectEvaluations(ctx, projectID)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			return httperr.InternalServerError(err)
 		}
 	}
 	return c.JSON(http.StatusOK, ee)
@@ -62,11 +62,11 @@ func (h *ApiHandler) ListProjectEvaluations(c echo.Context) error {
 func (h *ApiHandler) ListInstrumentEvaluations(c echo.Context) error {
 	instrumentID, err := uuid.Parse(c.Param("instrument_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
 	ee, err := h.EvaluationService.ListInstrumentEvaluations(c.Request().Context(), instrumentID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, ee)
 }
@@ -86,14 +86,11 @@ func (h *ApiHandler) ListInstrumentEvaluations(c echo.Context) error {
 func (h *ApiHandler) GetEvaluation(c echo.Context) error {
 	acID, err := uuid.Parse(c.Param("evaluation_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
 	ev, err := h.EvaluationService.GetEvaluation(c.Request().Context(), acID)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return echo.NewHTTPError(http.StatusNotFound, message.NotFound)
-		}
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.ServerErrorOrNotFound(err)
 	}
 	return c.JSON(http.StatusOK, ev)
 }
@@ -115,18 +112,18 @@ func (h *ApiHandler) GetEvaluation(c echo.Context) error {
 func (h *ApiHandler) CreateEvaluation(c echo.Context) error {
 	ev := model.Evaluation{}
 	if err := c.Bind(&ev); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedBody(err)
 	}
 	projectID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
 	profile := c.Get("profile").(model.Profile)
 	ev.ProjectID, ev.CreatorID, ev.CreateDate = projectID, profile.ID, time.Now()
 
 	evNew, err := h.EvaluationService.CreateEvaluation(c.Request().Context(), ev)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusCreated, evNew)
 }
@@ -149,18 +146,18 @@ func (h *ApiHandler) CreateEvaluation(c echo.Context) error {
 func (h *ApiHandler) UpdateEvaluation(c echo.Context) error {
 	var ev model.Evaluation
 	if err := c.Bind(&ev); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedBody(err)
 	}
 	evID, err := uuid.Parse(c.Param("evaluation_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
 	p := c.Get("profile").(model.Profile)
 	t := time.Now()
 	ev.UpdaterID, ev.UpdateDate = &p.ID, &t
 	evUpdated, err := h.EvaluationService.UpdateEvaluation(c.Request().Context(), evID, ev)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, evUpdated)
 }
@@ -182,10 +179,10 @@ func (h *ApiHandler) UpdateEvaluation(c echo.Context) error {
 func (h *ApiHandler) DeleteEvaluation(c echo.Context) error {
 	acID, err := uuid.Parse(c.Param("evaluation_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		return httperr.MalformedID(err)
 	}
 	if err := h.EvaluationService.DeleteEvaluation(c.Request().Context(), acID); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, make(map[string]interface{}))
 }

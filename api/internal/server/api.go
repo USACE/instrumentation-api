@@ -29,12 +29,16 @@ type apiGroups struct {
 
 func NewApiServer(cfg *config.ApiConfig, h *handler.ApiHandler) *ApiServer {
 	e := echo.New()
+
+	// when debug is enabled, returned errors are included in the response body
+	e.Debug = cfg.Debug
+
 	mw := h.Middleware
 
 	e.Use(mw.CORS, mw.GZIP)
 
 	if cfg.RequestLoggerEnabled {
-		e.Use(mw.RequestLogger)
+		e.Use(mw.RequestID, mw.RequestLogger)
 	}
 
 	public := e.Group(cfg.RoutePrefix)

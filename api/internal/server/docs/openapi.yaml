@@ -1442,12 +1442,12 @@ paths:
         description: instrument group payload
         required: true
       responses:
-        "200":
+        "201":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/InstrumentGroup'
-          description: OK
+          description: Created
         "400":
           content:
             application/json:

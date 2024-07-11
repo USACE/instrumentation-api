@@ -1,12 +1,13 @@
 package handler
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
 	"time"
 
-	"github.com/USACE/instrumentation-api/api/internal/message"
+	"github.com/USACE/instrumentation-api/api/internal/httperr"
 	"github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/google/uuid"
 
@@ -30,11 +31,11 @@ import (
 func (h *ApiHandler) ListProjectReportConfigs(c echo.Context) error {
 	pID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 	rcs, err := h.ReportConfigService.ListProjectReportConfigs(c.Request().Context(), pID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, rcs)
 }
@@ -57,11 +58,11 @@ func (h *ApiHandler) ListProjectReportConfigs(c echo.Context) error {
 func (h *ApiHandler) CreateReportConfig(c echo.Context) error {
 	pID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 	var rc model.ReportConfig
 	if err := c.Bind(&rc); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedBody(err)
 	}
 	rc.ProjectID = pID
 
@@ -71,7 +72,7 @@ func (h *ApiHandler) CreateReportConfig(c echo.Context) error {
 
 	rcNew, err := h.ReportConfigService.CreateReportConfig(c.Request().Context(), rc)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 
 	return c.JSON(http.StatusCreated, rcNew)
@@ -96,15 +97,15 @@ func (h *ApiHandler) CreateReportConfig(c echo.Context) error {
 func (h *ApiHandler) UpdateReportConfig(c echo.Context) error {
 	pID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 	rcID, err := uuid.Parse(c.Param("report_config_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 	var rc model.ReportConfig
 	if err := c.Bind(&rc); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedBody(err)
 	}
 	rc.ID = rcID
 	rc.ProjectID = pID
@@ -114,7 +115,7 @@ func (h *ApiHandler) UpdateReportConfig(c echo.Context) error {
 	rc.UpdaterID, rc.UpdateDate = &profile.ID, &t
 
 	if err := h.ReportConfigService.UpdateReportConfig(c.Request().Context(), rc); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{"id": rcID})
@@ -137,10 +138,10 @@ func (h *ApiHandler) UpdateReportConfig(c echo.Context) error {
 func (h *ApiHandler) DeleteReportConfig(c echo.Context) error {
 	rcID, err := uuid.Parse(c.Param("report_config_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 	if err := h.ReportConfigService.DeleteReportConfig(c.Request().Context(), rcID); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{"id": rcID})
@@ -161,11 +162,11 @@ func (h *ApiHandler) DeleteReportConfig(c echo.Context) error {
 func (h *ApiHandler) GetReportConfigWithPlotConfigs(c echo.Context) error {
 	rcID, err := uuid.Parse(c.Param("report_config_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 	rcs, err := h.ReportConfigService.GetReportConfigWithPlotConfigs(c.Request().Context(), rcID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, rcs)
 }
@@ -187,14 +188,14 @@ func (h *ApiHandler) GetReportConfigWithPlotConfigs(c echo.Context) error {
 func (h *ApiHandler) CreateReportDownloadJob(c echo.Context) error {
 	rcID, err := uuid.Parse(c.Param("report_config_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 	isLandscape := strings.ToLower(c.QueryParam("is_landscape")) == "true"
 	p := c.Get("profile").(model.Profile)
 
 	j, err := h.ReportConfigService.CreateReportDownloadJob(c.Request().Context(), rcID, p.ID, isLandscape)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 
 	return c.JSON(http.StatusCreated, j)
@@ -218,13 +219,13 @@ func (h *ApiHandler) CreateReportDownloadJob(c echo.Context) error {
 func (h *ApiHandler) GetReportDownloadJob(c echo.Context) error {
 	jobID, err := uuid.Parse(c.Param("job_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 	p := c.Get("profile").(model.Profile)
 
 	j, err := h.ReportConfigService.GetReportDownloadJob(c.Request().Context(), jobID, p.ID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 
 	return c.JSON(http.StatusOK, j)
@@ -247,17 +248,17 @@ func (h *ApiHandler) GetReportDownloadJob(c echo.Context) error {
 func (h *ApiHandler) UpdateReportDownloadJob(c echo.Context) error {
 	jobID, err := uuid.Parse(c.Param("job_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 	var j model.ReportDownloadJob
 	if err := c.Bind(&j); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedBody(err)
 	}
 	j.ID = jobID
 	j.ProgressUpdateDate = time.Now()
 
 	if err := h.ReportConfigService.UpdateReportDownloadJob(c.Request().Context(), j); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{"id": j.ID})
@@ -280,28 +281,28 @@ func (h *ApiHandler) UpdateReportDownloadJob(c echo.Context) error {
 func (h *ApiHandler) DownloadReport(c echo.Context) error {
 	jobID, err := uuid.Parse(c.Param("job_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 	p := c.Get("profile").(model.Profile)
 
 	j, err := h.ReportConfigService.GetReportDownloadJob(c.Request().Context(), jobID, p.ID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 
 	if j.Status != "SUCCESS" {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("job status %s", j.Status))
+		return httperr.Message(http.StatusBadRequest, fmt.Sprintf("job status %s", j.Status))
 	}
 	if j.FileExpiry != nil && time.Now().After(*j.FileExpiry) {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("file no longer exists, expired at %s", *j.FileExpiry))
+		return httperr.Message(http.StatusBadRequest, fmt.Sprintf("file no longer exists, expired at %s", *j.FileExpiry))
 	}
 	if j.FileKey == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "file key returned nil")
+		return httperr.InternalServerError(errors.New("file key returned nil"))
 	}
 
 	r, err := h.BlobService.NewReaderContext(c.Request().Context(), *j.FileKey, "")
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	c.Response().Header().Set(echo.HeaderContentDisposition, "attachment")
 	c.Response().Header().Set("Cache-Control", "public, max-age=31536000")

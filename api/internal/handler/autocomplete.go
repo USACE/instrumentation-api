@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"github.com/USACE/instrumentation-api/api/internal/httperr"
 	"github.com/USACE/instrumentation-api/api/internal/model"
 
 	"net/http"
@@ -27,7 +28,7 @@ func (h *ApiHandler) ListEmailAutocomplete(c echo.Context) error {
 	limit := 5
 	rr, err := h.EmailAutocompleteService.ListEmailAutocomplete(c.Request().Context(), searchText, limit)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, rr)
 }

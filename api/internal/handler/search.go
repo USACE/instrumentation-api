@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/USACE/instrumentation-api/api/internal/httperr"
 	"github.com/USACE/instrumentation-api/api/internal/model"
 
 	"net/http"
@@ -32,7 +33,7 @@ func (h *ApiHandler) Search(c echo.Context) error {
 	case "projects":
 		*pfn = h.ProjectService.SearchProjects
 	default:
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("search not implemented for entity: %s", entity))
+		return httperr.Message(http.StatusBadRequest, fmt.Sprintf("search not implemented for entity: %s", entity))
 	}
 
 	searchText := c.QueryParam("q")
@@ -43,7 +44,7 @@ func (h *ApiHandler) Search(c echo.Context) error {
 	limit := 5
 	rr, err := fn(c.Request().Context(), searchText, limit)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, rr)
 }

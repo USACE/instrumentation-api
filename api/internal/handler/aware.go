@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 
+	"github.com/USACE/instrumentation-api/api/internal/httperr"
 	_ "github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/labstack/echo/v4"
 )
@@ -20,7 +21,7 @@ import (
 func (h *ApiHandler) ListAwareParameters(c echo.Context) error {
 	pp, err := h.AwareParameterService.ListAwareParameters(c.Request().Context())
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, pp)
 }
@@ -38,7 +39,7 @@ func (h *ApiHandler) ListAwareParameters(c echo.Context) error {
 func (h *ApiHandler) ListAwarePlatformParameterConfig(c echo.Context) error {
 	cc, err := h.AwareParameterService.ListAwarePlatformParameterConfig(c.Request().Context())
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, cc)
 }
