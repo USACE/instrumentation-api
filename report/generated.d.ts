@@ -1284,8 +1284,8 @@ export interface paths {
         };
       };
       responses: {
-        /** @description OK */
-        200: {
+        /** @description Created */
+        201: {
           content: {
             "application/json": components["schemas"]["InstrumentGroup"];
           };
@@ -7835,11 +7835,13 @@ export interface components {
      *     }
      *   ],
      *   "id": "id",
+     *   "display_name": "display_name",
      *   "email": "email",
      *   "username": "username"
      * }
      */
     Profile: {
+      display_name?: string;
       email?: string;
       id?: string;
       is_admin?: boolean;

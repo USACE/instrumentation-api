@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 
+	"github.com/USACE/instrumentation-api/api/internal/httperr"
 	_ "github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/labstack/echo/v4"
 )
@@ -20,7 +21,7 @@ import (
 func (h *ApiHandler) GetDomains(c echo.Context) error {
 	dd, err := h.DomainService.GetDomains(c.Request().Context())
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, dd)
 }
@@ -38,7 +39,7 @@ func (h *ApiHandler) GetDomains(c echo.Context) error {
 func (h *ApiHandler) GetDomainMap(c echo.Context) error {
 	dm, err := h.DomainService.GetDomainMap(c.Request().Context())
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, dm)
 }

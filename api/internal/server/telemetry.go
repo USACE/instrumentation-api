@@ -21,6 +21,9 @@ type telemetryGroups struct {
 func NewTelemetryServer(cfg *config.TelemetryConfig, h *handler.TelemetryHandler) *TelemetryServer {
 	e := echo.New()
 
+	// when debug is enabled, returned errors are included in the response body
+	e.Debug = cfg.Debug
+
 	public := e.Group(cfg.RoutePrefix)
 	datalogger := e.Group(cfg.RoutePrefix)
 

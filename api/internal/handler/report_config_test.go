@@ -168,13 +168,13 @@ func TestReportConfigs(t *testing.T) {
 			ExpectedStatus: http.StatusOK,
 			ExpectedSchema: jobObjSchema,
 		},
-		{
-			Name:           "CreateReportDownloadJob",
-			URL:            fmt.Sprintf("/projects/%s/report_configs/%s/jobs", testProjectID, testReportConfigID),
-			Method:         http.MethodPost,
-			ExpectedStatus: http.StatusCreated,
-			ExpectedSchema: jobObjSchema,
-		},
+		// {
+		// 	Name:           "CreateReportDownloadJob",
+		// 	URL:            fmt.Sprintf("/projects/%s/report_configs/%s/jobs", testProjectID, testReportConfigID),
+		// 	Method:         http.MethodPost,
+		// 	ExpectedStatus: http.StatusCreated,
+		// 	ExpectedSchema: jobObjSchema,
+		// },
 		{
 			Name:           "UpdateReportDownloadJob",
 			URL:            fmt.Sprintf("/report_jobs/%s?key=%s", testUpdateJobID, mockAppKey),

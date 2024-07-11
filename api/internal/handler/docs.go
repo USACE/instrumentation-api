@@ -62,6 +62,6 @@ const htmlTmpl = `<!doctype html>
 const mockAuthOptions = `authentication: {
     preferredSecurityScheme: 'Bearer',
     apiKey: {
-        token: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwibmFtZSI6IlVzZXIuQXBwbGljYXRpb25BZG1pbiIsImlhdCI6MTUxNjIzOTAyMiwiZXhwIjoyMDAwMDAwMDAwLCJyb2xlcyI6W119.aKaDNBnuhQyXI6zvzn-dAg8SxJSP3mQEx5FTSmJbYog',
+        token: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ikw0YXFVRmd6YV9RVjhqc1ZOa281OW5GVzl6bGh1b0JGX3RxdlpkTUZkajQifQ.eyJzdWIiOiJmOGRjYWZlYS0yNDNlLTRiODktOGQ3ZC1mYTAxOTE4MTMwZjQiLCJ0eXAiOiJCZWFyZXIiLCJhbGxvd2VkLW9yaWdpbnMiOlsiaHR0cDovL2xvY2FsaG9zdDozMDAwIl0sIm5hbWUiOiJBbnRob255IExhbWJlcnQiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJ0ZXN0IiwiZ2l2ZW5fbmFtZSI6IkFudGhvbnkiLCJmYW1pbHlfbmFtZSI6IkxhbWJlcnQiLCJlbWFpbCI6ImFudGhvbnkubS5sYW1iZXJ0QGZha2UudXNhY2UuYXJteS5taWwiLCJzdWJqZWN0RE4iOiJsYW1iZXJ0LmFudGhvbnkubS4yIiwiY2FjVUlEIjoiMiJ9.8CjeifD51ZEZZOx9eeMd7RPanvtgkQQus-R19aU91Rw',
     },
 },`

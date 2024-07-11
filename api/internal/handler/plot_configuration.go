@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/USACE/instrumentation-api/api/internal/message"
+	"github.com/USACE/instrumentation-api/api/internal/httperr"
 	"github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/google/uuid"
 
@@ -25,11 +25,11 @@ import (
 func (h *ApiHandler) ListPlotConfigs(c echo.Context) error {
 	pID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
 	cc, err := h.PlotConfigService.ListPlotConfigs(c.Request().Context(), pID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, cc)
 }
@@ -49,11 +49,11 @@ func (h *ApiHandler) ListPlotConfigs(c echo.Context) error {
 func (h *ApiHandler) GetPlotConfig(c echo.Context) error {
 	cID, err := uuid.Parse(c.Param("plot_configuration_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 	g, err := h.PlotConfigService.GetPlotConfig(c.Request().Context(), cID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, g)
 }
@@ -75,28 +75,27 @@ func (h *ApiHandler) GetPlotConfig(c echo.Context) error {
 func (h *ApiHandler) CreatePlotConfig(c echo.Context) error {
 	var pc model.PlotConfig
 	if err := c.Bind(&pc); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedBody(err)
 	}
 	// Default to 1 year if no date range provided
 	if pc.DateRange == "" {
 		pc.DateRange = "1 year"
 	}
 	if _, err := pc.DateRangeTimeWindow(); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedDate(err)
 	}
 	pID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
-	if pID != pc.ProjectID {
-		return echo.NewHTTPError(http.StatusBadRequest, "route parameter project_id does not match project_id in JSON payload")
-	}
+	pc.ProjectID = pID
+
 	p := c.Get("profile").(model.Profile)
 	pc.CreatorID, pc.CreateDate = p.ID, time.Now()
 
 	pcNew, err := h.PlotConfigService.CreatePlotConfig(c.Request().Context(), pc)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusCreated, pcNew)
 }
@@ -119,22 +118,20 @@ func (h *ApiHandler) CreatePlotConfig(c echo.Context) error {
 func (h *ApiHandler) UpdatePlotConfig(c echo.Context) error {
 	var pc model.PlotConfig
 	if err := c.Bind(&pc); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedBody(err)
 	}
 	// Default to 1 year if no date range provided
 	if pc.DateRange == "" {
 		pc.DateRange = "1 year"
 	}
 	if _, err := pc.DateRangeTimeWindow(); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedDate(err)
 	}
 	pID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
-	if pID != pc.ProjectID {
-		return echo.NewHTTPError(http.StatusBadRequest, "route parameter project_id does not match project_id in JSON payload")
-	}
+	pc.ProjectID = pID
 
 	p := c.Get("profile").(model.Profile)
 	tNow := time.Now()
@@ -142,7 +139,7 @@ func (h *ApiHandler) UpdatePlotConfig(c echo.Context) error {
 
 	pcUpdated, err := h.PlotConfigService.UpdatePlotConfig(c.Request().Context(), pc)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, pcUpdated)
 }
@@ -164,14 +161,14 @@ func (h *ApiHandler) UpdatePlotConfig(c echo.Context) error {
 func (h *ApiHandler) DeletePlotConfig(c echo.Context) error {
 	pID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
 	cID, err := uuid.Parse(c.Param("plot_configuration_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
 	if err := h.PlotConfigService.DeletePlotConfig(c.Request().Context(), pID, cID); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, make(map[string]interface{}))
 }

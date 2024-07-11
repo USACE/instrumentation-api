@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"github.com/USACE/instrumentation-api/api/internal/message"
+	"github.com/USACE/instrumentation-api/api/internal/httperr"
 	"github.com/USACE/instrumentation-api/api/internal/model"
 
 	"net/http"
@@ -26,11 +26,11 @@ import (
 func (h *ApiHandler) GetTimeseries(c echo.Context) error {
 	tsID, err := uuid.Parse(c.Param("timeseries_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 	t, err := h.TimeseriesService.GetTimeseries(c.Request().Context(), tsID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, t)
 }
@@ -50,11 +50,11 @@ func (h *ApiHandler) GetTimeseries(c echo.Context) error {
 func (h *ApiHandler) ListInstrumentTimeseries(c echo.Context) error {
 	nID, err := uuid.Parse(c.Param("instrument_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 	tt, err := h.TimeseriesService.ListInstrumentTimeseries(c.Request().Context(), nID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, tt)
 }
@@ -73,11 +73,11 @@ func (h *ApiHandler) ListInstrumentTimeseries(c echo.Context) error {
 func (h *ApiHandler) ListInstrumentGroupTimeseries(c echo.Context) error {
 	gID, err := uuid.Parse(c.Param("instrument_group_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 	tt, err := h.TimeseriesService.ListInstrumentGroupTimeseries(c.Request().Context(), gID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, tt)
 }
@@ -96,11 +96,11 @@ func (h *ApiHandler) ListInstrumentGroupTimeseries(c echo.Context) error {
 func (h *ApiHandler) ListProjectTimeseries(c echo.Context) error {
 	pID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 	tt, err := h.TimeseriesService.ListProjectTimeseries(c.Request().Context(), pID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, tt)
 }
@@ -120,11 +120,11 @@ func (h *ApiHandler) ListProjectTimeseries(c echo.Context) error {
 func (h *ApiHandler) ListPlotConfigTimeseries(c echo.Context) error {
 	pID, err := uuid.Parse(c.Param("plot_config_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 	tt, err := h.TimeseriesService.ListProjectTimeseries(c.Request().Context(), pID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, tt)
 }
@@ -145,11 +145,11 @@ func (h *ApiHandler) ListPlotConfigTimeseries(c echo.Context) error {
 func (h *ApiHandler) CreateTimeseries(c echo.Context) error {
 	var tc model.TimeseriesCollectionItems
 	if err := c.Bind(&tc); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedBody(err)
 	}
 	tt, err := h.TimeseriesService.CreateTimeseriesBatch(c.Request().Context(), tc.Items)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusCreated, tt)
 }
@@ -171,15 +171,15 @@ func (h *ApiHandler) CreateTimeseries(c echo.Context) error {
 func (h *ApiHandler) UpdateTimeseries(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("timeseries_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 	t := model.Timeseries{}
 	if err := c.Bind(&t); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedBody(err)
 	}
 	t.ID = id
 	if _, err := h.TimeseriesService.UpdateTimeseries(c.Request().Context(), t); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, t)
 }
@@ -200,10 +200,10 @@ func (h *ApiHandler) UpdateTimeseries(c echo.Context) error {
 func (h *ApiHandler) DeleteTimeseries(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("timeseries_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
 	if err := h.TimeseriesService.DeleteTimeseries(c.Request().Context(), id); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, make(map[string]interface{}))
 }

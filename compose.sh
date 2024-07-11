@@ -5,7 +5,7 @@ set -o pipefail
 parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 cd "$parent_path"
 
-COMPOSECMD="env DOCKER_BUILDKIT=1 docker-compose -f docker-compose.yml"
+COMPOSECMD="docker-compose -f docker-compose.yml"
 mkdocs() {
     (
         DOCKER_BUILDKIT=1 docker build --file api/Dockerfile.openapi --output api/internal/server/docs api
@@ -16,25 +16,28 @@ mkdocs() {
 if [ "$1" = "watch" ]; then
     mkdocs -q
     if [ "$2" = "mock" ]; then
-        $COMPOSECMD -f docker-compose.dev.yml --profile=mock watch
+        DOCKER_BUILDKIT=1 $COMPOSECMD -f docker-compose.dev.yml --profile=mock watch
     else
-        $COMPOSECMD -f docker-compose.dev.yml watch
+        DOCKER_BUILDKIT=1 $COMPOSECMD -f docker-compose.dev.yml watch
     fi
 
 elif [ "$1" = "up" ]; then
     mkdocs -q
     if [ "$2" = "mock" ]; then
-        $COMPOSECMD --profile=mock up -d --build
+        DOCKER_BUILDKIT=1 $COMPOSECMD --profile=mock up -d --build
     else
-        $COMPOSECMD up -d --build
+        DOCKER_BUILDKIT=1 $COMPOSECMD up -d --build
     fi
+
+elif [ "$1" = "authdbdump" ]; then
+    $COMPOSECMD exec authdb pg_dump postgres > auth/initdb/init2.sql
 
 elif [ "$1" = "down" ]; then
     mkdocs -q
-    $COMPOSECMD --profile=mock down
+    $COMPOSECMD -f docker-compose.dev.yml --profile=mock down
 
 elif [ "$1" = "clean" ]; then
-    $COMPOSECMD --profile=mock down -v
+    $COMPOSECMD -f docker-compose.dev.yml --profile=mock down -v
 
 elif [ "$1" = "test" ]; then
     docker-compose build
@@ -59,9 +62,9 @@ elif [ "$1" = "test" ]; then
     GOCMD="go test ${REST_ARGS[@]} github.com/USACE/instrumentation-api/api/internal/handler"
 
     if [ "$REPORT" = true ]; then
-        docker-compose run -e AWS_SQS_QUEUE_NO_INIT=true --entrypoint="$GOCMD" api > $(pwd)/test.log
+        docker-compose run -e INSTRUMENTATION_AUTH_JWT_MOCKED=true --entrypoint="$GOCMD" api > $(pwd)/test.log
     else
-        docker-compose run -e AWS_SQS_QUEUE_NO_INIT=true --entrypoint="$GOCMD" api
+        docker-compose run -e INSTRUMENTATION_AUTH_JWT_MOCKED=true --entrypoint="$GOCMD" api
     fi
 
     if [ $TEARDOWN = true ]; then

@@ -1442,12 +1442,12 @@ paths:
         description: instrument group payload
         required: true
       responses:
-        "200":
+        "201":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/InstrumentGroup'
-          description: OK
+          description: Created
         "400":
           content:
             application/json:
@@ -3090,7 +3090,7 @@ paths:
                 $ref: '#/components/schemas/echo.HTTPError'
           description: Internal Server Error
       security:
-      - CacOnly: []
+      - ClaimsOnly: []
       summary: gets profile for current authenticated user
       tags:
       - profile
@@ -3163,7 +3163,7 @@ paths:
                 $ref: '#/components/schemas/echo.HTTPError'
           description: Internal Server Error
       security:
-      - CacOnly: []
+      - ClaimsOnly: []
       summary: creates token for a profile
       tags:
       - profile
@@ -3204,7 +3204,7 @@ paths:
                 $ref: '#/components/schemas/echo.HTTPError'
           description: Internal Server Error
       security:
-      - CacOnly: []
+      - ClaimsOnly: []
       summary: deletes a token for a profile
       tags:
       - profile
@@ -3268,7 +3268,7 @@ paths:
                 $ref: '#/components/schemas/echo.HTTPError'
           description: Internal Server Error
       security:
-      - CacOnly: []
+      - ClaimsOnly: []
       summary: creates a user profile
       tags:
       - profile
@@ -8916,9 +8916,12 @@ components:
         - token_id: token_id
           issued: issued
         id: id
+        display_name: display_name
         email: email
         username: username
       properties:
+        display_name:
+          type: string
         email:
           type: string
         id:
@@ -9828,7 +9831,7 @@ components:
       in: header
       name: Authorization
       type: apiKey
-    CacOnly:
+    ClaimsOnly:
       description: CAC-Only routes
       in: header
       name: Authorization

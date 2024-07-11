@@ -1,4 +1,36 @@
+volumes:
+  auth_pgdata:
+
 services:
+  auth:
+    build:
+      context: auth
+    restart: unless-stopped
+    env_file: ./env_files/auth.env
+    ports:
+      - ${KEYCLOAK_PORT:-8090}:8080
+    command: start-dev
+    depends_on:
+      authdb:
+        condition: service_healthy
+
+  authdb:
+    image: postgres:${AUTH_POSTGRES_VERSION:-14}
+    restart: unless-stopped
+    command: "-c fsync=off -c search_path=keycloak,${POSTGRES_USER:-postgres},public"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+    volumes:
+      - ./auth/initdb:/docker-entrypoint-initdb.d
+      - auth_pgdata:/var/lib/postgresql/data
+    user: ${POSTGRES_USER:-postgres}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   db:
     build:
       context: db
