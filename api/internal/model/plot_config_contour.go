@@ -2,6 +2,8 @@ package model
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -19,6 +21,14 @@ type PlotConfigContourPlotDisplay struct {
 	GradientSmoothing bool               `json:"gradient_smoothing" db:"gradient_smoothing"`
 	ContourSmoothing  bool               `json:"contour_smoothing" db:"contour_smoothing"`
 	ShowLabels        bool               `json:"show_labels" db:"show_labels"`
+}
+
+func (d *PlotConfigContourPlotDisplay) Scan(src interface{}) error {
+	b, ok := src.(string)
+	if !ok {
+		return fmt.Errorf("type assertion failed")
+	}
+	return json.Unmarshal([]byte(b), d)
 }
 
 const createPlotContourConfig = `

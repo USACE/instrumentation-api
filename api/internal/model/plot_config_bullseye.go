@@ -2,6 +2,8 @@ package model
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 
 	"github.com/google/uuid"
 )
@@ -16,7 +18,13 @@ type PlotConfigBullseyePlotDisplay struct {
 	YAxisTimeseriesID uuid.UUID `json:"y_axis_timeseries_id" db:"y_axis_timeseries_id"`
 }
 
-func (d PlotConfigBullseyePlotDisplay) Display() {}
+func (d *PlotConfigBullseyePlotDisplay) Scan(src interface{}) error {
+	b, ok := src.(string)
+	if !ok {
+		return fmt.Errorf("type assertion failed")
+	}
+	return json.Unmarshal([]byte(b), d)
+}
 
 const createPlotBullseyeConfig = `
 	INSERT INTO plot_bullseye_config (plot_config_id, x_axis_timeseries_id, y_axis_timeseries_id) VALUES ($1, $2, $3)

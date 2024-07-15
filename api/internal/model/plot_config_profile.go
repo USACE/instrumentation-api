@@ -2,6 +2,8 @@ package model
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 
 	"github.com/google/uuid"
 )
@@ -13,6 +15,14 @@ type PlotConfigProfilePlot struct {
 
 type PlotConfigProfilePlotDisplay struct {
 	InstrumentID uuid.UUID `json:"instrument_id" db:"instrument_id"`
+}
+
+func (d *PlotConfigProfilePlotDisplay) Scan(src interface{}) error {
+	b, ok := src.(string)
+	if !ok {
+		return fmt.Errorf("type assertion failed")
+	}
+	return json.Unmarshal([]byte(b), d)
 }
 
 const createPlotProfileConfig = `
