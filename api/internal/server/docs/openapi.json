@@ -8652,6 +8652,882 @@
         "tags" : [ "project-role" ]
       }
     },
+    "/projects/{project_id}/plot_configs" : {
+      "get" : {
+        "parameters" : [ {
+          "description" : "project uuid",
+          "in" : "path",
+          "name" : "project_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/PlotConfig"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Bad Request"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Not Found"
+          },
+          "500" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Internal Server Error"
+          }
+        },
+        "summary" : "lists plot configs",
+        "tags" : [ "plot-config" ]
+      }
+    },
+    "/projects/{project_id}/plot_configs/bullseye_plots" : {
+      "post" : {
+        "parameters" : [ {
+          "description" : "project uuid",
+          "in" : "path",
+          "name" : "project_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "description" : "api key",
+          "in" : "query",
+          "name" : "key",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "*/*" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PlotConfigBullseyePlot"
+              }
+            }
+          },
+          "description" : "plot config payload",
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PlotConfig"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Bad Request"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Not Found"
+          },
+          "500" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Internal Server Error"
+          }
+        },
+        "security" : [ {
+          "Bearer" : [ ]
+        } ],
+        "summary" : "adds a bullseye plot configuration to a project",
+        "tags" : [ "plot-config" ],
+        "x-codegen-request-body-name" : "plot_config"
+      }
+    },
+    "/projects/{project_id}/plot_configs/bullseye_plots/{plot_configuration_id}" : {
+      "put" : {
+        "parameters" : [ {
+          "description" : "project uuid",
+          "in" : "path",
+          "name" : "project_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "description" : "plot config uuid",
+          "in" : "path",
+          "name" : "plot_configuration_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "description" : "api key",
+          "in" : "query",
+          "name" : "key",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "*/*" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PlotConfigBullseyePlot"
+              }
+            }
+          },
+          "description" : "plot config payload",
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PlotConfig"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Bad Request"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Not Found"
+          },
+          "500" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Internal Server Error"
+          }
+        },
+        "security" : [ {
+          "Bearer" : [ ]
+        } ],
+        "tags" : [ "plot-config" ],
+        "x-codegen-request-body-name" : "plot_config"
+      }
+    },
+    "/projects/{project_id}/plot_configs/contour_plots" : {
+      "post" : {
+        "parameters" : [ {
+          "description" : "project uuid",
+          "in" : "path",
+          "name" : "project_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "description" : "api key",
+          "in" : "query",
+          "name" : "key",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "*/*" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PlotConfigContourPlot"
+              }
+            }
+          },
+          "description" : "plot config payload",
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PlotConfig"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Bad Request"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Not Found"
+          },
+          "500" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Internal Server Error"
+          }
+        },
+        "security" : [ {
+          "Bearer" : [ ]
+        } ],
+        "summary" : "adds a plot configuration to a project",
+        "tags" : [ "plot-config" ],
+        "x-codegen-request-body-name" : "plot_config"
+      }
+    },
+    "/projects/{project_id}/plot_configs/contour_plots/{plot_configuration_id}" : {
+      "put" : {
+        "parameters" : [ {
+          "description" : "project uuid",
+          "in" : "path",
+          "name" : "project_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "description" : "plot config uuid",
+          "in" : "path",
+          "name" : "plot_configuration_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "description" : "api key",
+          "in" : "query",
+          "name" : "key",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "*/*" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PlotConfigContourPlot"
+              }
+            }
+          },
+          "description" : "plot config payload",
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PlotConfig"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Bad Request"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Not Found"
+          },
+          "500" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Internal Server Error"
+          }
+        },
+        "security" : [ {
+          "Bearer" : [ ]
+        } ],
+        "tags" : [ "plot-config" ],
+        "x-codegen-request-body-name" : "plot_config"
+      }
+    },
+    "/projects/{project_id}/plot_configs/profile_plots" : {
+      "post" : {
+        "parameters" : [ {
+          "description" : "project uuid",
+          "in" : "path",
+          "name" : "project_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "description" : "api key",
+          "in" : "query",
+          "name" : "key",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "*/*" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PlotConfigProfilePlot"
+              }
+            }
+          },
+          "description" : "plot config payload",
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PlotConfig"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Bad Request"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Not Found"
+          },
+          "500" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Internal Server Error"
+          }
+        },
+        "security" : [ {
+          "Bearer" : [ ]
+        } ],
+        "summary" : "adds a profile plot configuration to a project",
+        "tags" : [ "plot-config" ],
+        "x-codegen-request-body-name" : "plot_config"
+      }
+    },
+    "/projects/{project_id}/plot_configs/profile_plots/{plot_configuration_id}" : {
+      "put" : {
+        "parameters" : [ {
+          "description" : "project uuid",
+          "in" : "path",
+          "name" : "project_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "description" : "plot config uuid",
+          "in" : "path",
+          "name" : "plot_configuration_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "description" : "api key",
+          "in" : "query",
+          "name" : "key",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "*/*" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PlotConfigProfilePlot"
+              }
+            }
+          },
+          "description" : "plot config payload",
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PlotConfig"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Bad Request"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Not Found"
+          },
+          "500" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Internal Server Error"
+          }
+        },
+        "security" : [ {
+          "Bearer" : [ ]
+        } ],
+        "tags" : [ "plot-config" ],
+        "x-codegen-request-body-name" : "plot_config"
+      }
+    },
+    "/projects/{project_id}/plot_configs/scatter_line_plots" : {
+      "post" : {
+        "parameters" : [ {
+          "description" : "project uuid",
+          "in" : "path",
+          "name" : "project_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "description" : "api key",
+          "in" : "query",
+          "name" : "key",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "*/*" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PlotConfigScatterLinePlot"
+              }
+            }
+          },
+          "description" : "plot config payload",
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PlotConfig"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Bad Request"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Not Found"
+          },
+          "500" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Internal Server Error"
+          }
+        },
+        "security" : [ {
+          "Bearer" : [ ]
+        } ],
+        "summary" : "adds a scatter-line plot configuration to a project",
+        "tags" : [ "plot-config" ],
+        "x-codegen-request-body-name" : "plot_config"
+      }
+    },
+    "/projects/{project_id}/plot_configs/scatter_line_plots/{plot_configuration_id}" : {
+      "put" : {
+        "parameters" : [ {
+          "description" : "project uuid",
+          "in" : "path",
+          "name" : "project_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "description" : "plot config uuid",
+          "in" : "path",
+          "name" : "plot_configuration_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "description" : "api key",
+          "in" : "query",
+          "name" : "key",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "*/*" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PlotConfigScatterLinePlot"
+              }
+            }
+          },
+          "description" : "plot config payload",
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PlotConfig"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Bad Request"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Not Found"
+          },
+          "500" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Internal Server Error"
+          }
+        },
+        "security" : [ {
+          "Bearer" : [ ]
+        } ],
+        "tags" : [ "plot-config" ],
+        "x-codegen-request-body-name" : "plot_config"
+      }
+    },
+    "/projects/{project_id}/plot_configs/{plot_configuration_id}" : {
+      "delete" : {
+        "parameters" : [ {
+          "description" : "project uuid",
+          "in" : "path",
+          "name" : "project_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "description" : "plot config uuid",
+          "in" : "path",
+          "name" : "plot_configuration_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "description" : "api key",
+          "in" : "query",
+          "name" : "key",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "additionalProperties" : true,
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Bad Request"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Not Found"
+          },
+          "500" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Internal Server Error"
+          }
+        },
+        "security" : [ {
+          "Bearer" : [ ]
+        } ],
+        "summary" : "deletes a plot configuration in a project",
+        "tags" : [ "plot-config" ]
+      },
+      "get" : {
+        "parameters" : [ {
+          "description" : "project uuid",
+          "in" : "path",
+          "name" : "project_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "description" : "plot config uuid",
+          "in" : "path",
+          "name" : "plot_configuration_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PlotConfig"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Bad Request"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Not Found"
+          },
+          "500" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Internal Server Error"
+          }
+        },
+        "summary" : "gets a single plot configuration by id",
+        "tags" : [ "plot-config" ]
+      }
+    },
     "/projects/{project_id}/plot_configurations" : {
       "get" : {
         "parameters" : [ {
@@ -8734,7 +9610,7 @@
           "content" : {
             "*/*" : {
               "schema" : {
-                "$ref" : "#/components/schemas/PlotConfig"
+                "$ref" : "#/components/schemas/PlotConfigScatterLinePlot"
               }
             }
           },
@@ -8786,7 +9662,7 @@
         "security" : [ {
           "Bearer" : [ ]
         } ],
-        "summary" : "adds a plot configuration to a project",
+        "summary" : "adds a scatter-line plot configuration to a project",
         "tags" : [ "plot-config" ],
         "x-codegen-request-body-name" : "plot_config"
       }
@@ -9034,7 +9910,7 @@
           "content" : {
             "*/*" : {
               "schema" : {
-                "$ref" : "#/components/schemas/PlotConfig"
+                "$ref" : "#/components/schemas/PlotConfigScatterLinePlot"
               }
             }
           },
@@ -12183,12 +13059,15 @@
             "type" : "string"
           },
           "display" : {
-            "$ref" : "#/components/schemas/PlotConfigDisplay"
+            "$ref" : "#/components/schemas/Opts"
           },
           "id" : {
             "type" : "string"
           },
           "name" : {
+            "type" : "string"
+          },
+          "plot_type" : {
             "type" : "string"
           },
           "project_id" : {
@@ -12227,7 +13106,247 @@
         },
         "type" : "object"
       },
-      "PlotConfigCustomShape" : {
+      "PlotConfigBullseyePlot" : {
+        "properties" : {
+          "auto_range" : {
+            "type" : "boolean"
+          },
+          "create_date" : {
+            "type" : "string"
+          },
+          "creator_id" : {
+            "type" : "string"
+          },
+          "creator_username" : {
+            "type" : "string"
+          },
+          "date_range" : {
+            "type" : "string"
+          },
+          "display" : {
+            "$ref" : "#/components/schemas/PlotConfigBullseyePlotDisplay"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "plot_type" : {
+            "type" : "string"
+          },
+          "project_id" : {
+            "type" : "string"
+          },
+          "report_configs" : {
+            "items" : {
+              "$ref" : "#/components/schemas/IDSlugName"
+            },
+            "type" : "array"
+          },
+          "show_comments" : {
+            "type" : "boolean"
+          },
+          "show_masked" : {
+            "type" : "boolean"
+          },
+          "show_nonvalidated" : {
+            "type" : "boolean"
+          },
+          "slug" : {
+            "type" : "string"
+          },
+          "threshold" : {
+            "type" : "integer"
+          },
+          "update_date" : {
+            "type" : "string"
+          },
+          "updater_id" : {
+            "type" : "string"
+          },
+          "updater_username" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "PlotConfigBullseyePlotDisplay" : {
+        "properties" : {
+          "x_axis_timeseries_id" : {
+            "type" : "string"
+          },
+          "y_axis_timeseries_id" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "PlotConfigContourPlot" : {
+        "properties" : {
+          "auto_range" : {
+            "type" : "boolean"
+          },
+          "create_date" : {
+            "type" : "string"
+          },
+          "creator_id" : {
+            "type" : "string"
+          },
+          "creator_username" : {
+            "type" : "string"
+          },
+          "date_range" : {
+            "type" : "string"
+          },
+          "display" : {
+            "$ref" : "#/components/schemas/PlotConfigContourPlotDisplay"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "plot_type" : {
+            "type" : "string"
+          },
+          "project_id" : {
+            "type" : "string"
+          },
+          "report_configs" : {
+            "items" : {
+              "$ref" : "#/components/schemas/IDSlugName"
+            },
+            "type" : "array"
+          },
+          "show_comments" : {
+            "type" : "boolean"
+          },
+          "show_masked" : {
+            "type" : "boolean"
+          },
+          "show_nonvalidated" : {
+            "type" : "boolean"
+          },
+          "slug" : {
+            "type" : "string"
+          },
+          "threshold" : {
+            "type" : "integer"
+          },
+          "update_date" : {
+            "type" : "string"
+          },
+          "updater_id" : {
+            "type" : "string"
+          },
+          "updater_username" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "PlotConfigContourPlotDisplay" : {
+        "properties" : {
+          "contour_smoothing" : {
+            "type" : "boolean"
+          },
+          "gradient_smoothing" : {
+            "type" : "boolean"
+          },
+          "locf_backfill" : {
+            "type" : "string"
+          },
+          "show_labels" : {
+            "type" : "boolean"
+          },
+          "time" : {
+            "type" : "string"
+          },
+          "timeseries_ids" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          }
+        },
+        "type" : "object"
+      },
+      "PlotConfigProfilePlot" : {
+        "properties" : {
+          "auto_range" : {
+            "type" : "boolean"
+          },
+          "create_date" : {
+            "type" : "string"
+          },
+          "creator_id" : {
+            "type" : "string"
+          },
+          "creator_username" : {
+            "type" : "string"
+          },
+          "date_range" : {
+            "type" : "string"
+          },
+          "display" : {
+            "$ref" : "#/components/schemas/PlotConfigProfilePlotDisplay"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "plot_type" : {
+            "type" : "string"
+          },
+          "project_id" : {
+            "type" : "string"
+          },
+          "report_configs" : {
+            "items" : {
+              "$ref" : "#/components/schemas/IDSlugName"
+            },
+            "type" : "array"
+          },
+          "show_comments" : {
+            "type" : "boolean"
+          },
+          "show_masked" : {
+            "type" : "boolean"
+          },
+          "show_nonvalidated" : {
+            "type" : "boolean"
+          },
+          "slug" : {
+            "type" : "string"
+          },
+          "threshold" : {
+            "type" : "integer"
+          },
+          "update_date" : {
+            "type" : "string"
+          },
+          "updater_id" : {
+            "type" : "string"
+          },
+          "updater_username" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "PlotConfigProfilePlotDisplay" : {
+        "properties" : {
+          "instrument_id" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "PlotConfigScatterLineCustomShape" : {
         "properties" : {
           "color" : {
             "type" : "string"
@@ -12247,25 +13366,25 @@
         },
         "type" : "object"
       },
-      "PlotConfigDisplay" : {
+      "PlotConfigScatterLineDisplay" : {
         "properties" : {
           "layout" : {
-            "$ref" : "#/components/schemas/PlotConfigLayout"
+            "$ref" : "#/components/schemas/PlotConfigScatterLineLayout"
           },
           "traces" : {
             "items" : {
-              "$ref" : "#/components/schemas/PlotConfigTimeseriesTrace"
+              "$ref" : "#/components/schemas/PlotConfigScatterLineTimeseriesTrace"
             },
             "type" : "array"
           }
         },
         "type" : "object"
       },
-      "PlotConfigLayout" : {
+      "PlotConfigScatterLineLayout" : {
         "properties" : {
           "custom_shapes" : {
             "items" : {
-              "$ref" : "#/components/schemas/PlotConfigCustomShape"
+              "$ref" : "#/components/schemas/PlotConfigScatterLineCustomShape"
             },
             "type" : "array"
           },
@@ -12278,7 +13397,72 @@
         },
         "type" : "object"
       },
-      "PlotConfigTimeseriesTrace" : {
+      "PlotConfigScatterLinePlot" : {
+        "properties" : {
+          "auto_range" : {
+            "type" : "boolean"
+          },
+          "create_date" : {
+            "type" : "string"
+          },
+          "creator_id" : {
+            "type" : "string"
+          },
+          "creator_username" : {
+            "type" : "string"
+          },
+          "date_range" : {
+            "type" : "string"
+          },
+          "display" : {
+            "$ref" : "#/components/schemas/PlotConfigScatterLineDisplay"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "plot_type" : {
+            "type" : "string"
+          },
+          "project_id" : {
+            "type" : "string"
+          },
+          "report_configs" : {
+            "items" : {
+              "$ref" : "#/components/schemas/IDSlugName"
+            },
+            "type" : "array"
+          },
+          "show_comments" : {
+            "type" : "boolean"
+          },
+          "show_masked" : {
+            "type" : "boolean"
+          },
+          "show_nonvalidated" : {
+            "type" : "boolean"
+          },
+          "slug" : {
+            "type" : "string"
+          },
+          "threshold" : {
+            "type" : "integer"
+          },
+          "update_date" : {
+            "type" : "string"
+          },
+          "updater_id" : {
+            "type" : "string"
+          },
+          "updater_username" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "PlotConfigScatterLineTimeseriesTrace" : {
         "properties" : {
           "color" : {
             "type" : "string"
@@ -12538,7 +13722,7 @@
           },
           "plot_configs" : {
             "items" : {
-              "$ref" : "#/components/schemas/PlotConfig"
+              "$ref" : "#/components/schemas/PlotConfigScatterLinePlot"
             },
             "type" : "array"
           },

@@ -5771,6 +5771,591 @@ paths:
       summary: adds project members and their role information
       tags:
       - project-role
+  /projects/{project_id}/plot_configs:
+    get:
+      parameters:
+      - description: project uuid
+        in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/PlotConfig'
+                type: array
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Internal Server Error
+      summary: lists plot configs
+      tags:
+      - plot-config
+  /projects/{project_id}/plot_configs/bullseye_plots:
+    post:
+      parameters:
+      - description: project uuid
+        in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      - description: api key
+        in: query
+        name: key
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/PlotConfigBullseyePlot'
+        description: plot config payload
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlotConfig'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: adds a bullseye plot configuration to a project
+      tags:
+      - plot-config
+      x-codegen-request-body-name: plot_config
+  /projects/{project_id}/plot_configs/bullseye_plots/{plot_configuration_id}:
+    put:
+      parameters:
+      - description: project uuid
+        in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      - description: plot config uuid
+        in: path
+        name: plot_configuration_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      - description: api key
+        in: query
+        name: key
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/PlotConfigBullseyePlot'
+        description: plot config payload
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlotConfig'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      tags:
+      - plot-config
+      x-codegen-request-body-name: plot_config
+  /projects/{project_id}/plot_configs/contour_plots:
+    post:
+      parameters:
+      - description: project uuid
+        in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      - description: api key
+        in: query
+        name: key
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/PlotConfigContourPlot'
+        description: plot config payload
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlotConfig'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: adds a plot configuration to a project
+      tags:
+      - plot-config
+      x-codegen-request-body-name: plot_config
+  /projects/{project_id}/plot_configs/contour_plots/{plot_configuration_id}:
+    put:
+      parameters:
+      - description: project uuid
+        in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      - description: plot config uuid
+        in: path
+        name: plot_configuration_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      - description: api key
+        in: query
+        name: key
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/PlotConfigContourPlot'
+        description: plot config payload
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlotConfig'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      tags:
+      - plot-config
+      x-codegen-request-body-name: plot_config
+  /projects/{project_id}/plot_configs/profile_plots:
+    post:
+      parameters:
+      - description: project uuid
+        in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      - description: api key
+        in: query
+        name: key
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/PlotConfigProfilePlot'
+        description: plot config payload
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlotConfig'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: adds a profile plot configuration to a project
+      tags:
+      - plot-config
+      x-codegen-request-body-name: plot_config
+  /projects/{project_id}/plot_configs/profile_plots/{plot_configuration_id}:
+    put:
+      parameters:
+      - description: project uuid
+        in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      - description: plot config uuid
+        in: path
+        name: plot_configuration_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      - description: api key
+        in: query
+        name: key
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/PlotConfigProfilePlot'
+        description: plot config payload
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlotConfig'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      tags:
+      - plot-config
+      x-codegen-request-body-name: plot_config
+  /projects/{project_id}/plot_configs/scatter_line_plots:
+    post:
+      parameters:
+      - description: project uuid
+        in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      - description: api key
+        in: query
+        name: key
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/PlotConfigScatterLinePlot'
+        description: plot config payload
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlotConfig'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: adds a scatter-line plot configuration to a project
+      tags:
+      - plot-config
+      x-codegen-request-body-name: plot_config
+  /projects/{project_id}/plot_configs/scatter_line_plots/{plot_configuration_id}:
+    put:
+      parameters:
+      - description: project uuid
+        in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      - description: plot config uuid
+        in: path
+        name: plot_configuration_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      - description: api key
+        in: query
+        name: key
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/PlotConfigScatterLinePlot'
+        description: plot config payload
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlotConfig'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      tags:
+      - plot-config
+      x-codegen-request-body-name: plot_config
+  /projects/{project_id}/plot_configs/{plot_configuration_id}:
+    delete:
+      parameters:
+      - description: project uuid
+        in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      - description: plot config uuid
+        in: path
+        name: plot_configuration_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      - description: api key
+        in: query
+        name: key
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: deletes a plot configuration in a project
+      tags:
+      - plot-config
+    get:
+      parameters:
+      - description: project uuid
+        in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      - description: plot config uuid
+        in: path
+        name: plot_configuration_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlotConfig'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Internal Server Error
+      summary: gets a single plot configuration by id
+      tags:
+      - plot-config
   /projects/{project_id}/plot_configurations:
     get:
       parameters:
@@ -5829,7 +6414,7 @@ paths:
         content:
           '*/*':
             schema:
-              $ref: '#/components/schemas/PlotConfig'
+              $ref: '#/components/schemas/PlotConfigScatterLinePlot'
         description: plot config payload
         required: true
       responses:
@@ -5859,7 +6444,7 @@ paths:
           description: Internal Server Error
       security:
       - Bearer: []
-      summary: adds a plot configuration to a project
+      summary: adds a scatter-line plot configuration to a project
       tags:
       - plot-config
       x-codegen-request-body-name: plot_config
@@ -6032,7 +6617,7 @@ paths:
         content:
           '*/*':
             schema:
-              $ref: '#/components/schemas/PlotConfig'
+              $ref: '#/components/schemas/PlotConfigScatterLinePlot'
         description: plot config payload
         required: true
       responses:
@@ -8676,6 +9261,429 @@ components:
         updater_username: updater_username
         creator_username: creator_username
         display:
+          key: ""
+        show_comments: true
+        report_configs:
+        - name: name
+          id: id
+          slug: slug
+        - name: name
+          id: id
+          slug: slug
+        auto_range: true
+        show_masked: true
+        threshold: 0
+        update_date: update_date
+        show_nonvalidated: true
+        project_id: project_id
+        creator_id: creator_id
+        name: name
+        updater_id: updater_id
+        id: id
+        create_date: create_date
+        plot_type: plot_type
+        slug: slug
+      properties:
+        auto_range:
+          type: boolean
+        create_date:
+          type: string
+        creator_id:
+          type: string
+        creator_username:
+          type: string
+        date_range:
+          type: string
+        display:
+          additionalProperties: true
+          type: object
+        id:
+          type: string
+        name:
+          type: string
+        plot_type:
+          type: string
+        project_id:
+          type: string
+        report_configs:
+          items:
+            $ref: '#/components/schemas/IDSlugName'
+          type: array
+        show_comments:
+          type: boolean
+        show_masked:
+          type: boolean
+        show_nonvalidated:
+          type: boolean
+        slug:
+          type: string
+        threshold:
+          type: integer
+        update_date:
+          type: string
+        updater_id:
+          type: string
+        updater_username:
+          type: string
+      type: object
+    PlotConfigBullseyePlot:
+      example:
+        date_range: date_range
+        updater_username: updater_username
+        creator_username: creator_username
+        display:
+          y_axis_timeseries_id: y_axis_timeseries_id
+          x_axis_timeseries_id: x_axis_timeseries_id
+        show_comments: true
+        report_configs:
+        - name: name
+          id: id
+          slug: slug
+        - name: name
+          id: id
+          slug: slug
+        auto_range: true
+        show_masked: true
+        threshold: 0
+        update_date: update_date
+        show_nonvalidated: true
+        project_id: project_id
+        creator_id: creator_id
+        name: name
+        updater_id: updater_id
+        id: id
+        create_date: create_date
+        plot_type: plot_type
+        slug: slug
+      properties:
+        auto_range:
+          type: boolean
+        create_date:
+          type: string
+        creator_id:
+          type: string
+        creator_username:
+          type: string
+        date_range:
+          type: string
+        display:
+          $ref: '#/components/schemas/PlotConfigBullseyePlotDisplay'
+        id:
+          type: string
+        name:
+          type: string
+        plot_type:
+          type: string
+        project_id:
+          type: string
+        report_configs:
+          items:
+            $ref: '#/components/schemas/IDSlugName'
+          type: array
+        show_comments:
+          type: boolean
+        show_masked:
+          type: boolean
+        show_nonvalidated:
+          type: boolean
+        slug:
+          type: string
+        threshold:
+          type: integer
+        update_date:
+          type: string
+        updater_id:
+          type: string
+        updater_username:
+          type: string
+      type: object
+    PlotConfigBullseyePlotDisplay:
+      example:
+        y_axis_timeseries_id: y_axis_timeseries_id
+        x_axis_timeseries_id: x_axis_timeseries_id
+      properties:
+        x_axis_timeseries_id:
+          type: string
+        y_axis_timeseries_id:
+          type: string
+      type: object
+    PlotConfigContourPlot:
+      example:
+        date_range: date_range
+        updater_username: updater_username
+        creator_username: creator_username
+        display:
+          contour_smoothing: true
+          gradient_smoothing: true
+          locf_backfill: locf_backfill
+          timeseries_ids:
+          - timeseries_ids
+          - timeseries_ids
+          show_labels: true
+          time: time
+        show_comments: true
+        report_configs:
+        - name: name
+          id: id
+          slug: slug
+        - name: name
+          id: id
+          slug: slug
+        auto_range: true
+        show_masked: true
+        threshold: 0
+        update_date: update_date
+        show_nonvalidated: true
+        project_id: project_id
+        creator_id: creator_id
+        name: name
+        updater_id: updater_id
+        id: id
+        create_date: create_date
+        plot_type: plot_type
+        slug: slug
+      properties:
+        auto_range:
+          type: boolean
+        create_date:
+          type: string
+        creator_id:
+          type: string
+        creator_username:
+          type: string
+        date_range:
+          type: string
+        display:
+          $ref: '#/components/schemas/PlotConfigContourPlotDisplay'
+        id:
+          type: string
+        name:
+          type: string
+        plot_type:
+          type: string
+        project_id:
+          type: string
+        report_configs:
+          items:
+            $ref: '#/components/schemas/IDSlugName'
+          type: array
+        show_comments:
+          type: boolean
+        show_masked:
+          type: boolean
+        show_nonvalidated:
+          type: boolean
+        slug:
+          type: string
+        threshold:
+          type: integer
+        update_date:
+          type: string
+        updater_id:
+          type: string
+        updater_username:
+          type: string
+      type: object
+    PlotConfigContourPlotDisplay:
+      example:
+        contour_smoothing: true
+        gradient_smoothing: true
+        locf_backfill: locf_backfill
+        timeseries_ids:
+        - timeseries_ids
+        - timeseries_ids
+        show_labels: true
+        time: time
+      properties:
+        contour_smoothing:
+          type: boolean
+        gradient_smoothing:
+          type: boolean
+        locf_backfill:
+          type: string
+        show_labels:
+          type: boolean
+        time:
+          type: string
+        timeseries_ids:
+          items:
+            type: string
+          type: array
+      type: object
+    PlotConfigProfilePlot:
+      example:
+        date_range: date_range
+        updater_username: updater_username
+        creator_username: creator_username
+        display:
+          instrument_id: instrument_id
+        show_comments: true
+        report_configs:
+        - name: name
+          id: id
+          slug: slug
+        - name: name
+          id: id
+          slug: slug
+        auto_range: true
+        show_masked: true
+        threshold: 0
+        update_date: update_date
+        show_nonvalidated: true
+        project_id: project_id
+        creator_id: creator_id
+        name: name
+        updater_id: updater_id
+        id: id
+        create_date: create_date
+        plot_type: plot_type
+        slug: slug
+      properties:
+        auto_range:
+          type: boolean
+        create_date:
+          type: string
+        creator_id:
+          type: string
+        creator_username:
+          type: string
+        date_range:
+          type: string
+        display:
+          $ref: '#/components/schemas/PlotConfigProfilePlotDisplay'
+        id:
+          type: string
+        name:
+          type: string
+        plot_type:
+          type: string
+        project_id:
+          type: string
+        report_configs:
+          items:
+            $ref: '#/components/schemas/IDSlugName'
+          type: array
+        show_comments:
+          type: boolean
+        show_masked:
+          type: boolean
+        show_nonvalidated:
+          type: boolean
+        slug:
+          type: string
+        threshold:
+          type: integer
+        update_date:
+          type: string
+        updater_id:
+          type: string
+        updater_username:
+          type: string
+      type: object
+    PlotConfigProfilePlotDisplay:
+      example:
+        instrument_id: instrument_id
+      properties:
+        instrument_id:
+          type: string
+      type: object
+    PlotConfigScatterLineCustomShape:
+      example:
+        color: color
+        data_point: 0.8008281904610115
+        name: name
+        plot_configuration_id: plot_configuration_id
+        enabled: true
+      properties:
+        color:
+          type: string
+        data_point:
+          type: number
+        enabled:
+          type: boolean
+        name:
+          type: string
+        plot_configuration_id:
+          type: string
+      type: object
+    PlotConfigScatterLineDisplay:
+      example:
+        layout:
+          custom_shapes:
+          - color: color
+            data_point: 0.8008281904610115
+            name: name
+            plot_configuration_id: plot_configuration_id
+            enabled: true
+          - color: color
+            data_point: 0.8008281904610115
+            name: name
+            plot_configuration_id: plot_configuration_id
+            enabled: true
+          yaxis_title: yaxis_title
+          secondary_axis_title: secondary_axis_title
+        traces:
+        - trace_type: trace_type
+          color: color
+          show_markers: true
+          timeseries_id: timeseries_id
+          y_axis: y_axis
+          parameter: parameter
+          name: name
+          width: 1.4658129805029452
+          line_style: line_style
+          plot_configuration_id: plot_configuration_id
+          trace_order: 6
+        - trace_type: trace_type
+          color: color
+          show_markers: true
+          timeseries_id: timeseries_id
+          y_axis: y_axis
+          parameter: parameter
+          name: name
+          width: 1.4658129805029452
+          line_style: line_style
+          plot_configuration_id: plot_configuration_id
+          trace_order: 6
+      properties:
+        layout:
+          $ref: '#/components/schemas/PlotConfigScatterLineLayout'
+        traces:
+          items:
+            $ref: '#/components/schemas/PlotConfigScatterLineTimeseriesTrace'
+          type: array
+      type: object
+    PlotConfigScatterLineLayout:
+      example:
+        custom_shapes:
+        - color: color
+          data_point: 0.8008281904610115
+          name: name
+          plot_configuration_id: plot_configuration_id
+          enabled: true
+        - color: color
+          data_point: 0.8008281904610115
+          name: name
+          plot_configuration_id: plot_configuration_id
+          enabled: true
+        yaxis_title: yaxis_title
+        secondary_axis_title: secondary_axis_title
+      properties:
+        custom_shapes:
+          items:
+            $ref: '#/components/schemas/PlotConfigScatterLineCustomShape'
+          type: array
+        secondary_axis_title:
+          type: string
+        yaxis_title:
+          type: string
+      type: object
+    PlotConfigScatterLinePlot:
+      example:
+        date_range: date_range
+        updater_username: updater_username
+        creator_username: creator_username
+        display:
           layout:
             custom_shapes:
             - color: color
@@ -8732,6 +9740,7 @@ components:
         updater_id: updater_id
         id: id
         create_date: create_date
+        plot_type: plot_type
         slug: slug
       properties:
         auto_range:
@@ -8745,10 +9754,12 @@ components:
         date_range:
           type: string
         display:
-          $ref: '#/components/schemas/PlotConfigDisplay'
+          $ref: '#/components/schemas/PlotConfigScatterLineDisplay'
         id:
           type: string
         name:
+          type: string
+        plot_type:
           type: string
         project_id:
           type: string
@@ -8773,98 +9784,7 @@ components:
         updater_username:
           type: string
       type: object
-    PlotConfigCustomShape:
-      example:
-        color: color
-        data_point: 0.8008281904610115
-        name: name
-        plot_configuration_id: plot_configuration_id
-        enabled: true
-      properties:
-        color:
-          type: string
-        data_point:
-          type: number
-        enabled:
-          type: boolean
-        name:
-          type: string
-        plot_configuration_id:
-          type: string
-      type: object
-    PlotConfigDisplay:
-      example:
-        layout:
-          custom_shapes:
-          - color: color
-            data_point: 0.8008281904610115
-            name: name
-            plot_configuration_id: plot_configuration_id
-            enabled: true
-          - color: color
-            data_point: 0.8008281904610115
-            name: name
-            plot_configuration_id: plot_configuration_id
-            enabled: true
-          yaxis_title: yaxis_title
-          secondary_axis_title: secondary_axis_title
-        traces:
-        - trace_type: trace_type
-          color: color
-          show_markers: true
-          timeseries_id: timeseries_id
-          y_axis: y_axis
-          parameter: parameter
-          name: name
-          width: 1.4658129805029452
-          line_style: line_style
-          plot_configuration_id: plot_configuration_id
-          trace_order: 6
-        - trace_type: trace_type
-          color: color
-          show_markers: true
-          timeseries_id: timeseries_id
-          y_axis: y_axis
-          parameter: parameter
-          name: name
-          width: 1.4658129805029452
-          line_style: line_style
-          plot_configuration_id: plot_configuration_id
-          trace_order: 6
-      properties:
-        layout:
-          $ref: '#/components/schemas/PlotConfigLayout'
-        traces:
-          items:
-            $ref: '#/components/schemas/PlotConfigTimeseriesTrace'
-          type: array
-      type: object
-    PlotConfigLayout:
-      example:
-        custom_shapes:
-        - color: color
-          data_point: 0.8008281904610115
-          name: name
-          plot_configuration_id: plot_configuration_id
-          enabled: true
-        - color: color
-          data_point: 0.8008281904610115
-          name: name
-          plot_configuration_id: plot_configuration_id
-          enabled: true
-        yaxis_title: yaxis_title
-        secondary_axis_title: secondary_axis_title
-      properties:
-        custom_shapes:
-          items:
-            $ref: '#/components/schemas/PlotConfigCustomShape'
-          type: array
-        secondary_axis_title:
-          type: string
-        yaxis_title:
-          type: string
-      type: object
-    PlotConfigTimeseriesTrace:
+    PlotConfigScatterLineTimeseriesTrace:
       example:
         trace_type: trace_type
         color: color
@@ -9198,6 +10118,7 @@ components:
           updater_id: updater_id
           id: id
           create_date: create_date
+          plot_type: plot_type
           slug: slug
         - date_range: date_range
           updater_username: updater_username
@@ -9259,6 +10180,7 @@ components:
           updater_id: updater_id
           id: id
           create_date: create_date
+          plot_type: plot_type
           slug: slug
         slug: slug
       properties:
@@ -9280,7 +10202,7 @@ components:
           type: string
         plot_configs:
           items:
-            $ref: '#/components/schemas/PlotConfig'
+            $ref: '#/components/schemas/PlotConfigScatterLinePlot'
           type: array
         project_id:
           type: string

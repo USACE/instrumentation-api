@@ -74,8 +74,8 @@ const plotConfigLayoutSchema = `{
                 }
             }
         },
-        "yaxis_title": { "type": ["string", "null"] },
-        "secondary_y_axis": { "type": ["string", "null"] }
+        "y_axis_title": { "type": ["string", "null"] },
+        "y2_axis_title": { "type": ["string", "null"] }
     }
 }`
 

@@ -246,10 +246,26 @@ func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 	r.public.GET("/opendcs/sites", h.ListOpendcsSites)
 
 	// PlotConfig
+	r.public.GET("/projects/:project_id/plot_configs", h.ListPlotConfigs)
+	r.public.GET("/projects/:project_id/plot_configs/:plot_configuration_id", h.GetPlotConfig)
+	r.private.DELETE("/projects/:project_id/plot_configs/:plot_configuration_id", h.DeletePlotConfig)
+	// PlotConfig ScatterLinePlot
+	r.private.POST("/projects/:project_id/plot_configs/scatter_line_plot", h.CreatePlotConfigScatterLinePlot)
+	r.private.PUT("/projects/:project_id/plot_configs/scatter_line_plot/:plot_configuration_id", h.UpdatePlotConfigScatterLinePlot)
+	// PlotConfig ProfilePlot
+	r.private.POST("/projects/:project_id/plot_configs/profile_plot", h.CreatePlotConfigProfilePlot)
+	r.private.PUT("/projects/:project_id/plot_configs/profile_plot/:plot_configuration_id", h.UpdatePlotConfigProfilePlot)
+	// PlotConfig ContourPlot
+	r.private.POST("/projects/:project_id/plot_configs/contour_plot", h.CreatePlotConfigContourPlot)
+	r.private.PUT("/projects/:project_id/plot_configs/contour_plot/:plot_configuration_id", h.UpdatePlotConfigContourPlot)
+	// PlotConfig BullseyePlot
+	r.private.POST("/projects/:project_id/plot_configs/bullseye_plot", h.CreatePlotConfigBullseyePlot)
+	r.private.PUT("/projects/:project_id/plot_configs/bullseye_plot/:plot_configuration_id", h.UpdatePlotConfigBullseyePlot)
+	// @deprecated
 	r.public.GET("/projects/:project_id/plot_configurations", h.ListPlotConfigs)
 	r.public.GET("/projects/:project_id/plot_configurations/:plot_configuration_id", h.GetPlotConfig)
-	r.private.POST("/projects/:project_id/plot_configurations", h.CreatePlotConfig)
-	r.private.PUT("/projects/:project_id/plot_configurations/:plot_configuration_id", h.UpdatePlotConfig)
+	r.private.POST("/projects/:project_id/plot_configurations", h.CreatePlotConfigScatterLinePlot)
+	r.private.PUT("/projects/:project_id/plot_configurations/:plot_configuration_id", h.UpdatePlotConfigScatterLinePlot)
 	r.private.DELETE("/projects/:project_id/plot_configurations/:plot_configuration_id", h.DeletePlotConfig)
 
 	// Profile

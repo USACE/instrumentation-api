@@ -16,14 +16,32 @@ CREATE VIEW v_plot_configuration AS (
         COALESCE(k.date_range, '1 year')      AS date_range,
         COALESCE(k.threshold, 3000)           AS threshold,
         COALESCE(rc.configs, '[]')::text      AS report_configs,
-        json_build_object(
-            'traces', COALESCE(traces.items, '[]'),
-            'layout', json_build_object(
-                'yaxis_title', k.yaxis_title,
-                'secondary_axis_title', k.secondary_axis_title,
-                'custom_shapes', COALESCE(cs.items, '[]')
-            )
-        )::text                               AS display
+        pc.plot_type,
+        CASE
+            WHEN pc.plot_type = 'scatter-line' THEN json_build_object(
+                'traces', COALESCE(traces.items, '[]'),
+                'layout', json_build_object(
+                    'y_axis_title', pcl.y_axis_title,
+                    'y2_axis_title', pcl.y2_axis_title,
+                    'custom_shapes', COALESCE(cs.items, '[]')
+                )
+            )::text
+            WHEN pc.plot_type = 'profile' THEN json_build_object(
+                'instrument_id', ppc.instrument_id
+            )::text
+            WHEN pc.plot_type = 'contour' THEN json_build_object(
+                'time', pcc.time,
+                'locf_backfill', pcc.locf_backfill,
+                'gradient_smoothing', pcc.gradient_smoothing,
+                'contour_smoothing', pcc.contour_smoothing,
+                'show_labels', pcc.show_labels
+            )::text
+            WHEN pc.plot_type = 'bullseye' THEN json_build_object(
+                'x_axis_timeseries_id', pbc.x_axis_timeseries_id,
+                'y_axis_timeseries_id', pbc.y_axis_timeseries_id
+            )::text
+            ELSE NULL
+        END AS display
     FROM plot_configuration pc
     LEFT JOIN (
         SELECT
@@ -33,9 +51,7 @@ CREATE VIEW v_plot_configuration AS (
             show_comments,
             auto_range,
             date_range,
-            threshold,
-            yaxis_title,
-            secondary_axis_title
+            threshold
         FROM plot_configuration_settings
         GROUP BY id
     ) k ON pc.id = k.id
@@ -69,40 +85,11 @@ CREATE VIEW v_plot_configuration AS (
         FROM plot_configuration_custom_shape ccs
         WHERE pc.id = ccs.plot_configuration_id
     ) cs on true
+    LEFT JOIN plot_bullseye_config pbc ON pbc.plot_config_id = pc.id
+    LEFT JOIN plot_profile_config ppc ON ppc.plot_config_id = pc.id
+    LEFT JOIN plot_contour_config pcc ON pcc.plot_config_id = pc.id
+    LEFT JOIN plot_scatter_line_config pcl ON pcl.plot_config_id = pc.id
     ORDER BY pc.name
-);
-
--- CREATE TABLE plot_contour_config (
---   plot_config_id uuid UNIQUE NOT NULL REFERENCES plot_config(id),
---   date timestamptz NOT NULL,
---   locf_backfill interval NOT NULL,
---   gradient_smoothing boolean NOT NULL DEFAULT false,
---   contour_smoothing boolean NOT NULL DEFAULT false,
---   show_labels boolean NOT NULL DEFAULT false
--- );
---
--- CREATE TABLE plot_contour_config_timeseries (
---   plot_contour_config_id uuid NOT NULL REFERENCES plot_contour_config(plot_config_id),
---   timeseries_id uuid NOT NULL REFERENCES timeseries(id),
---   CONSTRAINT UNIQUE(plot_contour_config_id, timeseries_id)
--- );
-
-CREATE VIEW v_plot_contour AS (
-    SELECT
-        
-);
-
---
--- CREATE TABLE plot_bullseye_config (
---   plot_config_id uuid UNIQUE NOT NULL REFERENCES plot_config(id),
---   x_axis_timeseries_id uuid NOT NULL REFERENCES timeseries(id),
---   y_axis_timeseries_id uuid NOT NULL REFERENCES timeseries(id),
---   CONSTRAINT UNIQUE(x_axis_timeseries_id, y_axis_timeseries_id)
--- );
-
-CREATE VIEW v_plot_bullseye AS (
-    SELECT
-        
 );
 
 GRANT SELECT ON v_plot_configuration TO instrumentation_reader;
