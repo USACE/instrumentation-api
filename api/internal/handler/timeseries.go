@@ -105,30 +105,6 @@ func (h *ApiHandler) ListProjectTimeseries(c echo.Context) error {
 	return c.JSON(http.StatusOK, tt)
 }
 
-// ListPlotConfigTimeseries godoc
-//
-//	@Summary lists all timeseries for a single plot config
-//	@Tags timeseries
-//	@Produce json
-//	@Param project_id path string true "project uuid" Format(uuid)
-//	@Param plot_config_id path string true "plot config uuid" Format(uuid)
-//	@Success 200 {array} model.Timeseries
-//	@Failure 400 {object} echo.HTTPError
-//	@Failure 404 {object} echo.HTTPError
-//	@Failure 500 {object} echo.HTTPError
-//	@Router /projects/{project_id}/plot_configurations/{plot_config_id}/timeseries [get]
-func (h *ApiHandler) ListPlotConfigTimeseries(c echo.Context) error {
-	pID, err := uuid.Parse(c.Param("plot_config_id"))
-	if err != nil {
-		return httperr.MalformedID(err)
-	}
-	tt, err := h.TimeseriesService.ListProjectTimeseries(c.Request().Context(), pID)
-	if err != nil {
-		return httperr.InternalServerError(err)
-	}
-	return c.JSON(http.StatusOK, tt)
-}
-
 // CreateTimeseries godoc
 //
 //	@Summary creates one or more timeseries

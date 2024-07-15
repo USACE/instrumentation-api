@@ -135,22 +135,6 @@ func (q *Queries) ListInstrumentTimeseries(ctx context.Context, instrumentID uui
 	return tt, nil
 }
 
-const listPlotConfigTimeseries = listTimeseries + `
-	WHERE id = ANY(
-		SELECT timeseries_id
-		FROM plot_configuration_timeseries
-		WHERE plot_configuration_id = $1
-	)
-`
-
-func (q *Queries) ListPlotConfigTimeseries(ctx context.Context, plotConfigID uuid.UUID) ([]Timeseries, error) {
-	tt := make([]Timeseries, 0)
-	if err := q.db.Select(&tt, listPlotConfigTimeseries, plotConfigID); err != nil {
-		return nil, err
-	}
-	return tt, nil
-}
-
 const listInstrumentGroupTimeseries = listTimeseries + `
 	WHERE  instrument_id IN (
 		SELECT instrument_id

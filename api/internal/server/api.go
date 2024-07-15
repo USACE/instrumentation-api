@@ -325,7 +325,6 @@ func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 	r.public.GET("/instruments/:instrument_id/timeseries/:timeseries_id", h.GetTimeseries)
 	r.public.GET("/projects/:project_id/timeseries", h.ListProjectTimeseries)
 	r.public.GET("/projects/:project_id/instruments/:instrument_id/timeseries", h.ListInstrumentTimeseries)
-	r.public.GET("/projects/:project_id/plot_configurations/:plot_config_id/timeseries", h.ListPlotConfigTimeseries)
 
 	r.private.POST("/timeseries", h.CreateTimeseries)
 	r.private.PUT("/timeseries/:timeseries_id", h.UpdateTimeseries)
