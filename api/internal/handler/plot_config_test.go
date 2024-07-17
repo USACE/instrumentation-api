@@ -42,30 +42,30 @@ var plotConfigDisplaySchema = fmt.Sprintf(`{
     "layout": %s
 }`, plotConfigTracesArrSchema, plotConfigLayoutSchema)
 
+// NOTE gojsonschema incorrectly marks this as invalid JSON when applied to the full schema
+// eventually migrating from gojsonschema to a system that validates against the openapi types spec would be preferred
+
 // var plotConfigDisplaySchema = fmt.Sprintf(`{
+//     "type": "object",
 //     "anyOf": [
 //         {
-//             "type": "object",
 //             "properties": {
 //                 "traces": %s,
 //                 "layout": %s
 //             }
 //         },
 //         {
-//             "type": "object",
 //             "properties": {
 //                 "instrument_id": { "type": "string" }
 //             }
 //         },
 //         {
-//             "type": "object",
 //             "properties": {
 //                 "x_axis_timeseries_id": { "type": "string" },
 //                 "y_axis_timeseries_id": { "type": "string" }
 //             }
 //         },
 //         {
-//             "type": "object",
 //             "properties": {
 //                 "timeseries_ids": { "type": "array", "items": { "type": "string" } },
 //                 "time": { "type": "string" },
