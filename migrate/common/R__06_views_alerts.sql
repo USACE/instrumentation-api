@@ -1,5 +1,5 @@
 -- ${flyway:timestamp}
-CREATE VIEW v_alert AS (
+CREATE OR REPLACE VIEW v_alert AS (
     SELECT a.id AS id,
        a.alert_config_id AS alert_config_id,
        a.create_date AS create_date,
@@ -24,7 +24,7 @@ CREATE VIEW v_alert AS (
     INNER JOIN project p ON ac.project_id = p.id
 );
 
-CREATE VIEW v_alert_config AS (
+CREATE OR REPLACE VIEW v_alert_config AS (
     SELECT
         ac.id                               AS id,
         ac.name                             AS name,
@@ -97,7 +97,7 @@ CREATE VIEW v_alert_config AS (
     WHERE NOT ac.deleted
 );
 
-CREATE VIEW v_submittal AS (
+CREATE OR REPLACE VIEW v_submittal AS (
     SELECT
         sub.id                  AS id,
         ac.id                   AS alert_config_id,

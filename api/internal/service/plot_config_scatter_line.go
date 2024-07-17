@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/USACE/instrumentation-api/api/internal/model"
@@ -29,20 +30,19 @@ func (s plotConfigService) CreatePlotConfigScatterLinePlot(ctx context.Context, 
 		return model.PlotConfig{}, err
 	}
 
-	pc.ID = pcID
-	if err := qtx.CreatePlotConfigSettings(ctx, pc.ID, pc.PlotConfigSettings); err != nil {
+	if err := qtx.CreatePlotConfigSettings(ctx, pcID, pc.PlotConfigSettings); err != nil {
 		return model.PlotConfig{}, err
 	}
 
-	if err := validateCreateTraces(ctx, qtx, pc.ID, pc.Display.Traces); err != nil {
+	if err := validateCreateTraces(ctx, qtx, pcID, pc.Display.Traces); err != nil {
 		return model.PlotConfig{}, err
 	}
 
-	if err := qtx.CreatePlotConfigScatterLineLayout(ctx, pc.ID, pc.Display.Layout); err != nil {
+	if err := qtx.CreatePlotConfigScatterLineLayout(ctx, pcID, pc.Display.Layout); err != nil {
 		return model.PlotConfig{}, err
 	}
 
-	if err := validateCreateCustomShapes(ctx, qtx, pc.ID, pc.Display.Layout.CustomShapes); err != nil {
+	if err := validateCreateCustomShapes(ctx, qtx, pcID, pc.Display.Layout.CustomShapes); err != nil {
 		return model.PlotConfig{}, err
 	}
 	pcNew, err := qtx.GetPlotConfig(ctx, pcID)
@@ -71,7 +71,8 @@ func (s plotConfigService) UpdatePlotConfigScatterLinePlot(ctx context.Context, 
 	}
 
 	if err := qtx.DeletePlotConfigSettings(ctx, pc.ID); err != nil {
-		return model.PlotConfig{}, err
+		log.Printf("fails on delete %s", pc.ID)
+		return model.PlotConfig{}, fmt.Errorf("fails on delete %s", pc.ID)
 	}
 
 	if err := qtx.DeleteAllPlotConfigTimeseriesTraces(ctx, pc.ID); err != nil {
@@ -83,7 +84,8 @@ func (s plotConfigService) UpdatePlotConfigScatterLinePlot(ctx context.Context, 
 	}
 
 	if err := qtx.CreatePlotConfigSettings(ctx, pc.ID, pc.PlotConfigSettings); err != nil {
-		return model.PlotConfig{}, err
+		log.Printf("fails on create %s, %+v", pc.ID, pc.PlotConfigSettings)
+		return model.PlotConfig{}, fmt.Errorf("fails on create %s, %+v", pc.ID, pc.PlotConfigSettings)
 	}
 
 	if err := validateCreateTraces(ctx, qtx, pc.ID, pc.Display.Traces); err != nil {

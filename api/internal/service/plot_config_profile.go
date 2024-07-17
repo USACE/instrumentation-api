@@ -26,11 +26,15 @@ func (s plotConfigService) CreatePlotConfigProfilePlot(ctx context.Context, pc m
 		return model.PlotConfig{}, err
 	}
 
+	if err := qtx.CreatePlotConfigSettings(ctx, pcID, pc.PlotConfigSettings); err != nil {
+		return model.PlotConfig{}, err
+	}
+
 	if err := qtx.CreatePlotProfileConfig(ctx, pcID, pc.Display); err != nil {
 		return model.PlotConfig{}, err
 	}
 
-	pcNew, err := qtx.GetPlotConfig(ctx, pc.ID)
+	pcNew, err := qtx.GetPlotConfig(ctx, pcID)
 	if err != nil {
 		return model.PlotConfig{}, err
 	}

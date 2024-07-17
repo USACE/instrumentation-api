@@ -85,6 +85,12 @@ func (h *ApiHandler) UpdatePlotConfigContourPlot(c echo.Context) error {
 	}
 	pc.ProjectID = pID
 
+	pcID, err := uuid.Parse(c.Param("plot_configuration_id"))
+	if err != nil {
+		return httperr.MalformedID(err)
+	}
+	pc.ID = pcID
+
 	p := c.Get("profile").(model.Profile)
 	tNow := time.Now()
 	pc.UpdaterID, pc.UpdateDate = &p.ID, &tNow

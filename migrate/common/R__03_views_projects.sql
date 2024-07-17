@@ -1,5 +1,5 @@
 -- ${flyway:timestamp}
-CREATE VIEW v_project AS (
+CREATE OR REPLACE VIEW v_project AS (
     SELECT
         p.id,
         p.federal_id,
@@ -42,7 +42,7 @@ CREATE VIEW v_project AS (
     CROSS JOIN config cfg
 );
 
-CREATE VIEW v_district AS (
+CREATE OR REPLACE VIEW v_district AS (
     SELECT
         ag.name         AS agency,
         dis.id          AS id,

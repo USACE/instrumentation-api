@@ -1,5 +1,5 @@
 -- ${flyway:timestamp}
-CREATE VIEW v_instrument_telemetry AS (
+CREATE OR REPLACE VIEW v_instrument_telemetry AS (
     SELECT a.id,
            a.instrument_id AS instrument_id,
            b.id AS telemetry_type_id,
@@ -11,7 +11,7 @@ CREATE VIEW v_instrument_telemetry AS (
     LEFT JOIN telemetry_iridium ti ON a.telemetry_id = ti.id
 );
 
-CREATE VIEW v_instrument AS (
+CREATE OR REPLACE VIEW v_instrument AS (
     SELECT
         i.id,
         i.deleted,
@@ -120,7 +120,7 @@ CREATE VIEW v_instrument AS (
     ) o ON o.instrument_id = i.id
 );
 
-CREATE VIEW v_instrument_group AS (
+CREATE OR REPLACE VIEW v_instrument_group AS (
     WITH instrument_count AS (
             SELECT 
             igi.instrument_group_id,

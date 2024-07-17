@@ -1,5 +1,5 @@
 -- ${flyway:timestamp}
-CREATE VIEW v_alert_check_measurement_submittal AS (
+CREATE OR REPLACE VIEW v_alert_check_measurement_submittal AS (
     SELECT
         ac.id AS alert_config_id,
         sub.id AS submittal_id,
@@ -58,7 +58,7 @@ CREATE VIEW v_alert_check_measurement_submittal AS (
     GROUP BY ac.id, sub.id
 );
 
-CREATE VIEW v_alert_check_evaluation_submittal AS (
+CREATE OR REPLACE VIEW v_alert_check_evaluation_submittal AS (
     SELECT
         ac.id AS alert_config_id,
         sub.id AS submittal_id,

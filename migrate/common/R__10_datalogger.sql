@@ -1,5 +1,5 @@
 -- ${flyway:timestamp}
-CREATE VIEW v_datalogger AS (
+CREATE OR REPLACE VIEW v_datalogger AS (
     SELECT
         dl.id          AS id,
         dl.sn          AS sn,
@@ -42,7 +42,7 @@ CREATE VIEW v_datalogger AS (
     WHERE NOT dl.deleted
 );
 
-CREATE VIEW v_datalogger_preview AS (
+CREATE OR REPLACE VIEW v_datalogger_preview AS (
     SELECT
         p.datalogger_table_id,
         p.preview,
@@ -53,7 +53,7 @@ CREATE VIEW v_datalogger_preview AS (
     WHERE NOT dl.deleted
 );
 
-CREATE VIEW v_datalogger_equivalency_table AS (
+CREATE OR REPLACE VIEW v_datalogger_equivalency_table AS (
     SELECT
         dt.datalogger_id AS datalogger_id,
         dt.id AS datalogger_table_id,
@@ -70,7 +70,7 @@ CREATE VIEW v_datalogger_equivalency_table AS (
     GROUP BY dt.datalogger_id, dt.id
 );
 
-CREATE VIEW v_datalogger_hash AS (
+CREATE OR REPLACE VIEW v_datalogger_hash AS (
     SELECT
         dh.datalogger_id AS datalogger_id,
         dh.hash          AS "hash",

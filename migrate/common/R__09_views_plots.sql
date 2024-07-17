@@ -1,5 +1,5 @@
 -- ${flyway:timestamp}
-CREATE VIEW v_plot_configuration AS (
+CREATE OR REPLACE VIEW v_plot_configuration AS (
     SELECT
         pc.id,
         pc.slug,

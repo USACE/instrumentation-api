@@ -247,12 +247,6 @@ func TestPlotConfigs(t *testing.T) {
 			ExpectedSchema: arrSchema,
 		},
 		{
-			Name:           "DeletePlotConfig",
-			URL:            fmt.Sprintf("/projects/%s/plot_configs/%s", testProjectID, testPlotConfigID),
-			Method:         http.MethodDelete,
-			ExpectedStatus: http.StatusOK,
-		},
-		{
 			Name:           "UpdatePlotConfigScatterLinePlot - Add Many Timeseries",
 			URL:            fmt.Sprintf("/projects/%s/plot_configs/scatter_line_plots/%s", testProjectID, testPlotConfigID),
 			Method:         http.MethodPut,
@@ -275,6 +269,12 @@ func TestPlotConfigs(t *testing.T) {
 			Body:           createPlotConfigBody,
 			ExpectedStatus: http.StatusCreated,
 			ExpectedSchema: objSchema,
+		},
+		{
+			Name:           "DeletePlotConfig",
+			URL:            fmt.Sprintf("/projects/%s/plot_configs/%s", testProjectID, testPlotConfigID),
+			Method:         http.MethodDelete,
+			ExpectedStatus: http.StatusOK,
 		}}
 
 	RunAll(t, tests)

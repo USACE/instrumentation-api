@@ -42,7 +42,7 @@ const updatePlotConfigContourBody = `{
             "5842c707-b4be-4d10-a89c-1064e282e555"
         ],
 	"time": "2024-06-15T18:45:47+00:00",
-        "locf_backfill": "PT1D",
+        "locf_backfill": "P1D",
         "gradient_smoothing": true,
         "contour_smoothing": true,
         "show_labels": true
@@ -59,7 +59,7 @@ const createPlotConfigContourBody = `{
             "5842c707-b4be-4d10-a89c-1064e282e555"
         ],
 	"time": "2024-06-15T18:45:47+00:00",
-        "locf_backfill": "PT1D",
+        "locf_backfill": "P1D",
         "gradient_smoothing": true,
         "contour_smoothing": true,
         "show_labels": true
@@ -75,8 +75,7 @@ func TestPlotConfigsContour(t *testing.T) {
 		{
 			Name:           "ListPlotConfigContourPlotTimes",
 			URL:            fmt.Sprintf("/projects/%s/plot_configs/contour_plots/%s/times", testProjectID, testPlotConfigContourID),
-			Method:         http.MethodPut,
-			Body:           updatePlotConfigContourBody,
+			Method:         http.MethodGet,
 			ExpectedStatus: http.StatusOK,
 			ExpectedSchema: timesSchema,
 		},

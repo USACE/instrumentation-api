@@ -1,5 +1,5 @@
 -- ${flyway:timestamp}
-CREATE VIEW v_timeseries AS (
+CREATE OR REPLACE VIEW v_timeseries AS (
     WITH ts_stored_and_computed AS (
         SELECT
             id,
@@ -29,7 +29,7 @@ CREATE VIEW v_timeseries AS (
     INNER JOIN unit U ON u.id = t.unit_id
 );
 
-CREATE VIEW v_timeseries_dependency AS (
+CREATE OR REPLACE VIEW v_timeseries_dependency AS (
     WITH variable_tsid_map AS (
 	    SELECT
             a.id AS timeseries_id,
@@ -56,7 +56,7 @@ CREATE VIEW v_timeseries_dependency AS (
     LEFT JOIN variable_tsid_map m ON m.variable = i.parsed_variable
 );
 
-CREATE VIEW v_timeseries_project_map AS (
+CREATE OR REPLACE VIEW v_timeseries_project_map AS (
     SELECT
         t.id AS timeseries_id,
         pi.project_id AS project_id
@@ -65,11 +65,11 @@ CREATE VIEW v_timeseries_project_map AS (
     LEFT JOIN project_instrument pi ON pi.instrument_id = i.id
 );
 
-CREATE VIEW v_timeseries_stored AS (
+CREATE OR REPLACE VIEW v_timeseries_stored AS (
     SELECT * FROM timeseries WHERE id NOT IN (SELECT timeseries_id FROM calculation)
 );
 
-CREATE VIEW v_timeseries_computed AS (
+CREATE OR REPLACE VIEW v_timeseries_computed AS (
     SELECT
         ts.*,
         cc.contents AS contents

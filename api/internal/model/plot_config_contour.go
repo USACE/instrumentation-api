@@ -73,7 +73,7 @@ func (q *Queries) DeletePlotContourConfig(ctx context.Context, plotConfigID uuid
 }
 
 const createPlotContourConfigTimeseries = `
-	INSERT INTO plot_contour_config_timeseries (plot_config_id, timeseries_id) VALUES ($1, $2)
+	INSERT INTO plot_contour_config_timeseries (plot_contour_config_id, timeseries_id) VALUES ($1, $2)
 `
 
 func (q *Queries) CreatePlotContourConfigTimeseries(ctx context.Context, plotConfigID, timeseriesID uuid.UUID) error {
@@ -82,7 +82,7 @@ func (q *Queries) CreatePlotContourConfigTimeseries(ctx context.Context, plotCon
 }
 
 const deleteAllPlotContourConfigTimeseries = `
-	DELETE FROM plot_contour_config_timeseries WHERE plot_config_id = $1
+	DELETE FROM plot_contour_config_timeseries WHERE plot_contour_config_id = $1
 `
 
 func (q *Queries) DeleteAllPlotContourConfigTimeseries(ctx context.Context, plotConfigID uuid.UUID) error {
@@ -91,12 +91,10 @@ func (q *Queries) DeleteAllPlotContourConfigTimeseries(ctx context.Context, plot
 }
 
 const listPlotContourConfigTimes = `
-	SELECT DISTINCT
-		pc.plot_config_id,
-		mm.time
+	SELECT DISTINCT mm.time
 	FROM plot_contour_config_timeseries pcts
 	INNER JOIN timeseries_measurement mm ON mm.timeseries_id = pcts.timeseries_id
-	WHERE pc.plot_config_id = $1
+	WHERE pcts.plot_contour_config_id = $1
 	AND mm.time > $2
 	AND mm.time < $3
 `
