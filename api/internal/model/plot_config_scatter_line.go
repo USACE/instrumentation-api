@@ -8,7 +8,6 @@ import (
 	"github.com/google/uuid"
 )
 
-// PlotConfigScatterLinePlot holds information for entity PlotConfigScatterLinePlot
 type PlotConfigScatterLinePlot struct {
 	PlotConfig
 	Display PlotConfigScatterLineDisplay `json:"display" db:"display"`
@@ -43,9 +42,9 @@ type PlotConfigScatterLineTimeseriesTrace struct {
 }
 
 type PlotConfigScatterLineLayout struct {
-	CustomShapes       []PlotConfigScatterLineCustomShape `json:"custom_shapes"`
-	YAxisTitle         *string                            `json:"yaxis_title"`
-	SecondaryAxisTitle *string                            `json:"secondary_axis_title"`
+	CustomShapes []PlotConfigScatterLineCustomShape `json:"custom_shapes"`
+	YAxisTitle   *string                            `json:"y_axis_title"`
+	Y2AxisTitle  *string                            `json:"y2_axis_title"`
 }
 
 type PlotConfigScatterLineCustomShape struct {
@@ -59,14 +58,14 @@ type PlotConfigScatterLineCustomShape struct {
 const createPlotConfigScatterLineLayout = `INSERT INTO plot_scatter_line_config (plot_config_id, y_axis_title, y2_axis_title) VALUES ($1, $2, $3)`
 
 func (q *Queries) CreatePlotConfigScatterLineLayout(ctx context.Context, pcID uuid.UUID, layout PlotConfigScatterLineLayout) error {
-	_, err := q.db.ExecContext(ctx, createPlotConfigScatterLineLayout, pcID, layout.YAxisTitle, layout.SecondaryAxisTitle)
+	_, err := q.db.ExecContext(ctx, createPlotConfigScatterLineLayout, pcID, layout.YAxisTitle, layout.Y2AxisTitle)
 	return err
 }
 
 const updatePlotConfigScatterLineLayout = `UPDATE plot_scatter_line_config SET y_axis_title=$2, y2_axis_title=$3 WHERE plot_config_id=$1`
 
 func (q *Queries) UpdatePlotConfigScatterLineLayout(ctx context.Context, pcID uuid.UUID, layout PlotConfigScatterLineLayout) error {
-	_, err := q.db.ExecContext(ctx, updatePlotConfigScatterLineLayout, pcID, layout.YAxisTitle, layout.SecondaryAxisTitle)
+	_, err := q.db.ExecContext(ctx, updatePlotConfigScatterLineLayout, pcID, layout.YAxisTitle, layout.Y2AxisTitle)
 	return err
 }
 

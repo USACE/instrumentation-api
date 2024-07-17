@@ -43,8 +43,7 @@ CREATE TABLE plot_scatter_line_config (
 );
 
 INSERT INTO plot_scatter_line_config (plot_config_id, y_axis_title, y2_axis_title)
-SELECT id, yaxis_title, secondary_axis_title FROM plot_configuration_settings
-WHERE yaxis_title IS NOT NULL OR secondary_axis_title IS NOT NULL;
+SELECT id, yaxis_title, secondary_axis_title FROM plot_configuration_settings;
 
 ALTER TABLE plot_configuration_settings
 DROP COLUMN yaxis_title,

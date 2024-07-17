@@ -2,13 +2,17 @@ package service
 
 import (
 	"context"
+	"time"
 
 	"github.com/USACE/instrumentation-api/api/internal/model"
+	"github.com/google/uuid"
 )
 
 type plotConfigContourPlotService interface {
 	CreatePlotConfigContourPlot(ctx context.Context, pc model.PlotConfigContourPlot) (model.PlotConfig, error)
 	UpdatePlotConfigContourPlot(ctx context.Context, pc model.PlotConfigContourPlot) (model.PlotConfig, error)
+	ListPlotConfigTimesContourPlot(ctx context.Context, plotConfigID uuid.UUID, tw model.TimeWindow) ([]time.Time, error)
+	ListPlotConfigMeasurementsContourPlot(ctx context.Context, plotConfigID uuid.UUID, t time.Time) (model.AggregatePlotConfigMeasurementsContourPlot, error)
 }
 
 func (s plotConfigService) CreatePlotConfigContourPlot(ctx context.Context, pc model.PlotConfigContourPlot) (model.PlotConfig, error) {
@@ -20,6 +24,7 @@ func (s plotConfigService) CreatePlotConfigContourPlot(ctx context.Context, pc m
 
 	qtx := s.WithTx(tx)
 
+	pc.PlotType = model.ContourPlotType
 	pcID, err := qtx.CreatePlotConfig(ctx, pc.PlotConfig)
 	if err != nil {
 		return model.PlotConfig{}, err
@@ -84,4 +89,27 @@ func (s plotConfigService) UpdatePlotConfigContourPlot(ctx context.Context, pc m
 	}
 
 	return pcNew, nil
+}
+
+func (s plotConfigService) ListPlotConfigMeasurementsContourPlot(ctx context.Context, plotConfigID uuid.UUID, t time.Time) (model.AggregatePlotConfigMeasurementsContourPlot, error) {
+	q := s.db.Queries()
+
+	mm, err := q.ListPlotConfigMeasurementsContourPlot(ctx, plotConfigID, t)
+	if err != nil {
+		return model.AggregatePlotConfigMeasurementsContourPlot{}, err
+	}
+
+	am := model.AggregatePlotConfigMeasurementsContourPlot{
+		X: make([]float64, len(mm)),
+		Y: make([]float64, len(mm)),
+		Z: make([]*float64, len(mm)),
+	}
+
+	for idx := range mm {
+		am.X[idx] = mm[idx].X
+		am.Y[idx] = mm[idx].Y
+		am.Z[idx] = mm[idx].Z
+	}
+
+	return am, nil
 }

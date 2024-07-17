@@ -115,7 +115,7 @@ func (q *Queries) GetPlotConfig(ctx context.Context, plotConfigID uuid.UUID) (Pl
 }
 
 const createPlotConfig = `
-	INSERT INTO plot_configuration (slug, name, project_id, creator, create_date) VALUES (slugify($1, 'plot_configuration'), $1, $2, $3, $4, $5)
+	INSERT INTO plot_configuration (slug, name, project_id, creator, create_date, plot_type) VALUES (slugify($1, 'plot_configuration'), $1, $2, $3, $4, $5)
 	RETURNING id
 `
 
@@ -128,7 +128,7 @@ func (q *Queries) CreatePlotConfig(ctx context.Context, pc PlotConfig) (uuid.UUI
 // PlotConfigSettings
 const createPlotConfigSettings = `
 	INSERT INTO plot_configuration_settings (id, show_masked, show_nonvalidated, show_comments, auto_range, date_range, threshold) 
-	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+	VALUES ($1, $2, $3, $4, $5, $6, $7)
 `
 
 func (q *Queries) CreatePlotConfigSettings(ctx context.Context, pcID uuid.UUID, pc PlotConfigSettings) error {

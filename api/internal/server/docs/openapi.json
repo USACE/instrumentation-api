@@ -8877,8 +8877,86 @@
         "security" : [ {
           "Bearer" : [ ]
         } ],
+        "summary" : "updates a bullseye plot configuration in a project",
         "tags" : [ "plot-config" ],
         "x-codegen-request-body-name" : "plot_config"
+      }
+    },
+    "/projects/{project_id}/plot_configs/bullseye_plots/{plot_configuration_id}/measurements" : {
+      "get" : {
+        "parameters" : [ {
+          "description" : "project uuid",
+          "in" : "path",
+          "name" : "project_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "description" : "plot config uuid",
+          "in" : "path",
+          "name" : "plot_configuration_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "description" : "api key",
+          "in" : "query",
+          "name" : "key",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AggregatePlotConfigMeasurementsContourPlot"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Bad Request"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Not Found"
+          },
+          "500" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Internal Server Error"
+          }
+        },
+        "security" : [ {
+          "Bearer" : [ ]
+        } ],
+        "summary" : "lists plot config measurements for a bullseye plot",
+        "tags" : [ "plot-config" ]
       }
     },
     "/projects/{project_id}/plot_configs/contour_plots" : {
@@ -9045,8 +9123,185 @@
         "security" : [ {
           "Bearer" : [ ]
         } ],
+        "summary" : "updates a plot configuration in a project",
         "tags" : [ "plot-config" ],
         "x-codegen-request-body-name" : "plot_config"
+      }
+    },
+    "/projects/{project_id}/plot_configs/contour_plots/{plot_configuration_id}/measurements" : {
+      "get" : {
+        "parameters" : [ {
+          "description" : "project uuid",
+          "in" : "path",
+          "name" : "project_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "description" : "plot config uuid",
+          "in" : "path",
+          "name" : "plot_configuration_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "description" : "time",
+          "in" : "query",
+          "name" : "time",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "description" : "api key",
+          "in" : "query",
+          "name" : "key",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AggregatePlotConfigMeasurementsContourPlot"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Bad Request"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Not Found"
+          },
+          "500" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Internal Server Error"
+          }
+        },
+        "security" : [ {
+          "Bearer" : [ ]
+        } ],
+        "summary" : "lists plot config measurements for a contour plot",
+        "tags" : [ "plot-config" ]
+      }
+    },
+    "/projects/{project_id}/plot_configs/contour_plots/{plot_configuration_id}/times" : {
+      "get" : {
+        "parameters" : [ {
+          "description" : "project uuid",
+          "in" : "path",
+          "name" : "project_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "description" : "plot config uuid",
+          "in" : "path",
+          "name" : "plot_configuration_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "description" : "after timestamp",
+          "in" : "query",
+          "name" : "after",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "description" : "before timestamp",
+          "in" : "query",
+          "name" : "before",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "description" : "api key",
+          "in" : "query",
+          "name" : "key",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AggregatePlotConfigMeasurementsContourPlot"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Bad Request"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Not Found"
+          },
+          "500" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Internal Server Error"
+          }
+        },
+        "security" : [ {
+          "Bearer" : [ ]
+        } ],
+        "summary" : "lists time parameters available for measurement qeries for a contour plot",
+        "tags" : [ "plot-config" ]
       }
     },
     "/projects/{project_id}/plot_configs/profile_plots" : {
@@ -9213,6 +9468,7 @@
         "security" : [ {
           "Bearer" : [ ]
         } ],
+        "summary" : "updates a profile plot configuration in a project",
         "tags" : [ "plot-config" ],
         "x-codegen-request-body-name" : "plot_config"
       }
@@ -9381,6 +9637,7 @@
         "security" : [ {
           "Bearer" : [ ]
         } ],
+        "summary" : "updates a scatter-line plot configuration in a project",
         "tags" : [ "plot-config" ],
         "x-codegen-request-body-name" : "plot_config"
       }
@@ -9667,76 +9924,6 @@
         "x-codegen-request-body-name" : "plot_config"
       }
     },
-    "/projects/{project_id}/plot_configurations/{plot_config_id}/timeseries" : {
-      "get" : {
-        "parameters" : [ {
-          "description" : "project uuid",
-          "in" : "path",
-          "name" : "project_id",
-          "required" : true,
-          "schema" : {
-            "format" : "uuid",
-            "type" : "string"
-          }
-        }, {
-          "description" : "plot config uuid",
-          "in" : "path",
-          "name" : "plot_config_id",
-          "required" : true,
-          "schema" : {
-            "format" : "uuid",
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "items" : {
-                    "$ref" : "#/components/schemas/Timeseries"
-                  },
-                  "type" : "array"
-                }
-              }
-            },
-            "description" : "OK"
-          },
-          "400" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/echo.HTTPError"
-                }
-              }
-            },
-            "description" : "Bad Request"
-          },
-          "404" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/echo.HTTPError"
-                }
-              }
-            },
-            "description" : "Not Found"
-          },
-          "500" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/echo.HTTPError"
-                }
-              }
-            },
-            "description" : "Internal Server Error"
-          }
-        },
-        "summary" : "lists all timeseries for a single plot config",
-        "tags" : [ "timeseries" ]
-      }
-    },
     "/projects/{project_id}/plot_configurations/{plot_configuration_id}" : {
       "delete" : {
         "parameters" : [ {
@@ -9962,6 +10149,7 @@
         "security" : [ {
           "Bearer" : [ ]
         } ],
+        "summary" : "updates a scatter-line plot configuration in a project",
         "tags" : [ "plot-config" ],
         "x-codegen-request-body-name" : "plot_config"
       }
@@ -11891,6 +12079,29 @@
         },
         "type" : "object"
       },
+      "AggregatePlotConfigMeasurementsContourPlot" : {
+        "properties" : {
+          "x" : {
+            "items" : {
+              "type" : "number"
+            },
+            "type" : "array"
+          },
+          "y" : {
+            "items" : {
+              "type" : "number"
+            },
+            "type" : "array"
+          },
+          "z" : {
+            "items" : {
+              "type" : "number"
+            },
+            "type" : "array"
+          }
+        },
+        "type" : "object"
+      },
       "Alert" : {
         "properties" : {
           "alert_config_id" : {
@@ -13388,10 +13599,10 @@
             },
             "type" : "array"
           },
-          "secondary_axis_title" : {
+          "y2_axis_title" : {
             "type" : "string"
           },
-          "yaxis_title" : {
+          "y_axis_title" : {
             "type" : "string"
           }
         },

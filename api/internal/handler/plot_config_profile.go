@@ -54,7 +54,7 @@ func (h *ApiHandler) CreatePlotConfigProfilePlot(c echo.Context) error {
 
 // UpdatePlotConfigProfilePlot godoc
 //
-//	@Sumary updates a profile plot configuration in a project
+//	@Summary updates a profile plot configuration in a project
 //	@Tags plot-config
 //	@Produce json
 //	@Param project_id path string true "project uuid" Format(uuid)

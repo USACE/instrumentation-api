@@ -31,6 +31,18 @@ func (d *PlotConfigContourPlotDisplay) Scan(src interface{}) error {
 	return json.Unmarshal([]byte(b), d)
 }
 
+type PlotConfigMeasurementContourPlot struct {
+	X float64  `json:"x" db:"x"`
+	Y float64  `json:"y" db:"y"`
+	Z *float64 `json:"z" db:"z"`
+}
+
+type AggregatePlotConfigMeasurementsContourPlot struct {
+	X []float64  `json:"x" db:"x"`
+	Y []float64  `json:"y" db:"y"`
+	Z []*float64 `json:"z" db:"z"`
+}
+
 const createPlotContourConfig = `
 	INSERT INTO plot_contour_config (plot_config_id, "time", locf_backfill, gradient_smoothing, contour_smoothing, show_labels) 
 	VALUES ($1, $2, $3, $4, $5, $6)
@@ -85,11 +97,39 @@ const listPlotContourConfigTimes = `
 	FROM plot_contour_config_timeseries pcts
 	INNER JOIN timeseries_measurement mm ON mm.timeseries_id = pcts.timeseries_id
 	WHERE pc.plot_config_id = $1
-	AND mm.time > $2 AND mm.time < $3
+	AND mm.time > $2
+	AND mm.time < $3
 `
 
-func (q *Queries) ListPlotContourConfigTimes(ctx context.Context, plotConfigID uuid.UUID, tw TimeWindow) ([]time.Time, error) {
+func (q *Queries) ListPlotConfigTimesContourPlot(ctx context.Context, plotConfigID uuid.UUID, tw TimeWindow) ([]time.Time, error) {
 	tt := make([]time.Time, 0)
 	err := q.db.SelectContext(ctx, &tt, listPlotContourConfigTimes, plotConfigID, tw.After, tw.Before)
 	return tt, err
+}
+
+const listPlotConfigMeasurementsContourPlot = `
+	SELECT
+		oi.x,
+		oi.y,
+		locf(mm.value) AS z
+	FROM plot_contour_config pc
+	LEFT JOIN plot_contour_config_timeseries pcts ON pcts.plot_contour_config_id = pc.plot_config_id
+	LEFT JOIN timeseries_measurement mm ON mm.timeseries_id = pcts.timeseries_id
+	INNER JOIN timeseries ts ON ts.id = pcts.timeseries_id
+	INNER JOIN (
+		SELECT
+			ii.id,
+			ST_X(ST_Centroid(ST_Transform(ii.geometry, 4326))) AS x,
+			ST_Y(ST_Centroid(ST_Transform(ii.geometry, 4326))) AS y
+		FROM instrument ii
+	) oi ON oi.id = ts.instrument_id
+	WHERE plot_config_id = $1
+	AND mm.time = $2
+	GROUP BY pc.plot_config_id, pcts.timeseries_id, oi.x, oi.y
+`
+
+func (q *Queries) ListPlotConfigMeasurementsContourPlot(ctx context.Context, plotConfigID uuid.UUID, t time.Time) ([]PlotConfigMeasurementContourPlot, error) {
+	var pcmm []PlotConfigMeasurementContourPlot
+	err := q.db.SelectContext(ctx, pcmm, listPlotConfigMeasurementsContourPlot, plotConfigID, t)
+	return pcmm, err
 }

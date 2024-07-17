@@ -27,11 +27,12 @@ var plotConfigSchema = fmt.Sprintf(`{
         "date_range": { "type": "string" },
         "threshold": { "type": "number" },
         "report_configs": %s,
+        "plot_type": { "type": "string" },
         "display": %s
     },
     "required": [
         "id", "slug", "name", "creator_id", "create_date", "updater_id", "update_date", "project_id",
-        "show_masked", "show_nonvalidated", "show_comments", "auto_range", "date_range", "threshold", "report_configs", "display"
+        "show_masked", "show_nonvalidated", "show_comments", "auto_range", "date_range", "threshold", "report_configs", "plot_type", "display"
     ],
     "additionalProperties": false
 }`, IDSlugNameArrSchema, plotConfigDisplaySchema)
@@ -40,6 +41,42 @@ var plotConfigDisplaySchema = fmt.Sprintf(`{
     "traces": %s,
     "layout": %s
 }`, plotConfigTracesArrSchema, plotConfigLayoutSchema)
+
+// var plotConfigDisplaySchema = fmt.Sprintf(`{
+//     "anyOf": [
+//         {
+//             "type": "object",
+//             "properties": {
+//                 "traces": %s,
+//                 "layout": %s
+//             }
+//         },
+//         {
+//             "type": "object",
+//             "properties": {
+//                 "instrument_id": { "type": "string" }
+//             }
+//         },
+//         {
+//             "type": "object",
+//             "properties": {
+//                 "x_axis_timeseries_id": { "type": "string" },
+//                 "y_axis_timeseries_id": { "type": "string" }
+//             }
+//         },
+//         {
+//             "type": "object",
+//             "properties": {
+//                 "timeseries_ids": { "type": "array", "items": { "type": "string" } },
+//                 "time": { "type": "string" },
+//                 "locf_backfill": { "type": "string" },
+//                 "gradient_smoothing": { "type": "boolean" },
+//                 "contour_smoothing": { "type": "boolean" },
+//                 "show_labels": { "type": "boolean" }
+//             }
+//         }
+//     ]
+// }`, plotConfigTracesArrSchema, plotConfigLayoutSchema)
 
 const plotConfigTracesArrSchema = `{
     "type": "array",
@@ -96,13 +133,13 @@ const updatePlotConfigRemoveTimeseriesBody = `{
     "display": {
         "traces": [
             {
-	        "timeseries_id": "9a3864a8-8766-4bfa-bad1-0328b166f6a8",
+                "timeseries_id": "9a3864a8-8766-4bfa-bad1-0328b166f6a8",
                 "name": "update test trace 1",
                 "trace_order": 0,
                 "color": "#0066ff"
-	    }
+            }
         ],
-	"layout": {
+        "layout": {
             "custom_shapes": [],
             "yaxis_title": "Custom Y Axis Title",
             "secondary_axis_title": "test second axis title"
@@ -118,43 +155,43 @@ const updatePlotConfigAddManyTimeseriesBody = `{
     "display": {
         "traces": [
             {
-	        "timeseries_id": "9a3864a8-8766-4bfa-bad1-0328b166f6a8",
+                "timeseries_id": "9a3864a8-8766-4bfa-bad1-0328b166f6a8",
                 "name": "update test trace 1",
                 "trace_order": 0,
                 "color": "#0066ff"
-	    },
+            },
             {
-	        "timeseries_id": "8f4ca3a3-5971-4597-bd6f-332d1cf5af7c",
+                "timeseries_id": "8f4ca3a3-5971-4597-bd6f-332d1cf5af7c",
                 "name": "update test trace 2",
                 "trace_order": 1,
                 "color": "#ff0000"
-	    },
+            },
             {
-	        "timeseries_id": "869465fc-dc1e-445e-81f4-9979b5fadda9",
+                "timeseries_id": "869465fc-dc1e-445e-81f4-9979b5fadda9",
                 "name": "update test trace 3",
                 "trace_order": 2,
                 "color": "#ffaa00"
-	    },
+            },
             {
-	        "timeseries_id": "7ee902a3-56d0-4acf-8956-67ac82c03a96",
+                "timeseries_id": "7ee902a3-56d0-4acf-8956-67ac82c03a96",
                 "name": "update test trace 4",
                 "trace_order": 3,
                 "color": "#0000ff"
-	    },
+            },
             {
-	        "timeseries_id": "d9697351-3a38-4194-9ac4-41541927e475",
+                "timeseries_id": "d9697351-3a38-4194-9ac4-41541927e475",
                 "name": "update test trace 5",
                 "trace_order": 4,
                 "color": "#00ff00"
-	    },
+            },
             {
-	        "timeseries_id": "22a734d6-dc24-451d-a462-43a32f335ae8",
+                "timeseries_id": "22a734d6-dc24-451d-a462-43a32f335ae8",
                 "name": "update test trace 6",
                 "trace_order": 5,
                 "color": "#aa00aa"
-	    }
+            }
         ],
-	"layout": {
+        "layout": {
             "custom_shapes": [],
             "yaxis_title": "Custom Y Axis Title",
             "secondary_axis_title": "test second axis title"
@@ -165,46 +202,47 @@ const updatePlotConfigAddManyTimeseriesBody = `{
 const createPlotConfigBody = `{
     "name": "Test Create Plot Configuration",
     "project_id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+    "plot_type": "scatter-line",
     "display": {
         "traces": [
             {
-	        "timeseries_id": "9a3864a8-8766-4bfa-bad1-0328b166f6a8",
+                "timeseries_id": "9a3864a8-8766-4bfa-bad1-0328b166f6a8",
                 "name": "update test trace 1",
                 "trace_order": 0,
                 "color": "#0066ff"
-	    },
+            },
             {
-	        "timeseries_id": "8f4ca3a3-5971-4597-bd6f-332d1cf5af7c",
+                "timeseries_id": "8f4ca3a3-5971-4597-bd6f-332d1cf5af7c",
                 "name": "update test trace 2",
                 "trace_order": 1,
                 "color": "#ff0000"
-	    },
+            },
             {
-	        "timeseries_id": "869465fc-dc1e-445e-81f4-9979b5fadda9",
+                "timeseries_id": "869465fc-dc1e-445e-81f4-9979b5fadda9",
                 "name": "update test trace 3",
                 "trace_order": 2,
                 "color": "#ffaa00"
-	    },
+            },
             {
-	        "timeseries_id": "7ee902a3-56d0-4acf-8956-67ac82c03a96",
+                "timeseries_id": "7ee902a3-56d0-4acf-8956-67ac82c03a96",
                 "name": "update test trace 4",
                 "trace_order": 3,
                 "color": "#0000ff"
-	    },
+            },
             {
-	        "timeseries_id": "d9697351-3a38-4194-9ac4-41541927e475",
+                "timeseries_id": "d9697351-3a38-4194-9ac4-41541927e475",
                 "name": "update test trace 5",
                 "trace_order": 4,
                 "color": "#00ff00"
-	    },
+            },
             {
-	        "timeseries_id": "22a734d6-dc24-451d-a462-43a32f335ae8",
+                "timeseries_id": "22a734d6-dc24-451d-a462-43a32f335ae8",
                 "name": "update test trace 6",
                 "trace_order": 5,
                 "color": "#aa00aa"
-	    }
+            }
         ],
-	"layout": {
+        "layout": {
             "custom_shapes": [
                 {
                     "enabled": true,

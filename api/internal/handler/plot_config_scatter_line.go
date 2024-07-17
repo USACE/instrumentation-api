@@ -55,7 +55,7 @@ func (h *ApiHandler) CreatePlotConfigScatterLinePlot(c echo.Context) error {
 
 // UpdatePlotConfigScatterLinePlot godoc
 //
-//	@Sumary updates a scatter-line plot configuration in a project
+//	@Summary updates a scatter-line plot configuration in a project
 //	@Tags plot-config
 //	@Produce json
 //	@Param project_id path string true "project uuid" Format(uuid)

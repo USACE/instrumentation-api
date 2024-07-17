@@ -4,11 +4,13 @@ import (
 	"context"
 
 	"github.com/USACE/instrumentation-api/api/internal/model"
+	"github.com/google/uuid"
 )
 
 type plotConfigBullseyePlotService interface {
 	CreatePlotConfigBullseyePlot(ctx context.Context, pc model.PlotConfigBullseyePlot) (model.PlotConfig, error)
 	UpdatePlotConfigBullseyePlot(ctx context.Context, pc model.PlotConfigBullseyePlot) (model.PlotConfig, error)
+	ListPlotConfigMeasurementsBullseyePlot(ctx context.Context, plotConfigID uuid.UUID, tw model.TimeWindow) ([]model.PlotConfigMeasurementBullseyePlot, error)
 }
 
 func (s plotConfigService) CreatePlotConfigBullseyePlot(ctx context.Context, pc model.PlotConfigBullseyePlot) (model.PlotConfig, error) {
@@ -20,6 +22,7 @@ func (s plotConfigService) CreatePlotConfigBullseyePlot(ctx context.Context, pc 
 
 	qtx := s.WithTx(tx)
 
+	pc.PlotType = model.BullseyePlotType
 	pcID, err := qtx.CreatePlotConfig(ctx, pc.PlotConfig)
 	if err != nil {
 		return model.PlotConfig{}, err

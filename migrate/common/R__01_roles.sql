@@ -117,7 +117,12 @@ GRANT SELECT ON
     report_config_plot_config,
     report_download_job,
     plot_configuration_timeseries_trace,
-    plot_configuration_custom_shape
+    plot_configuration_custom_shape,
+    plot_contour_config,
+    plot_contour_config_timeseries,
+    plot_profile_config,
+    plot_bullseye_config,
+    plot_scatter_line_config
 TO instrumentation_reader;
 
 -- Role instrumentation_writer
@@ -184,7 +189,12 @@ GRANT INSERT,UPDATE,DELETE ON
     report_config_plot_config,
     report_download_job,
     plot_configuration_timeseries_trace,
-    plot_configuration_custom_shape
+    plot_configuration_custom_shape,
+    plot_contour_config,
+    plot_contour_config_timeseries,
+    plot_profile_config,
+    plot_bullseye_config,
+    plot_scatter_line_config
 TO instrumentation_writer;
 
 -- Role postgis_reader

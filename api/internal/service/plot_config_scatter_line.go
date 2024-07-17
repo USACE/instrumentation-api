@@ -23,6 +23,7 @@ func (s plotConfigService) CreatePlotConfigScatterLinePlot(ctx context.Context, 
 
 	qtx := s.WithTx(tx)
 
+	pc.PlotType = model.ScatterLinePlotType
 	pcID, err := qtx.CreatePlotConfig(ctx, pc.PlotConfig)
 	if err != nil {
 		return model.PlotConfig{}, err

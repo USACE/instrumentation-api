@@ -20,6 +20,7 @@ func (s plotConfigService) CreatePlotConfigProfilePlot(ctx context.Context, pc m
 
 	qtx := s.WithTx(tx)
 
+	pc.PlotType = model.ProfilePlotType
 	pcID, err := qtx.CreatePlotConfig(ctx, pc.PlotConfig)
 	if err != nil {
 		return model.PlotConfig{}, err
