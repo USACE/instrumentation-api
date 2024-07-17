@@ -55,7 +55,7 @@ const htmlTmpl = `<!doctype html>
       document.getElementById('api-reference').dataset.configuration =
         JSON.stringify(configuration)
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference@1.23.5"></script>
   </body>
 </html>`
 
