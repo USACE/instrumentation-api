@@ -9,7 +9,7 @@ import (
 	"github.com/xeipuuv/gojsonschema"
 )
 
-var plotConfigSchema = fmt.Sprintf(`{
+const plotConfigBaseSchema = `{
     "type": "object",
     "properties": {
         "id": { "type": "string" },
@@ -35,48 +35,14 @@ var plotConfigSchema = fmt.Sprintf(`{
         "show_masked", "show_nonvalidated", "show_comments", "auto_range", "date_range", "threshold", "report_configs", "plot_type", "display"
     ],
     "additionalProperties": false
-}`, IDSlugNameArrSchema, plotConfigDisplaySchema)
+}`
+
+var plotConfigSchema = fmt.Sprintf(plotConfigBaseSchema, IDSlugNameArrSchema, plotConfigDisplaySchema)
 
 var plotConfigDisplaySchema = fmt.Sprintf(`{
     "traces": %s,
     "layout": %s
 }`, plotConfigTracesArrSchema, plotConfigLayoutSchema)
-
-// NOTE gojsonschema incorrectly marks this as invalid JSON when applied to the full schema
-// eventually migrating from gojsonschema to a system that validates against the openapi types spec would be preferred
-
-// var plotConfigDisplaySchema = fmt.Sprintf(`{
-//     "type": "object",
-//     "anyOf": [
-//         {
-//             "properties": {
-//                 "traces": %s,
-//                 "layout": %s
-//             }
-//         },
-//         {
-//             "properties": {
-//                 "instrument_id": { "type": "string" }
-//             }
-//         },
-//         {
-//             "properties": {
-//                 "x_axis_timeseries_id": { "type": "string" },
-//                 "y_axis_timeseries_id": { "type": "string" }
-//             }
-//         },
-//         {
-//             "properties": {
-//                 "timeseries_ids": { "type": "array", "items": { "type": "string" } },
-//                 "time": { "type": "string" },
-//                 "locf_backfill": { "type": "string" },
-//                 "gradient_smoothing": { "type": "boolean" },
-//                 "contour_smoothing": { "type": "boolean" },
-//                 "show_labels": { "type": "boolean" }
-//             }
-//         }
-//     ]
-// }`, plotConfigTracesArrSchema, plotConfigLayoutSchema)
 
 const plotConfigTracesArrSchema = `{
     "type": "array",
@@ -130,6 +96,7 @@ const updatePlotConfigRemoveTimeseriesBody = `{
     "name": "PZ-1A PLOT",
     "slug": "pz-1a-plot",
     "project_id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+    "plot_type": "scatter-line",
     "display": {
         "traces": [
             {
@@ -152,6 +119,7 @@ const updatePlotConfigAddManyTimeseriesBody = `{
     "name": "PZ-1A PLOT",
     "slug": "pz-1a-plot",
     "project_id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
+    "plot_type": "scatter-line",
     "display": {
         "traces": [
             {
@@ -200,7 +168,7 @@ const updatePlotConfigAddManyTimeseriesBody = `{
 }`
 
 const createPlotConfigBody = `{
-    "name": "Test Create Plot Configuration",
+    "name": "Test Create Plot Config",
     "project_id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",
     "plot_type": "scatter-line",
     "display": {
@@ -257,7 +225,7 @@ const createPlotConfigBody = `{
     }
 }`
 
-func TestPlotConfigurations(t *testing.T) {
+func TestPlotConfigs(t *testing.T) {
 	objSchema, err := gojsonschema.NewSchema(plotConfigObjectLoader)
 	assert.Nil(t, err)
 	arrSchema, err := gojsonschema.NewSchema(plotConfigArrayLoader)
@@ -265,48 +233,48 @@ func TestPlotConfigurations(t *testing.T) {
 
 	tests := []HTTPTest{
 		{
-			Name:           "GetPlotConfiguration",
-			URL:            fmt.Sprintf("/projects/%s/plot_configurations/%s", testProjectID, testPlotConfigID),
+			Name:           "GetPlotConfig",
+			URL:            fmt.Sprintf("/projects/%s/plot_configs/%s", testProjectID, testPlotConfigID),
 			Method:         http.MethodGet,
 			ExpectedStatus: http.StatusOK,
 			ExpectedSchema: objSchema,
 		},
 		{
-			Name:           "ListPlotConfigurations",
-			URL:            fmt.Sprintf("/projects/%s/plot_configurations", testProjectID),
+			Name:           "ListPlotConfigs",
+			URL:            fmt.Sprintf("/projects/%s/plot_configs", testProjectID),
 			Method:         http.MethodGet,
 			ExpectedStatus: http.StatusOK,
 			ExpectedSchema: arrSchema,
 		},
 		{
-			Name:           "UpdatePlotConfiguration - Add Many Timeseries",
-			URL:            fmt.Sprintf("/projects/%s/plot_configurations/%s", testProjectID, testPlotConfigID),
+			Name:           "DeletePlotConfig",
+			URL:            fmt.Sprintf("/projects/%s/plot_configs/%s", testProjectID, testPlotConfigID),
+			Method:         http.MethodDelete,
+			ExpectedStatus: http.StatusOK,
+		},
+		{
+			Name:           "UpdatePlotConfigScatterLinePlot - Add Many Timeseries",
+			URL:            fmt.Sprintf("/projects/%s/plot_configs/scatter_line_plots/%s", testProjectID, testPlotConfigID),
 			Method:         http.MethodPut,
 			Body:           updatePlotConfigAddManyTimeseriesBody,
 			ExpectedStatus: http.StatusOK,
 			ExpectedSchema: objSchema,
 		},
 		{
-			Name:           "UpdatePlotConfiguration - Remove Timeseries",
-			URL:            fmt.Sprintf("/projects/%s/plot_configurations/%s", testProjectID, testPlotConfigID),
+			Name:           "UpdatePlotConfigScatterLinePlot - Remove Timeseries",
+			URL:            fmt.Sprintf("/projects/%s/plot_configs/scatter_line_plots/%s", testProjectID, testPlotConfigID),
 			Method:         http.MethodPut,
 			Body:           updatePlotConfigRemoveTimeseriesBody,
 			ExpectedStatus: http.StatusOK,
 			ExpectedSchema: objSchema,
 		},
 		{
-			Name:           "CreatePlotConfiguration",
-			URL:            fmt.Sprintf("/projects/%s/plot_configurations", testProjectID),
+			Name:           "CreatePlotConfigScatterLinePlot",
+			URL:            fmt.Sprintf("/projects/%s/plot_configs/scatter_line_plots", testProjectID),
 			Method:         http.MethodPost,
 			Body:           createPlotConfigBody,
 			ExpectedStatus: http.StatusCreated,
 			ExpectedSchema: objSchema,
-		},
-		{
-			Name:           "DeletePlotConfiguration",
-			URL:            fmt.Sprintf("/projects/%s/plot_configurations/%s", testProjectID, testPlotConfigID),
-			Method:         http.MethodDelete,
-			ExpectedStatus: http.StatusOK,
 		}}
 
 	RunAll(t, tests)
