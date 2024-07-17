@@ -31,7 +31,7 @@ var plotConfigContourTimesLoader = gojsonschema.NewStringLoader(plotConfigContou
 const testPlotConfigContourID = "94df34f5-ba00-4c3d-bfa7-f128a00166be"
 
 const updatePlotConfigContourBody = `{
-    "id": "871e34da-c911-4d8f-ab68-e29ba17f8937",
+    "id": "94df34f5-ba00-4c3d-bfa7-f128a00166be",
     "name": "Updated Contour Plot",
     "slug": "updated-contour-plot",
     "project_id": "5b6f4f37-7755-4cf9-bd02-94f1e9bc5984",

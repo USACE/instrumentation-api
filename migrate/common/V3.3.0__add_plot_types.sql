@@ -26,14 +26,12 @@ CREATE TABLE plot_contour_config_timeseries (
 CREATE TABLE plot_bullseye_config (
   plot_config_id uuid UNIQUE NOT NULL REFERENCES plot_configuration(id) ON DELETE CASCADE,
   x_axis_timeseries_id uuid REFERENCES timeseries(id) ON DELETE SET NULL,
-  y_axis_timeseries_id uuid REFERENCES timeseries(id) ON DELETE SET NULL,
-  CONSTRAINT plot_bullseye_config_x_axis_timeseries_id_y_axis_timeseries_id_key
-  UNIQUE(x_axis_timeseries_id, y_axis_timeseries_id)
+  y_axis_timeseries_id uuid REFERENCES timeseries(id) ON DELETE SET NULL
 );
 
 CREATE TABLE plot_profile_config (
   plot_config_id uuid UNIQUE NOT NULL REFERENCES plot_configuration(id) ON DELETE CASCADE,
-  instrument_id uuid UNIQUE NOT NULL REFERENCES instrument(id) ON DELETE CASCADE
+  instrument_id uuid NOT NULL REFERENCES instrument(id) ON DELETE CASCADE
 );
 
 CREATE TABLE plot_scatter_line_config (

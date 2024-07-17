@@ -58,7 +58,7 @@ func (s plotConfigService) UpdatePlotConfigBullseyePlot(ctx context.Context, pc 
 	}
 
 	if err := qtx.UpdatePlotBullseyeConfig(ctx, pc.ID, pc.Display); err != nil {
-		return model.PlotConfig{}, nil
+		return model.PlotConfig{}, err
 	}
 
 	if err := qtx.DeletePlotConfigSettings(ctx, pc.ID); err != nil {

@@ -56,7 +56,7 @@ func (s plotConfigService) UpdatePlotConfigProfilePlot(ctx context.Context, pc m
 	}
 
 	if err := qtx.UpdatePlotProfileConfig(ctx, pc.ID, pc.Display); err != nil {
-		return model.PlotConfig{}, nil
+		return model.PlotConfig{}, err
 	}
 
 	if err := qtx.DeletePlotConfigSettings(ctx, pc.ID); err != nil {

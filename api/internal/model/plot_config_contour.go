@@ -54,7 +54,7 @@ func (q *Queries) CreatePlotContourConfig(ctx context.Context, plotConfigID uuid
 }
 
 const updatePlotContourConfig = `
-	UPDATE plot_contour_config SET "time"=$2, locf_backfill=$3, gradient_smoothing=$3, contour_smoothing=$4, show_labels=$5 
+	UPDATE plot_contour_config SET "time"=$2, locf_backfill=$3, gradient_smoothing=$4, contour_smoothing=$5, show_labels=$6 
 	WHERE plot_config_id=$1
 `
 
@@ -74,6 +74,7 @@ func (q *Queries) DeletePlotContourConfig(ctx context.Context, plotConfigID uuid
 
 const createPlotContourConfigTimeseries = `
 	INSERT INTO plot_contour_config_timeseries (plot_contour_config_id, timeseries_id) VALUES ($1, $2)
+	ON CONFLICT (plot_contour_config_id, timeseries_id) DO NOTHING
 `
 
 func (q *Queries) CreatePlotContourConfigTimeseries(ctx context.Context, plotConfigID, timeseriesID uuid.UUID) error {

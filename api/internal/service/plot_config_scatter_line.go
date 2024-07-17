@@ -72,7 +72,7 @@ func (s plotConfigService) UpdatePlotConfigScatterLinePlot(ctx context.Context, 
 
 	if err := qtx.DeletePlotConfigSettings(ctx, pc.ID); err != nil {
 		log.Printf("fails on delete %s", pc.ID)
-		return model.PlotConfig{}, fmt.Errorf("fails on delete %s", pc.ID)
+		return model.PlotConfig{}, err
 	}
 
 	if err := qtx.DeleteAllPlotConfigTimeseriesTraces(ctx, pc.ID); err != nil {
@@ -85,7 +85,7 @@ func (s plotConfigService) UpdatePlotConfigScatterLinePlot(ctx context.Context, 
 
 	if err := qtx.CreatePlotConfigSettings(ctx, pc.ID, pc.PlotConfigSettings); err != nil {
 		log.Printf("fails on create %s, %+v", pc.ID, pc.PlotConfigSettings)
-		return model.PlotConfig{}, fmt.Errorf("fails on create %s, %+v", pc.ID, pc.PlotConfigSettings)
+		return model.PlotConfig{}, err
 	}
 
 	if err := validateCreateTraces(ctx, qtx, pc.ID, pc.Display.Traces); err != nil {
