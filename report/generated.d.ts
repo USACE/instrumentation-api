@@ -5285,7 +5285,7 @@ export interface paths {
     };
   };
   "/projects/{project_id}/plot_configs/contour_plots/{plot_configuration_id}/measurements": {
-    /** lists plot config measurements for a contour plot */
+    /** gets plot config measurements for a contour plot at the specified time */
     get: {
       parameters: {
         query: {

@@ -6146,7 +6146,7 @@ paths:
           description: Internal Server Error
       security:
       - Bearer: []
-      summary: lists plot config measurements for a contour plot
+      summary: gets plot config measurements for a contour plot at the specified time
       tags:
       - plot-config
   /projects/{project_id}/plot_configs/contour_plots/{plot_configuration_id}/times:

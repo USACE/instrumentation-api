@@ -9212,7 +9212,7 @@
         "security" : [ {
           "Bearer" : [ ]
         } ],
-        "summary" : "lists plot config measurements for a contour plot",
+        "summary" : "gets plot config measurements for a contour plot at the specified time",
         "tags" : [ "plot-config" ]
       }
     },
