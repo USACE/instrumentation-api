@@ -78,10 +78,20 @@ CREATE VIEW v_timeseries_computed AS (
     WHERE id IN (SELECT timeseries_id FROM calculation)
 );
 
+CREATE VIEW IF NOT EXISTS v_timeseries_cwms AS (
+    SELECT
+        ts.*,
+        tc.cwms_timeseries_id,
+        tc.cwms_office_id
+    FROM v_timeseries ts
+    INNER JOIN timeseries_cwms tc ON ts.id = tc.timeseries_id
+);
+
 GRANT SELECT ON
     v_timeseries,
     v_timeseries_dependency,
     v_timeseries_stored,
     v_timeseries_computed,
+    v_timeseries_cwms,
     v_timeseries_project_map
 TO instrumentation_reader;
