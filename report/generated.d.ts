@@ -5164,7 +5164,7 @@ export interface paths {
         /** @description OK */
         200: {
           content: {
-            "application/json": components["schemas"]["AggregatePlotConfigMeasurementsContourPlot"];
+            "application/json": components["schemas"]["PlotConfigMeasurementBullseyePlot"][];
           };
         };
         /** @description Bad Request */
@@ -8418,6 +8418,18 @@ export interface components {
       show_labels?: boolean;
       time?: string;
       timeseries_ids?: string[];
+    };
+    /**
+     * @example {
+     *   "x": 0.8008281904610115,
+     *   "y": 6.027456183070403,
+     *   "time": "time"
+     * }
+     */
+    PlotConfigMeasurementBullseyePlot: {
+      time?: string;
+      x?: number;
+      y?: number;
     };
     /**
      * @example {

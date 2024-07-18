@@ -25,8 +25,18 @@ const plotConfigContourTimesSchema = `{
     "items": { "type": "string", "format": "date-time" }
 }`
 
+const plotConfigContourMeasurementsSchema = `{
+    "type": "object",
+    "properties": {
+	"x": { "type": "array", "items": { "type": "number" } },
+        "y": { "type": "array", "items": { "type": "number" } },
+        "z": { "type": "array", "items": { "type": "number" } }
+    }
+}`
+
 var plotConfigContourObjectLoader = gojsonschema.NewStringLoader(plotConfigContourSchema)
 var plotConfigContourTimesLoader = gojsonschema.NewStringLoader(plotConfigContourTimesSchema)
+var plotConfigContourMeasurementsLoader = gojsonschema.NewStringLoader(plotConfigContourMeasurementsSchema)
 
 const testPlotConfigContourID = "94df34f5-ba00-4c3d-bfa7-f128a00166be"
 
@@ -68,7 +78,10 @@ const createPlotConfigContourBody = `{
 
 func TestPlotConfigsContour(t *testing.T) {
 	objSchema, err := gojsonschema.NewSchema(plotConfigContourObjectLoader)
+	assert.Nil(t, err)
 	timesSchema, err := gojsonschema.NewSchema(plotConfigContourTimesLoader)
+	assert.Nil(t, err)
+	measurementsSchema, err := gojsonschema.NewSchema(plotConfigContourMeasurementsLoader)
 	assert.Nil(t, err)
 
 	tests := []HTTPTest{
@@ -78,6 +91,13 @@ func TestPlotConfigsContour(t *testing.T) {
 			Method:         http.MethodGet,
 			ExpectedStatus: http.StatusOK,
 			ExpectedSchema: timesSchema,
+		},
+		{
+			Name:           "GetPlotConfigContourPlotMeasurements",
+			URL:            fmt.Sprintf("/projects/%s/plot_configs/contour_plots/%s/measurements?time=2024-01-01T00:00:00Z", testProjectID, testPlotConfigContourID),
+			Method:         http.MethodGet,
+			ExpectedStatus: http.StatusOK,
+			ExpectedSchema: measurementsSchema,
 		},
 		{
 			Name:           "UpdatePlotConfigContourPlot",

@@ -84,6 +84,6 @@ const listPlotConfigMeasurementsBullseyePlot = `
 
 func (q *Queries) ListPlotConfigMeasurementsBullseyePlot(ctx context.Context, plotConfigID uuid.UUID, tw TimeWindow) ([]PlotConfigMeasurementBullseyePlot, error) {
 	var pcmm []PlotConfigMeasurementBullseyePlot
-	err := q.db.SelectContext(ctx, pcmm, listPlotConfigMeasurementsBullseyePlot, plotConfigID, tw.After, tw.Before)
+	err := q.db.SelectContext(ctx, &pcmm, listPlotConfigMeasurementsBullseyePlot, plotConfigID, tw.After, tw.Before)
 	return pcmm, err
 }

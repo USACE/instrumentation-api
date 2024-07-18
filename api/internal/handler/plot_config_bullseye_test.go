@@ -16,7 +16,20 @@ const plotConfigBullseyeDisplaySchema = `{
     "y_axis_timeseries_id": { "type": "string" }
 }`
 
+const plotConfigBullseyeMeasurementsSchema = `{
+    "type": "array",
+    "items": {
+        "type": "object",
+	"properties": {
+            "time": { "type": "string", "format": "date-time" },
+            "x": { "type": "number" },
+            "y": { "type": "number" }
+        }
+    }
+}`
+
 var plotConfigBullseyeObjectLoader = gojsonschema.NewStringLoader(plotConfigBullseyeSchema)
+var plotConfigBullseyeMeasurementsLoader = gojsonschema.NewStringLoader(plotConfigBullseyeMeasurementsSchema)
 
 const testPlotConfigBullseyeID = "871e34da-c911-4d8f-ab68-e29ba17f8937"
 
@@ -43,17 +56,26 @@ const createPlotConfigBullseyeBody = `{
 }`
 
 func TestPlotConfigsBullseye(t *testing.T) {
-	objSchema, err := gojsonschema.NewSchema(plotConfigBullseyeObjectLoader)
+	plotConfigSchema, err := gojsonschema.NewSchema(plotConfigBullseyeObjectLoader)
+	assert.Nil(t, err)
+	measurementsSchema, err := gojsonschema.NewSchema(plotConfigBullseyeMeasurementsLoader)
 	assert.Nil(t, err)
 
 	tests := []HTTPTest{
+		{
+			Name:           "ListPlotConfigMeasurementsBullseyePlot",
+			URL:            fmt.Sprintf("/projects/%s/plot_configs/bullseye_plots/%s/measurements", testProjectID, testPlotConfigBullseyeID),
+			Method:         http.MethodGet,
+			ExpectedStatus: http.StatusOK,
+			ExpectedSchema: measurementsSchema,
+		},
 		{
 			Name:           "UpdatePlotConfigBullseyePlot",
 			URL:            fmt.Sprintf("/projects/%s/plot_configs/bullseye_plots/%s", testProjectID, testPlotConfigBullseyeID),
 			Method:         http.MethodPut,
 			Body:           updatePlotConfigBullseyeBody,
 			ExpectedStatus: http.StatusOK,
-			ExpectedSchema: objSchema,
+			ExpectedSchema: plotConfigSchema,
 		},
 		{
 			Name:           "CreatePlotConfigBullseyePlot",
@@ -61,7 +83,7 @@ func TestPlotConfigsBullseye(t *testing.T) {
 			Method:         http.MethodPost,
 			Body:           createPlotConfigBullseyeBody,
 			ExpectedStatus: http.StatusCreated,
-			ExpectedSchema: objSchema,
+			ExpectedSchema: plotConfigSchema,
 		}}
 
 	RunAll(t, tests)

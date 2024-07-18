@@ -139,9 +139,9 @@ func (h *ApiHandler) ListPlotConfigTimesContourPlot(c echo.Context) error {
 	return c.JSON(http.StatusOK, tt)
 }
 
-// ListPlotConfigMeasurementsContourPlot godoc
+// GetPlotConfigMeasurementsContourPlot godoc
 //
-//	@Summary lists plot config measurements for a contour plot
+//	@Summary gets plot config measurements for a contour plot at the specified time
 //	@Tags plot-config
 //	@Produce json
 //	@Param project_id path string true "project uuid" Format(uuid)
@@ -154,7 +154,7 @@ func (h *ApiHandler) ListPlotConfigTimesContourPlot(c echo.Context) error {
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id}/plot_configs/contour_plots/{plot_configuration_id}/measurements [get]
 //	@Security Bearer
-func (h *ApiHandler) ListPlotConfigMeasurementsContourPlot(c echo.Context) error {
+func (h *ApiHandler) GetPlotConfigMeasurementsContourPlot(c echo.Context) error {
 	_, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
 		return httperr.MalformedID(err)
@@ -168,7 +168,7 @@ func (h *ApiHandler) ListPlotConfigMeasurementsContourPlot(c echo.Context) error
 	if err != nil {
 		return httperr.MalformedDate(err)
 	}
-	mm, err := h.PlotConfigService.ListPlotConfigMeasurementsContourPlot(c.Request().Context(), pcID, t)
+	mm, err := h.PlotConfigService.GetPlotConfigMeasurementsContourPlot(c.Request().Context(), pcID, t)
 	if err != nil {
 		return httperr.InternalServerError(err)
 	}

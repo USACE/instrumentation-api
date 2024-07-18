@@ -8915,7 +8915,10 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/AggregatePlotConfigMeasurementsContourPlot"
+                  "items" : {
+                    "$ref" : "#/components/schemas/PlotConfigMeasurementBullseyePlot"
+                  },
+                  "type" : "array"
                 }
               }
             },
@@ -13480,6 +13483,20 @@
               "type" : "string"
             },
             "type" : "array"
+          }
+        },
+        "type" : "object"
+      },
+      "PlotConfigMeasurementBullseyePlot" : {
+        "properties" : {
+          "time" : {
+            "type" : "string"
+          },
+          "x" : {
+            "type" : "number"
+          },
+          "y" : {
+            "type" : "number"
           }
         },
         "type" : "object"

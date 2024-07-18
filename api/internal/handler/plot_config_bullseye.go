@@ -110,7 +110,7 @@ func (h *ApiHandler) UpdatePlotConfigBullseyePlot(c echo.Context) error {
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param plot_configuration_id path string true "plot config uuid" Format(uuid)
 //	@Param key query string false "api key"
-//	@Success 200 {object} model.AggregatePlotConfigMeasurementsContourPlot
+//	@Success 200 {object} []model.PlotConfigMeasurementBullseyePlot
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError

@@ -5951,7 +5951,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AggregatePlotConfigMeasurementsContourPlot'
+                items:
+                  $ref: '#/components/schemas/PlotConfigMeasurementBullseyePlot'
+                type: array
           description: OK
         "400":
           content:
@@ -9665,6 +9667,19 @@ components:
           items:
             type: string
           type: array
+      type: object
+    PlotConfigMeasurementBullseyePlot:
+      example:
+        x: 0.8008281904610115
+        "y": 6.027456183070403
+        time: time
+      properties:
+        time:
+          type: string
+        x:
+          type: number
+        "y":
+          type: number
       type: object
     PlotConfigProfilePlot:
       example:

@@ -259,7 +259,7 @@ func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 	r.private.POST("/projects/:project_id/plot_configs/contour_plots", h.CreatePlotConfigContourPlot)
 	r.private.PUT("/projects/:project_id/plot_configs/contour_plots/:plot_configuration_id", h.UpdatePlotConfigContourPlot)
 	r.private.GET("/projects/:project_id/plot_configs/contour_plots/:plot_configuration_id/times", h.ListPlotConfigTimesContourPlot)
-	r.private.GET("/projects/:project_id/plot_configs/contour_plots/:plot_configuration_id/measurements", h.ListPlotConfigMeasurementsContourPlot)
+	r.private.GET("/projects/:project_id/plot_configs/contour_plots/:plot_configuration_id/measurements", h.GetPlotConfigMeasurementsContourPlot)
 	// PlotConfig BullseyePlot
 	r.private.POST("/projects/:project_id/plot_configs/bullseye_plots", h.CreatePlotConfigBullseyePlot)
 	r.private.PUT("/projects/:project_id/plot_configs/bullseye_plots/:plot_configuration_id", h.UpdatePlotConfigBullseyePlot)

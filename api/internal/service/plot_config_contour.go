@@ -12,7 +12,7 @@ type plotConfigContourPlotService interface {
 	CreatePlotConfigContourPlot(ctx context.Context, pc model.PlotConfigContourPlot) (model.PlotConfig, error)
 	UpdatePlotConfigContourPlot(ctx context.Context, pc model.PlotConfigContourPlot) (model.PlotConfig, error)
 	ListPlotConfigTimesContourPlot(ctx context.Context, plotConfigID uuid.UUID, tw model.TimeWindow) ([]time.Time, error)
-	ListPlotConfigMeasurementsContourPlot(ctx context.Context, plotConfigID uuid.UUID, t time.Time) (model.AggregatePlotConfigMeasurementsContourPlot, error)
+	GetPlotConfigMeasurementsContourPlot(ctx context.Context, plotConfigID uuid.UUID, t time.Time) (model.AggregatePlotConfigMeasurementsContourPlot, error)
 }
 
 func (s plotConfigService) CreatePlotConfigContourPlot(ctx context.Context, pc model.PlotConfigContourPlot) (model.PlotConfig, error) {
@@ -95,7 +95,7 @@ func (s plotConfigService) UpdatePlotConfigContourPlot(ctx context.Context, pc m
 	return pcNew, nil
 }
 
-func (s plotConfigService) ListPlotConfigMeasurementsContourPlot(ctx context.Context, plotConfigID uuid.UUID, t time.Time) (model.AggregatePlotConfigMeasurementsContourPlot, error) {
+func (s plotConfigService) GetPlotConfigMeasurementsContourPlot(ctx context.Context, plotConfigID uuid.UUID, t time.Time) (model.AggregatePlotConfigMeasurementsContourPlot, error) {
 	q := s.db.Queries()
 
 	mm, err := q.ListPlotConfigMeasurementsContourPlot(ctx, plotConfigID, t)

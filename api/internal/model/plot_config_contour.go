@@ -129,6 +129,6 @@ const listPlotConfigMeasurementsContourPlot = `
 
 func (q *Queries) ListPlotConfigMeasurementsContourPlot(ctx context.Context, plotConfigID uuid.UUID, t time.Time) ([]PlotConfigMeasurementContourPlot, error) {
 	var pcmm []PlotConfigMeasurementContourPlot
-	err := q.db.SelectContext(ctx, pcmm, listPlotConfigMeasurementsContourPlot, plotConfigID, t)
+	err := q.db.SelectContext(ctx, &pcmm, listPlotConfigMeasurementsContourPlot, plotConfigID, t)
 	return pcmm, err
 }

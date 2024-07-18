@@ -87,6 +87,7 @@ const listPlotConfigsSQL = `
 		auto_range,
 		date_range,
 		threshold,
+		plot_type,
 		display
 	FROM v_plot_configuration
 `
