@@ -14,7 +14,8 @@ type PlotConfigProfilePlot struct {
 }
 
 type PlotConfigProfilePlotDisplay struct {
-	InstrumentID uuid.UUID `json:"instrument_id" db:"instrument_id"`
+	InstrumentID   uuid.UUID `json:"instrument_id" db:"instrument_id"`
+	InstrumentType string    `json:"instrument_type,omitempty" db:"instrument_type"`
 }
 
 func (d *PlotConfigProfilePlotDisplay) Scan(src interface{}) error {

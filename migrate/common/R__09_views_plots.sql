@@ -27,7 +27,8 @@ CREATE OR REPLACE VIEW v_plot_configuration AS (
                 )
             )::text
             WHEN pc.plot_type = 'profile' THEN json_build_object(
-                'instrument_id', ppc.instrument_id
+                'instrument_id', ppc.instrument_id,
+                'instrument_type', ii.name
             )::text
             WHEN pc.plot_type = 'contour' THEN json_build_object(
                 'time', pcc.time,
@@ -87,6 +88,8 @@ CREATE OR REPLACE VIEW v_plot_configuration AS (
     ) cs on true
     LEFT JOIN plot_bullseye_config pbc ON pbc.plot_config_id = pc.id
     LEFT JOIN plot_profile_config ppc ON ppc.plot_config_id = pc.id
+    LEFT JOIN instrument ii ON ii.id = ppc.instrument_id
+    LEFT JOIN instrument_type it ON it.id = ii.type_id
     LEFT JOIN plot_contour_config pcc ON pcc.plot_config_id = pc.id
     LEFT JOIN plot_scatter_line_config pcl ON pcl.plot_config_id = pc.id
     ORDER BY pc.name
