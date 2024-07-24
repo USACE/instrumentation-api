@@ -6,12 +6,10 @@ import (
 	"github.com/google/uuid"
 )
 
-const listInstrumentConstants = listTimeseries + `
-	WHERE instrument_id = $1 AND id IN (
-		SELECT timeseries_id
-		FROM instrument_constants
-		WHERE instrument_id = $1
-	)
+const listInstrumentConstants = `
+	SELECT * FROM v_timeseries t
+	INNER JOIN instrument_constants ic ON ic.timeseries_id = t.id
+	WHERE ic.instrument_id = $1
 `
 
 // ListInstrumentConstants lists constants for a given instrument id

@@ -13,7 +13,7 @@ import (
 type TimeseriesCwmsService interface {
 	ListTimeseriesCwmsForProject(ctx context.Context, projectID uuid.UUID) ([]model.TimeseriesCwms, error)
 	ListTimeseriesCwmsForInstrument(ctx context.Context, instrumentID uuid.UUID) ([]model.TimeseriesCwms, error)
-	ListTimeseriesCwmsMeasurements(ctx context.Context, timeseriesID uuid.UUID) (model.MeasurementCollection, error)
+	ListTimeseriesCwmsMeasurements(ctx context.Context, timeseriesID uuid.UUID, threshold int) (model.MeasurementCollection, error)
 	CreateTimeseriesCwms(ctx context.Context, tsCwms model.TimeseriesCwms) (model.TimeseriesCwms, error)
 	UpdateTimeseriesCwms(ctx context.Context, tsCwms model.TimeseriesCwms) error
 }
@@ -82,6 +82,7 @@ func (s timeseriesCwmsService) CreateTimeseriesCwms(ctx context.Context, tsCwms 
 
 	qtx := s.WithTx(tx)
 
+	tsCwms.Type = model.CwmsTimeseriesType
 	tsNew, err := qtx.CreateTimeseries(ctx, tsCwms.Timeseries)
 	if err != nil {
 		return tsCwms, err

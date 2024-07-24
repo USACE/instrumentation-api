@@ -1,32 +1,23 @@
 -- ${flyway:timestamp}
 CREATE VIEW v_timeseries AS (
-    WITH ts_stored_and_computed AS (
-        SELECT
-            id,
-            slug,
-            name,
-            instrument_id,
-            parameter_id,
-            unit_id,
-            (SELECT id IN (SELECT timeseries_id FROM calculation)) AS is_computed
-        FROM timeseries
-    )
-    SELECT t.id                 AS id,
-        t.slug                  AS slug,
-        t.name                  AS name,
-        t.is_computed           AS is_computed,
+    SELECT
+        t.id,
+        t.slug,
+        t.name,
+        t.type,
+        CASE WHEN t.type = 'computed' THEN true ELSE false END AS is_computed,
         i.slug || '.' || t.slug AS variable,
-        i.id                    AS instrument_id,
-        i.slug                  AS instrument_slug,
-        i.name                  AS instrument,
-        p.id                    AS parameter_id,
-        p.name                  AS parameter,
-        u.id                    AS unit_id,
-        u.name                  AS unit
-    FROM ts_stored_and_computed t
+        i.id AS instrument_id,
+        i.slug AS instrument_slug,
+        i.name AS instrument,
+        p.id AS parameter_id,
+        p.name AS parameter,
+        u.id AS unit_id,
+        u.name AS unit
+    FROM timeseries
     INNER JOIN instrument i ON i.id = t.instrument_id
     INNER JOIN parameter p ON p.id = t.parameter_id
-    INNER JOIN unit U ON u.id = t.unit_id
+    INNER JOIN unit u ON u.id = t.unit_id
 );
 
 CREATE VIEW v_timeseries_dependency AS (
@@ -66,7 +57,9 @@ CREATE VIEW v_timeseries_project_map AS (
 );
 
 CREATE VIEW v_timeseries_stored AS (
-    SELECT * FROM timeseries WHERE id NOT IN (SELECT timeseries_id FROM calculation)
+    SELECT * FROM timeseries
+    WHERE type = 'standard'
+    OR type = 'constant'
 );
 
 CREATE VIEW v_timeseries_computed AS (
@@ -74,8 +67,7 @@ CREATE VIEW v_timeseries_computed AS (
         ts.*,
         cc.contents AS contents
     FROM timeseries ts
-    LEFT JOIN calculation cc ON ts.id = cc.timeseries_id
-    WHERE id IN (SELECT timeseries_id FROM calculation)
+    INNER JOIN calculation cc ON ts.id = cc.timeseries_id
 );
 
 CREATE VIEW IF NOT EXISTS v_timeseries_cwms AS (

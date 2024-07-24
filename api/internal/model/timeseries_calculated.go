@@ -47,8 +47,9 @@ const createCalculatedTimeseries = `
 		parameter_id,
 		unit_id,
 		slug,
-		name
-	) VALUES ($1, $2, $3, slugify($4, 'timeseries'), $4)
+		name,
+		type
+	) VALUES ($1, $2, $3, slugify($4, 'timeseries'), $4, 'computed')
 	RETURNING id
 `
 
@@ -104,19 +105,21 @@ func (q *Queries) DeleteCalculatedTimeseries(ctx context.Context, calculationID 
 
 const createOrUpdateCalculatedTimeseries = `
 	INSERT INTO timeseries (
-		 id,
-		 instrument_id,
-		 parameter_id,
-		 unit_id,
-		 slug,
-		 name
-	) VALUES ($1, $2, $3, $4, slugify($5, 'timeseries'), $5)
+		id,
+		instrument_id,
+		parameter_id,
+		unit_id,
+		slug,
+		name,
+		type
+	) VALUES ($1, $2, $3, $4, slugify($5, 'timeseries'), $5, 'computed')
 	ON CONFLICT (id) DO UPDATE SET
 		instrument_id = COALESCE(EXCLUDED.instrument_id, $6),
 		parameter_id = COALESCE(EXCLUDED.parameter_id, $7),
 		unit_id = COALESCE(EXCLUDED.unit_id, $8),
 		slug = COALESCE(EXCLUDED.slug, slugify($9, 'timeseries')),
-		name = COALESCE(EXCLUDED.name, $9)
+		name = COALESCE(EXCLUDED.name, $9),
+		type = 'computed'
 `
 
 func (q *Queries) CreateOrUpdateCalculatedTimeseries(ctx context.Context, cc CalculatedTimeseries, defaultCc CalculatedTimeseries) error {

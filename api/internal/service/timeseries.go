@@ -42,6 +42,7 @@ func (s timeseriesService) CreateTimeseriesBatch(ctx context.Context, tt []model
 
 	uu := make([]model.Timeseries, len(tt))
 	for idx, ts := range tt {
+		ts.Type = model.StandardTimeseriesType
 		tsNew, err := qtx.CreateTimeseries(ctx, ts)
 		if err != nil {
 			return nil, err
