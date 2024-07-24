@@ -8437,6 +8437,7 @@ export interface components {
      *   "updater_username": "updater_username",
      *   "creator_username": "creator_username",
      *   "display": {
+     *     "instrument_type": "instrument_type",
      *     "instrument_id": "instrument_id"
      *   },
      *   "show_comments": true,
@@ -8490,11 +8491,13 @@ export interface components {
     };
     /**
      * @example {
+     *   "instrument_type": "instrument_type",
      *   "instrument_id": "instrument_id"
      * }
      */
     PlotConfigProfilePlotDisplay: {
       instrument_id?: string;
+      instrument_type?: string;
     };
     /**
      * @example {

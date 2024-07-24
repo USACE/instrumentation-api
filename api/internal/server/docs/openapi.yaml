@@ -9687,6 +9687,7 @@ components:
         updater_username: updater_username
         creator_username: creator_username
         display:
+          instrument_type: instrument_type
           instrument_id: instrument_id
         show_comments: true
         report_configs:
@@ -9753,9 +9754,12 @@ components:
       type: object
     PlotConfigProfilePlotDisplay:
       example:
+        instrument_type: instrument_type
         instrument_id: instrument_id
       properties:
         instrument_id:
+          type: string
+        instrument_type:
           type: string
       type: object
     PlotConfigScatterLineCustomShape:

@@ -13570,6 +13570,9 @@
         "properties" : {
           "instrument_id" : {
             "type" : "string"
+          },
+          "instrument_type" : {
+            "type" : "string"
           }
         },
         "type" : "object"
