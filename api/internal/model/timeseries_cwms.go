@@ -2,6 +2,8 @@ package model
 
 import (
 	"context"
+
+	"github.com/google/uuid"
 )
 
 type TimeseriesCwms struct {
@@ -19,6 +21,7 @@ type CwmsMeasurementsRaw struct {
 	OfficeID       string             `json:"office-id"`
 	Page           string             `json:"page"`
 	PageSize       int                `json:"page-size"`
+	NextPage       *string            `json:"next-page"`
 	TimeZone       string             `json:"time-zone"`
 	Total          int                `json:"total"`
 	Units          string             `json:"units"`
@@ -30,6 +33,17 @@ type CwmsValueColumns struct {
 	Name     string `json:"name"`
 	Ordinal  int    `json:"ordinal"`
 	Datatype string `json:"datatype"`
+}
+
+const getTimeseriesCwms = `
+	SELECT * FROM v_timeseries_cwms
+	WHERE id = $1
+`
+
+func (q *Queries) GetTimeseriesCwms(ctx context.Context, timeseriesID uuid.UUID) (TimeseriesCwms, error) {
+	var t TimeseriesCwms
+	err := q.db.GetContext(ctx, &t, getTimeseriesCwms, timeseriesID)
+	return t, err
 }
 
 const createTimeseriesCwms = `

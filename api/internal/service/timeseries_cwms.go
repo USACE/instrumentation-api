@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -11,6 +12,7 @@ import (
 )
 
 type TimeseriesCwmsService interface {
+	GetTimeseriesCwms(ctx context.Context, timeseriesID uuid.UUID) (TimeseriesCwms, error)
 	CreateTimeseriesCwmsBatch(ctx context.Context, instrumentID uuid.UUID, tcc []model.TimeseriesCwms) ([]model.TimeseriesCwms, error)
 	UpdateTimeseriesCwms(ctx context.Context, tsCwms model.TimeseriesCwms) error
 	ListTimeseriesCwmsMeasurements(ctx context.Context, timeseriesID uuid.UUID, threshold int) (model.MeasurementCollection, error)
@@ -78,22 +80,67 @@ func (s timeseriesCwmsService) UpdateTimeseriesCwms(ctx context.Context, tsCwms 
 
 // If using external timeseries measurement in formula, measurements need to be queried and processed,
 // otherwise they can be requested directly by the client
-func (s timeseriesCwmsService) ListTimeseriesCwmsMeasurements(ctx context.Context, timeseriesID uuid.UUID, threshold int) (model.MeasurementCollection, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, s.cwmsDataUrl, nil)
+func (s timeseriesCwmsService) ListTimeseriesCwmsMeasurements(ctx context.Context, timeseriesID uuid.UUID, tw model.TimeWindow, threshold int) (model.MeasurementCollection, error) {
+	tc, err := s.GetTimeseriesCwms(ctx, timeseriesID)
 	if err != nil {
 		return model.MeasurementCollection{}, err
 	}
-	res, err := s.cwmsClient.Do(req)
+
+	url := fmt.Sprintf("%s?name=%s&office=%s&begin=%s&end=%s&page-size=3000", s.cwmsDataUrl, tc.CwmsTimeseriesID, tc.CwmsOfficeID, tw.After, tw.Before)
+
+	cm, err := downloadCwmsTimeseries(ctx, s.cwmsClient, url)
 	if err != nil {
 		return model.MeasurementCollection{}, err
+	}
+	if cm.Total == 0 {
+		return model.MeasurementCollection{}, nil
+	}
+
+	downsamplePerPage := threshold
+	if cm.Total > cm.PageSize {
+		downsamplePerPage = (cm.PageSize / cm.Total) * threshold
+	}
+
+	items, err := parseCwmsTimeseriesRequest(ctx, cm, downsamplePerPage)
+	if err != nil {
+		return model.MeasurementCollection{}, err
+	}
+
+	for cm.NextPage != nil {
+		nextPageUrl := fmt.Sprintf("%s&next-page=%s", url, *cm.NextPage)
+		cm, err := downloadCwmsTimeseries(ctx, s.cwmsClient, nextPageUrl)
+		if err != nil {
+			return model.MeasurementCollection{}, err
+		}
+		nextItems, err := parseCwmsTimeseriesRequest(ctx, cm, downsamplePerPage)
+		if err != nil {
+			return model.MeasurementCollection{}, err
+		}
+
+		items = append(items, nextItems...)
+	}
+
+	return model.MeasurementCollection{TimeseriesID: timeseriesID, Items: items}, nil
+}
+
+func downloadCwmsTimeseries(ctx context.Context, client *http.Client, url string) (model.CwmsMeasurementsRaw, error) {
+	var cm model.CwmsMeasurementsRaw
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return cm, err
+	}
+	res, err := client.Do(req)
+	if err != nil {
+		return cm, err
 	}
 	defer res.Body.Close()
 
-	var cm model.CwmsMeasurementsRaw
-	if err := json.NewDecoder(req.Body).Decode(&cm); err != nil {
-		return model.MeasurementCollection{}, err
-	}
+	err = json.NewDecoder(req.Body).Decode(&cm)
+	return cm, err
+}
 
+func parseCwmsTimeseriesRequest(ctx context.Context, cm model.CwmsMeasurementsRaw, downsamplePerPage int) ([]model.Measurement, error) {
 	var timeIdx, valIdx int
 	for idx := range cm.ValueColumns {
 		if cm.ValueColumns[idx].Name == "date-time" {
@@ -116,6 +163,5 @@ func (s timeseriesCwmsService) ListTimeseriesCwmsMeasurements(ctx context.Contex
 		}
 		mm[idx] = model.Measurement{Time: time.UnixMilli(msEpoch), Value: v}
 	}
-
-	return model.MeasurementCollection{TimeseriesID: timeseriesID, Items: model.LTTB(mm, threshold)}, nil
+	return model.LTTB(mm, downsamplePerPage), nil
 }
