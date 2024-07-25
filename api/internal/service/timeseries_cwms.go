@@ -36,15 +36,15 @@ func (s timeseriesCwmsService) CreateTimeseriesCwmsBatch(ctx context.Context, in
 
 	qtx := s.WithTx(tx)
 
-	for _, tc := range tcc {
-		tc.Type = model.CwmsTimeseriesType
-		tc.InstrumentID = instrumentID
-		tsNew, err := qtx.CreateTimeseries(ctx, tc.Timeseries)
+	for idx := range tcc {
+		tcc[idx].Type = model.CwmsTimeseriesType
+		tcc[idx].InstrumentID = instrumentID
+		tsNew, err := qtx.CreateTimeseries(ctx, tcc[idx].Timeseries)
 		if err != nil {
 			return tcc, err
 		}
-		tc.Timeseries = tsNew
-		if err := qtx.CreateTimeseriesCwms(ctx, tc); err != nil {
+		tcc[idx].Timeseries = tsNew
+		if err := qtx.CreateTimeseriesCwms(ctx, tcc[idx]); err != nil {
 			return tcc, err
 		}
 	}

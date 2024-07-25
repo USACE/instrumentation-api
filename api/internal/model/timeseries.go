@@ -84,7 +84,6 @@ const getTimeseriesProjectMap = `
 	WHERE timeseries_id IN (?)
 `
 
-// GetTimeseriesProjectMap returns a map of { timeseries_id: project_id, }
 func (q *Queries) GetTimeseriesProjectMap(ctx context.Context, timeseriesIDs []uuid.UUID) (map[uuid.UUID]uuid.UUID, error) {
 	query, args, err := sqlIn(getTimeseriesProjectMap, timeseriesIDs)
 	if err != nil {
@@ -126,7 +125,6 @@ const listInstrumentTimeseries = `
 	WHERE instrument_id = $1
 `
 
-// ListInstrumentTimeseries returns an array of timeseries for an instrument
 func (q *Queries) ListInstrumentTimeseries(ctx context.Context, instrumentID uuid.UUID) ([]Timeseries, error) {
 	tt := make([]Timeseries, 0)
 	if err := q.db.Select(&tt, listInstrumentTimeseries, instrumentID); err != nil {
@@ -155,7 +153,6 @@ const listInstrumentGroupTimeseries = `
 	WHERE gi.instrument_group_id = $1
 `
 
-// ListInstrumentGroupTimeseries returns an array of timeseries for instruments that belong to an instrument_group
 func (q *Queries) ListInstrumentGroupTimeseries(ctx context.Context, instrumentGroupID uuid.UUID) ([]Timeseries, error) {
 	tt := make([]Timeseries, 0)
 	if err := q.db.SelectContext(ctx, &tt, listInstrumentGroupTimeseries, instrumentGroupID); err != nil {
@@ -168,7 +165,6 @@ const getTimeseries = `
 	SELECT * FROM v_timeseries WHERE id = $1
 `
 
-// GetTimeseries returns a single timeseries without measurements
 func (q *Queries) GetTimeseries(ctx context.Context, timeseriesID uuid.UUID) (Timeseries, error) {
 	var t Timeseries
 	err := q.db.GetContext(ctx, &t, getTimeseries, timeseriesID)
@@ -181,7 +177,6 @@ const createTimeseries = `
 	RETURNING id, instrument_id, slug, name, parameter_id, unit_id, type
 `
 
-// CreateTimeseries creates many timeseries from an array of timeseries
 func (q *Queries) CreateTimeseries(ctx context.Context, ts Timeseries) (Timeseries, error) {
 	if ts.ParameterID == uuid.Nil {
 		ts.ParameterID = unknownParameterID
@@ -203,7 +198,6 @@ const updateTimeseries = `
 	RETURNING id
 `
 
-// UpdateTimeseries updates a timeseries
 func (q *Queries) UpdateTimeseries(ctx context.Context, ts Timeseries) (uuid.UUID, error) {
 	if ts.ParameterID == uuid.Nil {
 		ts.ParameterID = unknownParameterID
@@ -220,7 +214,6 @@ const deleteTimeseries = `
 	DELETE FROM timeseries WHERE id = $1
 `
 
-// DeleteTimeseries deletes a timeseries and cascade deletes all measurements
 func (q *Queries) DeleteTimeseries(ctx context.Context, timeseriesID uuid.UUID) error {
 	_, err := q.db.ExecContext(ctx, deleteTimeseries, timeseriesID)
 	return err

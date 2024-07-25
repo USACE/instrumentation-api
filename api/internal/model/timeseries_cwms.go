@@ -6,8 +6,8 @@ import (
 
 type TimeseriesCwms struct {
 	Timeseries
-	CwmsTimeseriesID string
-	CwmsOfficeID     string
+	CwmsTimeseriesID string `json:"cwms_timeseries_id" db:"cwms_timeseries_id"`
+	CwmsOfficeID     string `json:"cwms_office_id" db:"cwms_office_id"`
 }
 
 type CwmsMeasurementsRaw struct {

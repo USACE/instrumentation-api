@@ -11,8 +11,6 @@ import (
 )
 
 // ListTimeseriesCwmsMeasurements(ctx context.Context, timeseriesID uuid.UUID) (model.MeasurementCollection, error)
-// CreateTimeseriesCwms(ctx context.Context, tsCwms model.TimeseriesCwms) (model.TimeseriesCwms, error)
-// UpdateTimeseriesCwms(ctx context.Context, tsCwms model.TimeseriesCwms) error
 
 // CreateTimeseriesCwms godoc
 //
@@ -47,10 +45,10 @@ func (h *ApiHandler) CreateTimeseriesCwms(c echo.Context) error {
 		return httperr.InternalServerError(err)
 	}
 
-	return c.JSON(http.StatusOK, tss)
+	return c.JSON(http.StatusCreated, tss)
 }
 
-// CreateTimeseriesCwms godoc
+// UpdateTimeseriesCwms godoc
 //
 //	@Summary updates cwms timeseries
 //	@Tags timeseries-cwms
@@ -73,16 +71,21 @@ func (h *ApiHandler) UpdateTimeseriesCwms(c echo.Context) error {
 	if err != nil {
 		return httperr.MalformedID(err)
 	}
-
-	var tcc []model.TimeseriesCwms
-	if err := c.Bind(&tcc); err != nil {
-		return httperr.MalformedBody(err)
+	timeseriesID, err := uuid.Parse(c.Param("timeseries_id"))
+	if err != nil {
+		return httperr.MalformedID(err)
 	}
 
-	tss, err := h.TimeseriesCwmsService.CreateTimeseriesCwmsBatch(c.Request().Context(), instrumentID, tcc)
-	if err != nil {
+	var tc model.TimeseriesCwms
+	if err := c.Bind(&tc); err != nil {
+		return httperr.MalformedBody(err)
+	}
+	tc.InstrumentID = instrumentID
+	tc.ID = timeseriesID
+
+	if err := h.TimeseriesCwmsService.UpdateTimeseriesCwms(c.Request().Context(), tc); err != nil {
 		return httperr.InternalServerError(err)
 	}
 
-	return c.JSON(http.StatusOK, tss)
+	return c.JSON(http.StatusOK, map[string]interface{}{"id": tc.ID})
 }
