@@ -4881,6 +4881,98 @@ export interface paths {
       };
     };
   };
+  "/projects/{project_id}/instruments/{instrument_id}/timeseries/cwms": {
+    /** creates cwms timeseries */
+    post: {
+      parameters: {
+        path: {
+          /** @description project uuid */
+          project_id: string;
+          /** @description instrument uuid */
+          instrument_id: string;
+        };
+      };
+      /** @description array of cwms timeseries to create */
+      requestBody: {
+        content: {
+          "*/*": components["schemas"]["TimeseriesCwms"][];
+        };
+      };
+      responses: {
+        /** @description OK */
+        200: {
+          content: {
+            "application/json": components["schemas"]["TimeseriesCwms"][];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Internal Server Error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+      };
+    };
+  };
+  "/projects/{project_id}/instruments/{instrument_id}/timeseries/cwms/{timeseries_id}": {
+    /** updates cwms timeseries */
+    put: {
+      parameters: {
+        path: {
+          /** @description project uuid */
+          project_id: string;
+          /** @description instrument uuid */
+          instrument_id: string;
+          /** @description timeseries uuid */
+          timeseries_id: string;
+        };
+      };
+      /** @description cwms timeseries to update */
+      requestBody: {
+        content: {
+          "*/*": components["schemas"]["TimeseriesCwms"];
+        };
+      };
+      responses: {
+        /** @description OK */
+        200: {
+          content: {
+            "application/json": components["schemas"]["TimeseriesCwms"][];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Internal Server Error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+      };
+    };
+  };
   "/projects/{project_id}/members": {
     /** lists project members and their role information */
     get: {
@@ -6622,6 +6714,7 @@ export interface components {
      *         }
      *       ],
      *       "instrument": "instrument",
+     *       "type": "type",
      *       "instrument_id": "instrument_id",
      *       "unit": "unit",
      *       "parameter": "parameter",
@@ -6656,6 +6749,7 @@ export interface components {
      *         }
      *       ],
      *       "instrument": "instrument",
+     *       "type": "type",
      *       "instrument_id": "instrument_id",
      *       "unit": "unit",
      *       "parameter": "parameter",
@@ -8421,6 +8515,7 @@ export interface components {
      *     }
      *   ],
      *   "instrument": "instrument",
+     *   "type": "type",
      *   "instrument_id": "instrument_id",
      *   "unit": "unit",
      *   "parameter": "parameter",
@@ -8444,6 +8539,7 @@ export interface components {
       parameter?: string;
       parameter_id?: string;
       slug?: string;
+      type?: string;
       unit?: string;
       unit_id?: string;
       values?: components["schemas"]["Measurement"][];
@@ -8472,6 +8568,7 @@ export interface components {
      *         }
      *       ],
      *       "instrument": "instrument",
+     *       "type": "type",
      *       "instrument_id": "instrument_id",
      *       "unit": "unit",
      *       "parameter": "parameter",
@@ -8504,6 +8601,7 @@ export interface components {
      *         }
      *       ],
      *       "instrument": "instrument",
+     *       "type": "type",
      *       "instrument_id": "instrument_id",
      *       "unit": "unit",
      *       "parameter": "parameter",
@@ -8521,6 +8619,61 @@ export interface components {
      */
     TimeseriesCollectionItems: {
       items?: components["schemas"]["Timeseries"][];
+    };
+    /**
+     * @example {
+     *   "values": [
+     *     {
+     *       "annotation": "annotation",
+     *       "validated": true,
+     *       "masked": true,
+     *       "time": "time",
+     *       "error": "error",
+     *       "value": 0.8008281904610115
+     *     },
+     *     {
+     *       "annotation": "annotation",
+     *       "validated": true,
+     *       "masked": true,
+     *       "time": "time",
+     *       "error": "error",
+     *       "value": 0.8008281904610115
+     *     }
+     *   ],
+     *   "instrument": "instrument",
+     *   "type": "type",
+     *   "instrument_id": "instrument_id",
+     *   "unit": "unit",
+     *   "cwmsOfficeID": "cwmsOfficeID",
+     *   "cwmsTimeseriesID": "cwmsTimeseriesID",
+     *   "parameter": "parameter",
+     *   "name": "name",
+     *   "variable": "variable",
+     *   "id": "id",
+     *   "instrument_slug": "instrument_slug",
+     *   "is_computed": true,
+     *   "unit_id": "unit_id",
+     *   "slug": "slug",
+     *   "parameter_id": "parameter_id"
+     * }
+     */
+    TimeseriesCwms: {
+      cwmsOfficeID?: string;
+      cwmsTimeseriesID?: string;
+      id?: string;
+      instrument?: string;
+      instrument_id?: string;
+      instrument_slug?: string;
+      is_computed?: boolean;
+      name?: string;
+      parameter?: string;
+      parameter_id?: string;
+      slug?: string;
+      type?: string;
+      unit?: string;
+      unit_id?: string;
+      values?: components["schemas"]["Measurement"][];
+      variable?: string;
     };
     /**
      * @example {
@@ -8648,6 +8801,7 @@ export interface components {
      *     }
      *   ],
      *   "instrument": "instrument",
+     *   "type": "type",
      *   "instrument_id": "instrument_id",
      *   "unit": "unit",
      *   "parameter": "parameter",
@@ -8675,6 +8829,7 @@ export interface components {
       parameter?: string;
       parameter_id?: string;
       slug?: string;
+      type?: string;
       unit?: string;
       unit_id?: string;
       values?: components["schemas"]["Measurement"][];

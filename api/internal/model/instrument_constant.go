@@ -7,7 +7,7 @@ import (
 )
 
 const listInstrumentConstants = `
-	SELECT * FROM v_timeseries t
+	SELECT t.* FROM v_timeseries t
 	INNER JOIN instrument_constants ic ON ic.timeseries_id = t.id
 	WHERE ic.instrument_id = $1
 `

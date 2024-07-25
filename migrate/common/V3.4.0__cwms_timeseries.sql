@@ -5,7 +5,7 @@ ALTER TABLE timeseries ADD COLUMN type timeseries_type;
 UPDATE timeseries SET type = 'standard';
 
 UPDATE timeseries SET type = 'constant'
-WHERE id = ANY(SELECT ic.id FROM instrument_constants ic)
+WHERE id = ANY(SELECT ic.timeseries_id FROM instrument_constants ic)
 OR id = ANY(SELECT so.bottom_elevation_timeseries_id FROM saa_opts so)
 OR id = ANY(SELECT io.bottom_elevation_timeseries_id FROM ipi_opts io);
 

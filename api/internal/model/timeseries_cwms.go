@@ -2,8 +2,6 @@ package model
 
 import (
 	"context"
-
-	"github.com/google/uuid"
 )
 
 type TimeseriesCwms struct {
@@ -32,26 +30,6 @@ type CwmsValueColumns struct {
 	Name     string `json:"name"`
 	Ordinal  int    `json:"ordinal"`
 	Datatype string `json:"datatype"`
-}
-
-const listTimeseriesCwmsForProject = `
-	SELECT * FROM v_timeseries_cwms WHERE project_id = $1
-`
-
-func (q *Queries) ListTimeseriesCwmsForProject(ctx context.Context, projectID uuid.UUID) ([]TimeseriesCwms, error) {
-	tss := make([]TimeseriesCwms, 0)
-	err := q.db.SelectContext(ctx, &tss, listTimeseriesCwmsForProject)
-	return tss, err
-}
-
-const listTimeseriesCwmsForInstrument = `
-	SELECT * FROM v_timeseries_cwms WHERE instrument_id = $1
-`
-
-func (q *Queries) ListTimeseriesCwmsForInstrument(ctx context.Context, instrumentID uuid.UUID) ([]TimeseriesCwms, error) {
-	tss := make([]TimeseriesCwms, 0)
-	err := q.db.SelectContext(ctx, &tss, listTimeseriesCwmsForInstrument)
-	return tss, err
 }
 
 const createTimeseriesCwms = `

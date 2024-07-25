@@ -106,7 +106,7 @@ func (q *Queries) GetTimeseriesProjectMap(ctx context.Context, timeseriesIDs []u
 }
 
 const listProjectTimeseries = `
-	SELECT * FROM v_timeseries t
+	SELECT t.* FROM v_timeseries t
 	INNER JOIN project_instrument p ON p.instrument_id = t.instrument_id
 	WHERE p.project_id = $1
 `
@@ -136,7 +136,7 @@ func (q *Queries) ListInstrumentTimeseries(ctx context.Context, instrumentID uui
 }
 
 const listPlotConfigTimeseries = `
-	SELECT * FROM v_timeseries t
+	SELECT t.* FROM v_timeseries t
 	INNER JOIN plot_configuration_timeseries pct ON pct.timeseries_id = t.id
 	WHERE pct.plot_configuration_id = $1
 `
@@ -150,7 +150,7 @@ func (q *Queries) ListPlotConfigTimeseries(ctx context.Context, plotConfigID uui
 }
 
 const listInstrumentGroupTimeseries = `
-	SELECT * FROM v_timeseries t
+	SELECT t.* FROM v_timeseries t
 	INNER JOIN instrument_group_instruments gi ON gi.instrument_id = t.instrument_id
 	WHERE gi.instrument_group_id = $1
 `

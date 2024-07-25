@@ -5,6 +5,7 @@ CREATE VIEW v_timeseries AS (
         t.slug,
         t.name,
         t.type,
+        -- is_computed should be deprecated now that timeseries type enum is included
         CASE WHEN t.type = 'computed' THEN true ELSE false END AS is_computed,
         i.slug || '.' || t.slug AS variable,
         i.id AS instrument_id,
@@ -14,7 +15,7 @@ CREATE VIEW v_timeseries AS (
         p.name AS parameter,
         u.id AS unit_id,
         u.name AS unit
-    FROM timeseries
+    FROM timeseries t
     INNER JOIN instrument i ON i.id = t.instrument_id
     INNER JOIN parameter p ON p.id = t.parameter_id
     INNER JOIN unit u ON u.id = t.unit_id
@@ -27,7 +28,7 @@ CREATE VIEW v_timeseries_dependency AS (
             b.slug || '.' || a.slug AS variable
 	    FROM timeseries a
 	    LEFT JOIN instrument b ON b.id = a.instrument_id
-        WHERE a.id NOT IN (SELECT timeseries_id FROM calculation)
+            WHERE a.id NOT IN (SELECT c.timeseries_id FROM calculation c)
     )
     -- id references computed timeseries
     -- dependency_timeseries_id references timeseries used to caclulate computed timeseries
@@ -70,7 +71,7 @@ CREATE VIEW v_timeseries_computed AS (
     INNER JOIN calculation cc ON ts.id = cc.timeseries_id
 );
 
-CREATE VIEW IF NOT EXISTS v_timeseries_cwms AS (
+CREATE OR REPLACE VIEW v_timeseries_cwms AS (
     SELECT
         ts.*,
         tc.cwms_timeseries_id,
