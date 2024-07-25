@@ -31,7 +31,7 @@ CREATE OR REPLACE VIEW v_plot_configuration AS (
                 'instrument_type', ii.name
             )::text
             WHEN pc.plot_type = 'contour' THEN json_build_object(
-                'timeseries_ids', COALESCE(pcct.timeseries_ids, '[]'),
+                'timeseries_ids', COALESCE(pcct.timeseries_ids, '{}'),
                 'time', pcc.time,
                 'locf_backfill', pcc.locf_backfill,
                 'gradient_smoothing', pcc.gradient_smoothing,
@@ -93,7 +93,7 @@ CREATE OR REPLACE VIEW v_plot_configuration AS (
     LEFT JOIN instrument_type it ON it.id = ii.type_id
     LEFT JOIN plot_contour_config pcc ON pcc.plot_config_id = pc.id
     LEFT JOIN LATERAL (
-        SELECT array_agg(ipcct.timeseries_id)::text as timeseries_ids
+        SELECT array_agg(ipcct.timeseries_id) as timeseries_ids
         FROM plot_contour_config_timeseries ipcct
         WHERE ipcct.plot_contour_config_id = pc.id
     ) pcct ON true

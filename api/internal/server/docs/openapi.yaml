@@ -6186,7 +6186,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AggregatePlotConfigMeasurementsContourPlot'
+                items:
+                  type: string
+                type: array
           description: OK
         "400":
           content:

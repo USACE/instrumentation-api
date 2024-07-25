@@ -112,7 +112,7 @@ func (h *ApiHandler) UpdatePlotConfigContourPlot(c echo.Context) error {
 //	@Param after query string false "after timestamp"
 //	@Param before query string false "before timestamp"
 //	@Param key query string false "api key"
-//	@Success 200 {object} model.AggregatePlotConfigMeasurementsContourPlot
+//	@Success 200 {object} []time.Time
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError

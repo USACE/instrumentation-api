@@ -5352,7 +5352,7 @@ export interface paths {
         /** @description OK */
         200: {
           content: {
-            "application/json": components["schemas"]["AggregatePlotConfigMeasurementsContourPlot"];
+            "application/json": string[];
           };
         };
         /** @description Bad Request */
