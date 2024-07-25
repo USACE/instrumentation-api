@@ -15,7 +15,7 @@ type PlotConfigContourPlot struct {
 }
 
 type PlotConfigContourPlotDisplay struct {
-	TimeseiresIDs     dbSlice[uuid.UUID] `json:"timeseries_ids" db:"timeseries_ids"`
+	TimeseriesIDs     dbSlice[uuid.UUID] `json:"timeseries_ids" db:"timeseries_ids"`
 	Time              time.Time          `json:"time" db:"time"`
 	LocfBackfill      string             `json:"locf_backfill" db:"locf_backfill"`
 	GradientSmoothing bool               `json:"gradient_smoothing" db:"gradient_smoothing"`

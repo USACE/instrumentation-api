@@ -38,7 +38,7 @@ func (s plotConfigService) CreatePlotConfigContourPlot(ctx context.Context, pc m
 		return model.PlotConfig{}, err
 	}
 
-	for _, tsID := range pc.Display.TimeseiresIDs {
+	for _, tsID := range pc.Display.TimeseriesIDs {
 		if err := qtx.CreatePlotContourConfigTimeseries(ctx, pcID, tsID); err != nil {
 			return model.PlotConfig{}, err
 		}
@@ -81,7 +81,7 @@ func (s plotConfigService) UpdatePlotConfigContourPlot(ctx context.Context, pc m
 		return model.PlotConfig{}, err
 	}
 
-	for _, tsID := range pc.Display.TimeseiresIDs {
+	for _, tsID := range pc.Display.TimeseriesIDs {
 		if err := qtx.CreatePlotContourConfigTimeseries(ctx, pc.ID, tsID); err != nil {
 			return model.PlotConfig{}, err
 		}
