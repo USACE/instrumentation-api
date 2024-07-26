@@ -39,7 +39,9 @@ func (s plotConfigService) CreatePlotConfigProfilePlot(ctx context.Context, pc m
 		return model.PlotConfig{}, err
 	}
 
-	return pcNew, nil
+	err = tx.Commit()
+
+	return pcNew, err
 }
 
 func (s plotConfigService) UpdatePlotConfigProfilePlot(ctx context.Context, pc model.PlotConfigProfilePlot) (model.PlotConfig, error) {
@@ -72,5 +74,7 @@ func (s plotConfigService) UpdatePlotConfigProfilePlot(ctx context.Context, pc m
 		return model.PlotConfig{}, err
 	}
 
-	return pcNew, nil
+	err = tx.Commit()
+
+	return pcNew, err
 }

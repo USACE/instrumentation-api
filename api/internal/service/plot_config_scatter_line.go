@@ -50,11 +50,9 @@ func (s plotConfigService) CreatePlotConfigScatterLinePlot(ctx context.Context, 
 		return model.PlotConfig{}, err
 	}
 
-	if err := tx.Commit(); err != nil {
-		return model.PlotConfig{}, err
-	}
+	err = tx.Commit()
 
-	return pcNew, nil
+	return pcNew, err
 }
 
 func (s plotConfigService) UpdatePlotConfigScatterLinePlot(ctx context.Context, pc model.PlotConfigScatterLinePlot) (model.PlotConfig, error) {
@@ -105,11 +103,9 @@ func (s plotConfigService) UpdatePlotConfigScatterLinePlot(ctx context.Context, 
 		return model.PlotConfig{}, err
 	}
 
-	if err := tx.Commit(); err != nil {
-		return model.PlotConfig{}, err
-	}
+	err = tx.Commit()
 
-	return pcNew, nil
+	return pcNew, err
 }
 
 func validateCreateTraces(ctx context.Context, q *model.Queries, pcID uuid.UUID, trs []model.PlotConfigScatterLineTimeseriesTrace) error {

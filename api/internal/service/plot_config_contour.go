@@ -49,7 +49,9 @@ func (s plotConfigService) CreatePlotConfigContourPlot(ctx context.Context, pc m
 		return model.PlotConfig{}, err
 	}
 
-	return pcNew, nil
+	err = tx.Commit()
+
+	return pcNew, err
 }
 
 func (s plotConfigService) UpdatePlotConfigContourPlot(ctx context.Context, pc model.PlotConfigContourPlot) (model.PlotConfig, error) {
@@ -92,7 +94,9 @@ func (s plotConfigService) UpdatePlotConfigContourPlot(ctx context.Context, pc m
 		return model.PlotConfig{}, err
 	}
 
-	return pcNew, nil
+	err = tx.Commit()
+
+	return pcNew, err
 }
 
 func (s plotConfigService) GetPlotConfigMeasurementsContourPlot(ctx context.Context, plotConfigID uuid.UUID, t time.Time) (model.AggregatePlotConfigMeasurementsContourPlot, error) {

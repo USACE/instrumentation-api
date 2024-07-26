@@ -41,7 +41,9 @@ func (s plotConfigService) CreatePlotConfigBullseyePlot(ctx context.Context, pc 
 		return model.PlotConfig{}, err
 	}
 
-	return pcNew, nil
+	err = tx.Commit()
+
+	return pcNew, err
 }
 
 func (s plotConfigService) UpdatePlotConfigBullseyePlot(ctx context.Context, pc model.PlotConfigBullseyePlot) (model.PlotConfig, error) {
@@ -73,6 +75,7 @@ func (s plotConfigService) UpdatePlotConfigBullseyePlot(ctx context.Context, pc 
 	if err != nil {
 		return model.PlotConfig{}, err
 	}
+	err = tx.Commit()
 
-	return pcNew, nil
+	return pcNew, err
 }
