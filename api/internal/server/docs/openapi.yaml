@@ -5725,6 +5725,60 @@ paths:
       tags:
       - timeseries-cwms
       x-codegen-request-body-name: timeseries_cwms
+  /projects/{project_id}/instruments/{instrument_id}/timeseries/cwms/{timeseries_id}/measurements:
+    get:
+      parameters:
+      - description: project uuid
+        in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      - description: instrument uuid
+        in: path
+        name: instrument_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      - description: timeseries uuid
+        in: path
+        name: timeseries_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/MeasurementCollection'
+                type: array
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Internal Server Error
+      summary: lists measurements for a cwms timeseries
+      tags:
+      - timeseries-cwms
   /projects/{project_id}/members:
     get:
       parameters:
@@ -9768,6 +9822,7 @@ components:
       type: object
     TimeseriesCwms:
       example:
+        cwms_office_id: cwms_office_id
         values:
         - annotation: annotation
           validated: true
@@ -9783,10 +9838,9 @@ components:
           value: 0.8008281904610115
         instrument: instrument
         type: type
+        cwms_timeseries_id: cwms_timeseries_id
         instrument_id: instrument_id
         unit: unit
-        cwmsOfficeID: cwmsOfficeID
-        cwmsTimeseriesID: cwmsTimeseriesID
         parameter: parameter
         name: name
         variable: variable
@@ -9797,9 +9851,9 @@ components:
         slug: slug
         parameter_id: parameter_id
       properties:
-        cwmsOfficeID:
+        cwms_office_id:
           type: string
-        cwmsTimeseriesID:
+        cwms_timeseries_id:
           type: string
         id:
           type: string

@@ -12,10 +12,10 @@ import (
 )
 
 type TimeseriesCwmsService interface {
-	GetTimeseriesCwms(ctx context.Context, timeseriesID uuid.UUID) (TimeseriesCwms, error)
+	GetTimeseriesCwms(ctx context.Context, timeseriesID uuid.UUID) (model.TimeseriesCwms, error)
 	CreateTimeseriesCwmsBatch(ctx context.Context, instrumentID uuid.UUID, tcc []model.TimeseriesCwms) ([]model.TimeseriesCwms, error)
 	UpdateTimeseriesCwms(ctx context.Context, tsCwms model.TimeseriesCwms) error
-	ListTimeseriesCwmsMeasurements(ctx context.Context, timeseriesID uuid.UUID, threshold int) (model.MeasurementCollection, error)
+	ListTimeseriesCwmsMeasurements(ctx context.Context, timeseriesID uuid.UUID, tw model.TimeWindow, threshold int) (model.MeasurementCollection, error)
 }
 
 type timeseriesCwmsService struct {
@@ -86,7 +86,7 @@ func (s timeseriesCwmsService) ListTimeseriesCwmsMeasurements(ctx context.Contex
 		return model.MeasurementCollection{}, err
 	}
 
-	url := fmt.Sprintf("%s?name=%s&office=%s&begin=%s&end=%s&page-size=3000", s.cwmsDataUrl, tc.CwmsTimeseriesID, tc.CwmsOfficeID, tw.After, tw.Before)
+	url := fmt.Sprintf("%s?name=%s&office=%s&begin=%s&end=%s&page-size=500", s.cwmsDataUrl, tc.CwmsTimeseriesID, tc.CwmsOfficeID, tw.After, tw.Before)
 
 	cm, err := downloadCwmsTimeseries(ctx, s.cwmsClient, url)
 	if err != nil {
@@ -101,7 +101,7 @@ func (s timeseriesCwmsService) ListTimeseriesCwmsMeasurements(ctx context.Contex
 		downsamplePerPage = (cm.PageSize / cm.Total) * threshold
 	}
 
-	items, err := parseCwmsTimeseriesRequest(ctx, cm, downsamplePerPage)
+	items, err := parseCwmsTimeseriesRequest(cm, downsamplePerPage)
 	if err != nil {
 		return model.MeasurementCollection{}, err
 	}
@@ -112,7 +112,7 @@ func (s timeseriesCwmsService) ListTimeseriesCwmsMeasurements(ctx context.Contex
 		if err != nil {
 			return model.MeasurementCollection{}, err
 		}
-		nextItems, err := parseCwmsTimeseriesRequest(ctx, cm, downsamplePerPage)
+		nextItems, err := parseCwmsTimeseriesRequest(cm, downsamplePerPage)
 		if err != nil {
 			return model.MeasurementCollection{}, err
 		}
@@ -140,7 +140,7 @@ func downloadCwmsTimeseries(ctx context.Context, client *http.Client, url string
 	return cm, err
 }
 
-func parseCwmsTimeseriesRequest(ctx context.Context, cm model.CwmsMeasurementsRaw, downsamplePerPage int) ([]model.Measurement, error) {
+func parseCwmsTimeseriesRequest(cm model.CwmsMeasurementsRaw, downsamplePerPage int) ([]model.Measurement, error) {
 	var timeIdx, valIdx int
 	for idx := range cm.ValueColumns {
 		if cm.ValueColumns[idx].Name == "date-time" {

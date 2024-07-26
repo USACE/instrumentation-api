@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/USACE/instrumentation-api/api/internal/httperr"
 	"github.com/USACE/instrumentation-api/api/internal/model"
@@ -127,7 +128,13 @@ func (h *ApiHandler) ListTimeseriesCwmsMeasurements(c echo.Context) error {
 		threshold = tr
 	}
 
-	mc, err := h.TimeseriesCwmsService.ListTimeseriesCwmsMeasurements(c.Request().Context(), timeseriesID, threshold)
+	var tw model.TimeWindow
+	a, b := c.QueryParam("after"), c.QueryParam("before")
+	if err := tw.SetWindow(a, b, time.Now().AddDate(0, 0, -7), time.Now()); err != nil {
+		return httperr.MalformedDate(err)
+	}
+
+	mc, err := h.TimeseriesCwmsService.ListTimeseriesCwmsMeasurements(c.Request().Context(), timeseriesID, tw, threshold)
 	if err != nil {
 		return httperr.InternalServerError(err)
 	}

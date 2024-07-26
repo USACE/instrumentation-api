@@ -4973,6 +4973,47 @@ export interface paths {
       };
     };
   };
+  "/projects/{project_id}/instruments/{instrument_id}/timeseries/cwms/{timeseries_id}/measurements": {
+    /** lists measurements for a cwms timeseries */
+    get: {
+      parameters: {
+        path: {
+          /** @description project uuid */
+          project_id: string;
+          /** @description instrument uuid */
+          instrument_id: string;
+          /** @description timeseries uuid */
+          timeseries_id: string;
+        };
+      };
+      responses: {
+        /** @description OK */
+        200: {
+          content: {
+            "application/json": components["schemas"]["MeasurementCollection"][];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Internal Server Error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+      };
+    };
+  };
   "/projects/{project_id}/members": {
     /** lists project members and their role information */
     get: {
@@ -8622,6 +8663,7 @@ export interface components {
     };
     /**
      * @example {
+     *   "cwms_office_id": "cwms_office_id",
      *   "values": [
      *     {
      *       "annotation": "annotation",
@@ -8642,10 +8684,9 @@ export interface components {
      *   ],
      *   "instrument": "instrument",
      *   "type": "type",
+     *   "cwms_timeseries_id": "cwms_timeseries_id",
      *   "instrument_id": "instrument_id",
      *   "unit": "unit",
-     *   "cwmsOfficeID": "cwmsOfficeID",
-     *   "cwmsTimeseriesID": "cwmsTimeseriesID",
      *   "parameter": "parameter",
      *   "name": "name",
      *   "variable": "variable",
@@ -8658,8 +8699,8 @@ export interface components {
      * }
      */
     TimeseriesCwms: {
-      cwmsOfficeID?: string;
-      cwmsTimeseriesID?: string;
+      cwms_office_id?: string;
+      cwms_timeseries_id?: string;
       id?: string;
       instrument?: string;
       instrument_id?: string;
