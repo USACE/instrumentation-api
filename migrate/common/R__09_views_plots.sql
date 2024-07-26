@@ -32,7 +32,7 @@ CREATE OR REPLACE VIEW v_plot_configuration AS (
             )::text
             WHEN pc.plot_type = 'contour' THEN json_build_object(
                 'timeseries_ids', COALESCE(pcct.timeseries_ids, '{}'),
-                'time', pcc.time,
+                'time', to_char(pcc.time, 'YYYY-MM-DD"T"HH24:MI:SS.USOF'),
                 'locf_backfill', pcc.locf_backfill,
                 'gradient_smoothing', pcc.gradient_smoothing,
                 'contour_smoothing', pcc.contour_smoothing,
