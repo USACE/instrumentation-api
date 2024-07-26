@@ -98,6 +98,7 @@ const listPlotContourConfigTimes = `
 	WHERE pcts.plot_contour_config_id = $1
 	AND mm.time > $2
 	AND mm.time < $3
+	ORDER BY time ASC
 `
 
 func (q *Queries) ListPlotConfigTimesContourPlot(ctx context.Context, plotConfigID uuid.UUID, tw TimeWindow) ([]time.Time, error) {
