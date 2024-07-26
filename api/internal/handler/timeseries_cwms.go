@@ -2,8 +2,6 @@ package handler
 
 import (
 	"net/http"
-	"strconv"
-	"time"
 
 	"github.com/USACE/instrumentation-api/api/internal/httperr"
 	"github.com/USACE/instrumentation-api/api/internal/model"
@@ -92,52 +90,52 @@ func (h *ApiHandler) UpdateTimeseriesCwms(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]interface{}{"id": tc.ID})
 }
 
-// ListTimeseriesCwmsMeasurements godoc
+// // ListTimeseriesCwmsMeasurements godoc
+// //
+// //	@Summary lists measurements for a cwms timeseries
+// //	@Tags timeseries-cwms
+// //	@Produce json
+// //	@Param project_id path string true "project uuid" Format(uuid)
+// //	@Param instrument_id path string true "instrument uuid" Format(uuid)
+// //	@Param timeseries_id path string true "timeseries uuid" Format(uuid)
+// //	@Success 200 {array} model.MeasurementCollection
+// //	@Failure 400 {object} echo.HTTPError
+// //	@Failure 404 {object} echo.HTTPError
+// //	@Failure 500 {object} echo.HTTPError
+// //	@Router /projects/{project_id}/instruments/{instrument_id}/timeseries/cwms/{timeseries_id}/measurements [get]
+// func (h *ApiHandler) ListTimeseriesCwmsMeasurements(c echo.Context) error {
+// 	_, err := uuid.Parse(c.Param("project_id"))
+// 	if err != nil {
+// 		return httperr.MalformedID(err)
+// 	}
+// 	_, err = uuid.Parse(c.Param("instrument_id"))
+// 	if err != nil {
+// 		return httperr.MalformedID(err)
+// 	}
+// 	timeseriesID, err := uuid.Parse(c.Param("timeseries_id"))
+// 	if err != nil {
+// 		return httperr.MalformedID(err)
+// 	}
+// 	trs := c.QueryParam("threshold")
+// 	var threshold int
+// 	if trs != "" {
+// 		tr, err := strconv.Atoi(trs)
+// 		if err != nil {
+// 			return httperr.Message(http.StatusBadRequest, "threshold parameter must be an int")
+// 		}
+// 		threshold = tr
+// 	}
 //
-//	@Summary lists measurements for a cwms timeseries
-//	@Tags timeseries-cwms
-//	@Produce json
-//	@Param project_id path string true "project uuid" Format(uuid)
-//	@Param instrument_id path string true "instrument uuid" Format(uuid)
-//	@Param timeseries_id path string true "timeseries uuid" Format(uuid)
-//	@Success 200 {array} model.MeasurementCollection
-//	@Failure 400 {object} echo.HTTPError
-//	@Failure 404 {object} echo.HTTPError
-//	@Failure 500 {object} echo.HTTPError
-//	@Router /projects/{project_id}/instruments/{instrument_id}/timeseries/cwms/{timeseries_id}/measurements [get]
-func (h *ApiHandler) ListTimeseriesCwmsMeasurements(c echo.Context) error {
-	_, err := uuid.Parse(c.Param("project_id"))
-	if err != nil {
-		return httperr.MalformedID(err)
-	}
-	_, err = uuid.Parse(c.Param("instrument_id"))
-	if err != nil {
-		return httperr.MalformedID(err)
-	}
-	timeseriesID, err := uuid.Parse(c.Param("timeseries_id"))
-	if err != nil {
-		return httperr.MalformedID(err)
-	}
-	trs := c.QueryParam("threshold")
-	var threshold int
-	if trs != "" {
-		tr, err := strconv.Atoi(trs)
-		if err != nil {
-			return httperr.Message(http.StatusBadRequest, "threshold parameter must be an int")
-		}
-		threshold = tr
-	}
-
-	var tw model.TimeWindow
-	a, b := c.QueryParam("after"), c.QueryParam("before")
-	if err := tw.SetWindow(a, b, time.Now().AddDate(0, 0, -7), time.Now()); err != nil {
-		return httperr.MalformedDate(err)
-	}
-
-	mc, err := h.TimeseriesCwmsService.ListTimeseriesCwmsMeasurements(c.Request().Context(), timeseriesID, tw, threshold)
-	if err != nil {
-		return httperr.InternalServerError(err)
-	}
-
-	return c.JSON(http.StatusOK, mc)
-}
+// 	var tw model.TimeWindow
+// 	a, b := c.QueryParam("after"), c.QueryParam("before")
+// 	if err := tw.SetWindow(a, b, time.Now().AddDate(0, 0, -7), time.Now()); err != nil {
+// 		return httperr.MalformedDate(err)
+// 	}
+//
+// 	mc, err := h.TimeseriesCwmsService.ListTimeseriesCwmsMeasurements(c.Request().Context(), timeseriesID, tw, threshold)
+// 	if err != nil {
+// 		return httperr.InternalServerError(err)
+// 	}
+//
+// 	return c.JSON(http.StatusOK, mc)
+// }
