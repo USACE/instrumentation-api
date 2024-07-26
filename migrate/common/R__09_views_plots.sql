@@ -28,7 +28,7 @@ CREATE OR REPLACE VIEW v_plot_configuration AS (
             )::text
             WHEN pc.plot_type = 'profile' THEN json_build_object(
                 'instrument_id', ppc.instrument_id,
-                'instrument_type', ii.name
+                'instrument_type', it.name
             )::text
             WHEN pc.plot_type = 'contour' THEN json_build_object(
                 'timeseries_ids', COALESCE(pcct.timeseries_ids, '{}'),
