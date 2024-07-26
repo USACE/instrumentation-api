@@ -75,6 +75,9 @@ func (s timeseriesCwmsService) UpdateTimeseriesCwms(ctx context.Context, tsCwms 
 	return tx.Commit()
 }
 
+// TODO: determine what timeseries are appropriate for this function to limit/validate when called
+// for example,
+
 // If using external timeseries measurement in formula, measurements need to be queried and processed,
 // otherwise they can be requested directly by the client
 // func (s timeseriesCwmsService) ListTimeseriesCwmsMeasurements(ctx context.Context, timeseriesID uuid.UUID, tw model.TimeWindow, threshold int) (model.MeasurementCollection, error) {
@@ -103,9 +106,15 @@ func (s timeseriesCwmsService) UpdateTimeseriesCwms(ctx context.Context, tsCwms 
 // 		return model.MeasurementCollection{}, err
 // 	}
 //
+//	FIXME
+//	maxPageCount := 20
+//	pageCount := 1
 // 	for cm.NextPage != nil {
+//		if pageCount > maxPageCount {
+// 			return model.MeasurementCollection{}, errors.New("exceeded max page count")
+//		}
 // 		nextPageUrl := fmt.Sprintf("%s&next-page=%s", url, *cm.NextPage)
-// 		cm, err := downloadCwmsTimeseries(ctx, s.cwmsClient, nextPageUrl)
+// 		cm, err = downloadCwmsTimeseries(ctx, s.cwmsClient, nextPageUrl)
 // 		if err != nil {
 // 			return model.MeasurementCollection{}, err
 // 		}
@@ -115,6 +124,7 @@ func (s timeseriesCwmsService) UpdateTimeseriesCwms(ctx context.Context, tsCwms 
 // 		}
 //
 // 		items = append(items, nextItems...)
+//		pageCount++
 // 	}
 //
 // 	return model.MeasurementCollection{TimeseriesID: timeseriesID, Items: items}, nil
