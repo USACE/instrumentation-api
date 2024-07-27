@@ -74,13 +74,10 @@ func (q *Queries) GetAllAlertConfigsForProjectAndAlertType(ctx context.Context, 
 }
 
 const getAllAlertConfigsForInstrument = `
-	SELECT *
-	FROM v_alert_config
-	WHERE id = ANY(
-		SELECT alert_config_id
-		FROM alert_config_instrument
-		WHERE instrument_id = $1
-	)
+	SELECT ac.*
+	FROM v_alert_config ac
+	INNER JOIN alert_config_instrument aci ON aci.alert_config_id = ac.id
+	WHERE instrument_id = $1
 	ORDER BY name
 `
 
