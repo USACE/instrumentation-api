@@ -1,5 +1,5 @@
 -- ${flyway:timestamp}
-CREATE VIEW v_report_config AS (
+CREATE OR REPLACE VIEW v_report_config AS (
     SELECT
         rc.id,
         rc.slug,

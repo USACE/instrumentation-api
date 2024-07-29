@@ -1,5 +1,5 @@
 -- ${flyway:timestamp}
-CREATE VIEW v_unit AS (
+CREATE OR REPLACE VIEW v_unit AS (
     SELECT u.id AS id,
            u.name AS name,
            u.abbreviation AS abbreviation,

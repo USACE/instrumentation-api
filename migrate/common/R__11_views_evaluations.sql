@@ -1,5 +1,5 @@
 -- ${flyway:timestamp}
-CREATE VIEW v_evaluation AS (
+CREATE OR REPLACE VIEW v_evaluation AS (
     SELECT
         ev.id                               AS id,
         ev.name                             AS name,
