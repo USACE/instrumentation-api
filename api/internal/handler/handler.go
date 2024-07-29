@@ -106,6 +106,7 @@ type TelemetryHandler struct {
 	DataloggerTelemetryService service.DataloggerTelemetryService
 	EquivalencyTableService    service.EquivalencyTableService
 	MeasurementService         service.MeasurementService
+	Survey123Service           service.Survey123Service
 }
 
 func NewTelemetry(cfg *config.TelemetryConfig) *TelemetryHandler {

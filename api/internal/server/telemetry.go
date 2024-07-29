@@ -16,6 +16,7 @@ type TelemetryServer struct {
 type telemetryGroups struct {
 	public     *echo.Group
 	datalogger *echo.Group
+	survey123  *echo.Group
 }
 
 func NewTelemetryServer(cfg *config.TelemetryConfig, h *handler.TelemetryHandler) *TelemetryServer {
@@ -26,13 +27,18 @@ func NewTelemetryServer(cfg *config.TelemetryConfig, h *handler.TelemetryHandler
 
 	public := e.Group(cfg.RoutePrefix)
 	datalogger := e.Group(cfg.RoutePrefix)
+	survey123 := e.Group(cfg.RoutePrefix)
 
-	e.Use(h.Middleware.CORS, h.Middleware.GZIP)
-	datalogger.Use(h.Middleware.DataloggerKeyAuth)
+	mw := h.Middleware
+	e.Use(mw.GZIP)
+	public.Use(mw.CORS)
+	datalogger.Use(mw.CORS, mw.DataloggerKeyAuth)
+	survey123.Use(mw.CORSWhitelist)
 
 	server := &TelemetryServer{e, telemetryGroups{
 		public,
 		datalogger,
+		survey123,
 	}}
 	server.RegisterRoutes(h)
 
@@ -45,5 +51,8 @@ func (server *TelemetryServer) Start() error {
 
 func (r *TelemetryServer) RegisterRoutes(h *handler.TelemetryHandler) {
 	r.public.GET("/health", h.Healthcheck)
+
 	r.datalogger.POST("/telemetry/datalogger/:model/:sn", h.CreateOrUpdateDataloggerMeasurements)
+
+	r.survey123.POST("/telemetry/survey123.Measurements", h.CreateOrUpdateSurvey123Measurements)
 }
