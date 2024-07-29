@@ -9,7 +9,7 @@ import (
 )
 
 type AlertConfigEvaluationCheck struct {
-	AlertConfig AlertConfig
+	AlertConfig AlertConfigScheduler
 	AlertChecks []*EvaluationCheck
 }
 
@@ -17,11 +17,11 @@ type EvaluationCheck struct {
 	AlertCheck
 }
 
-func (a AlertConfigEvaluationCheck) GetAlertConfig() AlertConfig {
+func (a AlertConfigEvaluationCheck) GetAlertConfig() AlertConfigScheduler {
 	return a.AlertConfig
 }
 
-func (a *AlertConfigEvaluationCheck) SetAlertConfig(ac AlertConfig) {
+func (a *AlertConfigEvaluationCheck) SetAlertConfig(ac AlertConfigScheduler) {
 	a.AlertConfig = ac
 }
 

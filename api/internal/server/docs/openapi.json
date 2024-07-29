@@ -5389,7 +5389,9 @@
         },
         "summary" : "lists alert configs for a project",
         "tags" : [ "alert-config" ]
-      },
+      }
+    },
+    "/projects/{project_id}/alert_configs/schedulers" : {
       "post" : {
         "parameters" : [ {
           "description" : "project uuid",
@@ -5465,6 +5467,98 @@
           "Bearer" : [ ]
         } ],
         "summary" : "creates one alert config",
+        "tags" : [ "alert-config" ],
+        "x-codegen-request-body-name" : "alert_config"
+      }
+    },
+    "/projects/{project_id}/alert_configs/schedulers/{alert_config_id}" : {
+      "put" : {
+        "parameters" : [ {
+          "description" : "project uuid",
+          "in" : "path",
+          "name" : "project_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "description" : "alert config uuid",
+          "in" : "path",
+          "name" : "alert_config_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "description" : "api key",
+          "in" : "query",
+          "name" : "key",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AlertConfig"
+              }
+            }
+          },
+          "description" : "alert config payload",
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/AlertConfig"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Bad Request"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Not Found"
+          },
+          "500" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Internal Server Error"
+          }
+        },
+        "security" : [ {
+          "Bearer" : [ ]
+        } ],
+        "summary" : "updates an existing alert config",
         "tags" : [ "alert-config" ],
         "x-codegen-request-body-name" : "alert_config"
       }
@@ -5612,96 +5706,6 @@
         },
         "summary" : "gets a single alert",
         "tags" : [ "alert-config" ]
-      },
-      "put" : {
-        "parameters" : [ {
-          "description" : "project uuid",
-          "in" : "path",
-          "name" : "project_id",
-          "required" : true,
-          "schema" : {
-            "format" : "uuid",
-            "type" : "string"
-          }
-        }, {
-          "description" : "alert config uuid",
-          "in" : "path",
-          "name" : "alert_config_id",
-          "required" : true,
-          "schema" : {
-            "format" : "uuid",
-            "type" : "string"
-          }
-        }, {
-          "description" : "api key",
-          "in" : "query",
-          "name" : "key",
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/AlertConfig"
-              }
-            }
-          },
-          "description" : "alert config payload",
-          "required" : true
-        },
-        "responses" : {
-          "200" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "items" : {
-                    "$ref" : "#/components/schemas/AlertConfig"
-                  },
-                  "type" : "array"
-                }
-              }
-            },
-            "description" : "OK"
-          },
-          "400" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/echo.HTTPError"
-                }
-              }
-            },
-            "description" : "Bad Request"
-          },
-          "404" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/echo.HTTPError"
-                }
-              }
-            },
-            "description" : "Not Found"
-          },
-          "500" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/echo.HTTPError"
-                }
-              }
-            },
-            "description" : "Internal Server Error"
-          }
-        },
-        "security" : [ {
-          "Bearer" : [ ]
-        } ],
-        "summary" : "updates an existing alert config",
-        "tags" : [ "alert-config" ],
-        "x-codegen-request-body-name" : "alert_config"
       }
     },
     "/projects/{project_id}/collection_groups" : {
@@ -11088,28 +11092,16 @@
           "last_checked" : {
             "type" : "string"
           },
-          "last_reminded" : {
-            "type" : "string"
-          },
-          "mute_consecutive_alerts" : {
-            "type" : "boolean"
-          },
           "name" : {
             "type" : "string"
+          },
+          "opts" : {
+            "$ref" : "#/components/schemas/Opts"
           },
           "project_id" : {
             "type" : "string"
           },
           "project_name" : {
-            "type" : "string"
-          },
-          "remind_interval" : {
-            "type" : "string"
-          },
-          "schedule_interval" : {
-            "type" : "string"
-          },
-          "start_date" : {
             "type" : "string"
           },
           "update_date" : {
@@ -11119,9 +11111,6 @@
             "type" : "string"
           },
           "updater_username" : {
-            "type" : "string"
-          },
-          "warning_interval" : {
             "type" : "string"
           }
         },

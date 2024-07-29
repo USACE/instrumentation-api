@@ -34,8 +34,8 @@ type AlertCheckService interface {
 }
 
 type alertConfigChecker[T alertChecker] interface {
-	GetAlertConfig() model.AlertConfig
-	SetAlertConfig(model.AlertConfig)
+	GetAlertConfig() model.AlertConfigScheduler
+	SetAlertConfig(model.AlertConfigScheduler)
 	GetChecks() []T
 	SetChecks([]T)
 	DoEmail(string, config.AlertCheckConfig) error
@@ -76,7 +76,7 @@ func (s alertCheckService) DoAlertChecks(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	acs, err := qtx.ListAndCheckAlertConfigs(ctx)
+	acs, err := qtx.ListAndCheckAlertConfigSchedulers(ctx)
 	if err != nil {
 		return err
 	}
@@ -89,7 +89,7 @@ func (s alertCheckService) DoAlertChecks(ctx context.Context) error {
 	for _, s := range subs {
 		subMap[s.ID] = s
 	}
-	acMap := make(map[uuid.UUID]model.AlertConfig)
+	acMap := make(map[uuid.UUID]model.AlertConfigScheduler)
 	for _, a := range acs {
 		acMap[a.ID] = a
 	}
@@ -192,18 +192,18 @@ func checkMeasurements(ctx context.Context, q *model.Queries, subMap model.Submi
 func updateAlertConfigChecks[T alertChecker, PT alertConfigChecker[T]](ctx context.Context, q *model.Queries, accs []PT) error {
 	for _, acc := range accs {
 		ac := acc.GetAlertConfig()
-		if err := q.UpdateAlertConfigLastReminded(ctx, ac); err != nil {
+		if err := q.UpdateAlertConfigLastReminded(ctx, ac.ID, ac.Opts.LastReminded); err != nil {
 			return err
 		}
 		checks := acc.GetChecks()
 		for _, c := range checks {
 			sub := c.GetSubmittal()
-			if err := q.UpdateSubmittalCompletionDateOrWarningSent(ctx, sub); err != nil {
+			if err := q.UpdateSubmittal(ctx, sub); err != nil {
 				return err
 			}
 		}
-		if ac.CreateNextSubmittalFrom != nil {
-			if err := q.CreateNextSubmittalFromNewAlertConfigDate(ctx, ac); err != nil {
+		if ac.Opts.CreateNextSubmittalFrom != nil {
+			if err := q.CreateNextSubmittalFromExistingAlertConfigDate(ctx, ac.ID, ac.Opts.CreateNextSubmittalFrom); err != nil {
 				return err
 			}
 		}
@@ -265,21 +265,21 @@ func handleChecks[T alertChecker, PT alertConfigChecker[T]](ctx context.Context,
 					if sub.SubmittalStatusID == RedSubmittalStatusID {
 						sub.SubmittalStatusID = YellowSubmittalStatusID
 						sub.CompletionDate = &t
-						ac.CreateNextSubmittalFrom = &t
+						ac.Opts.CreateNextSubmittalFrom = &t
 					} else
 
 					// if submittal status is green and the current time is not before the submittal due date,
 					// complete the submittal at that due date and prepare the next submittal interval
 					if sub.SubmittalStatusID == GreenSubmittalStatusID && !t.Before(sub.DueDate) {
 						sub.CompletionDate = &sub.DueDate
-						ac.CreateNextSubmittalFrom = &sub.DueDate
+						ac.Opts.CreateNextSubmittalFrom = &sub.DueDate
 					}
 				} else
 
 				// if any submittal warning is triggered, immediately send a
 				// warning email, since submittal due dates are unique within alert configs
 				if shouldWarn && !sub.WarningSent {
-					if !ac.MuteConsecutiveAlerts || ac.LastReminded == nil {
+					if !ac.Opts.MuteConsecutiveAlerts || ac.Opts.LastReminded == nil {
 						mu.Lock()
 						if err := acc.DoEmail(warning, cfg); err != nil {
 							errs = append(errs, err)
@@ -296,7 +296,7 @@ func handleChecks[T alertChecker, PT alertConfigChecker[T]](ctx context.Context,
 					if sub.SubmittalStatusID != RedSubmittalStatusID {
 						sub.SubmittalStatusID = RedSubmittalStatusID
 						acAlert = true
-						ac.CreateNextSubmittalFrom = &sub.DueDate
+						ac.Opts.CreateNextSubmittalFrom = &sub.DueDate
 					}
 					resetReminders = false
 				}
@@ -314,16 +314,16 @@ func handleChecks[T alertChecker, PT alertConfigChecker[T]](ctx context.Context,
 			// if there are no alerts, there should also be no reminders sent. "last_reminded" is used to determine
 			// if an alert has already been sent for an alert config, and send a reminder if so
 			if resetReminders {
-				ac.LastReminded = nil
+				ac.Opts.LastReminded = nil
 			}
 
 			// if there are any reminders within an alert config, they will override the alerts if MuteConsecutiveAlerts is true
-			if acAlert && ((!acReminder && ac.LastReminded == nil) || !ac.MuteConsecutiveAlerts) {
-				ac.LastReminded = &t
+			if acAlert && ((!acReminder && ac.Opts.LastReminded == nil) || !ac.Opts.MuteConsecutiveAlerts) {
+				ac.Opts.LastReminded = &t
 				sendAlertEmail = true
 			}
-			if acReminder && ac.LastReminded != nil {
-				ac.LastReminded = &t
+			if acReminder && ac.Opts.LastReminded != nil {
+				ac.Opts.LastReminded = &t
 				sendReminderEmail = true
 			}
 

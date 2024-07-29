@@ -3187,6 +3187,8 @@ export interface paths {
         };
       };
     };
+  };
+  "/projects/{project_id}/alert_configs/schedulers": {
     /** creates one alert config */
     post: {
       parameters: {
@@ -3233,44 +3235,7 @@ export interface paths {
       };
     };
   };
-  "/projects/{project_id}/alert_configs/{alert_config_id}": {
-    /** gets a single alert */
-    get: {
-      parameters: {
-        path: {
-          /** @description project uuid */
-          project_id: string;
-          /** @description alert config uuid */
-          alert_config_id: string;
-        };
-      };
-      responses: {
-        /** @description OK */
-        200: {
-          content: {
-            "application/json": components["schemas"]["AlertConfig"];
-          };
-        };
-        /** @description Bad Request */
-        400: {
-          content: {
-            "application/json": components["schemas"]["echo.HTTPError"];
-          };
-        };
-        /** @description Not Found */
-        404: {
-          content: {
-            "application/json": components["schemas"]["echo.HTTPError"];
-          };
-        };
-        /** @description Internal Server Error */
-        500: {
-          content: {
-            "application/json": components["schemas"]["echo.HTTPError"];
-          };
-        };
-      };
-    };
+  "/projects/{project_id}/alert_configs/schedulers/{alert_config_id}": {
     /** updates an existing alert config */
     put: {
       parameters: {
@@ -3296,6 +3261,45 @@ export interface paths {
         200: {
           content: {
             "application/json": components["schemas"]["AlertConfig"][];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Internal Server Error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+      };
+    };
+  };
+  "/projects/{project_id}/alert_configs/{alert_config_id}": {
+    /** gets a single alert */
+    get: {
+      parameters: {
+        path: {
+          /** @description project uuid */
+          project_id: string;
+          /** @description alert config uuid */
+          alert_config_id: string;
+        };
+      };
+      responses: {
+        /** @description OK */
+        200: {
+          content: {
+            "application/json": components["schemas"]["AlertConfig"];
           };
         };
         /** @description Bad Request */
@@ -6429,7 +6433,6 @@ export interface components {
      *   "updater_username": "updater_username",
      *   "alert_type_id": "alert_type_id",
      *   "creator_username": "creator_username",
-     *   "remind_interval": "remind_interval",
      *   "body": "body",
      *   "project_name": "project_name",
      *   "alert_type": "alert_type",
@@ -6444,14 +6447,14 @@ export interface components {
      *       "instrument_id": "instrument_id"
      *     }
      *   ],
+     *   "opts": {
+     *     "key": ""
+     *   },
      *   "project_id": "project_id",
      *   "last_checked": "last_checked",
-     *   "mute_consecutive_alerts": true,
      *   "creator_id": "creator_id",
-     *   "last_reminded": "last_reminded",
      *   "name": "name",
      *   "updater_id": "updater_id",
-     *   "schedule_interval": "schedule_interval",
      *   "id": "id",
      *   "alert_email_subscriptions": [
      *     {
@@ -6467,9 +6470,7 @@ export interface components {
      *       "username": "username"
      *     }
      *   ],
-     *   "create_date": "create_date",
-     *   "warning_interval": "warning_interval",
-     *   "start_date": "start_date"
+     *   "create_date": "create_date"
      * }
      */
     AlertConfig: {
@@ -6483,18 +6484,15 @@ export interface components {
       id?: string;
       instruments?: components["schemas"]["AlertConfigInstrument"][];
       last_checked?: string;
-      last_reminded?: string;
-      mute_consecutive_alerts?: boolean;
       name?: string;
+      opts?: {
+        [key: string]: unknown;
+      };
       project_id?: string;
       project_name?: string;
-      remind_interval?: string;
-      schedule_interval?: string;
-      start_date?: string;
       update_date?: string;
       updater_id?: string;
       updater_username?: string;
-      warning_interval?: string;
     };
     /**
      * @example {

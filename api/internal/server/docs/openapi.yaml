@@ -3564,6 +3564,7 @@ paths:
       summary: lists alert configs for a project
       tags:
       - alert-config
+  /projects/{project_id}/alert_configs/schedulers:
     post:
       parameters:
       - description: project uuid
@@ -3613,6 +3614,68 @@ paths:
       security:
       - Bearer: []
       summary: creates one alert config
+      tags:
+      - alert-config
+      x-codegen-request-body-name: alert_config
+  /projects/{project_id}/alert_configs/schedulers/{alert_config_id}:
+    put:
+      parameters:
+      - description: project uuid
+        in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      - description: alert config uuid
+        in: path
+        name: alert_config_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      - description: api key
+        in: query
+        name: key
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlertConfig'
+        description: alert config payload
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/AlertConfig'
+                type: array
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: updates an existing alert config
       tags:
       - alert-config
       x-codegen-request-body-name: alert_config
@@ -3714,67 +3777,6 @@ paths:
       summary: gets a single alert
       tags:
       - alert-config
-    put:
-      parameters:
-      - description: project uuid
-        in: path
-        name: project_id
-        required: true
-        schema:
-          format: uuid
-          type: string
-      - description: alert config uuid
-        in: path
-        name: alert_config_id
-        required: true
-        schema:
-          format: uuid
-          type: string
-      - description: api key
-        in: query
-        name: key
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AlertConfig'
-        description: alert config payload
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                items:
-                  $ref: '#/components/schemas/AlertConfig'
-                type: array
-          description: OK
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/echo.HTTPError'
-          description: Bad Request
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/echo.HTTPError'
-          description: Not Found
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/echo.HTTPError'
-          description: Internal Server Error
-      security:
-      - Bearer: []
-      summary: updates an existing alert config
-      tags:
-      - alert-config
-      x-codegen-request-body-name: alert_config
   /projects/{project_id}/collection_groups:
     get:
       parameters:
@@ -7405,7 +7407,6 @@ components:
         updater_username: updater_username
         alert_type_id: alert_type_id
         creator_username: creator_username
-        remind_interval: remind_interval
         body: body
         project_name: project_name
         alert_type: alert_type
@@ -7415,14 +7416,13 @@ components:
           instrument_id: instrument_id
         - instrument_name: instrument_name
           instrument_id: instrument_id
+        opts:
+          key: ""
         project_id: project_id
         last_checked: last_checked
-        mute_consecutive_alerts: true
         creator_id: creator_id
-        last_reminded: last_reminded
         name: name
         updater_id: updater_id
-        schedule_interval: schedule_interval
         id: id
         alert_email_subscriptions:
         - user_type: user_type
@@ -7434,8 +7434,6 @@ components:
           email: email
           username: username
         create_date: create_date
-        warning_interval: warning_interval
-        start_date: start_date
       properties:
         alert_email_subscriptions:
           items:
@@ -7461,29 +7459,20 @@ components:
           type: array
         last_checked:
           type: string
-        last_reminded:
-          type: string
-        mute_consecutive_alerts:
-          type: boolean
         name:
           type: string
+        opts:
+          additionalProperties: true
+          type: object
         project_id:
           type: string
         project_name:
-          type: string
-        remind_interval:
-          type: string
-        schedule_interval:
-          type: string
-        start_date:
           type: string
         update_date:
           type: string
         updater_id:
           type: string
         updater_username:
-          type: string
-        warning_interval:
           type: string
       type: object
     AlertConfigInstrument:

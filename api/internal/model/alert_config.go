@@ -2,9 +2,6 @@ package model
 
 import (
 	"context"
-	"database/sql"
-	"errors"
-	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -16,18 +13,12 @@ type AlertConfig struct {
 	Body                    string                               `json:"body" db:"body"`
 	ProjectID               uuid.UUID                            `json:"project_id" db:"project_id"`
 	ProjectName             string                               `json:"project_name" db:"project_name"`
+	AlertEmailSubscriptions dbJSONSlice[EmailAutocompleteResult] `json:"alert_email_subscriptions" db:"alert_email_subscriptions"`
+	Instruments             dbJSONSlice[AlertConfigInstrument]   `json:"instruments" db:"instruments"`
+	LastChecked             *time.Time                           `json:"last_checked" db:"last_checked"`
 	AlertTypeID             uuid.UUID                            `json:"alert_type_id" db:"alert_type_id"`
 	AlertType               string                               `json:"alert_type" db:"alert_type"`
-	StartDate               time.Time                            `json:"start_date" db:"start_date"`
-	ScheduleInterval        string                               `json:"schedule_interval" db:"schedule_interval"`
-	RemindInterval          string                               `json:"remind_interval" db:"remind_interval"`
-	WarningInterval         string                               `json:"warning_interval" db:"warning_interval"`
-	LastChecked             *time.Time                           `json:"last_checked" db:"last_checked"`
-	LastReminded            *time.Time                           `json:"last_reminded" db:"last_reminded"`
-	Instruments             dbJSONSlice[AlertConfigInstrument]   `json:"instruments" db:"instruments"`
-	AlertEmailSubscriptions dbJSONSlice[EmailAutocompleteResult] `json:"alert_email_subscriptions" db:"alert_email_subscriptions"`
-	MuteConsecutiveAlerts   bool                                 `json:"mute_consecutive_alerts" db:"mute_consecutive_alerts"`
-	CreateNextSubmittalFrom *time.Time                           `json:"-" db:"-"`
+	Opts                    Opts                                 `json:"opts" db:"opts"`
 	AuditInfo
 }
 
@@ -58,7 +49,7 @@ func (q *Queries) GetAllAlertConfigsForProject(ctx context.Context, projectID uu
 	return aa, err
 }
 
-const qetAllAlertConfigsForProjectAndAlertType = `
+const getAllAlertConfigsForProjectAndAlertType = `
 	SELECT *
 	FROM v_alert_config
 	WHERE project_id = $1
@@ -69,7 +60,7 @@ const qetAllAlertConfigsForProjectAndAlertType = `
 // GetAllAlertConfigsForProjectAndAlertType lists alert configs for a single project filetered by alert type
 func (q *Queries) GetAllAlertConfigsForProjectAndAlertType(ctx context.Context, projectID, alertTypeID uuid.UUID) ([]AlertConfig, error) {
 	aa := make([]AlertConfig, 0)
-	err := q.db.SelectContext(ctx, &aa, qetAllAlertConfigsForProjectAndAlertType, projectID, alertTypeID)
+	err := q.db.SelectContext(ctx, &aa, getAllAlertConfigsForProjectAndAlertType, projectID, alertTypeID)
 	return aa, err
 }
 
@@ -105,14 +96,9 @@ const createAlertConfig = `
 		name,
 		body,
 		alert_type_id,
-		start_date,
-		schedule_interval,
-		mute_consecutive_alerts,
-		remind_interval,
-		warning_interval,
 		creator,
 		create_date
-	) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+	) VALUES ($1,$2,$3,$4,$5,$6)
 	RETURNING id
 `
 
@@ -123,11 +109,6 @@ func (q *Queries) CreateAlertConfig(ctx context.Context, ac AlertConfig) (uuid.U
 		ac.Name,
 		ac.Body,
 		ac.AlertTypeID,
-		ac.StartDate,
-		ac.ScheduleInterval,
-		ac.MuteConsecutiveAlerts,
-		ac.RemindInterval,
-		ac.WarningInterval,
 		ac.CreatorID,
 		ac.CreateDate,
 	)
@@ -152,29 +133,12 @@ func (q *Queries) UnassignAllInstrumentsFromAlertConfig(ctx context.Context, ale
 	return err
 }
 
-const createNextSubmittalFromExistingAlertConfigDate = `
-	INSERT INTO submittal (alert_config_id, due_date)
-	SELECT id, create_date + schedule_interval
-	FROM alert_config
-	WHERE id = $1
-`
-
-func (q *Queries) CreateNextSubmittalFromExistingAlertConfigDate(ctx context.Context, alertConfigID uuid.UUID) error {
-	_, err := q.db.ExecContext(ctx, createNextSubmittalFromExistingAlertConfigDate, alertConfigID)
-	return err
-}
-
 const updateAlertConfig = `
 	UPDATE alert_config SET
 		name = $3,
 		body = $4,
-		start_date = $5,
-		schedule_interval = $6,
-		mute_consecutive_alerts = $7,
-		remind_interval = $8,
-		warning_interval = $9,
-		updater = $10,
-		update_date = $11
+		updater = $5,
+		update_date = $6
 	WHERE id = $1 AND project_id = $2
 `
 
@@ -184,11 +148,6 @@ func (q *Queries) UpdateAlertConfig(ctx context.Context, ac AlertConfig) error {
 		ac.ProjectID,
 		ac.Name,
 		ac.Body,
-		ac.StartDate,
-		ac.ScheduleInterval,
-		ac.MuteConsecutiveAlerts,
-		ac.RemindInterval,
-		ac.WarningInterval,
 		ac.UpdaterID,
 		ac.UpdateDate,
 	)
@@ -201,28 +160,22 @@ const updateFutureSubmittalForAlertConfig = `
 	FROM (
 		SELECT
 			sub.id AS submittal_id,
-			sub.create_date + ac.schedule_interval AS new_due_date
+			sub.create_date + acs.schedule_interval AS new_due_date
 		FROM submittal sub
-		INNER JOIN alert_config ac ON sub.alert_config_id = ac.id
+		INNER JOIN alert_config_scheduler acs ON sub.alert_config_id = acs.alert_config_id
 		WHERE sub.alert_config_id = $1
-		AND sub.due_date > NOW()
+		AND sub.due_date > now()
 		AND sub.completion_date IS NULL
 		AND NOT sub.marked_as_missing
 	) sq
 	WHERE id = sq.submittal_id
-	AND sq.new_due_date > NOW()
+	AND sq.new_due_date > now()
 	RETURNING id
 `
 
 func (q *Queries) UpdateFutureSubmittalForAlertConfig(ctx context.Context, alertConfigID uuid.UUID) error {
 	var updatedSubID uuid.UUID
-	if err := q.db.GetContext(ctx, &updatedSubID, updateFutureSubmittalForAlertConfig, alertConfigID); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return fmt.Errorf("updated alert config new due date must be in the future! complete the current submittal before updating")
-		}
-		return err
-	}
-	return nil
+	return q.db.GetContext(ctx, &updatedSubID, updateFutureSubmittalForAlertConfig, alertConfigID)
 }
 
 const deleteAlertConfig = `

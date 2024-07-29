@@ -38,70 +38,63 @@ func NewAlertSubscriptionService(db *model.Database, q *model.Queries) *alertSub
 
 // SubscribeProfileToAlerts subscribes a profile to an instrument alert
 func (s alertSubscriptionService) SubscribeProfileToAlerts(ctx context.Context, alertConfigID uuid.UUID, profileID uuid.UUID) (model.AlertSubscription, error) {
-	var a model.AlertSubscription
 	tx, err := s.db.BeginTxx(ctx, nil)
 	if err != nil {
-		return a, err
+		return model.AlertSubscription{}, err
 	}
 	defer model.TxDo(tx.Rollback)
 
 	qtx := s.WithTx(tx)
 
 	if err := qtx.SubscribeProfileToAlerts(ctx, alertConfigID, profileID); err != nil {
-		return a, err
+		return model.AlertSubscription{}, err
 	}
 
 	updated, err := qtx.GetAlertSubscription(ctx, alertConfigID, profileID)
 	if err != nil {
-		return a, err
+		return model.AlertSubscription{}, err
 	}
 
-	if err := tx.Commit(); err != nil {
-		return a, err
-	}
+	err = tx.Commit()
 
-	return updated, nil
+	return updated, err
 }
 
 // UpdateMyAlertSubscription updates properties on a AlertSubscription
 func (s alertSubscriptionService) UpdateMyAlertSubscription(ctx context.Context, sub model.AlertSubscription) (model.AlertSubscription, error) {
-	var a model.AlertSubscription
 	tx, err := s.db.BeginTxx(ctx, nil)
 	if err != nil {
-		return a, err
+		return sub, err
 	}
 	defer model.TxDo(tx.Rollback)
 
 	qtx := s.WithTx(tx)
 
 	if err := qtx.UpdateMyAlertSubscription(ctx, sub); err != nil {
-		return a, err
+		return sub, err
 	}
 
 	updated, err := qtx.GetAlertSubscription(ctx, sub.AlertConfigID, sub.ProfileID)
 	if err != nil {
-		return a, err
+		return sub, err
 	}
 
-	if err := tx.Commit(); err != nil {
-		return a, err
-	}
+	err = tx.Commit()
 
-	return updated, nil
+	return updated, err
 }
 
 func (s alertSubscriptionService) SubscribeEmailsToAlertConfig(ctx context.Context, alertConfigID uuid.UUID, emails []model.EmailAutocompleteResult) (model.AlertConfig, error) {
-	var a model.AlertConfig
 	tx, err := s.db.BeginTxx(ctx, nil)
 	if err != nil {
-		return a, err
+		return model.AlertConfig{}, err
 	}
 	defer model.TxDo(tx.Rollback)
 
 	qtx := s.WithTx(tx)
 
 	if err := registerAndSubscribe(ctx, qtx, alertConfigID, emails); err != nil {
-		return a, err
+		return model.AlertConfig{}, err
 	}
 
 	// Register any emails that are not yet in system
@@ -109,7 +102,7 @@ func (s alertSubscriptionService) SubscribeEmailsToAlertConfig(ctx context.Conte
 		if em.UserType == unknown || em.UserType == email {
 			newID, err := qtx.RegisterEmail(ctx, em.Email)
 			if err != nil {
-				return a, err
+				return model.AlertConfig{}, err
 			}
 			emails[idx].ID = newID
 			emails[idx].UserType = email
@@ -119,34 +112,31 @@ func (s alertSubscriptionService) SubscribeEmailsToAlertConfig(ctx context.Conte
 	for _, em := range emails {
 		if em.UserType == email {
 			if err := qtx.SubscribeEmailToAlertConfig(ctx, alertConfigID, em.ID); err != nil {
-				return a, err
+				return model.AlertConfig{}, err
 			}
 		} else if em.UserType == profile {
 			if err := qtx.SubscribeProfileToAlertConfig(ctx, alertConfigID, em.ID); err != nil {
-				return a, err
+				return model.AlertConfig{}, err
 			}
 		} else {
-			return a, fmt.Errorf("unable to unsubscribe email %s: user type %s does not exist, aborting transaction", em.Email, em.UserType)
+			return model.AlertConfig{}, fmt.Errorf("unable to unsubscribe email %s: user type %s does not exist, aborting transaction", em.Email, em.UserType)
 		}
 	}
 
 	acUpdated, err := qtx.GetOneAlertConfig(ctx, alertConfigID)
 	if err != nil {
-		return a, err
+		return model.AlertConfig{}, err
 	}
 
-	if err := tx.Commit(); err != nil {
-		return a, err
-	}
+	err = tx.Commit()
 
-	return acUpdated, nil
+	return acUpdated, err
 }
 
 func (s alertSubscriptionService) UnsubscribeEmailsFromAlertConfig(ctx context.Context, alertConfigID uuid.UUID, emails []model.EmailAutocompleteResult) (model.AlertConfig, error) {
-	var a model.AlertConfig
 	tx, err := s.db.BeginTxx(ctx, nil)
 	if err != nil {
-		return a, err
+		return model.AlertConfig{}, err
 	}
 	defer model.TxDo(tx.Rollback)
 
@@ -154,30 +144,28 @@ func (s alertSubscriptionService) UnsubscribeEmailsFromAlertConfig(ctx context.C
 
 	for _, em := range emails {
 		if em.UserType == unknown {
-			return a, fmt.Errorf("required field user_type is null, aborting transaction")
+			return model.AlertConfig{}, fmt.Errorf("required field user_type is null, aborting transaction")
 		} else if em.UserType == email {
 			if err := qtx.UnsubscribeEmailFromAlertConfig(ctx, alertConfigID, em.ID); err != nil {
-				return a, err
+				return model.AlertConfig{}, err
 			}
 		} else if em.UserType == profile {
 			if err := qtx.UnsubscribeProfileFromAlertConfig(ctx, alertConfigID, em.ID); err != nil {
-				return a, err
+				return model.AlertConfig{}, err
 			}
 		} else {
-			return a, fmt.Errorf("unable to unsubscribe email %s: user type %s does not exist, aborting transaction", em.Email, em.UserType)
+			return model.AlertConfig{}, fmt.Errorf("unable to unsubscribe email %s: user type %s does not exist, aborting transaction", em.Email, em.UserType)
 		}
 	}
 
 	acUpdated, err := qtx.GetOneAlertConfig(ctx, alertConfigID)
 	if err != nil {
-		return a, err
+		return model.AlertConfig{}, err
 	}
 
-	if err := tx.Commit(); err != nil {
-		return a, err
-	}
+	err = tx.Commit()
 
-	return acUpdated, nil
+	return acUpdated, err
 }
 
 func (s alertSubscriptionService) UnsubscribeAllFromAlertConfig(ctx context.Context, alertConfigID uuid.UUID) error {
@@ -197,10 +185,7 @@ func (s alertSubscriptionService) UnsubscribeAllFromAlertConfig(ctx context.Cont
 		return err
 	}
 
-	if err := tx.Commit(); err != nil {
-		return err
-	}
-	return nil
+	return tx.Commit()
 }
 
 func registerAndSubscribe(ctx context.Context, q *model.Queries, alertConfigID uuid.UUID, emails []model.EmailAutocompleteResult) error {

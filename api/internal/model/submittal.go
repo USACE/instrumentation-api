@@ -106,6 +106,19 @@ func (q *Queries) ListUnverifiedMissingSubmittals(ctx context.Context) ([]Submit
 	return aa, nil
 }
 
+const createNextSubmittalFromNewAlertConfigDate = `
+	INSERT INTO submittal (alert_config_id, due_date)
+	SELECT ac.id, ac.create_date + acs.schedule_interval
+	FROM alert_config ac
+	INNER JOIN alert_config_scheduler acs ON acs.alert_config_id = ac.id
+	WHERE ac.id = $1
+`
+
+func (q *Queries) CreateNextSubmittalFromNewAlertConfigDate(ctx context.Context, alertConfigID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, createNextSubmittalFromNewAlertConfigDate, alertConfigID)
+	return err
+}
+
 const updateSubmittal = `
 	UPDATE submittal SET
 		submittal_status_id = $2,
@@ -145,5 +158,20 @@ const verifyMissingAlertConfigSubmittals = `
 
 func (q *Queries) VerifyMissingAlertConfigSubmittals(ctx context.Context, alertConfigID uuid.UUID) error {
 	_, err := q.db.ExecContext(ctx, verifyMissingAlertConfigSubmittals, alertConfigID)
+	return err
+}
+
+const createNextSubmittalFromExistingAlertConfigDate = `
+	INSERT INTO submittal (alert_config_id, create_date, due_date)
+	SELECT
+		ac.alert_config_id,
+		$2::timestamptz,
+		$2::timestamptz + ac.schedule_interval
+	FROM alert_config_scheduler ac
+	WHERE ac.alert_config_id = $1
+`
+
+func (q *Queries) CreateNextSubmittalFromExistingAlertConfigDate(ctx context.Context, alertConfigID uuid.UUID, nextSubmittalFrom *time.Time) error {
+	_, err := q.db.ExecContext(ctx, createNextSubmittalFromExistingAlertConfigDate, alertConfigID, nextSubmittalFrom)
 	return err
 }
