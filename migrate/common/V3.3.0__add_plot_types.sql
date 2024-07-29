@@ -43,6 +43,8 @@ CREATE TABLE plot_scatter_line_config (
 INSERT INTO plot_scatter_line_config (plot_config_id, y_axis_title, y2_axis_title)
 SELECT id, yaxis_title, secondary_axis_title FROM plot_configuration_settings;
 
+DROP VIEW IF EXISTS v_plot_configuration;
+
 ALTER TABLE plot_configuration_settings
 DROP COLUMN yaxis_title,
 DROP COLUMN secondary_axis_title;
