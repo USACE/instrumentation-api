@@ -16,7 +16,7 @@ type PlotConfigContourPlot struct {
 
 type PlotConfigContourPlotDisplay struct {
 	TimeseriesIDs     dbSlice[uuid.UUID] `json:"timeseries_ids" db:"timeseries_ids"`
-	Time              time.Time          `json:"time" db:"time"`
+	Time              *time.Time         `json:"time" db:"time"`
 	LocfBackfill      string             `json:"locf_backfill" db:"locf_backfill"`
 	GradientSmoothing bool               `json:"gradient_smoothing" db:"gradient_smoothing"`
 	ContourSmoothing  bool               `json:"contour_smoothing" db:"contour_smoothing"`
@@ -107,6 +107,7 @@ func (q *Queries) ListPlotConfigTimesContourPlot(ctx context.Context, plotConfig
 	return tt, err
 }
 
+// NOTE: this assumes all geometries are stored natively as WGS84 (EPSG:4326)
 const listPlotConfigMeasurementsContourPlot = `
 	SELECT
 		oi.x,
@@ -119,8 +120,8 @@ const listPlotConfigMeasurementsContourPlot = `
 	INNER JOIN (
 		SELECT
 			ii.id,
-			ST_X(ST_Centroid(ST_Transform(ii.geometry, 4326))) AS x,
-			ST_Y(ST_Centroid(ST_Transform(ii.geometry, 4326))) AS y
+			ST_X(ST_Centroid(ii.geometry)) AS x,
+			ST_Y(ST_Centroid(ii.geometry)) AS y
 		FROM instrument ii
 	) oi ON oi.id = ts.instrument_id
 	WHERE plot_config_id = $1
