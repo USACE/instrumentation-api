@@ -60,7 +60,7 @@ func (o *ReportConfigGlobalOverrides) Scan(src interface{}) error {
 
 type ReportConfigWithPlotConfigs struct {
 	ReportConfig
-	PlotConfigs []PlotConfig `json:"plot_configs"`
+	PlotConfigs []PlotConfigScatterLinePlot `json:"plot_configs"`
 }
 
 type ReportConfigJobMessage struct {
@@ -105,8 +105,8 @@ const listReportConfigPlotConfigs = `
 	)
 `
 
-func (q *Queries) ListReportConfigPlotConfigs(ctx context.Context, rcID uuid.UUID) ([]PlotConfig, error) {
-	pcs := make([]PlotConfig, 0)
+func (q *Queries) ListReportConfigPlotConfigs(ctx context.Context, rcID uuid.UUID) ([]PlotConfigScatterLinePlot, error) {
+	pcs := make([]PlotConfigScatterLinePlot, 0)
 	err := q.db.SelectContext(ctx, &pcs, listReportConfigPlotConfigs, rcID)
 	return pcs, err
 }

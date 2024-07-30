@@ -1,5 +1,5 @@
 -- ${flyway:timestamp}
-CREATE VIEW v_saa_segment AS (
+CREATE OR REPLACE VIEW v_saa_segment AS (
     SELECT
         seg.id,
         seg.instrument_id,
@@ -18,7 +18,7 @@ CREATE VIEW v_saa_segment AS (
     ) sub ON true
 );
 
-CREATE VIEW v_saa_measurement AS (
+CREATE OR REPLACE VIEW v_saa_measurement AS (
     SELECT
         r.instrument_id,
         r.time,
@@ -92,7 +92,7 @@ CREATE VIEW v_saa_measurement AS (
     GROUP BY r.instrument_id, r.time
 );
 
-CREATE VIEW v_ipi_segment AS (
+CREATE OR REPLACE VIEW v_ipi_segment AS (
     SELECT
         seg.id,
         seg.instrument_id,
@@ -109,7 +109,7 @@ CREATE VIEW v_ipi_segment AS (
     ) sub ON true
 );
 
-CREATE VIEW v_ipi_measurement AS (
+CREATE OR REPLACE VIEW v_ipi_measurement AS (
     SELECT
         r.instrument_id,
         r.time,

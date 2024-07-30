@@ -13,7 +13,7 @@ import (
 )
 
 //go:embed docs/*
-var apidocFS embed.FS
+var ApidocFS embed.FS
 
 type ApiServer struct {
 	e *echo.Echo
@@ -57,10 +57,10 @@ func NewApiServer(cfg *config.ApiConfig, h *handler.ApiHandler) *ApiServer {
 		app,
 	}}
 
-	apidocHandler := echo.WrapHandler(http.FileServer(http.FS(apidocFS)))
+	apidocHandler := echo.WrapHandler(http.FileServer(http.FS(ApidocFS)))
 	public.GET("/docs/*", apidocHandler)
 
-	apidoc, err := apidocFS.ReadFile("docs/openapi.json")
+	apidoc, err := ApidocFS.ReadFile("docs/openapi.json")
 	switch err {
 	case nil:
 		apiDocHtmlHandler, err := h.CreateDocHtmlHandler(apidoc, cfg.ServerBaseUrl, cfg.AuthJWTMocked)
@@ -248,10 +248,29 @@ func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 	r.public.GET("/opendcs/sites", h.ListOpendcsSites)
 
 	// PlotConfig
+	r.public.GET("/projects/:project_id/plot_configs", h.ListPlotConfigs)
+	r.public.GET("/projects/:project_id/plot_configs/:plot_configuration_id", h.GetPlotConfig)
+	r.private.DELETE("/projects/:project_id/plot_configs/:plot_configuration_id", h.DeletePlotConfig)
+	// PlotConfig ScatterLinePlot
+	r.private.POST("/projects/:project_id/plot_configs/scatter_line_plots", h.CreatePlotConfigScatterLinePlot)
+	r.private.PUT("/projects/:project_id/plot_configs/scatter_line_plots/:plot_configuration_id", h.UpdatePlotConfigScatterLinePlot)
+	// PlotConfig ProfilePlot
+	r.private.POST("/projects/:project_id/plot_configs/profile_plots", h.CreatePlotConfigProfilePlot)
+	r.private.PUT("/projects/:project_id/plot_configs/profile_plots/:plot_configuration_id", h.UpdatePlotConfigProfilePlot)
+	// PlotConfig ContourPlot
+	r.private.POST("/projects/:project_id/plot_configs/contour_plots", h.CreatePlotConfigContourPlot)
+	r.private.PUT("/projects/:project_id/plot_configs/contour_plots/:plot_configuration_id", h.UpdatePlotConfigContourPlot)
+	r.private.GET("/projects/:project_id/plot_configs/contour_plots/:plot_configuration_id/times", h.ListPlotConfigTimesContourPlot)
+	r.private.GET("/projects/:project_id/plot_configs/contour_plots/:plot_configuration_id/measurements", h.GetPlotConfigMeasurementsContourPlot)
+	// PlotConfig BullseyePlot
+	r.private.POST("/projects/:project_id/plot_configs/bullseye_plots", h.CreatePlotConfigBullseyePlot)
+	r.private.PUT("/projects/:project_id/plot_configs/bullseye_plots/:plot_configuration_id", h.UpdatePlotConfigBullseyePlot)
+	r.private.GET("/projects/:project_id/plot_configs/bullseye_plots/:plot_configuration_id/measurements", h.ListPlotConfigMeasurementsBullseyePlot)
+	// @deprecated
 	r.public.GET("/projects/:project_id/plot_configurations", h.ListPlotConfigs)
 	r.public.GET("/projects/:project_id/plot_configurations/:plot_configuration_id", h.GetPlotConfig)
-	r.private.POST("/projects/:project_id/plot_configurations", h.CreatePlotConfig)
-	r.private.PUT("/projects/:project_id/plot_configurations/:plot_configuration_id", h.UpdatePlotConfig)
+	r.private.POST("/projects/:project_id/plot_configurations", h.CreatePlotConfigScatterLinePlot)
+	r.private.PUT("/projects/:project_id/plot_configurations/:plot_configuration_id", h.UpdatePlotConfigScatterLinePlot)
 	r.private.DELETE("/projects/:project_id/plot_configurations/:plot_configuration_id", h.DeletePlotConfig)
 
 	// Profile
@@ -311,7 +330,6 @@ func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 	r.public.GET("/instruments/:instrument_id/timeseries/:timeseries_id", h.GetTimeseries)
 	r.public.GET("/projects/:project_id/timeseries", h.ListProjectTimeseries)
 	r.public.GET("/projects/:project_id/instruments/:instrument_id/timeseries", h.ListInstrumentTimeseries)
-	r.public.GET("/projects/:project_id/plot_configurations/:plot_config_id/timeseries", h.ListPlotConfigTimeseries)
 
 	r.private.POST("/timeseries", h.CreateTimeseries)
 	r.private.PUT("/timeseries/:timeseries_id", h.UpdateTimeseries)
