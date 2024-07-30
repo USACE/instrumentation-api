@@ -21,7 +21,7 @@ CREATE VIEW v_timeseries AS (
     INNER JOIN unit u ON u.id = t.unit_id
 );
 
-CREATE VIEW v_timeseries_dependency AS (
+CREATE OR REPLACE VIEW v_timeseries_dependency AS (
     WITH variable_tsid_map AS (
 	    SELECT
             a.id AS timeseries_id,
@@ -48,7 +48,7 @@ CREATE VIEW v_timeseries_dependency AS (
     LEFT JOIN variable_tsid_map m ON m.variable = i.parsed_variable
 );
 
-CREATE VIEW v_timeseries_project_map AS (
+CREATE OR REPLACE VIEW v_timeseries_project_map AS (
     SELECT
         t.id AS timeseries_id,
         pi.project_id AS project_id
@@ -63,7 +63,7 @@ CREATE VIEW v_timeseries_stored AS (
     OR type = 'constant'
 );
 
-CREATE VIEW v_timeseries_computed AS (
+CREATE OR REPLACE VIEW v_timeseries_computed AS (
     SELECT
         ts.*,
         cc.contents AS contents

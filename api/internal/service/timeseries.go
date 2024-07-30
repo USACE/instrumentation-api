@@ -14,7 +14,6 @@ type TimeseriesService interface {
 	ListProjectTimeseries(ctx context.Context, projectID uuid.UUID) ([]model.Timeseries, error)
 	ListInstrumentTimeseries(ctx context.Context, instrumentID uuid.UUID) ([]model.Timeseries, error)
 	ListInstrumentGroupTimeseries(ctx context.Context, instrumentGroupID uuid.UUID) ([]model.Timeseries, error)
-	ListPlotConfigTimeseries(ctx context.Context, plotConfigID uuid.UUID) ([]model.Timeseries, error)
 	GetTimeseries(ctx context.Context, timeseriesID uuid.UUID) (model.Timeseries, error)
 	CreateTimeseries(ctx context.Context, ts model.Timeseries) (model.Timeseries, error)
 	CreateTimeseriesBatch(ctx context.Context, tt []model.Timeseries) ([]model.Timeseries, error)

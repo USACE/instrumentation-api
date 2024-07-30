@@ -5145,6 +5145,644 @@ export interface paths {
       };
     };
   };
+  "/projects/{project_id}/plot_configs": {
+    /** lists plot configs */
+    get: {
+      parameters: {
+        path: {
+          /** @description project uuid */
+          project_id: string;
+        };
+      };
+      responses: {
+        /** @description OK */
+        200: {
+          content: {
+            "application/json": components["schemas"]["PlotConfig"][];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Internal Server Error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+      };
+    };
+  };
+  "/projects/{project_id}/plot_configs/bullseye_plots": {
+    /** adds a bullseye plot configuration to a project */
+    post: {
+      parameters: {
+        query?: {
+          /** @description api key */
+          key?: string;
+        };
+        path: {
+          /** @description project uuid */
+          project_id: string;
+        };
+      };
+      /** @description plot config payload */
+      requestBody: {
+        content: {
+          "*/*": components["schemas"]["PlotConfigBullseyePlot"];
+        };
+      };
+      responses: {
+        /** @description OK */
+        200: {
+          content: {
+            "application/json": components["schemas"]["PlotConfig"];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Internal Server Error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+      };
+    };
+  };
+  "/projects/{project_id}/plot_configs/bullseye_plots/{plot_configuration_id}": {
+    /** updates a bullseye plot configuration in a project */
+    put: {
+      parameters: {
+        query?: {
+          /** @description api key */
+          key?: string;
+        };
+        path: {
+          /** @description project uuid */
+          project_id: string;
+          /** @description plot config uuid */
+          plot_configuration_id: string;
+        };
+      };
+      /** @description plot config payload */
+      requestBody: {
+        content: {
+          "*/*": components["schemas"]["PlotConfigBullseyePlot"];
+        };
+      };
+      responses: {
+        /** @description OK */
+        200: {
+          content: {
+            "application/json": components["schemas"]["PlotConfig"];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Internal Server Error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+      };
+    };
+  };
+  "/projects/{project_id}/plot_configs/bullseye_plots/{plot_configuration_id}/measurements": {
+    /** lists plot config measurements for a bullseye plot */
+    get: {
+      parameters: {
+        query?: {
+          /** @description api key */
+          key?: string;
+        };
+        path: {
+          /** @description project uuid */
+          project_id: string;
+          /** @description plot config uuid */
+          plot_configuration_id: string;
+        };
+      };
+      responses: {
+        /** @description OK */
+        200: {
+          content: {
+            "application/json": components["schemas"]["PlotConfigMeasurementBullseyePlot"][];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Internal Server Error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+      };
+    };
+  };
+  "/projects/{project_id}/plot_configs/contour_plots": {
+    /** adds a plot configuration to a project */
+    post: {
+      parameters: {
+        query?: {
+          /** @description api key */
+          key?: string;
+        };
+        path: {
+          /** @description project uuid */
+          project_id: string;
+        };
+      };
+      /** @description plot config payload */
+      requestBody: {
+        content: {
+          "*/*": components["schemas"]["PlotConfigContourPlot"];
+        };
+      };
+      responses: {
+        /** @description OK */
+        200: {
+          content: {
+            "application/json": components["schemas"]["PlotConfig"];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Internal Server Error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+      };
+    };
+  };
+  "/projects/{project_id}/plot_configs/contour_plots/{plot_configuration_id}": {
+    /** updates a plot configuration in a project */
+    put: {
+      parameters: {
+        query?: {
+          /** @description api key */
+          key?: string;
+        };
+        path: {
+          /** @description project uuid */
+          project_id: string;
+          /** @description plot config uuid */
+          plot_configuration_id: string;
+        };
+      };
+      /** @description plot config payload */
+      requestBody: {
+        content: {
+          "*/*": components["schemas"]["PlotConfigContourPlot"];
+        };
+      };
+      responses: {
+        /** @description OK */
+        200: {
+          content: {
+            "application/json": components["schemas"]["PlotConfig"];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Internal Server Error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+      };
+    };
+  };
+  "/projects/{project_id}/plot_configs/contour_plots/{plot_configuration_id}/measurements": {
+    /** gets plot config measurements for a contour plot at the specified time */
+    get: {
+      parameters: {
+        query: {
+          /** @description time */
+          time: string;
+          /** @description api key */
+          key?: string;
+        };
+        path: {
+          /** @description project uuid */
+          project_id: string;
+          /** @description plot config uuid */
+          plot_configuration_id: string;
+        };
+      };
+      responses: {
+        /** @description OK */
+        200: {
+          content: {
+            "application/json": components["schemas"]["AggregatePlotConfigMeasurementsContourPlot"];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Internal Server Error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+      };
+    };
+  };
+  "/projects/{project_id}/plot_configs/contour_plots/{plot_configuration_id}/times": {
+    /** lists time parameters available for measurement qeries for a contour plot */
+    get: {
+      parameters: {
+        query?: {
+          /** @description after timestamp */
+          after?: string;
+          /** @description before timestamp */
+          before?: string;
+          /** @description api key */
+          key?: string;
+        };
+        path: {
+          /** @description project uuid */
+          project_id: string;
+          /** @description plot config uuid */
+          plot_configuration_id: string;
+        };
+      };
+      responses: {
+        /** @description OK */
+        200: {
+          content: {
+            "application/json": string[];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Internal Server Error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+      };
+    };
+  };
+  "/projects/{project_id}/plot_configs/profile_plots": {
+    /** adds a profile plot configuration to a project */
+    post: {
+      parameters: {
+        query?: {
+          /** @description api key */
+          key?: string;
+        };
+        path: {
+          /** @description project uuid */
+          project_id: string;
+        };
+      };
+      /** @description plot config payload */
+      requestBody: {
+        content: {
+          "*/*": components["schemas"]["PlotConfigProfilePlot"];
+        };
+      };
+      responses: {
+        /** @description OK */
+        200: {
+          content: {
+            "application/json": components["schemas"]["PlotConfig"];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Internal Server Error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+      };
+    };
+  };
+  "/projects/{project_id}/plot_configs/profile_plots/{plot_configuration_id}": {
+    /** updates a profile plot configuration in a project */
+    put: {
+      parameters: {
+        query?: {
+          /** @description api key */
+          key?: string;
+        };
+        path: {
+          /** @description project uuid */
+          project_id: string;
+          /** @description plot config uuid */
+          plot_configuration_id: string;
+        };
+      };
+      /** @description plot config payload */
+      requestBody: {
+        content: {
+          "*/*": components["schemas"]["PlotConfigProfilePlot"];
+        };
+      };
+      responses: {
+        /** @description OK */
+        200: {
+          content: {
+            "application/json": components["schemas"]["PlotConfig"];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Internal Server Error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+      };
+    };
+  };
+  "/projects/{project_id}/plot_configs/scatter_line_plots": {
+    /** adds a scatter-line plot configuration to a project */
+    post: {
+      parameters: {
+        query?: {
+          /** @description api key */
+          key?: string;
+        };
+        path: {
+          /** @description project uuid */
+          project_id: string;
+        };
+      };
+      /** @description plot config payload */
+      requestBody: {
+        content: {
+          "*/*": components["schemas"]["PlotConfigScatterLinePlot"];
+        };
+      };
+      responses: {
+        /** @description OK */
+        200: {
+          content: {
+            "application/json": components["schemas"]["PlotConfig"];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Internal Server Error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+      };
+    };
+  };
+  "/projects/{project_id}/plot_configs/scatter_line_plots/{plot_configuration_id}": {
+    /** updates a scatter-line plot configuration in a project */
+    put: {
+      parameters: {
+        query?: {
+          /** @description api key */
+          key?: string;
+        };
+        path: {
+          /** @description project uuid */
+          project_id: string;
+          /** @description plot config uuid */
+          plot_configuration_id: string;
+        };
+      };
+      /** @description plot config payload */
+      requestBody: {
+        content: {
+          "*/*": components["schemas"]["PlotConfigScatterLinePlot"];
+        };
+      };
+      responses: {
+        /** @description OK */
+        200: {
+          content: {
+            "application/json": components["schemas"]["PlotConfig"];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Internal Server Error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+      };
+    };
+  };
+  "/projects/{project_id}/plot_configs/{plot_configuration_id}": {
+    /** gets a single plot configuration by id */
+    get: {
+      parameters: {
+        path: {
+          /** @description project uuid */
+          project_id: string;
+          /** @description plot config uuid */
+          plot_configuration_id: string;
+        };
+      };
+      responses: {
+        /** @description OK */
+        200: {
+          content: {
+            "application/json": components["schemas"]["PlotConfig"];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Internal Server Error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+      };
+    };
+    /** deletes a plot configuration in a project */
+    delete: {
+      parameters: {
+        query?: {
+          /** @description api key */
+          key?: string;
+        };
+        path: {
+          /** @description project uuid */
+          project_id: string;
+          /** @description plot config uuid */
+          plot_configuration_id: string;
+        };
+      };
+      responses: {
+        /** @description OK */
+        200: {
+          content: {
+            "application/json": {
+              [key: string]: unknown;
+            };
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Internal Server Error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+      };
+    };
+  };
   "/projects/{project_id}/plot_configurations": {
     /** lists plot configs */
     get: {
@@ -5181,7 +5819,7 @@ export interface paths {
         };
       };
     };
-    /** adds a plot configuration to a project */
+    /** adds a scatter-line plot configuration to a project */
     post: {
       parameters: {
         query?: {
@@ -5196,7 +5834,7 @@ export interface paths {
       /** @description plot config payload */
       requestBody: {
         content: {
-          "*/*": components["schemas"]["PlotConfig"];
+          "*/*": components["schemas"]["PlotConfigScatterLinePlot"];
         };
       };
       responses: {
@@ -5204,45 +5842,6 @@ export interface paths {
         200: {
           content: {
             "application/json": components["schemas"]["PlotConfig"];
-          };
-        };
-        /** @description Bad Request */
-        400: {
-          content: {
-            "application/json": components["schemas"]["echo.HTTPError"];
-          };
-        };
-        /** @description Not Found */
-        404: {
-          content: {
-            "application/json": components["schemas"]["echo.HTTPError"];
-          };
-        };
-        /** @description Internal Server Error */
-        500: {
-          content: {
-            "application/json": components["schemas"]["echo.HTTPError"];
-          };
-        };
-      };
-    };
-  };
-  "/projects/{project_id}/plot_configurations/{plot_config_id}/timeseries": {
-    /** lists all timeseries for a single plot config */
-    get: {
-      parameters: {
-        path: {
-          /** @description project uuid */
-          project_id: string;
-          /** @description plot config uuid */
-          plot_config_id: string;
-        };
-      };
-      responses: {
-        /** @description OK */
-        200: {
-          content: {
-            "application/json": components["schemas"]["Timeseries"][];
           };
         };
         /** @description Bad Request */
@@ -5304,6 +5903,7 @@ export interface paths {
         };
       };
     };
+    /** updates a scatter-line plot configuration in a project */
     put: {
       parameters: {
         query?: {
@@ -5320,7 +5920,7 @@ export interface paths {
       /** @description plot config payload */
       requestBody: {
         content: {
-          "*/*": components["schemas"]["PlotConfig"];
+          "*/*": components["schemas"]["PlotConfigScatterLinePlot"];
         };
       };
       responses: {
@@ -6526,6 +7126,27 @@ export interface components {
     };
     /**
      * @example {
+     *   "x": [
+     *     0.8008281904610115,
+     *     0.8008281904610115
+     *   ],
+     *   "y": [
+     *     6.027456183070403,
+     *     6.027456183070403
+     *   ],
+     *   "z": [
+     *     1.4658129805029452,
+     *     1.4658129805029452
+     *   ]
+     * }
+     */
+    AggregatePlotConfigMeasurementsContourPlot: {
+      x?: number[];
+      y?: number[];
+      z?: number[];
+    };
+    /**
+     * @example {
      *   "instruments": [
      *     {
      *       "instrument_name": "instrument_name",
@@ -7726,6 +8347,398 @@ export interface components {
      *   "updater_username": "updater_username",
      *   "creator_username": "creator_username",
      *   "display": {
+     *     "key": ""
+     *   },
+     *   "show_comments": true,
+     *   "report_configs": [
+     *     {
+     *       "name": "name",
+     *       "id": "id",
+     *       "slug": "slug"
+     *     },
+     *     {
+     *       "name": "name",
+     *       "id": "id",
+     *       "slug": "slug"
+     *     }
+     *   ],
+     *   "auto_range": true,
+     *   "show_masked": true,
+     *   "threshold": 0,
+     *   "update_date": "update_date",
+     *   "show_nonvalidated": true,
+     *   "project_id": "project_id",
+     *   "creator_id": "creator_id",
+     *   "name": "name",
+     *   "updater_id": "updater_id",
+     *   "id": "id",
+     *   "create_date": "create_date",
+     *   "plot_type": "plot_type",
+     *   "slug": "slug"
+     * }
+     */
+    PlotConfig: {
+      auto_range?: boolean;
+      create_date?: string;
+      creator_id?: string;
+      creator_username?: string;
+      date_range?: string;
+      display?: {
+        [key: string]: unknown;
+      };
+      id?: string;
+      name?: string;
+      plot_type?: string;
+      project_id?: string;
+      report_configs?: components["schemas"]["IDSlugName"][];
+      show_comments?: boolean;
+      show_masked?: boolean;
+      show_nonvalidated?: boolean;
+      slug?: string;
+      threshold?: number;
+      update_date?: string;
+      updater_id?: string;
+      updater_username?: string;
+    };
+    /**
+     * @example {
+     *   "date_range": "date_range",
+     *   "updater_username": "updater_username",
+     *   "creator_username": "creator_username",
+     *   "display": {
+     *     "y_axis_timeseries_id": "y_axis_timeseries_id",
+     *     "x_axis_timeseries_id": "x_axis_timeseries_id"
+     *   },
+     *   "show_comments": true,
+     *   "report_configs": [
+     *     {
+     *       "name": "name",
+     *       "id": "id",
+     *       "slug": "slug"
+     *     },
+     *     {
+     *       "name": "name",
+     *       "id": "id",
+     *       "slug": "slug"
+     *     }
+     *   ],
+     *   "auto_range": true,
+     *   "show_masked": true,
+     *   "threshold": 0,
+     *   "update_date": "update_date",
+     *   "show_nonvalidated": true,
+     *   "project_id": "project_id",
+     *   "creator_id": "creator_id",
+     *   "name": "name",
+     *   "updater_id": "updater_id",
+     *   "id": "id",
+     *   "create_date": "create_date",
+     *   "plot_type": "plot_type",
+     *   "slug": "slug"
+     * }
+     */
+    PlotConfigBullseyePlot: {
+      auto_range?: boolean;
+      create_date?: string;
+      creator_id?: string;
+      creator_username?: string;
+      date_range?: string;
+      display?: components["schemas"]["PlotConfigBullseyePlotDisplay"];
+      id?: string;
+      name?: string;
+      plot_type?: string;
+      project_id?: string;
+      report_configs?: components["schemas"]["IDSlugName"][];
+      show_comments?: boolean;
+      show_masked?: boolean;
+      show_nonvalidated?: boolean;
+      slug?: string;
+      threshold?: number;
+      update_date?: string;
+      updater_id?: string;
+      updater_username?: string;
+    };
+    /**
+     * @example {
+     *   "y_axis_timeseries_id": "y_axis_timeseries_id",
+     *   "x_axis_timeseries_id": "x_axis_timeseries_id"
+     * }
+     */
+    PlotConfigBullseyePlotDisplay: {
+      x_axis_timeseries_id?: string;
+      y_axis_timeseries_id?: string;
+    };
+    /**
+     * @example {
+     *   "date_range": "date_range",
+     *   "updater_username": "updater_username",
+     *   "creator_username": "creator_username",
+     *   "display": {
+     *     "contour_smoothing": true,
+     *     "gradient_smoothing": true,
+     *     "locf_backfill": "locf_backfill",
+     *     "timeseries_ids": [
+     *       "timeseries_ids",
+     *       "timeseries_ids"
+     *     ],
+     *     "show_labels": true,
+     *     "time": "time"
+     *   },
+     *   "show_comments": true,
+     *   "report_configs": [
+     *     {
+     *       "name": "name",
+     *       "id": "id",
+     *       "slug": "slug"
+     *     },
+     *     {
+     *       "name": "name",
+     *       "id": "id",
+     *       "slug": "slug"
+     *     }
+     *   ],
+     *   "auto_range": true,
+     *   "show_masked": true,
+     *   "threshold": 0,
+     *   "update_date": "update_date",
+     *   "show_nonvalidated": true,
+     *   "project_id": "project_id",
+     *   "creator_id": "creator_id",
+     *   "name": "name",
+     *   "updater_id": "updater_id",
+     *   "id": "id",
+     *   "create_date": "create_date",
+     *   "plot_type": "plot_type",
+     *   "slug": "slug"
+     * }
+     */
+    PlotConfigContourPlot: {
+      auto_range?: boolean;
+      create_date?: string;
+      creator_id?: string;
+      creator_username?: string;
+      date_range?: string;
+      display?: components["schemas"]["PlotConfigContourPlotDisplay"];
+      id?: string;
+      name?: string;
+      plot_type?: string;
+      project_id?: string;
+      report_configs?: components["schemas"]["IDSlugName"][];
+      show_comments?: boolean;
+      show_masked?: boolean;
+      show_nonvalidated?: boolean;
+      slug?: string;
+      threshold?: number;
+      update_date?: string;
+      updater_id?: string;
+      updater_username?: string;
+    };
+    /**
+     * @example {
+     *   "contour_smoothing": true,
+     *   "gradient_smoothing": true,
+     *   "locf_backfill": "locf_backfill",
+     *   "timeseries_ids": [
+     *     "timeseries_ids",
+     *     "timeseries_ids"
+     *   ],
+     *   "show_labels": true,
+     *   "time": "time"
+     * }
+     */
+    PlotConfigContourPlotDisplay: {
+      contour_smoothing?: boolean;
+      gradient_smoothing?: boolean;
+      locf_backfill?: string;
+      show_labels?: boolean;
+      time?: string;
+      timeseries_ids?: string[];
+    };
+    /**
+     * @example {
+     *   "x": 0.8008281904610115,
+     *   "y": 6.027456183070403,
+     *   "time": "time"
+     * }
+     */
+    PlotConfigMeasurementBullseyePlot: {
+      time?: string;
+      x?: number;
+      y?: number;
+    };
+    /**
+     * @example {
+     *   "date_range": "date_range",
+     *   "updater_username": "updater_username",
+     *   "creator_username": "creator_username",
+     *   "display": {
+     *     "instrument_type": "instrument_type",
+     *     "instrument_id": "instrument_id"
+     *   },
+     *   "show_comments": true,
+     *   "report_configs": [
+     *     {
+     *       "name": "name",
+     *       "id": "id",
+     *       "slug": "slug"
+     *     },
+     *     {
+     *       "name": "name",
+     *       "id": "id",
+     *       "slug": "slug"
+     *     }
+     *   ],
+     *   "auto_range": true,
+     *   "show_masked": true,
+     *   "threshold": 0,
+     *   "update_date": "update_date",
+     *   "show_nonvalidated": true,
+     *   "project_id": "project_id",
+     *   "creator_id": "creator_id",
+     *   "name": "name",
+     *   "updater_id": "updater_id",
+     *   "id": "id",
+     *   "create_date": "create_date",
+     *   "plot_type": "plot_type",
+     *   "slug": "slug"
+     * }
+     */
+    PlotConfigProfilePlot: {
+      auto_range?: boolean;
+      create_date?: string;
+      creator_id?: string;
+      creator_username?: string;
+      date_range?: string;
+      display?: components["schemas"]["PlotConfigProfilePlotDisplay"];
+      id?: string;
+      name?: string;
+      plot_type?: string;
+      project_id?: string;
+      report_configs?: components["schemas"]["IDSlugName"][];
+      show_comments?: boolean;
+      show_masked?: boolean;
+      show_nonvalidated?: boolean;
+      slug?: string;
+      threshold?: number;
+      update_date?: string;
+      updater_id?: string;
+      updater_username?: string;
+    };
+    /**
+     * @example {
+     *   "instrument_type": "instrument_type",
+     *   "instrument_id": "instrument_id"
+     * }
+     */
+    PlotConfigProfilePlotDisplay: {
+      instrument_id?: string;
+      instrument_type?: string;
+    };
+    /**
+     * @example {
+     *   "color": "color",
+     *   "data_point": 0.8008281904610115,
+     *   "name": "name",
+     *   "plot_configuration_id": "plot_configuration_id",
+     *   "enabled": true
+     * }
+     */
+    PlotConfigScatterLineCustomShape: {
+      color?: string;
+      data_point?: number;
+      enabled?: boolean;
+      name?: string;
+      plot_configuration_id?: string;
+    };
+    /**
+     * @example {
+     *   "layout": {
+     *     "custom_shapes": [
+     *       {
+     *         "color": "color",
+     *         "data_point": 0.8008281904610115,
+     *         "name": "name",
+     *         "plot_configuration_id": "plot_configuration_id",
+     *         "enabled": true
+     *       },
+     *       {
+     *         "color": "color",
+     *         "data_point": 0.8008281904610115,
+     *         "name": "name",
+     *         "plot_configuration_id": "plot_configuration_id",
+     *         "enabled": true
+     *       }
+     *     ],
+     *     "y_axis_title": "y_axis_title",
+     *     "y2_axis_title": "y2_axis_title"
+     *   },
+     *   "traces": [
+     *     {
+     *       "trace_type": "trace_type",
+     *       "color": "color",
+     *       "show_markers": true,
+     *       "timeseries_id": "timeseries_id",
+     *       "y_axis": "y_axis",
+     *       "parameter": "parameter",
+     *       "name": "name",
+     *       "width": 1.4658129805029452,
+     *       "line_style": "line_style",
+     *       "plot_configuration_id": "plot_configuration_id",
+     *       "trace_order": 6
+     *     },
+     *     {
+     *       "trace_type": "trace_type",
+     *       "color": "color",
+     *       "show_markers": true,
+     *       "timeseries_id": "timeseries_id",
+     *       "y_axis": "y_axis",
+     *       "parameter": "parameter",
+     *       "name": "name",
+     *       "width": 1.4658129805029452,
+     *       "line_style": "line_style",
+     *       "plot_configuration_id": "plot_configuration_id",
+     *       "trace_order": 6
+     *     }
+     *   ]
+     * }
+     */
+    PlotConfigScatterLineDisplay: {
+      layout?: components["schemas"]["PlotConfigScatterLineLayout"];
+      traces?: components["schemas"]["PlotConfigScatterLineTimeseriesTrace"][];
+    };
+    /**
+     * @example {
+     *   "custom_shapes": [
+     *     {
+     *       "color": "color",
+     *       "data_point": 0.8008281904610115,
+     *       "name": "name",
+     *       "plot_configuration_id": "plot_configuration_id",
+     *       "enabled": true
+     *     },
+     *     {
+     *       "color": "color",
+     *       "data_point": 0.8008281904610115,
+     *       "name": "name",
+     *       "plot_configuration_id": "plot_configuration_id",
+     *       "enabled": true
+     *     }
+     *   ],
+     *   "y_axis_title": "y_axis_title",
+     *   "y2_axis_title": "y2_axis_title"
+     * }
+     */
+    PlotConfigScatterLineLayout: {
+      custom_shapes?: components["schemas"]["PlotConfigScatterLineCustomShape"][];
+      y2_axis_title?: string;
+      y_axis_title?: string;
+    };
+    /**
+     * @example {
+     *   "date_range": "date_range",
+     *   "updater_username": "updater_username",
+     *   "creator_username": "creator_username",
+     *   "display": {
      *     "layout": {
      *       "custom_shapes": [
      *         {
@@ -7743,8 +8756,8 @@ export interface components {
      *           "enabled": true
      *         }
      *       ],
-     *       "yaxis_title": "yaxis_title",
-     *       "secondary_axis_title": "secondary_axis_title"
+     *       "y_axis_title": "y_axis_title",
+     *       "y2_axis_title": "y2_axis_title"
      *     },
      *     "traces": [
      *       {
@@ -7799,18 +8812,20 @@ export interface components {
      *   "updater_id": "updater_id",
      *   "id": "id",
      *   "create_date": "create_date",
+     *   "plot_type": "plot_type",
      *   "slug": "slug"
      * }
      */
-    PlotConfig: {
+    PlotConfigScatterLinePlot: {
       auto_range?: boolean;
       create_date?: string;
       creator_id?: string;
       creator_username?: string;
       date_range?: string;
-      display?: components["schemas"]["PlotConfigDisplay"];
+      display?: components["schemas"]["PlotConfigScatterLineDisplay"];
       id?: string;
       name?: string;
+      plot_type?: string;
       project_id?: string;
       report_configs?: components["schemas"]["IDSlugName"][];
       show_comments?: boolean;
@@ -7821,105 +8836,6 @@ export interface components {
       update_date?: string;
       updater_id?: string;
       updater_username?: string;
-    };
-    /**
-     * @example {
-     *   "color": "color",
-     *   "data_point": 0.8008281904610115,
-     *   "name": "name",
-     *   "plot_configuration_id": "plot_configuration_id",
-     *   "enabled": true
-     * }
-     */
-    PlotConfigCustomShape: {
-      color?: string;
-      data_point?: number;
-      enabled?: boolean;
-      name?: string;
-      plot_configuration_id?: string;
-    };
-    /**
-     * @example {
-     *   "layout": {
-     *     "custom_shapes": [
-     *       {
-     *         "color": "color",
-     *         "data_point": 0.8008281904610115,
-     *         "name": "name",
-     *         "plot_configuration_id": "plot_configuration_id",
-     *         "enabled": true
-     *       },
-     *       {
-     *         "color": "color",
-     *         "data_point": 0.8008281904610115,
-     *         "name": "name",
-     *         "plot_configuration_id": "plot_configuration_id",
-     *         "enabled": true
-     *       }
-     *     ],
-     *     "yaxis_title": "yaxis_title",
-     *     "secondary_axis_title": "secondary_axis_title"
-     *   },
-     *   "traces": [
-     *     {
-     *       "trace_type": "trace_type",
-     *       "color": "color",
-     *       "show_markers": true,
-     *       "timeseries_id": "timeseries_id",
-     *       "y_axis": "y_axis",
-     *       "parameter": "parameter",
-     *       "name": "name",
-     *       "width": 1.4658129805029452,
-     *       "line_style": "line_style",
-     *       "plot_configuration_id": "plot_configuration_id",
-     *       "trace_order": 6
-     *     },
-     *     {
-     *       "trace_type": "trace_type",
-     *       "color": "color",
-     *       "show_markers": true,
-     *       "timeseries_id": "timeseries_id",
-     *       "y_axis": "y_axis",
-     *       "parameter": "parameter",
-     *       "name": "name",
-     *       "width": 1.4658129805029452,
-     *       "line_style": "line_style",
-     *       "plot_configuration_id": "plot_configuration_id",
-     *       "trace_order": 6
-     *     }
-     *   ]
-     * }
-     */
-    PlotConfigDisplay: {
-      layout?: components["schemas"]["PlotConfigLayout"];
-      traces?: components["schemas"]["PlotConfigTimeseriesTrace"][];
-    };
-    /**
-     * @example {
-     *   "custom_shapes": [
-     *     {
-     *       "color": "color",
-     *       "data_point": 0.8008281904610115,
-     *       "name": "name",
-     *       "plot_configuration_id": "plot_configuration_id",
-     *       "enabled": true
-     *     },
-     *     {
-     *       "color": "color",
-     *       "data_point": 0.8008281904610115,
-     *       "name": "name",
-     *       "plot_configuration_id": "plot_configuration_id",
-     *       "enabled": true
-     *     }
-     *   ],
-     *   "yaxis_title": "yaxis_title",
-     *   "secondary_axis_title": "secondary_axis_title"
-     * }
-     */
-    PlotConfigLayout: {
-      custom_shapes?: components["schemas"]["PlotConfigCustomShape"][];
-      secondary_axis_title?: string;
-      yaxis_title?: string;
     };
     /**
      * @example {
@@ -7936,7 +8852,7 @@ export interface components {
      *   "trace_order": 6
      * }
      */
-    PlotConfigTimeseriesTrace: {
+    PlotConfigScatterLineTimeseriesTrace: {
       color?: string;
       line_style?: string;
       /** @description read-only */
@@ -8189,8 +9105,8 @@ export interface components {
      *               "enabled": true
      *             }
      *           ],
-     *           "yaxis_title": "yaxis_title",
-     *           "secondary_axis_title": "secondary_axis_title"
+     *           "y_axis_title": "y_axis_title",
+     *           "y2_axis_title": "y2_axis_title"
      *         },
      *         "traces": [
      *           {
@@ -8245,6 +9161,7 @@ export interface components {
      *       "updater_id": "updater_id",
      *       "id": "id",
      *       "create_date": "create_date",
+     *       "plot_type": "plot_type",
      *       "slug": "slug"
      *     },
      *     {
@@ -8269,8 +9186,8 @@ export interface components {
      *               "enabled": true
      *             }
      *           ],
-     *           "yaxis_title": "yaxis_title",
-     *           "secondary_axis_title": "secondary_axis_title"
+     *           "y_axis_title": "y_axis_title",
+     *           "y2_axis_title": "y2_axis_title"
      *         },
      *         "traces": [
      *           {
@@ -8325,6 +9242,7 @@ export interface components {
      *       "updater_id": "updater_id",
      *       "id": "id",
      *       "create_date": "create_date",
+     *       "plot_type": "plot_type",
      *       "slug": "slug"
      *     }
      *   ],
@@ -8340,7 +9258,7 @@ export interface components {
       global_overrides?: components["schemas"]["ReportConfigGlobalOverrides"];
       id?: string;
       name?: string;
-      plot_configs?: components["schemas"]["PlotConfig"][];
+      plot_configs?: components["schemas"]["PlotConfigScatterLinePlot"][];
       project_id?: string;
       project_name?: string;
       slug?: string;

@@ -1,5 +1,5 @@
 -- ${flyway:timestamp}
-CREATE VIEW v_district_rollup AS (
+CREATE OR REPLACE VIEW v_district_rollup AS (
     SELECT
         ac.alert_type_id                    AS alert_type_id,
         dt.office_id                        AS office_id,

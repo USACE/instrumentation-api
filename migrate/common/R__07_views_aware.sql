@@ -1,5 +1,5 @@
 -- ${flyway:timestamp}
-CREATE VIEW v_aware_platform_parameter_enabled AS (
+CREATE OR REPLACE VIEW v_aware_platform_parameter_enabled AS (
     SELECT
 	i.id          AS instrument_id,
 	a.aware_id    AS aware_id,
