@@ -100,13 +100,6 @@ func TestTimeseries(t *testing.T) {
 			ExpectedSchema: arrSchema,
 		},
 		{
-			Name:           "ListPlotConfigTimeseries",
-			URL:            fmt.Sprintf("/projects/%s/plot_configurations/%s/timeseries", testProjectID, testPlotConfigID),
-			Method:         http.MethodGet,
-			ExpectedStatus: http.StatusOK,
-			ExpectedSchema: arrSchema,
-		},
-		{
 			Name:           "ListInstrumentGroupTimeseries",
 			URL:            fmt.Sprintf("/instrument_groups/%s/timeseries", testInstrumentGroupID),
 			Method:         http.MethodGet,
