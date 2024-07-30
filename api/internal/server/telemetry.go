@@ -54,5 +54,5 @@ func (r *TelemetryServer) RegisterRoutes(h *handler.TelemetryHandler) {
 
 	r.datalogger.POST("/telemetry/datalogger/:model/:sn", h.CreateOrUpdateDataloggerMeasurements)
 
-	r.survey123.POST("/telemetry/survey123/measurements", h.CreateOrUpdateSurvey123Measurements)
+	r.survey123.POST("/telemetry/survey123/:survey123_id/measurements", h.CreateOrUpdateSurvey123Measurements)
 }
