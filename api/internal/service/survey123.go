@@ -5,10 +5,11 @@ import (
 
 	"github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/google/uuid"
+	"github.com/jackc/pgtype"
 )
 
 type Survey123Service interface {
-	CreateSurvey123Preview(ctx context.Context, survey123EquivalencyTableID uuid.UUID, previewRawJson []byte) error
+	CreateOrUpdateSurvey123Preview(ctx context.Context, survey123EquivalencyTableID uuid.UUID, previewRawJson []byte) error
 	CreateOrUpdateSurvey123Measurements(ctx context.Context, sp model.Survey123Payload) error
 }
 
@@ -21,7 +22,11 @@ func NewSurvey123Service(db *model.Database, q *model.Queries) *survey123Service
 	return &survey123Service{db, q}
 }
 
-func (s survey123Service) CreateSurvey123Preview(ctx context.Context, survey123EquivalencyTableID uuid.UUID, previewRawJson []byte) error {
+func (s survey123Service) CreateOrUpdateSurvey123Preview(ctx context.Context, survey123EquivalencyTableID uuid.UUID, previewRawJson []byte) error {
+	pgJSON := pgtype.JSON{}
+	if err := pgJSON.Set(previewRawJson); err != nil {
+		return err
+	}
 
 	return nil
 }

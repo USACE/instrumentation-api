@@ -13,7 +13,12 @@ CREATE TABLE survey123_equivalency_table (
     display_name text,
     instrument_id uuid REFERENCES instrument (id) ON DELETE CASCADE,
     timeseries_id uuid REFERENCES timeseries (id) ON DELETE CASCADE,
-    CONSTRAINT unique_survey123_field UNIQUE(survey123_id, field_name),
+    CONSTRAINT survey123_equivalency_table_survey123_id_field_name_key UNIQUE(survey123_id, field_name),
     CONSTRAINT unique_active_survey123 FOREIGN KEY (survey123_id, survey123_deleted)
         REFERENCES survey123(id, deleted) ON UPDATE CASCADE
+);
+
+CREATE TABLE survey123_preview (
+    survey123_id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+    preview json NOT NULL
 );

@@ -21,7 +21,8 @@ import (
 //	@Router /telemetry/survey123/measurements [post]
 //	@Security Bearer
 func (h *TelemetryHandler) CreateOrUpdateSurvey123Measurements(c echo.Context) error {
-	// TODO
+	// TODO add raw json preview
+
 	var sp model.Survey123Payload
 	if err := c.Bind(&sp); err != nil {
 		return httperr.MalformedBody(err)
