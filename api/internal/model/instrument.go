@@ -184,7 +184,7 @@ func (q *Queries) GetInstrumentCount(ctx context.Context) (InstrumentCount, erro
 
 const createInstrument = `
 	INSERT INTO instrument (slug, name, type_id, geometry, station, station_offset, creator, create_date, nid_id, usgs_id)
-	VALUES (slugify($1, 'instrument'), $1, $2, ST_GeomFromWKB($3), $4, $5, $6, $7, $8, $9)
+	VALUES (slugify($1, 'instrument'), $1, $2, ST_SetSRID(ST_GeomFromWKB($3), 4326), $4, $5, $6, $7, $8, $9)
 	RETURNING id, slug
 `
 
