@@ -1,7 +1,7 @@
 package config
 
 type ServerConfig struct {
-	AllowOrigins         []string `envconfig:"ALLOW_ORIGINS"`
+	AllowOrigins         []string `envconfig:"ALLOWED_ORIGINS"`
 	ApplicationKey       string   `envconfig:"APPLICATION_KEY"`
 	AuthDisabled         bool     `envconfig:"AUTH_DISABLED"`
 	AuthJWTMocked        bool     `envconfig:"AUTH_JWT_MOCKED"`
