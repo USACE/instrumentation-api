@@ -36,6 +36,7 @@ type Instrument struct {
 	Projects      dbJSONSlice[IDSlugName] `json:"projects" db:"projects"`
 	NIDID         *string                 `json:"nid_id" db:"nid_id"`
 	USGSID        *string                 `json:"usgs_id" db:"usgs_id"`
+	HasCwms       bool                    `json:"has_cwms" db:"has_cwms"`
 	Opts          Opts                    `json:"opts" db:"opts"`
 	AuditInfo
 }
@@ -139,6 +140,7 @@ const listInstrumentsSQL = `
 		alert_configs,
 		nid_id,
 		usgs_id,
+		has_cwms,
 		opts
 	FROM v_instrument
 `

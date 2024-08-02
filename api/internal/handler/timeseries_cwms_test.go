@@ -99,6 +99,14 @@ func TestTimeseriesCwms(t *testing.T) {
 			Method:         http.MethodPut,
 			Body:           updateTimeseriesCwmsBody,
 			ExpectedStatus: http.StatusOK,
+		},
+		{
+			Name:           "ListTimeseriesCwms",
+			URL:            fmt.Sprintf("/projects/%s/instruments/%s/timeseries/cwms", testProjectID, testInstrumentID),
+			Method:         http.MethodGet,
+			Body:           createTimeseriesCwmsArrayBody,
+			ExpectedStatus: http.StatusOK,
+			ExpectedSchema: arrSchema,
 		}}
 
 	RunAll(t, tests)

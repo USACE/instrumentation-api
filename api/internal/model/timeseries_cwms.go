@@ -12,27 +12,15 @@ type TimeseriesCwms struct {
 	CwmsOfficeID     string `json:"cwms_office_id" db:"cwms_office_id"`
 }
 
-type CwmsMeasurementsRaw struct {
-	Begin          string             `json:"begin"`
-	End            string             `json:"end"`
-	Interval       string             `json:"interval"`
-	IntervalOffset int                `json:"interval-offset"`
-	Name           string             `json:"name"`
-	OfficeID       string             `json:"office-id"`
-	Page           string             `json:"page"`
-	PageSize       int                `json:"page-size"`
-	NextPage       *string            `json:"next-page"`
-	TimeZone       string             `json:"time-zone"`
-	Total          int                `json:"total"`
-	Units          string             `json:"units"`
-	ValueColumns   []CwmsValueColumns `json:"value-columns"`
-	Values         [][]any            `json:"values"`
-}
+const listTimeseriesCwms = `
+	SELECT * FROM v_timeseries_cwms
+	WHERE instrument_id = $1
+`
 
-type CwmsValueColumns struct {
-	Name     string `json:"name"`
-	Ordinal  int    `json:"ordinal"`
-	Datatype string `json:"datatype"`
+func (q *Queries) ListTimeseriesCwms(ctx context.Context, instrumentID uuid.UUID) ([]TimeseriesCwms, error) {
+	tss := make([]TimeseriesCwms, 0)
+	err := q.db.SelectContext(ctx, &tss, listTimeseriesCwms, instrumentID)
+	return tss, err
 }
 
 const getTimeseriesCwms = `
