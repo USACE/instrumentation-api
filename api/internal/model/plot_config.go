@@ -52,6 +52,8 @@ func (pc *PlotConfig) DateRangeTimeWindow() (TimeWindow, error) {
 		return TimeWindow{After: time.Now().AddDate(-5, 0, 0), Before: time.Now()}, nil
 	case "1 year":
 		return TimeWindow{After: time.Now().AddDate(-1, 0, 0), Before: time.Now()}, nil
+	case "1 month":
+		return TimeWindow{After: time.Now().AddDate(0, -1, 0), Before: time.Now()}, nil
 	default:
 		cdr := strings.Split(dr, " ")
 		invalidDateErr := fmt.Errorf("invalid date range; custom date range must be in format \"YYYY-MM-DD YYYY-MM-DD\"")
