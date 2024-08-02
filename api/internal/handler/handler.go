@@ -69,7 +69,6 @@ func NewApi(cfg *config.ApiConfig) *ApiHandler {
 	projectRoleService := service.NewProjectRoleService(db, q)
 	dataloggerTelemetryService := service.NewDataloggerTelemetryService(db, q)
 	mw := middleware.NewMiddleware(&cfg.ServerConfig, profileService, projectRoleService, dataloggerTelemetryService)
-	httpClient := newHttpClient()
 
 	return &ApiHandler{
 		Middleware:                     mw,
@@ -105,7 +104,7 @@ func NewApi(cfg *config.ApiConfig) *ApiHandler {
 		SaaInstrumentService:           service.NewSaaInstrumentService(db, q),
 		SubmittalService:               service.NewSubmittalService(db, q),
 		TimeseriesService:              service.NewTimeseriesService(db, q),
-		TimeseriesCwmsService:          service.NewTimeseriesCwmsService(httpClient, cfg.CwmsApiUrl, db, q),
+		TimeseriesCwmsService:          service.NewTimeseriesCwmsService(db, q),
 		CalculatedTimeseriesService:    service.NewCalculatedTimeseriesService(db, q),
 		ProcessTimeseriesService:       service.NewProcessTimeseriesService(db, q),
 		UnitService:                    service.NewUnitService(db, q),

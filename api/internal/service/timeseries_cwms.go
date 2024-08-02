@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"net/http"
 
 	"github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/google/uuid"
@@ -15,14 +14,12 @@ type TimeseriesCwmsService interface {
 }
 
 type timeseriesCwmsService struct {
-	cwmsClient  *http.Client
-	cwmsDataUrl string
-	db          *model.Database
+	db *model.Database
 	*model.Queries
 }
 
-func NewTimeseriesCwmsService(cwmsClient *http.Client, cwmsDataUrl string, db *model.Database, q *model.Queries) *timeseriesCwmsService {
-	return &timeseriesCwmsService{cwmsClient, cwmsDataUrl, db, q}
+func NewTimeseriesCwmsService(db *model.Database, q *model.Queries) *timeseriesCwmsService {
+	return &timeseriesCwmsService{db, q}
 }
 
 func (s timeseriesCwmsService) CreateTimeseriesCwmsBatch(ctx context.Context, instrumentID uuid.UUID, tcc []model.TimeseriesCwms) ([]model.TimeseriesCwms, error) {

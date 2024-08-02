@@ -12,7 +12,6 @@ type ApiConfig struct {
 	AWSS3Config
 	AWSSQSConfig
 	ServerConfig
-	CwmsConfig
 }
 
 // GetConfig returns environment variable config
