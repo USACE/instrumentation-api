@@ -4882,6 +4882,43 @@ export interface paths {
     };
   };
   "/projects/{project_id}/instruments/{instrument_id}/timeseries/cwms": {
+    /** lists cwms timeseries for an instrument */
+    get: {
+      parameters: {
+        path: {
+          /** @description project uuid */
+          project_id: string;
+          /** @description instrument uuid */
+          instrument_id: string;
+        };
+      };
+      responses: {
+        /** @description OK */
+        200: {
+          content: {
+            "application/json": components["schemas"]["TimeseriesCwms"][];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Internal Server Error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+      };
+    };
     /** creates cwms timeseries */
     post: {
       parameters: {
@@ -4950,47 +4987,6 @@ export interface paths {
         200: {
           content: {
             "application/json": components["schemas"]["TimeseriesCwms"][];
-          };
-        };
-        /** @description Bad Request */
-        400: {
-          content: {
-            "application/json": components["schemas"]["echo.HTTPError"];
-          };
-        };
-        /** @description Not Found */
-        404: {
-          content: {
-            "application/json": components["schemas"]["echo.HTTPError"];
-          };
-        };
-        /** @description Internal Server Error */
-        500: {
-          content: {
-            "application/json": components["schemas"]["echo.HTTPError"];
-          };
-        };
-      };
-    };
-  };
-  "/projects/{project_id}/instruments/{instrument_id}/timeseries/cwms/{timeseries_id}/measurements": {
-    /** lists measurements for a cwms timeseries */
-    get: {
-      parameters: {
-        path: {
-          /** @description project uuid */
-          project_id: string;
-          /** @description instrument uuid */
-          instrument_id: string;
-          /** @description timeseries uuid */
-          timeseries_id: string;
-        };
-      };
-      responses: {
-        /** @description OK */
-        200: {
-          content: {
-            "application/json": components["schemas"]["MeasurementCollection"][];
           };
         };
         /** @description Bad Request */
@@ -7949,6 +7945,7 @@ export interface components {
     };
     /**
      * @example {
+     *   "has_cwms": true,
      *   "projects": [
      *     {
      *       "name": "name",
@@ -8029,6 +8026,7 @@ export interface components {
       creator_username?: string;
       geometry?: components["schemas"]["Geometry"];
       groups?: string[];
+      has_cwms?: boolean;
       icon?: string;
       id?: string;
       name?: string;
