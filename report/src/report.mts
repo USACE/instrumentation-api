@@ -273,6 +273,9 @@ function parseDateRange(dateStr: string | undefined): {
     case "1 year":
       a.setUTCFullYear(a.getUTCFullYear() - 1);
       break;
+    case "1 month":
+      a.setUTCFullYear(a.getUTCFullYear(), a.getUTCMonth() - 1);
+      break;
     default:
       const dateParts = String(dateStr).trim().split(" ");
       if (dateParts.length !== 2) {
