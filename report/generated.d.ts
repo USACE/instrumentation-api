@@ -7982,6 +7982,7 @@ export interface components {
      *   "offset": 0,
      *   "creator_username": "creator_username",
      *   "type_id": "type_id",
+     *   "show_cwms_tab": true,
      *   "usgs_id": "usgs_id",
      *   "groups": [
      *     "groups",
@@ -8036,6 +8037,7 @@ export interface components {
         [key: string]: unknown;
       };
       projects?: components["schemas"]["IDSlugName"][];
+      show_cwms_tab?: boolean;
       slug?: string;
       station?: number;
       status?: string;

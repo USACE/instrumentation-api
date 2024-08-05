@@ -13191,6 +13191,9 @@
             },
             "type" : "array"
           },
+          "show_cwms_tab" : {
+            "type" : "boolean"
+          },
           "slug" : {
             "type" : "string"
           },

@@ -9182,6 +9182,7 @@ components:
         offset: 0
         creator_username: creator_username
         type_id: type_id
+        show_cwms_tab: true
         usgs_id: usgs_id
         groups:
         - groups
@@ -9248,6 +9249,8 @@ components:
           items:
             $ref: '#/components/schemas/IDSlugName'
           type: array
+        show_cwms_tab:
+          type: boolean
         slug:
           type: string
         station:

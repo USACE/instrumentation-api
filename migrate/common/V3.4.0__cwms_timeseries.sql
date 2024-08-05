@@ -17,3 +17,8 @@ CREATE TABLE timeseries_cwms (
   cwms_timeseries_id text NOT NULL,
   cwms_office_id text NOT NULL
 );
+
+ALTER TABLE instrument ADD COLUMN show_cwms_tab boolean;
+UPDATE instrument SET show_cwms_tab = false;
+ALTER TABLE instrument ALTER COLUMN show_cwms_tab SET NOT NULL;
+ALTER TABLE instrument ALTER COLUMN show_cwms_tab SET DEFAULT false;

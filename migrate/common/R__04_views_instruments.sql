@@ -21,6 +21,7 @@ CREATE OR REPLACE VIEW v_instrument AS (
         i.slug,
         i.name,
         i.type_id,
+        i.show_cwms_tab,
         t.name AS type,
         t.icon AS icon,
         ST_AsBinary(i.geometry) AS geometry,
