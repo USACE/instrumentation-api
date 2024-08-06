@@ -1,34 +1,47 @@
 package handler
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/USACE/instrumentation-api/api/internal/httperr"
 	"github.com/USACE/instrumentation-api/api/internal/model"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
-// CreateOrUpdateSurvey123Measurements godoc
-//
-//	@Summary creates or updates survey123 measurements
-//	@Tags timeseries
-//	@Produce json
-//	@Param timeseries_collection_items body TODO true "timeseries collection items payload"
-//	@Success 200 {array} map[string]uuid.UUID
-//	@Failure 400 {object} echo.HTTPError
-//	@Failure 404 {object} echo.HTTPError
-//	@Failure 500 {object} echo.HTTPError
-//	@Router /telemetry/survey123/measurements [post]
-//	@Security Bearer
 func (h *TelemetryHandler) CreateOrUpdateSurvey123Measurements(c echo.Context) error {
-	// TODO add raw json preview
+	survey123ID, err := uuid.Parse(c.Param("survey123_id"))
+	if err != nil {
+		return httperr.MalformedID(err)
+	}
 
-	var sp model.Survey123Payload
-	if err := c.Bind(&sp); err != nil {
+	var raw map[string]json.RawMessage
+	if err := c.Bind(&raw); err != nil {
 		return httperr.MalformedBody(err)
 	}
 
-	if err := h.Survey123Service.CreateOrUpdateSurvey123Measurements(c.Request().Context(), sp); err != nil {
+	previewRaw, err := json.Marshal(raw)
+	if err != nil {
+		return httperr.MalformedBody(err)
+	}
+
+	ctx := c.Request().Context()
+	if err := h.Survey123Service.CreateOrUpdateSurvey123Preview(ctx, survey123ID, previewRaw); err != nil {
+		return httperr.InternalServerError(err)
+	}
+
+	eq, err := h.Survey123Service.ListSurvey123EquivalencyTableRows(ctx, survey123ID)
+	if err != nil {
+		return httperr.ServerErrorOrNotFound(err)
+	}
+
+	var sp model.Survey123Payload
+	if err := json.Unmarshal(raw["applyEdits"], &sp); err != nil {
+		return httperr.MalformedBody(err)
+	}
+
+	if err := h.Survey123Service.CreateOrUpdateSurvey123Measurements(ctx, sp, eq); err != nil {
 		return httperr.InternalServerError(err)
 	}
 

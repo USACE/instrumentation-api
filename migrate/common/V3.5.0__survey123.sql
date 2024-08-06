@@ -6,7 +6,7 @@ CREATE TABLE survey123 (
 );
 
 CREATE TABLE survey123_equivalency_table (
-    id uuid PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+    id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
     survey123_id uuid NOT NULL REFERENCES survey123(id),
     survey123_deleted boolean NOT NULL DEFAULT false,
     field_name text NOT NULL,
@@ -19,6 +19,6 @@ CREATE TABLE survey123_equivalency_table (
 );
 
 CREATE TABLE survey123_preview (
-    survey123_id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+    survey123_id uuid NOT NULL REFERENCES survey123(id),
     preview json NOT NULL
 );
