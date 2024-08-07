@@ -87,7 +87,7 @@ const createSurvey123 = `
 
 func (q *Queries) CreateSurvey123(ctx context.Context, sv Survey123) (uuid.UUID, error) {
 	var newID uuid.UUID
-	err := q.db.GetContext(ctx, newID, createSurvey123, sv.ProjectID, sv.Name, sv.CreatorID)
+	err := q.db.GetContext(ctx, &newID, createSurvey123, sv.ProjectID, sv.Name, sv.CreatorID)
 	return newID, err
 }
 
@@ -112,7 +112,7 @@ func (q *Queries) CreateOrUpdateSurvey123Preview(ctx context.Context, pv Survey1
 
 const createOrUpdateSurvey123EquivalencyTableRow = `
 	INSERT INTO survey123_equivalency_table (survey123_id, field_name, display_name, instrument_id, timeseries_id) VALUES ($1, $2, $3, $4, $5)
-	ON CONFLICT ON CONSTRAINT survey123_equivalency_table_survey123_id_field_name_key DO UPDATE SET
+	ON CONFLICT ON CONSTRAINT survey123_equivalency_table_survey123_id_survey123_deleted_field_name_key DO UPDATE SET
 	display_name=EXCLUDED.display_name, instrument_id=EXCLUDED.instrument_id, timeseries_id=EXCLUDED.timeseries_id
 `
 
@@ -170,7 +170,7 @@ func (q *Queries) DeleteAllSurvey123EquivalencyTableRows(ctx context.Context, su
 const getSurvey123Preview = `
     SELECT p.survey123_id, p.preview, p.update_date
     FROM survey123_preview p
-    INNER JOIN survey123 s
+    INNER JOIN survey123 s ON p.survey123_id = s.id
     WHERE p.survey123_id = $1
     AND NOT s.deleted
 `

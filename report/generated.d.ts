@@ -380,14 +380,14 @@ export interface paths {
       /** @description equivalency table payload */
       requestBody: {
         content: {
-          "*/*": components["schemas"]["EquivalencyTable"];
+          "*/*": components["schemas"]["DataloggerEquivalencyTable"];
         };
       };
       responses: {
         /** @description OK */
         200: {
           content: {
-            "application/json": components["schemas"]["EquivalencyTable"];
+            "application/json": components["schemas"]["DataloggerEquivalencyTable"];
           };
         };
         /** @description Bad Request */
@@ -471,7 +471,7 @@ export interface paths {
         /** @description OK */
         200: {
           content: {
-            "application/json": components["schemas"]["EquivalencyTable"][];
+            "application/json": components["schemas"]["DataloggerEquivalencyTable"][];
           };
         };
         /** @description Bad Request */
@@ -511,14 +511,14 @@ export interface paths {
       /** @description equivalency table payload */
       requestBody: {
         content: {
-          "*/*": components["schemas"]["EquivalencyTable"];
+          "*/*": components["schemas"]["DataloggerEquivalencyTable"];
         };
       };
       responses: {
         /** @description OK */
         200: {
           content: {
-            "application/json": components["schemas"]["EquivalencyTable"];
+            "application/json": components["schemas"]["DataloggerEquivalencyTable"];
           };
         };
         /** @description Bad Request */
@@ -558,14 +558,14 @@ export interface paths {
       /** @description equivalency table payload */
       requestBody: {
         content: {
-          "*/*": components["schemas"]["EquivalencyTable"];
+          "*/*": components["schemas"]["DataloggerEquivalencyTable"];
         };
       };
       responses: {
         /** @description OK */
         200: {
           content: {
-            "application/json": components["schemas"]["EquivalencyTable"];
+            "application/json": components["schemas"]["DataloggerEquivalencyTable"];
           };
         };
         /** @description Bad Request */
@@ -6211,6 +6211,199 @@ export interface paths {
       };
     };
   };
+  "/projects/{project_id}/survey123": {
+    /** lists Survey123 connections for a project */
+    get: {
+      parameters: {
+        path: {
+          /** @description project uuid */
+          project_id: string;
+        };
+      };
+      responses: {
+        /** @description OK */
+        200: {
+          content: {
+            "application/json": components["schemas"]["Survey123"][];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Internal Server Error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+      };
+    };
+    /** creates a Survey123 connection with equivalency table mappings */
+    post: {
+      parameters: {
+        path: {
+          /** @description project uuid */
+          project_id: string;
+        };
+      };
+      responses: {
+        /** @description OK */
+        200: {
+          content: {
+            "application/json": {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Internal Server Error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+      };
+    };
+  };
+  "/projects/{project_id}/survey123/{survey123_id}": {
+    /** updates a Survey123 connection with equivalency table mappings */
+    put: {
+      parameters: {
+        path: {
+          /** @description project uuid */
+          project_id: string;
+          /** @description survey123 uuid */
+          survey123_id: string;
+        };
+      };
+      responses: {
+        /** @description OK */
+        200: {
+          content: {
+            "application/json": {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Internal Server Error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+      };
+    };
+    /** deletes a Survey123 connection with equivalency table mappings */
+    delete: {
+      parameters: {
+        path: {
+          /** @description project uuid */
+          project_id: string;
+          /** @description survey123 uuid */
+          survey123_id: string;
+        };
+      };
+      responses: {
+        /** @description OK */
+        200: {
+          content: {
+            "application/json": {
+              [key: string]: string;
+            };
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Internal Server Error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+      };
+    };
+  };
+  "/projects/{project_id}/survey123/{survey123_id}/previews": {
+    /** gets the most recent Survey123 raw json payload sent from the webhook API */
+    get: {
+      parameters: {
+        path: {
+          /** @description project uuid */
+          project_id: string;
+          /** @description survey123 uuid */
+          survey123_id: string;
+        };
+      };
+      responses: {
+        /** @description OK */
+        200: {
+          content: {
+            "application/json": string;
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Internal Server Error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+      };
+    };
+  };
   "/projects/{project_id}/timeseries": {
     /** lists all timeseries for a single project */
     get: {
@@ -7366,6 +7559,51 @@ export interface components {
     };
     /**
      * @example {
+     *   "datalogger_table_id": "datalogger_table_id",
+     *   "datalogger_table_name": "datalogger_table_name",
+     *   "rows": [
+     *     {
+     *       "timeseries_id": "timeseries_id",
+     *       "id": "id",
+     *       "display_name": "display_name",
+     *       "instrument_id": "instrument_id",
+     *       "field_name": "field_name"
+     *     },
+     *     {
+     *       "timeseries_id": "timeseries_id",
+     *       "id": "id",
+     *       "display_name": "display_name",
+     *       "instrument_id": "instrument_id",
+     *       "field_name": "field_name"
+     *     }
+     *   ],
+     *   "datalogger_id": "datalogger_id"
+     * }
+     */
+    DataloggerEquivalencyTable: {
+      datalogger_id?: string;
+      datalogger_table_id?: string;
+      datalogger_table_name?: string;
+      rows?: components["schemas"]["DataloggerEquivalencyTableRow"][];
+    };
+    /**
+     * @example {
+     *   "timeseries_id": "timeseries_id",
+     *   "id": "id",
+     *   "display_name": "display_name",
+     *   "instrument_id": "instrument_id",
+     *   "field_name": "field_name"
+     * }
+     */
+    DataloggerEquivalencyTableRow: {
+      display_name?: string;
+      field_name?: string;
+      id?: string;
+      instrument_id?: string;
+      timeseries_id?: string;
+    };
+    /**
+     * @example {
      *   "id": "id",
      *   "table_name": "table_name"
      * }
@@ -7525,51 +7763,6 @@ export interface components {
       id?: string;
       user_type?: string;
       username?: string;
-    };
-    /**
-     * @example {
-     *   "datalogger_table_id": "datalogger_table_id",
-     *   "datalogger_table_name": "datalogger_table_name",
-     *   "rows": [
-     *     {
-     *       "timeseries_id": "timeseries_id",
-     *       "id": "id",
-     *       "display_name": "display_name",
-     *       "instrument_id": "instrument_id",
-     *       "field_name": "field_name"
-     *     },
-     *     {
-     *       "timeseries_id": "timeseries_id",
-     *       "id": "id",
-     *       "display_name": "display_name",
-     *       "instrument_id": "instrument_id",
-     *       "field_name": "field_name"
-     *     }
-     *   ],
-     *   "datalogger_id": "datalogger_id"
-     * }
-     */
-    EquivalencyTable: {
-      datalogger_id?: string;
-      datalogger_table_id?: string;
-      datalogger_table_name?: string;
-      rows?: components["schemas"]["EquivalencyTableRow"][];
-    };
-    /**
-     * @example {
-     *   "timeseries_id": "timeseries_id",
-     *   "id": "id",
-     *   "display_name": "display_name",
-     *   "instrument_id": "instrument_id",
-     *   "field_name": "field_name"
-     * }
-     */
-    EquivalencyTableRow: {
-      display_name?: string;
-      field_name?: string;
-      id?: string;
-      instrument_id?: string;
-      timeseries_id?: string;
     };
     /**
      * @example {
@@ -9307,6 +9500,66 @@ export interface components {
       submittal_status_id?: string;
       submittal_status_name?: string;
       warning_sent?: boolean;
+    };
+    /**
+     * @example {
+     *   "updater_username": "updater_username",
+     *   "project_id": "project_id",
+     *   "creator_username": "creator_username",
+     *   "creator_id": "creator_id",
+     *   "name": "name",
+     *   "updater_id": "updater_id",
+     *   "id": "id",
+     *   "create_date": "create_date",
+     *   "rows": [
+     *     {
+     *       "timeseries_id": "timeseries_id",
+     *       "display_name": "display_name",
+     *       "instrument_id": "instrument_id",
+     *       "field_name": "field_name"
+     *     },
+     *     {
+     *       "timeseries_id": "timeseries_id",
+     *       "display_name": "display_name",
+     *       "instrument_id": "instrument_id",
+     *       "field_name": "field_name"
+     *     }
+     *   ],
+     *   "errors": [
+     *     "errors",
+     *     "errors"
+     *   ],
+     *   "slug": "slug",
+     *   "update_date": "update_date"
+     * }
+     */
+    Survey123: {
+      create_date?: string;
+      creator_id?: string;
+      creator_username?: string;
+      errors?: string[];
+      id?: string;
+      name?: string;
+      project_id?: string;
+      rows?: components["schemas"]["Survey123EquivalencyTableRow"][];
+      slug?: string;
+      update_date?: string;
+      updater_id?: string;
+      updater_username?: string;
+    };
+    /**
+     * @example {
+     *   "timeseries_id": "timeseries_id",
+     *   "display_name": "display_name",
+     *   "instrument_id": "instrument_id",
+     *   "field_name": "field_name"
+     * }
+     */
+    Survey123EquivalencyTableRow: {
+      display_name?: string;
+      field_name?: string;
+      instrument_id?: string;
+      timeseries_id?: string;
     };
     /**
      * @example {

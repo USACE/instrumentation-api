@@ -66,7 +66,7 @@ const survey123PreviewSchema = `{
 var survey123PreviewLoader = gojsonschema.NewStringLoader(survey123PreviewSchema)
 
 const (
-	testSurvey123ID = "TODO"
+	testSurvey123ID = "a2e19d85-4c64-4e99-b93a-4f4f56a718cf"
 )
 
 const createSurvey123Body = `{
@@ -75,26 +75,20 @@ const createSurvey123Body = `{
 }`
 
 const updateSurvey123Body = `{
-    "id": "TODO",
+    "id": "a2e19d85-4c64-4e99-b93a-4f4f56a718cf",
     "name": "Updated name",
     "rows": [
         {
-            "field_name": "test1__depth",
-            "display_name": "depth",
-            "instrument_id": "a7540f69-c41e-43b3-b655-6e44097edb7e",
-            "timeseries_id": "7ee902a3-56d0-4acf-8956-67ac82c03a96"
-        },
-        {
             "field_name": "test1__battery",
             "display_name": "battery",
-            "instrument_id": "a7540f69-c41e-43b3-b655-6e44097edb7e",
-            "timeseries_id": "869465fc-dc1e-445e-81f4-9979b5fadda9"
+            "instrument_id": "d8c66ef9-06f0-4d52-9233-f3778e0624f0",
+            "timeseries_id": "c3c00251-12fb-42a1-9d49-cdb269bb3039"
         },
         {
             "field_name": "test1__temperature",
             "display_name": "temperature",
-            "instrument_id": "a7540f69-c41e-43b3-b655-6e44097edb7e",
-            "timeseries_id": "869465fc-dc1e-445e-81f4-9979b5fadda9"
+            "instrument_id": "d8c66ef9-06f0-4d52-9233-f3778e0624f0",
+            "timeseries_id": "e45a9620-a431-4b70-af97-a4e185eb7311"
         }
     ]
 }`

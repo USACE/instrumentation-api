@@ -3,7 +3,7 @@
 ARG BUILDER_IMAGE=node:22.1-alpine3.19
 ARG BASE_IMAGE=alpine:3.19
 
-FROM ${BUILDER_IMAGE} as builder
+FROM ${BUILDER_IMAGE} AS builder
 WORKDIR /usr/app
 COPY package*.json ./
 RUN npm install

@@ -54,6 +54,10 @@ const getIsValidEquivalencyTableTimeseriesBatch = `
 `
 
 func (q *Queries) GetIsValidEquivalencyTableTimeseriesBatch(ctx context.Context, timeseriesIDs []uuid.UUID) error {
+	if len(timeseriesIDs) == 0 {
+		return nil
+	}
+
 	query, args, err := sqlIn(getIsValidEquivalencyTableTimeseriesBatch, timeseriesIDs, timeseriesIDs)
 	if err != nil {
 		return err

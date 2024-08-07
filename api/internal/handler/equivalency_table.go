@@ -18,7 +18,7 @@ import (
 //	@Param datalogger_id path string true "datalogger uuid" Format(uuid)
 //	@Param datalogger_table_id path string true "datalogger table uuid" Format(uuid)
 //	@Param key query string false "api key"
-//	@Success 200 {array} model.EquivalencyTable
+//	@Success 200 {array} model.DataloggerEquivalencyTable
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
@@ -56,9 +56,9 @@ func (h *ApiHandler) GetEquivalencyTable(c echo.Context) error {
 //	@Produce json
 //	@Param datalogger_id path string true "datalogger uuid" Format(uuid)
 //	@Param datalogger_table_id path string true "datalogger table uuid" Format(uuid)
-//	@Param equivalency_table body model.EquivalencyTable true "equivalency table payload"
+//	@Param equivalency_table body model.DataloggerEquivalencyTable true "equivalency table payload"
 //	@Param key query string false "api key"
-//	@Success 200 {object} model.EquivalencyTable
+//	@Success 200 {object} model.DataloggerEquivalencyTable
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
@@ -122,9 +122,9 @@ func (h *ApiHandler) CreateEquivalencyTable(c echo.Context) error {
 //	@Produce json
 //	@Param datalogger_id path string true "datalogger uuid" Format(uuid)
 //	@Param datalogger_table_id path string true "datalogger table uuid" Format(uuid)
-//	@Param equivalency_table body model.EquivalencyTable true "equivalency table payload"
+//	@Param equivalency_table body model.DataloggerEquivalencyTable true "equivalency table payload"
 //	@Param key query string false "api key"
-//	@Success 200 {object} model.EquivalencyTable
+//	@Success 200 {object} model.DataloggerEquivalencyTable
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
