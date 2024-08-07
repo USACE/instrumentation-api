@@ -322,6 +322,13 @@ func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 	r.private.PUT("/submittals/:submittal_id/verify_missing", h.VerifyMissingSubmittal)
 	r.private.PUT("/alert_configs/:alert_config_id/submittals/verify_missing", h.VerifyMissingAlertConfigSubmittals)
 
+	// Survey123
+	r.public.GET("/projects/:project_id/survey123", h.ListSurvey123sForProject)
+	r.public.GET("/projects/:project_id/survey123/:survey123_id/previews", h.GetSurvey123Preview)
+	r.private.POST("/projects/:project_id/survey123", h.CreateSurvey123)
+	r.private.PUT("/projects/:project_id/survey123/:survey123_id", h.UpdateSurvey123)
+	r.private.DELETE("/projects/:project_id/survey123/:survey123_id", h.DeleteSurvey123)
+
 	// Timeseries
 	// TODO: Delete timeseries endpoints without project context in URL
 	r.public.GET("/timeseries/:timeseries_id", h.GetTimeseries)

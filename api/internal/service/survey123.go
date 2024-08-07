@@ -2,25 +2,27 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/google/uuid"
-	"github.com/jackc/pgtype"
 )
 
 type Survey123Service interface {
-	ListProjectSurvey123s(ctx context.Context, projectID uuid.UUID) ([]model.Survey123, error)
-	ListSurvey123EquivalencyTableRows(ctx context.Context, survey123ID uuid.UUID) ([]model.EquivalencyTableRow, error)
+	ListSurvey123sForProject(ctx context.Context, projectID uuid.UUID) ([]model.Survey123, error)
+	ListSurvey123EquivalencyTableRows(ctx context.Context, survey123ID uuid.UUID) ([]model.Survey123EquivalencyTableRow, error)
 	CreateSurvey123(ctx context.Context, sv model.Survey123) (uuid.UUID, error)
-	CreateOrUpdateSurvey123EquivalencyTable(ctx context.Context, survey123ID uuid.UUID, mappings []model.EquivalencyTableRow) error
-	DeleteSurvey123EquivalencyTableRow(ctx context.Context, survey123RowID uuid.UUID) error
-	CreateOrUpdateSurvey123Preview(ctx context.Context, survey123ID uuid.UUID, previewRawJson []byte) error
-	CreateOrUpdateSurvey123Measurements(ctx context.Context, sp model.Survey123Payload, rr []model.EquivalencyTableRow) error
+	UpdateSurvey123(ctx context.Context, sv model.Survey123) error
+	SoftDeleteSurvey123(ctx context.Context, survey123ID uuid.UUID) error
+	GetSurvey123Preview(ctx context.Context, survey123ID uuid.UUID) (model.Survey123Preview, error)
+	CreateOrUpdateSurvey123Preview(ctx context.Context, pv model.Survey123Preview) error
+	CreateOrUpdateSurvey123Measurements(ctx context.Context, survey123ID uuid.UUID, sp model.Survey123Payload, rr []model.Survey123EquivalencyTableRow) error
 }
 
 type survey123Service struct {
@@ -45,10 +47,28 @@ func (s survey123Service) CreateSurvey123(ctx context.Context, sv model.Survey12
 	if err != nil {
 		return uuid.Nil, err
 	}
+
+	tsIDs := make([]uuid.UUID, 0)
+	for _, r := range sv.Rows {
+		if r.TimeseriesID != nil {
+			tsIDs = append(tsIDs, *r.TimeseriesID)
+		}
+	}
+
+	if err = qtx.GetIsValidEquivalencyTableTimeseriesBatch(ctx, tsIDs); err != nil {
+		return uuid.Nil, err
+	}
+
+	for _, r := range sv.Rows {
+		if err := qtx.CreateOrUpdateSurvey123EquivalencyTableRow(ctx, newID, r); err != nil {
+			return uuid.Nil, err
+		}
+	}
+
 	return newID, tx.Commit()
 }
 
-func (s survey123Service) CreateOrUpdateSurvey123EquivalencyTable(ctx context.Context, survey123ID uuid.UUID, mappings []model.EquivalencyTableRow) error {
+func (s survey123Service) UpdateSurvey123(ctx context.Context, sv model.Survey123) error {
 	tx, err := s.db.BeginTxx(ctx, nil)
 	if err != nil {
 		return err
@@ -57,36 +77,73 @@ func (s survey123Service) CreateOrUpdateSurvey123EquivalencyTable(ctx context.Co
 
 	qtx := s.WithTx(tx)
 
-	for _, r := range mappings {
-		if r.TimeseriesID != nil {
-			if err := qtx.GetIsValidEquivalencyTableTimeseries(ctx, *r.TimeseriesID); err != nil {
-				return err
-			}
-		}
-		if err := qtx.CreateOrUpdateSurvey123EquivalencyTableRow(ctx, survey123ID, r); err != nil {
-			return err
-		}
-	}
-	return tx.Commit()
-}
-
-func (s survey123Service) CreateOrUpdateSurvey123Preview(ctx context.Context, survey123ID uuid.UUID, previewRawJson []byte) error {
-	pgJSON := pgtype.JSON{}
-	if err := pgJSON.Set(previewRawJson); err != nil {
+	if err := qtx.UpdateSurvey123(ctx, sv); err != nil {
 		return err
 	}
 
-	return s.db.Queries().CreateOrUpdateSurvey123Preview(ctx, survey123ID, pgJSON)
+	if err := qtx.DeleteAllSurvey123EquivalencyTableRows(ctx, sv.ID); err != nil {
+		return err
+	}
+
+	tsIDs := make([]uuid.UUID, 0)
+	for _, r := range sv.Rows {
+		if r.TimeseriesID != nil {
+			tsIDs = append(tsIDs, *r.TimeseriesID)
+		}
+	}
+
+	if err = qtx.GetIsValidEquivalencyTableTimeseriesBatch(ctx, tsIDs); err != nil {
+		return err
+	}
+
+	for _, r := range sv.Rows {
+		if err := qtx.CreateOrUpdateSurvey123EquivalencyTableRow(ctx, sv.ID, r); err != nil {
+			return err
+		}
+	}
+
+	return tx.Commit()
 }
 
-func (s survey123Service) CreateOrUpdateSurvey123Measurements(ctx context.Context, sp model.Survey123Payload, rr []model.EquivalencyTableRow) error {
-	eqt := make(map[string]model.EquivalencyTableRow)
+func (s survey123Service) createOrUpdateSurvey123PayloadError(ctx context.Context, survey123ID uuid.UUID, errMsgs []string) error {
+	tx, err := s.db.BeginTxx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer model.TxDo(tx.Rollback)
+
+	qtx := s.WithTx(tx)
+
+	if err := qtx.DeleteAllSurvey123PayloadErrors(ctx, survey123ID); err != nil {
+		if !errors.Is(err, sql.ErrNoRows) {
+			return err
+		}
+	}
+
+	for _, errMsg := range errMsgs {
+		if err := qtx.CreateSurvey123PayloadError(ctx, survey123ID, errMsg); err != nil {
+			return err
+		}
+	}
+
+	return tx.Commit()
+}
+
+func (s survey123Service) CreateOrUpdateSurvey123Measurements(ctx context.Context, survey123ID uuid.UUID, sp model.Survey123Payload, rr []model.Survey123EquivalencyTableRow) error {
+	eqt := make(map[string]model.Survey123EquivalencyTableRow)
 	for _, r := range rr {
-		eqt[r.FieldName] = model.EquivalencyTableRow{
+		eqt[r.FieldName] = model.Survey123EquivalencyTableRow{
 			TimeseriesID: r.TimeseriesID,
 			InstrumentID: r.InstrumentID,
 		}
 	}
+
+	em := make([]string, 0)
+	defer func() {
+		if err := s.createOrUpdateSurvey123PayloadError(ctx, survey123ID, em); err != nil {
+			log.Printf(err.Error())
+		}
+	}()
 
 	tx, err := s.db.BeginTxx(ctx, nil)
 	if err != nil {
@@ -98,38 +155,44 @@ func (s survey123Service) CreateOrUpdateSurvey123Measurements(ctx context.Contex
 
 	switch sp.EventType {
 	case "addData":
-		for _, r := range sp.Adds {
-			mm, err := parseAttributes(r.Attributes, eqt)
-			if err != nil {
-				return err
-			}
-			for _, m := range mm {
-				if err := qtx.CreateTimeseriesMeasurement(ctx, m.TimeseriesID, m.Time, m.Value); err != nil {
-					return err
+		for _, edit := range sp.Edits {
+			for _, r := range edit.Adds {
+				mm, err := parseAttributes(r.Attributes, eqt)
+				if err != nil {
+					em = append(em, err.Error())
+					continue
+				}
+				for _, m := range mm {
+					if err := qtx.CreateTimeseriesMeasurement(ctx, m.TimeseriesID, m.Time, m.Value); err != nil {
+						return err
+					}
 				}
 			}
 		}
 	case "editData":
-		for _, r := range sp.Updates {
-			mm, err := parseAttributes(r.Attributes, eqt)
-			if err != nil {
-				return err
-			}
-			for _, m := range mm {
-				if err := qtx.CreateTimeseriesMeasurement(ctx, m.TimeseriesID, m.Time, m.Value); err != nil {
-					return err
+		for _, edit := range sp.Edits {
+			for _, r := range edit.Updates {
+				mm, err := parseAttributes(r.Attributes, eqt)
+				if err != nil {
+					em = append(em, err.Error())
+					continue
+				}
+				for _, m := range mm {
+					if err := qtx.CreateTimeseriesMeasurement(ctx, m.TimeseriesID, m.Time, m.Value); err != nil {
+						return err
+					}
 				}
 			}
-		}
-
-		for _, r := range sp.Adds {
-			mm, err := parseAttributes(r.Attributes, eqt)
-			if err != nil {
-				return err
-			}
-			for _, m := range mm {
-				if err := qtx.CreateTimeseriesMeasurement(ctx, m.TimeseriesID, m.Time, m.Value); err != nil {
-					return err
+			for _, r := range edit.Adds {
+				mm, err := parseAttributes(r.Attributes, eqt)
+				if err != nil {
+					em = append(em, err.Error())
+					continue
+				}
+				for _, m := range mm {
+					if err := qtx.CreateTimeseriesMeasurement(ctx, m.TimeseriesID, m.Time, m.Value); err != nil {
+						return err
+					}
 				}
 			}
 		}
@@ -140,9 +203,10 @@ func (s survey123Service) CreateOrUpdateSurvey123Measurements(ctx context.Contex
 	return tx.Commit()
 }
 
-func parseAttributes(attr map[string]interface{}, eqt map[string]model.EquivalencyTableRow) ([]model.Measurement, error) {
+func parseAttributes(attr map[string]interface{}, eqt map[string]model.Survey123EquivalencyTableRow) ([]model.Measurement, error) {
 	errs := make([]error, 0)
 	mappings := make(map[string]map[string]interface{})
+
 	// group by instrument prefix
 	for k, v := range attr {
 		if k == "" {

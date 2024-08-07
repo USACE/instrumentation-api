@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/USACE/instrumentation-api/api/internal/httperr"
 	"github.com/USACE/instrumentation-api/api/internal/model"
@@ -26,8 +27,11 @@ func (h *TelemetryHandler) CreateOrUpdateSurvey123Measurements(c echo.Context) e
 		return httperr.MalformedBody(err)
 	}
 
+	t := time.Now()
+	pv := model.Survey123Preview{Survey123ID: survey123ID, Preview: previewRaw, UpdateDate: &t}
+
 	ctx := c.Request().Context()
-	if err := h.Survey123Service.CreateOrUpdateSurvey123Preview(ctx, survey123ID, previewRaw); err != nil {
+	if err := h.Survey123Service.CreateOrUpdateSurvey123Preview(ctx, pv); err != nil {
 		return httperr.InternalServerError(err)
 	}
 
@@ -36,12 +40,19 @@ func (h *TelemetryHandler) CreateOrUpdateSurvey123Measurements(c echo.Context) e
 		return httperr.ServerErrorOrNotFound(err)
 	}
 
-	var sp model.Survey123Payload
-	if err := json.Unmarshal(raw["applyEdits"], &sp); err != nil {
+	var et string
+	if err := json.Unmarshal(raw["eventType"], &et); err != nil {
 		return httperr.MalformedBody(err)
 	}
 
-	if err := h.Survey123Service.CreateOrUpdateSurvey123Measurements(ctx, sp, eq); err != nil {
+	var se []model.Survey123Edits
+	if err := json.Unmarshal(raw["applyEdits"], &se); err != nil {
+		return httperr.MalformedBody(err)
+	}
+
+	sp := model.Survey123Payload{EventType: et, Edits: se}
+
+	if err := h.Survey123Service.CreateOrUpdateSurvey123Measurements(ctx, survey123ID, sp, eq); err != nil {
 		return httperr.InternalServerError(err)
 	}
 

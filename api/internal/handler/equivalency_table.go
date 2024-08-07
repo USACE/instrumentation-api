@@ -71,7 +71,7 @@ func (h *ApiHandler) CreateEquivalencyTable(c echo.Context) error {
 		return httperr.MalformedID(err)
 	}
 
-	t := model.EquivalencyTable{DataloggerID: dlID}
+	t := model.DataloggerEquivalencyTable{DataloggerID: dlID}
 	if err := c.Bind(&t); err != nil {
 		return httperr.MalformedBody(err)
 	}
@@ -141,7 +141,7 @@ func (h *ApiHandler) UpdateEquivalencyTable(c echo.Context) error {
 		return httperr.MalformedID(err)
 	}
 
-	t := model.EquivalencyTable{DataloggerID: dlID, DataloggerTableID: dataloggerTableID}
+	t := model.DataloggerEquivalencyTable{DataloggerID: dlID, DataloggerTableID: dataloggerTableID}
 	if err := c.Bind(&t); err != nil {
 		return httperr.MalformedBody(err)
 	}
