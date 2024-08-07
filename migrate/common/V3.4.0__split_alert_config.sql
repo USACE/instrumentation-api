@@ -22,6 +22,10 @@ INSERT INTO alert_config_scheduler (alert_config_id, start_date, schedule_interv
 SELECT id, start_date, schedule_interval, warning_interval, remind_interval, last_reminded, mute_consecutive_alerts
 FROM alert_config;
 
+DROP VIEW IF EXISTS v_alert_config;
+DROP VIEW IF EXISTS v_alert_check_measurement_submittal;
+DROP VIEW IF EXISTS v_alert_check_evaluation_submittal;
+
 ALTER TABLE alert_config
   DROP start_date,
   DROP schedule_interval,
