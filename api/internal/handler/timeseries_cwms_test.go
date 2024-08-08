@@ -26,9 +26,11 @@ const timeseriesCwmsSchema = `{
         "is_computed": { "type": "boolean" },
         "type": { "type": "string" },
 	"cwms_timeseries_id": { "type": "string" },
-	"cwms_office_id": { "type": "string" }
+	"cwms_office_id": { "type": "string" },
+	"cwms_extent_earliest_time": { "type": "string", "format": "date-time" },
+	"cwms_extent_latest_time": { "type": "string", "format": "date-time" }
     },
-    "required": ["id", "slug", "name", "variable", "instrument_id", "parameter_id", "unit_id", "is_computed", "type", "cwms_timeseries_id", "cwms_office_id"],
+    "required": ["id", "slug", "name", "variable", "instrument_id", "parameter_id", "unit_id", "is_computed", "type", "cwms_timeseries_id", "cwms_office_id", "cwms_extent_earliest_time", "cwms_extent_latest_time"],
     "additionalProperties": false
 }`
 
@@ -47,7 +49,9 @@ const createTimeseriesCwmsArrayBody = `[{
     "parameter_id": "068b59b0-aafb-4c98-ae4b-ed0365a6fbac",
     "unit_id": "f777f2e2-5e32-424e-a1ca-19d16cd8abce",
     "cwms_timeseries_id": "test timeseries",
-    "cwms_office_id": "test office"
+    "cwms_office_id": "test office",
+    "cwms_extent_earliest_time": "2020-01-01T00:00:00Z",
+    "cwms_extent_latest_time": "2024-01-01T00:00:00Z"
 },
 {
     "name": "Test CWMS Timeseries 6",
@@ -55,7 +59,9 @@ const createTimeseriesCwmsArrayBody = `[{
     "parameter_id": "068b59b0-aafb-4c98-ae4b-ed0365a6fbac",
     "unit_id": "f777f2e2-5e32-424e-a1ca-19d16cd8abce",
     "cwms_timeseries_id": "test timeseries",
-    "cwms_office_id": "test office"
+    "cwms_office_id": "test office",
+    "cwms_extent_earliest_time": "2020-01-01T00:00:00Z",
+    "cwms_extent_latest_time": "2024-01-01T00:00:00Z"
 },
 {
     "name": "Test CWMS Timeseries 7",
@@ -63,7 +69,9 @@ const createTimeseriesCwmsArrayBody = `[{
     "parameter_id": "068b59b0-aafb-4c98-ae4b-ed0365a6fbac",
     "unit_id": "f777f2e2-5e32-424e-a1ca-19d16cd8abce",
     "cwms_timeseries_id": "test timeseries",
-    "cwms_office_id": "test office"
+    "cwms_office_id": "test office",
+    "cwms_extent_earliest_time": "2020-01-01T00:00:00Z",
+    "cwms_extent_latest_time": "2024-01-01T00:00:00Z"
 }]`
 
 const updateTimeseriesCwmsBody = `{
@@ -77,7 +85,9 @@ const updateTimeseriesCwmsBody = `{
     "unit_id": "f777f2e2-5e32-424e-a1ca-19d16cd8abce",
     "unit": "feet",
     "cwms_timeseries_id": "test timeseries",
-    "cwms_office_id": "test office"
+    "cwms_office_id": "test office",
+    "cwms_extent_earliest_time": "2020-01-01T00:00:00Z",
+    "cwms_extent_latest_time": "2024-01-01T00:00:00Z"
 }`
 
 func TestTimeseriesCwms(t *testing.T) {
