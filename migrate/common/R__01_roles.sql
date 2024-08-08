@@ -65,7 +65,19 @@ GRANT
 TO instrumentation_user;
 
 -- Drop all views to be recreated
-SELECT 'DROP VIEW ' || string_agg (table_name, ', ') || ' CASCADE;'
-FROM information_schema.views
-WHERE table_schema = 'midas'
-AND table_name LIKE 'v_%';
+DO $$
+DECLARE drop_views_query text;
+BEGIN
+    SELECT 'DROP VIEW ' || string_agg (table_name, ', ') || ' CASCADE;'
+    FROM information_schema.views
+    INTO drop_views_query
+    WHERE table_schema = 'midas'
+    AND table_name LIKE 'v_%';
+
+    IF (drop_views_query IS NULL) THEN
+        RAISE NOTICE 'not dropping views on schema midas -- no views found to drop';
+    ELSE
+        EXECUTE drop_views_query;
+    END IF;
+END
+$$;
