@@ -17,8 +17,8 @@ CREATE TABLE timeseries_cwms (
   cwms_timeseries_id text NOT NULL,
   cwms_office_id text NOT NULL,
   cwms_extent_earliest_time timestamptz NOT NULL,
-  cwms_extent_latest_time timestamptz NOT NULL,
-  CHECK (cwms_extent_earliest_time <= cwms_extent_latest_time)
+  cwms_extent_latest_time timestamptz,
+  CHECK (cwms_extent_latest_time IS NULL OR cwms_extent_earliest_time <= cwms_extent_latest_time)
 );
 
 ALTER TABLE instrument ADD COLUMN show_cwms_tab boolean;

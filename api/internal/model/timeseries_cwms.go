@@ -9,10 +9,10 @@ import (
 
 type TimeseriesCwms struct {
 	Timeseries
-	CwmsTimeseriesID       string    `json:"cwms_timeseries_id" db:"cwms_timeseries_id"`
-	CwmsOfficeID           string    `json:"cwms_office_id" db:"cwms_office_id"`
-	CwmsExtentEarliestTime time.Time `json:"cwms_extent_earliest_time" db:"cwms_extent_earliest_time"`
-	CwmsExtentLatestTime   time.Time `json:"cwms_extent_latest_time" db:"cwms_extent_latest_time"`
+	CwmsTimeseriesID       string     `json:"cwms_timeseries_id" db:"cwms_timeseries_id"`
+	CwmsOfficeID           string     `json:"cwms_office_id" db:"cwms_office_id"`
+	CwmsExtentEarliestTime time.Time  `json:"cwms_extent_earliest_time" db:"cwms_extent_earliest_time"`
+	CwmsExtentLatestTime   *time.Time `json:"cwms_extent_latest_time" db:"cwms_extent_latest_time"`
 }
 
 const listTimeseriesCwms = `
