@@ -1,24 +1,31 @@
 -- ${flyway:timestamp}
 CREATE OR REPLACE VIEW v_alert AS (
-    SELECT a.id AS id,
-       a.alert_config_id AS alert_config_id,
-       a.create_date AS create_date,
-       p.id AS project_id,
-       p.name AS project_name,
-       ac.name AS name,
-       ac.body AS body,
-       (
+    SELECT
+        a.id AS id,
+        a.alert_config_id AS alert_config_id,
+        a.create_date AS create_date,
+        p.id AS project_id,
+        p.name AS project_name,
+        ac.name AS name,
+        ac.body AS body,
+        (
             SELECT COALESCE(json_agg(json_build_object(
-                'instrument_id',   id,
-                'instrument_name', name
+                'instrument_id', ii.id,
+                'instrument_name', ii.name
             ))::text, '[]'::text)
-            FROM instrument
-            WHERE id = ANY(
-                SELECT iac.instrument_id
-                FROM   alert_config_instrument iac
-                WHERE  iac.alert_config_id = ac.id
-            )
-        ) AS instruments
+            FROM instrument ii
+            INNER JOIN alert_config_instrument acii ON acii.instrument_id = ii.id
+            WHERE acii.alert_config_id = ac.id
+        ) AS instruments,
+        (
+            SELECT COALESCE(json_agg(json_build_object(
+                'timeseries_id', ts.id,
+                'timeseries_name', ts.name
+            ))::text, '[]'::text)
+            FROM timeseries ts
+            INNER JOIN alert_config_timeseries acts ON acts.timeseries_id = ts.id
+            WHERE acts.alert_config_id = ac.id
+        ) AS timeseries,
     FROM alert a
     INNER JOIN alert_config ac ON a.alert_config_id = ac.id
     INNER JOIN project p ON ac.project_id = p.id
@@ -63,12 +70,18 @@ CREATE OR REPLACE VIEW v_alert_config AS (
                 'instrument_name', ii.name
             ))::text, '[]'::text)
             FROM instrument ii
-            WHERE ii.id = ANY(
-                SELECT iac.instrument_id
-                FROM   alert_config_instrument iac
-                WHERE  iac.alert_config_id = ac.id
-            )
+            INNER JOIN alert_config_instrument acii ON acii.instrument_id = ii.id
+            WHERE acii.alert_config_id = ac.id
         ) AS instruments,
+        (
+            SELECT COALESCE(json_agg(json_build_object(
+                'timeseries_id', ts.id,
+                'timeseries_name', ts.name
+            ))::text, '[]'::text)
+            FROM timeseries ts
+            INNER JOIN alert_config_timeseries acts ON acts.timeseries_id = ts.id
+            WHERE acts.alert_config_id = ac.id
+        ) AS timeseries,
         (
             SELECT COALESCE(json_agg(json_build_object(
                 'id', ae.id,
@@ -83,10 +96,8 @@ CREATE OR REPLACE VIEW v_alert_config AS (
                     null AS username,
                     ie.email AS email
                 FROM email ie
-                WHERE ie.id IN (
-                    SELECT aes.email_id FROM alert_email_subscription aes
-                    WHERE aes.alert_config_id = ac.id
-                )
+                INNER JOIN alert_email_subscription aes ON eas.email_id = ie.id
+                WHERE aes.alert_config_id = ac.id
                 UNION
                 SELECT
                     ip.id,
@@ -94,10 +105,8 @@ CREATE OR REPLACE VIEW v_alert_config AS (
                     ip.username AS username,
                     ip.email AS email
                 FROM profile ip
-                WHERE ip.id IN (
-                    SELECT aps.profile_id FROM alert_profile_subscription aps
-                    WHERE aps.alert_config_id = ac.id
-                )
+                INNER JOIN alert_profile_subscription aps ON aps.profile_id = ip.id
+                WHERE aps.alert_config_id = ac.id
             ) ae
         ) AS alert_email_subscriptions
     FROM alert_config ac

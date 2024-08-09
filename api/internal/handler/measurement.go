@@ -48,6 +48,10 @@ func (h *ApiHandler) CreateOrUpdateProjectTimeseriesMeasurements(c echo.Context)
 		return httperr.InternalServerError(err)
 	}
 
+	c.Response().After(func() {
+		// TODO
+	})
+
 	return c.JSON(http.StatusCreated, stored)
 }
 
@@ -72,6 +76,10 @@ func (h *ApiHandler) CreateOrUpdateTimeseriesMeasurements(c echo.Context) error 
 	if err != nil {
 		return httperr.InternalServerError(err)
 	}
+
+	c.Response().After(func() {
+		// TODO
+	})
 
 	return c.JSON(http.StatusCreated, stored)
 }
@@ -106,6 +114,11 @@ func (h *ApiHandler) UpdateTimeseriesMeasurements(c echo.Context) error {
 	if err != nil {
 		return httperr.InternalServerError(err)
 	}
+
+	c.Response().After(func() {
+		// TODO
+	})
+
 	return c.JSON(http.StatusOK, stored)
 }
 

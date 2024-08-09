@@ -58,12 +58,15 @@ func (h *TelemetryHandler) CreateOrUpdateDataloggerMeasurements(c echo.Context) 
 		return httperr.InternalServerError(err)
 	}
 
-	if modelName == "CR6" || modelName == "CR1000X" {
-		cr6Handler := getCR6Handler(h, dl, rawJSON)
-		return cr6Handler(c)
+	var handlerFunc echo.HandlerFunc
+	switch modelName {
+	case "CR6", "CR1000X":
+		handlerFunc = getCR6Handler(h, dl, rawJSON)
+	default:
+		handlerFunc = func(c echo.Context) error { return httperr.BadRequest(errors.New("datalogger model not supported")) }
 	}
 
-	return httperr.BadRequest(errors.New("datalogger model not supported"))
+	return handlerFunc(c)
 }
 
 // getCR6Handler handles parsing and uploading of Campbell Scientific CR6 measurement payloads
@@ -195,6 +198,10 @@ func getCR6Handler(h *TelemetryHandler, dl model.Datalogger, rawJSON []byte) ech
 			em = append(em, fmt.Sprintf("%d: %s", http.StatusInternalServerError, err.Error()))
 			return httperr.InternalServerError(err)
 		}
+
+		c.Response().After(func() {
+			// TODO
+		})
 
 		return c.JSON(http.StatusOK, map[string]interface{}{"model": *dl.Model, "sn": dl.SN})
 	}

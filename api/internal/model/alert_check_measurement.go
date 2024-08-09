@@ -24,11 +24,11 @@ type MeasurementSubmittalTimeseries struct {
 	Status         string `json:"status"`
 }
 
-func (a AlertConfigMeasurementCheck) GetAlertConfig() AlertConfigScheduler {
+func (a AlertConfigMeasurementCheck) GetAlertConfigScheduler() AlertConfigScheduler {
 	return a.AlertConfig
 }
 
-func (a *AlertConfigMeasurementCheck) SetAlertConfig(ac AlertConfigScheduler) {
+func (a *AlertConfigMeasurementCheck) SetAlertConfigScheduler(ac AlertConfigScheduler) {
 	a.AlertConfig = ac
 }
 

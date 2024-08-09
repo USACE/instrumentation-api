@@ -8,6 +8,11 @@ import (
 	"github.com/google/uuid"
 )
 
+type AlertConfigThreshold struct {
+	AlertConfig
+	Opts AlertConfigThresholdOpts `json:"opts" db:"opts"`
+}
+
 type AlertConfigThresholdOpts struct {
 	AlertLowValue   *float64 `json:"alert_low_value" db:"alert_low_value"`
 	AlertHighValue  *float64 `json:"alert_high_value" db:"alert_high_value"`
@@ -48,7 +53,7 @@ const updateAlertConfigThreshold = `
 		warn_high_value=$5,
 		ignore_low_value=$6,
 		ignore_high_value=$7
-	WHERE alert_config_id = $1
+	WHERE alert_config_id=$1
 `
 
 func (q *Queries) UpdateAlertConfigThreshold(ctx context.Context, alertConfigID uuid.UUID, opts AlertConfigThresholdOpts) error {

@@ -13,12 +13,6 @@ var (
 	EvaluationSubmittalAlertTypeID  uuid.UUID = uuid.MustParse("da6ee89e-58cc-4d85-8384-43c3c33a68bd")
 )
 
-const (
-	warning  = "Warning"
-	alert    = "Alert"
-	reminder = "Reminder"
-)
-
 type AlertCheck struct {
 	AlertConfigID uuid.UUID `db:"alert_config_id"`
 	SubmittalID   uuid.UUID `db:"submittal_id"`
@@ -48,6 +42,6 @@ func (ck *AlertCheck) SetSubmittal(sub Submittal) {
 	ck.Submittal = sub
 }
 
-type AlertConfigMap map[uuid.UUID]AlertConfigScheduler
+type AlertConfigSchedulerMap map[uuid.UUID]AlertConfigScheduler
 
 type SubmittalMap map[uuid.UUID]Submittal

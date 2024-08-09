@@ -34,6 +34,11 @@ ALTER TABLE alert_config
   DROP last_reminded,
   DROP mute_consecutive_alerts;
 
+CREATE TABLE alert_config_timeseries (
+  alert_config_id uuid NOT NULL REFERENCES alert_config(id),
+  timeseries_id uuid NOT NULL REFERENCES timeseries(id)
+);
+
 INSERT INTO alert_type VALUES
 ('bb15e7c2-8eae-452c-92f7-e720dc5c9432', 'Threshold'),
 ('c37effee-6b48-4436-8d72-737ed78c1fb7', 'Rate of Change');

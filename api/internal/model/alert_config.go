@@ -2,9 +2,12 @@ package model
 
 import (
 	"context"
+	"database/sql/driver"
+	"encoding/json"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgtype"
 )
 
 type AlertConfig struct {
@@ -15,6 +18,7 @@ type AlertConfig struct {
 	ProjectName             string                               `json:"project_name" db:"project_name"`
 	AlertEmailSubscriptions dbJSONSlice[EmailAutocompleteResult] `json:"alert_email_subscriptions" db:"alert_email_subscriptions"`
 	Instruments             dbJSONSlice[AlertConfigInstrument]   `json:"instruments" db:"instruments"`
+	Timeseries              dbJSONSlice[AlertConfigTimeseries]   `json:"timeseries" db:"timeseries"`
 	LastChecked             *time.Time                           `json:"last_checked" db:"last_checked"`
 	AlertTypeID             uuid.UUID                            `json:"alert_type_id" db:"alert_type_id"`
 	AlertType               string                               `json:"alert_type" db:"alert_type"`
@@ -25,6 +29,26 @@ type AlertConfig struct {
 type AlertConfigInstrument struct {
 	InstrumentID   uuid.UUID `json:"instrument_id" db:"instrument_id"`
 	InstrumentName string    `json:"instrument_name" db:"instrument_name"`
+}
+
+type AlertConfigTimeseries struct {
+	TimeseriesID   uuid.UUID `json:"timeseries_id" db:"timeseries_id"`
+	TimeseriesName string    `json:"timeseries_name" db:"timeseries_name"`
+}
+
+type TimeseriesAlertConfig struct {
+	TimeseriesID         uuid.UUID  `json:"timeseries_id" db:"timeseries_id"`
+	LastMeasurementTime  *time.Time `json:"last_measurement_time" db:"last_measurement_value"`
+	LastMeasurementValue *float64   `json:"last_measurement_value" db:"last_measurement_value"`
+	AlertConfig
+}
+
+type TimeseriesAlertConfigMeasurementsJSON json.RawMessage
+
+func (o TimeseriesAlertConfigMeasurementsJSON) Value() (driver.Value, error) {
+	var pgJSONArr pgtype.JSONBArray
+	err := pgJSONArr.Set(o)
+	return pgJSONArr, err
 }
 
 func (a *AlertConfig) GetToAddresses() []string {
@@ -77,6 +101,45 @@ func (q *Queries) GetAllAlertConfigsForInstrument(ctx context.Context, instrumen
 	aa := make([]AlertConfig, 0)
 	err := q.db.SelectContext(ctx, &aa, getAllAlertConfigsForInstrument, instrumentID)
 	return aa, err
+}
+
+const listAlertConfigsForTimeseries = `
+	DO $$
+	DECLARE r jsonb;
+	BEGIN
+	FOR r IN
+		SELECT unnest(?::jsonb[])
+	LOOP
+		RETURN QUERY SELECT
+			acts.timeseries_id,
+			mm.time last_measurement_time,
+			mm.value AS last_measurement_value,
+			ac.*
+		FROM v_alert_config ac
+		INNER JOIN alert_config_timeseries acts ON acts.alert_config_id = ac.id
+		LEFT JOIN LATERAL (
+			SELECT imm.time, imm.value
+			FROM timeseries_measurement imm
+			WHERE imm.timeseries_id = acts.timeseries_id
+			AND imm.time < CAST (r->>'time' AS timestamptz)
+		) mm ON true
+		WHERE acts.timeseries_id = CAST (r->>'timeseries_id' AS uuid)
+		AND ac.alert_type_id IN (?);
+	END LOOP;
+	RETURN;
+	END
+	$$;
+`
+
+func (q *Queries) GetTimeseriesAlertConfigsForTimeseriesAndAlertTypes(ctx context.Context, rr TimeseriesAlertConfigMeasurementsJSON, alertTypeIDs []uuid.UUID) ([]TimeseriesAlertConfig, error) {
+	query, args, err := sqlIn(listAlertConfigsForTimeseries, rr, alertTypeIDs)
+	if err != nil {
+		return nil, err
+	}
+	query = q.db.Rebind(query)
+	acc := make([]TimeseriesAlertConfig, 0)
+	err = q.db.SelectContext(ctx, &acc, listAlertConfigsForTimeseries, args...)
+	return acc, err
 }
 
 const getOneAlertConfig = `
