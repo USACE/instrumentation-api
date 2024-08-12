@@ -45,7 +45,6 @@ CREATE OR REPLACE VIEW v_alert_config AS (
         prj.id AS project_id,
         prj.name AS project_name,
         ac.last_checked,
-        ac.status,
         atype.id AS alert_type_id,
         atype.name AS alert_type,
         CASE
@@ -66,7 +65,7 @@ CREATE OR REPLACE VIEW v_alert_config AS (
                 'warn_high_value', act.warn_high_value,
                 'ignore_low_value', act.ignore_low_value,
                 'ignore_high_value', act.ignore_high_value,
-                'variance', act.variance,
+                'variance', act.variance
             )::text
             -- rate of change
             WHEN atype.id = 'c37effee-6b48-4436-8d72-737ed78c1fb7'::uuid THEN json_build_object(
@@ -108,7 +107,7 @@ CREATE OR REPLACE VIEW v_alert_config AS (
                     null AS username,
                     ie.email AS email
                 FROM email ie
-                INNER JOIN alert_email_subscription aes ON eas.email_id = ie.id
+                INNER JOIN alert_email_subscription aes ON aes.email_id = ie.id
                 WHERE aes.alert_config_id = ac.id
                 UNION
                 SELECT

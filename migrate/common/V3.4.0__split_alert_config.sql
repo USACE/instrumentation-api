@@ -27,16 +27,19 @@ DROP VIEW IF EXISTS v_alert_check_measurement_submittal;
 DROP VIEW IF EXISTS v_alert_check_evaluation_submittal;
 
 ALTER TABLE alert_config
+  -- dropping because migrating to alert_config_scheduler table
   DROP start_date,
   DROP schedule_interval,
   DROP warning_interval,
   DROP remind_interval,
   DROP last_reminded,
-  DROP mute_consecutive_alerts;
+  DROP mute_consecutive_alerts,
+  -- dropping because ununsed
+  DROP n_missed_before_alert;
 
 CREATE TABLE alert_config_timeseries (
-  alert_config_id uuid NOT NULL REFERENCES alert_config(id),
-  timeseries_id uuid NOT NULL REFERENCES timeseries(id)
+  alert_config_id uuid NOT NULL REFERENCES alert_config(id) ON DELETE CASCADE,
+  timeseries_id uuid NOT NULL REFERENCES timeseries(id) ON DELETE CASCADE
 );
 
 INSERT INTO alert_type VALUES
@@ -62,5 +65,6 @@ CREATE TABLE alert_config_threshold (
 CREATE TABLE alert_config_change (
   alert_config_id uuid NOT NULL REFERENCES alert_config(id) ON DELETE CASCADE,
   warn_rate_of_change double precision,
-  alert_rate_of_change double precision NOT NULL
+  alert_rate_of_change double precision NOT NULL,
+  locf_backfill interval
 );

@@ -17,6 +17,14 @@ const alertConfigInstrumentSchema = `{
     }
 }`
 
+const alertConfigTimeseriesSchema = `{
+    "type": "object",
+    "properties": {
+        "timeseries_id": { "type": "string" },
+        "timeseries_name": { "type": "string" }
+    }
+}`
+
 const alertConfigEmailSchema = `{
     "type": "object",
     "properties": {
@@ -27,7 +35,7 @@ const alertConfigEmailSchema = `{
     }
 }`
 
-var alertConfigSchema = fmt.Sprintf(`{
+const alertConfigSchemaTemplate = `{
     "type": "object",
     "properties": {
         "id": { "type": "string" },
@@ -36,6 +44,7 @@ var alertConfigSchema = fmt.Sprintf(`{
         "project_id": { "type": "string" },
         "alert_type_id": { "type": "string" },
         "alert_type": { "type": "string" },
+        "timeseries": { "type": "array", "items": %s },
         "instruments": { "type": "array", "items": %s },
         "alert_email_subscriptions": { "type": "array", "items": %s },
         "alert_status": { "type": "string" },
@@ -48,7 +57,9 @@ var alertConfigSchema = fmt.Sprintf(`{
         "opts": %s
     },
     "additionalProperties": true
-}`, alertConfigInstrumentSchema, alertConfigEmailSchema, alertConfigSchedulerOptsSchema)
+}`
+
+var alertConfigSchema = fmt.Sprintf(alertConfigSchemaTemplate, alertConfigTimeseriesSchema, alertConfigInstrumentSchema, alertConfigEmailSchema, alertConfigSchedulerOptsSchema)
 
 var alertConfigObjectLoader = gojsonschema.NewStringLoader(alertConfigSchema)
 
@@ -57,8 +68,27 @@ var alertConfigArrayLoader = gojsonschema.NewStringLoader(fmt.Sprintf(`{
     "items": %s
 }`, alertConfigSchema))
 
+const testCreateAlertConfigBodyEmailSubs = `[
+        {   "id": "1ebf9e14-2b1c-404e-9535-6c2ee24944b6",
+            "user_type": "email",
+            "username": null,
+            "email": "no.profile@fake.usace.army.mil"
+        },
+        {
+            "id": "57329df6-9f7a-4dad-9383-4633b452efab",
+            "user_type": "profile",
+            "username": "AnthonyLambert",
+            "email": "anthony.lambert@fake.usace.army.mil"
+        },
+        {
+            "id": null,
+            "user_type": null,
+            "username": null,
+            "email": "noprofile.newemail@fake.usace.army.mil"
+        }
+    ]`
+
 const (
-	testAlertConfigID           = "1efd2d85-d3ee-4388-85a0-f824a761ff8b"
 	testAlertConfigInstrumentID = "9e8f2ca4-4037-45a4-aaca-d9e598877439"
 )
 

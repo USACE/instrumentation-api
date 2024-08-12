@@ -5391,6 +5391,175 @@
         "tags" : [ "alert-config" ]
       }
     },
+    "/projects/{project_id}/alert_configs/changes" : {
+      "post" : {
+        "parameters" : [ {
+          "description" : "project uuid",
+          "in" : "path",
+          "name" : "project_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "description" : "api key",
+          "in" : "query",
+          "name" : "key",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AlertConfigChange"
+              }
+            }
+          },
+          "description" : "rate of change alert config payload",
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AlertConfig"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Bad Request"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Not Found"
+          },
+          "500" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Internal Server Error"
+          }
+        },
+        "security" : [ {
+          "Bearer" : [ ]
+        } ],
+        "summary" : "creates one rate of change alert config",
+        "tags" : [ "alert-config" ],
+        "x-codegen-request-body-name" : "alert_config"
+      }
+    },
+    "/projects/{project_id}/alert_configs/changes/{alert_config_id}" : {
+      "put" : {
+        "parameters" : [ {
+          "description" : "project uuid",
+          "in" : "path",
+          "name" : "project_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "description" : "alert config uuid",
+          "in" : "path",
+          "name" : "alert_config_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "description" : "api key",
+          "in" : "query",
+          "name" : "key",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AlertConfigChange"
+              }
+            }
+          },
+          "description" : "rate of change alert config payload",
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AlertConfig"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Bad Request"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Not Found"
+          },
+          "500" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Internal Server Error"
+          }
+        },
+        "security" : [ {
+          "Bearer" : [ ]
+        } ],
+        "summary" : "updates an existing rate of change alert config",
+        "tags" : [ "alert-config" ],
+        "x-codegen-request-body-name" : "alert_config"
+      }
+    },
     "/projects/{project_id}/alert_configs/schedulers" : {
       "post" : {
         "parameters" : [ {
@@ -5559,6 +5728,175 @@
           "Bearer" : [ ]
         } ],
         "summary" : "updates an existing alert config",
+        "tags" : [ "alert-config" ],
+        "x-codegen-request-body-name" : "alert_config"
+      }
+    },
+    "/projects/{project_id}/alert_configs/thresholds" : {
+      "post" : {
+        "parameters" : [ {
+          "description" : "project uuid",
+          "in" : "path",
+          "name" : "project_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "description" : "api key",
+          "in" : "query",
+          "name" : "key",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AlertConfigThreshold"
+              }
+            }
+          },
+          "description" : "threshold alert config payload",
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AlertConfig"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Bad Request"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Not Found"
+          },
+          "500" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Internal Server Error"
+          }
+        },
+        "security" : [ {
+          "Bearer" : [ ]
+        } ],
+        "summary" : "creates one threshold alert config",
+        "tags" : [ "alert-config" ],
+        "x-codegen-request-body-name" : "alert_config"
+      }
+    },
+    "/projects/{project_id}/alert_configs/thresholds/{alert_config_id}" : {
+      "put" : {
+        "parameters" : [ {
+          "description" : "project uuid",
+          "in" : "path",
+          "name" : "project_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "description" : "alert config uuid",
+          "in" : "path",
+          "name" : "alert_config_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "description" : "api key",
+          "in" : "query",
+          "name" : "key",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AlertConfigThreshold"
+              }
+            }
+          },
+          "description" : "threshold alert config payload",
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AlertConfig"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Bad Request"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Not Found"
+          },
+          "500" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Internal Server Error"
+          }
+        },
+        "security" : [ {
+          "Bearer" : [ ]
+        } ],
+        "summary" : "updates an existing threshold alert config",
         "tags" : [ "alert-config" ],
         "x-codegen-request-body-name" : "alert_config"
       }
@@ -12143,6 +12481,12 @@
           },
           "read" : {
             "type" : "boolean"
+          },
+          "timeseries" : {
+            "items" : {
+              "$ref" : "#/components/schemas/AlertConfigTimeseries"
+            },
+            "type" : "array"
           }
         },
         "type" : "object"
@@ -12197,6 +12541,12 @@
           "project_name" : {
             "type" : "string"
           },
+          "timeseries" : {
+            "items" : {
+              "$ref" : "#/components/schemas/AlertConfigTimeseries"
+            },
+            "type" : "array"
+          },
           "update_date" : {
             "type" : "string"
           },
@@ -12209,12 +12559,199 @@
         },
         "type" : "object"
       },
+      "AlertConfigChange" : {
+        "properties" : {
+          "alert_email_subscriptions" : {
+            "items" : {
+              "$ref" : "#/components/schemas/EmailAutocompleteResult"
+            },
+            "type" : "array"
+          },
+          "alert_type" : {
+            "type" : "string"
+          },
+          "alert_type_id" : {
+            "type" : "string"
+          },
+          "body" : {
+            "type" : "string"
+          },
+          "create_date" : {
+            "type" : "string"
+          },
+          "creator_id" : {
+            "type" : "string"
+          },
+          "creator_username" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "instruments" : {
+            "items" : {
+              "$ref" : "#/components/schemas/AlertConfigInstrument"
+            },
+            "type" : "array"
+          },
+          "last_checked" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "opts" : {
+            "$ref" : "#/components/schemas/AlertConfigChangeOpts"
+          },
+          "project_id" : {
+            "type" : "string"
+          },
+          "project_name" : {
+            "type" : "string"
+          },
+          "timeseries" : {
+            "items" : {
+              "$ref" : "#/components/schemas/AlertConfigTimeseries"
+            },
+            "type" : "array"
+          },
+          "update_date" : {
+            "type" : "string"
+          },
+          "updater_id" : {
+            "type" : "string"
+          },
+          "updater_username" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "AlertConfigChangeOpts" : {
+        "properties" : {
+          "alert_rate_of_change" : {
+            "type" : "number"
+          },
+          "locf_backfill" : {
+            "type" : "string"
+          },
+          "warn_rate_of_change" : {
+            "type" : "number"
+          }
+        },
+        "type" : "object"
+      },
       "AlertConfigInstrument" : {
         "properties" : {
           "instrument_id" : {
             "type" : "string"
           },
           "instrument_name" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "AlertConfigThreshold" : {
+        "properties" : {
+          "alert_email_subscriptions" : {
+            "items" : {
+              "$ref" : "#/components/schemas/EmailAutocompleteResult"
+            },
+            "type" : "array"
+          },
+          "alert_type" : {
+            "type" : "string"
+          },
+          "alert_type_id" : {
+            "type" : "string"
+          },
+          "body" : {
+            "type" : "string"
+          },
+          "create_date" : {
+            "type" : "string"
+          },
+          "creator_id" : {
+            "type" : "string"
+          },
+          "creator_username" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "instruments" : {
+            "items" : {
+              "$ref" : "#/components/schemas/AlertConfigInstrument"
+            },
+            "type" : "array"
+          },
+          "last_checked" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "opts" : {
+            "$ref" : "#/components/schemas/AlertConfigThresholdOpts"
+          },
+          "project_id" : {
+            "type" : "string"
+          },
+          "project_name" : {
+            "type" : "string"
+          },
+          "timeseries" : {
+            "items" : {
+              "$ref" : "#/components/schemas/AlertConfigTimeseries"
+            },
+            "type" : "array"
+          },
+          "update_date" : {
+            "type" : "string"
+          },
+          "updater_id" : {
+            "type" : "string"
+          },
+          "updater_username" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "AlertConfigThresholdOpts" : {
+        "properties" : {
+          "alert_high_value" : {
+            "type" : "number"
+          },
+          "alert_low_value" : {
+            "type" : "number"
+          },
+          "ignore_high_value" : {
+            "type" : "number"
+          },
+          "ignore_low_value" : {
+            "type" : "number"
+          },
+          "variance" : {
+            "type" : "number"
+          },
+          "warn_high_value" : {
+            "type" : "number"
+          },
+          "warn_low_value" : {
+            "type" : "number"
+          }
+        },
+        "type" : "object"
+      },
+      "AlertConfigTimeseries" : {
+        "properties" : {
+          "timeseries_id" : {
+            "type" : "string"
+          },
+          "timeseries_name" : {
             "type" : "string"
           }
         },
