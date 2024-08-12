@@ -94,7 +94,7 @@ func (s inclinometerMeasurementService) CreateTimeseriesConstant(ctx context.Con
 		t.UnitID = unitIDs[0]
 		ts = append(ts, t)
 
-		// Create timeseries for constant
+		t.Type = model.ConstantTimeseriesType
 		tsNew, err := qtx.CreateTimeseries(ctx, t)
 		if err != nil {
 			return err

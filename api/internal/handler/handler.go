@@ -11,6 +11,15 @@ import (
 	"github.com/USACE/instrumentation-api/api/internal/service"
 )
 
+func newHttpClient() *http.Client {
+	return &http.Client{
+		Timeout: time.Second * 60,
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return nil
+		},
+	}
+}
+
 type ApiHandler struct {
 	Middleware                     middleware.Middleware
 	BlobService                    cloud.Blob
@@ -45,6 +54,7 @@ type ApiHandler struct {
 	SaaInstrumentService           service.SaaInstrumentService
 	SubmittalService               service.SubmittalService
 	TimeseriesService              service.TimeseriesService
+	TimeseriesCwmsService          service.TimeseriesCwmsService
 	CalculatedTimeseriesService    service.CalculatedTimeseriesService
 	ProcessTimeseriesService       service.ProcessTimeseriesService
 	UnitService                    service.UnitService
@@ -94,6 +104,7 @@ func NewApi(cfg *config.ApiConfig) *ApiHandler {
 		SaaInstrumentService:           service.NewSaaInstrumentService(db, q),
 		SubmittalService:               service.NewSubmittalService(db, q),
 		TimeseriesService:              service.NewTimeseriesService(db, q),
+		TimeseriesCwmsService:          service.NewTimeseriesCwmsService(db, q),
 		CalculatedTimeseriesService:    service.NewCalculatedTimeseriesService(db, q),
 		ProcessTimeseriesService:       service.NewProcessTimeseriesService(db, q),
 		UnitService:                    service.NewUnitService(db, q),
@@ -147,12 +158,7 @@ type DcsLoaderHandler struct {
 func NewDcsLoader(cfg *config.DcsLoaderConfig) *DcsLoaderHandler {
 	s3Blob := cloud.NewS3Blob(&cfg.AWSS3Config, "", "")
 	ps := cloud.NewSQSPubsub(&cfg.AWSSQSConfig).WithBlob(s3Blob)
-	apiClient := &http.Client{
-		Timeout: time.Second * 60,
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return nil
-		},
-	}
+	apiClient := newHttpClient()
 
 	return &DcsLoaderHandler{
 		PubsubService:    ps,
