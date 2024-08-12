@@ -351,6 +351,11 @@ func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 	r.private.PUT("/formulas/:formula_id", h.UpdateCalculation)
 	r.private.DELETE("/formulas/:formula_id", h.DeleteCalculation)
 
+	// CwmsTimeseries
+	r.public.GET("/projects/:project_id/instruments/:instrument_id/timeseries/cwms", h.ListTimeseriesCwms)
+	r.private.POST("/projects/:project_id/instruments/:instrument_id/timeseries/cwms", h.CreateTimeseriesCwms)
+	r.private.PUT("/projects/:project_id/instruments/:instrument_id/timeseries/cwms/:timeseries_id", h.UpdateTimeseriesCwms)
+
 	// ProcessTimeseries
 	r.public.GET("/timeseries/:timeseries_id/measurements", h.ListTimeseriesMeasurementsByTimeseries)
 	r.public.GET("/instruments/:instrument_id/timeseries/:timeseries_id/measurements", h.ListTimeseriesMeasurementsByTimeseries)

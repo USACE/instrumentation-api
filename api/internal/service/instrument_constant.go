@@ -36,6 +36,7 @@ func (s instrumentConstantService) CreateInstrumentConstants(ctx context.Context
 
 	uu := make([]model.Timeseries, len(tt))
 	for idx, t := range tt {
+		t.Type = model.ConstantTimeseriesType
 		tsNew, err := qtx.CreateTimeseries(ctx, t)
 		if err != nil {
 			return nil, err

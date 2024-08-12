@@ -1,32 +1,24 @@
 -- ${flyway:timestamp}
-CREATE OR REPLACE VIEW v_timeseries AS (
-    WITH ts_stored_and_computed AS (
-        SELECT
-            id,
-            slug,
-            name,
-            instrument_id,
-            parameter_id,
-            unit_id,
-            (SELECT id IN (SELECT timeseries_id FROM calculation)) AS is_computed
-        FROM timeseries
-    )
-    SELECT t.id                 AS id,
-        t.slug                  AS slug,
-        t.name                  AS name,
-        t.is_computed           AS is_computed,
+CREATE VIEW v_timeseries AS (
+    SELECT
+        t.id,
+        t.slug,
+        t.name,
+        t.type,
+        -- is_computed should be deprecated now that timeseries type enum is included
+        CASE WHEN t.type = 'computed' THEN true ELSE false END AS is_computed,
         i.slug || '.' || t.slug AS variable,
-        i.id                    AS instrument_id,
-        i.slug                  AS instrument_slug,
-        i.name                  AS instrument,
-        p.id                    AS parameter_id,
-        p.name                  AS parameter,
-        u.id                    AS unit_id,
-        u.name                  AS unit
-    FROM ts_stored_and_computed t
+        i.id AS instrument_id,
+        i.slug AS instrument_slug,
+        i.name AS instrument,
+        p.id AS parameter_id,
+        p.name AS parameter,
+        u.id AS unit_id,
+        u.name AS unit
+    FROM timeseries t
     INNER JOIN instrument i ON i.id = t.instrument_id
     INNER JOIN parameter p ON p.id = t.parameter_id
-    INNER JOIN unit U ON u.id = t.unit_id
+    INNER JOIN unit u ON u.id = t.unit_id
 );
 
 CREATE OR REPLACE VIEW v_timeseries_dependency AS (
@@ -36,7 +28,7 @@ CREATE OR REPLACE VIEW v_timeseries_dependency AS (
             b.slug || '.' || a.slug AS variable
 	    FROM timeseries a
 	    LEFT JOIN instrument b ON b.id = a.instrument_id
-        WHERE a.id NOT IN (SELECT timeseries_id FROM calculation)
+            WHERE a.id NOT IN (SELECT c.timeseries_id FROM calculation c)
     )
     -- id references computed timeseries
     -- dependency_timeseries_id references timeseries used to caclulate computed timeseries
@@ -65,8 +57,10 @@ CREATE OR REPLACE VIEW v_timeseries_project_map AS (
     LEFT JOIN project_instrument pi ON pi.instrument_id = i.id
 );
 
-CREATE OR REPLACE VIEW v_timeseries_stored AS (
-    SELECT * FROM timeseries WHERE id NOT IN (SELECT timeseries_id FROM calculation)
+CREATE VIEW v_timeseries_stored AS (
+    SELECT * FROM timeseries
+    WHERE type = 'standard'
+    OR type = 'constant'
 );
 
 CREATE OR REPLACE VIEW v_timeseries_computed AS (
@@ -74,8 +68,18 @@ CREATE OR REPLACE VIEW v_timeseries_computed AS (
         ts.*,
         cc.contents AS contents
     FROM timeseries ts
-    LEFT JOIN calculation cc ON ts.id = cc.timeseries_id
-    WHERE id IN (SELECT timeseries_id FROM calculation)
+    INNER JOIN calculation cc ON ts.id = cc.timeseries_id
+);
+
+CREATE OR REPLACE VIEW v_timeseries_cwms AS (
+    SELECT
+        ts.*,
+        tc.cwms_timeseries_id,
+        tc.cwms_office_id,
+        tc.cwms_extent_earliest_time,
+        tc.cwms_extent_latest_time
+    FROM v_timeseries ts
+    INNER JOIN timeseries_cwms tc ON ts.id = tc.timeseries_id
 );
 
 GRANT SELECT ON
@@ -83,5 +87,6 @@ GRANT SELECT ON
     v_timeseries_dependency,
     v_timeseries_stored,
     v_timeseries_computed,
+    v_timeseries_cwms,
     v_timeseries_project_map
 TO instrumentation_reader;

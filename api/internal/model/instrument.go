@@ -36,6 +36,8 @@ type Instrument struct {
 	Projects      dbJSONSlice[IDSlugName] `json:"projects" db:"projects"`
 	NIDID         *string                 `json:"nid_id" db:"nid_id"`
 	USGSID        *string                 `json:"usgs_id" db:"usgs_id"`
+	HasCwms       bool                    `json:"has_cwms" db:"has_cwms"`
+	ShowCwmsTab   bool                    `json:"show_cwms_tab" db:"show_cwms_tab"`
 	Opts          Opts                    `json:"opts" db:"opts"`
 	AuditInfo
 }
@@ -139,6 +141,8 @@ const listInstrumentsSQL = `
 		alert_configs,
 		nid_id,
 		usgs_id,
+		has_cwms,
+		show_cwms_tab,
 		opts
 	FROM v_instrument
 `
@@ -181,8 +185,8 @@ func (q *Queries) GetInstrumentCount(ctx context.Context) (InstrumentCount, erro
 }
 
 const createInstrument = `
-	INSERT INTO instrument (slug, name, type_id, geometry, station, station_offset, creator, create_date, nid_id, usgs_id)
-	VALUES (slugify($1, 'instrument'), $1, $2, ST_SetSRID(ST_GeomFromWKB($3), 4326), $4, $5, $6, $7, $8, $9)
+	INSERT INTO instrument (slug, name, type_id, geometry, station, station_offset, creator, create_date, nid_id, usgs_id, show_cwms_tab)
+	VALUES (slugify($1, 'instrument'), $1, $2, ST_SetSRID(ST_GeomFromWKB($3), 4326), $4, $5, $6, $7, $8, $9, $10)
 	RETURNING id, slug
 `
 
@@ -190,7 +194,7 @@ func (q *Queries) CreateInstrument(ctx context.Context, i Instrument) (IDSlugNam
 	var aa IDSlugName
 	if err := q.db.GetContext(
 		ctx, &aa, createInstrument,
-		i.Name, i.TypeID, i.Geometry, i.Station, i.StationOffset, i.CreatorID, i.CreateDate, i.NIDID, i.USGSID,
+		i.Name, i.TypeID, i.Geometry, i.Station, i.StationOffset, i.CreatorID, i.CreateDate, i.NIDID, i.USGSID, i.ShowCwmsTab,
 	); err != nil {
 		return aa, err
 	}
@@ -245,7 +249,8 @@ const updateInstrument = `
 		station = $8,
 		station_offset = $9,
 		nid_id = $10,
-		usgs_id = $11
+		usgs_id = $11,
+		show_cwms_tab = $12
 	WHERE id = $2
 	AND id IN (
 		SELECT instrument_id
@@ -258,7 +263,7 @@ func (q *Queries) UpdateInstrument(ctx context.Context, projectID uuid.UUID, i I
 	_, err := q.db.ExecContext(
 		ctx, updateInstrument,
 		projectID, i.ID, i.Name, i.TypeID, i.Geometry,
-		i.UpdaterID, i.UpdateDate, i.Station, i.StationOffset, i.NIDID, i.USGSID,
+		i.UpdaterID, i.UpdateDate, i.Station, i.StationOffset, i.NIDID, i.USGSID, i.ShowCwmsTab,
 	)
 	return err
 }

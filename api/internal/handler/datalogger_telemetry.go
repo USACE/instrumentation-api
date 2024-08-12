@@ -102,13 +102,13 @@ func getCR6Handler(h *TelemetryHandler, dl model.Datalogger, rawJSON []byte) ech
 		if dl.SN != pl.Head.Environment.SerialNo {
 			snErr := fmt.Sprint(snErrMsg, dl.SN)
 			em = append(em, fmt.Sprintf("%d: %s", http.StatusBadRequest, snErr))
-			httperr.BadRequest(errors.New(snErr))
+			return httperr.BadRequest(errors.New(snErr))
 		}
 		// Check sn from route param matches model in request body
 		if *dl.Model != pl.Head.Environment.Model {
 			modelErr := fmt.Sprint(modelErrMsg, *dl.Model)
 			em = append(em, fmt.Sprintf("%d: %s", http.StatusBadRequest, modelErr))
-			httperr.BadRequest(errors.New(modelErr))
+			return httperr.BadRequest(errors.New(modelErr))
 		}
 
 		// reroute deferred errors and previews to respective table

@@ -8,6 +8,13 @@ import (
 	"github.com/google/uuid"
 )
 
+const (
+	StandardTimeseriesType = "standard"
+	ConstantTimeseriesType = "constant"
+	ComputedTimeseriesType = "computed"
+	CwmsTimeseriesType     = "cwms"
+)
+
 type Timeseries struct {
 	ID             uuid.UUID     `json:"id"`
 	Slug           string        `json:"slug"`
@@ -21,6 +28,7 @@ type Timeseries struct {
 	UnitID         uuid.UUID     `json:"unit_id" db:"unit_id"`
 	Unit           string        `json:"unit,omitempty"`
 	Values         []Measurement `json:"values,omitempty"`
+	Type           string        `json:"type" db:"type"`
 	IsComputed     bool          `json:"is_computed" db:"is_computed"`
 }
 
@@ -57,13 +65,6 @@ var (
 	unknownUnitID      = uuid.MustParse("4a999277-4cf5-4282-93ce-23b33c65e2c8")
 )
 
-const listTimeseries = `
-	SELECT
-		id, slug, name, variable, instrument_id,
-		instrument_slug, instrument, parameter_id, parameter, unit_id, unit, is_computed
-	FROM v_timeseries
-`
-
 const getStoredTimeseriesExists = `
 	SELECT EXISTS (SELECT id FROM v_timeseries_stored WHERE id = $1)
 `
@@ -83,7 +84,6 @@ const getTimeseriesProjectMap = `
 	WHERE timeseries_id IN (?)
 `
 
-// GetTimeseriesProjectMap returns a map of { timeseries_id: project_id, }
 func (q *Queries) GetTimeseriesProjectMap(ctx context.Context, timeseriesIDs []uuid.UUID) (map[uuid.UUID]uuid.UUID, error) {
 	query, args, err := sqlIn(getTimeseriesProjectMap, timeseriesIDs)
 	if err != nil {
@@ -104,12 +104,10 @@ func (q *Queries) GetTimeseriesProjectMap(ctx context.Context, timeseriesIDs []u
 	return m, nil
 }
 
-const listProjectTimeseries = listTimeseries + `
-	WHERE instrument_id = ANY(
-		SELECT instrument_id
-		FROM project_instrument
-		WHERE project_id = $1
-	)
+const listProjectTimeseries = `
+	SELECT t.* FROM v_timeseries t
+	INNER JOIN project_instrument p ON p.instrument_id = t.instrument_id
+	WHERE p.project_id = $1
 `
 
 // ListProjectTimeseries lists all timeseries for a given project
@@ -122,11 +120,11 @@ func (q *Queries) ListProjectTimeseries(ctx context.Context, projectID uuid.UUID
 	return tt, nil
 }
 
-const listInstrumentTimeseries = listTimeseries + `
+const listInstrumentTimeseries = `
+	SELECT * FROM v_timeseries
 	WHERE instrument_id = $1
 `
 
-// ListInstrumentTimeseries returns an array of timeseries for an instrument
 func (q *Queries) ListInstrumentTimeseries(ctx context.Context, instrumentID uuid.UUID) ([]Timeseries, error) {
 	tt := make([]Timeseries, 0)
 	if err := q.db.Select(&tt, listInstrumentTimeseries, instrumentID); err != nil {
@@ -135,15 +133,26 @@ func (q *Queries) ListInstrumentTimeseries(ctx context.Context, instrumentID uui
 	return tt, nil
 }
 
-const listInstrumentGroupTimeseries = listTimeseries + `
-	WHERE  instrument_id IN (
-		SELECT instrument_id
-		FROM   instrument_group_instruments
-		WHERE  instrument_group_id = $1
-	)
+const listPlotConfigTimeseries = `
+	SELECT t.* FROM v_timeseries t
+	INNER JOIN plot_configuration_timeseries pct ON pct.timeseries_id = t.id
+	WHERE pct.plot_configuration_id = $1
 `
 
-// ListInstrumentGroupTimeseries returns an array of timeseries for instruments that belong to an instrument_group
+func (q *Queries) ListPlotConfigTimeseries(ctx context.Context, plotConfigID uuid.UUID) ([]Timeseries, error) {
+	tt := make([]Timeseries, 0)
+	if err := q.db.Select(&tt, listPlotConfigTimeseries, plotConfigID); err != nil {
+		return nil, err
+	}
+	return tt, nil
+}
+
+const listInstrumentGroupTimeseries = `
+	SELECT t.* FROM v_timeseries t
+	INNER JOIN instrument_group_instruments gi ON gi.instrument_id = t.instrument_id
+	WHERE gi.instrument_group_id = $1
+`
+
 func (q *Queries) ListInstrumentGroupTimeseries(ctx context.Context, instrumentGroupID uuid.UUID) ([]Timeseries, error) {
 	tt := make([]Timeseries, 0)
 	if err := q.db.SelectContext(ctx, &tt, listInstrumentGroupTimeseries, instrumentGroupID); err != nil {
@@ -152,11 +161,10 @@ func (q *Queries) ListInstrumentGroupTimeseries(ctx context.Context, instrumentG
 	return tt, nil
 }
 
-const getTimeseries = listTimeseries + `
-	WHERE id = $1
+const getTimeseries = `
+	SELECT * FROM v_timeseries WHERE id = $1
 `
 
-// GetTimeseries returns a single timeseries without measurements
 func (q *Queries) GetTimeseries(ctx context.Context, timeseriesID uuid.UUID) (Timeseries, error) {
 	var t Timeseries
 	err := q.db.GetContext(ctx, &t, getTimeseries, timeseriesID)
@@ -164,12 +172,11 @@ func (q *Queries) GetTimeseries(ctx context.Context, timeseriesID uuid.UUID) (Ti
 }
 
 const createTimeseries = `
-	INSERT INTO timeseries (instrument_id, slug, name, parameter_id, unit_id)
-	VALUES ($1, slugify($2, 'timeseries'), $2, $3, $4)
-	RETURNING id, instrument_id, slug, name, parameter_id, unit_id
+	INSERT INTO timeseries (instrument_id, slug, name, parameter_id, unit_id, type)
+	VALUES ($1, slugify($2, 'timeseries'), $2, $3, $4, $5)
+	RETURNING id, instrument_id, slug, name, parameter_id, unit_id, type
 `
 
-// CreateTimeseries creates many timeseries from an array of timeseries
 func (q *Queries) CreateTimeseries(ctx context.Context, ts Timeseries) (Timeseries, error) {
 	if ts.ParameterID == uuid.Nil {
 		ts.ParameterID = unknownParameterID
@@ -177,8 +184,11 @@ func (q *Queries) CreateTimeseries(ctx context.Context, ts Timeseries) (Timeseri
 	if ts.UnitID == uuid.Nil {
 		ts.UnitID = unknownUnitID
 	}
+	if ts.Type == "" {
+		ts.Type = StandardTimeseriesType
+	}
 	var tsNew Timeseries
-	err := q.db.GetContext(ctx, &tsNew, createTimeseries, ts.InstrumentID, ts.Name, ts.ParameterID, ts.UnitID)
+	err := q.db.GetContext(ctx, &tsNew, createTimeseries, ts.InstrumentID, ts.Name, ts.ParameterID, ts.UnitID, ts.Type)
 	return tsNew, err
 }
 
@@ -188,7 +198,6 @@ const updateTimeseries = `
 	RETURNING id
 `
 
-// UpdateTimeseries updates a timeseries
 func (q *Queries) UpdateTimeseries(ctx context.Context, ts Timeseries) (uuid.UUID, error) {
 	if ts.ParameterID == uuid.Nil {
 		ts.ParameterID = unknownParameterID
@@ -205,7 +214,6 @@ const deleteTimeseries = `
 	DELETE FROM timeseries WHERE id = $1
 `
 
-// DeleteTimeseries deletes a timeseries and cascade deletes all measurements
 func (q *Queries) DeleteTimeseries(ctx context.Context, timeseriesID uuid.UUID) error {
 	_, err := q.db.ExecContext(ctx, deleteTimeseries, timeseriesID)
 	return err

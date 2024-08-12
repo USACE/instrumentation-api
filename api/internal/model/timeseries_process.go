@@ -402,18 +402,19 @@ func queryTimeseriesMeasurements(ctx context.Context, q *Queries, f ProcessMeasu
 		INNER JOIN timeseries_measurement m2 ON m2.time = nhm.time AND m2.timeseries_id = nhm.timeseries_id
 	)
 	(
-		SELECT rt.id                          AS timeseries_id,
-			   ts.instrument_id               AS instrument_id,
-			   i.slug || '.' || ts.slug       AS variable,
-			   false                          AS is_computed,
-			   null                           AS formula,
-			   COALESCE((
-					SELECT json_agg(json_build_object('time', time, 'value', value) ORDER BY time ASC)::text
-					FROM timeseries_measurement
-					WHERE timeseries_id = rt.id AND time >= ? AND time <= ?
-			   ), '[]')			  AS measurements,
-			   nl.measurement::text           AS next_measurement_low,
-			   nh.measurement::text           AS next_measurement_high
+		SELECT
+			rt.id AS timeseries_id,
+			ts.instrument_id AS instrument_id,
+			i.slug || '.' || ts.slug AS variable,
+			false AS is_computed,
+			null AS formula,
+			COALESCE((
+			     	SELECT json_agg(json_build_object('time', time, 'value', value) ORDER BY time ASC)::text
+			     	FROM timeseries_measurement
+			     	WHERE timeseries_id = rt.id AND time >= ? AND time <= ?
+			), '[]') AS measurements,
+			nl.measurement::text AS next_measurement_low,
+			nh.measurement::text AS next_measurement_high
 		FROM required_timeseries rt
 		INNER JOIN timeseries ts ON ts.id = rt.id
 		INNER JOIN instrument i ON i.id = ts.instrument_id
@@ -422,14 +423,15 @@ func queryTimeseriesMeasurements(ctx context.Context, q *Queries, f ProcessMeasu
 	)
 	UNION ALL
 	(
-		SELECT id                		  	  AS timeseries_id,
-			   instrument_id        		  AS instrument_id,
-			   slug			        	  AS variable,
-			   true                    		  AS is_computed,
-			   contents             		  AS formula,
-			   '[]'::text              		  AS measurements,
-			   null                    		  AS next_measurement_low,
-			   null                    		  AS next_measurement_high
+		SELECT
+			id AS timeseries_id,
+			instrument_id AS instrument_id,
+			slug AS variable,
+			true AS is_computed,
+			contents AS formula,
+			'[]'::text AS measurements,
+			null AS next_measurement_low,
+			null AS next_measurement_high
 		FROM v_timeseries_computed
 		WHERE ` + filterSQL + ` AND contents IS NOT NULL
 	)
@@ -496,25 +498,26 @@ func queryInclinometerTimeseriesMeasurements(ctx context.Context, q *Queries, f 
 		GROUP BY timeseries_id
 	)
 	-- Stored Timeseries
-	SELECT rt.id                          AS timeseries_id,
-		   ts.instrument_id               AS instrument_id,
-		   i.slug || '.' || ts.slug       AS variable,
-		   false                          AS is_computed,
-		   null                           AS formula,
-		   COALESCE(m.measurements, '[]') AS measurements
+	SELECT
+		rt.id AS timeseries_id,
+		ts.instrument_id AS instrument_id,
+		i.slug || '.' || ts.slug AS variable,
+		false AS is_computed,
+		null AS formula,
+		COALESCE(m.measurements, '[]') AS measurements
 	FROM required_timeseries rt
 	INNER JOIN timeseries ts ON ts.id = rt.id
 	INNER JOIN instrument i ON i.id = ts.instrument_id AND i.id IN (SELECT id FROM requested_instruments)
 	LEFT JOIN measurements m ON m.timeseries_id = rt.id
 	UNION
 	-- Computed Timeseries
-	SELECT cc.id                   AS timeseries_id,
-		   cc.instrument_id        AS instrument_id,
-		   -- TODO: make this component of the query a 'slug'-type.
-		   cc.name			       AS variable,
-		   true                    AS is_computed,
-		   cc.contents             AS formula,
-		   '[]'::text              AS measurements
+	SELECT
+		cc.id AS timeseries_id,
+		cc.instrument_id AS instrument_id,
+		cc.name AS variable,
+		true AS is_computed,
+		cc.contents AS formula,
+		'[]'::text AS measurements
 	FROM v_timeseries_computed cc
 	WHERE cc.contents IS NOT NULL AND cc.instrument_id IN (SELECT id FROM requested_instruments)
 	ORDER BY is_computed
