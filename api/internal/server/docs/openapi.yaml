@@ -11385,11 +11385,13 @@ components:
           error: error
           value: 0.8008281904610115
         instrument: instrument
+        cwms_extent_earliest_time: cwms_extent_earliest_time
         type: type
         cwms_timeseries_id: cwms_timeseries_id
         instrument_id: instrument_id
         unit: unit
         parameter: parameter
+        cwms_extent_latest_time: cwms_extent_latest_time
         name: name
         variable: variable
         id: id
@@ -11399,6 +11401,10 @@ components:
         slug: slug
         parameter_id: parameter_id
       properties:
+        cwms_extent_earliest_time:
+          type: string
+        cwms_extent_latest_time:
+          type: string
         cwms_office_id:
           type: string
         cwms_timeseries_id:

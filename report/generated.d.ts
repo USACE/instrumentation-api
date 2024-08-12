@@ -10013,11 +10013,13 @@ export interface components {
      *     }
      *   ],
      *   "instrument": "instrument",
+     *   "cwms_extent_earliest_time": "cwms_extent_earliest_time",
      *   "type": "type",
      *   "cwms_timeseries_id": "cwms_timeseries_id",
      *   "instrument_id": "instrument_id",
      *   "unit": "unit",
      *   "parameter": "parameter",
+     *   "cwms_extent_latest_time": "cwms_extent_latest_time",
      *   "name": "name",
      *   "variable": "variable",
      *   "id": "id",
@@ -10029,6 +10031,8 @@ export interface components {
      * }
      */
     TimeseriesCwms: {
+      cwms_extent_earliest_time?: string;
+      cwms_extent_latest_time?: string;
       cwms_office_id?: string;
       cwms_timeseries_id?: string;
       id?: string;
