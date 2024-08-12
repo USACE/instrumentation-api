@@ -200,7 +200,7 @@ func getCR6Handler(h *TelemetryHandler, dl model.Datalogger, rawJSON []byte) ech
 		}
 
 		c.Response().After(func() {
-			// TODO
+			h.AlertCheckAfterService.DoAlertAfterRequestChecks(mcs)
 		})
 
 		return c.JSON(http.StatusOK, map[string]interface{}{"model": *dl.Model, "sn": dl.SN})

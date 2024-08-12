@@ -4,8 +4,11 @@ import (
 	"context"
 	"database/sql/driver"
 	"encoding/json"
+	"fmt"
 	"time"
 
+	"github.com/USACE/instrumentation-api/api/internal/config"
+	et "github.com/USACE/instrumentation-api/api/internal/email"
 	"github.com/google/uuid"
 	"github.com/jackc/pgtype"
 )
@@ -23,6 +26,7 @@ type AlertConfig struct {
 	AlertTypeID             uuid.UUID                            `json:"alert_type_id" db:"alert_type_id"`
 	AlertType               string                               `json:"alert_type" db:"alert_type"`
 	Opts                    Opts                                 `json:"opts" db:"opts"`
+	Violations              []string                             `json:"-" db:"-"`
 	AuditInfo
 }
 
@@ -42,6 +46,44 @@ type TimeseriesAlertConfig struct {
 	LastMeasurementValue *float64   `json:"last_measurement_value" db:"last_measurement_value"`
 	AlertConfig
 }
+
+func (ac AlertConfig) DoEmail(emailType string, cfg config.EmailConfig) error {
+	if emailType == "" {
+		return fmt.Errorf("must provide emailType")
+	}
+	preformatted := et.EmailContent{
+		TextSubject: "-- DO NOT REPLY -- MIDAS " + emailType + ": " + ac.AlertType,
+		TextBody:    "The following " + emailType + " has been triggered:\r\n" + alertEmailTemplate,
+	}
+	templContent, err := et.CreateEmailTemplateContent(preformatted)
+	if err != nil {
+		return err
+	}
+	content, err := et.FormatAlertConfigTemplates(templContent, ac)
+	if err != nil {
+		return err
+	}
+	emails := make([]string, len(ac.AlertEmailSubscriptions))
+	for idx := range ac.AlertEmailSubscriptions {
+		emails[idx] = ac.AlertEmailSubscriptions[idx].Email
+	}
+	content.To = emails
+	if err := et.ConstructAndSendEmail(content, cfg); err != nil {
+		return err
+	}
+	return nil
+}
+
+const alertEmailTemplate = `\r
+Project: {{.ProjectName}}\r
+Alert Type: {{.AlertType}}\r
+Alert Name: "{{.Name}}"\r
+Description: "{{.Body}}"\r
+Voilations ({{len .Violations}} total):\r
+{{range $i, $val := .Violations}}
+{{if le $i 5}}\t• {{$val}}\r{{end}}
+{{if eq $i 6}}\t  more...{{end}}\r{{end}}
+`
 
 type TimeseriesAlertConfigMeasurementsJSON json.RawMessage
 
@@ -196,6 +238,24 @@ func (q *Queries) UnassignAllInstrumentsFromAlertConfig(ctx context.Context, ale
 	return err
 }
 
+const assignTimeseriesToAlertConfig = `
+	INSERT INTO alert_config_timeseries (alert_config_id, timeseries_id) VALUES ($1, $2)
+`
+
+func (q *Queries) AssignTimeseriesToAlertConfig(ctx context.Context, alertConfigID, timeseriesID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, assignTimeseriesToAlertConfig, alertConfigID, timeseriesID)
+	return err
+}
+
+const unassignAllTimeseriesFromAlertConfig = `
+	DELETE FROM alert_config_timeseries WHERE alert_config_id = $1
+`
+
+func (q *Queries) UnassignAllTimeseriesFromAlertConfig(ctx context.Context, alertConfigID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, unassignAllTimeseriesFromAlertConfig, alertConfigID)
+	return err
+}
+
 const updateAlertConfig = `
 	UPDATE alert_config SET
 		name = $3,
@@ -248,5 +308,14 @@ const deleteAlertConfig = `
 // DeleteAlertConfig deletes an alert by ID
 func (q *Queries) DeleteAlertConfig(ctx context.Context, alertConfigID uuid.UUID) error {
 	_, err := q.db.ExecContext(ctx, deleteAlertConfig, alertConfigID)
+	return err
+}
+
+const updateAlertConfigStatus = `
+	UPDATE alert_config SET status=$2, last_checked=$3 WHERE id=$1
+`
+
+func (q *Queries) UpdateAlertConfigStatus(ctx context.Context, alertConfigID uuid.UUID, status *string) error {
+	_, err := q.db.ExecContext(ctx, updateAlertConfigStatus, alertConfigID, status, time.Now())
 	return err
 }

@@ -7,16 +7,14 @@ import (
 )
 
 // Config stores configuration information stored in environment variables
-type AlertCheckConfig struct {
+type AlertCheckSchedulerConfig struct {
 	DBConfig
-	SmtpConfig
-	TriggerMocked   bool   `envconfig:"INSTRUMENTATION_AWS_ECS_TRIGGER_MOCKED"`
-	EmailSendMocked bool   `envconfig:"INSTRUMENTATION_EMAIL_SEND_MOCKED"`
-	EmailFrom       string `envconfig:"INSTRUMENTATION_EMAIL_FROM"`
+	EmailConfig
+	TriggerMocked bool `envconfig:"INSTRUMENTATION_AWS_ECS_TRIGGER_MOCKED"`
 }
 
-func NewAlertCheckConfig() *AlertCheckConfig {
-	var cfg AlertCheckConfig
+func NewAlertCheckConfig() *AlertCheckSchedulerConfig {
+	var cfg AlertCheckSchedulerConfig
 	if err := envconfig.Process("instrumentation", &cfg); err != nil {
 		log.Fatal(err.Error())
 	}

@@ -14,6 +14,8 @@ type AlertConfigService interface {
 	GetOneAlertConfig(ctx context.Context, alertConfigID uuid.UUID) (model.AlertConfig, error)
 	DeleteAlertConfig(ctx context.Context, alertConfigID uuid.UUID) error
 	alertConfigSchedulerService
+	alertConfigThresholdService
+	alertConfigChangeService
 }
 
 type alertConfigService struct {

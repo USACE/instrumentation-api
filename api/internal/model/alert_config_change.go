@@ -14,7 +14,10 @@ type AlertConfigChange struct {
 }
 
 type AlertConfigChangeOpts struct {
-	RateOfChange float64 `json:"rate_of_change" db:"rate_of_change"`
+	WarnRateOfChange  *float64 `json:"warn_rate_of_change" db:"warn_rate_of_change"`
+	AlertRateOfChange float64  `json:"alert_rate_of_change" db:"alert_rate_of_change"`
+	LocfBackfill      *string  `json:"locf_backfill" db:"locf_backfill"`
+	LocfBackfillMs    *int64   `json:"-" db:"locf_backfill_ms"`
 }
 
 func (o *AlertConfigChangeOpts) Scan(src interface{}) error {
@@ -25,22 +28,29 @@ func (o *AlertConfigChangeOpts) Scan(src interface{}) error {
 	return json.Unmarshal([]byte(b), o)
 }
 
+type TimeseriesMeasurementChange struct {
+	BeforeMeasurement Measurement
+	AfterMeasurement  Measurement
+	Change            float64
+}
+
 const createAlertConfigChange = `
-	INSERT INTO alert_config_change (alert_config_id, rate_of_change) VALUES ($1,$2)
+	INSERT INTO alert_config_change (alert_config_id, warn_rate_of_change, alert_rate_of_change) VALUES ($1,$2,$3)
 `
 
 func (q *Queries) CreateAlertConfigChange(ctx context.Context, alertConfigID uuid.UUID, opts AlertConfigChangeOpts) error {
-	_, err := q.db.ExecContext(ctx, createAlertConfigChange, alertConfigID, opts.RateOfChange)
+	_, err := q.db.ExecContext(ctx, createAlertConfigChange, alertConfigID, opts.WarnRateOfChange, opts.AlertRateOfChange)
 	return err
 }
 
 const updateAlertConfigChange = `
 	UPDATE alert_config_change SET
-		rate_of_change=$2
+		warn_rate_of_change=$2,
+		alert_rate_of_change=$3
 	WHERE alert_config_id=$1
 `
 
 func (q *Queries) UpdateAlertConfigChange(ctx context.Context, alertConfigID uuid.UUID, opts AlertConfigChangeOpts) error {
-	_, err := q.db.ExecContext(ctx, updateAlertConfigChange, alertConfigID, opts.RateOfChange)
+	_, err := q.db.ExecContext(ctx, updateAlertConfigChange, alertConfigID, opts.WarnRateOfChange, opts.AlertRateOfChange)
 	return err
 }

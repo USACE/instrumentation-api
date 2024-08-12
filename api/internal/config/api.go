@@ -12,6 +12,7 @@ type ApiConfig struct {
 	AWSS3Config
 	AWSSQSConfig
 	ServerConfig
+	EmailConfig
 }
 
 // GetConfig returns environment variable config

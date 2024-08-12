@@ -14,6 +14,24 @@ import (
 	"github.com/google/uuid"
 )
 
+type AlertCheckSchedulerService interface {
+	DoAlertSchedulerChecks(ctx context.Context) error
+}
+
+type alertCheckSchedulerEmailer interface {
+	DoEmail(string, config.AlertCheckSchedulerConfig) error
+}
+
+type alertCheckSchedulerService struct {
+	db *model.Database
+	*model.Queries
+	cfg *config.AlertCheckSchedulerConfig
+}
+
+func NewAlertCheckSchedulerService(db *model.Database, q *model.Queries, cfg *config.AlertCheckSchedulerConfig) *alertCheckSchedulerService {
+	return &alertCheckSchedulerService{db, q, cfg}
+}
+
 var (
 	GreenSubmittalStatusID  uuid.UUID = uuid.MustParse("0c0d6487-3f71-4121-8575-19514c7b9f03")
 	YellowSubmittalStatusID uuid.UUID = uuid.MustParse("ef9a3235-f6e2-4e6c-92f6-760684308f7f")
@@ -28,7 +46,7 @@ type alertConfigSchedulerChecker[T alertSchedulerChecker] interface {
 	SetAlertConfigScheduler(model.AlertConfigScheduler)
 	GetChecks() []T
 	SetChecks([]T)
-	alertCheckEmailer
+	alertCheckSchedulerEmailer
 }
 
 type alertSchedulerChecker interface {
@@ -39,7 +57,7 @@ type alertSchedulerChecker interface {
 	SetSubmittal(model.Submittal)
 }
 
-func (s alertCheckService) DoAlertSchedulerChecks(ctx context.Context) error {
+func (s alertCheckSchedulerService) DoAlertSchedulerChecks(ctx context.Context) error {
 	if s.cfg == nil {
 		return fmt.Errorf("missing config")
 	}
@@ -94,8 +112,8 @@ func (s alertCheckService) DoAlertSchedulerChecks(ctx context.Context) error {
 	return nil
 }
 
-func checkEvaluations(ctx context.Context, q *model.Queries, subMap model.SubmittalMap, acMap model.AlertConfigSchedulerMap, cfg config.AlertCheckConfig) error {
-	accs := make([]*model.AlertConfigEvaluationCheck, 0)
+func checkEvaluations(ctx context.Context, q *model.Queries, subMap model.SubmittalMap, acMap model.AlertConfigSchedulerMap, cfg config.AlertCheckSchedulerConfig) error {
+	accs := make([]*model.AlertConfigSchedulerEvaluationCheck, 0)
 	ecs, err := q.GetAllIncompleteEvaluationSubmittals(ctx)
 	if err != nil {
 		return err
@@ -115,7 +133,7 @@ func checkEvaluations(ctx context.Context, q *model.Queries, subMap model.Submit
 		if v.AlertTypeID != EvaluationSubmittalAlertTypeID {
 			continue
 		}
-		acc := model.AlertConfigEvaluationCheck{
+		acc := model.AlertConfigSchedulerEvaluationCheck{
 			AlertConfig: v,
 			AlertChecks: ecMap[k],
 		}
@@ -131,8 +149,8 @@ func checkEvaluations(ctx context.Context, q *model.Queries, subMap model.Submit
 	return nil
 }
 
-func checkMeasurements(ctx context.Context, q *model.Queries, subMap model.SubmittalMap, acMap model.AlertConfigSchedulerMap, cfg config.AlertCheckConfig) error {
-	accs := make([]*model.AlertConfigMeasurementCheck, 0)
+func checkMeasurements(ctx context.Context, q *model.Queries, subMap model.SubmittalMap, acMap model.AlertConfigSchedulerMap, cfg config.AlertCheckSchedulerConfig) error {
+	accs := make([]*model.AlertConfigSchedulerMeasurementCheck, 0)
 	mcs, err := q.GetAllIncompleteMeasurementSubmittals(ctx)
 	if err != nil {
 		return err
@@ -154,7 +172,7 @@ func checkMeasurements(ctx context.Context, q *model.Queries, subMap model.Submi
 		if v.AlertTypeID != MeasurementSubmittalAlertTypeID {
 			continue
 		}
-		acc := model.AlertConfigMeasurementCheck{
+		acc := model.AlertConfigSchedulerMeasurementCheck{
 			AlertConfig: v,
 			AlertChecks: mcMap[k],
 		}
@@ -204,7 +222,7 @@ func updateAlertConfigChecks[T alertSchedulerChecker, PT alertConfigSchedulerChe
 // TODO: smtp.SendMail esablishes a new connection for each batch of emails sent. I would be better to aggregate
 // the contents of each email, then create a connection pool to reuse and send all emails at once, with any errors wrapped and returned
 // p.s. Dear future me/someone else: I'm sorry
-func handleChecks[T alertSchedulerChecker, PT alertConfigSchedulerChecker[T]](ctx context.Context, q *model.Queries, accs []PT, cfg config.AlertCheckConfig) error {
+func handleChecks[T alertSchedulerChecker, PT alertConfigSchedulerChecker[T]](ctx context.Context, q *model.Queries, accs []PT, cfg config.AlertCheckSchedulerConfig) error {
 	defer util.Timer()()
 
 	mu := &sync.Mutex{}
@@ -238,27 +256,25 @@ func handleChecks[T alertSchedulerChecker, PT alertConfigSchedulerChecker[T]](ct
 				shouldRemind := c.GetShouldRemind()
 				sub := c.GetSubmittal()
 
+				switch {
 				// if no submittal alerts or warnings are found, no emails should be sent
-				if !shouldAlert && !shouldWarn {
+				case !shouldAlert && !shouldWarn:
 					// if submittal status was previously red, update status to yellow and
 					// completion_date to current timestamp
 					if sub.SubmittalStatusID == RedSubmittalStatusID {
 						sub.SubmittalStatusID = YellowSubmittalStatusID
 						sub.CompletionDate = &t
 						ac.Opts.CreateNextSubmittalFrom = &t
-					} else
 
-					// if submittal status is green and the current time is not before the submittal due date,
-					// complete the submittal at that due date and prepare the next submittal interval
-					if sub.SubmittalStatusID == GreenSubmittalStatusID && !t.Before(sub.DueDate) {
+					} else if sub.SubmittalStatusID == GreenSubmittalStatusID && !t.Before(sub.DueDate) {
+						// if submittal status is green and the current time is not before the submittal due date,
+						// complete the submittal at that due date and prepare the next submittal interval
 						sub.CompletionDate = &sub.DueDate
 						ac.Opts.CreateNextSubmittalFrom = &sub.DueDate
 					}
-				} else
-
 				// if any submittal warning is triggered, immediately send a
 				// warning email, since submittal due dates are unique within alert configs
-				if shouldWarn && !sub.WarningSent {
+				case shouldWarn && !sub.WarningSent:
 					if !ac.Opts.MuteConsecutiveAlerts || ac.Opts.LastReminded == nil {
 						mu.Lock()
 						if err := acc.DoEmail(emailWarning, cfg); err != nil {
@@ -268,11 +284,9 @@ func handleChecks[T alertSchedulerChecker, PT alertConfigSchedulerChecker[T]](ct
 					}
 					sub.SubmittalStatusID = GreenSubmittalStatusID
 					sub.WarningSent = true
-				} else
-
 				// if any submittal alert is triggered after a warning has been sent within an
 				// alert config, aggregate missing submittals and send their contents in an alert email
-				if shouldAlert {
+				case shouldAlert:
 					if sub.SubmittalStatusID != RedSubmittalStatusID {
 						sub.SubmittalStatusID = RedSubmittalStatusID
 						acAlert = true

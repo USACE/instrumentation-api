@@ -20,6 +20,7 @@ type AlertConfigThresholdOpts struct {
 	WarnHighValue   *float64 `json:"warn_high_value" db:"warn_high_value"`
 	IgnoreLowValue  *float64 `json:"ignore_low_value" db:"ignore_low_value"`
 	IgnoreHighValue *float64 `json:"ignore_high_value" db:"ignore_high_value"`
+	Variance        float64  `json:"variance" db:"variance"`
 }
 
 func (o *AlertConfigThresholdOpts) Scan(src interface{}) error {
@@ -32,15 +33,15 @@ func (o *AlertConfigThresholdOpts) Scan(src interface{}) error {
 
 const createAlertConfigThreshold = `
 	INSERT INTO alert_config_threshold
-	(alert_config_id, alert_low_value, alert_high_value, warn_low_value, warn_high_value, ignore_low_value, ignore_high_value) VALUES
-	($1,$2,$3,$4,$5,$6,$7)
+	(alert_config_id, alert_low_value, alert_high_value, warn_low_value, warn_high_value, ignore_low_value, ignore_high_value, variance) VALUES
+	($1,$2,$3,$4,$5,$6,$7,$8)
 `
 
 func (q *Queries) CreateAlertConfigThreshold(ctx context.Context, alertConfigID uuid.UUID, opts AlertConfigThresholdOpts) error {
 	_, err := q.db.ExecContext(ctx, createAlertConfigThreshold, alertConfigID,
 		opts.AlertLowValue, opts.AlertHighValue,
 		opts.WarnLowValue, opts.WarnHighValue,
-		opts.IgnoreLowValue, opts.IgnoreHighValue,
+		opts.IgnoreLowValue, opts.IgnoreHighValue, opts.Variance,
 	)
 	return err
 }
@@ -52,7 +53,8 @@ const updateAlertConfigThreshold = `
 		warn_low_value=$4,
 		warn_high_value=$5,
 		ignore_low_value=$6,
-		ignore_high_value=$7
+		ignore_high_value=$7,
+		variance=$8
 	WHERE alert_config_id=$1
 `
 
@@ -60,7 +62,7 @@ func (q *Queries) UpdateAlertConfigThreshold(ctx context.Context, alertConfigID 
 	_, err := q.db.ExecContext(ctx, updateAlertConfigThreshold, alertConfigID,
 		opts.AlertLowValue, opts.AlertHighValue,
 		opts.WarnLowValue, opts.WarnHighValue,
-		opts.IgnoreLowValue, opts.IgnoreHighValue,
+		opts.IgnoreLowValue, opts.IgnoreHighValue, opts.Variance,
 	)
 	return err
 }

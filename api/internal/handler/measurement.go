@@ -49,7 +49,7 @@ func (h *ApiHandler) CreateOrUpdateProjectTimeseriesMeasurements(c echo.Context)
 	}
 
 	c.Response().After(func() {
-		// TODO
+		h.AlertCheckAfterService.DoAlertAfterRequestChecks(stored)
 	})
 
 	return c.JSON(http.StatusCreated, stored)
@@ -78,7 +78,7 @@ func (h *ApiHandler) CreateOrUpdateTimeseriesMeasurements(c echo.Context) error 
 	}
 
 	c.Response().After(func() {
-		// TODO
+		h.AlertCheckAfterService.DoAlertAfterRequestChecks(stored)
 	})
 
 	return c.JSON(http.StatusCreated, stored)
@@ -116,7 +116,7 @@ func (h *ApiHandler) UpdateTimeseriesMeasurements(c echo.Context) error {
 	}
 
 	c.Response().After(func() {
-		// TODO
+		h.AlertCheckAfterService.DoAlertAfterRequestChecks(stored)
 	})
 
 	return c.JSON(http.StatusOK, stored)

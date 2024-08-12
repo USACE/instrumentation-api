@@ -24,7 +24,7 @@ func main() {
 }
 
 func checkAlerts(h *handler.AlertCheckHandler) {
-	if err := h.AlertCheckService.DoAlertSchedulerChecks(context.Background()); err != nil {
+	if err := h.AlertCheckSchedulerService.DoAlertSchedulerChecks(context.Background()); err != nil {
 		log.Fatal(err.Error())
 	}
 	log.Printf("successfully completed alert checks at %s", time.Now())

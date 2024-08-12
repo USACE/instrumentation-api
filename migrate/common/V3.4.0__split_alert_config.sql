@@ -51,6 +51,7 @@ CREATE TABLE alert_config_threshold (
   warn_high_value double precision,
   ignore_low_value double precision,
   ignore_high_value double precision,
+  variance double precision NOT NULL DEFAULT 0,
   CHECK (ignore_low_value < alert_low_value),
   CHECK (alert_low_value < warn_low_value),
   CHECK (warn_low_value < warn_high_value),
@@ -60,5 +61,6 @@ CREATE TABLE alert_config_threshold (
 
 CREATE TABLE alert_config_change (
   alert_config_id uuid NOT NULL REFERENCES alert_config(id) ON DELETE CASCADE,
-  rate_of_change double precision NOT NULL
+  warn_rate_of_change double precision,
+  alert_rate_of_change double precision NOT NULL
 );

@@ -4,30 +4,65 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"math"
+	"slices"
+	"time"
 
+	"github.com/USACE/instrumentation-api/api/internal/config"
 	"github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/google/uuid"
 )
+
+type AlertCheckAfterService interface {
+	DoAlertAfterRequestChecks(mcc []model.MeasurementCollection)
+}
+
+type alertCheckAfterService struct {
+	db *model.Database
+	*model.Queries
+	cfg *config.EmailConfig
+}
+
+func NewAlertCheckAfterService(db *model.Database, q *model.Queries, cfg *config.EmailConfig) *alertCheckAfterService {
+	return &alertCheckAfterService{db, q, cfg}
+}
 
 var (
 	ThresholdAlertTypeID    = uuid.MustParse("bb15e7c2-8eae-452c-92f7-e720dc5c9432")
 	RateOfChangeAlertTypeID = uuid.MustParse("c37effee-6b48-4436-8d72-737ed78c1fb7")
 )
 
-type TimeseriesTimeMeasurement struct {
-	FirstNewMeasurement model.Measurement
-	Measurements        []model.Measurement
+const (
+	alertLow  = "Alert Low"
+	warnLow   = "Warn Low"
+	warnHigh  = "Warn High"
+	alertHigh = "Alert High"
+)
+
+func (s alertCheckAfterService) DoAlertAfterRequestChecks(mcc []model.MeasurementCollection) {
+	var cause error
+	actx, cancel := context.WithTimeoutCause(context.Background(), time.Second*10, cause)
+	defer func() {
+		cancel()
+		if cause != nil {
+			log.Println(cause.Error())
+		}
+	}()
+
+	if err := s.doAlertAfterRequestChecks(actx, mcc); err != nil {
+		log.Println(err.Error())
+	}
 }
 
-func (s alertCheckService) DoAlertAfterRequestChecks(ctx context.Context, mcc []model.MeasurementCollection) error {
+func (s alertCheckAfterService) doAlertAfterRequestChecks(ctx context.Context, mcc []model.MeasurementCollection) error {
 	if len(mcc) == 0 {
 		return errors.New("error measurement collection is empty")
 	}
 
 	fnmms := make([]model.Measurement, 0)
-	mmMap := make(map[uuid.UUID]TimeseriesTimeMeasurement)
+	mmMap := make(map[uuid.UUID][]model.Measurement)
 
 	for idx := range mcc {
 		if len(mcc[idx].Items) != 0 {
@@ -39,10 +74,7 @@ func (s alertCheckService) DoAlertAfterRequestChecks(ctx context.Context, mcc []
 			Value:        mcc[idx].Items[0].Value,
 		}
 		fnmms = append(fnmms, firstNewMmt)
-		mmMap[mcc[idx].TimeseriesID] = TimeseriesTimeMeasurement{
-			FirstNewMeasurement: firstNewMmt,
-			Measurements:        mcc[idx].Items,
-		}
+		mmMap[mcc[idx].TimeseriesID] = mcc[idx].Items
 	}
 
 	tx, err := s.db.BeginTxx(ctx, nil)
@@ -63,7 +95,18 @@ func (s alertCheckService) DoAlertAfterRequestChecks(ctx context.Context, mcc []
 		return err
 	}
 
+	if len(acc) == 0 {
+		return nil
+	}
+
 	for _, ac := range acc {
+		var sev string
+		var vv []string
+		var lastMmt *model.Measurement
+		if ac.LastMeasurementTime != nil && ac.LastMeasurementValue != nil {
+			lastMmt = &model.Measurement{TimeseriesID: ac.TimeseriesID, Time: *ac.LastMeasurementTime, Value: *ac.LastMeasurementValue}
+		}
+
 		switch ac.AlertTypeID {
 		case ThresholdAlertTypeID:
 			opts, err := model.MapToStruct[model.AlertConfigThresholdOpts](ac.Opts)
@@ -71,7 +114,16 @@ func (s alertCheckService) DoAlertAfterRequestChecks(ctx context.Context, mcc []
 				log.Println(err.Error())
 				continue
 			}
-			if err := doAlertCheckThresholds(opts, mmMap[ac.TimeseriesID]); err != nil {
+
+			mm, exists := mmMap[ac.TimeseriesID]
+			if !exists {
+				continue
+			}
+
+			slices.SortFunc(mm, func(a, b model.Measurement) int { return a.Time.Compare(b.Time) })
+
+			sev, vv, err = doAlertCheckThresholds(opts, mm, lastMmt)
+			if err != nil {
 				log.Println(err.Error())
 				continue
 			}
@@ -81,56 +133,172 @@ func (s alertCheckService) DoAlertAfterRequestChecks(ctx context.Context, mcc []
 				log.Println(err.Error())
 				continue
 			}
-			if err := doAlertCheckChanges(opts, mmMap[ac.TimeseriesID]); err != nil {
+
+			mm, exists := mmMap[ac.TimeseriesID]
+			if !exists {
+				continue
+			}
+
+			slices.SortFunc(mm, func(a, b model.Measurement) int { return a.Time.Compare(b.Time) })
+
+			sev, vv, err = doAlertCheckChanges(opts, mm, lastMmt)
+			if err != nil {
 				log.Println(err.Error())
 				continue
 			}
 		default:
 			log.Printf("error alert type not supported: %s", ac.AlertType)
+			continue
+		}
+
+		ac.Violations = vv
+
+		if err := ac.DoEmail(sev, *s.cfg); err != nil {
+			log.Println(err.Error())
+			continue
 		}
 	}
-
 	return tx.Commit()
 }
 
-func doAlertCheckThresholds(opts model.AlertConfigThresholdOpts, mm TimeseriesTimeMeasurement) error {
-	for idx := range mm.Measurements {
-		v := mm.Measurements[idx].Value
-		switch {
-		case opts.IgnoreLowValue != nil && opts.AlertLowValue != nil && v <= *opts.AlertLowValue && v >= *opts.IgnoreLowValue:
-			// case where ignore low is set
-		case opts.AlertLowValue != nil && v <= *opts.AlertLowValue:
-			// case where ignore low is not set
-		case opts.WarnLowValue != nil && v <= *opts.WarnLowValue:
-			// case where warn low
-		case opts.WarnHighValue != nil && v <= *opts.WarnHighValue:
-			// safe zone
-		case opts.WarnHighValue != nil && v >= *opts.WarnHighValue:
-			// case where warn high
-		case opts.IgnoreHighValue != nil && opts.AlertHighValue != nil && v >= *opts.AlertHighValue && v <= *opts.IgnoreHighValue:
-			// case where ignore high is set
-		case opts.AlertHighValue != nil && v >= *opts.AlertHighValue:
-			// case where ignore high is not set
-		}
-	}
-	return nil
+func alertCheckThresholdMessage(alertType string, m model.Measurement, thresholdName string, thresholdValue float64) string {
+	return fmt.Sprintf("(%s) %s %.3f voilates \"%s\" threshold of %.3f", alertType, m.Time, m.Value, thresholdName, thresholdValue)
 }
 
-func doAlertCheckChanges(opts model.AlertConfigChangeOpts, mm TimeseriesTimeMeasurement) error {
-	changes := make([]model.Measurement, 0)
-	fnm := mm.FirstNewMeasurement
+func doAlertCheckThresholds(opts model.AlertConfigThresholdOpts, mm []model.Measurement, lastMmt *model.Measurement) (string, []string, error) {
+	vv := make([]string, 0)
+	var highestEmailSev string
+	var prevSev string
 
-	change := math.Abs(mm.Measurements[0].Value - fnm.Value)
-	if change >= opts.RateOfChange {
-		changes = append(changes, model.Measurement{Time: fnm.Time, Value: fnm.Value})
+	if lastMmt != nil {
+		sev, _, err := handleThresholdRange(opts, *lastMmt, prevSev)
+		if err != nil {
+			return highestEmailSev, vv, err
+		}
+		prevSev = sev
 	}
 
-	for idx := 0; idx < len(mm.Measurements)-1; idx++ {
-		change := math.Abs(mm.Measurements[idx].Value - mm.Measurements[idx+1].Value)
-		if change >= opts.RateOfChange {
-			changes = append(changes, model.Measurement{Time: fnm.Time, Value: fnm.Value})
+	for idx := range mm {
+		sev, msg, err := handleThresholdRange(opts, mm[idx], prevSev)
+		if err != nil {
+			continue
+		}
+
+		switch sev {
+		case alertLow, alertHigh:
+			highestEmailSev = emailAlert
+
+		case warnLow, warnHigh:
+			if highestEmailSev != emailAlert {
+				highestEmailSev = emailWarning
+			}
+		case "":
+			continue
+		}
+
+		prevSev = sev
+		vv = append(vv, msg)
+	}
+
+	return highestEmailSev, vv, nil
+}
+
+func handleThresholdRange(opts model.AlertConfigThresholdOpts, m model.Measurement, prevSev string) (string, string, error) {
+	v := m.Value
+	switch {
+	case opts.IgnoreLowValue != nil && opts.AlertLowValue != nil && v <= *opts.AlertLowValue && v >= *opts.IgnoreLowValue:
+		// case where ignore low is set, skip
+		return "", "", nil
+
+	case opts.AlertLowValue != nil && v <= *opts.AlertLowValue:
+		return alertLow, alertCheckThresholdMessage(emailAlert, m, alertLow, *opts.AlertLowValue), nil
+
+	case opts.WarnLowValue != nil && v <= *opts.WarnLowValue:
+		if prevSev == alertLow && opts.AlertLowValue != nil && v <= *opts.AlertLowValue+opts.Variance {
+			return alertLow, alertCheckThresholdMessage(emailAlert, m, alertLow+" + Variance", *opts.AlertLowValue), nil
+		}
+		return warnLow, alertCheckThresholdMessage(emailWarning, m, warnLow, *opts.WarnLowValue), nil
+
+	case opts.WarnHighValue != nil && v <= *opts.WarnHighValue:
+		if prevSev == warnLow && opts.WarnLowValue != nil && v <= *opts.WarnLowValue+opts.Variance {
+			return warnLow, alertCheckThresholdMessage(emailWarning, m, warnLow+" + Variance", *opts.WarnLowValue), nil
+
+		} else if prevSev == warnHigh && opts.WarnHighValue != nil && v >= *opts.AlertLowValue-opts.Variance {
+			return warnHigh, alertCheckThresholdMessage(emailWarning, m, warnHigh+" - Variance", *opts.WarnHighValue), nil
+		}
+		return "", "", nil
+
+	case opts.WarnHighValue != nil && v >= *opts.WarnHighValue:
+		if prevSev == alertHigh && opts.AlertLowValue != nil && v >= *opts.AlertLowValue-opts.Variance {
+			return alertHigh, alertCheckThresholdMessage(emailAlert, m, alertHigh+" - Variance", *opts.AlertHighValue), nil
+		}
+		return warnHigh, alertCheckThresholdMessage(emailWarning, m, warnHigh, *opts.WarnHighValue), nil
+
+	case opts.IgnoreHighValue != nil && opts.AlertHighValue != nil && v >= *opts.AlertHighValue && v <= *opts.IgnoreHighValue:
+		// case where ignore high is set, skip
+		return "", "", nil
+
+	case opts.AlertHighValue != nil && v >= *opts.AlertHighValue:
+		return alertHigh, alertCheckThresholdMessage(emailAlert, m, alertHigh, *opts.AlertHighValue), nil
+
+	default:
+		return "", "", fmt.Errorf("error no threshold values set for alert config %s", m.TimeseriesID)
+	}
+}
+
+func alertCheckChangeMessage(alertType string, last, next model.Measurement, change float64) string {
+	return fmt.Sprintf("(%s) %s %.3f (before), %s %.3f (after) voilates rate of change %.3f",
+		alertType, last.Time, last.Value, next.Time, next.Value, change,
+	)
+}
+
+func doAlertCheckChanges(opts model.AlertConfigChangeOpts, mm []model.Measurement, lastMmt *model.Measurement) (string, []string, error) {
+	vv := make([]string, 0)
+	var sev string
+
+	if len(mm) == 0 {
+		return sev, vv, fmt.Errorf("error no measurements found in uploaded collection")
+	}
+
+	if lastMmt != nil {
+		skip := false
+		if opts.LocfBackfillMs != nil {
+			if t := mm[0].Time.Add(-time.Duration(*opts.LocfBackfillMs)); t.After(lastMmt.Time) {
+				skip = true
+			}
+		}
+
+		if !skip {
+			change := math.Abs(mm[0].Value - math.Abs(lastMmt.Value))
+			if change >= opts.AlertRateOfChange {
+				sev = emailAlert
+				vv = append(vv, alertCheckChangeMessage(emailAlert, *lastMmt, mm[0], change))
+			} else if opts.WarnRateOfChange != nil && change >= *opts.WarnRateOfChange {
+				if sev != emailAlert {
+					sev = emailWarning
+				}
+				vv = append(vv, alertCheckChangeMessage(emailWarning, *lastMmt, mm[0], change))
+			}
 		}
 	}
 
-	return nil
+	for idx := 0; idx < len(mm)-1; idx++ {
+		if opts.LocfBackfillMs != nil {
+			if t := mm[idx+1].Time.Add(-time.Duration(*opts.LocfBackfillMs)); t.After(mm[idx].Time) {
+				continue
+			}
+		}
+		change := math.Abs(mm[idx].Value - math.Abs(mm[idx+1].Value))
+		if change >= opts.AlertRateOfChange {
+			sev = emailAlert
+			vv = append(vv, alertCheckChangeMessage(emailAlert, mm[idx], mm[idx+1], change))
+		} else if opts.WarnRateOfChange != nil && change >= *opts.WarnRateOfChange {
+			if sev != emailAlert {
+				sev = emailWarning
+			}
+			vv = append(vv, alertCheckChangeMessage(emailWarning, mm[idx], mm[idx+1], change))
+		}
+	}
+
+	return sev, vv, nil
 }

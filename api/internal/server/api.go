@@ -101,9 +101,17 @@ func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 	r.public.GET("/projects/:project_id/alert_configs/:alert_config_id", h.GetAlertConfig)
 	r.private.DELETE("/projects/:project_id/alert_configs/:alert_config_id", h.DeleteAlertConfig)
 
+	// AlertConfigChange
+	r.private.POST("/projects/:project_id/alert_configs/changes", h.CreateAlertConfigChange)
+	r.private.PUT("/projects/:project_id/alert_configs/changes/:alert_config_id", h.UpdateAlertConfigChange)
+
 	// AlertConfigScheduler
 	r.private.POST("/projects/:project_id/alert_configs/schedulers", h.CreateAlertConfigScheduler)
 	r.private.PUT("/projects/:project_id/alert_configs/schedulers/:alert_config_id", h.UpdateAlertConfigScheduler)
+
+	// AlertConfigThreshold
+	r.private.POST("/projects/:project_id/alert_configs/thresholds", h.CreateAlertConfigThreshold)
+	r.private.PUT("/projects/:project_id/alert_configs/thresholds/:alert_config_id", h.UpdateAlertConfigThreshold)
 
 	// AlertSubscription
 	r.private.GET("/my_alert_subscriptions", h.ListMyAlertSubscriptions) // Private because token required to determine user (i.e. who is "me")

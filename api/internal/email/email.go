@@ -54,7 +54,7 @@ func FormatAlertConfigTemplates(templContent EmailTemplateContent, data any) (Em
 	}, nil
 }
 
-func ConstructAndSendEmail(ec EmailContent, cfg config.AlertCheckConfig) error {
+func ConstructAndSendEmail(ec EmailContent, cfg config.EmailConfig) error {
 	if len(ec.To) == 0 {
 		if cfg.EmailSendMocked {
 			log.Print("no email subs")
