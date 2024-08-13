@@ -2,15 +2,12 @@ package model
 
 import (
 	"context"
-	"database/sql/driver"
-	"encoding/json"
 	"fmt"
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/internal/config"
 	et "github.com/USACE/instrumentation-api/api/internal/email"
 	"github.com/google/uuid"
-	"github.com/jackc/pgtype"
 )
 
 type AlertConfig struct {
@@ -42,7 +39,7 @@ type AlertConfigTimeseries struct {
 
 type TimeseriesAlertConfig struct {
 	TimeseriesID         uuid.UUID  `json:"timeseries_id" db:"timeseries_id"`
-	LastMeasurementTime  *time.Time `json:"last_measurement_time" db:"last_measurement_value"`
+	LastMeasurementTime  *time.Time `json:"last_measurement_time" db:"last_measurement_time"`
 	LastMeasurementValue *float64   `json:"last_measurement_value" db:"last_measurement_value"`
 	AlertConfig
 }
@@ -74,24 +71,14 @@ func (ac AlertConfig) DoEmail(emailType string, cfg config.EmailConfig) error {
 	return nil
 }
 
-const alertEmailTemplate = `\r
-Project: {{.ProjectName}}\r
-Alert Type: {{.AlertType}}\r
-Alert Name: "{{.Name}}"\r
-Description: "{{.Body}}"\r
-Voilations ({{len .Violations}} total):\r
-{{range $i, $val := .Violations}}
-{{if le $i 5}}\t• {{$val}}\r{{end}}
-{{if eq $i 6}}\t  more...{{end}}\r{{end}}
-`
-
-type TimeseriesAlertConfigMeasurementsJSON json.RawMessage
-
-func (o TimeseriesAlertConfigMeasurementsJSON) Value() (driver.Value, error) {
-	var pgJSONArr pgtype.JSONBArray
-	err := pgJSONArr.Set(o)
-	return pgJSONArr, err
-}
+const alertEmailTemplate = "Project: {{.ProjectName}}\r\n" +
+	"Alert Type: {{.AlertType}}\r\n" +
+	"Alert Name: \"{{.Name}}\"\r\n" +
+	"Description: \"{{.Body}}\"\r\n" +
+	"Voilations ({{len .Violations}} total):\r\n" +
+	"{{range $i, $val := .Violations}}\r\n" +
+	"{{if le $i 5}}\t• {{$val}}\r\n{{end}}" +
+	"{{if eq $i 6}}\t  more...\r\n{{end}}{{end}}"
 
 func (a *AlertConfig) GetToAddresses() []string {
 	emails := make([]string, len(a.AlertEmailSubscriptions))
@@ -146,41 +133,35 @@ func (q *Queries) GetAllAlertConfigsForInstrument(ctx context.Context, instrumen
 }
 
 const listAlertConfigsForTimeseries = `
-	DO $$
-	DECLARE r jsonb;
-	BEGIN
-	FOR r IN
-		SELECT unnest(?::jsonb[])
-	LOOP
-		RETURN QUERY SELECT
-			acts.timeseries_id,
-			mm.time last_measurement_time,
-			mm.value AS last_measurement_value,
-			ac.*
-		FROM v_alert_config ac
-		INNER JOIN alert_config_timeseries acts ON acts.alert_config_id = ac.id
-		LEFT JOIN LATERAL (
-			SELECT imm.time, imm.value
-			FROM timeseries_measurement imm
-			WHERE imm.timeseries_id = acts.timeseries_id
-			AND imm.time < CAST (r->>'time' AS timestamptz)
-		) mm ON true
-		WHERE acts.timeseries_id = CAST (r->>'timeseries_id' AS uuid)
-		AND ac.alert_type_id IN (?);
-	END LOOP;
-	RETURN;
-	END
-	$$;
+	WITH input AS (SELECT * FROM json_to_recordset(?) AS r(timeseries_id uuid, time timestamptz))
+	SELECT
+		acts.timeseries_id,
+		mm.time AS last_measurement_time,
+		mm.value AS last_measurement_value,
+		ac.*
+	FROM v_alert_config ac
+	INNER JOIN alert_config_timeseries acts ON acts.alert_config_id = ac.id
+	INNER JOIN input ON true
+	LEFT JOIN LATERAL (
+		SELECT imm.time, imm.value
+		FROM timeseries_measurement imm
+		WHERE imm.timeseries_id = acts.timeseries_id
+		AND imm.time < input.time
+		ORDER BY imm.time DESC
+		LIMIT 1
+	) mm ON true
+	WHERE acts.timeseries_id = input.timeseries_id
+	AND ac.alert_type_id IN (?)
 `
 
-func (q *Queries) GetTimeseriesAlertConfigsForTimeseriesAndAlertTypes(ctx context.Context, rr TimeseriesAlertConfigMeasurementsJSON, alertTypeIDs []uuid.UUID) ([]TimeseriesAlertConfig, error) {
+func (q *Queries) GetTimeseriesAlertConfigsForTimeseriesAndAlertTypes(ctx context.Context, rr string, alertTypeIDs []uuid.UUID) ([]TimeseriesAlertConfig, error) {
 	query, args, err := sqlIn(listAlertConfigsForTimeseries, rr, alertTypeIDs)
 	if err != nil {
 		return nil, err
 	}
 	query = q.db.Rebind(query)
 	acc := make([]TimeseriesAlertConfig, 0)
-	err = q.db.SelectContext(ctx, &acc, listAlertConfigsForTimeseries, args...)
+	err = q.db.SelectContext(ctx, &acc, query, args...)
 	return acc, err
 }
 

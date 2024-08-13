@@ -8644,9 +8644,10 @@ components:
         - instrument_name: instrument_name
           instrument_id: instrument_id
         opts:
-          warn_rate_of_change: 6.027456183070403
+          warn_rate_of_change: 1.4658129805029452
           alert_rate_of_change: 0.8008281904610115
           locf_backfill: locf_backfill
+          ignore_rate_of_change: 6.027456183070403
         timeseries:
         - timeseries_id: timeseries_id
           timeseries_name: timeseries_name
@@ -8714,11 +8715,14 @@ components:
       type: object
     AlertConfigChangeOpts:
       example:
-        warn_rate_of_change: 6.027456183070403
+        warn_rate_of_change: 1.4658129805029452
         alert_rate_of_change: 0.8008281904610115
         locf_backfill: locf_backfill
+        ignore_rate_of_change: 6.027456183070403
       properties:
         alert_rate_of_change:
+          type: number
+        ignore_rate_of_change:
           type: number
         locf_backfill:
           type: string

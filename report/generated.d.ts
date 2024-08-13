@@ -7478,9 +7478,10 @@ export interface components {
      *     }
      *   ],
      *   "opts": {
-     *     "warn_rate_of_change": 6.027456183070403,
+     *     "warn_rate_of_change": 1.4658129805029452,
      *     "alert_rate_of_change": 0.8008281904610115,
-     *     "locf_backfill": "locf_backfill"
+     *     "locf_backfill": "locf_backfill",
+     *     "ignore_rate_of_change": 6.027456183070403
      *   },
      *   "timeseries": [
      *     {
@@ -7537,13 +7538,15 @@ export interface components {
     };
     /**
      * @example {
-     *   "warn_rate_of_change": 6.027456183070403,
+     *   "warn_rate_of_change": 1.4658129805029452,
      *   "alert_rate_of_change": 0.8008281904610115,
-     *   "locf_backfill": "locf_backfill"
+     *   "locf_backfill": "locf_backfill",
+     *   "ignore_rate_of_change": 6.027456183070403
      * }
      */
     AlertConfigChangeOpts: {
       alert_rate_of_change?: number;
+      ignore_rate_of_change?: number;
       locf_backfill?: string;
       warn_rate_of_change?: number;
     };

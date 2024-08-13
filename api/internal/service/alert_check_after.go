@@ -61,17 +61,30 @@ func (s alertCheckAfterService) doAlertAfterRequestChecks(ctx context.Context, m
 		return errors.New("error measurement collection is empty")
 	}
 
-	fnmms := make([]model.Measurement, 0)
+	fnmms := make([]model.TimeseriesMeasurement, 0)
 	mmMap := make(map[uuid.UUID][]model.Measurement)
 
 	for idx := range mcc {
-		if len(mcc[idx].Items) != 0 {
+		if len(mcc[idx].Items) == 0 {
 			continue
 		}
-		firstNewMmt := model.Measurement{
+
+		slices.SortFunc(mcc[idx].Items, func(a, b model.Measurement) int { return a.Time.Compare(b.Time) })
+
+		if mcc[idx].TimeseriesID == uuid.Nil {
+			tsID := mcc[idx].Items[0].TimeseriesID
+			if tsID == uuid.Nil {
+				continue
+			}
+			mcc[idx].TimeseriesID = tsID
+		}
+
+		firstNewMmt := model.TimeseriesMeasurement{
 			TimeseriesID: mcc[idx].TimeseriesID,
-			Time:         mcc[idx].Items[0].Time,
-			Value:        mcc[idx].Items[0].Value,
+			Measurement: model.Measurement{
+				Time:  mcc[idx].Items[0].Time,
+				Value: mcc[idx].Items[0].Value,
+			},
 		}
 		fnmms = append(fnmms, firstNewMmt)
 		mmMap[mcc[idx].TimeseriesID] = mcc[idx].Items
@@ -90,7 +103,7 @@ func (s alertCheckAfterService) doAlertAfterRequestChecks(ctx context.Context, m
 		return err
 	}
 
-	acc, err := qtx.GetTimeseriesAlertConfigsForTimeseriesAndAlertTypes(ctx, b, []uuid.UUID{ThresholdAlertTypeID, RateOfChangeAlertTypeID})
+	acc, err := qtx.GetTimeseriesAlertConfigsForTimeseriesAndAlertTypes(ctx, string(b), []uuid.UUID{ThresholdAlertTypeID, RateOfChangeAlertTypeID})
 	if err != nil {
 		return err
 	}
@@ -120,8 +133,6 @@ func (s alertCheckAfterService) doAlertAfterRequestChecks(ctx context.Context, m
 				continue
 			}
 
-			slices.SortFunc(mm, func(a, b model.Measurement) int { return a.Time.Compare(b.Time) })
-
 			sev, vv, err = doAlertCheckThresholds(opts, mm, lastMmt)
 			if err != nil {
 				log.Println(err.Error())
@@ -138,8 +149,6 @@ func (s alertCheckAfterService) doAlertAfterRequestChecks(ctx context.Context, m
 			if !exists {
 				continue
 			}
-
-			slices.SortFunc(mm, func(a, b model.Measurement) int { return a.Time.Compare(b.Time) })
 
 			sev, vv, err = doAlertCheckChanges(opts, mm, lastMmt)
 			if err != nil {
@@ -206,8 +215,7 @@ func doAlertCheckThresholds(opts model.AlertConfigThresholdOpts, mm []model.Meas
 func handleThresholdRange(opts model.AlertConfigThresholdOpts, m model.Measurement, prevSev string) (string, string, error) {
 	v := m.Value
 	switch {
-	case opts.IgnoreLowValue != nil && opts.AlertLowValue != nil && v <= *opts.AlertLowValue && v >= *opts.IgnoreLowValue:
-		// case where ignore low is set, skip
+	case opts.IgnoreLowValue != nil && v <= *opts.IgnoreLowValue:
 		return "", "", nil
 
 	case opts.AlertLowValue != nil && v <= *opts.AlertLowValue:
@@ -219,14 +227,11 @@ func handleThresholdRange(opts model.AlertConfigThresholdOpts, m model.Measureme
 		}
 		return warnLow, alertCheckThresholdMessage(emailWarning, m, warnLow, *opts.WarnLowValue), nil
 
-	case opts.WarnHighValue != nil && v <= *opts.WarnHighValue:
-		if prevSev == warnLow && opts.WarnLowValue != nil && v <= *opts.WarnLowValue+opts.Variance {
-			return warnLow, alertCheckThresholdMessage(emailWarning, m, warnLow+" + Variance", *opts.WarnLowValue), nil
-
-		} else if prevSev == warnHigh && opts.WarnHighValue != nil && v >= *opts.AlertLowValue-opts.Variance {
-			return warnHigh, alertCheckThresholdMessage(emailWarning, m, warnHigh+" - Variance", *opts.WarnHighValue), nil
-		}
+	case opts.IgnoreHighValue != nil && opts.AlertHighValue != nil && v >= *opts.AlertHighValue && v >= *opts.IgnoreHighValue:
 		return "", "", nil
+
+	case opts.AlertHighValue != nil && v >= *opts.AlertHighValue:
+		return alertHigh, alertCheckThresholdMessage(emailAlert, m, alertHigh, *opts.AlertHighValue), nil
 
 	case opts.WarnHighValue != nil && v >= *opts.WarnHighValue:
 		if prevSev == alertHigh && opts.AlertLowValue != nil && v >= *opts.AlertLowValue-opts.Variance {
@@ -234,21 +239,20 @@ func handleThresholdRange(opts model.AlertConfigThresholdOpts, m model.Measureme
 		}
 		return warnHigh, alertCheckThresholdMessage(emailWarning, m, warnHigh, *opts.WarnHighValue), nil
 
-	case opts.IgnoreHighValue != nil && opts.AlertHighValue != nil && v >= *opts.AlertHighValue && v <= *opts.IgnoreHighValue:
-		// case where ignore high is set, skip
-		return "", "", nil
-
-	case opts.AlertHighValue != nil && v >= *opts.AlertHighValue:
-		return alertHigh, alertCheckThresholdMessage(emailAlert, m, alertHigh, *opts.AlertHighValue), nil
-
 	default:
-		return "", "", fmt.Errorf("error no threshold values set for alert config %s", m.TimeseriesID)
+		if prevSev == warnLow && opts.WarnLowValue != nil && v <= *opts.WarnLowValue+opts.Variance {
+			return warnLow, alertCheckThresholdMessage(emailWarning, m, warnLow+" + Variance", *opts.WarnLowValue), nil
+
+		} else if prevSev == warnHigh && opts.WarnHighValue != nil && v >= *opts.AlertLowValue-opts.Variance {
+			return warnHigh, alertCheckThresholdMessage(emailWarning, m, warnHigh+" - Variance", *opts.WarnHighValue), nil
+		}
+		return "", "", nil
 	}
 }
 
-func alertCheckChangeMessage(alertType string, last, next model.Measurement, change float64) string {
-	return fmt.Sprintf("(%s) %s %.3f (before), %s %.3f (after) voilates rate of change %.3f",
-		alertType, last.Time, last.Value, next.Time, next.Value, change,
+func alertCheckChangeMessage(alertType string, last, next model.Measurement, change, threshold float64) string {
+	return fmt.Sprintf("(%s) time %s, value %.3f (before); time %s value %.3f (after); %3f voilates rate of change %.3f",
+		alertType, last.Time, last.Value, next.Time, next.Value, change, threshold,
 	)
 }
 
@@ -270,14 +274,19 @@ func doAlertCheckChanges(opts model.AlertConfigChangeOpts, mm []model.Measuremen
 
 		if !skip {
 			change := math.Abs(mm[0].Value - math.Abs(lastMmt.Value))
-			if change >= opts.AlertRateOfChange {
+			switch {
+			case opts.IgnoreRateOfChange != nil && change >= *opts.IgnoreRateOfChange:
+				// oob
+
+			case change >= opts.AlertRateOfChange:
 				sev = emailAlert
-				vv = append(vv, alertCheckChangeMessage(emailAlert, *lastMmt, mm[0], change))
-			} else if opts.WarnRateOfChange != nil && change >= *opts.WarnRateOfChange {
+				vv = append(vv, alertCheckChangeMessage(emailAlert, *lastMmt, mm[0], change, opts.AlertRateOfChange))
+
+			case opts.WarnRateOfChange != nil && change >= *opts.WarnRateOfChange:
 				if sev != emailAlert {
 					sev = emailWarning
 				}
-				vv = append(vv, alertCheckChangeMessage(emailWarning, *lastMmt, mm[0], change))
+				vv = append(vv, alertCheckChangeMessage(emailWarning, *lastMmt, mm[0], change, *opts.WarnRateOfChange))
 			}
 		}
 	}
@@ -289,14 +298,20 @@ func doAlertCheckChanges(opts model.AlertConfigChangeOpts, mm []model.Measuremen
 			}
 		}
 		change := math.Abs(mm[idx].Value - math.Abs(mm[idx+1].Value))
-		if change >= opts.AlertRateOfChange {
+		switch {
+		case opts.IgnoreRateOfChange != nil && change >= *opts.IgnoreRateOfChange:
+			// oob
+			continue
+
+		case change >= opts.AlertRateOfChange:
 			sev = emailAlert
-			vv = append(vv, alertCheckChangeMessage(emailAlert, mm[idx], mm[idx+1], change))
-		} else if opts.WarnRateOfChange != nil && change >= *opts.WarnRateOfChange {
+			vv = append(vv, alertCheckChangeMessage(emailAlert, mm[idx], mm[idx+1], change, opts.AlertRateOfChange))
+
+		case opts.WarnRateOfChange != nil && change >= *opts.WarnRateOfChange:
 			if sev != emailAlert {
 				sev = emailWarning
 			}
-			vv = append(vv, alertCheckChangeMessage(emailWarning, mm[idx], mm[idx+1], change))
+			vv = append(vv, alertCheckChangeMessage(emailWarning, mm[idx], mm[idx+1], change, *opts.WarnRateOfChange))
 		}
 	}
 

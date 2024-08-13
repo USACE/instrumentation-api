@@ -71,6 +71,7 @@ CREATE OR REPLACE VIEW v_alert_config AS (
             WHEN atype.id = 'c37effee-6b48-4436-8d72-737ed78c1fb7'::uuid THEN json_build_object(
                 'warn_rate_of_change', acc.warn_rate_of_change,
                 'alert_rate_of_change', acc.alert_rate_of_change,
+                'ignore_rate_of_change', acc.ignore_rate_of_change,
                 'locf_backfill', acc.locf_backfill,
                 'locf_backfill_ms', extract(epoch from acc.locf_backfill)
             )::text

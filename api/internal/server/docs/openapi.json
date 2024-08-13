@@ -12876,6 +12876,9 @@
           "alert_rate_of_change" : {
             "type" : "number"
           },
+          "ignore_rate_of_change" : {
+            "type" : "number"
+          },
           "locf_backfill" : {
             "type" : "string"
           },

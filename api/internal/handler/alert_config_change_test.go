@@ -14,6 +14,7 @@ const alertConfigChangeOptsSchema = `{
     "properties": {
 	"warn_rate_of_change": { "type": ["number", "null"] },
 	"alert_rate_of_change": { "type": "number" },
+	"ignore_rate_of_change": { "type": ["number", "null"] },
 	"locf_backfill": { "type": ["string", "null"] }
     },
     "additionalProperties": true
@@ -31,6 +32,7 @@ const createAlertConfigChangeBody = `{
     "opts": {
         "warn_rate_of_change": 5.0,
         "alert_rate_of_change": 10.0,
+        "ignore_rate_of_change": null,
         "locf_backfill": "1 hour"
     },
     "timeseries": [
@@ -48,6 +50,7 @@ const updateAlertConfigChangeBody = `{
     "opts": {
         "warn_rate_of_change": 8.0,
         "alert_rate_of_change": 15.0,
+        "ignore_rate_of_change": 1000.0,
         "locf_backfill": null
     },
     "timeseries": [],

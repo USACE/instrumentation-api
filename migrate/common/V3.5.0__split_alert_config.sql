@@ -66,5 +66,6 @@ CREATE TABLE alert_config_change (
   alert_config_id uuid NOT NULL REFERENCES alert_config(id) ON DELETE CASCADE,
   warn_rate_of_change double precision,
   alert_rate_of_change double precision NOT NULL,
+  ignore_rate_of_change double precision,
   locf_backfill interval
 );
