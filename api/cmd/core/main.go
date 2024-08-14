@@ -9,7 +9,7 @@ import (
 )
 
 // @title MIDAS Web API
-// @version 2.0
+// @version 3.4.0
 // @description Monitoring Instrumentation Data Acquisition Systems (MIDAS) Web API
 
 // @license.name MIT
