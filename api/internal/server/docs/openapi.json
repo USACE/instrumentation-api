@@ -10854,6 +10854,17 @@
             "type" : "string"
           }
         } ],
+        "requestBody" : {
+          "content" : {
+            "*/*" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Survey123"
+              }
+            }
+          },
+          "description" : "survey123 payload",
+          "required" : true
+        },
         "responses" : {
           "200" : {
             "content" : {
@@ -10903,7 +10914,8 @@
           "Bearer" : [ ]
         } ],
         "summary" : "creates a Survey123 connection with equivalency table mappings",
-        "tags" : [ "survey123" ]
+        "tags" : [ "survey123" ],
+        "x-codegen-request-body-name" : "survey123"
       }
     },
     "/projects/{project_id}/survey123/{survey123_id}" : {
@@ -10998,6 +11010,17 @@
             "type" : "string"
           }
         } ],
+        "requestBody" : {
+          "content" : {
+            "*/*" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Survey123"
+              }
+            }
+          },
+          "description" : "survey123 payload",
+          "required" : true
+        },
         "responses" : {
           "200" : {
             "content" : {
@@ -11047,7 +11070,8 @@
           "Bearer" : [ ]
         } ],
         "summary" : "updates a Survey123 connection with equivalency table mappings",
-        "tags" : [ "survey123" ]
+        "tags" : [ "survey123" ],
+        "x-codegen-request-body-name" : "survey123"
       }
     },
     "/projects/{project_id}/survey123/{survey123_id}/previews" : {

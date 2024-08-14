@@ -7255,6 +7255,13 @@ paths:
         schema:
           format: uuid
           type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/Survey123'
+        description: survey123 payload
+        required: true
       responses:
         "200":
           content:
@@ -7287,6 +7294,7 @@ paths:
       summary: creates a Survey123 connection with equivalency table mappings
       tags:
       - survey123
+      x-codegen-request-body-name: survey123
   /projects/{project_id}/survey123/{survey123_id}:
     delete:
       parameters:
@@ -7352,6 +7360,13 @@ paths:
         schema:
           format: uuid
           type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/Survey123'
+        description: survey123 payload
+        required: true
       responses:
         "200":
           content:
@@ -7384,6 +7399,7 @@ paths:
       summary: updates a Survey123 connection with equivalency table mappings
       tags:
       - survey123
+      x-codegen-request-body-name: survey123
   /projects/{project_id}/survey123/{survey123_id}/previews:
     get:
       parameters:

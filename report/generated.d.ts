@@ -6255,6 +6255,12 @@ export interface paths {
           project_id: string;
         };
       };
+      /** @description survey123 payload */
+      requestBody: {
+        content: {
+          "*/*": components["schemas"]["Survey123"];
+        };
+      };
       responses: {
         /** @description OK */
         200: {
@@ -6294,6 +6300,12 @@ export interface paths {
           project_id: string;
           /** @description survey123 uuid */
           survey123_id: string;
+        };
+      };
+      /** @description survey123 payload */
+      requestBody: {
+        content: {
+          "*/*": components["schemas"]["Survey123"];
         };
       };
       responses: {
