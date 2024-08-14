@@ -14513,6 +14513,12 @@
       },
       "TimeseriesCwms" : {
         "properties" : {
+          "cwms_extent_earliest_time" : {
+            "type" : "string"
+          },
+          "cwms_extent_latest_time" : {
+            "type" : "string"
+          },
           "cwms_office_id" : {
             "type" : "string"
           },
