@@ -6258,7 +6258,7 @@ export interface paths {
       /** @description survey123 payload */
       requestBody: {
         content: {
-          "*/*": components["schemas"]["Survey123"];
+          "application/json": components["schemas"]["Survey123"];
         };
       };
       responses: {
@@ -6305,7 +6305,7 @@ export interface paths {
       /** @description survey123 payload */
       requestBody: {
         content: {
-          "*/*": components["schemas"]["Survey123"];
+          "application/json": components["schemas"]["Survey123"];
         };
       };
       responses: {

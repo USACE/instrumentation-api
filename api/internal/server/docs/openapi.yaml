@@ -7257,7 +7257,7 @@ paths:
           type: string
       requestBody:
         content:
-          '*/*':
+          application/json:
             schema:
               $ref: '#/components/schemas/Survey123'
         description: survey123 payload
@@ -7362,7 +7362,7 @@ paths:
           type: string
       requestBody:
         content:
-          '*/*':
+          application/json:
             schema:
               $ref: '#/components/schemas/Survey123'
         description: survey123 payload

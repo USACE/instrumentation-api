@@ -69,6 +69,7 @@ func (h *ApiHandler) GetSurvey123Preview(c echo.Context) error {
 //
 //	@Summary creates a Survey123 connection with equivalency table mappings
 //	@Tags survey123
+//	@Accept json
 //	@Produce json
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param survey123 body model.Survey123 true "survey123 payload"
@@ -104,6 +105,7 @@ func (h *ApiHandler) CreateSurvey123(c echo.Context) error {
 //
 //	@Summary updates a Survey123 connection with equivalency table mappings
 //	@Tags survey123
+//	@Accept json
 //	@Produce json
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param survey123_id path string true "survey123 uuid" Format(uuid)
