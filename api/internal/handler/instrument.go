@@ -2,9 +2,10 @@ package handler
 
 import (
 	"net/http"
+	"strings"
 	"time"
 
-	"github.com/USACE/instrumentation-api/api/internal/message"
+	"github.com/USACE/instrumentation-api/api/internal/httperr"
 	"github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/paulmach/orb/geojson"
 
@@ -25,7 +26,7 @@ import (
 func (h *ApiHandler) ListInstruments(c echo.Context) error {
 	nn, err := h.InstrumentService.ListInstruments(c.Request().Context())
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, nn)
 }
@@ -43,7 +44,7 @@ func (h *ApiHandler) ListInstruments(c echo.Context) error {
 func (h *ApiHandler) GetInstrumentCount(c echo.Context) error {
 	ic, err := h.InstrumentService.GetInstrumentCount(c.Request().Context())
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, ic)
 }
@@ -62,14 +63,11 @@ func (h *ApiHandler) GetInstrumentCount(c echo.Context) error {
 func (h *ApiHandler) GetInstrument(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("instrument_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 	n, err := h.InstrumentService.GetInstrument(c.Request().Context(), id)
 	if err != nil {
-		if err.Error() == message.NotFound {
-			return echo.NewHTTPError(http.StatusBadRequest, message.NotFound)
-		}
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.ServerErrorOrNotFound(err)
 	}
 
 	return c.JSON(http.StatusOK, n)
@@ -83,6 +81,7 @@ func (h *ApiHandler) GetInstrument(c echo.Context) error {
 //	@Param project_id path string true "project id" Format(uuid)
 //	@Param instrument_id path string true "instrument id" Format(uuid)
 //	@Param instrument body model.InstrumentCollection true "instrument collection payload"
+//	@Param key query string false "api key"
 //	@Success 200 {array} model.IDSlugName
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -94,18 +93,20 @@ func (h *ApiHandler) CreateInstruments(c echo.Context) error {
 
 	projectID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
 
 	ic := model.InstrumentCollection{}
 	if err := c.Bind(&ic); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedBody(err)
 	}
 
 	p := c.Get("profile").(model.Profile)
 	t := time.Now()
 
+	instrumentNames := make([]string, len(ic))
 	for idx := range ic {
+		instrumentNames[idx] = ic[idx].Name
 		var prj model.IDSlugName
 		prj.ID = projectID
 		ic[idx].Projects = []model.IDSlugName{prj}
@@ -113,94 +114,23 @@ func (h *ApiHandler) CreateInstruments(c echo.Context) error {
 		ic[idx].CreateDate = t
 	}
 
-	if c.QueryParam("dry_run") == "true" {
-		v, err := h.InstrumentService.ValidateCreateInstruments(ctx, ic)
+	if strings.ToLower(c.QueryParam("dry_run")) == "true" {
+		v, err := h.InstrumentAssignService.ValidateInstrumentNamesProjectUnique(ctx, projectID, instrumentNames)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			return httperr.InternalServerError(err)
+		}
+		if !v.IsValid {
+			return c.JSON(http.StatusBadRequest, v)
 		}
 		return c.JSON(http.StatusOK, v)
 	}
 
 	nn, err := h.InstrumentService.CreateInstruments(ctx, ic)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 
 	return c.JSON(http.StatusCreated, nn)
-}
-
-// AssignInstrumentToProject godoc
-//
-//	@Summary assigns an instrument to a project.
-//	@Tags instrument
-//	@Description must be Project (or Application) Admin of all existing instrument projects and project to be assigned
-//	@Produce json
-//	@Param project_id path string true "project uuid" Format(uuid)
-//	@Param instrument_id path string true "instrument uuid" Format(uuid)
-//	@Success 200 {object} map[string]interface{}
-//	@Failure 400 {object} echo.HTTPError
-//	@Failure 404 {object} echo.HTTPError
-//	@Failure 500 {object} echo.HTTPError
-//	@Router /projects/{project_id}/instruments/{instrument_id}/assignments [post]
-//	@Security Bearer
-func (h *ApiHandler) AssignInstrumentToProject(c echo.Context) error {
-	pID, err := uuid.Parse(c.Param("project_id"))
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
-	}
-	iID, err := uuid.Parse(c.Param("instrument_id"))
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
-	}
-
-	ctx := c.Request().Context()
-	p := c.Get("profile").(model.Profile)
-	if !p.IsAdmin {
-		autorized, err := h.InstrumentService.AssignerIsAuthorized(ctx, iID, p.ID)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, message.InternalServerError)
-		}
-		if !autorized {
-			return echo.NewHTTPError(http.StatusUnauthorized, message.Unauthorized)
-		}
-	}
-
-	if err := h.InstrumentService.AssignInstrumentToProject(ctx, pID, iID); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	return c.JSON(http.StatusOK, make(map[string]interface{}))
-}
-
-// UnassignInstrumentFromProject godoc
-//
-//	@Summary unassigns an instrument from a project.
-//	@Tags instrument
-//	@Description must be Project Admin of project to be unassigned
-//	@Produce json
-//	@Param project_id path string true "project uuid" Format(uuid)
-//	@Param instrument_id path string true "instrument uuid" Format(uuid)
-//	@Success 200 {object} map[string]interface{}
-//	@Failure 400 {object} echo.HTTPError
-//	@Failure 404 {object} echo.HTTPError
-//	@Failure 500 {object} echo.HTTPError
-//	@Router /projects/{project_id}/instruments/{instrument_id}/assignments [delete]
-//	@Security Bearer
-func (h *ApiHandler) UnassignInstrumentFromProject(c echo.Context) error {
-	pID, err := uuid.Parse(c.Param("project_id"))
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
-	}
-	iID, err := uuid.Parse(c.Param("instrument_id"))
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
-	}
-
-	if err := h.InstrumentService.UnassignInstrumentFromProject(c.Request().Context(), pID, iID); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	return c.JSON(http.StatusOK, make(map[string]interface{}))
 }
 
 // UpdateInstrument godoc
@@ -211,6 +141,7 @@ func (h *ApiHandler) UnassignInstrumentFromProject(c echo.Context) error {
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param instrument_id path string true "instrument uuid" Format(uuid)
 //	@Param instrument body model.Instrument true "instrument payload"
+//	@Param key query string false "api key"
 //	@Success 200 {object} model.Instrument
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -220,16 +151,16 @@ func (h *ApiHandler) UnassignInstrumentFromProject(c echo.Context) error {
 func (h *ApiHandler) UpdateInstrument(c echo.Context) error {
 	iID, err := uuid.Parse(c.Param("instrument_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 	pID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 
 	var i model.Instrument
 	if err := c.Bind(&i); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedBody(err)
 	}
 	i.ID = iID
 
@@ -241,7 +172,7 @@ func (h *ApiHandler) UpdateInstrument(c echo.Context) error {
 	// update
 	iUpdated, err := h.InstrumentService.UpdateInstrument(c.Request().Context(), pID, i)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	// return updated instrument
 	return c.JSON(http.StatusOK, iUpdated)
@@ -255,6 +186,7 @@ func (h *ApiHandler) UpdateInstrument(c echo.Context) error {
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param instrument_id path string true "instrument uuid" Format(uuid)
 //	@Param instrument body model.Instrument true "instrument payload"
+//	@Param key query string false "api key"
 //	@Success 200 {object} model.Instrument
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -264,25 +196,22 @@ func (h *ApiHandler) UpdateInstrument(c echo.Context) error {
 func (h *ApiHandler) UpdateInstrumentGeometry(c echo.Context) error {
 	projectID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
 	instrumentID, err := uuid.Parse(c.Param("instrument_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
 	var geom geojson.Geometry
 	if err := c.Bind(&geom); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedBody(err)
 	}
 	// profile of user creating instruments
-	p, ok := c.Get("profile").(model.Profile)
-	if !ok {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
+	p := c.Get("profile").(model.Profile)
 
 	instrument, err := h.InstrumentService.UpdateInstrumentGeometry(c.Request().Context(), projectID, instrumentID, geom, p)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, instrument)
 }
@@ -294,6 +223,7 @@ func (h *ApiHandler) UpdateInstrumentGeometry(c echo.Context) error {
 //	@Produce json
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param instrument_id path string true "instrument uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -303,16 +233,16 @@ func (h *ApiHandler) UpdateInstrumentGeometry(c echo.Context) error {
 func (h *ApiHandler) DeleteFlagInstrument(c echo.Context) error {
 	pID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 
 	iID, err := uuid.Parse(c.Param("instrument_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 
 	if err := h.InstrumentService.DeleteFlagInstrument(c.Request().Context(), pID, iID); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 
 	return c.JSON(http.StatusOK, make(map[string]interface{}))

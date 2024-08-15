@@ -32,7 +32,7 @@ const listEvaluationDistrictRollup = `
 // ListCollectionGroups lists all collection groups for a project
 func (q *Queries) ListEvaluationDistrictRollup(ctx context.Context, opID uuid.UUID, tw TimeWindow) ([]DistrictRollup, error) {
 	dr := make([]DistrictRollup, 0)
-	if err := q.db.SelectContext(ctx, &dr, listEvaluationDistrictRollup, opID, tw.Start, tw.End); err != nil {
+	if err := q.db.SelectContext(ctx, &dr, listEvaluationDistrictRollup, opID, tw.After, tw.Before); err != nil {
 		return nil, err
 	}
 	return dr, nil
@@ -49,7 +49,7 @@ const listMeasurementDistrictRollup = `
 // ListCollectionGroups lists all collection groups for a project
 func (q *Queries) ListMeasurementDistrictRollup(ctx context.Context, opID uuid.UUID, tw TimeWindow) ([]DistrictRollup, error) {
 	dr := make([]DistrictRollup, 0)
-	if err := q.db.SelectContext(ctx, &dr, listMeasurementDistrictRollup, opID, tw.Start, tw.End); err != nil {
+	if err := q.db.SelectContext(ctx, &dr, listMeasurementDistrictRollup, opID, tw.After, tw.Before); err != nil {
 		return nil, err
 	}
 	return dr, nil

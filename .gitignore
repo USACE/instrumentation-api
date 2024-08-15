@@ -30,5 +30,7 @@ __debug*
 **/.tool-versions
 
 # reports from regression tests
-report
 test.log
+
+**/node_modules
+**/dist

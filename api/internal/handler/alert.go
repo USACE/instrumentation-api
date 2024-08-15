@@ -1,11 +1,9 @@
 package handler
 
 import (
-	"database/sql"
-	"errors"
 	"net/http"
 
-	"github.com/USACE/instrumentation-api/api/internal/message"
+	"github.com/USACE/instrumentation-api/api/internal/httperr"
 	"github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/google/uuid"
 
@@ -25,15 +23,14 @@ import (
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /projects/{project_id}/instruments/{instrument_id}/alerts [get]
-//	@Security Bearer
 func (h *ApiHandler) ListAlertsForInstrument(c echo.Context) error {
 	instrumentID, err := uuid.Parse(c.Param("instrument_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
 	aa, err := h.AlertService.GetAllAlertsForInstrument(c.Request().Context(), instrumentID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, aa)
 }
@@ -44,17 +41,19 @@ func (h *ApiHandler) ListAlertsForInstrument(c echo.Context) error {
 //	@Description list all alerts a profile is subscribed to
 //	@Tags alert
 //	@Produce json
+//	@Param key query string false "api key"
 //	@Success 200 {array} model.Alert
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
 //	@Router /my_alerts [get]
+//	@Security Bearer
 func (h *ApiHandler) ListMyAlerts(c echo.Context) error {
 	p := c.Get("profile").(model.Profile)
 	profileID := p.ID
 	aa, err := h.AlertService.GetAllAlertsForProfile(c.Request().Context(), profileID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, aa)
 }
@@ -67,6 +66,7 @@ func (h *ApiHandler) ListMyAlerts(c echo.Context) error {
 //	@Tags alert
 //	@Produce json
 //	@Param alert_id path string true "alert uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Success 200 {object} model.Alert
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -78,14 +78,11 @@ func (h *ApiHandler) DoAlertRead(c echo.Context) error {
 	profileID := p.ID
 	alertID, err := uuid.Parse(c.Param("alert_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
 	a, err := h.AlertService.DoAlertRead(c.Request().Context(), profileID, alertID)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return echo.NewHTTPError(http.StatusNotFound, message.NotFound)
-		}
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, a)
 }
@@ -98,6 +95,7 @@ func (h *ApiHandler) DoAlertRead(c echo.Context) error {
 //	@Tags alert
 //	@Produce json
 //	@Param alert_id path string true "alert uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Success 200 {object} model.Alert
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -109,14 +107,11 @@ func (h *ApiHandler) DoAlertUnread(c echo.Context) error {
 	profileID := p.ID
 	alertID, err := uuid.Parse(c.Param("alert_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
 	a, err := h.AlertService.DoAlertUnread(c.Request().Context(), profileID, alertID)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return echo.NewHTTPError(http.StatusNotFound, message.NotFound)
-		}
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, a)
 }

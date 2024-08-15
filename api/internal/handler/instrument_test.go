@@ -58,9 +58,11 @@ var instrumentSchema = fmt.Sprintf(`{
         "projects": %s,
         "nid_id": { "type": ["string", "null"] },
         "usgs_id": { "type": ["string", "null"] },
+	"has_cwms": { "type": "boolean" },
+        "show_cwms_tab": { "type": "boolean" },
 	"opts": { "type": ["object", "null"] }
     },
-    "required": ["id", "slug", "name", "type_id", "type", "status_id", "status", "status_time", "geometry", "creator_id", "create_date", "updater_id", "update_date", "projects", "station", "offset", "constants", "alert_configs", "nid_id", "usgs_id"],
+    "required": ["id", "slug", "name", "type_id", "type", "status_id", "status", "status_time", "geometry", "creator_id", "create_date", "updater_id", "update_date", "projects", "station", "offset", "constants", "has_cwms", "alert_configs", "nid_id", "usgs_id", "show_cwms_tab"],
     "additionalProperties": false
 }`, IDSlugNameArrSchema)
 
@@ -81,8 +83,7 @@ var instrumentCountObjectLoader = gojsonschema.NewStringLoader(`{
 }`)
 
 const (
-	testInstrumentID    = "a7540f69-c41e-43b3-b655-6e44097edb7e"
-	testAssignProjectID = "d559abfd-7ec7-4d0d-97bd-a04018f01e4c"
+	testInstrumentID = "a7540f69-c41e-43b3-b655-6e44097edb7e"
 )
 
 const updateInstrumentBody = `{
@@ -309,13 +310,6 @@ func TestInstruments(t *testing.T) {
 			ExpectedSchema: arrSchema,
 		},
 		{
-			Name:           "CreateInstrumentBulk",
-			URL:            fmt.Sprintf("/projects/%s/instruments", testProjectID),
-			Method:         http.MethodPost,
-			Body:           createInstrumentBulkBody,
-			ExpectedStatus: http.StatusCreated,
-		},
-		{
 			Name:           "ValidateCreateInstrument",
 			URL:            fmt.Sprintf("/projects/%s/instruments?dry_run=true", testProjectID),
 			Method:         http.MethodPost,
@@ -323,16 +317,18 @@ func TestInstruments(t *testing.T) {
 			ExpectedStatus: http.StatusOK,
 		},
 		{
-			Name:           "AssignInstrumentToProject",
-			URL:            fmt.Sprintf("/projects/%s/instruments/%s/assignments", testAssignProjectID, testInstrumentID),
+			Name:           "CreateInstrumentBulk",
+			URL:            fmt.Sprintf("/projects/%s/instruments", testProjectID),
 			Method:         http.MethodPost,
-			ExpectedStatus: http.StatusOK,
+			Body:           createInstrumentBulkBody,
+			ExpectedStatus: http.StatusCreated,
 		},
 		{
-			Name:           "UnssignInstrumentFromProject",
-			URL:            fmt.Sprintf("/projects/%s/instruments/%s/assignments", testAssignProjectID, testInstrumentID),
-			Method:         http.MethodDelete,
-			ExpectedStatus: http.StatusOK,
+			Name:           "ValidateCreateInstrumentFail",
+			URL:            fmt.Sprintf("/projects/%s/instruments?dry_run=true", testProjectID),
+			Method:         http.MethodPost,
+			Body:           validateCreateInstrumentBulkBody,
+			ExpectedStatus: http.StatusBadRequest,
 		},
 		{
 			Name:           "DeleteInstrument",

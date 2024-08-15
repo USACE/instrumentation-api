@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/USACE/instrumentation-api/api/internal/message"
+	"github.com/USACE/instrumentation-api/api/internal/httperr"
 	_ "github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -25,7 +25,7 @@ import (
 func (h *ApiHandler) ListProjectSubmittals(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 
 	var fmo bool
@@ -36,7 +36,7 @@ func (h *ApiHandler) ListProjectSubmittals(c echo.Context) error {
 
 	subs, err := h.SubmittalService.ListProjectSubmittals(c.Request().Context(), id, fmo)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, subs)
 }
@@ -56,7 +56,7 @@ func (h *ApiHandler) ListProjectSubmittals(c echo.Context) error {
 func (h *ApiHandler) ListInstrumentSubmittals(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("instrument_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 
 	var fmo bool
@@ -67,7 +67,7 @@ func (h *ApiHandler) ListInstrumentSubmittals(c echo.Context) error {
 
 	subs, err := h.SubmittalService.ListInstrumentSubmittals(c.Request().Context(), id, fmo)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, subs)
 }
@@ -86,7 +86,7 @@ func (h *ApiHandler) ListInstrumentSubmittals(c echo.Context) error {
 func (h *ApiHandler) ListAlertConfigSubmittals(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("alert_config_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 
 	var fmo bool
@@ -97,7 +97,7 @@ func (h *ApiHandler) ListAlertConfigSubmittals(c echo.Context) error {
 
 	subs, err := h.SubmittalService.ListAlertConfigSubmittals(c.Request().Context(), id, fmo)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, subs)
 }
@@ -108,6 +108,7 @@ func (h *ApiHandler) ListAlertConfigSubmittals(c echo.Context) error {
 //	@Tags submittal
 //	@Produce json
 //	@Param submittal_id path string true "submittal uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -117,10 +118,10 @@ func (h *ApiHandler) ListAlertConfigSubmittals(c echo.Context) error {
 func (h *ApiHandler) VerifyMissingSubmittal(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("submittal_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		return httperr.MalformedID(err)
 	}
 	if err := h.SubmittalService.VerifyMissingSubmittal(c.Request().Context(), id); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.ServerErrorOrNotFound(err)
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{"submittal_id": id})
 }
@@ -131,6 +132,7 @@ func (h *ApiHandler) VerifyMissingSubmittal(c echo.Context) error {
 //	@Tags submittal
 //	@Produce json
 //	@Param alert_config_id path string true "alert config uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -140,10 +142,10 @@ func (h *ApiHandler) VerifyMissingSubmittal(c echo.Context) error {
 func (h *ApiHandler) VerifyMissingAlertConfigSubmittals(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("alert_config_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		return httperr.MalformedID(err)
 	}
 	if err := h.SubmittalService.VerifyMissingAlertConfigSubmittals(c.Request().Context(), id); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{"alert_config_id": id})
 }

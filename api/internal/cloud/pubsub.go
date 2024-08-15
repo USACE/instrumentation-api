@@ -1,34 +1,47 @@
 package cloud
 
 import (
+	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"io"
 	"log"
+	"net/http"
 
 	"github.com/USACE/instrumentation-api/api/internal/config"
 	"github.com/aws/aws-lambda-go/events"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/sqs"
+	"github.com/aws/aws-sdk-go-v2/service/sqs"
+	sqsTypes "github.com/aws/aws-sdk-go-v2/service/sqs/types"
 )
 
 type Pubsub interface {
-	ProcessMessages(handler messageHandler) error
+	ProcessMessagesFromBlob(handler messageHandler) error
+	PublishMessage(ctx context.Context, message []byte) (string, error)
+	MockPublishMessage(ctx context.Context, message []byte) (string, error)
 }
 
+type messageHandler func(r io.Reader) error
+
 type SQSPubsub struct {
-	*sqs.SQS
-	cfg  *config.AWSSQSConfig
-	blob Blob
+	*sqs.Client
+	cfg      *config.AWSSQSConfig
+	blob     Blob
+	queueUrl *string
 }
 
 var _ Pubsub = (*SQSPubsub)(nil)
 
 func NewSQSPubsub(cfg *config.AWSSQSConfig) *SQSPubsub {
-	awsCfg := cfg.SQSConfig()
-	sess := session.Must(session.NewSession(awsCfg))
-	return &SQSPubsub{sqs.New(sess), cfg, nil}
+	sqsCfg, optFns := cfg.SQSConfig()
+	queue := sqs.NewFromConfig(sqsCfg, optFns...)
+
+	ps := &SQSPubsub{queue, cfg, nil, nil}
+	if !cfg.AWSSQSQueueNoInit {
+		ps.MustInitQueueUrl()
+	}
+
+	return ps
 }
 
 func (s *SQSPubsub) WithBlob(blob Blob) *SQSPubsub {
@@ -36,47 +49,55 @@ func (s *SQSPubsub) WithBlob(blob Blob) *SQSPubsub {
 	return s
 }
 
-func queueURL(s *SQSPubsub) (string, error) {
-	if s.cfg.AWSSQSQueueURL != "" {
-		return s.cfg.AWSSQSQueueURL, nil
+func (s *SQSPubsub) MustInitQueueUrl() {
+	if err := s.InitQueueUrl(); err != nil {
+		log.Fatalf(err.Error())
 	}
-	urlResult, err := s.GetQueueUrl(&sqs.GetQueueUrlInput{QueueName: &s.cfg.AWSSQSQueueName})
-	if err != nil {
-		return "", err
-	}
-	if urlResult == nil || urlResult.QueueUrl == nil {
-		return "", errors.New("queue url is nil")
-	}
-	return *urlResult.QueueUrl, nil
 }
 
-type messageHandler func(r io.Reader) error
+func (s *SQSPubsub) InitQueueUrl() error {
+	if s.cfg.AWSSQSQueueURL != "" {
+		s.queueUrl = &s.cfg.AWSSQSQueueURL
+		return nil
+	}
+	urlResult, err := s.GetQueueUrl(context.Background(), &sqs.GetQueueUrlInput{QueueName: &s.cfg.AWSSQSQueueName})
+	if err != nil {
+		return err
+	}
+	if urlResult == nil || urlResult.QueueUrl == nil {
+		return errors.New("queue url is nil")
+	}
+	s.queueUrl = urlResult.QueueUrl
+	return nil
+}
 
-func (s *SQSPubsub) ProcessMessages(handler messageHandler) error {
+func (s *SQSPubsub) ProcessMessagesFromBlob(handler messageHandler) error {
 	if s.blob == nil {
 		return errors.New("blob must not be nil")
 	}
 
-	url, err := queueURL(s)
-	if err != nil {
-		return err
+	if s.queueUrl == nil {
+		if err := s.InitQueueUrl(); err != nil {
+			return err
+		}
 	}
 
 	var entity events.SNSEntity
 	var evt events.S3Event
+	ctx := context.Background()
 
 	for {
-		output, err := s.ReceiveMessage(&sqs.ReceiveMessageInput{
-			AttributeNames: []*string{
-				aws.String(sqs.MessageSystemAttributeNameSentTimestamp),
+		output, err := s.ReceiveMessage(ctx, &sqs.ReceiveMessageInput{
+			AttributeNames: []sqsTypes.QueueAttributeName{
+				sqsTypes.QueueAttributeName(sqsTypes.MessageSystemAttributeNameSentTimestamp),
 			},
-			MessageAttributeNames: []*string{
-				aws.String(sqs.QueueAttributeNameAll),
+			MessageAttributeNames: []string{
+				string(sqsTypes.QueueAttributeNameAll),
 			},
-			QueueUrl:            aws.String(url),
-			MaxNumberOfMessages: aws.Int64(1),
-			VisibilityTimeout:   aws.Int64(30),
-			WaitTimeSeconds:     aws.Int64(20),
+			QueueUrl:            s.queueUrl,
+			MaxNumberOfMessages: 1,
+			VisibilityTimeout:   30,
+			WaitTimeSeconds:     20,
 		})
 		if err != nil {
 			return err
@@ -113,10 +134,62 @@ func (s *SQSPubsub) ProcessMessages(handler messageHandler) error {
 				}
 			}
 
-			s.DeleteMessage(&sqs.DeleteMessageInput{
-				QueueUrl:      aws.String(url),
+			s.DeleteMessage(ctx, &sqs.DeleteMessageInput{
+				QueueUrl:      s.queueUrl,
 				ReceiptHandle: m.MessageId,
 			})
 		}
 	}
+}
+
+func (s *SQSPubsub) PublishMessage(ctx context.Context, message []byte) (string, error) {
+	if s.queueUrl == nil {
+		if err := s.InitQueueUrl(); err != nil {
+			return "", err
+		}
+	}
+
+	messageBody := string(message)
+	sqsMessageInput := &sqs.SendMessageInput{
+		MessageBody: &messageBody,
+		QueueUrl:    s.queueUrl,
+	}
+
+	out, err := s.SendMessage(ctx, sqsMessageInput)
+	if err != nil {
+		return "", err
+	}
+
+	if out == nil || out.MessageId == nil {
+		return "", errors.New("nil message id returned from queue")
+	}
+
+	return *out.MessageId, nil
+}
+
+func (s *SQSPubsub) MockPublishMessage(ctx context.Context, message []byte) (string, error) {
+	body := events.SQSMessage{Body: string(message)}
+	event := events.SQSEvent{Records: []events.SQSMessage{body}}
+	b, err := json.Marshal(event)
+	if err != nil {
+		return "", err
+	}
+
+	if err := mockInvokeLocalLambda("http://report:8080/2015-03-31/functions/function/invocations", b); err != nil {
+		return "", err
+	}
+
+	return "mock-message-id", nil
+}
+
+func mockInvokeLocalLambda(invokeUrl string, message []byte) error {
+	r := bytes.NewReader(message)
+	res, err := http.Post(invokeUrl, "application/json", r)
+	if err != nil {
+		return err
+	}
+	if res.StatusCode != 200 {
+		return errors.New("unable to invoke locally mocked lambda")
+	}
+	return nil
 }

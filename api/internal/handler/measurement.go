@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/USACE/instrumentation-api/api/internal/httperr"
 	"github.com/USACE/instrumentation-api/api/internal/model"
 
 	"github.com/google/uuid"
@@ -18,6 +19,7 @@ import (
 //	@Produce json
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param timeseries_measurement_collections body model.TimeseriesMeasurementCollectionCollection true "array of timeseries measurement collections"
+//	@Param key query string false "api key"
 //	@Success 200 {array} model.MeasurementCollection
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -28,22 +30,22 @@ func (h *ApiHandler) CreateOrUpdateProjectTimeseriesMeasurements(c echo.Context)
 	ctx := c.Request().Context()
 	var mcc model.TimeseriesMeasurementCollectionCollection
 	if err := c.Bind(&mcc); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedBody(err)
 	}
 
 	pID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
 
 	dd := mcc.TimeseriesIDs()
 	if err := h.TimeseriesService.AssertTimeseriesLinkedToProject(ctx, pID, dd); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.InternalServerError(err)
 	}
 
 	stored, err := h.MeasurementService.CreateOrUpdateTimeseriesMeasurements(ctx, mcc.Items)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 
 	return c.JSON(http.StatusCreated, stored)
@@ -55,6 +57,7 @@ func (h *ApiHandler) CreateOrUpdateProjectTimeseriesMeasurements(c echo.Context)
 //	@Tags measurement
 //	@Produce json
 //	@Param timeseries_measurement_collections body model.TimeseriesMeasurementCollectionCollection true "array of timeseries measurement collections"
+//	@Param key query string true "api key"
 //	@Success 200 {array} model.MeasurementCollection
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -63,11 +66,11 @@ func (h *ApiHandler) CreateOrUpdateProjectTimeseriesMeasurements(c echo.Context)
 func (h *ApiHandler) CreateOrUpdateTimeseriesMeasurements(c echo.Context) error {
 	var mcc model.TimeseriesMeasurementCollectionCollection
 	if err := c.Bind(&mcc); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedBody(err)
 	}
 	stored, err := h.MeasurementService.CreateOrUpdateTimeseriesMeasurements(c.Request().Context(), mcc.Items)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.InternalServerError(err)
 	}
 
 	return c.JSON(http.StatusCreated, stored)
@@ -82,6 +85,7 @@ func (h *ApiHandler) CreateOrUpdateTimeseriesMeasurements(c echo.Context) error 
 //	@Param after query string false "after timestamp" Format(date-time)
 //	@Param before query string false "before timestamp" Format(date-time)
 //	@Param timeseries_measurement_collections body model.TimeseriesMeasurementCollectionCollection true "array of timeseries measurement collections"
+//	@Param key query string false "api key"
 //	@Success 200 {array} model.MeasurementCollection
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -92,15 +96,15 @@ func (h *ApiHandler) UpdateTimeseriesMeasurements(c echo.Context) error {
 	var tw model.TimeWindow
 	a, b := c.QueryParam("after"), c.QueryParam("before")
 	if err := tw.SetWindow(a, b, time.Now().AddDate(0, 0, -7), time.Now()); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedDate(err)
 	}
 	var mcc model.TimeseriesMeasurementCollectionCollection
 	if err := c.Bind(&mcc); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedBody(err)
 	}
 	stored, err := h.MeasurementService.UpdateTimeseriesMeasurements(c.Request().Context(), mcc.Items, tw)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, stored)
 }
@@ -112,6 +116,7 @@ func (h *ApiHandler) UpdateTimeseriesMeasurements(c echo.Context) error {
 //	@Produce json
 //	@Param timeseries_id path string true "timeseries uuid" Format(uuid)
 //	@Param time query string true "timestamp of measurement to delete" Format(date-time)
+//	@Param key query string false "api key"
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -122,15 +127,15 @@ func (h *ApiHandler) DeleteTimeserieMeasurements(c echo.Context) error {
 	// id from url params
 	id, err := uuid.Parse(c.Param("timeseries_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
 	timeString := c.QueryParam("time")
 	t, err := time.Parse(time.RFC3339, timeString)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedDate(err)
 	}
 	if err := h.MeasurementService.DeleteTimeserieMeasurements(c.Request().Context(), id, t); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, make(map[string]interface{}))
 }

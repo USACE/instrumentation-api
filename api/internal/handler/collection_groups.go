@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/USACE/instrumentation-api/api/internal/message"
+	"github.com/USACE/instrumentation-api/api/internal/httperr"
 
 	"github.com/google/uuid"
 
@@ -27,11 +27,11 @@ import (
 func (h *ApiHandler) ListCollectionGroups(c echo.Context) error {
 	pID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
 	cc, err := h.CollectionGroupService.ListCollectionGroups(c.Request().Context(), pID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, &cc)
 }
@@ -51,15 +51,15 @@ func (h *ApiHandler) ListCollectionGroups(c echo.Context) error {
 func (h *ApiHandler) GetCollectionGroupDetails(c echo.Context) error {
 	pID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
 	cgID, err := uuid.Parse(c.Param("collection_group_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
 	d, err := h.CollectionGroupService.GetCollectionGroupDetails(c.Request().Context(), pID, cgID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, d)
 }
@@ -72,6 +72,7 @@ func (h *ApiHandler) GetCollectionGroupDetails(c echo.Context) error {
 //	@Produce json
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param collection_group body model.CollectionGroup true "collection group payload"
+//	@Param key query string false "api key"
 //	@Success 200 {array} model.CollectionGroup
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -82,12 +83,12 @@ func (h *ApiHandler) CreateCollectionGroup(c echo.Context) error {
 	var cg model.CollectionGroup
 	// Bind Information Provided
 	if err := c.Bind(&cg); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedBody(err)
 	}
 	// Project ID from Route Params
 	pID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
 	cg.ProjectID = pID
 	p := c.Get("profile").(model.Profile)
@@ -95,7 +96,7 @@ func (h *ApiHandler) CreateCollectionGroup(c echo.Context) error {
 
 	cgNew, err := h.CollectionGroupService.CreateCollectionGroup(c.Request().Context(), cg)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusCreated, []model.CollectionGroup{cgNew})
 }
@@ -108,6 +109,7 @@ func (h *ApiHandler) CreateCollectionGroup(c echo.Context) error {
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param collection_group_id path string true "collection group uuid"
 //	@Param collection_group body model.CollectionGroup true "collection group payload"
+//	@Param key query string false "api key"
 //	@Success 200 {object} model.CollectionGroup
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -117,26 +119,27 @@ func (h *ApiHandler) CreateCollectionGroup(c echo.Context) error {
 func (h *ApiHandler) UpdateCollectionGroup(c echo.Context) error {
 	var cg model.CollectionGroup
 	if err := c.Bind(&cg); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedBody(err)
 	}
+
 	pID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
 	cg.ProjectID = pID
+
 	cgID, err := uuid.Parse(c.Param("collection_group_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
-	if cgID != cg.ID {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MatchRouteParam("`collection_group_id`"))
-	}
+	cg.ID = cgID
+
 	p := c.Get("profile").(model.Profile)
 	t := time.Now()
 	cg.UpdaterID, cg.UpdateDate = &p.ID, &t
 	cgUpdated, err := h.CollectionGroupService.UpdateCollectionGroup(c.Request().Context(), cg)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusCreated, cgUpdated)
 }
@@ -148,6 +151,7 @@ func (h *ApiHandler) UpdateCollectionGroup(c echo.Context) error {
 //	@Produce json
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param collection_group_id path string true "collection group uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -157,14 +161,14 @@ func (h *ApiHandler) UpdateCollectionGroup(c echo.Context) error {
 func (h *ApiHandler) DeleteCollectionGroup(c echo.Context) error {
 	pID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
 	cgID, err := uuid.Parse(c.Param("collection_group_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
 	if err := h.CollectionGroupService.DeleteCollectionGroup(c.Request().Context(), pID, cgID); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, make(map[string]interface{}))
 }
@@ -177,6 +181,7 @@ func (h *ApiHandler) DeleteCollectionGroup(c echo.Context) error {
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param collection_group_id path string true "collection group uuid" Format(uuid)
 //	@Param timeseries_id path string true "timeseries uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -186,14 +191,14 @@ func (h *ApiHandler) DeleteCollectionGroup(c echo.Context) error {
 func (h *ApiHandler) AddTimeseriesToCollectionGroup(c echo.Context) error {
 	cgID, err := uuid.Parse(c.Param("collection_group_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
 	tsID, err := uuid.Parse(c.Param("timeseries_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
 	if err := h.CollectionGroupService.AddTimeseriesToCollectionGroup(c.Request().Context(), cgID, tsID); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, make(map[string]interface{}))
 }
@@ -206,6 +211,7 @@ func (h *ApiHandler) AddTimeseriesToCollectionGroup(c echo.Context) error {
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param collection_group_id path string true "collection group uuid" Format(uuid)
 //	@Param timeseries_id path string true "timeseries uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -215,14 +221,14 @@ func (h *ApiHandler) AddTimeseriesToCollectionGroup(c echo.Context) error {
 func (h *ApiHandler) RemoveTimeseriesFromCollectionGroup(c echo.Context) error {
 	cgID, err := uuid.Parse(c.Param("collection_group_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
 	tsID, err := uuid.Parse(c.Param("timeseries_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
 	if err := h.CollectionGroupService.RemoveTimeseriesFromCollectionGroup(c.Request().Context(), cgID, tsID); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, make(map[string]interface{}))
 }

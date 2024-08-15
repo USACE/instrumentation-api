@@ -59,9 +59,10 @@ const collectionGroupDetailsSchema = `{
                     "unit": { "type": "string" },
                     "latest_time": {"type": "string", "format": "date-time" },
                     "latest_value": {"type": "number" },
-                    "is_computed": {"type": "boolean" }
+                    "is_computed": { "type": "boolean" },
+                    "type": { "type": "string" }
                 },
-                "required": ["id", "slug", "name", "variable", "instrument_id", "instrument", "instrument_slug", "parameter_id", "parameter", "unit_id", "unit", "latest_time", "latest_value", "is_computed"],
+                "required": ["id", "slug", "name", "variable", "instrument_id", "instrument", "instrument_slug", "parameter_id", "parameter", "unit_id", "unit", "latest_time", "latest_value", "is_computed", "type"],
                 "additionalProperties": false
             }
         }

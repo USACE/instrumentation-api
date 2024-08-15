@@ -10,7 +10,7 @@ INSERT INTO profile (id, edipi, is_admin, username, email) VALUES
     -- Application Admin
     ('57329df6-9f7a-4dad-9383-4633b452efab',2,true,'AnthonyLambert','anthony.lambert@fake.usace.army.mil'),
     -- Blue Water Dam Project Admin
-    ('f320df83-e2ea-4fe9-969a-4e0239b8da51',3,false,'MollyRutherford','molly.rutherford@fake.usace.army.mil'),
+    ('f320df83-e2ea-4fe9-969a-4e0239b8da51',3,false,'nocactest','molly.rutherford@fake.usace.army.mil'),
     -- Blue Water Dam Project Member
     ('89aa1e13-041a-4d15-9e45-f76eba3b0551',4,false,'DominicGlover','dominic.glover@fake.usace.army.mil'),
     ('405ab7e1-20fc-4d26-a074-eccad88bf0a9',5,false,'JoeQuinn','joe.quinn@fake.usace.army.mil'),

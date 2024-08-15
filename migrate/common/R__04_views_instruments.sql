@@ -1,5 +1,5 @@
 -- ${flyway:timestamp}
-CREATE VIEW v_instrument_telemetry AS (
+CREATE OR REPLACE VIEW v_instrument_telemetry AS (
     SELECT a.id,
            a.instrument_id AS instrument_id,
            b.id AS telemetry_type_id,
@@ -11,7 +11,7 @@ CREATE VIEW v_instrument_telemetry AS (
     LEFT JOIN telemetry_iridium ti ON a.telemetry_id = ti.id
 );
 
-CREATE VIEW v_instrument AS (
+CREATE OR REPLACE VIEW v_instrument AS (
     SELECT
         i.id,
         i.deleted,
@@ -21,6 +21,7 @@ CREATE VIEW v_instrument AS (
         i.slug,
         i.name,
         i.type_id,
+        i.show_cwms_tab,
         t.name AS type,
         t.icon AS icon,
         ST_AsBinary(i.geometry) AS geometry,
@@ -33,6 +34,7 @@ CREATE VIEW v_instrument AS (
         i.nid_id,
         i.usgs_id,
         tel.telemetry AS telemetry,
+        cwms.has_cwms,
         COALESCE(op.parr::TEXT, '[]'::TEXT) AS projects,
         COALESCE(c.constants, '{}') AS constants,
         COALESCE(g.groups, '{}') AS groups,
@@ -97,6 +99,13 @@ CREATE VIEW v_instrument AS (
         FROM v_instrument_telemetry v
         GROUP BY instrument_id
     ) tel ON tel.instrument_id = i.id
+    LEFT JOIN LATERAL (
+        SELECT EXISTS(
+            SELECT 1 FROM timeseries_cwms iitc
+            INNER JOIN timeseries iit ON iit.id = iitc.timeseries_id
+            WHERE iit.instrument_id = i.id
+        ) AS has_cwms
+    ) cwms ON true
     LEFT JOIN (
         -- optional properties that vary per
         -- instrument can be added here via union
@@ -120,7 +129,7 @@ CREATE VIEW v_instrument AS (
     ) o ON o.instrument_id = i.id
 );
 
-CREATE VIEW v_instrument_group AS (
+CREATE OR REPLACE VIEW v_instrument_group AS (
     WITH instrument_count AS (
             SELECT 
             igi.instrument_group_id,

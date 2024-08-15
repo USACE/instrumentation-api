@@ -11,6 +11,15 @@ import (
 	"github.com/USACE/instrumentation-api/api/internal/service"
 )
 
+func newHttpClient() *http.Client {
+	return &http.Client{
+		Timeout: time.Second * 60,
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return nil
+		},
+	}
+}
+
 type ApiHandler struct {
 	Middleware                     middleware.Middleware
 	BlobService                    cloud.Blob
@@ -28,6 +37,7 @@ type ApiHandler struct {
 	HeartbeatService               service.HeartbeatService
 	HomeService                    service.HomeService
 	InstrumentService              service.InstrumentService
+	InstrumentAssignService        service.InstrumentAssignService
 	InstrumentConstantService      service.InstrumentConstantService
 	InstrumentGroupService         service.InstrumentGroupService
 	InstrumentNoteService          service.InstrumentNoteService
@@ -40,9 +50,11 @@ type ApiHandler struct {
 	ProfileService                 service.ProfileService
 	ProjectRoleService             service.ProjectRoleService
 	ProjectService                 service.ProjectService
+	ReportConfigService            service.ReportConfigService
 	SaaInstrumentService           service.SaaInstrumentService
 	SubmittalService               service.SubmittalService
 	TimeseriesService              service.TimeseriesService
+	TimeseriesCwmsService          service.TimeseriesCwmsService
 	CalculatedTimeseriesService    service.CalculatedTimeseriesService
 	ProcessTimeseriesService       service.ProcessTimeseriesService
 	UnitService                    service.UnitService
@@ -51,6 +63,7 @@ type ApiHandler struct {
 func NewApi(cfg *config.ApiConfig) *ApiHandler {
 	db := model.NewDatabase(&cfg.DBConfig)
 	q := db.Queries()
+	ps := cloud.NewSQSPubsub(&cfg.AWSSQSConfig)
 
 	profileService := service.NewProfileService(db, q)
 	projectRoleService := service.NewProjectRoleService(db, q)
@@ -59,7 +72,7 @@ func NewApi(cfg *config.ApiConfig) *ApiHandler {
 
 	return &ApiHandler{
 		Middleware:                     mw,
-		BlobService:                    cloud.NewS3Blob(&cfg.AWSS3Config, "/midas", cfg.RoutePrefix),
+		BlobService:                    cloud.NewS3Blob(&cfg.AWSS3Config, "/instrumentation", cfg.RoutePrefix),
 		AlertService:                   service.NewAlertService(db, q),
 		AlertConfigService:             service.NewAlertConfigService(db, q),
 		AlertSubscriptionService:       service.NewAlertSubscriptionService(db, q),
@@ -74,6 +87,7 @@ func NewApi(cfg *config.ApiConfig) *ApiHandler {
 		HeartbeatService:               service.NewHeartbeatService(db, q),
 		HomeService:                    service.NewHomeService(db, q),
 		InstrumentService:              service.NewInstrumentService(db, q),
+		InstrumentAssignService:        service.NewInstrumentAssignService(db, q),
 		InstrumentConstantService:      service.NewInstrumentConstantService(db, q),
 		InstrumentGroupService:         service.NewInstrumentGroupService(db, q),
 		InstrumentNoteService:          service.NewInstrumentNoteService(db, q),
@@ -86,9 +100,11 @@ func NewApi(cfg *config.ApiConfig) *ApiHandler {
 		ProfileService:                 profileService,
 		ProjectRoleService:             service.NewProjectRoleService(db, q),
 		ProjectService:                 service.NewProjectService(db, q),
+		ReportConfigService:            service.NewReportConfigService(db, q, ps, cfg.AuthJWTMocked),
 		SaaInstrumentService:           service.NewSaaInstrumentService(db, q),
 		SubmittalService:               service.NewSubmittalService(db, q),
 		TimeseriesService:              service.NewTimeseriesService(db, q),
+		TimeseriesCwmsService:          service.NewTimeseriesCwmsService(db, q),
 		CalculatedTimeseriesService:    service.NewCalculatedTimeseriesService(db, q),
 		ProcessTimeseriesService:       service.NewProcessTimeseriesService(db, q),
 		UnitService:                    service.NewUnitService(db, q),
@@ -135,22 +151,17 @@ func NewAlertCheck(cfg *config.AlertCheckConfig) *AlertCheckHandler {
 }
 
 type DcsLoaderHandler struct {
-	Pubsub           cloud.Pubsub
+	PubsubService    cloud.Pubsub
 	DcsLoaderService service.DcsLoaderService
 }
 
 func NewDcsLoader(cfg *config.DcsLoaderConfig) *DcsLoaderHandler {
-	blobService := cloud.NewS3Blob(&cfg.AWSS3Config, "", "")
-	ps := cloud.NewSQSPubsub(&cfg.AWSSQSConfig).WithBlob(blobService)
-	apiClient := &http.Client{
-		Timeout: time.Second * 60,
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return nil
-		},
-	}
+	s3Blob := cloud.NewS3Blob(&cfg.AWSS3Config, "", "")
+	ps := cloud.NewSQSPubsub(&cfg.AWSSQSConfig).WithBlob(s3Blob)
+	apiClient := newHttpClient()
 
 	return &DcsLoaderHandler{
-		Pubsub:           ps,
+		PubsubService:    ps,
 		DcsLoaderService: service.NewDcsLoaderService(apiClient, cfg),
 	}
 }

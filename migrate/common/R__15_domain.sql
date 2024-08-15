@@ -1,5 +1,5 @@
 -- ${flyway:timestamp}
-CREATE VIEW v_domain AS (
+CREATE OR REPLACE VIEW v_domain AS (
     SELECT
         id, 
         'instrument_type'   AS group, 
@@ -60,7 +60,7 @@ CREATE VIEW v_domain AS (
 
 GRANT SELECT ON v_domain TO instrumentation_reader;
 
-CREATE VIEW v_domain_group AS (
+CREATE OR REPLACE VIEW v_domain_group AS (
   SELECT
     "group",
     JSON_AGG(JSON_BUILD_OBJECT(

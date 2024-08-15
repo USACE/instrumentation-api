@@ -25,6 +25,7 @@ func handleOpts(ctx context.Context, q *model.Queries, inst model.Instrument, rt
 				tsConstant.Slug = inst.Slug + fmt.Sprintf("segment-%d-length", i)
 				tsConstant.Name = inst.Slug + fmt.Sprintf("segment-%d-length", i)
 
+				tsConstant.Type = model.ConstantTimeseriesType
 				tsNew, err := q.CreateTimeseries(ctx, tsConstant)
 				if err != nil {
 					return err
@@ -45,6 +46,7 @@ func handleOpts(ctx context.Context, q *model.Queries, inst model.Instrument, rt
 			tsConstant.Slug = inst.Slug + "-bottom-elevation"
 			tsConstant.Name = inst.Slug + "-bottom-elevation"
 
+			tsConstant.Type = model.ConstantTimeseriesType
 			tsNew, err := q.CreateTimeseries(ctx, tsConstant)
 			if err != nil {
 				return err
@@ -80,6 +82,7 @@ func handleOpts(ctx context.Context, q *model.Queries, inst model.Instrument, rt
 				tsConstant.Slug = inst.Slug + fmt.Sprintf("segment-%d-length", i)
 				tsConstant.Name = inst.Slug + fmt.Sprintf("segment-%d-length", i)
 
+				tsConstant.Type = model.ConstantTimeseriesType
 				tsNew, err := q.CreateTimeseries(ctx, tsConstant)
 				if err != nil {
 					return err
@@ -100,6 +103,7 @@ func handleOpts(ctx context.Context, q *model.Queries, inst model.Instrument, rt
 			tsConstant.Slug = inst.Slug + "-bottom-elevation"
 			tsConstant.Name = inst.Slug + "-bottom-elevation"
 
+			tsConstant.Type = model.ConstantTimeseriesType
 			tsNew, err := q.CreateTimeseries(ctx, tsConstant)
 			if err != nil {
 				return err

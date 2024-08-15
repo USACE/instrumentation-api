@@ -18,8 +18,10 @@ import (
 )
 
 const (
-	host    = "http://localhost:8080"
-	mockJwt = `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwibmFtZSI6IlVzZXIuQWRtaW4iLCJpYXQiOjE1MTYyMzkwMjIsImV4cCI6MjAwMDAwMDAwMCwicm9sZXMiOlsiUFVCTElDLlVTRVIiXX0.4VAMamtH92GiIb5CpGKpP6LKwU6IjIfw5wS4qc8O8VM`
+	truncateLinesBody = 30
+	host              = "http://localhost:8080"
+	mockJwt           = `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ikw0YXFVRmd6YV9RVjhqc1ZOa281OW5GVzl6bGh1b0JGX3RxdlpkTUZkajQifQ.eyJzdWIiOiJmOGRjYWZlYS0yNDNlLTRiODktOGQ3ZC1mYTAxOTE4MTMwZjQiLCJ0eXAiOiJCZWFyZXIiLCJhbGxvd2VkLW9yaWdpbnMiOlsiaHR0cDovL2xvY2FsaG9zdDozMDAwIl0sIm5hbWUiOiJBbnRob255IExhbWJlcnQiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJ0ZXN0IiwiZ2l2ZW5fbmFtZSI6IkFudGhvbnkiLCJmYW1pbHlfbmFtZSI6IkxhbWJlcnQiLCJlbWFpbCI6ImFudGhvbnkubS5sYW1iZXJ0QGZha2UudXNhY2UuYXJteS5taWwiLCJzdWJqZWN0RE4iOiJsYW1iZXJ0LmFudGhvbnkubS4yIiwiY2FjVUlEIjoiMiJ9.8CjeifD51ZEZZOx9eeMd7RPanvtgkQQus-R19aU91Rw`
+	mockAppKey        = "appkey"
 )
 
 const IDSlugNameArrSchema = `{
@@ -82,10 +84,10 @@ func RunHTTPTest(v HTTPTest) (*http.Response, error) {
 func RunAll(t *testing.T, tests []HTTPTest) {
 	for _, v := range tests {
 		t.Run(v.Name, func(t *testing.T) {
-			run, err := RunHTTPTest(v)
-			assert.Nil(t, err, "error calling RunHTTPTest(v)")
-			if err != nil {
-				t.Log(err.Error())
+			run, httpErr := RunHTTPTest(v)
+			assert.Nil(t, httpErr, "error calling RunHTTPTest(v)")
+			if httpErr != nil {
+				t.Log(httpErr.Error())
 			}
 
 			assert.Equal(t, v.ExpectedStatus, run.StatusCode)
@@ -108,8 +110,8 @@ func RunAll(t *testing.T, tests []HTTPTest) {
 			} else {
 				s := dst.String()
 				ss := strings.Split(s, "\n")
-				if len(ss) > 25 {
-					s = fmt.Sprintf("%s\n...", strings.Join(ss[:25], "\n"))
+				if len(ss) > truncateLinesBody {
+					s = fmt.Sprintf("%s\n...", strings.Join(ss[:truncateLinesBody], "\n"))
 				}
 				t.Logf("response body: %s", s)
 			}

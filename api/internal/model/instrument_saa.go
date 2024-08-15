@@ -149,6 +149,6 @@ const getSaaMeasurementsForInstrument = `
 
 func (q *Queries) GetSaaMeasurementsForInstrument(ctx context.Context, instrumentID uuid.UUID, tw TimeWindow) ([]SaaMeasurements, error) {
 	mm := make([]SaaMeasurements, 0)
-	err := q.db.SelectContext(ctx, &mm, getSaaMeasurementsForInstrument, instrumentID, tw.Start, tw.End)
+	err := q.db.SelectContext(ctx, &mm, getSaaMeasurementsForInstrument, instrumentID, tw.After, tw.Before)
 	return mm, err
 }

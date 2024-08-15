@@ -1,11 +1,9 @@
 package handler
 
 import (
-	"database/sql"
-	"errors"
 	"net/http"
 
-	"github.com/USACE/instrumentation-api/api/internal/message"
+	"github.com/USACE/instrumentation-api/api/internal/httperr"
 	"github.com/USACE/instrumentation-api/api/internal/model"
 
 	"github.com/google/uuid"
@@ -26,12 +24,12 @@ import (
 func (h *ApiHandler) ListInstrumentStatus(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("instrument_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 
 	ss, err := h.InstrumentStatusService.ListInstrumentStatus(c.Request().Context(), id)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, ss)
 }
@@ -51,15 +49,12 @@ func (h *ApiHandler) ListInstrumentStatus(c echo.Context) error {
 func (h *ApiHandler) GetInstrumentStatus(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("status_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 
 	s, err := h.InstrumentStatusService.GetInstrumentStatus(c.Request().Context(), id)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return echo.NewHTTPError(http.StatusNotFound, message.NotFound)
-		}
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.ServerErrorOrNotFound(err)
 	}
 	return c.JSON(http.StatusOK, s)
 }
@@ -71,6 +66,7 @@ func (h *ApiHandler) GetInstrumentStatus(c echo.Context) error {
 //	@Produce json
 //	@Param instrument_id path string true "instrument uuid" Format(uuid)
 //	@Param instrument_status body model.InstrumentStatusCollection true "instrument status collection paylaod"
+//	@Param key query string false "api key"
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -80,24 +76,23 @@ func (h *ApiHandler) GetInstrumentStatus(c echo.Context) error {
 func (h *ApiHandler) CreateOrUpdateInstrumentStatus(c echo.Context) error {
 	instrumentID, err := uuid.Parse(c.Param("instrument_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 
 	var sc model.InstrumentStatusCollection
 	if err := c.Bind(&sc); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedBody(err)
 	}
-	// Assign Fresh UUID to each Status
 	for idx := range sc.Items {
 		id, err := uuid.NewRandom()
 		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			return httperr.InternalServerError(err)
 		}
 		sc.Items[idx].ID = id
 	}
 
 	if err := h.InstrumentStatusService.CreateOrUpdateInstrumentStatus(c.Request().Context(), instrumentID, sc.Items); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusCreated, make(map[string]interface{}))
 }
@@ -109,6 +104,7 @@ func (h *ApiHandler) CreateOrUpdateInstrumentStatus(c echo.Context) error {
 //	@Produce json
 //	@Param instrument_id path string true "instrument uuid" Format(uuid)
 //	@Param status_id path string true "project uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Success 200 {object} map[string]interface{}
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -118,10 +114,10 @@ func (h *ApiHandler) CreateOrUpdateInstrumentStatus(c echo.Context) error {
 func (h *ApiHandler) DeleteInstrumentStatus(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("status_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 	if err := h.InstrumentStatusService.DeleteInstrumentStatus(c.Request().Context(), id); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, make(map[string]interface{}))
 }

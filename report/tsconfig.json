@@ -1,0 +1,37 @@
+{
+  "compilerOptions": {
+    /* Strictness */
+    "strict": true,
+    /* General settings */
+    "verbatimModuleSyntax": true,
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "moduleDetection": "force",
+    "allowImportingTsExtensions": true,
+    "downlevelIteration": true,
+    "noUncheckedIndexedAccess": true,
+    "preserveConstEnums": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "allowSyntheticDefaultImports": true,
+    /* Library and target */
+    "target": "es2022",
+    "lib": [
+      "es2022",
+      "dom",
+      "dom.iterable"
+    ],
+    /* Using bundler */
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "noEmit": true,
+    "exclude": [
+      ".git",
+      "node_modules",
+      "**/dist/*",
+      "**/node_modules/*"
+    ]
+  }
+}
