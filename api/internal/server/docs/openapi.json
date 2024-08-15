@@ -8,7 +8,7 @@
       "url" : "https://github.com/USACE/instrumentation-api/blob/555ea51191ff1245fe5910a295862be7514aaec6/LICENSE.md"
     },
     "title" : "MIDAS Web API",
-    "version" : "2.0"
+    "version" : "3.4.0"
   },
   "servers" : [ {
     "url" : "/"
@@ -8410,6 +8410,250 @@
         "tags" : [ "timeseries" ]
       }
     },
+    "/projects/{project_id}/instruments/{instrument_id}/timeseries/cwms" : {
+      "get" : {
+        "parameters" : [ {
+          "description" : "project uuid",
+          "in" : "path",
+          "name" : "project_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "description" : "instrument uuid",
+          "in" : "path",
+          "name" : "instrument_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/TimeseriesCwms"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Bad Request"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Not Found"
+          },
+          "500" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Internal Server Error"
+          }
+        },
+        "summary" : "lists cwms timeseries for an instrument",
+        "tags" : [ "timeseries-cwms" ]
+      },
+      "post" : {
+        "parameters" : [ {
+          "description" : "project uuid",
+          "in" : "path",
+          "name" : "project_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "description" : "instrument uuid",
+          "in" : "path",
+          "name" : "instrument_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "*/*" : {
+              "schema" : {
+                "items" : {
+                  "$ref" : "#/components/schemas/TimeseriesCwms"
+                },
+                "type" : "array"
+              }
+            }
+          },
+          "description" : "array of cwms timeseries to create",
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/TimeseriesCwms"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Bad Request"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Not Found"
+          },
+          "500" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Internal Server Error"
+          }
+        },
+        "summary" : "creates cwms timeseries",
+        "tags" : [ "timeseries-cwms" ],
+        "x-codegen-request-body-name" : "timeseries_cwms_arr"
+      }
+    },
+    "/projects/{project_id}/instruments/{instrument_id}/timeseries/cwms/{timeseries_id}" : {
+      "put" : {
+        "parameters" : [ {
+          "description" : "project uuid",
+          "in" : "path",
+          "name" : "project_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "description" : "instrument uuid",
+          "in" : "path",
+          "name" : "instrument_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "description" : "timeseries uuid",
+          "in" : "path",
+          "name" : "timeseries_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "*/*" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/TimeseriesCwms"
+              }
+            }
+          },
+          "description" : "cwms timeseries to update",
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/TimeseriesCwms"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Bad Request"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Not Found"
+          },
+          "500" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Internal Server Error"
+          }
+        },
+        "summary" : "updates cwms timeseries",
+        "tags" : [ "timeseries-cwms" ],
+        "x-codegen-request-body-name" : "timeseries_cwms"
+      }
+    },
     "/projects/{project_id}/members" : {
       "get" : {
         "parameters" : [ {
@@ -13278,6 +13522,9 @@
             },
             "type" : "array"
           },
+          "has_cwms" : {
+            "type" : "boolean"
+          },
           "icon" : {
             "type" : "string"
           },
@@ -13301,6 +13548,9 @@
               "$ref" : "#/components/schemas/IDSlugName"
             },
             "type" : "array"
+          },
+          "show_cwms_tab" : {
+            "type" : "boolean"
           },
           "slug" : {
             "type" : "string"
@@ -14651,6 +14901,9 @@
           "slug" : {
             "type" : "string"
           },
+          "type" : {
+            "type" : "string"
+          },
           "unit" : {
             "type" : "string"
           },
@@ -14676,6 +14929,68 @@
               "$ref" : "#/components/schemas/Timeseries"
             },
             "type" : "array"
+          }
+        },
+        "type" : "object"
+      },
+      "TimeseriesCwms" : {
+        "properties" : {
+          "cwms_extent_earliest_time" : {
+            "type" : "string"
+          },
+          "cwms_extent_latest_time" : {
+            "type" : "string"
+          },
+          "cwms_office_id" : {
+            "type" : "string"
+          },
+          "cwms_timeseries_id" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "instrument" : {
+            "type" : "string"
+          },
+          "instrument_id" : {
+            "type" : "string"
+          },
+          "instrument_slug" : {
+            "type" : "string"
+          },
+          "is_computed" : {
+            "type" : "boolean"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "parameter" : {
+            "type" : "string"
+          },
+          "parameter_id" : {
+            "type" : "string"
+          },
+          "slug" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string"
+          },
+          "unit" : {
+            "type" : "string"
+          },
+          "unit_id" : {
+            "type" : "string"
+          },
+          "values" : {
+            "items" : {
+              "$ref" : "#/components/schemas/Measurement"
+            },
+            "type" : "array"
+          },
+          "variable" : {
+            "type" : "string"
           }
         },
         "type" : "object"
@@ -14789,6 +15104,9 @@
             "type" : "string"
           },
           "slug" : {
+            "type" : "string"
+          },
+          "type" : {
             "type" : "string"
           },
           "unit" : {

@@ -6,7 +6,7 @@ info:
     name: MIT
     url: https://github.com/USACE/instrumentation-api/blob/555ea51191ff1245fe5910a295862be7514aaec6/LICENSE.md
   title: MIDAS Web API
-  version: "2.0"
+  version: 3.4.0
 servers:
 - url: /
 paths:
@@ -5606,6 +5606,171 @@ paths:
       summary: lists timeseries for an instrument
       tags:
       - timeseries
+  /projects/{project_id}/instruments/{instrument_id}/timeseries/cwms:
+    get:
+      parameters:
+      - description: project uuid
+        in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      - description: instrument uuid
+        in: path
+        name: instrument_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/TimeseriesCwms'
+                type: array
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Internal Server Error
+      summary: lists cwms timeseries for an instrument
+      tags:
+      - timeseries-cwms
+    post:
+      parameters:
+      - description: project uuid
+        in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      - description: instrument uuid
+        in: path
+        name: instrument_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              items:
+                $ref: '#/components/schemas/TimeseriesCwms'
+              type: array
+        description: array of cwms timeseries to create
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/TimeseriesCwms'
+                type: array
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Internal Server Error
+      summary: creates cwms timeseries
+      tags:
+      - timeseries-cwms
+      x-codegen-request-body-name: timeseries_cwms_arr
+  /projects/{project_id}/instruments/{instrument_id}/timeseries/cwms/{timeseries_id}:
+    put:
+      parameters:
+      - description: project uuid
+        in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      - description: instrument uuid
+        in: path
+        name: instrument_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      - description: timeseries uuid
+        in: path
+        name: timeseries_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/TimeseriesCwms'
+        description: cwms timeseries to update
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/TimeseriesCwms'
+                type: array
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Internal Server Error
+      summary: updates cwms timeseries
+      tags:
+      - timeseries-cwms
+      x-codegen-request-body-name: timeseries_cwms
   /projects/{project_id}/members:
     get:
       parameters:
@@ -8609,6 +8774,7 @@ components:
             error: error
             value: 0.8008281904610115
           instrument: instrument
+          type: type
           instrument_id: instrument_id
           unit: unit
           parameter: parameter
@@ -8636,6 +8802,7 @@ components:
             error: error
             value: 0.8008281904610115
           instrument: instrument
+          type: type
           instrument_id: instrument_id
           unit: unit
           parameter: parameter
@@ -9226,6 +9393,7 @@ components:
       type: object
     Instrument:
       example:
+        has_cwms: true
         projects:
         - name: name
           id: id
@@ -9254,6 +9422,7 @@ components:
         offset: 0
         creator_username: creator_username
         type_id: type_id
+        show_cwms_tab: true
         usgs_id: usgs_id
         groups:
         - groups
@@ -9301,6 +9470,8 @@ components:
           items:
             type: string
           type: array
+        has_cwms:
+          type: boolean
         icon:
           type: string
         id:
@@ -9318,6 +9489,8 @@ components:
           items:
             $ref: '#/components/schemas/IDSlugName'
           type: array
+        show_cwms_tab:
+          type: boolean
         slug:
           type: string
         station:
@@ -10949,6 +11122,7 @@ components:
           error: error
           value: 0.8008281904610115
         instrument: instrument
+        type: type
         instrument_id: instrument_id
         unit: unit
         parameter: parameter
@@ -10979,6 +11153,8 @@ components:
           type: string
         slug:
           type: string
+        type:
+          type: string
         unit:
           type: string
         unit_id:
@@ -11007,6 +11183,7 @@ components:
             error: error
             value: 0.8008281904610115
           instrument: instrument
+          type: type
           instrument_id: instrument_id
           unit: unit
           parameter: parameter
@@ -11032,6 +11209,7 @@ components:
             error: error
             value: 0.8008281904610115
           instrument: instrument
+          type: type
           instrument_id: instrument_id
           unit: unit
           parameter: parameter
@@ -11048,6 +11226,78 @@ components:
           items:
             $ref: '#/components/schemas/Timeseries'
           type: array
+      type: object
+    TimeseriesCwms:
+      example:
+        cwms_office_id: cwms_office_id
+        values:
+        - annotation: annotation
+          validated: true
+          masked: true
+          time: time
+          error: error
+          value: 0.8008281904610115
+        - annotation: annotation
+          validated: true
+          masked: true
+          time: time
+          error: error
+          value: 0.8008281904610115
+        instrument: instrument
+        cwms_extent_earliest_time: cwms_extent_earliest_time
+        type: type
+        cwms_timeseries_id: cwms_timeseries_id
+        instrument_id: instrument_id
+        unit: unit
+        parameter: parameter
+        cwms_extent_latest_time: cwms_extent_latest_time
+        name: name
+        variable: variable
+        id: id
+        instrument_slug: instrument_slug
+        is_computed: true
+        unit_id: unit_id
+        slug: slug
+        parameter_id: parameter_id
+      properties:
+        cwms_extent_earliest_time:
+          type: string
+        cwms_extent_latest_time:
+          type: string
+        cwms_office_id:
+          type: string
+        cwms_timeseries_id:
+          type: string
+        id:
+          type: string
+        instrument:
+          type: string
+        instrument_id:
+          type: string
+        instrument_slug:
+          type: string
+        is_computed:
+          type: boolean
+        name:
+          type: string
+        parameter:
+          type: string
+        parameter_id:
+          type: string
+        slug:
+          type: string
+        type:
+          type: string
+        unit:
+          type: string
+        unit_id:
+          type: string
+        values:
+          items:
+            $ref: '#/components/schemas/Measurement'
+          type: array
+        variable:
+          type: string
       type: object
     TimeseriesMeasurementCollectionCollection:
       example:
@@ -11163,6 +11413,7 @@ components:
           error: error
           value: 0.8008281904610115
         instrument: instrument
+        type: type
         instrument_id: instrument_id
         unit: unit
         parameter: parameter
@@ -11198,6 +11449,8 @@ components:
         parameter_id:
           type: string
         slug:
+          type: string
+        type:
           type: string
         unit:
           type: string

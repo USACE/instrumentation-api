@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 
 import argparse
-from datetime import datetime, timedelta
-import time
 import json
-from urllib.error import HTTPError, URLError
-from urllib.request import urlopen, Request
 import random
+import time
+from datetime import datetime, timedelta
 from getpass import getpass
-
 from typing import Any
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
 
 # the follow parameters can be set here or overwritten with command line flags
 # this is an api key used local testing. You will be promter for the api key
@@ -17,7 +16,7 @@ from typing import Any
 DEFAULT_API_KEY = "8pszF58y7Hpwr8DgR9UYhovcjJYdBhRSMt9dGX1RBmdj6WtH4NUNFao"
 DEFAULT_USE_MOCK_API_KEY = False
 DEFAULT_BASE_URL = "http://telemetry"
-DEFAULT_INTERVAL_SECONDS = 10
+DEFAULT_INTERVAL_SECONDS = 60
 DEFAULT_MODEL = "CR6"
 DEFAULT_SN = "12345"
 DEFAULT_TABLE_NAME = "Demo Datalogger Table"
