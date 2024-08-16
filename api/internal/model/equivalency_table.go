@@ -10,14 +10,14 @@ import (
 	"github.com/jackc/pgerrcode"
 )
 
-type EquivalencyTable struct {
-	DataloggerID        uuid.UUID                        `json:"datalogger_id" db:"datalogger_id"`
-	DataloggerTableID   uuid.UUID                        `json:"datalogger_table_id" db:"datalogger_table_id"`
-	DataloggerTableName string                           `json:"datalogger_table_name" db:"datalogger_table_name"`
-	Rows                dbJSONSlice[EquivalencyTableRow] `json:"rows" db:"fields"`
+type DataloggerEquivalencyTable struct {
+	DataloggerID        uuid.UUID                                  `json:"datalogger_id" db:"datalogger_id"`
+	DataloggerTableID   uuid.UUID                                  `json:"datalogger_table_id" db:"datalogger_table_id"`
+	DataloggerTableName string                                     `json:"datalogger_table_name" db:"datalogger_table_name"`
+	Rows                dbJSONSlice[DataloggerEquivalencyTableRow] `json:"rows" db:"fields"`
 }
 
-type EquivalencyTableRow struct {
+type DataloggerEquivalencyTableRow struct {
 	ID           uuid.UUID  `json:"id" db:"id"`
 	FieldName    string     `json:"field_name" db:"field_name"`
 	DisplayName  string     `json:"display_name" db:"display_name"`
@@ -39,6 +39,37 @@ func (q *Queries) GetIsValidDataloggerTable(ctx context.Context, dataloggerTable
 	}
 	if !isValid {
 		return fmt.Errorf("table preparse is read only %s", dataloggerTableID)
+	}
+	return nil
+}
+
+const getIsValidEquivalencyTableTimeseriesBatch = `
+	SELECT NOT EXISTS (
+		SELECT id FROM v_timeseries_computed
+		WHERE id IN (?)
+		UNION ALL
+		SELECT timeseries_id FROM instrument_constants
+		WHERE timeseries_id IN (?)
+	)
+`
+
+func (q *Queries) GetIsValidEquivalencyTableTimeseriesBatch(ctx context.Context, timeseriesIDs []uuid.UUID) error {
+	if len(timeseriesIDs) == 0 {
+		return nil
+	}
+
+	query, args, err := sqlIn(getIsValidEquivalencyTableTimeseriesBatch, timeseriesIDs, timeseriesIDs)
+	if err != nil {
+		return err
+	}
+	query = q.db.Rebind(query)
+
+	var isValid bool
+	if err := q.db.GetContext(ctx, &isValid, query, args...); err != nil {
+		return err
+	}
+	if !isValid {
+		return errors.New("comuted or constant timeseries not allowed")
 	}
 	return nil
 }
@@ -76,8 +107,8 @@ const getEquivalencyTable = `
 `
 
 // GetEquivalencyTable returns a single Datalogger EquivalencyTable
-func (q *Queries) GetEquivalencyTable(ctx context.Context, dataloggerTableID uuid.UUID) (EquivalencyTable, error) {
-	var et EquivalencyTable
+func (q *Queries) GetEquivalencyTable(ctx context.Context, dataloggerTableID uuid.UUID) (DataloggerEquivalencyTable, error) {
+	var et DataloggerEquivalencyTable
 	err := q.db.GetContext(ctx, &et, getEquivalencyTable, dataloggerTableID)
 	return et, err
 }
@@ -90,7 +121,7 @@ const createOrUpdateEquivalencyTableRow = `
 	DO UPDATE SET display_name = EXCLUDED.display_name, instrument_id = EXCLUDED.instrument_id, timeseries_id = EXCLUDED.timeseries_id
 `
 
-func (q *Queries) CreateOrUpdateEquivalencyTableRow(ctx context.Context, dataloggerID, dataloggerTableID uuid.UUID, tr EquivalencyTableRow) error {
+func (q *Queries) CreateOrUpdateEquivalencyTableRow(ctx context.Context, dataloggerID, dataloggerTableID uuid.UUID, tr DataloggerEquivalencyTableRow) error {
 	if _, err := q.db.ExecContext(ctx, createOrUpdateEquivalencyTableRow,
 		dataloggerID,
 		dataloggerTableID,
@@ -113,7 +144,7 @@ const updateEquivalencyTableRow = `
 	WHERE id = $1
 `
 
-func (q *Queries) UpdateEquivalencyTableRow(ctx context.Context, tr EquivalencyTableRow) error {
+func (q *Queries) UpdateEquivalencyTableRow(ctx context.Context, tr DataloggerEquivalencyTableRow) error {
 	if _, err := q.db.ExecContext(ctx, updateEquivalencyTableRow,
 		tr.ID,
 		tr.FieldName,

@@ -129,9 +129,9 @@ func getCR6Handler(h *TelemetryHandler, dl model.Datalogger, rawJSON []byte) ech
 			return httperr.InternalServerError(err)
 		}
 
-		eqtFields := make(map[string]model.EquivalencyTableRow)
+		eqtFields := make(map[string]model.DataloggerEquivalencyTableRow)
 		for _, r := range eqt.Rows {
-			eqtFields[r.FieldName] = model.EquivalencyTableRow{
+			eqtFields[r.FieldName] = model.DataloggerEquivalencyTableRow{
 				TimeseriesID: r.TimeseriesID,
 				InstrumentID: r.InstrumentID,
 			}

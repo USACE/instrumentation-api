@@ -59,12 +59,13 @@ elif [ "$1" = "test" ]; then
         esac
     done
 
+    TESTCMD="docker-compose run -e INSTRUMENTATION_AUTH_JWT_MOCKED=true -e INSTRUMENTATION_REQUEST_LOGGER_ENABLED=false"
     GOCMD="go test ${REST_ARGS[@]} github.com/USACE/instrumentation-api/api/internal/handler"
 
     if [ "$REPORT" = true ]; then
-        docker-compose run -e INSTRUMENTATION_AUTH_JWT_MOCKED=true --entrypoint="$GOCMD" api > $(pwd)/test.log
+        $TESTCMD --entrypoint="$GOCMD" api > $(pwd)/test.log
     else
-        docker-compose run -e INSTRUMENTATION_AUTH_JWT_MOCKED=true --entrypoint="$GOCMD" api
+        $TESTCMD --entrypoint="$GOCMD" api
     fi
 
     if [ $TEARDOWN = true ]; then

@@ -53,6 +53,7 @@ type ApiHandler struct {
 	ReportConfigService            service.ReportConfigService
 	SaaInstrumentService           service.SaaInstrumentService
 	SubmittalService               service.SubmittalService
+	Survey123Service               service.Survey123Service
 	TimeseriesService              service.TimeseriesService
 	TimeseriesCwmsService          service.TimeseriesCwmsService
 	CalculatedTimeseriesService    service.CalculatedTimeseriesService
@@ -103,6 +104,7 @@ func NewApi(cfg *config.ApiConfig) *ApiHandler {
 		ReportConfigService:            service.NewReportConfigService(db, q, ps, cfg.AuthJWTMocked),
 		SaaInstrumentService:           service.NewSaaInstrumentService(db, q),
 		SubmittalService:               service.NewSubmittalService(db, q),
+		Survey123Service:               service.NewSurvey123Service(db, q),
 		TimeseriesService:              service.NewTimeseriesService(db, q),
 		TimeseriesCwmsService:          service.NewTimeseriesCwmsService(db, q),
 		CalculatedTimeseriesService:    service.NewCalculatedTimeseriesService(db, q),
@@ -117,6 +119,7 @@ type TelemetryHandler struct {
 	DataloggerTelemetryService service.DataloggerTelemetryService
 	EquivalencyTableService    service.EquivalencyTableService
 	MeasurementService         service.MeasurementService
+	Survey123Service           service.Survey123Service
 }
 
 func NewTelemetry(cfg *config.TelemetryConfig) *TelemetryHandler {
@@ -134,6 +137,7 @@ func NewTelemetry(cfg *config.TelemetryConfig) *TelemetryHandler {
 		DataloggerTelemetryService: dataloggerTelemetryService,
 		EquivalencyTableService:    service.NewEquivalencyTableService(db, q),
 		MeasurementService:         service.NewMeasurementService(db, q),
+		Survey123Service:           service.NewSurvey123Service(db, q),
 	}
 }
 

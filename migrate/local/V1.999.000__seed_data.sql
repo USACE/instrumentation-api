@@ -95,7 +95,11 @@ INSERT INTO timeseries (id, instrument_id, parameter_id, unit_id, slug, name) VA
 ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5985', '9e8f2ca4-4037-45a4-aaca-d9e598877439', '2b7f96e1-820f-4f61-ba8f-861640af6232', '4a999277-4cf5-4282-93ce-23b33c65e2c8', 'demo-staffgage-1.formula', 'demo-staffgage-1'),
 ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5986', 'd8c66ef9-06f0-4d52-9233-f3778e0624f0', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', '4a999277-4cf5-4282-93ce-23b33c65e2c8', 'inclinometer-1.formula', 'inclinometer-1'),
 ('844fb688-e77c-481e-bff9-81a0fff9f3f2', 'd8c66ef9-06f0-4d52-9233-f3778e0624f0', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', '4a999277-4cf5-4282-93ce-23b33c65e2c8', 'test-create-datalogger-table-mapping', 'test-create-datalogger-table-mapping'),
-('da79bdb9-ded4-4f4a-8982-33e09b136815', 'd8c66ef9-06f0-4d52-9233-f3778e0624f0', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', '4a999277-4cf5-4282-93ce-23b33c65e2c8', 'test-table-mapping', 'test-table-mapping');
+('da79bdb9-ded4-4f4a-8982-33e09b136815', 'd8c66ef9-06f0-4d52-9233-f3778e0624f0', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', '4a999277-4cf5-4282-93ce-23b33c65e2c8', 'test-table-mapping', 'test-table-mapping'),
+('359bd5df-d43e-491a-871d-4701dcbff136', 'd8c66ef9-06f0-4d52-9233-f3778e0624f0', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', '4a999277-4cf5-4282-93ce-23b33c65e2c8', 'test-survey123-mapping-1', 'test-survey123-mapping-1'),
+('c3c00251-12fb-42a1-9d49-cdb269bb3039', 'd8c66ef9-06f0-4d52-9233-f3778e0624f0', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', '4a999277-4cf5-4282-93ce-23b33c65e2c8', 'test-survey123-mapping-2', 'test-survey123-mapping-2'),
+('939ff61d-65df-4f7f-b145-210d00f16d90', 'd8c66ef9-06f0-4d52-9233-f3778e0624f0', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', '4a999277-4cf5-4282-93ce-23b33c65e2c8', 'test-survey123-mapping-3', 'test-survey123-mapping-3'),
+('e45a9620-a431-4b70-af97-a4e185eb7311', 'd8c66ef9-06f0-4d52-9233-f3778e0624f0', '068b59b0-aafb-4c98-ae4b-ed0365a6fbac', '4a999277-4cf5-4282-93ce-23b33c65e2c8', 'test-survey123-mapping-4', 'test-survey123-mapping-4');
 
 INSERT INTO calculation (timeseries_id, contents) VALUES
 ('5b6f4f37-7755-4cf9-bd02-94f1e9bc5984', '[demo-piezometer-1.top-of-riser] - [demo-piezometer-1.distance-to-water]'),

@@ -639,7 +639,7 @@
           "content" : {
             "*/*" : {
               "schema" : {
-                "$ref" : "#/components/schemas/EquivalencyTable"
+                "$ref" : "#/components/schemas/DataloggerEquivalencyTable"
               }
             }
           },
@@ -651,7 +651,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/EquivalencyTable"
+                  "$ref" : "#/components/schemas/DataloggerEquivalencyTable"
                 }
               }
             },
@@ -874,7 +874,7 @@
               "application/json" : {
                 "schema" : {
                   "items" : {
-                    "$ref" : "#/components/schemas/EquivalencyTable"
+                    "$ref" : "#/components/schemas/DataloggerEquivalencyTable"
                   },
                   "type" : "array"
                 }
@@ -950,7 +950,7 @@
           "content" : {
             "*/*" : {
               "schema" : {
-                "$ref" : "#/components/schemas/EquivalencyTable"
+                "$ref" : "#/components/schemas/DataloggerEquivalencyTable"
               }
             }
           },
@@ -962,7 +962,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/EquivalencyTable"
+                  "$ref" : "#/components/schemas/DataloggerEquivalencyTable"
                 }
               }
             },
@@ -1037,7 +1037,7 @@
           "content" : {
             "*/*" : {
               "schema" : {
-                "$ref" : "#/components/schemas/EquivalencyTable"
+                "$ref" : "#/components/schemas/DataloggerEquivalencyTable"
               }
             }
           },
@@ -1049,7 +1049,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/EquivalencyTable"
+                  "$ref" : "#/components/schemas/DataloggerEquivalencyTable"
                 }
               }
             },
@@ -11027,6 +11027,364 @@
         "tags" : [ "submittal" ]
       }
     },
+    "/projects/{project_id}/survey123" : {
+      "get" : {
+        "parameters" : [ {
+          "description" : "project uuid",
+          "in" : "path",
+          "name" : "project_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/Survey123"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Bad Request"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Not Found"
+          },
+          "500" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Internal Server Error"
+          }
+        },
+        "summary" : "lists Survey123 connections for a project",
+        "tags" : [ "survey123" ]
+      },
+      "post" : {
+        "parameters" : [ {
+          "description" : "project uuid",
+          "in" : "path",
+          "name" : "project_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Survey123"
+              }
+            }
+          },
+          "description" : "survey123 payload",
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "additionalProperties" : {
+                    "type" : "string"
+                  },
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Bad Request"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Not Found"
+          },
+          "500" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Internal Server Error"
+          }
+        },
+        "security" : [ {
+          "Bearer" : [ ]
+        } ],
+        "summary" : "creates a Survey123 connection with equivalency table mappings",
+        "tags" : [ "survey123" ],
+        "x-codegen-request-body-name" : "survey123"
+      }
+    },
+    "/projects/{project_id}/survey123/{survey123_id}" : {
+      "delete" : {
+        "parameters" : [ {
+          "description" : "project uuid",
+          "in" : "path",
+          "name" : "project_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "description" : "survey123 uuid",
+          "in" : "path",
+          "name" : "survey123_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "additionalProperties" : {
+                    "type" : "string"
+                  },
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Bad Request"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Not Found"
+          },
+          "500" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Internal Server Error"
+          }
+        },
+        "security" : [ {
+          "Bearer" : [ ]
+        } ],
+        "summary" : "deletes a Survey123 connection with equivalency table mappings",
+        "tags" : [ "survey123" ]
+      },
+      "put" : {
+        "parameters" : [ {
+          "description" : "project uuid",
+          "in" : "path",
+          "name" : "project_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "description" : "survey123 uuid",
+          "in" : "path",
+          "name" : "survey123_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Survey123"
+              }
+            }
+          },
+          "description" : "survey123 payload",
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "additionalProperties" : {
+                    "type" : "string"
+                  },
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Bad Request"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Not Found"
+          },
+          "500" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Internal Server Error"
+          }
+        },
+        "security" : [ {
+          "Bearer" : [ ]
+        } ],
+        "summary" : "updates a Survey123 connection with equivalency table mappings",
+        "tags" : [ "survey123" ],
+        "x-codegen-request-body-name" : "survey123"
+      }
+    },
+    "/projects/{project_id}/survey123/{survey123_id}/previews" : {
+      "get" : {
+        "parameters" : [ {
+          "description" : "project uuid",
+          "in" : "path",
+          "name" : "project_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "description" : "survey123 uuid",
+          "in" : "path",
+          "name" : "survey123_id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Bad Request"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Not Found"
+          },
+          "500" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/echo.HTTPError"
+                }
+              }
+            },
+            "description" : "Internal Server Error"
+          }
+        },
+        "summary" : "gets the most recent Survey123 raw json payload sent from the webhook API",
+        "tags" : [ "survey123" ]
+      }
+    },
     "/projects/{project_id}/timeseries" : {
       "get" : {
         "parameters" : [ {
@@ -12687,6 +13045,46 @@
         },
         "type" : "object"
       },
+      "DataloggerEquivalencyTable" : {
+        "properties" : {
+          "datalogger_id" : {
+            "type" : "string"
+          },
+          "datalogger_table_id" : {
+            "type" : "string"
+          },
+          "datalogger_table_name" : {
+            "type" : "string"
+          },
+          "rows" : {
+            "items" : {
+              "$ref" : "#/components/schemas/DataloggerEquivalencyTableRow"
+            },
+            "type" : "array"
+          }
+        },
+        "type" : "object"
+      },
+      "DataloggerEquivalencyTableRow" : {
+        "properties" : {
+          "display_name" : {
+            "type" : "string"
+          },
+          "field_name" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "instrument_id" : {
+            "type" : "string"
+          },
+          "timeseries_id" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
       "DataloggerTable" : {
         "properties" : {
           "id" : {
@@ -12887,46 +13285,6 @@
             "type" : "string"
           },
           "username" : {
-            "type" : "string"
-          }
-        },
-        "type" : "object"
-      },
-      "EquivalencyTable" : {
-        "properties" : {
-          "datalogger_id" : {
-            "type" : "string"
-          },
-          "datalogger_table_id" : {
-            "type" : "string"
-          },
-          "datalogger_table_name" : {
-            "type" : "string"
-          },
-          "rows" : {
-            "items" : {
-              "$ref" : "#/components/schemas/EquivalencyTableRow"
-            },
-            "type" : "array"
-          }
-        },
-        "type" : "object"
-      },
-      "EquivalencyTableRow" : {
-        "properties" : {
-          "display_name" : {
-            "type" : "string"
-          },
-          "field_name" : {
-            "type" : "string"
-          },
-          "id" : {
-            "type" : "string"
-          },
-          "instrument_id" : {
-            "type" : "string"
-          },
-          "timeseries_id" : {
             "type" : "string"
           }
         },
@@ -14435,6 +14793,70 @@
           },
           "warning_sent" : {
             "type" : "boolean"
+          }
+        },
+        "type" : "object"
+      },
+      "Survey123" : {
+        "properties" : {
+          "create_date" : {
+            "type" : "string"
+          },
+          "creator_id" : {
+            "type" : "string"
+          },
+          "creator_username" : {
+            "type" : "string"
+          },
+          "errors" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "project_id" : {
+            "type" : "string"
+          },
+          "rows" : {
+            "items" : {
+              "$ref" : "#/components/schemas/Survey123EquivalencyTableRow"
+            },
+            "type" : "array"
+          },
+          "slug" : {
+            "type" : "string"
+          },
+          "update_date" : {
+            "type" : "string"
+          },
+          "updater_id" : {
+            "type" : "string"
+          },
+          "updater_username" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "Survey123EquivalencyTableRow" : {
+        "properties" : {
+          "display_name" : {
+            "type" : "string"
+          },
+          "field_name" : {
+            "type" : "string"
+          },
+          "instrument_id" : {
+            "type" : "string"
+          },
+          "timeseries_id" : {
+            "type" : "string"
           }
         },
         "type" : "object"
