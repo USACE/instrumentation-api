@@ -25,7 +25,7 @@ CREATE TABLE survey123_equivalency_table (
 
 CREATE TABLE survey123_preview (
     survey123_id uuid NOT NULL REFERENCES survey123(id),
-    preview json NOT NULL,
+    preview text NOT NULL,
     update_date timestamptz NOT NULL DEFAULT now()
 );
 

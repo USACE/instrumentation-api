@@ -22,13 +22,13 @@ func (h *TelemetryHandler) CreateOrUpdateSurvey123Measurements(c echo.Context) e
 		return httperr.MalformedBody(err)
 	}
 
-	previewRaw, err := json.Marshal(raw)
+	preview, err := json.Marshal(raw)
 	if err != nil {
 		return httperr.MalformedBody(err)
 	}
 
 	t := time.Now()
-	pv := model.Survey123Preview{Survey123ID: survey123ID, Preview: previewRaw, UpdateDate: &t}
+	pv := model.Survey123Preview{Survey123ID: survey123ID, Preview: string(preview), UpdateDate: &t}
 
 	ctx := c.Request().Context()
 	if err := h.Survey123Service.CreateOrUpdateSurvey123Preview(ctx, pv); err != nil {

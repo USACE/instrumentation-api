@@ -59,7 +59,7 @@ const survey123PreviewSchema = `{
     "properties": {
         "survey123_id": { "type": "string" },
 	"update_date": { "type": "string" },
-	"preview": { "type": ["object", "array", "null"] }
+	"preview": { "type": "string" }
     }
 }`
 

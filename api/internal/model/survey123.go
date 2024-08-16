@@ -3,13 +3,10 @@ package model
 import (
 	"context"
 	"database/sql"
-	"database/sql/driver"
-	"encoding/json"
 	"errors"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgtype"
 )
 
 type Survey123 struct {
@@ -46,29 +43,9 @@ type Survey123ApplyEdits struct {
 }
 
 type Survey123Preview struct {
-	Survey123ID uuid.UUID   `json:"survey123_id" db:"survey123_id"`
-	Preview     PreviewJSON `json:"preview" db:"preview"`
-	UpdateDate  *time.Time  `json:"update_date" db:"update_date"`
-}
-
-type PreviewJSON json.RawMessage
-
-func (o PreviewJSON) Value() (driver.Value, error) {
-	var pgJSON pgtype.JSON
-	if err := pgJSON.Set(o); err != nil {
-		return nil, err
-	}
-	return pgJSON.Value()
-}
-
-func (o *PreviewJSON) Scan(src interface{}) error {
-	var pgJSON pgtype.JSON
-	if err := pgJSON.Scan(src); err != nil {
-		return err
-	}
-	b := PreviewJSON(pgJSON.Bytes)
-	o = &b
-	return nil
+	Survey123ID uuid.UUID  `json:"survey123_id" db:"survey123_id"`
+	Preview     string     `json:"preview" db:"preview"`
+	UpdateDate  *time.Time `json:"update_date" db:"update_date"`
 }
 
 const listSurvey123sForProject = `
@@ -180,8 +157,7 @@ func (q *Queries) GetSurvey123Preview(ctx context.Context, survey123ID uuid.UUID
 	err := q.db.GetContext(ctx, &pv, getSurvey123Preview, survey123ID)
 	if errors.Is(err, sql.ErrNoRows) {
 		pv.Survey123ID = survey123ID
-		b, _ := json.Marshal(nil)
-		pv.Preview = b
+		pv.Preview = "null"
 		return pv, nil
 	}
 	return pv, err
