@@ -12773,6 +12773,9 @@
           "last_checked" : {
             "type" : "string"
           },
+          "muted" : {
+            "type" : "boolean"
+          },
           "name" : {
             "type" : "string"
           },
@@ -12840,6 +12843,9 @@
           },
           "last_checked" : {
             "type" : "string"
+          },
+          "muted" : {
+            "type" : "boolean"
           },
           "name" : {
             "type" : "string"
@@ -12936,6 +12942,9 @@
           },
           "last_checked" : {
             "type" : "string"
+          },
+          "muted" : {
+            "type" : "boolean"
           },
           "name" : {
             "type" : "string"

@@ -7433,7 +7433,8 @@ export interface components {
      *       "username": "username"
      *     }
      *   ],
-     *   "create_date": "create_date"
+     *   "create_date": "create_date",
+     *   "muted": true
      * }
      */
     AlertConfig: {
@@ -7447,6 +7448,7 @@ export interface components {
       id?: string;
       instruments?: components["schemas"]["AlertConfigInstrument"][];
       last_checked?: string;
+      muted?: boolean;
       name?: string;
       opts?: {
         [key: string]: unknown;
@@ -7513,7 +7515,8 @@ export interface components {
      *       "username": "username"
      *     }
      *   ],
-     *   "create_date": "create_date"
+     *   "create_date": "create_date",
+     *   "muted": true
      * }
      */
     AlertConfigChange: {
@@ -7527,6 +7530,7 @@ export interface components {
       id?: string;
       instruments?: components["schemas"]["AlertConfigInstrument"][];
       last_checked?: string;
+      muted?: boolean;
       name?: string;
       opts?: components["schemas"]["AlertConfigChangeOpts"];
       project_id?: string;
@@ -7618,7 +7622,8 @@ export interface components {
      *       "username": "username"
      *     }
      *   ],
-     *   "create_date": "create_date"
+     *   "create_date": "create_date",
+     *   "muted": true
      * }
      */
     AlertConfigThreshold: {
@@ -7632,6 +7637,7 @@ export interface components {
       id?: string;
       instruments?: components["schemas"]["AlertConfigInstrument"][];
       last_checked?: string;
+      muted?: boolean;
       name?: string;
       opts?: components["schemas"]["AlertConfigThresholdOpts"];
       project_id?: string;
@@ -7927,7 +7933,7 @@ export interface components {
      *       0,
      *       0
      *     ],
-     *     "status": null
+     *     "status": 6
      *   },
      *   "datalogger_table_id": "datalogger_table_id",
      *   "update_date": "update_date"
@@ -10219,7 +10225,7 @@ export interface components {
      *     0,
      *     0
      *   ],
-     *   "status": null
+     *   "status": 6
      * }
      */
     "pgtype.JSON": {

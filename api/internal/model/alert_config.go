@@ -22,6 +22,7 @@ type AlertConfig struct {
 	LastChecked             *time.Time                           `json:"last_checked" db:"last_checked"`
 	AlertTypeID             uuid.UUID                            `json:"alert_type_id" db:"alert_type_id"`
 	AlertType               string                               `json:"alert_type" db:"alert_type"`
+	Muted                   bool                                 `json:"muted" db:"muted"`
 	Opts                    Opts                                 `json:"opts" db:"opts"`
 	Violations              []string                             `json:"-" db:"-"`
 	AuditInfo
@@ -152,6 +153,8 @@ const listAlertConfigsForTimeseries = `
 	) mm ON true
 	WHERE acts.timeseries_id = input.timeseries_id
 	AND ac.alert_type_id IN (?)
+	AND NOT ac.deleted
+	AND NOT ac.muted
 `
 
 func (q *Queries) GetTimeseriesAlertConfigsForTimeseriesAndAlertTypes(ctx context.Context, rr string, alertTypeIDs []uuid.UUID) ([]TimeseriesAlertConfig, error) {
@@ -183,8 +186,9 @@ const createAlertConfig = `
 		body,
 		alert_type_id,
 		creator,
-		create_date
-	) VALUES ($1,$2,$3,$4,$5,$6)
+		create_date,
+		muted
+	) VALUES ($1,$2,$3,$4,$5,$6,$7)
 	RETURNING id
 `
 
@@ -197,6 +201,7 @@ func (q *Queries) CreateAlertConfig(ctx context.Context, ac AlertConfig) (uuid.U
 		ac.AlertTypeID,
 		ac.CreatorID,
 		ac.CreateDate,
+		ac.Muted,
 	)
 	return alertConfigID, err
 }
@@ -242,7 +247,8 @@ const updateAlertConfig = `
 		name = $3,
 		body = $4,
 		updater = $5,
-		update_date = $6
+		update_date = $6,
+		muted = $7
 	WHERE id = $1 AND project_id = $2
 `
 
@@ -254,6 +260,7 @@ func (q *Queries) UpdateAlertConfig(ctx context.Context, ac AlertConfig) error {
 		ac.Body,
 		ac.UpdaterID,
 		ac.UpdateDate,
+		ac.Muted,
 	)
 	return err
 }

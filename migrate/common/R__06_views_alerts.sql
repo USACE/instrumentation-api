@@ -47,6 +47,7 @@ CREATE OR REPLACE VIEW v_alert_config AS (
         ac.last_checked,
         atype.id AS alert_type_id,
         atype.name AS alert_type,
+        ac.muted,
         CASE
             -- measurement-submittal and evaluation-submittal
             WHEN atype.id = '97e7a25c-d5c7-4ded-b272-1bb6e5914fe3'::uuid OR atype.id = 'da6ee89e-58cc-4d85-8384-43c3c33a68bd'::uuid THEN json_build_object(

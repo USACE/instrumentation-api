@@ -35,7 +35,11 @@ ALTER TABLE alert_config
   DROP last_reminded,
   DROP mute_consecutive_alerts,
   -- dropping because ununsed
-  DROP n_missed_before_alert;
+  DROP n_missed_before_alert,
+  ADD COLUMN muted boolean DEFAULT false;
+
+UPDATE alert_config SET muted = false;
+ALTER TABLE alert_config ALTER COLUMN muted SET NOT NULL;
 
 CREATE TABLE alert_config_timeseries (
   alert_config_id uuid NOT NULL REFERENCES alert_config(id) ON DELETE CASCADE,

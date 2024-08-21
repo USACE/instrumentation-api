@@ -56,6 +56,7 @@ CREATE OR REPLACE VIEW v_alert_check_measurement_submittal AS (
     LEFT JOIN timeseries ts ON ts.id = lm.timeseries_id
     WHERE ac.alert_type_id = '97e7a25c-d5c7-4ded-b272-1bb6e5914fe3'::UUID
     AND NOT ac.deleted
+    AND NOT ac.muted
     GROUP BY ac.id, sub.id, acs.warning_interval, acs.remind_interval, acs.last_reminded
 );
 
@@ -91,6 +92,7 @@ CREATE OR REPLACE VIEW v_alert_check_evaluation_submittal AS (
     INNER JOIN alert_config_scheduler acs ON acs.alert_config_id = ac.id
     WHERE ac.alert_type_id = 'da6ee89e-58cc-4d85-8384-43c3c33a68bd'::UUID
     AND NOT ac.deleted
+    AND NOT ac.muted
 );
 
 GRANT SELECT ON
