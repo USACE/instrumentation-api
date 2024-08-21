@@ -2,10 +2,11 @@ package model
 
 import (
 	"encoding/csv"
-	"encoding/json"
 	"log"
 	"math"
 	"os"
+	"strconv"
+	"strings"
 )
 
 type DataloggerPayload struct {
@@ -46,19 +47,13 @@ type Field struct {
 type FloatNanInf float64
 
 func (j *FloatNanInf) UnmarshalJSON(v []byte) error {
-	switch string(v) {
-	case `"NAN"`, "NAN":
+	f := strings.ReplaceAll(strings.ReplaceAll(string(v), "\"", ""), "\\", "")
+	fv, err := strconv.ParseFloat(f, 64)
+	if err != nil {
 		*j = FloatNanInf(math.NaN())
-	case `"INF"`, "INF":
-		*j = FloatNanInf(math.Inf(1))
-	default:
-		var fv float64
-		if err := json.Unmarshal(v, &fv); err != nil {
-			*j = FloatNanInf(math.NaN())
-			return nil
-		}
-		*j = FloatNanInf(fv)
+		return nil
 	}
+	*j = FloatNanInf(fv)
 	return nil
 }
 

@@ -2,6 +2,12 @@ package config
 
 import "net/smtp"
 
+type EmailConfig struct {
+	SmtpConfig
+	EmailSendMocked bool   `envconfig:"INSTRUMENTATION_EMAIL_SEND_MOCKED"`
+	EmailFrom       string `envconfig:"INSTRUMENTATION_EMAIL_FROM"`
+}
+
 type SmtpConfig struct {
 	SmtpHost     string `envconfig:"INSTRUMENTATION_SMTP_HOST"`
 	SmtpPort     string `envconfig:"INSTRUMENTATION_SMTP_PORT"`

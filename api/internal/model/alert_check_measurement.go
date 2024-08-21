@@ -8,8 +8,8 @@ import (
 	et "github.com/USACE/instrumentation-api/api/internal/email"
 )
 
-type AlertConfigMeasurementCheck struct {
-	AlertConfig AlertConfig
+type AlertConfigSchedulerMeasurementCheck struct {
+	AlertConfig AlertConfigScheduler
 	AlertChecks []*MeasurementCheck
 }
 
@@ -24,23 +24,23 @@ type MeasurementSubmittalTimeseries struct {
 	Status         string `json:"status"`
 }
 
-func (a AlertConfigMeasurementCheck) GetAlertConfig() AlertConfig {
+func (a AlertConfigSchedulerMeasurementCheck) GetAlertConfigScheduler() AlertConfigScheduler {
 	return a.AlertConfig
 }
 
-func (a *AlertConfigMeasurementCheck) SetAlertConfig(ac AlertConfig) {
+func (a *AlertConfigSchedulerMeasurementCheck) SetAlertConfigScheduler(ac AlertConfigScheduler) {
 	a.AlertConfig = ac
 }
 
-func (a AlertConfigMeasurementCheck) GetChecks() []*MeasurementCheck {
+func (a AlertConfigSchedulerMeasurementCheck) GetChecks() []*MeasurementCheck {
 	return a.AlertChecks
 }
 
-func (a *AlertConfigMeasurementCheck) SetChecks(mc []*MeasurementCheck) {
+func (a *AlertConfigSchedulerMeasurementCheck) SetChecks(mc []*MeasurementCheck) {
 	a.AlertChecks = mc
 }
 
-func (ms AlertConfigMeasurementCheck) DoEmail(emailType string, cfg config.AlertCheckConfig) error {
+func (ms AlertConfigSchedulerMeasurementCheck) DoEmail(emailType string, cfg config.AlertCheckSchedulerConfig) error {
 	if emailType == "" {
 		return fmt.Errorf("must provide emailType")
 	}
@@ -67,7 +67,7 @@ func (ms AlertConfigMeasurementCheck) DoEmail(emailType string, cfg config.Alert
 		return err
 	}
 	content.To = ms.AlertConfig.GetToAddresses()
-	if err := et.ConstructAndSendEmail(content, cfg); err != nil {
+	if err := et.ConstructAndSendEmail(content, cfg.EmailConfig); err != nil {
 		return err
 	}
 	return nil

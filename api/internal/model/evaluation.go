@@ -126,10 +126,10 @@ func (q *Queries) CompleteEvaluationSubmittal(ctx context.Context, submittalID u
 const createNextEvaluationSubmittal = `
 	INSERT INTO submittal (alert_config_id, due_date)
 	SELECT
-		ac.id,
+		ac.alert_config_id,
 		NOW() + ac.schedule_interval
-	FROM alert_config ac
-	WHERE ac.id IN (SELECT alert_config_id FROM submittal WHERE id = $1)
+	FROM alert_config_scheduler ac
+	WHERE ac.alert_config_id IN (SELECT alert_config_id FROM submittal WHERE id = $1)
 `
 
 func (q *Queries) CreateNextEvaluationSubmittal(ctx context.Context, submittalID uuid.UUID) error {

@@ -3564,6 +3564,120 @@ paths:
       summary: lists alert configs for a project
       tags:
       - alert-config
+  /projects/{project_id}/alert_configs/changes:
+    post:
+      parameters:
+      - description: project uuid
+        in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      - description: api key
+        in: query
+        name: key
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlertConfigChange'
+        description: rate of change alert config payload
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertConfig'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: creates one rate of change alert config
+      tags:
+      - alert-config
+      x-codegen-request-body-name: alert_config
+  /projects/{project_id}/alert_configs/changes/{alert_config_id}:
+    put:
+      parameters:
+      - description: project uuid
+        in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      - description: alert config uuid
+        in: path
+        name: alert_config_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      - description: api key
+        in: query
+        name: key
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlertConfigChange'
+        description: rate of change alert config payload
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertConfig'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: updates an existing rate of change alert config
+      tags:
+      - alert-config
+      x-codegen-request-body-name: alert_config
+  /projects/{project_id}/alert_configs/schedulers:
     post:
       parameters:
       - description: project uuid
@@ -3613,6 +3727,181 @@ paths:
       security:
       - Bearer: []
       summary: creates one alert config
+      tags:
+      - alert-config
+      x-codegen-request-body-name: alert_config
+  /projects/{project_id}/alert_configs/schedulers/{alert_config_id}:
+    put:
+      parameters:
+      - description: project uuid
+        in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      - description: alert config uuid
+        in: path
+        name: alert_config_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      - description: api key
+        in: query
+        name: key
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlertConfig'
+        description: alert config payload
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/AlertConfig'
+                type: array
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: updates an existing alert config
+      tags:
+      - alert-config
+      x-codegen-request-body-name: alert_config
+  /projects/{project_id}/alert_configs/thresholds:
+    post:
+      parameters:
+      - description: project uuid
+        in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      - description: api key
+        in: query
+        name: key
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlertConfigThreshold'
+        description: threshold alert config payload
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertConfig'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: creates one threshold alert config
+      tags:
+      - alert-config
+      x-codegen-request-body-name: alert_config
+  /projects/{project_id}/alert_configs/thresholds/{alert_config_id}:
+    put:
+      parameters:
+      - description: project uuid
+        in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      - description: alert config uuid
+        in: path
+        name: alert_config_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      - description: api key
+        in: query
+        name: key
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlertConfigThreshold'
+        description: threshold alert config payload
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertConfig'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/echo.HTTPError'
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: updates an existing threshold alert config
       tags:
       - alert-config
       x-codegen-request-body-name: alert_config
@@ -3714,67 +4003,6 @@ paths:
       summary: gets a single alert
       tags:
       - alert-config
-    put:
-      parameters:
-      - description: project uuid
-        in: path
-        name: project_id
-        required: true
-        schema:
-          format: uuid
-          type: string
-      - description: alert config uuid
-        in: path
-        name: alert_config_id
-        required: true
-        schema:
-          format: uuid
-          type: string
-      - description: api key
-        in: query
-        name: key
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AlertConfig'
-        description: alert config payload
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                items:
-                  $ref: '#/components/schemas/AlertConfig'
-                type: array
-          description: OK
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/echo.HTTPError'
-          description: Bad Request
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/echo.HTTPError'
-          description: Not Found
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/echo.HTTPError'
-          description: Internal Server Error
-      security:
-      - Bearer: []
-      summary: updates an existing alert config
-      tags:
-      - alert-config
-      x-codegen-request-body-name: alert_config
   /projects/{project_id}/collection_groups:
     get:
       parameters:
@@ -8281,6 +8509,11 @@ components:
         - instrument_name: instrument_name
           instrument_id: instrument_id
         read: true
+        timeseries:
+        - timeseries_id: timeseries_id
+          timeseries_name: timeseries_name
+        - timeseries_id: timeseries_id
+          timeseries_name: timeseries_name
         alert_config_id: alert_config_id
         project_id: project_id
         name: name
@@ -8309,13 +8542,16 @@ components:
           type: string
         read:
           type: boolean
+        timeseries:
+          items:
+            $ref: '#/components/schemas/AlertConfigTimeseries'
+          type: array
       type: object
     AlertConfig:
       example:
         updater_username: updater_username
         alert_type_id: alert_type_id
         creator_username: creator_username
-        remind_interval: remind_interval
         body: body
         project_name: project_name
         alert_type: alert_type
@@ -8325,14 +8561,18 @@ components:
           instrument_id: instrument_id
         - instrument_name: instrument_name
           instrument_id: instrument_id
+        opts:
+          key: ""
+        timeseries:
+        - timeseries_id: timeseries_id
+          timeseries_name: timeseries_name
+        - timeseries_id: timeseries_id
+          timeseries_name: timeseries_name
         project_id: project_id
         last_checked: last_checked
-        mute_consecutive_alerts: true
         creator_id: creator_id
-        last_reminded: last_reminded
         name: name
         updater_id: updater_id
-        schedule_interval: schedule_interval
         id: id
         alert_email_subscriptions:
         - user_type: user_type
@@ -8344,8 +8584,7 @@ components:
           email: email
           username: username
         create_date: create_date
-        warning_interval: warning_interval
-        start_date: start_date
+        muted: true
       properties:
         alert_email_subscriptions:
           items:
@@ -8371,30 +8610,130 @@ components:
           type: array
         last_checked:
           type: string
-        last_reminded:
-          type: string
-        mute_consecutive_alerts:
+        muted:
           type: boolean
         name:
           type: string
+        opts:
+          additionalProperties: true
+          type: object
         project_id:
           type: string
         project_name:
           type: string
-        remind_interval:
-          type: string
-        schedule_interval:
-          type: string
-        start_date:
-          type: string
+        timeseries:
+          items:
+            $ref: '#/components/schemas/AlertConfigTimeseries'
+          type: array
         update_date:
           type: string
         updater_id:
           type: string
         updater_username:
           type: string
-        warning_interval:
+      type: object
+    AlertConfigChange:
+      example:
+        updater_username: updater_username
+        alert_type_id: alert_type_id
+        creator_username: creator_username
+        body: body
+        project_name: project_name
+        alert_type: alert_type
+        update_date: update_date
+        instruments:
+        - instrument_name: instrument_name
+          instrument_id: instrument_id
+        - instrument_name: instrument_name
+          instrument_id: instrument_id
+        opts:
+          warn_rate_of_change: 1.4658129805029452
+          alert_rate_of_change: 0.8008281904610115
+          locf_backfill: locf_backfill
+          ignore_rate_of_change: 6.027456183070403
+        timeseries:
+        - timeseries_id: timeseries_id
+          timeseries_name: timeseries_name
+        - timeseries_id: timeseries_id
+          timeseries_name: timeseries_name
+        project_id: project_id
+        last_checked: last_checked
+        creator_id: creator_id
+        name: name
+        updater_id: updater_id
+        id: id
+        alert_email_subscriptions:
+        - user_type: user_type
+          id: id
+          email: email
+          username: username
+        - user_type: user_type
+          id: id
+          email: email
+          username: username
+        create_date: create_date
+        muted: true
+      properties:
+        alert_email_subscriptions:
+          items:
+            $ref: '#/components/schemas/EmailAutocompleteResult'
+          type: array
+        alert_type:
           type: string
+        alert_type_id:
+          type: string
+        body:
+          type: string
+        create_date:
+          type: string
+        creator_id:
+          type: string
+        creator_username:
+          type: string
+        id:
+          type: string
+        instruments:
+          items:
+            $ref: '#/components/schemas/AlertConfigInstrument'
+          type: array
+        last_checked:
+          type: string
+        muted:
+          type: boolean
+        name:
+          type: string
+        opts:
+          $ref: '#/components/schemas/AlertConfigChangeOpts'
+        project_id:
+          type: string
+        project_name:
+          type: string
+        timeseries:
+          items:
+            $ref: '#/components/schemas/AlertConfigTimeseries'
+          type: array
+        update_date:
+          type: string
+        updater_id:
+          type: string
+        updater_username:
+          type: string
+      type: object
+    AlertConfigChangeOpts:
+      example:
+        warn_rate_of_change: 1.4658129805029452
+        alert_rate_of_change: 0.8008281904610115
+        locf_backfill: locf_backfill
+        ignore_rate_of_change: 6.027456183070403
+      properties:
+        alert_rate_of_change:
+          type: number
+        ignore_rate_of_change:
+          type: number
+        locf_backfill:
+          type: string
+        warn_rate_of_change:
+          type: number
       type: object
     AlertConfigInstrument:
       example:
@@ -8404,6 +8743,131 @@ components:
         instrument_id:
           type: string
         instrument_name:
+          type: string
+      type: object
+    AlertConfigThreshold:
+      example:
+        updater_username: updater_username
+        alert_type_id: alert_type_id
+        creator_username: creator_username
+        body: body
+        project_name: project_name
+        alert_type: alert_type
+        update_date: update_date
+        instruments:
+        - instrument_name: instrument_name
+          instrument_id: instrument_id
+        - instrument_name: instrument_name
+          instrument_id: instrument_id
+        opts:
+          alert_low_value: 6.027456183070403
+          warn_low_value: 7.061401241503109
+          variance: 5.637376656633329
+          ignore_low_value: 5.962133916683182
+          warn_high_value: 2.3021358869347655
+          alert_high_value: 0.8008281904610115
+          ignore_high_value: 1.4658129805029452
+        timeseries:
+        - timeseries_id: timeseries_id
+          timeseries_name: timeseries_name
+        - timeseries_id: timeseries_id
+          timeseries_name: timeseries_name
+        project_id: project_id
+        last_checked: last_checked
+        creator_id: creator_id
+        name: name
+        updater_id: updater_id
+        id: id
+        alert_email_subscriptions:
+        - user_type: user_type
+          id: id
+          email: email
+          username: username
+        - user_type: user_type
+          id: id
+          email: email
+          username: username
+        create_date: create_date
+        muted: true
+      properties:
+        alert_email_subscriptions:
+          items:
+            $ref: '#/components/schemas/EmailAutocompleteResult'
+          type: array
+        alert_type:
+          type: string
+        alert_type_id:
+          type: string
+        body:
+          type: string
+        create_date:
+          type: string
+        creator_id:
+          type: string
+        creator_username:
+          type: string
+        id:
+          type: string
+        instruments:
+          items:
+            $ref: '#/components/schemas/AlertConfigInstrument'
+          type: array
+        last_checked:
+          type: string
+        muted:
+          type: boolean
+        name:
+          type: string
+        opts:
+          $ref: '#/components/schemas/AlertConfigThresholdOpts'
+        project_id:
+          type: string
+        project_name:
+          type: string
+        timeseries:
+          items:
+            $ref: '#/components/schemas/AlertConfigTimeseries'
+          type: array
+        update_date:
+          type: string
+        updater_id:
+          type: string
+        updater_username:
+          type: string
+      type: object
+    AlertConfigThresholdOpts:
+      example:
+        alert_low_value: 6.027456183070403
+        warn_low_value: 7.061401241503109
+        variance: 5.637376656633329
+        ignore_low_value: 5.962133916683182
+        warn_high_value: 2.3021358869347655
+        alert_high_value: 0.8008281904610115
+        ignore_high_value: 1.4658129805029452
+      properties:
+        alert_high_value:
+          type: number
+        alert_low_value:
+          type: number
+        ignore_high_value:
+          type: number
+        ignore_low_value:
+          type: number
+        variance:
+          type: number
+        warn_high_value:
+          type: number
+        warn_low_value:
+          type: number
+      type: object
+    AlertConfigTimeseries:
+      example:
+        timeseries_id: timeseries_id
+        timeseries_name: timeseries_name
+      properties:
+        timeseries_id:
+          type: string
+        timeseries_name:
           type: string
       type: object
     AlertSubscription:
@@ -8686,7 +9150,7 @@ components:
           bytes:
           - 0
           - 0
-          status: null
+          status: 6
         datalogger_table_id: datalogger_table_id
         update_date: update_date
       properties:
@@ -11158,7 +11622,7 @@ components:
         bytes:
         - 0
         - 0
-        status: null
+        status: 6
       properties:
         bytes:
           items:

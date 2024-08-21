@@ -18,6 +18,7 @@ type Alert struct {
 	Body          string                             `json:"body"`
 	CreateDate    time.Time                          `json:"create_date" db:"create_date"`
 	Instruments   dbJSONSlice[AlertConfigInstrument] `json:"instruments" db:"instruments"`
+	Timeseries    dbJSONSlice[AlertConfigTimeseries] `json:"timeseries" db:"timeseries"`
 }
 
 const createAlerts = `

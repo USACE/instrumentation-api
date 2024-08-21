@@ -9,6 +9,7 @@ import (
 type TelemetryConfig struct {
 	DBConfig
 	ServerConfig
+	EmailConfig
 }
 
 func NewTelemetryConfig() *TelemetryConfig {

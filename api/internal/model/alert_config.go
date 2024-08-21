@@ -2,11 +2,11 @@ package model
 
 import (
 	"context"
-	"database/sql"
-	"errors"
 	"fmt"
 	"time"
 
+	"github.com/USACE/instrumentation-api/api/internal/config"
+	et "github.com/USACE/instrumentation-api/api/internal/email"
 	"github.com/google/uuid"
 )
 
@@ -16,18 +16,15 @@ type AlertConfig struct {
 	Body                    string                               `json:"body" db:"body"`
 	ProjectID               uuid.UUID                            `json:"project_id" db:"project_id"`
 	ProjectName             string                               `json:"project_name" db:"project_name"`
+	AlertEmailSubscriptions dbJSONSlice[EmailAutocompleteResult] `json:"alert_email_subscriptions" db:"alert_email_subscriptions"`
+	Instruments             dbJSONSlice[AlertConfigInstrument]   `json:"instruments" db:"instruments"`
+	Timeseries              dbJSONSlice[AlertConfigTimeseries]   `json:"timeseries" db:"timeseries"`
+	LastChecked             *time.Time                           `json:"last_checked" db:"last_checked"`
 	AlertTypeID             uuid.UUID                            `json:"alert_type_id" db:"alert_type_id"`
 	AlertType               string                               `json:"alert_type" db:"alert_type"`
-	StartDate               time.Time                            `json:"start_date" db:"start_date"`
-	ScheduleInterval        string                               `json:"schedule_interval" db:"schedule_interval"`
-	RemindInterval          string                               `json:"remind_interval" db:"remind_interval"`
-	WarningInterval         string                               `json:"warning_interval" db:"warning_interval"`
-	LastChecked             *time.Time                           `json:"last_checked" db:"last_checked"`
-	LastReminded            *time.Time                           `json:"last_reminded" db:"last_reminded"`
-	Instruments             dbJSONSlice[AlertConfigInstrument]   `json:"instruments" db:"instruments"`
-	AlertEmailSubscriptions dbJSONSlice[EmailAutocompleteResult] `json:"alert_email_subscriptions" db:"alert_email_subscriptions"`
-	MuteConsecutiveAlerts   bool                                 `json:"mute_consecutive_alerts" db:"mute_consecutive_alerts"`
-	CreateNextSubmittalFrom *time.Time                           `json:"-" db:"-"`
+	Muted                   bool                                 `json:"muted" db:"muted"`
+	Opts                    Opts                                 `json:"opts" db:"opts"`
+	Violations              []string                             `json:"-" db:"-"`
 	AuditInfo
 }
 
@@ -35,6 +32,54 @@ type AlertConfigInstrument struct {
 	InstrumentID   uuid.UUID `json:"instrument_id" db:"instrument_id"`
 	InstrumentName string    `json:"instrument_name" db:"instrument_name"`
 }
+
+type AlertConfigTimeseries struct {
+	TimeseriesID   uuid.UUID `json:"timeseries_id" db:"timeseries_id"`
+	TimeseriesName string    `json:"timeseries_name" db:"timeseries_name"`
+}
+
+type TimeseriesAlertConfig struct {
+	TimeseriesID         uuid.UUID  `json:"timeseries_id" db:"timeseries_id"`
+	LastMeasurementTime  *time.Time `json:"last_measurement_time" db:"last_measurement_time"`
+	LastMeasurementValue *float64   `json:"last_measurement_value" db:"last_measurement_value"`
+	AlertConfig
+}
+
+func (ac AlertConfig) DoEmail(emailType string, cfg config.EmailConfig) error {
+	if emailType == "" {
+		return fmt.Errorf("must provide emailType")
+	}
+	preformatted := et.EmailContent{
+		TextSubject: "-- DO NOT REPLY -- MIDAS " + emailType + ": " + ac.AlertType,
+		TextBody:    "The following " + emailType + " has been triggered:\r\n" + alertEmailTemplate,
+	}
+	templContent, err := et.CreateEmailTemplateContent(preformatted)
+	if err != nil {
+		return err
+	}
+	content, err := et.FormatAlertConfigTemplates(templContent, ac)
+	if err != nil {
+		return err
+	}
+	emails := make([]string, len(ac.AlertEmailSubscriptions))
+	for idx := range ac.AlertEmailSubscriptions {
+		emails[idx] = ac.AlertEmailSubscriptions[idx].Email
+	}
+	content.To = emails
+	if err := et.ConstructAndSendEmail(content, cfg); err != nil {
+		return err
+	}
+	return nil
+}
+
+const alertEmailTemplate = "Project: {{.ProjectName}}\r\n" +
+	"Alert Type: {{.AlertType}}\r\n" +
+	"Alert Name: \"{{.Name}}\"\r\n" +
+	"Description: \"{{.Body}}\"\r\n" +
+	"Voilations ({{len .Violations}} total):\r\n" +
+	"{{range $i, $val := .Violations}}\r\n" +
+	"{{if le $i 5}}\t• {{$val}}\r\n{{end}}" +
+	"{{if eq $i 6}}\t  more...\r\n{{end}}{{end}}"
 
 func (a *AlertConfig) GetToAddresses() []string {
 	emails := make([]string, len(a.AlertEmailSubscriptions))
@@ -58,7 +103,7 @@ func (q *Queries) GetAllAlertConfigsForProject(ctx context.Context, projectID uu
 	return aa, err
 }
 
-const qetAllAlertConfigsForProjectAndAlertType = `
+const getAllAlertConfigsForProjectAndAlertType = `
 	SELECT *
 	FROM v_alert_config
 	WHERE project_id = $1
@@ -69,18 +114,15 @@ const qetAllAlertConfigsForProjectAndAlertType = `
 // GetAllAlertConfigsForProjectAndAlertType lists alert configs for a single project filetered by alert type
 func (q *Queries) GetAllAlertConfigsForProjectAndAlertType(ctx context.Context, projectID, alertTypeID uuid.UUID) ([]AlertConfig, error) {
 	aa := make([]AlertConfig, 0)
-	err := q.db.SelectContext(ctx, &aa, qetAllAlertConfigsForProjectAndAlertType, projectID, alertTypeID)
+	err := q.db.SelectContext(ctx, &aa, getAllAlertConfigsForProjectAndAlertType, projectID, alertTypeID)
 	return aa, err
 }
 
 const getAllAlertConfigsForInstrument = `
-	SELECT *
-	FROM v_alert_config
-	WHERE id = ANY(
-		SELECT alert_config_id
-		FROM alert_config_instrument
-		WHERE instrument_id = $1
-	)
+	SELECT ac.*
+	FROM v_alert_config ac
+	INNER JOIN alert_config_instrument aci ON aci.alert_config_id = ac.id
+	WHERE instrument_id = $1
 	ORDER BY name
 `
 
@@ -89,6 +131,40 @@ func (q *Queries) GetAllAlertConfigsForInstrument(ctx context.Context, instrumen
 	aa := make([]AlertConfig, 0)
 	err := q.db.SelectContext(ctx, &aa, getAllAlertConfigsForInstrument, instrumentID)
 	return aa, err
+}
+
+const listAlertConfigsForTimeseries = `
+	WITH input AS (SELECT * FROM json_to_recordset(?) AS r(timeseries_id uuid, time timestamptz))
+	SELECT
+		acts.timeseries_id,
+		mm.time AS last_measurement_time,
+		mm.value AS last_measurement_value,
+		ac.*
+	FROM v_alert_config ac
+	INNER JOIN alert_config_timeseries acts ON acts.alert_config_id = ac.id
+	INNER JOIN input ON true
+	LEFT JOIN LATERAL (
+		SELECT imm.time, imm.value
+		FROM timeseries_measurement imm
+		WHERE imm.timeseries_id = acts.timeseries_id
+		AND imm.time < input.time
+		ORDER BY imm.time DESC
+		LIMIT 1
+	) mm ON true
+	WHERE acts.timeseries_id = input.timeseries_id
+	AND ac.alert_type_id IN (?)
+	AND NOT ac.muted
+`
+
+func (q *Queries) GetTimeseriesAlertConfigsForTimeseriesAndAlertTypes(ctx context.Context, rr string, alertTypeIDs []uuid.UUID) ([]TimeseriesAlertConfig, error) {
+	query, args, err := sqlIn(listAlertConfigsForTimeseries, rr, alertTypeIDs)
+	if err != nil {
+		return nil, err
+	}
+	query = q.db.Rebind(query)
+	acc := make([]TimeseriesAlertConfig, 0)
+	err = q.db.SelectContext(ctx, &acc, query, args...)
+	return acc, err
 }
 
 const getOneAlertConfig = `
@@ -108,14 +184,10 @@ const createAlertConfig = `
 		name,
 		body,
 		alert_type_id,
-		start_date,
-		schedule_interval,
-		mute_consecutive_alerts,
-		remind_interval,
-		warning_interval,
 		creator,
-		create_date
-	) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+		create_date,
+		muted
+	) VALUES ($1,$2,$3,$4,$5,$6,$7)
 	RETURNING id
 `
 
@@ -126,13 +198,9 @@ func (q *Queries) CreateAlertConfig(ctx context.Context, ac AlertConfig) (uuid.U
 		ac.Name,
 		ac.Body,
 		ac.AlertTypeID,
-		ac.StartDate,
-		ac.ScheduleInterval,
-		ac.MuteConsecutiveAlerts,
-		ac.RemindInterval,
-		ac.WarningInterval,
 		ac.CreatorID,
 		ac.CreateDate,
+		ac.Muted,
 	)
 	return alertConfigID, err
 }
@@ -155,15 +223,21 @@ func (q *Queries) UnassignAllInstrumentsFromAlertConfig(ctx context.Context, ale
 	return err
 }
 
-const createNextSubmittalFromExistingAlertConfigDate = `
-	INSERT INTO submittal (alert_config_id, due_date)
-	SELECT id, create_date + schedule_interval
-	FROM alert_config
-	WHERE id = $1
+const assignTimeseriesToAlertConfig = `
+	INSERT INTO alert_config_timeseries (alert_config_id, timeseries_id) VALUES ($1, $2)
 `
 
-func (q *Queries) CreateNextSubmittalFromExistingAlertConfigDate(ctx context.Context, alertConfigID uuid.UUID) error {
-	_, err := q.db.ExecContext(ctx, createNextSubmittalFromExistingAlertConfigDate, alertConfigID)
+func (q *Queries) AssignTimeseriesToAlertConfig(ctx context.Context, alertConfigID, timeseriesID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, assignTimeseriesToAlertConfig, alertConfigID, timeseriesID)
+	return err
+}
+
+const unassignAllTimeseriesFromAlertConfig = `
+	DELETE FROM alert_config_timeseries WHERE alert_config_id = $1
+`
+
+func (q *Queries) UnassignAllTimeseriesFromAlertConfig(ctx context.Context, alertConfigID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, unassignAllTimeseriesFromAlertConfig, alertConfigID)
 	return err
 }
 
@@ -171,13 +245,9 @@ const updateAlertConfig = `
 	UPDATE alert_config SET
 		name = $3,
 		body = $4,
-		start_date = $5,
-		schedule_interval = $6,
-		mute_consecutive_alerts = $7,
-		remind_interval = $8,
-		warning_interval = $9,
-		updater = $10,
-		update_date = $11
+		updater = $5,
+		update_date = $6,
+		muted = $7
 	WHERE id = $1 AND project_id = $2
 `
 
@@ -187,13 +257,9 @@ func (q *Queries) UpdateAlertConfig(ctx context.Context, ac AlertConfig) error {
 		ac.ProjectID,
 		ac.Name,
 		ac.Body,
-		ac.StartDate,
-		ac.ScheduleInterval,
-		ac.MuteConsecutiveAlerts,
-		ac.RemindInterval,
-		ac.WarningInterval,
 		ac.UpdaterID,
 		ac.UpdateDate,
+		ac.Muted,
 	)
 	return err
 }
@@ -204,28 +270,22 @@ const updateFutureSubmittalForAlertConfig = `
 	FROM (
 		SELECT
 			sub.id AS submittal_id,
-			sub.create_date + ac.schedule_interval AS new_due_date
+			sub.create_date + acs.schedule_interval AS new_due_date
 		FROM submittal sub
-		INNER JOIN alert_config ac ON sub.alert_config_id = ac.id
+		INNER JOIN alert_config_scheduler acs ON sub.alert_config_id = acs.alert_config_id
 		WHERE sub.alert_config_id = $1
-		AND sub.due_date > NOW()
+		AND sub.due_date > now()
 		AND sub.completion_date IS NULL
 		AND NOT sub.marked_as_missing
 	) sq
 	WHERE id = sq.submittal_id
-	AND sq.new_due_date > NOW()
+	AND sq.new_due_date > now()
 	RETURNING id
 `
 
 func (q *Queries) UpdateFutureSubmittalForAlertConfig(ctx context.Context, alertConfigID uuid.UUID) error {
 	var updatedSubID uuid.UUID
-	if err := q.db.GetContext(ctx, &updatedSubID, updateFutureSubmittalForAlertConfig, alertConfigID); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return fmt.Errorf("updated alert config new due date must be in the future! complete the current submittal before updating")
-		}
-		return err
-	}
-	return nil
+	return q.db.GetContext(ctx, &updatedSubID, updateFutureSubmittalForAlertConfig, alertConfigID)
 }
 
 const deleteAlertConfig = `
@@ -235,5 +295,14 @@ const deleteAlertConfig = `
 // DeleteAlertConfig deletes an alert by ID
 func (q *Queries) DeleteAlertConfig(ctx context.Context, alertConfigID uuid.UUID) error {
 	_, err := q.db.ExecContext(ctx, deleteAlertConfig, alertConfigID)
+	return err
+}
+
+const updateAlertConfigStatus = `
+	UPDATE alert_config SET status=$2, last_checked=$3 WHERE id=$1
+`
+
+func (q *Queries) UpdateAlertConfigStatus(ctx context.Context, alertConfigID uuid.UUID, status *string) error {
+	_, err := q.db.ExecContext(ctx, updateAlertConfigStatus, alertConfigID, status, time.Now())
 	return err
 }

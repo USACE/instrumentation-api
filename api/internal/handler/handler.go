@@ -24,6 +24,7 @@ type ApiHandler struct {
 	Middleware                     middleware.Middleware
 	BlobService                    cloud.Blob
 	AlertService                   service.AlertService
+	AlertCheckAfterService         service.AlertCheckAfterService
 	AlertConfigService             service.AlertConfigService
 	AlertSubscriptionService       service.AlertSubscriptionService
 	EmailAutocompleteService       service.EmailAutocompleteService
@@ -74,6 +75,7 @@ func NewApi(cfg *config.ApiConfig) *ApiHandler {
 		Middleware:                     mw,
 		BlobService:                    cloud.NewS3Blob(&cfg.AWSS3Config, "/instrumentation", cfg.RoutePrefix),
 		AlertService:                   service.NewAlertService(db, q),
+		AlertCheckAfterService:         service.NewAlertCheckAfterService(db, q, &cfg.EmailConfig),
 		AlertConfigService:             service.NewAlertConfigService(db, q),
 		AlertSubscriptionService:       service.NewAlertSubscriptionService(db, q),
 		EmailAutocompleteService:       service.NewEmailAutocompleteService(db, q),
@@ -113,6 +115,7 @@ func NewApi(cfg *config.ApiConfig) *ApiHandler {
 
 type TelemetryHandler struct {
 	Middleware                 middleware.Middleware
+	AlertCheckAfterService     service.AlertCheckAfterService
 	DataloggerService          service.DataloggerService
 	DataloggerTelemetryService service.DataloggerTelemetryService
 	EquivalencyTableService    service.EquivalencyTableService
@@ -130,6 +133,7 @@ func NewTelemetry(cfg *config.TelemetryConfig) *TelemetryHandler {
 
 	return &TelemetryHandler{
 		Middleware:                 mw,
+		AlertCheckAfterService:     service.NewAlertCheckAfterService(db, q, &cfg.EmailConfig),
 		DataloggerService:          service.NewDataloggerService(db, q),
 		DataloggerTelemetryService: dataloggerTelemetryService,
 		EquivalencyTableService:    service.NewEquivalencyTableService(db, q),
@@ -138,15 +142,15 @@ func NewTelemetry(cfg *config.TelemetryConfig) *TelemetryHandler {
 }
 
 type AlertCheckHandler struct {
-	AlertCheckService service.AlertCheckService
+	AlertCheckSchedulerService service.AlertCheckSchedulerService
 }
 
-func NewAlertCheck(cfg *config.AlertCheckConfig) *AlertCheckHandler {
+func NewAlertCheck(cfg *config.AlertCheckSchedulerConfig) *AlertCheckHandler {
 	db := model.NewDatabase(&cfg.DBConfig)
 	q := db.Queries()
 
 	return &AlertCheckHandler{
-		AlertCheckService: service.NewAlertCheckService(db, q, cfg),
+		AlertCheckSchedulerService: service.NewAlertCheckSchedulerService(db, q, cfg),
 	}
 }
 

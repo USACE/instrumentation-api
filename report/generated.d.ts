@@ -3187,6 +3187,104 @@ export interface paths {
         };
       };
     };
+  };
+  "/projects/{project_id}/alert_configs/changes": {
+    /** creates one rate of change alert config */
+    post: {
+      parameters: {
+        query?: {
+          /** @description api key */
+          key?: string;
+        };
+        path: {
+          /** @description project uuid */
+          project_id: string;
+        };
+      };
+      /** @description rate of change alert config payload */
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["AlertConfigChange"];
+        };
+      };
+      responses: {
+        /** @description OK */
+        200: {
+          content: {
+            "application/json": components["schemas"]["AlertConfig"];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Internal Server Error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+      };
+    };
+  };
+  "/projects/{project_id}/alert_configs/changes/{alert_config_id}": {
+    /** updates an existing rate of change alert config */
+    put: {
+      parameters: {
+        query?: {
+          /** @description api key */
+          key?: string;
+        };
+        path: {
+          /** @description project uuid */
+          project_id: string;
+          /** @description alert config uuid */
+          alert_config_id: string;
+        };
+      };
+      /** @description rate of change alert config payload */
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["AlertConfigChange"];
+        };
+      };
+      responses: {
+        /** @description OK */
+        200: {
+          content: {
+            "application/json": components["schemas"]["AlertConfig"];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Internal Server Error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+      };
+    };
+  };
+  "/projects/{project_id}/alert_configs/schedulers": {
     /** creates one alert config */
     post: {
       parameters: {
@@ -3233,15 +3331,72 @@ export interface paths {
       };
     };
   };
-  "/projects/{project_id}/alert_configs/{alert_config_id}": {
-    /** gets a single alert */
-    get: {
+  "/projects/{project_id}/alert_configs/schedulers/{alert_config_id}": {
+    /** updates an existing alert config */
+    put: {
       parameters: {
+        query?: {
+          /** @description api key */
+          key?: string;
+        };
         path: {
           /** @description project uuid */
           project_id: string;
           /** @description alert config uuid */
           alert_config_id: string;
+        };
+      };
+      /** @description alert config payload */
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["AlertConfig"];
+        };
+      };
+      responses: {
+        /** @description OK */
+        200: {
+          content: {
+            "application/json": components["schemas"]["AlertConfig"][];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Internal Server Error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+      };
+    };
+  };
+  "/projects/{project_id}/alert_configs/thresholds": {
+    /** creates one threshold alert config */
+    post: {
+      parameters: {
+        query?: {
+          /** @description api key */
+          key?: string;
+        };
+        path: {
+          /** @description project uuid */
+          project_id: string;
+        };
+      };
+      /** @description threshold alert config payload */
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["AlertConfigThreshold"];
         };
       };
       responses: {
@@ -3271,7 +3426,9 @@ export interface paths {
         };
       };
     };
-    /** updates an existing alert config */
+  };
+  "/projects/{project_id}/alert_configs/thresholds/{alert_config_id}": {
+    /** updates an existing threshold alert config */
     put: {
       parameters: {
         query?: {
@@ -3285,17 +3442,56 @@ export interface paths {
           alert_config_id: string;
         };
       };
-      /** @description alert config payload */
+      /** @description threshold alert config payload */
       requestBody: {
         content: {
-          "application/json": components["schemas"]["AlertConfig"];
+          "application/json": components["schemas"]["AlertConfigThreshold"];
         };
       };
       responses: {
         /** @description OK */
         200: {
           content: {
-            "application/json": components["schemas"]["AlertConfig"][];
+            "application/json": components["schemas"]["AlertConfig"];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Not Found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+        /** @description Internal Server Error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["echo.HTTPError"];
+          };
+        };
+      };
+    };
+  };
+  "/projects/{project_id}/alert_configs/{alert_config_id}": {
+    /** gets a single alert */
+    get: {
+      parameters: {
+        path: {
+          /** @description project uuid */
+          project_id: string;
+          /** @description alert config uuid */
+          alert_config_id: string;
+        };
+      };
+      responses: {
+        /** @description OK */
+        200: {
+          content: {
+            "application/json": components["schemas"]["AlertConfig"];
           };
         };
         /** @description Bad Request */
@@ -7154,6 +7350,16 @@ export interface components {
      *     }
      *   ],
      *   "read": true,
+     *   "timeseries": [
+     *     {
+     *       "timeseries_id": "timeseries_id",
+     *       "timeseries_name": "timeseries_name"
+     *     },
+     *     {
+     *       "timeseries_id": "timeseries_id",
+     *       "timeseries_name": "timeseries_name"
+     *     }
+     *   ],
      *   "alert_config_id": "alert_config_id",
      *   "project_id": "project_id",
      *   "name": "name",
@@ -7173,13 +7379,13 @@ export interface components {
       project_id?: string;
       project_name?: string;
       read?: boolean;
+      timeseries?: components["schemas"]["AlertConfigTimeseries"][];
     };
     /**
      * @example {
      *   "updater_username": "updater_username",
      *   "alert_type_id": "alert_type_id",
      *   "creator_username": "creator_username",
-     *   "remind_interval": "remind_interval",
      *   "body": "body",
      *   "project_name": "project_name",
      *   "alert_type": "alert_type",
@@ -7194,14 +7400,24 @@ export interface components {
      *       "instrument_id": "instrument_id"
      *     }
      *   ],
+     *   "opts": {
+     *     "key": ""
+     *   },
+     *   "timeseries": [
+     *     {
+     *       "timeseries_id": "timeseries_id",
+     *       "timeseries_name": "timeseries_name"
+     *     },
+     *     {
+     *       "timeseries_id": "timeseries_id",
+     *       "timeseries_name": "timeseries_name"
+     *     }
+     *   ],
      *   "project_id": "project_id",
      *   "last_checked": "last_checked",
-     *   "mute_consecutive_alerts": true,
      *   "creator_id": "creator_id",
-     *   "last_reminded": "last_reminded",
      *   "name": "name",
      *   "updater_id": "updater_id",
-     *   "schedule_interval": "schedule_interval",
      *   "id": "id",
      *   "alert_email_subscriptions": [
      *     {
@@ -7218,8 +7434,7 @@ export interface components {
      *     }
      *   ],
      *   "create_date": "create_date",
-     *   "warning_interval": "warning_interval",
-     *   "start_date": "start_date"
+     *   "muted": true
      * }
      */
     AlertConfig: {
@@ -7233,18 +7448,111 @@ export interface components {
       id?: string;
       instruments?: components["schemas"]["AlertConfigInstrument"][];
       last_checked?: string;
-      last_reminded?: string;
-      mute_consecutive_alerts?: boolean;
+      muted?: boolean;
       name?: string;
+      opts?: {
+        [key: string]: unknown;
+      };
       project_id?: string;
       project_name?: string;
-      remind_interval?: string;
-      schedule_interval?: string;
-      start_date?: string;
+      timeseries?: components["schemas"]["AlertConfigTimeseries"][];
       update_date?: string;
       updater_id?: string;
       updater_username?: string;
-      warning_interval?: string;
+    };
+    /**
+     * @example {
+     *   "updater_username": "updater_username",
+     *   "alert_type_id": "alert_type_id",
+     *   "creator_username": "creator_username",
+     *   "body": "body",
+     *   "project_name": "project_name",
+     *   "alert_type": "alert_type",
+     *   "update_date": "update_date",
+     *   "instruments": [
+     *     {
+     *       "instrument_name": "instrument_name",
+     *       "instrument_id": "instrument_id"
+     *     },
+     *     {
+     *       "instrument_name": "instrument_name",
+     *       "instrument_id": "instrument_id"
+     *     }
+     *   ],
+     *   "opts": {
+     *     "warn_rate_of_change": 1.4658129805029452,
+     *     "alert_rate_of_change": 0.8008281904610115,
+     *     "locf_backfill": "locf_backfill",
+     *     "ignore_rate_of_change": 6.027456183070403
+     *   },
+     *   "timeseries": [
+     *     {
+     *       "timeseries_id": "timeseries_id",
+     *       "timeseries_name": "timeseries_name"
+     *     },
+     *     {
+     *       "timeseries_id": "timeseries_id",
+     *       "timeseries_name": "timeseries_name"
+     *     }
+     *   ],
+     *   "project_id": "project_id",
+     *   "last_checked": "last_checked",
+     *   "creator_id": "creator_id",
+     *   "name": "name",
+     *   "updater_id": "updater_id",
+     *   "id": "id",
+     *   "alert_email_subscriptions": [
+     *     {
+     *       "user_type": "user_type",
+     *       "id": "id",
+     *       "email": "email",
+     *       "username": "username"
+     *     },
+     *     {
+     *       "user_type": "user_type",
+     *       "id": "id",
+     *       "email": "email",
+     *       "username": "username"
+     *     }
+     *   ],
+     *   "create_date": "create_date",
+     *   "muted": true
+     * }
+     */
+    AlertConfigChange: {
+      alert_email_subscriptions?: components["schemas"]["EmailAutocompleteResult"][];
+      alert_type?: string;
+      alert_type_id?: string;
+      body?: string;
+      create_date?: string;
+      creator_id?: string;
+      creator_username?: string;
+      id?: string;
+      instruments?: components["schemas"]["AlertConfigInstrument"][];
+      last_checked?: string;
+      muted?: boolean;
+      name?: string;
+      opts?: components["schemas"]["AlertConfigChangeOpts"];
+      project_id?: string;
+      project_name?: string;
+      timeseries?: components["schemas"]["AlertConfigTimeseries"][];
+      update_date?: string;
+      updater_id?: string;
+      updater_username?: string;
+    };
+    /**
+     * @example {
+     *   "warn_rate_of_change": 1.4658129805029452,
+     *   "alert_rate_of_change": 0.8008281904610115,
+     *   "locf_backfill": "locf_backfill",
+     *   "ignore_rate_of_change": 6.027456183070403
+     * }
+     */
+    AlertConfigChangeOpts: {
+      alert_rate_of_change?: number;
+      ignore_rate_of_change?: number;
+      locf_backfill?: string;
+      warn_rate_of_change?: number;
     };
     /**
      * @example {
@@ -7255,6 +7563,119 @@ export interface components {
     AlertConfigInstrument: {
       instrument_id?: string;
       instrument_name?: string;
+    };
+    /**
+     * @example {
+     *   "updater_username": "updater_username",
+     *   "alert_type_id": "alert_type_id",
+     *   "creator_username": "creator_username",
+     *   "body": "body",
+     *   "project_name": "project_name",
+     *   "alert_type": "alert_type",
+     *   "update_date": "update_date",
+     *   "instruments": [
+     *     {
+     *       "instrument_name": "instrument_name",
+     *       "instrument_id": "instrument_id"
+     *     },
+     *     {
+     *       "instrument_name": "instrument_name",
+     *       "instrument_id": "instrument_id"
+     *     }
+     *   ],
+     *   "opts": {
+     *     "alert_low_value": 6.027456183070403,
+     *     "warn_low_value": 7.061401241503109,
+     *     "variance": 5.637376656633329,
+     *     "ignore_low_value": 5.962133916683182,
+     *     "warn_high_value": 2.3021358869347655,
+     *     "alert_high_value": 0.8008281904610115,
+     *     "ignore_high_value": 1.4658129805029452
+     *   },
+     *   "timeseries": [
+     *     {
+     *       "timeseries_id": "timeseries_id",
+     *       "timeseries_name": "timeseries_name"
+     *     },
+     *     {
+     *       "timeseries_id": "timeseries_id",
+     *       "timeseries_name": "timeseries_name"
+     *     }
+     *   ],
+     *   "project_id": "project_id",
+     *   "last_checked": "last_checked",
+     *   "creator_id": "creator_id",
+     *   "name": "name",
+     *   "updater_id": "updater_id",
+     *   "id": "id",
+     *   "alert_email_subscriptions": [
+     *     {
+     *       "user_type": "user_type",
+     *       "id": "id",
+     *       "email": "email",
+     *       "username": "username"
+     *     },
+     *     {
+     *       "user_type": "user_type",
+     *       "id": "id",
+     *       "email": "email",
+     *       "username": "username"
+     *     }
+     *   ],
+     *   "create_date": "create_date",
+     *   "muted": true
+     * }
+     */
+    AlertConfigThreshold: {
+      alert_email_subscriptions?: components["schemas"]["EmailAutocompleteResult"][];
+      alert_type?: string;
+      alert_type_id?: string;
+      body?: string;
+      create_date?: string;
+      creator_id?: string;
+      creator_username?: string;
+      id?: string;
+      instruments?: components["schemas"]["AlertConfigInstrument"][];
+      last_checked?: string;
+      muted?: boolean;
+      name?: string;
+      opts?: components["schemas"]["AlertConfigThresholdOpts"];
+      project_id?: string;
+      project_name?: string;
+      timeseries?: components["schemas"]["AlertConfigTimeseries"][];
+      update_date?: string;
+      updater_id?: string;
+      updater_username?: string;
+    };
+    /**
+     * @example {
+     *   "alert_low_value": 6.027456183070403,
+     *   "warn_low_value": 7.061401241503109,
+     *   "variance": 5.637376656633329,
+     *   "ignore_low_value": 5.962133916683182,
+     *   "warn_high_value": 2.3021358869347655,
+     *   "alert_high_value": 0.8008281904610115,
+     *   "ignore_high_value": 1.4658129805029452
+     * }
+     */
+    AlertConfigThresholdOpts: {
+      alert_high_value?: number;
+      alert_low_value?: number;
+      ignore_high_value?: number;
+      ignore_low_value?: number;
+      variance?: number;
+      warn_high_value?: number;
+      warn_low_value?: number;
+    };
+    /**
+     * @example {
+     *   "timeseries_id": "timeseries_id",
+     *   "timeseries_name": "timeseries_name"
+     * }
+     */
+    AlertConfigTimeseries: {
+      timeseries_id?: string;
+      timeseries_name?: string;
     };
     /**
      * @example {
@@ -7512,7 +7933,7 @@ export interface components {
      *       0,
      *       0
      *     ],
-     *     "status": null
+     *     "status": 6
      *   },
      *   "datalogger_table_id": "datalogger_table_id",
      *   "update_date": "update_date"
@@ -9804,7 +10225,7 @@ export interface components {
      *     0,
      *     0
      *   ],
-     *   "status": null
+     *   "status": 6
      * }
      */
     "pgtype.JSON": {

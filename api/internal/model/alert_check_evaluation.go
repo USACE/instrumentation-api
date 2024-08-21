@@ -8,8 +8,8 @@ import (
 	"github.com/USACE/instrumentation-api/api/internal/email"
 )
 
-type AlertConfigEvaluationCheck struct {
-	AlertConfig AlertConfig
+type AlertConfigSchedulerEvaluationCheck struct {
+	AlertConfig AlertConfigScheduler
 	AlertChecks []*EvaluationCheck
 }
 
@@ -17,23 +17,23 @@ type EvaluationCheck struct {
 	AlertCheck
 }
 
-func (a AlertConfigEvaluationCheck) GetAlertConfig() AlertConfig {
+func (a AlertConfigSchedulerEvaluationCheck) GetAlertConfigScheduler() AlertConfigScheduler {
 	return a.AlertConfig
 }
 
-func (a *AlertConfigEvaluationCheck) SetAlertConfig(ac AlertConfig) {
+func (a *AlertConfigSchedulerEvaluationCheck) SetAlertConfigScheduler(ac AlertConfigScheduler) {
 	a.AlertConfig = ac
 }
 
-func (a AlertConfigEvaluationCheck) GetChecks() []*EvaluationCheck {
+func (a AlertConfigSchedulerEvaluationCheck) GetChecks() []*EvaluationCheck {
 	return a.AlertChecks
 }
 
-func (a *AlertConfigEvaluationCheck) SetChecks(ec []*EvaluationCheck) {
+func (a *AlertConfigSchedulerEvaluationCheck) SetChecks(ec []*EvaluationCheck) {
 	a.AlertChecks = ec
 }
 
-func (acc AlertConfigEvaluationCheck) DoEmail(emailType string, cfg config.AlertCheckConfig) error {
+func (acc AlertConfigSchedulerEvaluationCheck) DoEmail(emailType string, cfg config.AlertCheckSchedulerConfig) error {
 	if emailType == "" {
 		return fmt.Errorf("must provide emailType")
 	}
@@ -58,7 +58,7 @@ func (acc AlertConfigEvaluationCheck) DoEmail(emailType string, cfg config.Alert
 		return err
 	}
 	content.To = acc.AlertConfig.GetToAddresses()
-	if err := email.ConstructAndSendEmail(content, cfg); err != nil {
+	if err := email.ConstructAndSendEmail(content, cfg.EmailConfig); err != nil {
 		return err
 	}
 	return nil

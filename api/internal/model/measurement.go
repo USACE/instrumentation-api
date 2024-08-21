@@ -53,6 +53,11 @@ type Measurement struct {
 	TimeseriesNote
 }
 
+type TimeseriesMeasurement struct {
+	TimeseriesID uuid.UUID `json:"timeseries_id" db:"timeseries_id"`
+	Measurement
+}
+
 // MeasurementLean is the minimalist representation of a timeseries measurement
 // a key value pair where key is the timestamp, value is the measurement { <time.Time>: <float32> }
 type MeasurementLean map[time.Time]float64
