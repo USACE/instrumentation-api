@@ -153,7 +153,6 @@ const listAlertConfigsForTimeseries = `
 	) mm ON true
 	WHERE acts.timeseries_id = input.timeseries_id
 	AND ac.alert_type_id IN (?)
-	AND NOT ac.deleted
 	AND NOT ac.muted
 `
 
