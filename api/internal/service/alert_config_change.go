@@ -72,7 +72,7 @@ func (s alertConfigService) UpdateAlertConfigChange(ctx context.Context, ac mode
 	}
 
 	for _, aci := range ac.Timeseries {
-		if err := qtx.AssignInstrumentToAlertConfig(ctx, ac.ID, aci.TimeseriesID); err != nil {
+		if err := qtx.AssignTimeseriesToAlertConfig(ctx, ac.ID, aci.TimeseriesID); err != nil {
 			return model.AlertConfig{}, err
 		}
 	}
