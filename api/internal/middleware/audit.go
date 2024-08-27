@@ -3,6 +3,7 @@ package middleware
 import (
 	"errors"
 	"strconv"
+	"strings"
 
 	"github.com/USACE/instrumentation-api/api/internal/httperr"
 	"github.com/USACE/instrumentation-api/api/internal/model"
@@ -81,6 +82,11 @@ func (m *mw) AttachClaims(next echo.HandlerFunc) echo.HandlerFunc {
 		if err != nil {
 			return httperr.Forbidden(err)
 		}
+
+		if !strings.HasSuffix(strings.ToLower(claims.Email), "@usace.army.mil") || !strings.HasSuffix(strings.ToLower(claims.Email), "@erdc.dren.mil") {
+			return httperr.Forbidden(err)
+		}
+
 		c.Set("claims", claims)
 
 		return next(c)
