@@ -83,14 +83,7 @@ func (m *mw) AttachClaims(next echo.HandlerFunc) echo.HandlerFunc {
 			return httperr.Forbidden(err)
 		}
 
-		email := strings.ToLower(claims.Email)
-		allowEmail := false
-		for _, suf := range m.cfg.AuthAllowEmailSuffixes {
-			if strings.HasSuffix(email, suf) {
-				allowEmail = true
-			}
-		}
-		if !allowEmail {
+		if email := strings.ToLower(claims.Email); !strings.HasSuffix(email, "usace.army.mil") && !strings.HasSuffix(email, "erdc.dren.mil") && email != "midas@rsgis.dev" {
 			return httperr.Forbidden(errors.New("email forbidden"))
 		}
 
