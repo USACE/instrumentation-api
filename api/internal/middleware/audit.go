@@ -84,11 +84,14 @@ func (m *mw) AttachClaims(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		email := strings.ToLower(claims.Email)
+		allowEmail := false
 		for _, suf := range m.cfg.AuthAllowEmailSuffixes {
 			if strings.HasSuffix(email, suf) {
-				break
+				allowEmail = true
 			}
-			return httperr.Forbidden(err)
+		}
+		if !allowEmail {
+			return httperr.Forbidden(errors.New("email forbidden"))
 		}
 
 		c.Set("claims", claims)
