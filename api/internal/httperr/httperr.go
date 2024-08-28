@@ -58,3 +58,7 @@ func MalformedBody(err error) *echo.HTTPError {
 func MalformedDate(err error) *echo.HTTPError {
 	return Error(http.StatusBadRequest, "malformed date - use RFC3339 format", err)
 }
+
+func ForbiddenRole(err error) *echo.HTTPError {
+	return Error(418, "forbidden role", err)
+}

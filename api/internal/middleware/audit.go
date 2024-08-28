@@ -157,10 +157,10 @@ func (m *mw) IsApplicationAdmin(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		p, ok := c.Get("profile").(model.Profile)
 		if !ok {
-			return httperr.Forbidden(errors.New("could not bind profile from context"))
+			return httperr.Unauthorized(errors.New("could not bind profile from context"))
 		}
 		if !p.IsAdmin {
-			return httperr.Forbidden(errors.New("attempted application admin access failure"))
+			return httperr.ForbiddenRole(errors.New("attempted application admin access failure"))
 		}
 		return next(c)
 	}
@@ -172,18 +172,18 @@ func (m *mw) IsProjectAdmin(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		p, ok := c.Get("profile").(model.Profile)
 		if !ok {
-			return httperr.Forbidden(errors.New("could not bind profile from context"))
+			return httperr.Unauthorized(errors.New("could not bind profile from context"))
 		}
 		if p.IsAdmin {
 			return next(c)
 		}
 		projectID, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
-			return httperr.Forbidden(err)
+			return httperr.MalformedID(err)
 		}
 		authorized, err := m.ProjectRoleService.IsProjectAdmin(c.Request().Context(), p.ID, projectID)
 		if err != nil || !authorized {
-			return httperr.Forbidden(err)
+			return httperr.ForbiddenRole(err)
 		}
 		return next(c)
 	}
@@ -195,18 +195,18 @@ func (m *mw) IsProjectMember(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		p, ok := c.Get("profile").(model.Profile)
 		if !ok {
-			return httperr.Forbidden(errors.New("could not bind profile from context"))
+			return httperr.Unauthorized(errors.New("could not bind profile from context"))
 		}
 		if p.IsAdmin {
 			return next(c)
 		}
 		projectID, err := uuid.Parse(c.Param("project_id"))
 		if err != nil {
-			return httperr.Forbidden(err)
+			return httperr.MalformedID(err)
 		}
 		authorized, err := m.ProjectRoleService.IsProjectMember(c.Request().Context(), p.ID, projectID)
 		if err != nil || !authorized {
-			return httperr.Forbidden(err)
+			return httperr.ForbiddenRole(err)
 		}
 		return next(c)
 	}
