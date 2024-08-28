@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/USACE/instrumentation-api/api/internal/httperr"
@@ -21,6 +22,10 @@ import (
 //	@Security ClaimsOnly
 func (h *ApiHandler) CreateProfile(c echo.Context) error {
 	claims := c.Get("claims").(model.ProfileClaims)
+
+	if !claims.X509Presented {
+		return httperr.Forbidden(errors.New("x509 certificate not presented"))
+	}
 
 	p := model.ProfileInfo{
 		Username:    claims.PreferredUsername,
