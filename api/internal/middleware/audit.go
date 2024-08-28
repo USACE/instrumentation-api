@@ -3,6 +3,7 @@ package middleware
 import (
 	"errors"
 	"strconv"
+	"strings"
 
 	"github.com/USACE/instrumentation-api/api/internal/httperr"
 	"github.com/USACE/instrumentation-api/api/internal/model"
@@ -81,6 +82,18 @@ func (m *mw) AttachClaims(next echo.HandlerFunc) echo.HandlerFunc {
 		if err != nil {
 			return httperr.Forbidden(err)
 		}
+
+		email := strings.ToLower(claims.Email)
+		allowEmail := false
+		for _, suf := range m.cfg.AuthAllowEmailSuffixes {
+			if strings.HasSuffix(email, suf) {
+				allowEmail = true
+			}
+		}
+		if !allowEmail {
+			return httperr.Forbidden(errors.New("email forbidden"))
+		}
+
 		c.Set("claims", claims)
 
 		return next(c)
