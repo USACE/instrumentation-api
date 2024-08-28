@@ -83,7 +83,7 @@ func (m *mw) AttachClaims(next echo.HandlerFunc) echo.HandlerFunc {
 			return httperr.Forbidden(err)
 		}
 
-		if !strings.HasSuffix(strings.ToLower(claims.Email), "@usace.army.mil") || !strings.HasSuffix(strings.ToLower(claims.Email), "@erdc.dren.mil") {
+		if email := strings.ToLower(claims.Email); !strings.HasSuffix(email, "@usace.army.mil") && !strings.HasSuffix(email, "@erdc.dren.mil") {
 			return httperr.Forbidden(err)
 		}
 
