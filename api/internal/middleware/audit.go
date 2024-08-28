@@ -83,7 +83,11 @@ func (m *mw) AttachClaims(next echo.HandlerFunc) echo.HandlerFunc {
 			return httperr.Forbidden(err)
 		}
 
-		if email := strings.ToLower(claims.Email); !strings.HasSuffix(email, "@usace.army.mil") && !strings.HasSuffix(email, "@erdc.dren.mil") {
+		email := strings.ToLower(claims.Email)
+		for _, suf := range m.cfg.AuthAllowEmailSuffixes {
+			if strings.HasSuffix(email, suf) {
+				break
+			}
 			return httperr.Forbidden(err)
 		}
 
