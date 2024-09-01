@@ -6,6 +6,7 @@ on:
     paths:
       - "api/**"
       - "report/**"
+      - "migrate/**"
       - ".github/workflows/api-develop.yml"
 
 jobs:
@@ -39,22 +40,8 @@ jobs:
         if: ${{ success() }}
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          API_ECR_REPOSITORY: midas-api
-          TELEMETRY_ECR_REPOSITORY: midas-telemetry
-          ALERT_ECR_REPOSITORY: midas-alert
-          DCSLOADER_ECR_REPOSITORY: midas-dcs-loader
-          REPORT_ECR_REPOSITORY: midas-report
         run: |
-          docker build --target core -t $ECR_REGISTRY/$API_ECR_REPOSITORY:develop api
-          docker build --target telemetry -t $ECR_REGISTRY/$TELEMETRY_ECR_REPOSITORY:develop api
-          docker build --target alert -t $ECR_REGISTRY/$ALERT_ECR_REPOSITORY:develop api
-          docker build --target dcs-loader -t $ECR_REGISTRY/$DCSLOADER_ECR_REPOSITORY:develop api
-          docker build -t $ECR_REGISTRY/$REPORT_ECR_REPOSITORY:develop report
-          docker push -a $ECR_REGISTRY/$API_ECR_REPOSITORY
-          docker push -a $ECR_REGISTRY/$TELEMETRY_ECR_REPOSITORY
-          docker push -a $ECR_REGISTRY/$ALERT_ECR_REPOSITORY
-          docker push -a $ECR_REGISTRY/$DCSLOADER_ECR_REPOSITORY
-          docker push -a $ECR_REGISTRY/$REPORT_ECR_REPOSITORY
+          ./compose.sh build develop push $ECR_REGISTRY
 
       - name: Logout of Amazon ECR
         if: ${{ always() }}
