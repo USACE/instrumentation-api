@@ -3,10 +3,10 @@ package config
 import "net/smtp"
 
 type SmtpConfig struct {
-	SmtpHost     string `envconfig:"INSTRUMENTATION_SMTP_HOST"`
-	SmtpPort     string `envconfig:"INSTRUMENTATION_SMTP_PORT"`
-	SmtpAuthUser string `envconfig:"INSTRUMENTATION_SMTP_AUTH_USER"`
-	SmtpAuthPass string `envconfig:"INSTRUMENTATION_SMTP_AUTH_PASS"`
+	SmtpHost     string `env:"SMTP_HOST"`
+	SmtpPort     string `env:"SMTP_PORT"`
+	SmtpAuthUser string `env:"SMTP_AUTH_USER"`
+	SmtpAuthPass string `env:"SMTP_AUTH_PASS"`
 }
 
 func (cfg *SmtpConfig) SmtpAuth() smtp.Auth {
