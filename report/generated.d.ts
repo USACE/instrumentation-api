@@ -7512,7 +7512,7 @@ export interface components {
      *       0,
      *       0
      *     ],
-     *     "status": null
+     *     "status": 6
      *   },
      *   "datalogger_table_id": "datalogger_table_id",
      *   "update_date": "update_date"
@@ -9804,7 +9804,7 @@ export interface components {
      *     0,
      *     0
      *   ],
-     *   "status": null
+     *   "status": 6
      * }
      */
     "pgtype.JSON": {

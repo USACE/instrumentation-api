@@ -8686,7 +8686,7 @@ components:
           bytes:
           - 0
           - 0
-          status: null
+          status: 6
         datalogger_table_id: datalogger_table_id
         update_date: update_date
       properties:
@@ -11158,7 +11158,7 @@ components:
         bytes:
         - 0
         - 0
-        status: null
+        status: 6
       properties:
         bytes:
           items:

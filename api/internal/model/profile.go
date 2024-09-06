@@ -25,7 +25,7 @@ type TokenInfoProfile struct {
 
 // ProfileInfo is information necessary to construct a profile
 type ProfileInfo struct {
-	EDIPI       *int   `json:"-" db:"edipi"`
+	EDIPI       int    `json:"-" db:"edipi"`
 	Username    string `json:"username" db:"username"`
 	DisplayName string `json:"display_name" db:"display_name"`
 	Email       string `json:"email" db:"email"`
