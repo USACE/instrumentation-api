@@ -11,11 +11,11 @@ import (
 )
 
 type AWSS3Config struct {
-	AWSS3Endpoint       string `envconfig:"AWS_S3_ENDPOINT"`
-	AWSS3Region         string `envconfig:"AWS_S3_REGION"`
-	AWSS3DisableSSL     bool   `envconfig:"AWS_S3_DISABLE_SSL"`
-	AWSS3ForcePathStyle bool   `envconfig:"AWS_S3_FORCE_PATH_STYLE"`
-	AWSS3Bucket         string `envconfig:"AWS_S3_BUCKET"`
+	AWSS3Endpoint       string `env:"AWS_S3_ENDPOINT"`
+	AWSS3Region         string `env:"AWS_S3_REGION"`
+	AWSS3DisableSSL     bool   `env:"AWS_S3_DISABLE_SSL"`
+	AWSS3ForcePathStyle bool   `env:"AWS_S3_FORCE_PATH_STYLE"`
+	AWSS3Bucket         string `env:"AWS_S3_BUCKET"`
 }
 
 func (cfg *AWSS3Config) S3Config() (aws.Config, []func(*s3.Options)) {
@@ -43,11 +43,11 @@ func (cfg *AWSS3Config) S3Config() (aws.Config, []func(*s3.Options)) {
 }
 
 type AWSSQSConfig struct {
-	AWSSQSRegion      string `envconfig:"AWS_SQS_REGION"`
-	AWSSQSEndpoint    string `envconfig:"AWS_SQS_ENDPOINT"`
-	AWSSQSQueueURL    string `envconfig:"AWS_SQS_QUEUE_URL"`
-	AWSSQSQueueName   string `envconfig:"AWS_SQS_QUEUE_NAME"`
-	AWSSQSQueueNoInit bool   `envconfig:"AWS_SQS_QUEUE_NO_INIT"`
+	AWSSQSRegion      string `env:"AWS_SQS_REGION"`
+	AWSSQSEndpoint    string `env:"AWS_SQS_ENDPOINT"`
+	AWSSQSQueueURL    string `env:"AWS_SQS_QUEUE_URL"`
+	AWSSQSQueueName   string `env:"AWS_SQS_QUEUE_NAME"`
+	AWSSQSQueueNoInit bool   `env:"AWS_SQS_QUEUE_NO_INIT"`
 }
 
 func (cfg *AWSSQSConfig) SQSConfig() (aws.Config, []func(*sqs.Options)) {

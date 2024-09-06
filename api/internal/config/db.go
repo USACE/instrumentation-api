@@ -3,11 +3,11 @@ package config
 import "fmt"
 
 type DBConfig struct {
-	DBUser    string
-	DBPass    string
-	DBName    string
-	DBHost    string
-	DBSSLMode string
+	DBUser    string `env:"DBUSER"`
+	DBPass    string `env:"DBPASS"`
+	DBName    string `env:"DBNAME"`
+	DBHost    string `env:"DBHOST"`
+	DBSSLMode string `env:"DBSSLMODE"`
 }
 
 func (c *DBConfig) ConnStr() string {

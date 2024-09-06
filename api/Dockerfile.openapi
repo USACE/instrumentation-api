@@ -8,7 +8,7 @@ RUN go mod download
 RUN go install github.com/swaggo/swag/cmd/swag@latest
 
 COPY . .
-RUN swag init --ot json --pd -g cmd/core/main.go --parseInternal true --dir internal
+RUN swag init --ot json --pd -g cmd/midas-api/main.go --parseInternal true --dir internal
 RUN find ./docs -type f -exec sed -i '' -e 's/github_com_USACE_instrumentation-api_api_internal_model.//g' {} \;
 
 FROM openapitools/openapi-generator-cli:latest-release AS docgen

@@ -71,11 +71,13 @@ services:
     build:
       args:
         - GO_VERSION=${GO_VERSION:-1.22}
-      context: api
+        - BUILD_TARGET=midas-api
+        - BUILD_TAG=local
       target: builder
+      context: api
       labels:
         - com.host.description=instrumentation-api
-    entrypoint: go run cmd/core/main.go
+    entrypoint: go run cmd/midas-api/main.go
     restart: unless-stopped
     env_file:
       - path: ./env_files/api.env
@@ -91,19 +93,16 @@ services:
         condition: service_healthy
       migrate:
         condition: service_completed_successfully
-      alert:
-        condition: service_started
       elasticmq:
-        condition: service_started
-      report:
         condition: service_started
 
   telemetry:
     build:
       args:
         - GO_VERSION=${GO_VERSION:-1.22}
+        - BUILD_TARGET=midas-telemetry
+        - BUILD_TAG=local
       context: api
-      target: telemetry
     restart: on-failure
     env_file:
       - path: ./env_files/telemetry.env
@@ -120,8 +119,9 @@ services:
     build:
       args:
         - GO_VERSION=${GO_VERSION:-1.22}
+        - BUILD_TARGET=midas-alert
+        - BUILD_TAG=local
       context: api
-      target: alert
     env_file:
       - path: ./env_files/alert.env
         required: true
@@ -135,8 +135,9 @@ services:
     build:
       args:
         - GO_VERSION=${GO_VERSION:-1.22}
+        - BUILD_TARGET=midas-dcs-loader
+        - BUILD_TAG=local
       context: api
-      target: dcs-loader
     env_file:
       - path: ./env_files/dcs-loader.env
         required: true
@@ -207,3 +208,5 @@ services:
     depends_on:
       telemetry:
         condition: service_started
+    profiles:
+      - mock

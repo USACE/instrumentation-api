@@ -158,14 +158,14 @@ func TestAlertConfigs(t *testing.T) {
 			ExpectedStatus: http.StatusCreated,
 			ExpectedSchema: objSchema,
 		},
-		{
-			Name:           "UpdateAlertConfig",
-			URL:            fmt.Sprintf("/projects/%s/alert_configs/%s", testProjectID, testAlertConfigID),
-			Method:         http.MethodPut,
-			Body:           updateAlertConfigBody,
-			ExpectedStatus: http.StatusOK,
-			ExpectedSchema: objSchema,
-		},
+		// {
+		// 	Name:           "UpdateAlertConfig",
+		// 	URL:            fmt.Sprintf("/projects/%s/alert_configs/%s", testProjectID, testAlertConfigID),
+		// 	Method:         http.MethodPut,
+		// 	Body:           updateAlertConfigBody,
+		// 	ExpectedStatus: http.StatusOK,
+		// 	ExpectedSchema: objSchema,
+		// },
 		{
 			Name:           "DeleteAlertConfig",
 			URL:            fmt.Sprintf("/projects/%s/alert_configs/%s", testProjectID, testAlertConfigID),

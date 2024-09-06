@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 14.12 (Debian 14.12-1.pgdg120+1)
--- Dumped by pg_dump version 14.12 (Debian 14.12-1.pgdg120+1)
+-- Dumped from database version 14.13 (Debian 14.13-1.pgdg120+1)
+-- Dumped by pg_dump version 14.13 (Debian 14.13-1.pgdg120+1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -1489,6 +1489,13 @@ f675ebb2-8c9f-4d74-a5b9-ce32818865c4	1719428810190	cwbi	UPDATE	98749fe9-5c8f-4d4
 4380573e-54a8-46f5-a963-800ba182aa7d	1719438849825	cwbi	ACTION	98749fe9-5c8f-4d46-b973-16664c916f0f	fca2fb0d-1434-4ba2-bd0a-699e623e79be	f3fc1dd9-af7b-498a-9435-31da080a37ad	192.168.32.1	users/127cbaee-ee0c-4cd9-92a3-8e8a6f023e4a/reset-password	\N	\N	USER
 76f3fc10-4508-4fb4-adb3-e309d34b41d6	1719438907833	cwbi	UPDATE	98749fe9-5c8f-4d46-b973-16664c916f0f	fca2fb0d-1434-4ba2-bd0a-699e623e79be	f3fc1dd9-af7b-498a-9435-31da080a37ad	192.168.32.1	users/127cbaee-ee0c-4cd9-92a3-8e8a6f023e4a	\N	\N	USER
 312690b1-fc76-493e-8f58-720216ca62ba	1720198846971	cwbi	UPDATE	98749fe9-5c8f-4d46-b973-16664c916f0f	fca2fb0d-1434-4ba2-bd0a-699e623e79be	f3fc1dd9-af7b-498a-9435-31da080a37ad	172.19.0.1	\N	\N	\N	REALM
+0a22a727-bace-489d-93dd-92e846002e27	1725660663733	cwbi	ACTION	98749fe9-5c8f-4d46-b973-16664c916f0f	fca2fb0d-1434-4ba2-bd0a-699e623e79be	f3fc1dd9-af7b-498a-9435-31da080a37ad	172.18.0.1	users/f9b33064-13d0-47d7-8294-fb8f0fac819f/reset-password	\N	\N	USER
+c479b33e-903c-485e-9603-7a0e167f2102	1725660848446	cwbi	UPDATE	98749fe9-5c8f-4d46-b973-16664c916f0f	fca2fb0d-1434-4ba2-bd0a-699e623e79be	f3fc1dd9-af7b-498a-9435-31da080a37ad	172.18.0.1	users/f9b33064-13d0-47d7-8294-fb8f0fac819f	\N	\N	USER
+4cf8efda-6550-4449-9604-054e448f6e49	1725660929672	cwbi	UPDATE	98749fe9-5c8f-4d46-b973-16664c916f0f	fca2fb0d-1434-4ba2-bd0a-699e623e79be	f3fc1dd9-af7b-498a-9435-31da080a37ad	172.18.0.1	users/f9b33064-13d0-47d7-8294-fb8f0fac819f	\N	\N	USER
+566f91fe-d63c-4425-8c7a-45b5ba292660	1725660959411	cwbi	UPDATE	98749fe9-5c8f-4d46-b973-16664c916f0f	fca2fb0d-1434-4ba2-bd0a-699e623e79be	f3fc1dd9-af7b-498a-9435-31da080a37ad	172.18.0.1	users/f9b33064-13d0-47d7-8294-fb8f0fac819f	\N	\N	USER
+bd0538bd-841f-4571-8f57-54d647d6ea73	1725661066497	cwbi	UPDATE	98749fe9-5c8f-4d46-b973-16664c916f0f	fca2fb0d-1434-4ba2-bd0a-699e623e79be	f3fc1dd9-af7b-498a-9435-31da080a37ad	172.18.0.1	users/f9b33064-13d0-47d7-8294-fb8f0fac819f	\N	\N	USER
+2987d079-026a-482d-ab24-2827c0475574	1725661068753	cwbi	UPDATE	98749fe9-5c8f-4d46-b973-16664c916f0f	fca2fb0d-1434-4ba2-bd0a-699e623e79be	f3fc1dd9-af7b-498a-9435-31da080a37ad	172.18.0.1	users/f9b33064-13d0-47d7-8294-fb8f0fac819f	\N	\N	USER
+bf318ee8-4e38-4444-97a9-c20cbd7001cd	1725661279432	cwbi	CREATE	98749fe9-5c8f-4d46-b973-16664c916f0f	fca2fb0d-1434-4ba2-bd0a-699e623e79be	f3fc1dd9-af7b-498a-9435-31da080a37ad	172.18.0.1	clients/86b97bc5-1afd-40b2-ad62-bddaaaf321c7/protocol-mappers/models/cfe591a3-b08f-408b-90b7-a00eb96388d2	\N	\N	PROTOCOL_MAPPER
 \.
 
 
@@ -2256,7 +2263,7 @@ COPY keycloak.credential (id, salt, type, user_id, created_date, user_label, sec
 08c1dcd8-c7da-4851-b18d-3fd2fe5905ef	\N	password	f3fc1dd9-af7b-498a-9435-31da080a37ad	1719326096351	\N	{"value":"fNSqW2YM3jIEBSKVk6zogGGIerlNBxlII/d0jCJmmIgahPKX3CmI0GKBbz2arwR5O6a4DulX0v6KGja33O3Y9w==","salt":"lrvDVTkV44mlKYR0H7ahKQ==","additionalParameters":{}}	{"hashIterations":27500,"algorithm":"pbkdf2-sha256","additionalParameters":{}}	10
 eb68ec6c-b233-467a-83de-f8907db05bf8	\N	password	f8dcafea-243e-4b89-8d7d-fa01918130f4	1719327627809	My password	{"value":"rS7hFhgurbYTqf2xOl21TK+ma64Za4bGekInBymZql67Fw9onWH8ghYQrIXhI/Px7RtIdevaAwXtGEnxGBEtpg==","salt":"E4/Bwx3A3YV1wur9bAI4nQ==","additionalParameters":{}}	{"hashIterations":27500,"algorithm":"pbkdf2-sha256","additionalParameters":{}}	10
 c0ddc8fb-b335-4908-979c-170956e5dfc1	\N	password	127cbaee-ee0c-4cd9-92a3-8e8a6f023e4a	1719438849822	My password	{"value":"cmmEQr11CDETApkFo92Ufi0h+qPfe2Rz34N6RNgdVYaOYZOcAwldY6d6M6spufpuGc62vGhZ0NBKlAR5/u8AHw==","salt":"oPBgKF5zunaSWRspE2bGVw==","additionalParameters":{}}	{"hashIterations":27500,"algorithm":"pbkdf2-sha256","additionalParameters":{}}	10
-eea54938-e813-43ff-81b6-697354de1a11	\N	password	f9b33064-13d0-47d7-8294-fb8f0fac819f	1720198987674	\N	{"value":"41Cn7baSFQjReOlJjBFVUSMnS5LlXopOMbXG4BZ7JcqjKT9bEdrLHpgDcLJdFS6VABZunx/WaVeyb1jLaO2GAg==","salt":"eg9MBjHhyQdRGH/Pask4jw==","additionalParameters":{}}	{"hashIterations":27500,"algorithm":"pbkdf2-sha256","additionalParameters":{}}	10
+eea54938-e813-43ff-81b6-697354de1a11	\N	password	f9b33064-13d0-47d7-8294-fb8f0fac819f	1725660663731	My password	{"value":"ShYFD1RRiDgpcByhjWiOReh5+CQdQCt8yKGSwC7xKecM+A/dQ/gKwDZSndQjxIkJGRPmLXrIsS7N6CvTFUsHSQ==","salt":"iDVbMFzwwDYr4KkMfG74Vg==","additionalParameters":{}}	{"hashIterations":27500,"algorithm":"pbkdf2-sha256","additionalParameters":{}}	10
 \.
 
 
@@ -2640,6 +2647,21 @@ c0076dcf-bbc0-4849-9ce3-598734d943a6	midas	{"auth_method":"openid-connect","auth
 5d2740f0-42fe-449c-8f33-b6385979287f	midas	{"auth_method":"openid-connect","auth_type":"code","register_method":"form","last_name":"TestUser","redirect_uri":"http://localhost:3000/blue-water-dam-example-project#dashboard","first_name":"New","code_id":"deb471d7-7554-4cf6-8b9c-b04d87161ca9","email":"thisisatestemail@fake.usace.army.mil","username":"aaaaaaa"}	\N	172.19.0.1	cwbi	\N	1720198987621	REGISTER	f9b33064-13d0-47d7-8294-fb8f0fac819f
 3720d91a-3c15-4480-acfc-84d0a274aa29	midas	{"auth_method":"openid-connect","auth_type":"code","redirect_uri":"http://localhost:3000/blue-water-dam-example-project#dashboard","consent":"no_consent_required","code_id":"deb471d7-7554-4cf6-8b9c-b04d87161ca9","username":"aaaaaaa"}	\N	172.19.0.1	cwbi	deb471d7-7554-4cf6-8b9c-b04d87161ca9	1720198987679	LOGIN	f9b33064-13d0-47d7-8294-fb8f0fac819f
 70ab02ce-946a-4b80-a479-9d4ff5fc48ac	midas	{"token_id":"00c0879f-dce7-464e-9872-bb55d1f5ecd4","grant_type":"authorization_code","refresh_token_type":"Refresh","scope":"openid email profile","refresh_token_id":"3cfa6bbd-62f6-4a1c-8a24-bb6e53869f5d","code_id":"deb471d7-7554-4cf6-8b9c-b04d87161ca9","client_auth_method":"client-secret"}	\N	172.19.0.1	cwbi	deb471d7-7554-4cf6-8b9c-b04d87161ca9	1720198988530	CODE_TO_TOKEN	f9b33064-13d0-47d7-8294-fb8f0fac819f
+600f5a9b-ac3e-4173-8194-e8f107bb4879	midas	{"auth_method":"openid-connect","auth_type":"code","redirect_uri":"http://localhost:3000/","consent":"no_consent_required","code_id":"45ae96a2-cc5e-4ea6-98fd-5e49b80fc732","username":"aaaaaaa"}	\N	172.18.0.1	cwbi	45ae96a2-cc5e-4ea6-98fd-5e49b80fc732	1725660672145	LOGIN	f9b33064-13d0-47d7-8294-fb8f0fac819f
+ff806a10-71c2-4643-a4b4-a7dee6a778d9	midas	{"token_id":"f40f432c-dd10-4e49-a2ce-1b5c97bc3ace","grant_type":"authorization_code","refresh_token_type":"Refresh","scope":"openid email profile","refresh_token_id":"e774d295-8c4d-4fe2-b656-a06e20a40265","code_id":"45ae96a2-cc5e-4ea6-98fd-5e49b80fc732","client_auth_method":"client-secret"}	\N	172.18.0.1	cwbi	45ae96a2-cc5e-4ea6-98fd-5e49b80fc732	1725660672854	CODE_TO_TOKEN	f9b33064-13d0-47d7-8294-fb8f0fac819f
+e643e506-220c-406d-af63-fc9bf5f4efb8	\N	{"redirect_uri":"http://localhost:3000/"}	\N	172.18.0.1	cwbi	45ae96a2-cc5e-4ea6-98fd-5e49b80fc732	1725660711439	LOGOUT	f9b33064-13d0-47d7-8294-fb8f0fac819f
+93492a81-6869-4550-9aba-7c3d3bb50258	midas	{"auth_method":"openid-connect","auth_type":"code","redirect_uri":"http://localhost:3000/","consent":"no_consent_required","code_id":"a8082c75-6e89-48b3-b250-d59fc74706cf","username":"aaaaaaa"}	\N	172.18.0.1	cwbi	a8082c75-6e89-48b3-b250-d59fc74706cf	1725660734079	LOGIN	f9b33064-13d0-47d7-8294-fb8f0fac819f
+799a2f88-9f00-4e68-b5f3-e30ca94b61a5	midas	{"token_id":"8b70993b-3cc8-47de-b24d-1a2cd8053802","grant_type":"authorization_code","refresh_token_type":"Refresh","scope":"openid email profile","refresh_token_id":"b996467b-9b2d-4c8d-a6ec-bc381fecd90a","code_id":"a8082c75-6e89-48b3-b250-d59fc74706cf","client_auth_method":"client-secret"}	\N	172.18.0.1	cwbi	a8082c75-6e89-48b3-b250-d59fc74706cf	1725660735065	CODE_TO_TOKEN	f9b33064-13d0-47d7-8294-fb8f0fac819f
+588caf08-9a52-48af-a4dd-2dac3fc9818f	midas	{"auth_method":"openid-connect","auth_type":"code","response_type":"code","redirect_uri":"http://localhost:3000/silent-check-sso.html","consent":"no_consent_required","code_id":"a8082c75-6e89-48b3-b250-d59fc74706cf","response_mode":"fragment","username":"newcacuser"}	\N	172.18.0.1	cwbi	a8082c75-6e89-48b3-b250-d59fc74706cf	1725661086020	LOGIN	f9b33064-13d0-47d7-8294-fb8f0fac819f
+3deddde8-26f2-4fd3-a520-ea252e117aec	midas	{"token_id":"bee50885-69e6-445d-9187-d256d092e54a","grant_type":"authorization_code","refresh_token_type":"Refresh","scope":"openid email profile","refresh_token_id":"bb3746ef-efde-466a-946e-61099f269bef","code_id":"a8082c75-6e89-48b3-b250-d59fc74706cf","client_auth_method":"client-secret"}	\N	172.18.0.1	cwbi	a8082c75-6e89-48b3-b250-d59fc74706cf	1725661086052	CODE_TO_TOKEN	f9b33064-13d0-47d7-8294-fb8f0fac819f
+1b039f6d-7999-47d3-9467-8c0391b5d9d7	\N	{"redirect_uri":"http://localhost:3000/"}	\N	172.18.0.1	cwbi	a8082c75-6e89-48b3-b250-d59fc74706cf	1725661092160	LOGOUT	f9b33064-13d0-47d7-8294-fb8f0fac819f
+6b2038e5-9a02-4f7e-a2ee-c7ad122d562f	midas	{"auth_method":"openid-connect","auth_type":"code","redirect_uri":"http://localhost:3000/","consent":"no_consent_required","code_id":"5bffeee7-eca2-48c7-884d-038c0f4fb430","username":"newcacuser"}	\N	172.18.0.1	cwbi	5bffeee7-eca2-48c7-884d-038c0f4fb430	1725661113341	LOGIN	f9b33064-13d0-47d7-8294-fb8f0fac819f
+85015ec3-ad27-4393-81de-23dbc37c6684	midas	{"token_id":"378c64d8-3c1d-4f41-8804-205c88dae06f","grant_type":"authorization_code","refresh_token_type":"Refresh","scope":"openid email profile","refresh_token_id":"a9509f19-d319-4776-a80c-dabded84568c","code_id":"5bffeee7-eca2-48c7-884d-038c0f4fb430","client_auth_method":"client-secret"}	\N	172.18.0.1	cwbi	5bffeee7-eca2-48c7-884d-038c0f4fb430	1725661114328	CODE_TO_TOKEN	f9b33064-13d0-47d7-8294-fb8f0fac819f
+48ea06f7-2daa-4259-8e59-3db4ed880a21	\N	{"redirect_uri":"http://localhost:3000/"}	\N	172.18.0.1	cwbi	5bffeee7-eca2-48c7-884d-038c0f4fb430	1725661324686	LOGOUT	f9b33064-13d0-47d7-8294-fb8f0fac819f
+6d652666-6561-47a8-a20a-c0ef91f24d6d	midas	{"auth_method":"openid-connect","auth_type":"code","redirect_uri":"http://localhost:3000/","consent":"no_consent_required","code_id":"3accb510-2111-454c-b0fa-9a1543908453","username":"newcacuser"}	\N	172.18.0.1	cwbi	3accb510-2111-454c-b0fa-9a1543908453	1725661342555	LOGIN	f9b33064-13d0-47d7-8294-fb8f0fac819f
+4d3f6de2-7483-4316-a3a3-eaf4f3811d29	midas	{"token_id":"e281bb09-e205-4ff3-9d67-0e0879c43e1f","grant_type":"authorization_code","refresh_token_type":"Refresh","scope":"openid email profile","refresh_token_id":"3a700787-fd9e-4870-ac86-bb6ec4c7cc8c","code_id":"3accb510-2111-454c-b0fa-9a1543908453","client_auth_method":"client-secret"}	\N	172.18.0.1	cwbi	3accb510-2111-454c-b0fa-9a1543908453	1725661343568	CODE_TO_TOKEN	f9b33064-13d0-47d7-8294-fb8f0fac819f
+d9ae2c13-7591-42fd-95b0-4fd375bfdfa0	midas	{"auth_method":"openid-connect","auth_type":"code","response_type":"code","redirect_uri":"http://localhost:3000/silent-check-sso.html","consent":"no_consent_required","code_id":"3accb510-2111-454c-b0fa-9a1543908453","response_mode":"fragment","username":"newcacuser"}	\N	172.18.0.1	cwbi	3accb510-2111-454c-b0fa-9a1543908453	1725666012850	LOGIN	f9b33064-13d0-47d7-8294-fb8f0fac819f
+6e638b6e-6675-4407-b5af-65daed76ecc1	midas	{"token_id":"b8b2c09f-ed7b-44ef-b3c4-81a9d172a286","grant_type":"authorization_code","refresh_token_type":"Refresh","scope":"openid email profile","refresh_token_id":"0af5180f-834b-4ac7-9922-b4034a960631","code_id":"3accb510-2111-454c-b0fa-9a1543908453","client_auth_method":"client-secret"}	\N	172.18.0.1	cwbi	3accb510-2111-454c-b0fa-9a1543908453	1725666012886	CODE_TO_TOKEN	f9b33064-13d0-47d7-8294-fb8f0fac819f
 \.
 
 
@@ -2963,6 +2985,7 @@ ab6ba770-fdab-462e-968a-41f8212f79e6	cacUID	openid-connect	oidc-usermodel-attrib
 e4e59817-cd1e-4b91-a6be-427e1e8c3093	locale	openid-connect	oidc-usermodel-attribute-mapper	38f6b360-c12e-4e69-8b63-43ab4910e344	\N
 d6680f62-2652-47d0-9b6c-6b7eae6d8c34	cacUID	openid-connect	oidc-usermodel-attribute-mapper	86b97bc5-1afd-40b2-ad62-bddaaaf321c7	\N
 1e3b6b8c-e208-4ef5-bc46-02ab17db4808	subjectDN	openid-connect	oidc-usermodel-attribute-mapper	86b97bc5-1afd-40b2-ad62-bddaaaf321c7	\N
+cfe591a3-b08f-408b-90b7-a00eb96388d2	x509_presented	openid-connect	oidc-usermodel-attribute-mapper	86b97bc5-1afd-40b2-ad62-bddaaaf321c7	\N
 \.
 
 
@@ -3311,6 +3334,13 @@ d6680f62-2652-47d0-9b6c-6b7eae6d8c34	String	jsonType.label
 1e3b6b8c-e208-4ef5-bc46-02ab17db4808	true	id.token.claim
 1e3b6b8c-e208-4ef5-bc46-02ab17db4808	true	access.token.claim
 1e3b6b8c-e208-4ef5-bc46-02ab17db4808	subjectDN	claim.name
+cfe591a3-b08f-408b-90b7-a00eb96388d2	false	aggregate.attrs
+cfe591a3-b08f-408b-90b7-a00eb96388d2	true	userinfo.token.claim
+cfe591a3-b08f-408b-90b7-a00eb96388d2	false	multivalued
+cfe591a3-b08f-408b-90b7-a00eb96388d2	x509_presented	user.attribute
+cfe591a3-b08f-408b-90b7-a00eb96388d2	true	id.token.claim
+cfe591a3-b08f-408b-90b7-a00eb96388d2	true	access.token.claim
+cfe591a3-b08f-408b-90b7-a00eb96388d2	x509_presented	claim.name
 \.
 
 
@@ -3702,6 +3732,8 @@ COPY keycloak.scope_policy (scope_id, policy_id) FROM stdin;
 COPY keycloak.user_attribute (name, value, user_id, id) FROM stdin;
 cacUID	2	f8dcafea-243e-4b89-8d7d-fa01918130f4	4ec925d4-0a48-422b-9922-d764e3f2361f
 subjectDN	lambert.anthony.m.2	f8dcafea-243e-4b89-8d7d-fa01918130f4	29137655-cad9-4d5f-b9a4-19427e42e43b
+cacUID	54321	f9b33064-13d0-47d7-8294-fb8f0fac819f	4ec94757-c452-4065-9cad-1b052e285bf5
+x509_presented	true	f9b33064-13d0-47d7-8294-fb8f0fac819f	d7f8c6eb-0eeb-4843-b2c2-a0ce9147df84
 \.
 
 
@@ -3729,7 +3761,7 @@ COPY keycloak.user_entity (id, email, email_constraint, email_verified, enabled,
 f3fc1dd9-af7b-498a-9435-31da080a37ad	\N	47fc5432-cc32-4471-ae60-5d638d6b7fb4	f	t	\N	\N	\N	98749fe9-5c8f-4d46-b973-16664c916f0f	admin	1719326096269	\N	0
 f8dcafea-243e-4b89-8d7d-fa01918130f4	anthony.m.lambert@fake.usace.army.mil	e2b90b7a-7b44-4982-aa44-c4ca043efb03	t	t	\N	Anthony	Lambert	cwbi	test	1719327608101	\N	0
 127cbaee-ee0c-4cd9-92a3-8e8a6f023e4a	molly.rutherford@fake.usace.army.mil	7a01ff11-105d-40c5-9818-f70563fa8256	t	t	\N	Molly	Rutherford	cwbi	nocactest	1719438836112	\N	0
-f9b33064-13d0-47d7-8294-fb8f0fac819f	thisisatestemail@fake.usace.army.mil	563e0f8e-b5d3-446b-8831-29d36470c702	f	t	\N	New	TestUser	cwbi	aaaaaaa	1720198987614	\N	0
+f9b33064-13d0-47d7-8294-fb8f0fac819f	testuser.new@fake.usace.army.mil	4cecef9f-c7b4-47f3-9f7d-2045c6bdb234	t	t	\N	New	TestUser	cwbi	newcacuser	1720198987614	\N	0
 \.
 
 
