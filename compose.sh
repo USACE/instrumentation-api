@@ -5,7 +5,7 @@ set -Eeo pipefail
 parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 cd "$parent_path"
 
-COMPOSECMD="docker-compose -f docker-compose.yml"
+COMPOSECMD="docker compose -f docker-compose.yml"
 
 mkdocs() {
     (
@@ -114,7 +114,7 @@ elif [ "$1" = "clean" ]; then
 
 
 elif [ "$1" = "test" ]; then
-    docker-compose build
+    docker compose build
     shift
 
     TEARDOWN=false
@@ -136,13 +136,13 @@ elif [ "$1" = "test" ]; then
     GOCMD="go test ${REST_ARGS[@]} github.com/USACE/instrumentation-api/api/internal/handler"
 
     if [ "$REPORT" = true ]; then
-        docker-compose run -e INSTRUMENTATION_AUTH_JWT_MOCKED=true --entrypoint="$GOCMD" api > $(pwd)/test.log
+        docker compose run -e INSTRUMENTATION_AUTH_JWT_MOCKED=true --entrypoint="$GOCMD" api > $(pwd)/test.log
     else
-        docker-compose run -e INSTRUMENTATION_AUTH_JWT_MOCKED=true --entrypoint="$GOCMD" api
+        docker compose run -e INSTRUMENTATION_AUTH_JWT_MOCKED=true --entrypoint="$GOCMD" api
     fi
 
     if [ $TEARDOWN = true ]; then
-        docker-compose --profile=mock down -v
+        docker compose --profile=mock down -v
     fi
 
 
