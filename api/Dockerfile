@@ -14,7 +14,7 @@ ENV CGO_ENABLED=0
 COPY go.* ./
 RUN go mod download
 
-COPY . .
+COPY cmd/ internal/ ./
 RUN --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/go/pkg \
     GOOS=linux GOARCH=${GOARCH} \
