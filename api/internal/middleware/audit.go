@@ -18,9 +18,8 @@ func mapClaims(user *jwt.Token) (model.ProfileClaims, error) {
 		return model.ProfileClaims{}, errors.New("unable to map claims")
 	}
 
-	// common claims, required
-	pu, ok := claims["preferred_username"].(string)
-	if !ok || pu == "" {
+	preferredUsername, ok := claims["preferred_username"].(string)
+	if !ok || preferredUsername == "" {
 		return model.ProfileClaims{}, errors.New("error parsing token claims: email")
 	}
 	email, ok := claims["email"].(string)
@@ -32,15 +31,14 @@ func mapClaims(user *jwt.Token) (model.ProfileClaims, error) {
 		return model.ProfileClaims{}, errors.New("error parsing token claims: name")
 	}
 
-	// cac-specific claims, for cac users only
 	dnClaim, exists := claims["subjectDN"]
-	var dn *string
+	var subjectDN *string
 	if exists && dnClaim != nil {
 		dnStr, ok := dnClaim.(string)
 		if !ok {
 			return model.ProfileClaims{}, errors.New("error parsing token claims: subjectDN")
 		}
-		dn = &dnStr
+		subjectDN = &dnStr
 	}
 
 	cacUIDClaim, exists := claims["cacUID"]
@@ -53,16 +51,19 @@ func mapClaims(user *jwt.Token) (model.ProfileClaims, error) {
 		cacUID = &cacUIDClaims
 	}
 
-	// x509 coerces to false for nil when second param returned
-	x509, _ := claims["x509_presented"].(bool)
+	x509, _ := claims["x509_presented"].(string)
+	x509Presented := false
+	if strings.ToLower(x509) == "true" {
+		x509Presented = true
+	}
 
 	return model.ProfileClaims{
-		PreferredUsername: pu,
+		PreferredUsername: preferredUsername,
 		Name:              name,
 		Email:             email,
-		SubjectDN:         dn,
+		SubjectDN:         subjectDN,
 		CacUID:            cacUID,
-		X509Presented:     x509,
+		X509Presented:     x509Presented,
 	}, nil
 }
 

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"database/sql"
 	"errors"
 	"net/http"
 
@@ -24,14 +25,17 @@ func (h *ApiHandler) CreateProfile(c echo.Context) error {
 	claims := c.Get("claims").(model.ProfileClaims)
 
 	if !claims.X509Presented {
-		return httperr.Forbidden(errors.New("x509 certificate not presented"))
+		return httperr.Forbidden(errors.New("invalid value for claim x509_presented"))
+	}
+	if claims.CacUID == nil {
+		return httperr.Forbidden(errors.New("unable to create profile; cacUID claim is nil"))
 	}
 
 	p := model.ProfileInfo{
 		Username:    claims.PreferredUsername,
 		DisplayName: claims.Name,
 		Email:       claims.Email,
-		EDIPI:       claims.CacUID,
+		EDIPI:       *claims.CacUID,
 	}
 
 	pNew, err := h.ProfileService.CreateProfile(c.Request().Context(), p)
@@ -58,6 +62,9 @@ func (h *ApiHandler) GetMyProfile(c echo.Context) error {
 
 	p, err := h.ProfileService.GetProfileWithTokensForClaims(ctx, claims)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return h.CreateProfile(c)
+		}
 		return httperr.InternalServerError(err)
 	}
 
