@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"strings"
 
@@ -37,19 +36,12 @@ func (s profileService) GetProfileWithTokensForClaims(ctx context.Context, claim
 	var err error
 	if claims.CacUID != nil {
 		p, err = s.GetProfileWithTokensForEDIPI(ctx, *claims.CacUID)
-		if err != nil {
-			return model.Profile{}, err
-		}
 	} else {
 		p, err = s.GetProfileWithTokensForEmail(ctx, claims.Email)
-		if err != nil {
-			if errors.Is(err, sql.ErrNoRows) {
-				return s.GetProfileWithTokensForUsername(ctx, claims.PreferredUsername)
-			}
-			return model.Profile{}, err
-		}
 	}
-
+	if err != nil {
+		return model.Profile{}, err
+	}
 	return p, nil
 }
 
@@ -135,19 +127,6 @@ func (s profileService) UpdateProfileForClaims(ctx context.Context, p model.Prof
 	if strings.ToLower(p.Email) == strings.ToLower(claims.Email) && !claimsMatchProfile {
 		if err := s.UpdateProfileForEmail(ctx, claims.Email, model.ProfileInfo{
 			Username:    claims.PreferredUsername,
-			DisplayName: claims.Name,
-		}); err != nil {
-			return p, err
-		}
-		p.Username = claims.PreferredUsername
-		p.DisplayName = claims.Name
-
-		return p, nil
-	}
-
-	if p.Username == claims.PreferredUsername && !claimsMatchProfile {
-		if err := s.UpdateProfileForUsername(ctx, claims.PreferredUsername, model.ProfileInfo{
-			Email:       claims.Email,
 			DisplayName: claims.Name,
 		}); err != nil {
 			return p, err
