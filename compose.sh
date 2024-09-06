@@ -78,15 +78,24 @@ elif [ "$1" = "build" ]; then
             exit 1
         fi
 
-        for IMAGE in midas-api midas-telemetry midas-alert midas-dcs-loader midas-sql
+        declare -a REGISTRIES=("midas-api" "midas-telemetry" "midas-alert" "midas-dcs-loader" "midas-sql")
+
+        # tag
+        for IMAGE in "${REGISTRIES[@]}"
         do
             docker tag $IMAGE:"$2" $4/$IMAGE:"$2"
-            docker push -a $4/$IMAGE:"$2"
         done
-
         if [ "$2" = "develop" ]; then
             docker tag midas-report:"$2" $4/midas-report:"$2"
-            docker push -a $4/midas-report:"$2"
+        fi
+
+        # push
+        for IMAGE in "${REGISTRIES[@]}"
+        do
+            docker push $4/$IMAGE:"$2"
+        done
+        if [ "$2" = "develop" ]; then
+            docker push $4/midas-report:"$2"
         fi
     fi
 
