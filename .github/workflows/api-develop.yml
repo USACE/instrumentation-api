@@ -4,6 +4,7 @@ on:
   push:
     branches: [develop]
     paths:
+      - "compose.sh"
       - "api/**"
       - "report/**"
       - "migrate/**"
