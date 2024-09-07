@@ -34,8 +34,6 @@ elif [ "$1" = "up" ]; then
     
 
 elif [ "$1" = "build" ]; then
-    mkdocs -q
-
     if [ "$2" = "local" ] || [ "$2" = "develop" ] || [ "$2" = "test" ] || [ "$2" = "prod" ]; then
         SCRATCH_BASE_IMAGE=scratch
         ALPINE_BASE_IMAGE=alpine:3.19
