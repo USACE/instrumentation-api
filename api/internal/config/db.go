@@ -1,6 +1,8 @@
 package config
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type DBConfig struct {
 	DBUser    string `env:"DBUSER"`
@@ -10,6 +12,7 @@ type DBConfig struct {
 	DBSSLMode string `env:"DBSSLMODE"`
 }
 
-func (c *DBConfig) ConnStr() string {
-	return fmt.Sprintf("user=%s password=%s dbname=%s host=%s sslmode=%s", c.DBUser, c.DBPass, c.DBName, c.DBHost, c.DBSSLMode)
+func (cfg *DBConfig) ConnStr() string {
+	s := fmt.Sprintf("user=%s password=%s dbname=%s host=%s sslmode=%s", cfg.DBUser, cfg.DBPass, cfg.DBName, cfg.DBHost, cfg.DBSSLMode)
+	return s
 }

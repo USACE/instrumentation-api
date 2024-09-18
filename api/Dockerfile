@@ -1,5 +1,5 @@
 ARG BASE_IMAGE=scratch
-ARG GO_VERSION=1.22
+ARG GO_VERSION=1.23
 
 FROM golang:${GO_VERSION}-alpine AS builder
 
@@ -14,11 +14,11 @@ ENV CGO_ENABLED=0
 COPY go.* ./
 RUN go mod download
 
-COPY cmd/ internal/ ./
+COPY . .
 RUN --mount=type=cache,target=/root/.cache/go-build \
-    --mount=type=cache,target=/go/pkg \
-    GOOS=linux GOARCH=${GOARCH} \
-    go build -ldflags="-w -s" -o /go/bin/app ./cmd/${BUILD_TARGET}
+	--mount=type=cache,target=/go/pkg \
+	GOOS=linux GOARCH=${GOARCH} \
+	go build -ldflags="-w -s" -o /go/bin/app ./cmd/${BUILD_TARGET}
 
 FROM ${BASE_IMAGE}
 ARG BUILD_TAG
