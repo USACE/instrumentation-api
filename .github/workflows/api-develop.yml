@@ -30,7 +30,7 @@ jobs:
   
       - name: Run Tests
         run: |
-          cp .example.env .env
+          cp .env.example .env
           ./compose.sh test
 
       - name: Login to Amazon ECR
