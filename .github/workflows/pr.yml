@@ -18,4 +18,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Run Tests
-        run: ./compose.sh test
+        run: |
+          cp .example.env .env
+          ./compose.sh test
