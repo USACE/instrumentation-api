@@ -16,7 +16,37 @@ func main() {
 	mcfg := config.NewMigrateConfig()
 
 	seedLocal := strings.Contains(mcfg.FileLocations, "filesystem:/flyway/sql/local")
-	dbUrl := strings.TrimPrefix(mcfg.DBUrl, "jdbc:postgresql://")
+	dbConfig := migrateDBConfig(mcfg)
+
+	var cmd string
+
+	if len(os.Args) > 2 {
+		log.Fatal("too many arguments")
+	}
+
+	if len(os.Args) > 1 {
+		switch strings.ToLower(os.Args[1]) {
+		case "migrate":
+			cmd = "migrate"
+		case "init":
+			cmd = "init"
+		default:
+			log.Fatalf("invalid argument %s", os.Args[1])
+		}
+	}
+
+	migrator := migrate.NewMigrationService(&migrate.Config{
+		Init:          cmd == "init",
+		DBConfig:      dbConfig,
+		SeedLocal:     seedLocal,
+		MigrationsDir: migrations.MigrationsDir,
+	})
+
+	migrator.Run(context.Background())
+}
+
+func migrateDBConfig(cfg *config.MigrateConfig) migrate.DBConfig {
+	dbUrl := strings.TrimPrefix(cfg.DBUrl, "jdbc:postgresql://")
 
 	dd := strings.Split(dbUrl, "/")
 
@@ -46,37 +76,13 @@ func main() {
 		log.Fatal("invalid database url (database name)")
 	}
 
-	var cmd string
-
-	if len(os.Args) > 2 {
-		log.Fatal("too many arguments")
+	return migrate.DBConfig{
+		DBUser:          cfg.DBUser,
+		DBPass:          cfg.DBPassword,
+		DBName:          dbName,
+		DBHost:          dbHost,
+		DBPort:          dbPort,
+		DBSSLMode:       "disable",
+		DatabaseSchemas: []string{"midas", "public"},
 	}
-
-	if len(os.Args) > 1 {
-		switch strings.ToLower(os.Args[1]) {
-		case "migrate":
-			cmd = "migrate"
-		case "init":
-			cmd = "init"
-		default:
-			log.Fatalf("invalid argument %s", os.Args[1])
-		}
-	}
-
-	migrator := migrate.NewMigrationService(&migrate.Config{
-		Init:      cmd == "init",
-		SeedLocal: seedLocal,
-		DBConfig: migrate.DBConfig{
-			DBUser:          mcfg.DBUser,
-			DBPass:          mcfg.DBPassword,
-			DBName:          dbName,
-			DBHost:          dbHost,
-			DBPort:          dbPort,
-			DBSSLMode:       "disable",
-			DatabaseSchemas: []string{"midas", "public"},
-		},
-		MigrationsDir: migrations.MigrationsDir,
-	})
-
-	migrator.Run(context.Background())
 }
