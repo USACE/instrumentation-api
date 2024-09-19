@@ -46,7 +46,7 @@ func main() {
 	}
 
 	migrator := migrate.NewMigrationService(&migrate.Config{
-		Init:      false,
+		Init:      true,
 		SeedLocal: seedLocal,
 		DBConfig: migrate.DBConfig{
 			DBUser:          mcfg.DBUser,
