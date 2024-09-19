@@ -46,7 +46,7 @@ elif [ "$1" = "build" ]; then
             AMD64_TARGET_PLATFORM=true
         fi
 
-        for BUILD_TARGET in midas-api midas-telemetry midas-alert midas-dcs-loader
+        for BUILD_TARGET in midas-api midas-sql midas-telemetry midas-alert midas-dcs-loader
         do
           docker build \
             ${AMD64_TARGET_PLATFORM:+--platform=linux/amd64} \
@@ -60,11 +60,6 @@ elif [ "$1" = "build" ]; then
         docker build \
           --build-arg="BASE_IMAGE=${ALPINE_BASE_IMAGE}" \
           -t midas-report:$2 report
-
-        docker build \
-          ${AMD64_TARGET_PLATFORM:+--platform=linux/amd64} \
-          --build-arg="BASE_IMAGE=${FLYWAY_BASE_IMAGE}" \
-          -t midas-sql:$2 migrate
     else
         echo -e "usage:\n\t./compose.sh build [local,develop,test,prod]"
         exit 1

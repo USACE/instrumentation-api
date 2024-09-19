@@ -7,7 +7,6 @@ on:
       - "compose.sh"
       - "api/**"
       - "report/**"
-      - "migrate/**"
       - ".github/workflows/api-develop.yml"
 
 jobs:
