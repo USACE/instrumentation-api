@@ -61,7 +61,7 @@ services:
     env_file:
       - path: ./env_files/migrate.env
         required: true
-    # command: seed
+    command: migrate
     depends_on:
       db:
         condition: service_healthy

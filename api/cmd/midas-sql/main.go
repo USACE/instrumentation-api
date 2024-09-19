@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 
@@ -45,8 +46,25 @@ func main() {
 		log.Fatal("invalid database url (database name)")
 	}
 
+	var cmd string
+
+	if len(os.Args) > 2 {
+		log.Fatal("too many arguments")
+	}
+
+	if len(os.Args) > 1 {
+		switch strings.ToLower(os.Args[1]) {
+		case "migrate":
+			cmd = "migrate"
+		case "init":
+			cmd = "init"
+		default:
+			log.Fatalf("invalid argument %s", os.Args[1])
+		}
+	}
+
 	migrator := migrate.NewMigrationService(&migrate.Config{
-		Init:      true,
+		Init:      cmd == "init",
 		SeedLocal: seedLocal,
 		DBConfig: migrate.DBConfig{
 			DBUser:          mcfg.DBUser,
