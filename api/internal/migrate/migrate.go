@@ -250,16 +250,23 @@ func (s migrationService) migrate(ctx context.Context) error {
 		return err
 	}
 
+	action := "APPLYING"
+	if s.cfg.Init {
+		action = "INITIALIZING"
+	}
+
 	log.Println()
-	log.Printf("APPLYING %d NEW VERSIONED MIGRATIONS...", len(migrationsNew))
+	log.Printf("%s %d NEW VERSIONED MIGRATIONS...", action, len(migrationsNew))
 	log.Println()
 	for _, m := range migrationsNew {
 		content, err := fs.ReadFile(s.cfg.MigrationsDir, m.Filename)
 		if err != nil {
 			return err
 		}
+		status := "initialized"
 		startExec := time.Now()
 		if !s.cfg.Init {
+			status = "applied"
 			if _, err := tx.ExecContext(ctx, string(content)); err != nil {
 				return err
 			}
@@ -280,7 +287,7 @@ func (s migrationService) migrate(ctx context.Context) error {
 			return err
 		}
 		installedRank++
-		log.Printf("migration %s applied", m.Filename)
+		log.Printf("migration %s %s", m.Filename, status)
 	}
 
 	repeat, err := fs.ReadDir(s.cfg.MigrationsDir, "repeat")
