@@ -1,4 +1,3 @@
--- ${flyway:timestamp}
 CREATE OR REPLACE VIEW v_district_rollup AS (
     SELECT
         ac.alert_type_id                    AS alert_type_id,
@@ -28,7 +27,3 @@ CREATE OR REPLACE VIEW v_district_rollup AS (
     GROUP BY ac.alert_type_id, dt.office_id, dt.initials, prj.id, prj.name, DATE_TRUNC('month', sub.due_date)
 	ORDER BY DATE_TRUNC('month', sub.due_date), ac.alert_type_id
 );
-
-GRANT SELECT ON
-    v_district_rollup
-TO instrumentation_reader;

@@ -54,15 +54,14 @@ services:
   migrate:
     build:
       args:
-        - BASE_IMAGE=${MIGRATE_BASE_IMAGE:-flyway/flyway:10.9.1}
-      context: migrate
-    restart: on-failure
+        - GO_VERSION=${GO_VERSION}
+        - BUILD_TARGET=midas-sql
+        - BUILD_TAG=local
+      context: api
     env_file:
       - path: ./env_files/migrate.env
         required: true
     command: migrate
-    volumes:
-      - ./migrate:/flyway/sql
     depends_on:
       db:
         condition: service_healthy
@@ -70,7 +69,7 @@ services:
   api:
     build:
       args:
-        - GO_VERSION=${GO_VERSION:-1.22}
+        - GO_VERSION=${GO_VERSION}
         - BUILD_TARGET=midas-api
         - BUILD_TAG=local
       target: builder
@@ -99,7 +98,7 @@ services:
   telemetry:
     build:
       args:
-        - GO_VERSION=${GO_VERSION:-1.22}
+        - GO_VERSION=${GO_VERSION}
         - BUILD_TARGET=midas-telemetry
         - BUILD_TAG=local
       context: api
@@ -118,7 +117,7 @@ services:
   alert:
     build:
       args:
-        - GO_VERSION=${GO_VERSION:-1.22}
+        - GO_VERSION=${GO_VERSION}
         - BUILD_TARGET=midas-alert
         - BUILD_TAG=local
       context: api
@@ -134,7 +133,7 @@ services:
   dcs-loader:
     build:
       args:
-        - GO_VERSION=${GO_VERSION:-1.22}
+        - GO_VERSION=${GO_VERSION}
         - BUILD_TARGET=midas-dcs-loader
         - BUILD_TAG=local
       context: api
@@ -177,23 +176,23 @@ services:
     volumes:
       - ./data:/media
 
-  report:
-    build:
-      args:
-        - NODE_VERSION=${NODE_VERSION:-22.1}
-        - ALPINE_VERSION=${ALPINE_VERSION:-3.19}
-      context: report
-      network: host
-    env_file:
-      - path: ./env_files/report.env
-        required: true
-    security_opt:
-      - 'seccomp:./report/chrome/chrome.json'
-    depends_on:
-      elasticmq:
-        condition: service_started
-      minio_init:
-        condition: service_completed_successfully
+  # report:
+  #   build:
+  #     args:
+  #       - NODE_VERSION=${NODE_VERSION:-22.1}
+  #       - ALPINE_VERSION=${ALPINE_VERSION:-3.19}
+  #     context: report
+  #     network: host
+  #   env_file:
+  #     - path: ./env_files/report.env
+  #       required: true
+  #   security_opt:
+  #     - 'seccomp:./report/chrome/chrome.json'
+  #   depends_on:
+  #     elasticmq:
+  #       condition: service_started
+  #     minio_init:
+  #       condition: service_completed_successfully
 
   elasticmq:
     image: softwaremill/elasticmq

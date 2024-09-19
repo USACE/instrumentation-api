@@ -1,4 +1,3 @@
--- ${flyway:timestamp}
 CREATE OR REPLACE VIEW v_project AS (
     SELECT
         p.id,
@@ -39,7 +38,10 @@ CREATE OR REPLACE VIEW v_project AS (
     LEFT JOIN (
         SELECT id, office_id FROM district
     ) d ON d.id = p.district_id
-    CROSS JOIN config cfg
+    LEFT JOIN LATERAL (
+        SELECT static_host FROM config
+        LIMIT 1
+    ) cfg ON true
 );
 
 CREATE OR REPLACE VIEW v_district AS (
@@ -55,8 +57,3 @@ CREATE OR REPLACE VIEW v_district AS (
     INNER JOIN division div ON dis.division_id = div.id
     INNER JOIN agency ag ON ag.id = div.agency_id
 );
-
-GRANT SELECT ON
-    v_project,
-    v_district
-TO instrumentation_reader;

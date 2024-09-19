@@ -1,5 +1,4 @@
--- ${flyway:timestamp}
-CREATE VIEW v_timeseries AS (
+CREATE OR REPLACE VIEW v_timeseries AS (
     SELECT
         t.id,
         t.slug,
@@ -81,12 +80,3 @@ CREATE OR REPLACE VIEW v_timeseries_cwms AS (
     FROM v_timeseries ts
     INNER JOIN timeseries_cwms tc ON ts.id = tc.timeseries_id
 );
-
-GRANT SELECT ON
-    v_timeseries,
-    v_timeseries_dependency,
-    v_timeseries_stored,
-    v_timeseries_computed,
-    v_timeseries_cwms,
-    v_timeseries_project_map
-TO instrumentation_reader;

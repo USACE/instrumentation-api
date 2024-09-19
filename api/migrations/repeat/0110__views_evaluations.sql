@@ -1,4 +1,3 @@
--- ${flyway:timestamp}
 CREATE OR REPLACE VIEW v_evaluation AS (
     SELECT
         ev.id                               AS id,
@@ -36,7 +35,3 @@ CREATE OR REPLACE VIEW v_evaluation AS (
     LEFT  JOIN submittal sub ON sub.id = ev.submittal_id
     LEFT  JOIN alert_config ac ON ac.id = sub.alert_config_id
 );
-
-GRANT SELECT ON
-    v_evaluation
-TO instrumentation_reader;

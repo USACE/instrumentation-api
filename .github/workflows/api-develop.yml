@@ -30,7 +30,9 @@ jobs:
           aws-region: ${{ secrets.CWBICI_DEVELOP_AWS_REGION }}
   
       - name: Run Tests
-        run: ./compose.sh test
+        run: |
+          cp .env.example .env
+          ./compose.sh test
 
       - name: Login to Amazon ECR
         if: ${{ success() }}

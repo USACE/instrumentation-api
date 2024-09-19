@@ -1,4 +1,3 @@
--- ${flyway:timestamp}
 CREATE OR REPLACE VIEW v_profile AS (
     WITH roles_by_profile AS (
         SELECT
@@ -58,9 +57,3 @@ CREATE OR REPLACE VIEW v_email_autocomplete AS (
         username || email AS username_email
     FROM profile
 );
-
-GRANT SELECT ON
-    v_profile,
-    v_profile_project_roles,
-    v_email_autocomplete
-TO instrumentation_reader;

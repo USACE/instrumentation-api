@@ -1,4 +1,3 @@
--- ${flyway:timestamp}
 CREATE OR REPLACE VIEW v_alert_check_measurement_submittal AS (
     SELECT
         ac.id AS alert_config_id,
@@ -90,8 +89,3 @@ CREATE OR REPLACE VIEW v_alert_check_evaluation_submittal AS (
     WHERE ac.alert_type_id = 'da6ee89e-58cc-4d85-8384-43c3c33a68bd'::UUID
     AND NOT ac.deleted
 );
-
-GRANT SELECT ON
-    v_alert_check_measurement_submittal,
-    v_alert_check_evaluation_submittal
-TO instrumentation_reader;

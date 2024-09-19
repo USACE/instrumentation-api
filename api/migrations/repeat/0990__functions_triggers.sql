@@ -1,11 +1,8 @@
--- ${flyway:timestamp}
-
 CREATE OR REPLACE FUNCTION aware_create_timeseries()
     RETURNS TRIGGER
     LANGUAGE PLPGSQL
     AS $$
 BEGIN
-
 INSERT INTO timeseries(instrument_id, parameter_id, unit_id, slug, name) (
 	SELECT a.instrument_id AS instrument_id,
 		   ap.parameter_id AS parameter_id,
@@ -21,20 +18,18 @@ RETURN NEW;
 END;
 $$;
 
--- Trigger; Create Timeseries when aware_platform_parameter_enabled
 DROP TRIGGER IF EXISTS aware_create_timeseries ON aware_platform_parameter_enabled;
+
 CREATE TRIGGER aware_create_timeseries
 AFTER INSERT ON aware_platform_parameter_enabled
 FOR EACH ROW
 EXECUTE PROCEDURE aware_create_timeseries();
 
--- Trigger Function; Enable all AWARE parameters when new record insert into aware_platform
 CREATE OR REPLACE FUNCTION aware_enable_params()
     RETURNS TRIGGER
     LANGUAGE PLPGSQL
     AS $$
 BEGIN
-
 INSERT INTO aware_platform_parameter_enabled (aware_platform_id, aware_parameter_id) (
 	SELECT a.id AS aware_platform_id,
 		   b.id AS aware_parameter_id
@@ -49,8 +44,8 @@ RETURN NEW;
 END;
 $$;
 
--- Trigger; Enable all AWARE parameters when new record insert into aware_platform
 DROP TRIGGER IF EXISTS aware_enable_params ON aware_platform;
+
 CREATE TRIGGER aware_enable_params
 AFTER INSERT ON aware_platform
 FOR EACH ROW 

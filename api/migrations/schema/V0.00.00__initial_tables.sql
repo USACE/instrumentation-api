@@ -1,4 +1,7 @@
-CREATE extension IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "postgis";
+CREATE EXTENSION IF NOT EXISTS "btree_gist";
+CREATE EXTENSION IF NOT EXISTS "unaccent";
 
 -- config (application config variables)
 CREATE TABLE IF NOT EXISTS config (

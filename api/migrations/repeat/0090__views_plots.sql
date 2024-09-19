@@ -1,4 +1,3 @@
--- ${flyway:timestamp}
 CREATE OR REPLACE VIEW v_plot_configuration AS (
     SELECT
         pc.id,
@@ -103,5 +102,3 @@ CREATE OR REPLACE VIEW v_plot_configuration AS (
     LEFT JOIN plot_scatter_line_config pcl ON pcl.plot_config_id = pc.id
     ORDER BY pc.name
 );
-
-GRANT SELECT ON v_plot_configuration TO instrumentation_reader;

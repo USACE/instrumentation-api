@@ -1,4 +1,3 @@
--- ${flyway:timestamp}
 CREATE OR REPLACE VIEW v_datalogger AS (
     SELECT
         dl.id          AS id,
@@ -81,10 +80,3 @@ CREATE OR REPLACE VIEW v_datalogger_hash AS (
     INNER JOIN datalogger_model m ON dl.model_id = m.id
     WHERE NOT dl.deleted
 );
-
-GRANT SELECT ON
-    v_datalogger,
-    v_datalogger_preview,
-    v_datalogger_equivalency_table,
-    v_datalogger_hash
-TO instrumentation_reader;

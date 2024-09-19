@@ -1,5 +1,3 @@
-CREATE EXTENSION btree_gist;
-
 DROP VIEW IF EXISTS v_alert_config;
 ALTER TABLE alert_config DROP COLUMN alert_status_id;
 ALTER TABLE alert_config ADD COLUMN mute_consecutive_alerts BOOLEAN NOT NULL DEFAULT false;

@@ -1,4 +1,3 @@
--- ${flyway:timestamp}
 CREATE OR REPLACE VIEW v_instrument_telemetry AS (
     SELECT a.id,
            a.instrument_id AS instrument_id,
@@ -161,9 +160,3 @@ CREATE OR REPLACE VIEW v_instrument_group AS (
         GROUP BY ig.id, ic.i_count
         ORDER BY ig.name
 );
-
-GRANT SELECT ON
-    v_instrument_telemetry,
-    v_instrument,
-    v_instrument_group
-TO instrumentation_reader;

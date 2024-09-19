@@ -51,7 +51,7 @@ elif [ "$1" = "build" ]; then
           docker build \
             ${AMD64_TARGET_PLATFORM:+--platform=linux/amd64} \
             --build-arg="BASE_IMAGE=${SCRATCH_BASE_IMAGE}" \
-            --build-arg="GO_VERSION=1.22" \
+            --build-arg="GO_VERSION=1.23" \
             --build-arg="BUILD_TAG=$2" \
             --build-arg="BUILD_TARGET=${BUILD_TARGET}" \
             -t $BUILD_TARGET:"$2" api

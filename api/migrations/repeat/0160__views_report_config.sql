@@ -1,4 +1,3 @@
--- ${flyway:timestamp}
 CREATE OR REPLACE VIEW v_report_config AS (
     SELECT
         rc.id,
@@ -44,5 +43,3 @@ CREATE OR REPLACE VIEW v_report_config AS (
         WHERE pc.id = ANY(SELECT plot_config_id FROM report_config_plot_config WHERE report_config_id = rc.id)
     ) pc ON true
 );
-
-GRANT SELECT ON v_report_config TO instrumentation_reader;

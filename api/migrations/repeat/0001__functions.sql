@@ -1,4 +1,3 @@
--- ${flyway:timestamp}
 CREATE OR REPLACE FUNCTION locf_s(a float, b float)
 RETURNS float
 LANGUAGE SQL

@@ -1,4 +1,3 @@
--- ${flyway:timestamp}
 CREATE OR REPLACE VIEW v_saa_segment AS (
     SELECT
         seg.id,
@@ -156,10 +155,3 @@ CREATE OR REPLACE VIEW v_ipi_measurement AS (
     ) q ON true) r
     GROUP BY r.instrument_id, r.time
 );
-
-GRANT SELECT ON
-    v_saa_segment,
-    v_saa_measurement,
-    v_ipi_segment,
-    v_ipi_measurement
-TO instrumentation_reader;

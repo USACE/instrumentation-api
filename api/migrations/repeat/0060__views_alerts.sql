@@ -1,4 +1,3 @@
--- ${flyway:timestamp}
 CREATE OR REPLACE VIEW v_alert AS (
     SELECT a.id AS id,
        a.alert_config_id AS alert_config_id,
@@ -117,9 +116,3 @@ CREATE OR REPLACE VIEW v_submittal AS (
     INNER JOIN submittal_status sst ON sub.submittal_status_id = sst.id
     INNER JOIN alert_type aty ON ac.alert_type_id = aty.id
 );
-
-GRANT SELECT ON
-    v_alert,
-    v_alert_config,
-    v_submittal
-TO instrumentation_reader;

@@ -1,8 +1,3 @@
--- ${flyway:timestamp}
--- Users and Roles for HHD Instrumentation Webapp
-
--- User instrumentation_user
--- Note: Substitute real password for 'password'
 DO $$
 BEGIN
     CREATE USER instrumentation_user WITH ENCRYPTED PASSWORD 'password';
@@ -35,22 +30,15 @@ BEGIN
 END
 $$;
 
--- Set Search Path
 ALTER ROLE instrumentation_user SET search_path TO midas,topology,public;
 
--- Set intervalstyle
 ALTER ROLE instrumentation_user SET intervalstyle TO 'iso_8601';
 
--- Set statement timeout
 ALTER ROLE instrumentation_user SET statement_timeout TO '55s';
 
--- grant permissions for instrumentation_user (api user)
 GRANT USAGE ON SCHEMA midas TO instrumentation_user;
-GRANT SELECT ON ALL TABLES IN SCHEMA midas TO instrumentation_reader;
 GRANT INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA midas TO instrumentation_writer;
-
-REVOKE SELECT ON flyway_schema_history FROM instrumentation_reader;
-REVOKE INSERT,UPDATE,DELETE ON flyway_schema_history FROM instrumentation_writer;
+REVOKE INSERT,UPDATE,DELETE ON schema_migration_history FROM instrumentation_writer;
 
 GRANT SELECT ON
     geometry_columns,
@@ -64,7 +52,6 @@ GRANT
     instrumentation_writer
 TO instrumentation_user;
 
--- Drop all views to be recreated
 DO $$
 DECLARE drop_views_query text;
 BEGIN
