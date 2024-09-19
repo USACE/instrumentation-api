@@ -18,7 +18,7 @@ func main() {
 	seedLocal := strings.Contains(mcfg.FileLocations, "filesystem:/flyway/sql/local")
 	dbConfig := migrateDBConfig(mcfg)
 
-	cmd := "init"
+	var cmd string
 
 	if len(os.Args) > 2 {
 		log.Fatal("too many arguments")
