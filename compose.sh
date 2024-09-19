@@ -5,7 +5,7 @@ set -Eeo pipefail
 parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 cd "$parent_path"
 
-COMPOSECMD="docker-compose -f docker-compose.yml"
+COMPOSECMD="docker compose -f docker-compose.yml"
 
 mkdocs() {
     (
@@ -34,8 +34,6 @@ elif [ "$1" = "up" ]; then
     
 
 elif [ "$1" = "build" ]; then
-    mkdocs -q
-
     if [ "$2" = "local" ] || [ "$2" = "develop" ] || [ "$2" = "test" ] || [ "$2" = "prod" ]; then
         SCRATCH_BASE_IMAGE=scratch
         ALPINE_BASE_IMAGE=alpine:3.19
@@ -78,15 +76,24 @@ elif [ "$1" = "build" ]; then
             exit 1
         fi
 
-        for IMAGE in midas-api midas-telemetry midas-alert midas-dcs-loader midas-sql
+        declare -a REGISTRIES=("midas-api" "midas-telemetry" "midas-alert" "midas-dcs-loader" "midas-sql")
+
+        # tag
+        for IMAGE in "${REGISTRIES[@]}"
         do
             docker tag $IMAGE:"$2" $4/$IMAGE:"$2"
-            docker push -a $4/$IMAGE:"$2"
         done
-
         if [ "$2" = "develop" ]; then
             docker tag midas-report:"$2" $4/midas-report:"$2"
-            docker push -a $4/midas-report:"$2"
+        fi
+
+        # push
+        for IMAGE in "${REGISTRIES[@]}"
+        do
+            docker push $4/$IMAGE:"$2"
+        done
+        if [ "$2" = "develop" ]; then
+            docker push $4/midas-report:"$2"
         fi
     fi
 
@@ -105,7 +112,7 @@ elif [ "$1" = "clean" ]; then
 
 
 elif [ "$1" = "test" ]; then
-    docker-compose build
+    docker compose build
     shift
 
     TEARDOWN=false
@@ -127,13 +134,13 @@ elif [ "$1" = "test" ]; then
     GOCMD="go test ${REST_ARGS[@]} github.com/USACE/instrumentation-api/api/internal/handler"
 
     if [ "$REPORT" = true ]; then
-        docker-compose run -e INSTRUMENTATION_AUTH_JWT_MOCKED=true --entrypoint="$GOCMD" api > $(pwd)/test.log
+        docker compose run -e INSTRUMENTATION_AUTH_JWT_MOCKED=true --entrypoint="$GOCMD" api > $(pwd)/test.log
     else
-        docker-compose run -e INSTRUMENTATION_AUTH_JWT_MOCKED=true --entrypoint="$GOCMD" api
+        docker compose run -e INSTRUMENTATION_AUTH_JWT_MOCKED=true --entrypoint="$GOCMD" api
     fi
 
     if [ $TEARDOWN = true ]; then
-        docker-compose --profile=mock down -v
+        docker compose --profile=mock down -v
     fi
 
 
