@@ -120,17 +120,19 @@ type Version struct {
 	*version.Version
 }
 
+const logSep = "-----------------------------------------"
+
 func (s migrationService) Run(ctx context.Context) {
 	start := time.Now()
 
 	if err := s.migrate(ctx); err != nil {
-		log.Println()
+		log.Print(logSep)
 		log.Print("ERROR ENCOUNTERED; ROLLED BACK MIGRATIONS")
 		log.Fatal(err.Error())
 	}
 
 	end := time.Now()
-	log.Println()
+	log.Print(logSep)
 	log.Printf("SUCCESSFULLY COMPLETED DATABASE MIGRATIONS IN %s", end.Sub(start))
 }
 
@@ -194,7 +196,7 @@ func (s migrationService) migrate(ctx context.Context) error {
 	slices.SortFunc(schemaMigrations, sortFileBySemver)
 
 	log.Printf("VALIDATING %d EXISTING VERSIONED MIGRATIONS...", len(history))
-	log.Println()
+	log.Print(logSep)
 	for _, m := range schemaMigrations {
 		n := m.Prefix + "/" + m.File.Name()
 
@@ -255,9 +257,9 @@ func (s migrationService) migrate(ctx context.Context) error {
 		action = "INITIALIZING"
 	}
 
-	log.Println()
+	log.Print(logSep)
 	log.Printf("%s %d NEW VERSIONED MIGRATIONS...", action, len(migrationsNew))
-	log.Println()
+	log.Print(logSep)
 	for _, m := range migrationsNew {
 		content, err := fs.ReadFile(s.cfg.MigrationsDir, m.Filename)
 		if err != nil {
@@ -299,9 +301,9 @@ func (s migrationService) migrate(ctx context.Context) error {
 		return repeat[i].Name() < repeat[j].Name()
 	})
 
-	log.Println()
+	log.Print(logSep)
 	log.Printf("APPLYING %d REPEAT MIGRATIONS...", len(repeat))
-	log.Println()
+	log.Print(logSep)
 	for _, f := range repeat {
 		n := "repeat/" + f.Name()
 		content, err := fs.ReadFile(s.cfg.MigrationsDir, n)
