@@ -178,7 +178,7 @@ func getCR6Handler(h *TelemetryHandler, dl model.Datalogger, rawJSON []byte) ech
 					delete(eqtFields, f.Name)
 					continue
 				}
-				items[j] = model.Measurement{TimeseriesID: *row.TimeseriesID, Time: t, Value: v}
+				items[j] = model.Measurement{TimeseriesID: *row.TimeseriesID, Time: t, Value: model.FloatNanInf(v)}
 			}
 
 			mcs[i] = model.MeasurementCollection{TimeseriesID: *row.TimeseriesID, Items: items}

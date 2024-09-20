@@ -187,7 +187,7 @@ func (mrc *ProcessTimeseriesResponseCollection) CollectSingleTimeseries(threshol
 				mmts[i] = Measurement{
 					TimeseriesID: t.TimeseriesID,
 					Time:         m.Time,
-					Value:        m.Value,
+					Value:        FloatNanInf(m.Value),
 					Error:        m.Error,
 				}
 			}
@@ -548,7 +548,7 @@ func queryInclinometerTimeseriesMeasurements(ctx context.Context, q *Queries, f 
 			log.Println(err)
 		}
 		for i := range tt2[idx].Measurements {
-			values, err := q.ListInclinometerMeasurementValues(ctx, t.TimeseriesID, tt2[idx].Measurements[i].Time, cm.Value)
+			values, err := q.ListInclinometerMeasurementValues(ctx, t.TimeseriesID, tt2[idx].Measurements[i].Time, float64(cm.Value))
 			if err != nil {
 				return nil, err
 			}

@@ -3,7 +3,9 @@ package model
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"math"
+	"strings"
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/internal/util"
@@ -46,11 +48,38 @@ func (cc *TimeseriesMeasurementCollectionCollection) UnmarshalJSON(b []byte) err
 
 // Measurement is a time and value associated with a timeseries
 type Measurement struct {
-	TimeseriesID uuid.UUID `json:"-" db:"timeseries_id"`
-	Time         time.Time `json:"time"`
-	Value        float64   `json:"value"`
-	Error        string    `json:"error,omitempty"`
+	TimeseriesID uuid.UUID   `json:"-" db:"timeseries_id"`
+	Time         time.Time   `json:"time"`
+	Value        FloatNanInf `json:"value"`
+	Error        string      `json:"error,omitempty"`
 	TimeseriesNote
+}
+
+type FloatNanInf float64
+
+func (j FloatNanInf) MarshalJSON() ([]byte, error) {
+	if math.IsNaN(float64(j)) || math.IsInf(float64(j), 0) {
+		return []byte("null"), nil
+	}
+
+	return []byte(fmt.Sprintf("%f", float64(j))), nil
+}
+
+func (j *FloatNanInf) UnmarshalJSON(v []byte) error {
+	switch strings.ToLower(string(v)) {
+	case `"nan"`, "nan", "", "null", "undefined":
+		*j = FloatNanInf(math.NaN())
+	case `"inf"`, "inf":
+		*j = FloatNanInf(math.Inf(1))
+	default:
+		var fv float64
+		if err := json.Unmarshal(v, &fv); err != nil {
+			*j = FloatNanInf(math.NaN())
+			return nil
+		}
+		*j = FloatNanInf(fv)
+	}
+	return nil
 }
 
 // MeasurementLean is the minimalist representation of a timeseries measurement
@@ -79,7 +108,7 @@ func (m Measurement) getTime() time.Time {
 }
 
 func (m Measurement) getValue() float64 {
-	return m.Value
+	return float64(m.Value)
 }
 
 // Should only ever be one

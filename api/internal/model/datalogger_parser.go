@@ -2,9 +2,7 @@ package model
 
 import (
 	"encoding/csv"
-	"encoding/json"
 	"log"
-	"math"
 	"os"
 )
 
@@ -41,25 +39,6 @@ type Field struct {
 	Units    string `json:"units"`
 	Process  string `json:"process"`
 	Settable bool   `json:"settable"`
-}
-
-type FloatNanInf float64
-
-func (j *FloatNanInf) UnmarshalJSON(v []byte) error {
-	switch string(v) {
-	case `"NAN"`, "NAN":
-		*j = FloatNanInf(math.NaN())
-	case `"INF"`, "INF":
-		*j = FloatNanInf(math.Inf(1))
-	default:
-		var fv float64
-		if err := json.Unmarshal(v, &fv); err != nil {
-			*j = FloatNanInf(math.NaN())
-			return nil
-		}
-		*j = FloatNanInf(fv)
-	}
-	return nil
 }
 
 // ParseTOA5 parses a Campbell Scientific TOA5 data file that is simlar to a csv.
