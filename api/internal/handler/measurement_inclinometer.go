@@ -51,7 +51,7 @@ func (h *ApiHandler) ListInclinometerMeasurements(c echo.Context) error {
 	}
 
 	for idx := range im.Inclinometers {
-		values, err := h.InclinometerMeasurementService.ListInclinometerMeasurementValues(ctx, tsID, im.Inclinometers[idx].Time, cm.Value)
+		values, err := h.InclinometerMeasurementService.ListInclinometerMeasurementValues(ctx, tsID, im.Inclinometers[idx].Time, float64(cm.Value))
 		if err != nil {
 			return httperr.InternalServerError(err)
 		}

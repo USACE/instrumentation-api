@@ -105,7 +105,7 @@ func (s inclinometerMeasurementService) CreateTimeseriesConstant(ctx context.Con
 		}
 
 		measurement.Time = time.Now()
-		measurement.Value = value
+		measurement.Value = model.FloatNanInf(value)
 		measurements = append(measurements, measurement)
 		mc.TimeseriesID = tsNew.ID
 		mc.Items = measurements

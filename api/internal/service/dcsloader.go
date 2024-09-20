@@ -71,7 +71,7 @@ func (s dcsLoaderService) ParseCsvMeasurementCollection(r io.Reader) ([]model.Me
 				Items:        make([]model.Measurement, 0),
 			}
 		}
-		mcMap[tsid].Items = append(mcMap[tsid].Items, model.Measurement{TimeseriesID: tsid, Time: t, Value: v})
+		mcMap[tsid].Items = append(mcMap[tsid].Items, model.Measurement{TimeseriesID: tsid, Time: t, Value: model.FloatNanInf(v)})
 		mCount++
 	}
 

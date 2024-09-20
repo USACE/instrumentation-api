@@ -51,7 +51,7 @@ const createMeasurementsObjectBody = `{
     "timeseries_id": "869465fc-dc1e-445e-81f4-9979b5fadda9",
     "items": [
     	    {"time": "2020-06-01T00:00:00Z", "value": 10.00},
-            {"time": "2020-06-02T01:00:00Z", "value": 11.10},
+            {"time": "2020-06-02T01:00:00Z", "value": null},
             {"time": "2020-06-03T02:00:00Z", "value": 10.20},
             {"time": "2020-06-04T03:00:00Z", "value": 10.30},
             {"time": "2020-06-05T04:00:00Z", "value": 10.40}
@@ -65,7 +65,7 @@ const createMeasurementsArrayBody = `[
 		{"time": "2020-06-01T00:00:00Z", "value": 10.00},
 	        {"time": "2020-06-02T01:00:00Z", "value": 11.10},
 	        {"time": "2020-06-03T02:00:00Z", "value": 10.20},
-	        {"time": "2020-06-04T03:00:00Z", "value": 10.30},
+	        {"time": "2020-06-04T03:00:00Z", "value": null},
 	        {"time": "2020-06-05T04:00:00Z", "value": 10.40}
 	]
     },
@@ -73,7 +73,7 @@ const createMeasurementsArrayBody = `[
         "timeseries_id": "9a3864a8-8766-4bfa-bad1-0328b166f6a8",
         "items": [
 		{"time": "2020-06-01T00:00:00Z", "value": 10.00},
-	        {"time": "2020-06-02T01:00:00Z", "value": 11.10},
+	        {"time": "2020-06-02T01:00:00Z", "value": null},
 	        {"time": "2020-06-03T02:00:00Z", "value": 10.20},
 	        {"time": "2020-06-04T03:00:00Z", "value": 10.30},
 	        {"time": "2020-06-05T04:00:00Z", "value": 10.40}
@@ -86,7 +86,7 @@ const createMeasurementsArrayBody = `[
 	        {"time": "2020-06-02T01:00:00Z", "value": 11.10},
 	        {"time": "2020-06-03T02:00:00Z", "value": 10.20},
 	        {"time": "2020-06-04T03:00:00Z", "value": 10.30},
-	        {"time": "2020-06-05T04:00:00Z", "value": 10.40}
+	        {"time": "2020-06-05T04:00:00Z", "value": null}
 	]
     }
 ]`
