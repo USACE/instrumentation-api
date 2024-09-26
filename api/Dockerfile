@@ -1,12 +1,11 @@
 ARG BASE_IMAGE=scratch
 ARG GO_VERSION=1.23
 
-FROM golang:${GO_VERSION}-alpine AS builder
+FROM golang:${GO_VERSION}-bookworm AS builder
 
 ARG GOARCH=amd64
 ARG BUILD_TARGET
 
-RUN apk add --no-cache ca-certificates
 WORKDIR /go/src/app
 
 ENV CGO_ENABLED=0
