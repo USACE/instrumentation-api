@@ -11,13 +11,11 @@
       "mode": "auto",
       "program": "${workspaceFolder}/main.go",
       "env": {
-        "INSTRUMENTATION_LAMBDACONTEXT": "false",
         "INSTRUMENTATION_DBUSER": "instrumentation_user",
         "INSTRUMENTATION_DBPASS": "password",
         "INSTRUMENTATION_DBNAME": "postgres",
         "INSTRUMENTATION_DBHOST": "localhost",
         "INSTRUMENTATION_DBSSLMODE": "disable",
-        "INSTRUMENTATION_HEARTBEATKEY": "password"
       },
       "args": []
     }

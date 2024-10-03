@@ -60,10 +60,10 @@ type InclinometerMeasurementCollectionCollection struct {
 }
 
 // InclinometerTimeseriesIDs returns a slice of all timeseries IDs contained in the InclinometerMeasurementCollectionCollection
-func (cc *InclinometerMeasurementCollectionCollection) InclinometerTimeseriesIDs() []uuid.UUID {
-	dd := make([]uuid.UUID, 0)
+func (cc *InclinometerMeasurementCollectionCollection) TimeseriesIDs() map[uuid.UUID]struct{} {
+	dd := make(map[uuid.UUID]struct{})
 	for _, item := range cc.Items {
-		dd = append(dd, item.TimeseriesID)
+		dd[item.TimeseriesID] = struct{}{}
 	}
 	return dd
 }
@@ -101,7 +101,7 @@ const listInclinometerMeasurements = `
 // ListInclinometersMeasurements returns a timeseries with slice of inclinometer measurements populated
 func (q *Queries) ListInclinometerMeasurements(ctx context.Context, timeseriesID uuid.UUID, tw TimeWindow) (*InclinometerMeasurementCollection, error) {
 	mc := InclinometerMeasurementCollection{TimeseriesID: timeseriesID}
-	if err := q.db.SelectContext(ctx, &mc.Inclinometers, listInclinometerMeasurements, timeseriesID, tw.Start, tw.End); err != nil {
+	if err := q.db.SelectContext(ctx, &mc.Inclinometers, listInclinometerMeasurements, timeseriesID, tw.After, tw.Before); err != nil {
 		return nil, err
 	}
 	return &mc, nil

@@ -4,6 +4,8 @@ import (
 	"io"
 	"log"
 	"time"
+
+	"github.com/USACE/instrumentation-api/api/internal/httperr"
 )
 
 // Entrypoint for Dcs Loader service queue
@@ -11,12 +13,12 @@ func (h *DcsLoaderHandler) Start() error {
 	handler := func(r io.Reader) error {
 		mcs, mCount, err := h.DcsLoaderService.ParseCsvMeasurementCollection(r)
 		if err != nil {
-			return err
+			return httperr.InternalServerError(err)
 		}
 
 		startPostTime := time.Now()
 		if err := h.DcsLoaderService.PostMeasurementCollectionToApi(mcs); err != nil {
-			return err
+			return httperr.InternalServerError(err)
 		}
 		log.Printf(
 			"\n\tSUCCESS; POST %d measurements across %d timeseries in %f seconds\n",
@@ -25,5 +27,5 @@ func (h *DcsLoaderHandler) Start() error {
 		return nil
 	}
 
-	return h.Pubsub.ProcessMessages(handler)
+	return h.PubsubService.ProcessMessagesFromBlob(handler)
 }

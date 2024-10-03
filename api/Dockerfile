@@ -1,41 +1,27 @@
 ARG BASE_IMAGE=scratch
-ARG GO_VERSION=1.21
+ARG GO_VERSION=1.23
 
-FROM golang:${GO_VERSION}-alpine AS builder
+FROM golang:${GO_VERSION}-bookworm AS builder
 
 ARG GOARCH=amd64
-ARG BUILD_ENV
+ARG BUILD_TARGET
 
-RUN apk update && apk add --no-cache git ca-certificates
 WORKDIR /go/src/app
 
 ENV CGO_ENABLED=0
-
-RUN go install github.com/go-delve/delve/cmd/dlv@latest
 
 COPY go.* ./
 RUN go mod download
 
 COPY . .
 RUN --mount=type=cache,target=/root/.cache/go-build \
-    --mount=type=cache,target=/go/pkg \
-    GOOS=linux GOARCH=${GOARCH} \
-    go build -ldflags="-w -s" -o /go/bin ./...
+	--mount=type=cache,target=/go/pkg \
+	GOOS=linux GOARCH=${GOARCH} \
+	go build -ldflags="-w -s" -o /go/bin/app ./cmd/${BUILD_TARGET}
 
-FROM ${BASE_IMAGE} AS core
-COPY --from=builder /go/bin/core /go/bin/midas-core
-ENTRYPOINT ["/go/bin/midas-core"]
-
-FROM ${BASE_IMAGE} AS telemetry
-COPY --from=builder /go/bin/telemetry /go/bin/midas-telemetry
-ENTRYPOINT ["/go/bin/midas-telemetry"]
-
-FROM ${BASE_IMAGE} AS alert
-COPY --from=builder /go/bin/alert /go/bin/midas-alert
+FROM ${BASE_IMAGE}
+ARG BUILD_TAG
+ENV BUILD_TAG=${BUILD_TAG}
+COPY --from=builder /go/bin/app /go/bin/app
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
-ENTRYPOINT ["/go/bin/midas-alert"]
-
-FROM ${BASE_IMAGE} AS dcs-loader
-COPY --from=builder /go/bin/dcs-loader /go/bin/midas-dcs-loader
-COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
-ENTRYPOINT ["/go/bin/midas-dcs-loader"]
+ENTRYPOINT ["/go/bin/app"]

@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 
+	"github.com/USACE/instrumentation-api/api/internal/httperr"
 	_ "github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/labstack/echo/v4"
 )
@@ -18,7 +19,7 @@ import (
 func (h *ApiHandler) GetHome(c echo.Context) error {
 	home, err := h.HomeService.GetHome(c.Request().Context())
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, home)
 }

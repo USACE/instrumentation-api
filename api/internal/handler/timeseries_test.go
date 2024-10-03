@@ -23,9 +23,10 @@ const timeseriesSchema = `{
         "parameter": { "type": "string"  },
         "unit_id": { "type": "string" },
         "unit": { "type": "string"  },
-        "is_computed": { "type": "boolean" }
+        "is_computed": { "type": "boolean" },
+        "type": { "type": "string" }
     },
-    "required": ["id", "slug", "name", "variable", "instrument_id", "parameter_id", "unit_id", "is_computed"],
+    "required": ["id", "slug", "name", "variable", "instrument_id", "parameter_id", "unit_id", "is_computed", "type"],
     "additionalProperties": false
 }`
 

@@ -1,8 +1,9 @@
 package model
 
 import (
-	"encoding/json"
-	"math"
+	"encoding/csv"
+	"log"
+	"os"
 )
 
 type DataloggerPayload struct {
@@ -40,21 +41,50 @@ type Field struct {
 	Settable bool   `json:"settable"`
 }
 
-type FloatNanInf float64
-
-func (j *FloatNanInf) UnmarshalJSON(v []byte) error {
-	switch string(v) {
-	case `"NAN"`, "NAN":
-		*j = FloatNanInf(math.NaN())
-	case `"INF"`, "INF":
-		*j = FloatNanInf(math.Inf(1))
-	default:
-		var fv float64
-		if err := json.Unmarshal(v, &fv); err != nil {
-			*j = FloatNanInf(math.NaN())
-			return nil
-		}
-		*j = FloatNanInf(fv)
+// ParseTOA5 parses a Campbell Scientific TOA5 data file that is simlar to a csv.
+// The unique properties of TOA5 are that the meatdata are stored in header of file (first 4 lines of csv)
+func ParseTOA5(filename string) ([][]string, error) {
+	f, err := os.Open(filename)
+	if err != nil {
+		return nil, err
 	}
-	return nil
+	defer f.Close()
+
+	r := csv.NewReader(f)
+
+	// read headers
+	// LINE 1: information about the data logger (e.g. serial number and program name)
+	header1, err := r.Read()
+	if err != nil {
+		return nil, err
+	}
+	// LINE 2: data header (names of the variables stored in the table)
+	header2, err := r.Read()
+	if err != nil {
+		return nil, err
+	}
+	// LINE 3: units for the variables if they have been defined in the data logger
+	header3, err := r.Read()
+	if err != nil {
+		return nil, err
+	}
+	// LINE 4: abbreviation for processing data logger performed
+	// (e.g. sample, average, standard deviation, maximum, minimum, etc.)
+	header4, err := r.Read()
+	if err != nil {
+		return nil, err
+	}
+	log.Printf("header1: %v", header1)
+	log.Printf("header2: %v", header2)
+	log.Printf("header3: %v", header3)
+	log.Printf("header4: %v", header4)
+
+	// continue read until EOF
+	data, err := r.ReadAll()
+	if err != nil {
+		return nil, err
+	}
+	log.Printf("data: %v", data)
+
+	return data, nil
 }

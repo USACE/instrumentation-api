@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 
+	"github.com/USACE/instrumentation-api/api/internal/httperr"
 	_ "github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/labstack/echo/v4"
 )
@@ -23,7 +24,7 @@ func (h *ApiHandler) GetMedia(c echo.Context) error {
 	req := c.Request()
 	r, err := h.BlobService.NewReaderContext(req.Context(), req.RequestURI, "")
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	c.Response().Header().Set(echo.HeaderContentDisposition, "attachment")
 	c.Response().Header().Set("Cache-Control", "public, max-age=31536000")

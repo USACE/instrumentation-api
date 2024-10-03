@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/USACE/instrumentation-api/api/internal/message"
+	"github.com/USACE/instrumentation-api/api/internal/httperr"
 	"github.com/USACE/instrumentation-api/api/internal/model"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -34,25 +34,24 @@ const (
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
 //	@Failure 500 {object} echo.HTTPError
+//	@Router /timeseries/{timeseries_id}/measurements [get]
 //	@Router /instruments/{instrument_id}/timeseries/{timeseries_id}/measurements [get]
 func (h *ApiHandler) ListTimeseriesMeasurementsByTimeseries(c echo.Context) error {
 	tsID, err := uuid.Parse(c.Param("timeseries_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
-
-	// TODO: move business logic to service layer
 
 	isStored, err := h.TimeseriesService.GetStoredTimeseriesExists(c.Request().Context(), tsID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 
 	if isStored {
 		var tw model.TimeWindow
 		a, b := c.QueryParam("after"), c.QueryParam("before")
 		if err := tw.SetWindow(a, b, time.Now().AddDate(0, 0, -7), time.Now()); err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			return httperr.MalformedDate(err)
 		}
 
 		trs := c.QueryParam("threshold")
@@ -61,14 +60,14 @@ func (h *ApiHandler) ListTimeseriesMeasurementsByTimeseries(c echo.Context) erro
 		if trs != "" {
 			tr, err := strconv.Atoi(trs)
 			if err != nil {
-				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+				return httperr.Message(http.StatusBadRequest, "threshold parameter must be an int")
 			}
 			threshold = tr
 		}
 
 		resBody, err := h.MeasurementService.ListTimeseriesMeasurements(c.Request().Context(), tsID, tw, threshold)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			return httperr.InternalServerError(err)
 		}
 		return c.JSON(http.StatusOK, resBody)
 	}
@@ -96,7 +95,7 @@ func (h *ApiHandler) ListTimeseriesMeasurementsByTimeseries(c echo.Context) erro
 func (h *ApiHandler) ListTimeseriesMeasurementsByInstrument(c echo.Context) error {
 	iID, err := uuid.Parse(c.Param("instrument_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 	f := model.ProcessMeasurementFilter{InstrumentID: &iID}
 
@@ -118,7 +117,7 @@ func (h *ApiHandler) ListTimeseriesMeasurementsByInstrument(c echo.Context) erro
 func (h *ApiHandler) ListTimeseriesMeasurementsByInstrumentGroup(c echo.Context) error {
 	igID, err := uuid.Parse(c.Param("instrument_group_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message.MalformedID)
+		return httperr.MalformedID(err)
 	}
 	f := model.ProcessMeasurementFilter{InstrumentGroupID: &igID}
 
@@ -141,7 +140,7 @@ func (h *ApiHandler) ListTimeseriesMeasurementsByInstrumentGroup(c echo.Context)
 func (h *ApiHandler) ListTimeseriesMeasurementsExplorer(c echo.Context) error {
 	var iIDs []uuid.UUID
 	if err := (&echo.DefaultBinder{}).BindBody(c, &iIDs); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedBody(err)
 	}
 	f := model.ProcessMeasurementFilter{InstrumentIDs: iIDs}
 
@@ -164,7 +163,7 @@ func (h *ApiHandler) ListTimeseriesMeasurementsExplorer(c echo.Context) error {
 func (h *ApiHandler) ListInclinometerTimeseriesMeasurementsExplorer(c echo.Context) error {
 	var iIDs []uuid.UUID
 	if err := (&echo.DefaultBinder{}).BindBody(c, &iIDs); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedBody(err)
 	}
 	f := model.ProcessMeasurementFilter{InstrumentIDs: iIDs}
 
@@ -177,11 +176,11 @@ func selectMeasurementsHandler(h *ApiHandler, f model.ProcessMeasurementFilter, 
 		var tw model.TimeWindow
 		a, b := c.QueryParam("after"), c.QueryParam("before")
 		if err := tw.SetWindow(a, b, time.Now().AddDate(0, 0, -7), time.Now()); err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			return httperr.MalformedDate(err)
 		}
 
-		f.After = tw.Start
-		f.Before = tw.End
+		f.After = tw.After
+		f.Before = tw.Before
 
 		trs := c.QueryParam("threshold")
 
@@ -189,39 +188,27 @@ func selectMeasurementsHandler(h *ApiHandler, f model.ProcessMeasurementFilter, 
 		if trs != "" {
 			tr, err := strconv.Atoi(trs)
 			if err != nil {
-				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+				return httperr.Message(http.StatusBadRequest, "query parameter `threshold` must be non-negative int")
 			}
 			threshold = tr
 		}
 
 		mrc, err := h.ProcessTimeseriesService.SelectMeasurements(c.Request().Context(), f)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			return httperr.InternalServerError(err)
 		}
 
 		if requestType == byTimeseriesRequest && f.TimeseriesID != nil {
 			resBody, err := mrc.CollectSingleTimeseries(threshold, *f.TimeseriesID)
 			if err != nil {
-				if err.Error() == message.NotFound {
-					return c.JSON(
-						http.StatusOK,
-						model.MeasurementCollection{
-							TimeseriesID: *f.TimeseriesID,
-							Items:        make([]model.Measurement, 0),
-						},
-					)
-				}
-				return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+				return httperr.InternalServerError(err)
 			}
 			return c.JSON(http.StatusOK, resBody)
 
 		} else {
 			resBody, err := mrc.GroupByInstrument(threshold)
 			if err != nil {
-				if err.Error() == message.NotFound {
-					return c.JSON(http.StatusOK, make([]map[string]interface{}, 0))
-				}
-				return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+				return httperr.InternalServerError(err)
 			}
 			return c.JSON(http.StatusOK, resBody)
 		}
@@ -233,15 +220,15 @@ func selectInclinometerMeasurementsHandler(h *ApiHandler, f model.ProcessMeasure
 		var tw model.TimeWindow
 		a, b := c.QueryParam("after"), c.QueryParam("before")
 		if err := tw.SetWindow(a, b, time.Now().AddDate(0, 0, -7), time.Now()); err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			return httperr.MalformedDate(err)
 		}
 
-		f.After = tw.Start
-		f.Before = tw.End
+		f.After = tw.After
+		f.Before = tw.Before
 
 		mrc, err := h.ProcessTimeseriesService.SelectInclinometerMeasurements(c.Request().Context(), f)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			return httperr.InternalServerError(err)
 		}
 
 		resBody, err := mrc.GroupByInstrument()

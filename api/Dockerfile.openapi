@@ -1,0 +1,26 @@
+ARG GO_VERSION=1.23
+
+FROM golang:${GO_VERSION}-alpine AS swaggo
+WORKDIR /work
+
+COPY go.* ./
+RUN go mod download
+RUN go install github.com/swaggo/swag/cmd/swag@latest
+
+COPY . .
+RUN swag init --ot json --pd -g cmd/midas-api/main.go --parseInternal true --dir internal
+RUN find ./docs -type f -exec sed -i '' -e 's/github_com_USACE_instrumentation-api_api_internal_model.//g' {} \;
+
+FROM openapitools/openapi-generator-cli:latest-release AS docgen
+WORKDIR /work
+RUN mkdir v3
+
+RUN mkdir /docs
+
+COPY --from=swaggo /work/docs/swagger.json .
+RUN /usr/local/bin/docker-entrypoint.sh generate -i /work/swagger.json -o /work/v3 -g openapi-yaml --minimal-update
+RUN /usr/local/bin/docker-entrypoint.sh generate -i /work/swagger.json -o /work/v3 -g openapi --minimal-update
+
+FROM scratch
+COPY --from=docgen /work/v3/openapi.json .
+COPY --from=docgen /work/v3/openapi/openapi.yaml .

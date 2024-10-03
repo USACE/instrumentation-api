@@ -38,7 +38,7 @@ type noteCbk func(context.Context, uuid.UUID, time.Time, model.TimeseriesNote) e
 func createMeasurements(ctx context.Context, mc []model.MeasurementCollection, mmtFn mmtCbk, noteFn noteCbk) error {
 	for _, c := range mc {
 		for _, m := range c.Items {
-			if err := mmtFn(ctx, c.TimeseriesID, m.Time, m.Value); err != nil {
+			if err := mmtFn(ctx, c.TimeseriesID, m.Time, float64(m.Value)); err != nil {
 				return err
 			}
 			if m.Masked != nil || m.Validated != nil || m.Annotation != nil {
@@ -105,10 +105,10 @@ func (s measurementService) UpdateTimeseriesMeasurements(ctx context.Context, mc
 	qtx := s.WithTx(tx)
 
 	for _, c := range mc {
-		if err := qtx.DeleteTimeseriesMeasurementsByRange(ctx, c.TimeseriesID, tw.Start, tw.End); err != nil {
+		if err := qtx.DeleteTimeseriesMeasurementsByRange(ctx, c.TimeseriesID, tw.After, tw.Before); err != nil {
 			return nil, err
 		}
-		if err := qtx.DeleteTimeseriesNote(ctx, c.TimeseriesID, tw.Start, tw.End); err != nil {
+		if err := qtx.DeleteTimeseriesNote(ctx, c.TimeseriesID, tw.After, tw.Before); err != nil {
 			return nil, err
 		}
 	}

@@ -5,7 +5,6 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -37,6 +36,8 @@ type Instrument struct {
 	Projects      dbJSONSlice[IDSlugName] `json:"projects" db:"projects"`
 	NIDID         *string                 `json:"nid_id" db:"nid_id"`
 	USGSID        *string                 `json:"usgs_id" db:"usgs_id"`
+	HasCwms       bool                    `json:"has_cwms" db:"has_cwms"`
+	ShowCwmsTab   bool                    `json:"show_cwms_tab" db:"show_cwms_tab"`
 	Opts          Opts                    `json:"opts" db:"opts"`
 	AuditInfo
 }
@@ -51,12 +52,6 @@ func (o *Opts) Scan(src interface{}) error {
 		return fmt.Errorf("type assertion failed")
 	}
 	return json.Unmarshal([]byte(b), o)
-}
-
-// CreateInstrumentsValidationResult holds results of checking InstrumentCollection POST
-type CreateInstrumentsValidationResult struct {
-	IsValid bool     `json:"is_valid"`
-	Errors  []string `json:"errors"`
 }
 
 // InstrumentCollection is a collection of Instrument items
@@ -75,6 +70,12 @@ func (ic InstrumentCollection) Shorten() IDSlugCollection {
 
 type InstrumentCount struct {
 	InstrumentCount int `json:"instrument_count"`
+}
+
+type InstrumentsProjectCount struct {
+	InstrumentID   uuid.UUID `json:"instrument_id" db:"instrument_id"`
+	InstrumentName string    `json:"instrument_name" db:"instrument_name"`
+	ProjectCount   int       `json:"project_count" db:"project_count"`
 }
 
 type Geometry geojson.Geometry
@@ -110,6 +111,11 @@ func (g *Geometry) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+type InstrumentIDName struct {
+	ID   uuid.UUID `json:"id"`
+	Name string    `json:"name"`
+}
+
 const listInstrumentsSQL = `
 	SELECT 
 		id,
@@ -135,6 +141,8 @@ const listInstrumentsSQL = `
 		alert_configs,
 		nid_id,
 		usgs_id,
+		has_cwms,
+		show_cwms_tab,
 		opts
 	FROM v_instrument
 `
@@ -177,8 +185,8 @@ func (q *Queries) GetInstrumentCount(ctx context.Context) (InstrumentCount, erro
 }
 
 const createInstrument = `
-	INSERT INTO instrument (slug, name, type_id, geometry, station, station_offset, creator, create_date, nid_id, usgs_id)
-	VALUES (slugify($1, 'instrument'), $1, $2, ST_GeomFromWKB($3), $4, $5, $6, $7, $8, $9)
+	INSERT INTO instrument (slug, name, type_id, geometry, station, station_offset, creator, create_date, nid_id, usgs_id, show_cwms_tab)
+	VALUES (slugify($1, 'instrument'), $1, $2, ST_SetSRID(ST_GeomFromWKB($3), 4326), $4, $5, $6, $7, $8, $9, $10)
 	RETURNING id, slug
 `
 
@@ -186,7 +194,7 @@ func (q *Queries) CreateInstrument(ctx context.Context, i Instrument) (IDSlugNam
 	var aa IDSlugName
 	if err := q.db.GetContext(
 		ctx, &aa, createInstrument,
-		i.Name, i.TypeID, i.Geometry, i.Station, i.StationOffset, i.CreatorID, i.CreateDate, i.NIDID, i.USGSID,
+		i.Name, i.TypeID, i.Geometry, i.Station, i.StationOffset, i.CreatorID, i.CreateDate, i.NIDID, i.USGSID, i.ShowCwmsTab,
 	); err != nil {
 		return aa, err
 	}
@@ -216,87 +224,19 @@ func (q *Queries) ListInstrumentProjects(ctx context.Context, instrumentID uuid.
 	return projectIDs, err
 }
 
-const assignInstrumentToProject = `
-	INSERT INTO project_instrument (project_id, instrument_id) VALUES ($1, $2)
-	ON CONFLICT ON CONSTRAINT project_instrument_project_id_instrument_id_key DO NOTHING
-`
-
-func (q *Queries) AssignInstrumentToProject(ctx context.Context, projectID, instrumentID uuid.UUID) error {
-	_, err := q.db.ExecContext(ctx, assignInstrumentToProject, projectID, instrumentID)
-	return err
-}
-
-const unassignInstrumentFromProject = `
-	DELETE FROM project_instrument WHERE project_id = $1 AND instrument_id = $2
-`
-
-func (q *Queries) UnassignInstrumentFromProject(ctx context.Context, projectID, instrumentID uuid.UUID) error {
-	_, err := q.db.ExecContext(ctx, unassignInstrumentFromProject, projectID, instrumentID)
-	return err
-}
-
 const getProjectCountForInstrument = `
-	SELECT COUNT(*) FROM project_instrument WHERE instrument_id = $1
-`
-
-func (q *Queries) GetProjectCountForInstrument(ctx context.Context, instrumentID uuid.UUID) (int, error) {
-	var count int
-	err := q.db.GetContext(ctx, &count, getProjectCountForInstrument, instrumentID)
-	return count, err
-}
-
-const validateCreateInstruments = ` 
-	SELECT pi.project_id, i.name
+	SELECT pi.instrument_id, i.name AS instrument_name, COUNT(pi.*) AS project_count
 	FROM project_instrument pi
 	INNER JOIN instrument i ON pi.instrument_id = i.id
-	WHERE pi.project_id IN (?)
-	AND NOT i.deleted
-	ORDER BY pi.project_id
+	WHERE pi.instrument_id IN (?)
+	GROUP BY pi.instrument_id, i.name
+	ORDER BY i.name
 `
 
-// ValidateCreateInstruments creates many instruments from an array of instruments
-func (q *Queries) ValidateCreateInstruments(ctx context.Context, instruments []Instrument) (CreateInstrumentsValidationResult, error) {
-	validationResult := CreateInstrumentsValidationResult{Errors: make([]string, 0)}
-	projectIDs := make([]uuid.UUID, 0)
-	for idx := range instruments {
-		for _, project := range instruments[idx].Projects {
-			projectIDs = append(projectIDs, project.ID)
-		}
-	}
-	query, args, err := sqlIn(validateCreateInstruments, projectIDs)
-	if err != nil {
-		return validationResult, err
-	}
-	var nn []struct {
-		ProjectID      uuid.UUID `db:"project_id"`
-		InstrumentName string    `db:"name"`
-	}
-	if err := q.db.SelectContext(ctx, &nn, q.db.Rebind(query), args...); err != nil {
-		return validationResult, err
-	}
-	m := make(map[uuid.UUID]map[string]bool)
-	var _pID uuid.UUID
-	for _, n := range nn {
-		if n.ProjectID != _pID {
-			m[n.ProjectID] = make(map[string]bool)
-			_pID = n.ProjectID
-		}
-		m[n.ProjectID][strings.ToUpper(n.InstrumentName)] = true
-	}
-	validationResult.IsValid = true
-	for _, n := range instruments {
-		for _, prj := range n.Projects {
-			if !m[prj.ID][strings.ToUpper(n.Name)] {
-				continue
-			}
-		}
-		validationResult.IsValid = false
-		validationResult.Errors = append(
-			validationResult.Errors,
-			fmt.Sprintf("Instrument name '%s' is already taken. Instrument names must be unique within associated projects", n.Name),
-		)
-	}
-	return validationResult, nil
+func (q *Queries) GetProjectCountForInstruments(ctx context.Context, instrumentIDs []uuid.UUID) ([]InstrumentsProjectCount, error) {
+	counts := make([]InstrumentsProjectCount, 0)
+	err := q.db.SelectContext(ctx, &counts, getProjectCountForInstrument, instrumentIDs)
+	return counts, err
 }
 
 const updateInstrument = `
@@ -309,7 +249,8 @@ const updateInstrument = `
 		station = $8,
 		station_offset = $9,
 		nid_id = $10,
-		usgs_id = $11
+		usgs_id = $11,
+		show_cwms_tab = $12
 	WHERE id = $2
 	AND id IN (
 		SELECT instrument_id
@@ -322,7 +263,7 @@ func (q *Queries) UpdateInstrument(ctx context.Context, projectID uuid.UUID, i I
 	_, err := q.db.ExecContext(
 		ctx, updateInstrument,
 		projectID, i.ID, i.Name, i.TypeID, i.Geometry,
-		i.UpdaterID, i.UpdateDate, i.Station, i.StationOffset, i.NIDID, i.USGSID,
+		i.UpdaterID, i.UpdateDate, i.Station, i.StationOffset, i.NIDID, i.USGSID, i.ShowCwmsTab,
 	)
 	return err
 }
@@ -361,4 +302,21 @@ const deleteFlagInstrument = `
 func (q *Queries) DeleteFlagInstrument(ctx context.Context, projectID, instrumentID uuid.UUID) error {
 	_, err := q.db.ExecContext(ctx, deleteFlagInstrument, projectID, instrumentID)
 	return err
+}
+
+const listInstrumentIDNamesByIDs = `
+	SELECT id, name
+	FROM instrument
+	WHERE id IN (?)
+	AND NOT deleted
+`
+
+func (q *Queries) ListInstrumentIDNamesByIDs(ctx context.Context, instrumentIDs []uuid.UUID) ([]InstrumentIDName, error) {
+	query, args, err := sqlIn(listInstrumentIDNamesByIDs, instrumentIDs)
+	if err != nil {
+		return nil, err
+	}
+	ii := make([]InstrumentIDName, 0)
+	err = q.db.SelectContext(ctx, &ii, q.db.Rebind(query), args...)
+	return ii, err
 }

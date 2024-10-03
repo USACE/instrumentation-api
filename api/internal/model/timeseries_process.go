@@ -2,6 +2,7 @@ package model
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -9,7 +10,6 @@ import (
 	"time"
 
 	"github.com/Knetic/govaluate"
-	"github.com/USACE/instrumentation-api/api/internal/message"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx/types"
 	"github.com/tidwall/btree"
@@ -101,6 +101,7 @@ type ProcessMeasurementFilter struct {
 	InstrumentID      *uuid.UUID  `db:"instrument_id"`
 	InstrumentGroupID *uuid.UUID  `db:"instrument_group_id"`
 	InstrumentIDs     []uuid.UUID `db:"instrument_ids"`
+	TimeseriesIDs     []uuid.UUID `db:"timeseries_ids"`
 	After             time.Time   `db:"after"`
 	Before            time.Time   `db:"before"`
 }
@@ -113,7 +114,7 @@ type BTreeNode struct {
 
 func (mrc *ProcessTimeseriesResponseCollection) GroupByInstrument(threshold int) (map[uuid.UUID][]MeasurementCollectionLean, error) {
 	if len(*mrc) == 0 {
-		return make(map[uuid.UUID][]MeasurementCollectionLean), fmt.Errorf(message.NotFound)
+		return make(map[uuid.UUID][]MeasurementCollectionLean), nil
 	}
 
 	tmp := make(map[uuid.UUID]map[uuid.UUID][]MeasurementLean)
@@ -150,7 +151,7 @@ func (mrc *ProcessTimeseriesResponseCollection) GroupByInstrument(threshold int)
 
 func (mrc *ProcessInclinometerTimeseriesResponseCollection) GroupByInstrument() (map[uuid.UUID][]InclinometerMeasurementCollectionLean, error) {
 	if len(*mrc) == 0 {
-		return make(map[uuid.UUID][]InclinometerMeasurementCollectionLean), fmt.Errorf(message.NotFound)
+		return make(map[uuid.UUID][]InclinometerMeasurementCollectionLean), sql.ErrNoRows
 	}
 
 	res := make(map[uuid.UUID][]InclinometerMeasurementCollectionLean)
@@ -173,7 +174,10 @@ func (mrc *ProcessInclinometerTimeseriesResponseCollection) GroupByInstrument() 
 
 func (mrc *ProcessTimeseriesResponseCollection) CollectSingleTimeseries(threshold int, tsID uuid.UUID) (MeasurementCollection, error) {
 	if len(*mrc) == 0 {
-		return MeasurementCollection{}, fmt.Errorf(message.NotFound)
+		return MeasurementCollection{
+			TimeseriesID: tsID,
+			Items:        make([]Measurement, 0),
+		}, nil
 	}
 
 	for _, t := range *mrc {
@@ -183,7 +187,7 @@ func (mrc *ProcessTimeseriesResponseCollection) CollectSingleTimeseries(threshol
 				mmts[i] = Measurement{
 					TimeseriesID: t.TimeseriesID,
 					Time:         m.Time,
-					Value:        m.Value,
+					Value:        FloatNanInf(m.Value),
 					Error:        m.Error,
 				}
 			}
@@ -357,6 +361,9 @@ func queryTimeseriesMeasurements(ctx context.Context, q *Queries, f ProcessMeasu
 	} else if len(f.InstrumentIDs) > 0 {
 		filterSQL = `instrument_id IN (?)`
 		filterArg = f.InstrumentIDs
+	} else if len(f.TimeseriesIDs) > 0 {
+		filterSQL = `id IN (?)`
+		filterArg = f.TimeseriesIDs
 	} else {
 		return nil, fmt.Errorf("must supply valid filter for timeseries_measurement query")
 	}
@@ -395,18 +402,19 @@ func queryTimeseriesMeasurements(ctx context.Context, q *Queries, f ProcessMeasu
 		INNER JOIN timeseries_measurement m2 ON m2.time = nhm.time AND m2.timeseries_id = nhm.timeseries_id
 	)
 	(
-		SELECT rt.id                          AS timeseries_id,
-			   ts.instrument_id               AS instrument_id,
-			   i.slug || '.' || ts.slug       AS variable,
-			   false                          AS is_computed,
-			   null                           AS formula,
-			   COALESCE((
-					SELECT json_agg(json_build_object('time', time, 'value', value) ORDER BY time ASC)::text
-					FROM timeseries_measurement
-					WHERE timeseries_id = rt.id AND time >= ? AND time <= ?
-			   ), '[]')			  AS measurements,
-			   nl.measurement::text           AS next_measurement_low,
-			   nh.measurement::text           AS next_measurement_high
+		SELECT
+			rt.id AS timeseries_id,
+			ts.instrument_id AS instrument_id,
+			i.slug || '.' || ts.slug AS variable,
+			false AS is_computed,
+			null AS formula,
+			COALESCE((
+			     	SELECT json_agg(json_build_object('time', time, 'value', value) ORDER BY time ASC)::text
+			     	FROM timeseries_measurement
+			     	WHERE timeseries_id = rt.id AND time >= ? AND time <= ?
+			), '[]') AS measurements,
+			nl.measurement::text AS next_measurement_low,
+			nh.measurement::text AS next_measurement_high
 		FROM required_timeseries rt
 		INNER JOIN timeseries ts ON ts.id = rt.id
 		INNER JOIN instrument i ON i.id = ts.instrument_id
@@ -415,14 +423,15 @@ func queryTimeseriesMeasurements(ctx context.Context, q *Queries, f ProcessMeasu
 	)
 	UNION ALL
 	(
-		SELECT id                		  	  AS timeseries_id,
-			   instrument_id        		  AS instrument_id,
-			   slug			        	  AS variable,
-			   true                    		  AS is_computed,
-			   contents             		  AS formula,
-			   '[]'::text              		  AS measurements,
-			   null                    		  AS next_measurement_low,
-			   null                    		  AS next_measurement_high
+		SELECT
+			id AS timeseries_id,
+			instrument_id AS instrument_id,
+			slug AS variable,
+			true AS is_computed,
+			contents AS formula,
+			'[]'::text AS measurements,
+			null AS next_measurement_low,
+			null AS next_measurement_high
 		FROM v_timeseries_computed
 		WHERE ` + filterSQL + ` AND contents IS NOT NULL
 	)
@@ -442,7 +451,7 @@ func queryTimeseriesMeasurements(ctx context.Context, q *Queries, f ProcessMeasu
 		tt2[idx] = ProcessTimeseries{
 			ProcessTimeseriesInfo: t.ProcessTimeseriesInfo,
 			Measurements:          make([]ProcessMeasurement, 0),
-			TimeWindow:            TimeWindow{Start: f.After, End: f.Before},
+			TimeWindow:            TimeWindow{After: f.After, Before: f.Before},
 		}
 		if err := json.Unmarshal([]byte(t.Measurements), &tt2[idx].Measurements); err != nil {
 			log.Println(err)
@@ -489,25 +498,26 @@ func queryInclinometerTimeseriesMeasurements(ctx context.Context, q *Queries, f 
 		GROUP BY timeseries_id
 	)
 	-- Stored Timeseries
-	SELECT rt.id                          AS timeseries_id,
-		   ts.instrument_id               AS instrument_id,
-		   i.slug || '.' || ts.slug       AS variable,
-		   false                          AS is_computed,
-		   null                           AS formula,
-		   COALESCE(m.measurements, '[]') AS measurements
+	SELECT
+		rt.id AS timeseries_id,
+		ts.instrument_id AS instrument_id,
+		i.slug || '.' || ts.slug AS variable,
+		false AS is_computed,
+		null AS formula,
+		COALESCE(m.measurements, '[]') AS measurements
 	FROM required_timeseries rt
 	INNER JOIN timeseries ts ON ts.id = rt.id
 	INNER JOIN instrument i ON i.id = ts.instrument_id AND i.id IN (SELECT id FROM requested_instruments)
 	LEFT JOIN measurements m ON m.timeseries_id = rt.id
 	UNION
 	-- Computed Timeseries
-	SELECT cc.id                   AS timeseries_id,
-		   cc.instrument_id        AS instrument_id,
-		   -- TODO: make this component of the query a 'slug'-type.
-		   cc.name			       AS variable,
-		   true                    AS is_computed,
-		   cc.contents             AS formula,
-		   '[]'::text              AS measurements
+	SELECT
+		cc.id AS timeseries_id,
+		cc.instrument_id AS instrument_id,
+		cc.name AS variable,
+		true AS is_computed,
+		cc.contents AS formula,
+		'[]'::text AS measurements
 	FROM v_timeseries_computed cc
 	WHERE cc.contents IS NOT NULL AND cc.instrument_id IN (SELECT id FROM requested_instruments)
 	ORDER BY is_computed
@@ -528,7 +538,7 @@ func queryInclinometerTimeseriesMeasurements(ctx context.Context, q *Queries, f 
 		tt2[idx] = ProcessInclinometerTimeseries{
 			ProcessTimeseriesInfo: t.ProcessTimeseriesInfo,
 			Measurements:          make([]ProcessInclinometerMeasurement, 0),
-			TimeWindow:            TimeWindow{Start: f.After, End: f.Before},
+			TimeWindow:            TimeWindow{After: f.After, Before: f.Before},
 		}
 		cm, err := q.GetTimeseriesConstantMeasurement(ctx, t.TimeseriesID, "inclinometer-constant")
 		if err != nil {
@@ -538,7 +548,7 @@ func queryInclinometerTimeseriesMeasurements(ctx context.Context, q *Queries, f 
 			log.Println(err)
 		}
 		for i := range tt2[idx].Measurements {
-			values, err := q.ListInclinometerMeasurementValues(ctx, t.TimeseriesID, tt2[idx].Measurements[i].Time, cm.Value)
+			values, err := q.ListInclinometerMeasurementValues(ctx, t.TimeseriesID, tt2[idx].Measurements[i].Time, float64(cm.Value))
 			if err != nil {
 				return nil, err
 			}

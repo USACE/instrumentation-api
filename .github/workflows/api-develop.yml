@@ -4,7 +4,9 @@ on:
   push:
     branches: [develop]
     paths:
+      - "compose.sh"
       - "api/**"
+      - "report/**"
       - ".github/workflows/api-develop.yml"
 
 jobs:
@@ -27,7 +29,9 @@ jobs:
           aws-region: ${{ secrets.CWBICI_DEVELOP_AWS_REGION }}
   
       - name: Run Tests
-        run: ./compose.sh test
+        run: |
+          cp .env.example .env
+          ./compose.sh test
 
       - name: Login to Amazon ECR
         if: ${{ success() }}
@@ -38,19 +42,8 @@ jobs:
         if: ${{ success() }}
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          API_ECR_REPOSITORY: midas-api
-          TELEMETRY_ECR_REPOSITORY: midas-telemetry
-          ALERT_ECR_REPOSITORY: midas-alert
-          DCSLOADER_ECR_REPOSITORY: midas-dcs-loader
         run: |
-          docker build --target core -t $ECR_REGISTRY/$API_ECR_REPOSITORY:develop api
-          docker build --target telemetry -t $ECR_REGISTRY/$TELEMETRY_ECR_REPOSITORY:develop api
-          docker build --target alert -t $ECR_REGISTRY/$ALERT_ECR_REPOSITORY:develop api
-          docker build --target dcs-loader -t $ECR_REGISTRY/$DCSLOADER_ECR_REPOSITORY:develop api
-          docker push -a $ECR_REGISTRY/$API_ECR_REPOSITORY
-          docker push -a $ECR_REGISTRY/$TELEMETRY_ECR_REPOSITORY
-          docker push -a $ECR_REGISTRY/$ALERT_ECR_REPOSITORY
-          docker push -a $ECR_REGISTRY/$DCSLOADER_ECR_REPOSITORY
+          ./compose.sh build develop push $ECR_REGISTRY
 
       - name: Logout of Amazon ECR
         if: ${{ always() }}

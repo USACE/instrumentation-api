@@ -136,6 +136,6 @@ const getIpiMeasurementsForInstrument = `
 
 func (q *Queries) GetIpiMeasurementsForInstrument(ctx context.Context, instrumentID uuid.UUID, tw TimeWindow) ([]IpiMeasurements, error) {
 	mm := make([]IpiMeasurements, 0)
-	err := q.db.SelectContext(ctx, &mm, getIpiMeasurementsForInstrument, instrumentID, tw.Start, tw.End)
+	err := q.db.SelectContext(ctx, &mm, getIpiMeasurementsForInstrument, instrumentID, tw.After, tw.Before)
 	return mm, err
 }

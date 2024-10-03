@@ -3,7 +3,9 @@ package model
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"math"
+	"strings"
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/internal/util"
@@ -17,10 +19,10 @@ type TimeseriesMeasurementCollectionCollection struct {
 }
 
 // TimeseriesIDs returns a slice of all timeseries IDs contained in the MeasurementCollectionCollection
-func (cc *TimeseriesMeasurementCollectionCollection) TimeseriesIDs() []uuid.UUID {
-	dd := make([]uuid.UUID, 0)
+func (cc *TimeseriesMeasurementCollectionCollection) TimeseriesIDs() map[uuid.UUID]struct{} {
+	dd := make(map[uuid.UUID]struct{})
 	for _, item := range cc.Items {
-		dd = append(dd, item.TimeseriesID)
+		dd[item.TimeseriesID] = struct{}{}
 	}
 	return dd
 }
@@ -46,11 +48,38 @@ func (cc *TimeseriesMeasurementCollectionCollection) UnmarshalJSON(b []byte) err
 
 // Measurement is a time and value associated with a timeseries
 type Measurement struct {
-	TimeseriesID uuid.UUID `json:"-" db:"timeseries_id"`
-	Time         time.Time `json:"time"`
-	Value        float64   `json:"value"`
-	Error        string    `json:"error,omitempty"`
+	TimeseriesID uuid.UUID   `json:"-" db:"timeseries_id"`
+	Time         time.Time   `json:"time"`
+	Value        FloatNanInf `json:"value"`
+	Error        string      `json:"error,omitempty"`
 	TimeseriesNote
+}
+
+type FloatNanInf float64
+
+func (j FloatNanInf) MarshalJSON() ([]byte, error) {
+	if math.IsNaN(float64(j)) || math.IsInf(float64(j), 0) {
+		return []byte("null"), nil
+	}
+
+	return []byte(fmt.Sprintf("%f", float64(j))), nil
+}
+
+func (j *FloatNanInf) UnmarshalJSON(v []byte) error {
+	switch strings.ToLower(string(v)) {
+	case `"nan"`, "nan", "", "null", "undefined":
+		*j = FloatNanInf(math.NaN())
+	case `"inf"`, "inf":
+		*j = FloatNanInf(math.Inf(1))
+	default:
+		var fv float64
+		if err := json.Unmarshal(v, &fv); err != nil {
+			*j = FloatNanInf(math.NaN())
+			return nil
+		}
+		*j = FloatNanInf(fv)
+	}
+	return nil
 }
 
 // MeasurementLean is the minimalist representation of a timeseries measurement
@@ -79,7 +108,7 @@ func (m Measurement) getTime() time.Time {
 }
 
 func (m Measurement) getValue() float64 {
-	return m.Value
+	return float64(m.Value)
 }
 
 // Should only ever be one
@@ -111,22 +140,22 @@ const (
 
 const listTimeseriesMeasurements = `
 	SELECT
-		M.timeseries_id,
-		M.time,
-		M.value,
-		COALESCE(N.masked, 'false') AS masked,
-		COALESCE(N.validated, 'false') AS validated,
-		COALESCE(N.annotation, '') AS annotation
-	FROM timeseries_measurement M
-	LEFT JOIN timeseries_notes N ON M.timeseries_id = N.timeseries_id AND M.time = N.time
-	INNER JOIN timeseries T ON T.id = M.timeseries_id
-	WHERE T.id = $1 AND M.time > $2 AND M.time < $3 ORDER BY M.time ASC
+		m.timeseries_id,
+		m.time,
+		m.value,
+		n.masked,
+		n.validated,
+		n.annotation
+	FROM timeseries_measurement m
+	LEFT JOIN timeseries_notes n ON m.timeseries_id = n.timeseries_id AND m.time = n.time
+	INNER JOIN timeseries t ON t.id = m.timeseries_id
+	WHERE t.id = $1 AND m.time > $2 AND m.time < $3 ORDER BY m.time ASC
 `
 
 // ListTimeseriesMeasurements returns a stored timeseries with slice of timeseries measurements populated
 func (q *Queries) ListTimeseriesMeasurements(ctx context.Context, timeseriesID uuid.UUID, tw TimeWindow, threshold int) (*MeasurementCollection, error) {
 	items := make([]Measurement, 0)
-	if err := q.db.SelectContext(ctx, &items, listTimeseriesMeasurements, timeseriesID, tw.Start, tw.End); err != nil {
+	if err := q.db.SelectContext(ctx, &items, listTimeseriesMeasurements, timeseriesID, tw.After, tw.Before); err != nil {
 		return nil, err
 	}
 	return &MeasurementCollection{TimeseriesID: timeseriesID, Items: LTTB(items, threshold)}, nil

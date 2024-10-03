@@ -1,12 +1,10 @@
 package handler
 
 import (
-	"database/sql"
-	"errors"
 	"net/http"
 	"time"
 
-	"github.com/USACE/instrumentation-api/api/internal/message"
+	"github.com/USACE/instrumentation-api/api/internal/httperr"
 	"github.com/USACE/instrumentation-api/api/internal/model"
 
 	"github.com/google/uuid"
@@ -27,22 +25,22 @@ import (
 func (h *ApiHandler) GetAllAlertConfigsForProject(c echo.Context) error {
 	projectID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
 	var aa []model.AlertConfig
 	if qp := c.QueryParam("alert_type_id"); qp != "" {
 		alertTypeID, err := uuid.Parse(qp)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			return httperr.MalformedID(err)
 		}
 		aa, err = h.AlertConfigService.GetAllAlertConfigsForProjectAndAlertType(c.Request().Context(), projectID, alertTypeID)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			return httperr.InternalServerError(err)
 		}
 	} else {
 		aa, err = h.AlertConfigService.GetAllAlertConfigsForProject(c.Request().Context(), projectID)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			return httperr.InternalServerError(err)
 		}
 	}
 	return c.JSON(http.StatusOK, aa)
@@ -63,11 +61,11 @@ func (h *ApiHandler) GetAllAlertConfigsForProject(c echo.Context) error {
 func (h *ApiHandler) ListInstrumentAlertConfigs(c echo.Context) error {
 	instrumentID, err := uuid.Parse(c.Param("instrument_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
 	aa, err := h.AlertConfigService.GetAllAlertConfigsForInstrument(c.Request().Context(), instrumentID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, aa)
 }
@@ -87,14 +85,11 @@ func (h *ApiHandler) ListInstrumentAlertConfigs(c echo.Context) error {
 func (h *ApiHandler) GetAlertConfig(c echo.Context) error {
 	acID, err := uuid.Parse(c.Param("alert_config_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
 	a, err := h.AlertConfigService.GetOneAlertConfig(c.Request().Context(), acID)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return echo.NewHTTPError(http.StatusNotFound, message.NotFound)
-		}
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, a)
 }
@@ -107,6 +102,7 @@ func (h *ApiHandler) GetAlertConfig(c echo.Context) error {
 //	@Produce json
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param alert_config body model.AlertConfig true "alert config payload"
+//	@Param key query string false "api key"
 //	@Success 200 {object} model.AlertConfig
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -116,18 +112,18 @@ func (h *ApiHandler) GetAlertConfig(c echo.Context) error {
 func (h *ApiHandler) CreateAlertConfig(c echo.Context) error {
 	ac := model.AlertConfig{}
 	if err := c.Bind(&ac); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedBody(err)
 	}
 	projectID, err := uuid.Parse(c.Param("project_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
 	profile := c.Get("profile").(model.Profile)
 	ac.ProjectID, ac.CreatorID, ac.CreateDate = projectID, profile.ID, time.Now()
 
 	acNew, err := h.AlertConfigService.CreateAlertConfig(c.Request().Context(), ac)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusCreated, acNew)
 }
@@ -141,6 +137,7 @@ func (h *ApiHandler) CreateAlertConfig(c echo.Context) error {
 //	@Param project_id path string true "project uuid" Format(uuid)
 //	@Param alert_config_id path string true "alert config uuid" Format(uuid)
 //	@Param alert_config body model.AlertConfig true "alert config payload"
+//	@Param key query string false "api key"
 //	@Success 200 {array} model.AlertConfig
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -150,21 +147,18 @@ func (h *ApiHandler) CreateAlertConfig(c echo.Context) error {
 func (h *ApiHandler) UpdateAlertConfig(c echo.Context) error {
 	var ac model.AlertConfig
 	if err := c.Bind(&ac); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedBody(err)
 	}
 	acID, err := uuid.Parse(c.Param("alert_config_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.MalformedID(err)
 	}
 	p := c.Get("profile").(model.Profile)
 	t := time.Now()
 	ac.UpdaterID, ac.UpdateDate = &p.ID, &t
 	aUpdated, err := h.AlertConfigService.UpdateAlertConfig(c.Request().Context(), acID, ac)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return echo.NewHTTPError(http.StatusNotFound, message.NotFound)
-		}
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, aUpdated)
 }
@@ -176,6 +170,7 @@ func (h *ApiHandler) UpdateAlertConfig(c echo.Context) error {
 //	@Produce json
 //	@Param project_id path string true "Project ID" Format(uuid)
 //	@Param alert_config_id path string true "instrument uuid" Format(uuid)
+//	@Param key query string false "api key"
 //	@Success 200 {array} model.AlertConfig
 //	@Failure 400 {object} echo.HTTPError
 //	@Failure 404 {object} echo.HTTPError
@@ -185,10 +180,10 @@ func (h *ApiHandler) UpdateAlertConfig(c echo.Context) error {
 func (h *ApiHandler) DeleteAlertConfig(c echo.Context) error {
 	acID, err := uuid.Parse(c.Param("alert_config_id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		return httperr.MalformedID(err)
 	}
 	if err := h.AlertConfigService.DeleteAlertConfig(c.Request().Context(), acID); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return httperr.InternalServerError(err)
 	}
 	return c.JSON(http.StatusOK, make(map[string]interface{}))
 }

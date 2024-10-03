@@ -1,14 +1,19 @@
 package server
 
 import (
+	"fmt"
+	"log"
 	"net/http"
 
-	_ "github.com/USACE/instrumentation-api/api/docs"
+	"embed"
+
 	"github.com/USACE/instrumentation-api/api/internal/config"
 	"github.com/USACE/instrumentation-api/api/internal/handler"
 	"github.com/labstack/echo/v4"
-	echoSwagger "github.com/swaggo/echo-swagger"
 )
+
+//go:embed docs/*
+var ApidocFS embed.FS
 
 type ApiServer struct {
 	e *echo.Echo
@@ -16,35 +21,58 @@ type ApiServer struct {
 }
 
 type apiGroups struct {
-	public  *echo.Group
-	private *echo.Group
-	cacOnly *echo.Group
-	app     *echo.Group
+	public     *echo.Group
+	private    *echo.Group
+	claimsOnly *echo.Group
+	app        *echo.Group
 }
 
 func NewApiServer(cfg *config.ApiConfig, h *handler.ApiHandler) *ApiServer {
 	e := echo.New()
+
+	// when debug is enabled, returned errors are included in the response body
+	e.Debug = cfg.Debug
+
 	mw := h.Middleware
 
 	e.Use(mw.CORS, mw.GZIP)
 
+	if cfg.RequestLoggerEnabled {
+		e.Use(mw.RequestID, mw.RequestLogger)
+	}
+
 	public := e.Group(cfg.RoutePrefix)
 	private := e.Group(cfg.RoutePrefix) // cac or token (KeyAuth)
-	cacOnly := e.Group(cfg.RoutePrefix)
+	authOnly := e.Group(cfg.RoutePrefix)
 	app := e.Group(cfg.RoutePrefix)
 
-	private.Use(mw.JWTSkipIfKey, mw.KeyAuth, mw.EDIPI, mw.AttachProfile)
-	cacOnly.Use(mw.JWT, mw.EDIPI, mw.CACOnly)
+	private.Use(mw.JWTSkipIfKey, mw.KeyAuth, mw.AttachClaims, mw.AttachProfile)
+	authOnly.Use(mw.CORSWhitelist, mw.JWT, mw.AttachClaims, mw.RequireClaims)
 	app.Use(mw.AppKeyAuth)
 
 	server := &ApiServer{e, apiGroups{
 		public,
 		private,
-		cacOnly,
+		authOnly,
 		app,
 	}}
 
-	public.GET("/swagger/*", echoSwagger.WrapHandler)
+	apidocHandler := echo.WrapHandler(http.FileServer(http.FS(ApidocFS)))
+	public.GET("/docs/*", apidocHandler)
+
+	apidoc, err := ApidocFS.ReadFile("docs/openapi.json")
+	switch err {
+	case nil:
+		apiDocHtmlHandler, err := h.CreateDocHtmlHandler(apidoc, cfg.ServerBaseUrl, cfg.AuthJWTMocked)
+		if err != nil {
+			fmt.Printf("error serving apidoc html: %s", err.Error())
+			break
+		}
+		public.GET("/docs", apiDocHtmlHandler)
+		public.GET("/docs/index.html", apiDocHtmlHandler)
+	default:
+		log.Printf("unable to read embedded file docs/openapi.json: %s", err.Error())
+	}
 
 	server.RegisterRoutes(h)
 	return server
@@ -150,11 +178,15 @@ func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 	r.public.GET("/instruments/:instrument_id", h.GetInstrument)
 	r.public.GET("/instruments/:instrument_id/timeseries_measurements", h.ListTimeseriesMeasurementsByInstrument)
 	r.private.POST("/projects/:project_id/instruments", h.CreateInstruments)
-	r.private.POST("/projects/:project_id/instruments/:instrument_id/assignments", h.AssignInstrumentToProject, mw.IsProjectAdmin)
-	r.private.DELETE("/projects/:project_id/instruments/:instrument_id/assignments", h.UnassignInstrumentFromProject, mw.IsProjectAdmin)
 	r.private.PUT("/projects/:project_id/instruments/:instrument_id", h.UpdateInstrument)
 	r.private.PUT("/projects/:project_id/instruments/:instrument_id/geometry", h.UpdateInstrumentGeometry)
 	r.private.DELETE("/projects/:project_id/instruments/:instrument_id", h.DeleteFlagInstrument)
+
+	// InstrumentAssignments
+	r.private.POST("/projects/:project_id/instruments/:instrument_id/assignments", h.AssignInstrumentToProject, mw.IsProjectAdmin)
+	r.private.DELETE("/projects/:project_id/instruments/:instrument_id/assignments", h.UnassignInstrumentFromProject, mw.IsProjectAdmin)
+	r.private.PUT("/projects/:project_id/instruments/:instrument_id/assignments", h.UpdateInstrumentProjectAssignments)
+	r.private.PUT("/projects/:project_id/instruments/assignments", h.UpdateProjectInstrumentAssignments)
 
 	// InstrumentConstant
 	r.public.GET("/projects/:project_id/instruments/:instrument_id/constants", h.ListInstrumentConstants)
@@ -214,17 +246,36 @@ func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 	r.public.GET("/opendcs/sites", h.ListOpendcsSites)
 
 	// PlotConfig
+	r.public.GET("/projects/:project_id/plot_configs", h.ListPlotConfigs)
+	r.public.GET("/projects/:project_id/plot_configs/:plot_configuration_id", h.GetPlotConfig)
+	r.private.DELETE("/projects/:project_id/plot_configs/:plot_configuration_id", h.DeletePlotConfig)
+	// PlotConfig ScatterLinePlot
+	r.private.POST("/projects/:project_id/plot_configs/scatter_line_plots", h.CreatePlotConfigScatterLinePlot)
+	r.private.PUT("/projects/:project_id/plot_configs/scatter_line_plots/:plot_configuration_id", h.UpdatePlotConfigScatterLinePlot)
+	// PlotConfig ProfilePlot
+	r.private.POST("/projects/:project_id/plot_configs/profile_plots", h.CreatePlotConfigProfilePlot)
+	r.private.PUT("/projects/:project_id/plot_configs/profile_plots/:plot_configuration_id", h.UpdatePlotConfigProfilePlot)
+	// PlotConfig ContourPlot
+	r.private.POST("/projects/:project_id/plot_configs/contour_plots", h.CreatePlotConfigContourPlot)
+	r.private.PUT("/projects/:project_id/plot_configs/contour_plots/:plot_configuration_id", h.UpdatePlotConfigContourPlot)
+	r.private.GET("/projects/:project_id/plot_configs/contour_plots/:plot_configuration_id/times", h.ListPlotConfigTimesContourPlot)
+	r.private.GET("/projects/:project_id/plot_configs/contour_plots/:plot_configuration_id/measurements", h.GetPlotConfigMeasurementsContourPlot)
+	// PlotConfig BullseyePlot
+	r.private.POST("/projects/:project_id/plot_configs/bullseye_plots", h.CreatePlotConfigBullseyePlot)
+	r.private.PUT("/projects/:project_id/plot_configs/bullseye_plots/:plot_configuration_id", h.UpdatePlotConfigBullseyePlot)
+	r.private.GET("/projects/:project_id/plot_configs/bullseye_plots/:plot_configuration_id/measurements", h.ListPlotConfigMeasurementsBullseyePlot)
+	// @deprecated
 	r.public.GET("/projects/:project_id/plot_configurations", h.ListPlotConfigs)
 	r.public.GET("/projects/:project_id/plot_configurations/:plot_configuration_id", h.GetPlotConfig)
-	r.private.POST("/projects/:project_id/plot_configurations", h.CreatePlotConfig)
-	r.private.PUT("/projects/:project_id/plot_configurations/:plot_configuration_id", h.UpdatePlotConfig)
+	r.private.POST("/projects/:project_id/plot_configurations", h.CreatePlotConfigScatterLinePlot)
+	r.private.PUT("/projects/:project_id/plot_configurations/:plot_configuration_id", h.UpdatePlotConfigScatterLinePlot)
 	r.private.DELETE("/projects/:project_id/plot_configurations/:plot_configuration_id", h.DeletePlotConfig)
 
 	// Profile
-	r.cacOnly.POST("/profiles", h.CreateProfile)
-	r.cacOnly.GET("/my_profile", h.GetMyProfile)
-	r.cacOnly.POST("/my_tokens", h.CreateToken)
-	r.cacOnly.DELETE("/my_tokens/:token_id", h.DeleteToken)
+	r.claimsOnly.POST("/profiles", h.CreateProfile)
+	r.claimsOnly.GET("/my_profile", h.GetMyProfile)
+	r.claimsOnly.POST("/my_tokens", h.CreateToken)
+	r.claimsOnly.DELETE("/my_tokens/:token_id", h.DeleteToken)
 
 	// ProjectRole
 	r.private.GET("/projects/:project_id/members", h.ListProjectMembers)
@@ -244,6 +295,17 @@ func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 	r.private.POST("/projects/:project_id/images", h.UploadProjectImage, mw.IsApplicationAdmin)
 	r.private.PUT("/projects/:project_id", h.UpdateProject, mw.IsApplicationAdmin)
 	r.private.DELETE("/projects/:project_id", h.DeleteFlagProject, mw.IsApplicationAdmin)
+
+	// Report Config
+	r.private.GET("/projects/:project_id/report_configs", h.ListProjectReportConfigs)
+	r.private.POST("/projects/:project_id/report_configs", h.CreateReportConfig)
+	r.private.PUT("/projects/:project_id/report_configs/:report_config_id", h.UpdateReportConfig)
+	r.private.DELETE("/projects/:project_id/report_configs/:report_config_id", h.DeleteReportConfig)
+	r.app.GET("/report_configs/:report_config_id/plot_configs", h.GetReportConfigWithPlotConfigs)
+	r.private.GET("/projects/:project_id/report_configs/:report_config_id/jobs/:job_id", h.GetReportDownloadJob)
+	r.private.POST("/projects/:project_id/report_configs/:report_config_id/jobs", h.CreateReportDownloadJob)
+	r.app.PUT("/report_jobs/:job_id", h.UpdateReportDownloadJob)
+	r.private.GET("/projects/:project_id/report_configs/:report_config_id/jobs/:job_id/downloads", h.DownloadReport)
 
 	// Search
 	r.public.GET("/search/:entity", h.Search)
@@ -266,6 +328,7 @@ func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 	r.public.GET("/instruments/:instrument_id/timeseries/:timeseries_id", h.GetTimeseries)
 	r.public.GET("/projects/:project_id/timeseries", h.ListProjectTimeseries)
 	r.public.GET("/projects/:project_id/instruments/:instrument_id/timeseries", h.ListInstrumentTimeseries)
+
 	r.private.POST("/timeseries", h.CreateTimeseries)
 	r.private.PUT("/timeseries/:timeseries_id", h.UpdateTimeseries)
 	r.private.DELETE("/timeseries/:timeseries_id", h.DeleteTimeseries)
@@ -277,6 +340,11 @@ func (r *ApiServer) RegisterRoutes(h *handler.ApiHandler) {
 	// Will need to coordinate this with the web client
 	r.private.PUT("/formulas/:formula_id", h.UpdateCalculation)
 	r.private.DELETE("/formulas/:formula_id", h.DeleteCalculation)
+
+	// CwmsTimeseries
+	r.public.GET("/projects/:project_id/instruments/:instrument_id/timeseries/cwms", h.ListTimeseriesCwms)
+	r.private.POST("/projects/:project_id/instruments/:instrument_id/timeseries/cwms", h.CreateTimeseriesCwms)
+	r.private.PUT("/projects/:project_id/instruments/:instrument_id/timeseries/cwms/:timeseries_id", h.UpdateTimeseriesCwms)
 
 	// ProcessTimeseries
 	r.public.GET("/timeseries/:timeseries_id/measurements", h.ListTimeseriesMeasurementsByTimeseries)
