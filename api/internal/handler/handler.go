@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/USACE/instrumentation-api/api/internal/cloud"
@@ -156,6 +157,9 @@ type DcsLoaderHandler struct {
 }
 
 func NewDcsLoader(cfg *config.DcsLoaderConfig) *DcsLoaderHandler {
+	if !strings.HasPrefix(cfg.AWSSQSEndpoint, "https://") || !strings.HasPrefix(cfg.AWSSQSEndpoint, "http://") {
+		cfg.AWSSQSEndpoint = "https://" + cfg.AWSSQSEndpoint
+	}
 	s3Blob := cloud.NewS3Blob(&cfg.AWSS3Config, "", "")
 	ps := cloud.NewSQSPubsub(&cfg.AWSSQSConfig).WithBlob(s3Blob)
 	apiClient := newHttpClient()
