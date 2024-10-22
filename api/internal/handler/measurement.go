@@ -186,7 +186,7 @@ func (h *ApiHandler) createOrUpdateTimeseriesMeasurementsMultipartFormData(c ech
 		}
 	}()
 
-	if err := h.DataloggerTelemetryService.CreateOrUpdateTOA5MeasurementCollection(c.Request().Context(), src); err != nil {
+	if err := h.DataloggerTelemetryService.CreateOrUpdateDataloggerTOA5MeasurementCollection(c.Request().Context(), src); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 

@@ -21,7 +21,7 @@ type DataloggerTelemetryService interface {
 	CreateDataloggerTablePreview(ctx context.Context, prv model.DataloggerTablePreview) error
 	UpdateDataloggerTablePreview(ctx context.Context, dataloggerID uuid.UUID, tableName string, prv model.DataloggerTablePreview) (uuid.UUID, error)
 	UpdateDataloggerTableError(ctx context.Context, dataloggerID uuid.UUID, tableName *string, e *model.DataloggerError) error
-	CreateOrUpdateTOA5MeasurementCollection(ctx context.Context, r io.Reader) error
+	CreateOrUpdateDataloggerTOA5MeasurementCollection(ctx context.Context, r io.Reader) error
 }
 
 type dataloggerTelemetryService struct {
@@ -89,7 +89,7 @@ func (s dataloggerTelemetryService) UpdateDataloggerTableError(ctx context.Conte
 
 // ParseTOA5 parses a Campbell Scientific TOA5 data file that is simlar to a csv.
 // The unique properties of TOA5 are that the meatdata are stored in header of file (first 4 lines of csv)
-func (s dataloggerTelemetryService) CreateOrUpdateTOA5MeasurementCollection(ctx context.Context, r io.Reader) error {
+func (s dataloggerTelemetryService) CreateOrUpdateDataloggerTOA5MeasurementCollection(ctx context.Context, r io.Reader) error {
 	tx, err := s.db.BeginTxx(ctx, nil)
 	if err != nil {
 		return err
