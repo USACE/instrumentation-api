@@ -63,12 +63,11 @@ func (s *S3Blob) NewReader(rawPath, bucketName string) (io.ReadCloser, error) {
 	if err != nil {
 		return nil, err
 	}
-	key := aws.String(s.cfg.bucketPrefix + strings.TrimPrefix(path, s.cfg.routePrefix))
+	key := strings.TrimPrefix(s.cfg.bucketPrefix+strings.TrimPrefix(path, s.cfg.routePrefix), "/")
 	if bucketName == "" {
 		bucketName = s.cfg.bucketName
 	}
-
-	output, err := s.GetObject(context.Background(), &s3.GetObjectInput{Bucket: aws.String(bucketName), Key: key})
+	output, err := s.GetObject(context.Background(), &s3.GetObjectInput{Bucket: aws.String(bucketName), Key: aws.String(key)})
 	if err != nil {
 		return nil, err
 	}
